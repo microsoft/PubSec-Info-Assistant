@@ -33,6 +33,6 @@ elif [[ "${WORKSPACE}" =~ [[:upper:]] ]]; then
 fi
 
 # Set the name of the resource group
-export RG_NAME="infoasst-searchoai-$WORKSPACE"
+export RG_NAME="infoasst-$WORKSPACE"
 
 echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$RG_NAME\e[0m\n"

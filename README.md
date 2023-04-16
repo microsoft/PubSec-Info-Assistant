@@ -2,7 +2,7 @@
 
 This sample demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (gpt-35-turbo), and Azure Cognitive Search for data indexing and retrieval.
 
-![RAG Architecture](docs/images/appcomponents.png)
+![Process Flow](docs/process_flow.drawio.png)
 
 ## Features
 

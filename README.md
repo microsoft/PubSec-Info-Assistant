@@ -1,10 +1,8 @@
-# ChatGPT + Enterprise data with Azure OpenAI and Cognitive Search
+# Public Sector Information Assistant Accelerator
 
 This sample demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (gpt-35-turbo), and Azure Cognitive Search for data indexing and retrieval.
 
-The repo includes sample data so it's ready to try end to end. In this sample application we use a fictitious company called Contoso Electronics, and the experience allows its employees to ask questions about the benefits, internal policies, as well as job descriptions and roles.
-
-![RAG Architecture](docs/appcomponents.png)
+![Process Flow](docs/process_flow.drawio.png)
 
 ## Features
 
@@ -13,59 +11,72 @@ The repo includes sample data so it's ready to try end to end. In this sample ap
 * Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
 * Settings directly in the UX to tweak the behavior and experiment with options
 
-![Chat screen](docs/chatscreen.png)
+![Chat screen](docs/images/chatscreen.png)
 
-## Getting Started
+# Getting Started
+
+---
 
 > **IMPORTANT:** In order to deploy and run this example, you'll need an **Azure subscription with access enabled for the Azure OpenAI service**. You can request access [here](https://aka.ms/oaiapply).
 
-### Prerequisites
+## Prerequisites
 
-- Azure Developer CLI (install from [here](https://aka.ms/azure-dev/install))
-- Python (install from [here](https://www.python.org/downloads/))
-    - **Imporant**: Python and the pip package manager must be in the path in Windows for the setup scripts to work.
-- Node.js (install from [here](https://nodejs.org/en/download/))
-- Git (install from [here](https://git-scm.com/downloads))
-- Powershell (pwsh) (install from [here](https://github.com/powershell/powershell))
-   - **Imporant**: Ensure you can run pwsh.exe from a PowerShell command. If this fails, you likely need to upgrade PowerShell.
+---
 
-### Installation
+The PS Info Assistant Accelerator requires a variety of services in Azure. There are a few prerequisites required to deploy and configure the PS Info Assistant Accelerator. Please obtain these items first before continuing on to the deployment section of this guide.
 
-Starting from scratch:
-1. Create a new folder and switch to it in the terminal
-2. Run "azd up -t azure-search-openai-demo"
-    * For the target location, the regions that currently support the models used in this sample are East US or South Central US. For an up-to-date list of regions and models, check [here](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models)
+>To get started with the PS Info Assistant Accelerator you will need the following:
+>
+>* An active Azure Subscription *
+>* Administrative rights on the Azure Subscription
+>
+>\* *The Azure Subscription needs to be a paid subscription. While you can create a free tier of any of the Cognitive Services, you can only create one free Cognitive Service in an account so the trial would therefore not be able to handle all of the services in this example.*
 
-Deploying or re-deploying a local clone of the repo:
-* Simply run "azd up"
+You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/). Once you have your prerequisite items, please move on to the Deployment Configuration step.
 
-Running locally:
-* Run `./app/start.cmd` or run the "VS Code Task: Start App" to start the project locally.
+## Deployment Configuration
 
-** AZURE RESOURCE COSTS ** by default this sample will create Azure App Service and Azure Cognitive Search resources that have a monthly cost. You can switch them to free versions of each of them if you want to avoid this cost by changing the parameters file under the infra folder (though there are some limits to consider; for example, you can have up to 1 free Cognitive Search resource per subscription.)
+>You will also need some development tools to edit and run the deployment scripts provided. It is recommended you use the following:
+>
+>* A windows based computer (local or cloud)
+>* [Visual Studio Code](https://visualstudio.microsoft.com/downloads/)
+>* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+>* [Windows Store Ubuntu 22.04 LTS](https://apps.microsoft.com/store/detail/ubuntu-22042-lts/9PN20MSR04DW)
+>* [Git for Windows](https://gitforwindows.org/)
 
-### Quickstart
+The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. Follow our [Configuring your System for Development Containers](docs/developing_inside_a_container.md) guide.
 
-* In Azure: navigate to the Azure WebApp deployed by azd. The URL is printed out when azd completes (as "Endpoint"), or you can find it in the Azure portal.
-* Running locally: navigate to 127.0.0.1:5000
+*More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once in the web app:
-* Try different topics in chat or Q&A context. For chat, try follow up questions, clarifications, ask to simplify or elaborate on answer, etc.
-* Explore citations and sources
-* Click on "settings" to try different options, tweak prompts, etc.
+Once you have the prerequisites completed, please move on to the Sizing Estimation step.
+
+---
+
+# Sizing Estimator
+
+ The PS Info Assistant Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](./docs/costestimator.md) to help find the configuration that fits your needs.
+
+Once you have completed the Sizing Estimator, please move on to the Deployment steps.
+
+---
+
+# Deployment
+
+There are several steps to deploying the PS Info Assistant Accelerator. The following checklist will guide you through configuring the PS Info Assistant Accelerator in your environments. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
+
+>1. Configure Local Development Environment
+>       * [Configuring your Development Environment](/docs/development_environment.md)
+>1. Configure Azure resources
+>       * [Configure Azure resources](/infra/README.md)
+
+---
+
+# Using PS Info Assistant for the first time
+
+TBD
 
 ## Resources
 
 * [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
 * [Azure Cognitive Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
 * [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
-
-### Note
->Note: The PDF documents used in this demo contain information generated using a language model (Azure OpenAI Service). The information contained in these documents is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document. All rights reserved to Microsoft.
-
-### FAQ
-
-***Question***: Why do we need to break up the PDFs into chunks when Azure Cognitive Search supports searching large documents?
-
-***Answer***: Chunking allows us to limit the amount of information we send to OpenAI due to token limits. By breaking up the content, it allows us to easily find potential chunks of text that we can inject into OpenAI. The menthod of chunking we use leverages a sliding window of text such that sentences that end one chunk will start the next. This allows us to reduce the chance of losing the context of the text.
-

@@ -38,9 +38,9 @@ openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
 openai.api_version = "2022-12-01"
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
-openai.api_type = "azure_ad"
-openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-openai.api_key = openai_token.token
+#openai.api_type = "azure_ad"
+#openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
+openai.api_key = AZURE_OPENAI_SERVICE_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
@@ -87,7 +87,7 @@ def content_file(path):
     
 @app.route("/ask", methods=["POST"])
 def ask():
-    ensure_openai_token()
+    #ensure_openai_token()
     approach = request.json["approach"]
     try:
         impl = ask_approaches.get(approach)
@@ -101,7 +101,7 @@ def ask():
     
 @app.route("/chat", methods=["POST"])
 def chat():
-    ensure_openai_token()
+    #ensure_openai_token()
     approach = request.json["approach"]
     try:
         impl = chat_approaches.get(approach)

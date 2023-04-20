@@ -49,6 +49,9 @@ do
 done
 echo $parameter_json > $DIR/../infra/main.parameters.json
 
+#make sure bicep is always the latest version
+az bicep upgrade
+
 #deploy bicep
 az deployment sub what-if --location $LOCATION --template-file main.bicep --parameters main.parameters.json
 if [ -z $SKIP_PLAN_CHECK ]

@@ -363,4 +363,4 @@ infra_output.json
 random.txt
 
 # Azure Developer CLI outputs
-.azure/config
+.azure

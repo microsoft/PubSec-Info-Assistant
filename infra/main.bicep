@@ -282,6 +282,8 @@ output AZURE_STORAGE_CONTAINER string = containerName
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
-output AZURE_OPENAI_GPT_DEPLOYMENT string = azureOpenAIServiceKey
+output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeploymentName
+output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = chatGptDeploymentName
+output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey

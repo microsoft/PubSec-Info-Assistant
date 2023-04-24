@@ -358,5 +358,6 @@ static/
 local.env
 main.parameters.json
 infrastructure.env
+infrastructure.debug.env
 infra_output.json
 random.txt

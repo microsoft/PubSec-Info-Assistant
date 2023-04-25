@@ -22,6 +22,8 @@ param cognitiveServiesForSearchName string = ''
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
 param resourceGroupName string = ''
+param logAnalyticsName string = ''
+param applicationInsightsName string = ''
 param backendServiceName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
@@ -42,9 +44,21 @@ var prefix = 'infoasst'
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${prefix}-searchoai-${environmentName}'
+  name: !empty(resourceGroupName) ? resourceGroupName : '${prefix}-${environmentName}'
   location: location
   tags: tags
+}
+
+module logging 'core/logging/logging.bicep' = {
+  name: 'logging'
+  scope: rg
+  params: {
+    logAnalyticsName: !empty(logAnalyticsName) ? logAnalyticsName : '${prefix}-${abbrs.logAnalytics}${randomString}'
+    applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${prefix}-${abbrs.appInsights}${randomString}'
+    location: location
+    tags: tags
+    skuName: 'PerGB2018'
+  }
 }
 
 // Create an App Service Plan to group applications under the same payment plan and SKU
@@ -76,6 +90,8 @@ module backend 'core/host/appservice.bicep' = {
     runtimeVersion: '3.10'
     scmDoBuildDuringDeployment: true
     managedIdentity: true
+    applicationInsightsName: logging.outputs.applicationInsightsName
+    logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     appSettings: {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
@@ -86,6 +102,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_GPT_DEPLOYMENT: gptDeploymentName
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeploymentName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
+      APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
     }
   }
 }
@@ -265,6 +282,8 @@ output AZURE_STORAGE_CONTAINER string = containerName
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
-output AZURE_OPENAI_GPT_DEPLOYMENT string = azureOpenAIServiceKey
+output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeploymentName
+output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = chatGptDeploymentName
+output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey

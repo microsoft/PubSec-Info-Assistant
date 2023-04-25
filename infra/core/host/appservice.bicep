@@ -4,6 +4,7 @@ param tags object = {}
 
 // Reference Properties
 param applicationInsightsName string = ''
+param logAnalyticsWorkspaceName string = ''
 param appServicePlanId string
 param keyVaultName string = ''
 param managedIdentity bool = !empty(keyVaultName)
@@ -34,6 +35,8 @@ param scmDoBuildDuringDeployment bool = false
 param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
+
+param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
 
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: name
@@ -93,6 +96,42 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
   name: applicationInsightsName
+}
+
+resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: appService.name
+  scope: appService
+  properties: {
+    workspaceId: logAnalyticsWorkspaceResourceId
+    logs: [
+      {
+        category: 'AppServiceAppLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 30
+          enabled: true 
+        }
+      }
+      {
+        category: 'AppServicePlatformLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 30
+          enabled: true 
+        }
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        retentionPolicy: {
+          days: 30
+          enabled: true 
+        }
+      }
+    ]
+  }
 }
 
 output identityPrincipalId string = managedIdentity ? appService.identity.principalId : ''

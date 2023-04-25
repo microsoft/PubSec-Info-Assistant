@@ -45,8 +45,19 @@ jq -r  '
         {
             "path": "coG_SERVICES_FOR_SEARCH_KEY",
             "env_var": "COGNITIVE_SERVICES_KEY"
+        },
+        {
+            "path": "azurE_OPENAI_GPT_DEPLOYMENT",
+            "env_var": "AZURE_OPENAI_GPT_DEPLOYMENT"
+        },
+        {
+            "path": "azurE_OPENAI_CHAT_GPT_DEPLOYMENT",
+            "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
+        },
+        {
+            "path": "azurE_OPENAI_SERVICE_KEY",
+            "env_var": "AZURE_OPENAI_SERVICE_KEY"
         }
-        
     ]
         as $env_vars_to_extract
     |

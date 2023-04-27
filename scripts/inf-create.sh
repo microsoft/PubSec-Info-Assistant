@@ -18,12 +18,30 @@ function finish {
 }
 trap finish EXIT
 
-#set up variable for the bicep deployment
-if [ -f "random.txt" ]; then
-  randomString=$(cat random.txt)
+#set up variables for the bicep deployment
+#get or create the random.txt from local file system
+if [ -f ".state/${WORKSPACE}/random.txt" ]; then
+  randomString=$(cat .state/${WORKSPACE}/random.txt)
 else  
   randomString=$(mktemp --dry-run XXXXX)
-  echo $randomString >> random.txt
+  mkdir -p .state/${WORKSPACE}
+  echo $randomString >> .state/${WORKSPACE}/random.txt
+fi
+
+if [ -n $IN_AUTOMATION ]; then
+  #if in automation, add the random.txt to the state container
+  echo "az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists"
+  exists=$(az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists)
+  echo "exists: $exists"
+  if [ $exists == "true" ]; then
+    echo "az storage blob download --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --query content --output tsv"
+    randomString=$(az storage blob download --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --query content --output tsv)
+    rm .state/${WORKSPACE}/random.txt
+    echo $randomString >> .state/${WORKSPACE}/random.txt
+  else
+    echo "az storage blob upload --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --file .state/${WORKSPACE}/random.txt"
+    upload=$(az storage blob upload --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --file .state/${WORKSPACE}/random.txt)
+  fi
 fi
 randomString="${randomString,,}"
 export RANDOM_STRING=$randomString
@@ -41,6 +59,7 @@ declare -A REPLACE_TOKENS=(
     [\${CHATGPT_MODEL_DEPLOYMENT_NAME}]=${AZURE_OPENAI_CHATGPT_DEPLOYMENT}
     [\${USE_EXISTING_AOAI}]=${USE_EXISTING_AOAI}
     [\${AZURE_OPENAI_SERVICE_KEY}]=${AZURE_OPENAI_SERVICE_KEY}
+    [\${BUILD_NUMBER}]=${BUILD_NUMBER}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

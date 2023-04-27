@@ -103,7 +103,7 @@ Variable | Required | Description
 --- | --- | ---
 LOCATION | Yes | The location (West Europe is the default). The BICEP templates use this value.
 WORKSPACE | Yes  | The workspace name (use something simple and unique to you). This will appended to infoasst-????? in your subscription.
-IS_LOCAL | Yes  | Defaults to true, **DO NOT** change this.
+REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
 SKIP_PLAN_CHECK | No | If this value is set to 1, then the BICEP deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
 USE_EXISTING_AOAI | Yes | Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. Set the value to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.

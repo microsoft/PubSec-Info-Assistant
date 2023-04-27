@@ -13,6 +13,7 @@ param randomString string
 @description('Primary location for all resources')
 param location string
 
+param aadClientId string = ''
 param buildNumber string = 'local'
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
@@ -105,6 +106,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
     }
+    aadClientId: aadClientId
   }
 }
 

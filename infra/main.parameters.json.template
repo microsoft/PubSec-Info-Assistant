@@ -37,6 +37,9 @@
     },
     "buildNumber": {
       "value": "${BUILD_NUMBER}"
+    },
+    "aadClientId": {
+      "value": "${AZURE_AD_APP_CLIENT_ID}"
     }
   }
 }

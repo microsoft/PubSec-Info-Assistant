@@ -17,6 +17,14 @@ fi
 
 echo "Environment set: $ENVIRONMENT_NAME."
 
+if [[ -n $IN_AUTOMATION ]]; then
+    if [[ -z $BUILD_BUILDID ]]; then
+        echo "Require BUILD_BUILDID to be set for CI builds"
+        exit 1        
+    fi
+    export BUILD_NUMBER=$BUILD_BUILDNUMBER
+fi
+
 # Pull in variables dependent on the envionment we are deploying to.
 if [ -f "$ENV_DIR/environments/$ENVIRONMENT_NAME.env" ]; then
     echo "Loading environment variables for $ENVIRONMENT_NAME."

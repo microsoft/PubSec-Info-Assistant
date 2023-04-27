@@ -13,6 +13,7 @@ param randomString string
 @description('Primary location for all resources')
 param location string
 
+param buildNumber string = 'local'
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
 param azureOpenAIServiceKey string
@@ -39,7 +40,7 @@ param chatGptModelName string = 'gpt-35-turbo'
 param principalId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
-var tags = { ProjectName: 'Information Assistant' }
+var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 
 // Organize resources in a resource group

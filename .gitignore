@@ -361,6 +361,7 @@ infrastructure.env
 infrastructure.debug.env
 infra_output.json
 random.txt
+.state
 
 # Azure Developer CLI outputs
 .azure

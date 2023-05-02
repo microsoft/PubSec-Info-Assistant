@@ -9,10 +9,11 @@ source "${DIR}"/../scripts/load-env.sh
 source "${DIR}/environments/infrastructure.env"
 BINARIES_OUTPUT_PATH="${DIR}/../app/backend/"
 
+echo $BINARIES_OUTPUT_PATH
 #cleanup configuration files that will get updated after deployment
-if [ -f $BINARIES_OUTPUT_PATH/.azure.config ]
+if [ -f $BINARIES_OUTPUT_PATH.azure/config ]
     then
-        rm $BINARIES_OUTPUT_PATH/.azure/config
+        rm $BINARIES_OUTPUT_PATH.azure/config
     fi
 
 cd $BINARIES_OUTPUT_PATH

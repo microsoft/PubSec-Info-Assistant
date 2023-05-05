@@ -22,7 +22,9 @@ rm -rf ${BINARIES_OUTPUT_PATH} && mkdir -p ${BINARIES_OUTPUT_PATH}
 cd app/frontend
 npm install
 npm run build
-cd $DIR
 
-# copy the webapp content to the ./artifacts folders
-rsync -r -q --exclude 'node_modules' ${WEBAPP_ROOT_PATH}/ ${BINARIES_OUTPUT_PATH}/
+
+# zip the webapp content from app/backend to the ./artifacts folders
+cd ../backend
+zip -r ${BINARIES_OUTPUT_PATH}/webapp.zip .
+cd $DIR

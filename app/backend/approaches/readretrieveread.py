@@ -3,7 +3,7 @@ from approaches.approach import Approach
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
 from langchain.llms.openai import AzureOpenAI
-from langchain.callbacks.base import CallbackManager
+from langchain.callbacks.base import BaseCallbackManager
 from langchain.chains import LLMChain
 from langchain.agents import Tool, ZeroShotAgent, AgentExecutor
 from langchain.llms.openai import AzureOpenAI
@@ -74,7 +74,7 @@ Thought: {agent_scratchpad}"""
 
         # Use to capture thought process during iterations
         cb_handler = HtmlCallbackHandler()
-        cb_manager = CallbackManager(handlers=[cb_handler])
+        cb_manager = BaseCallbackManager(handlers=[cb_handler])
         
         acs_tool = Tool(name = "CognitiveSearch", func = lambda q: self.retrieve(q, overrides), description = self.CognitiveSearchToolDescription)
         employee_tool = EmployeeInfoTool("Employee1")

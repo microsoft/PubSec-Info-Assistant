@@ -57,16 +57,16 @@ if [ -z $aadAppId ]
 export AZURE_AD_APP_CLIENT_ID=$aadAppId
 
 aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-if [ -z $aadSPId ]
-  then
-    if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
-      # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
-      az ad sp update --id $aadAppId --set "appRoleAssignmentRequired=true"
-    else
-      # otherwise the default is to allow all users in the tenant to access the app
-      az ad sp update --id $aadAppId --set "appRoleAssignmentRequired=false"
-    fi
-  fi
+if [ -z $aadSPId ]; then
+    aadSPId=$(az ad sp create --id $aadAppId --output tsv --query "[].id")
+fi
+if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
+  # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
+  az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=true"
+else
+  # otherwise the default is to allow all users in the tenant to access the app
+  az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=false"
+fi
 
 #set up parameter file
 declare -A REPLACE_TOKENS=(

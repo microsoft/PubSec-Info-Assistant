@@ -187,7 +187,11 @@ module storage 'core/storage/storage-account.bicep' = {
     }
     containers: [
       {
-        name: 'content'
+        name: containerName
+        publicAccess: 'None'
+      }
+      {
+        name: 'website'
         publicAccess: 'None'
       }
     ]
@@ -282,6 +286,7 @@ output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output AZURE_STORAGE_CONTAINER string = containerName
+output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name

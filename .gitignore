@@ -352,7 +352,7 @@ MigrationBackup/
 # NPM
 npm-debug.log*
 node_modules
-static/
+static
 
 #devcontainer tools
 local.env

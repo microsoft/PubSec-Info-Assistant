@@ -1,5 +1,9 @@
 """ Python function to read PDF files and extract text using Azure Form Recognizer"""
-
+import azure.functions as func
+from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
+from azure.core.credentials import AzureKeyCredential
+from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.core.exceptions import HttpResponseError
 import logging
 import os
 from enum import Enum
@@ -8,49 +12,33 @@ import tiktoken
 import nltk
 nltk.download('words')
 nltk.download('punkt')
-import azure.functions as func
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.formrecognizer import DocumentAnalysisClient
-from azure.core.exceptions import HttpResponseError
 
 XY_ROUNDING_FACTOR = 1
 CHUNK_TARGET_SIZE = 750
 REAL_WORDS_TARGET = 0.25
-TARGET_PAGES = "ALL"            # ALL or Custom page numbers for multi-page documents(PDF/TIFF).
-                                # Input the page numbers and/or ranges of pages you want to get
-                                # in the result. For a range of pages, use a hyphen, like
-                                # pages="1-3, 5-6". Separate each page number or range with a comma.
+TARGET_PAGES = "ALL"          # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
+
 
 def main(myblob: func.InputStream):
-    """ Function to read PDF files and extract text using Azure Form Recognizer"""
-    logging.info("Python blob trigger function processed blob \n"
-                 "Name: %s\n"
-                 "Blob Size: %s bytes", myblob.name, myblob.length)
+    """ Function to read PDF files and extract text using Azure Form Recognizer"""    
+    logging.info(f"Python blob trigger function processed blob \n"
+                 f"Name: {myblob.name}\n"
+                 f"Blob Size: {myblob.length} bytes")
 
+    from azure.core.exceptions import HttpResponseError
     try:
-        
         analyze_layout(myblob)
     except HttpResponseError as error:
-        print("For more information about troubleshooting errors, see the following guide: "
-              "https://aka.ms/azsdk/python/formrecognizer/troubleshooting")
-        # Examples of how to check an HttpResponseError
         # Check by error code:
         if error.error is not None:
-            if error.error.code == "InvalidImage":
-                print(f"Received an invalid image error: {error.error}")
-            if error.error.code == "InvalidRequest":
-                print(f"Received an invalid request error: {error.error}")
-            # Raise the error again after printing it
             raise
-        # If the inner error is None and then it is possible to check
-        # the message to get more information:
+        # If the inner error is None and then it is possible to check the message to get more information:
         if "Invalid request".casefold() in error.message.casefold():
             print(f"Uh-oh! Seems there was an invalid request: {error}")
         # Raise the error again
         raise
-
-    logging.info("Done")
+    
+    logging.info(f"chunking complete for file {myblob.name}")
 
 
 def is_pdf(file_name):
@@ -63,15 +51,13 @@ def is_pdf(file_name):
 
 def sort_key(element):
     """ Function to sort elements by page number and role priority """
-    return element["page"]
+    return (element["page"])
     # to do, more complex sorting logic to cope with indented bulleted lists
-    # return (element["page"], element["role_priority"], element["bounding_region"][0]["x"],
-    # element["bounding_region"][0]["y"])
+    return (element["page"], element["role_priority"], element["bounding_region"][0]["x"], element["bounding_region"][0]["y"])
 
 
 def num_tokens_from_string(string: str, encoding_name: str) -> int:
     """ Function to return the number of tokens in a text string"""
-    # Returns the number of tokens in a text string
     encoding = tiktoken.get_encoding(encoding_name)
     num_tokens = len(encoding.encode(string))
     return num_tokens
@@ -99,11 +85,11 @@ def role_prioroty(role):
         case "footnote":
             priority = paragraph_roles.footnote.value
         case "pageHeader" :
-            priority = paragraph_roles.pageHeader.value            
+            priority = paragraph_roles.pageHeader.value           
         case "pageFooter" :
             priority = paragraph_roles.pageFooter.value
         case "pageNumber" :
-            priority = paragraph_roles.pageNumber.value     
+            priority = paragraph_roles.pageNumber.value
         case other:     # content
             priority = paragraph_roles.other.value         
     return (priority)
@@ -111,6 +97,7 @@ def role_prioroty(role):
 
 # Load a pre-trained tokenizer
 tokenizer = nltk.tokenize.word_tokenize
+
 
 # Load a set of known English words
 word_set = set(nltk.corpus.words.words())
@@ -121,33 +108,27 @@ def is_real_word(token):
     """ Function to check whether a token is a real English word"""
     return token.lower() in word_set
 
+
 # Define a function to check whether a string contains real English words
 def contains_real_words(string):
     """ Function to check whether a string contains real English words"""
     tokens = tokenizer(string)
     real_word_count = sum(1 for token in tokens if is_real_word(token))
-    # Require at least 50% of tokens to be real words and at least one word
-    return (real_word_count / len(tokens) > REAL_WORDS_TARGET) and (len(tokens) >= 1)
+    return (real_word_count / len(tokens) > REAL_WORDS_TARGET) and (len(tokens) >= 1)  # Require at least 50% of tokens to be real words and at least one word
 
-
-def format_polygon(polygon):
-    """ Function to format a polygon for display"""
-    if not polygon:
-        return "N/A"
-    return ", ".join([f"[{p.x}, {p.y}]" for p in polygon])
 
 def token_count(input_text):
     """ Function to return the number of tokens in a text string"""
     # calc token count
     encoding = "cl100k_base"    # For gpt-4, gpt-3.5-turbo, text-embedding-ada-002, you need to use cl100k_base
     token_count = num_tokens_from_string(input_text, encoding)
-    return token_count
+    return token_count 
+
 
 def analyze_layout(myblob: func.InputStream):
     """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer"""
     if is_pdf(myblob.name):
-
-        logging.info("processing pdf %s", myblob.name)
+        logging.info("processing pdf " + myblob.name)
 
         azure_blob_storage_account = os.environ["AZURE_BLOB_STORAGE_ACCOUNT"]
         azure_blob_drop_storage_container = os.environ["AZURE_BLOB_DROP_STORAGE_CONTAINER"]
@@ -175,15 +156,18 @@ def analyze_layout(myblob: func.InputStream):
         )
         source_blob_path = f'https://{azure_blob_storage_account}.blob.core.windows.net/{myblob.name}?{sas_token}'
         source_blob_path = source_blob_path.replace(" ", "%20")
+        
+        logging.info(f"Path and SAS token for file in azure storage are now generated \n")
 
     # [START extract_layout]
+    logging.info(f"Calling form regognizer \n")
     endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
     key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 
     document_analysis_client = DocumentAnalysisClient(
         endpoint=endpoint, credential=AzureKeyCredential(key)
     )
-
+ 
     if TARGET_PAGES == "ALL":
         poller = document_analysis_client.begin_analyze_document_from_url(
             "prebuilt-layout", document_url=source_blob_path
@@ -191,86 +175,18 @@ def analyze_layout(myblob: func.InputStream):
     else :
         poller = document_analysis_client.begin_analyze_document_from_url(
             "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES
-        )
+        )        
     result = poller.result()
-
-    for idx, style in enumerate(result.styles):
-        print(
-            "Document contains %s content", 
-            "handwritten" if style.is_handwritten else "no handwritten"
-        )
-
-    for page in result.pages:
-        print(f"----Analyzing layout from page #{page.page_number}----")
-        print(
-            f"Page has width: {page.width} and height: {page.height}, \
-                  measured with unit: {page.unit}"
-        )
-
-        for line_idx, line in enumerate(page.lines):
-            words = line.get_words()
-            print(
-                "...Line # {} has word count {} and text '{}' within bounding polygon '{}'".format(
-                    line_idx,
-                    len(words),
-                    line.content,
-                    format_polygon(line.polygon),
-                )
-            )
-
-            for word in words:
-                print(
-                    "......Word '{}' has a confidence of {}".format(
-                        word.content, word.confidence
-                    )
-                )
-
-        for selection_mark in page.selection_marks:
-            print(
-                "...Selection mark is '{}' within bounding polygon '{}' and has a confidence of {}".format(
-                    selection_mark.state,
-                    format_polygon(selection_mark.polygon),
-                    selection_mark.confidence,
-                )
-            )
-
-    for table_idx, table in enumerate(result.tables):
-        print(
-            "Table # {} has {} rows and {} columns".format(
-                table_idx, table.row_count, table.column_count
-            )
-        )
-        for region in table.bounding_regions:
-            print(
-                "Table # {} location on page: {} is {}".format(
-                    table_idx,
-                    region.page_number,
-                    format_polygon(region.polygon),
-                )
-            )
-        for cell in table.cells:
-            print(
-                "...Cell[{}][{}] has content '{}'".format(
-                    cell.row_index,
-                    cell.column_index,
-                    cell.content,
-                )
-            )
-            for region in cell.bounding_regions:
-                print(
-                    "...content on page {} is within bounding polygon '{}'".format(
-                        region.page_number,
-                        format_polygon(region.polygon),
-                    )
-                )
+    logging.info(f"Form Recognizer has returned results \n")
 
     # build the json structure
+    logging.info(f"Constructing JSON structure of the document\n")
     pargraph_elements = []
     title = ""
     section_heading = ""
     for paragraph in result.paragraphs: 
         # only porcess content, titles and sectionHeading 
-        if paragraph.role == "title" or paragraph.role == "sectionHeading" or paragraph.role == None:
+        if paragraph.role == "title" or paragraph.role == "sectionHeading" or paragraph.role is None:
             polygon_elements = []
             # store the most recent title and subheading as context data
             if paragraph.role == "title":
@@ -295,7 +211,9 @@ def analyze_layout(myblob: func.InputStream):
     # sort
     pargraph_elements.sort(key=sort_key)
 
+
     # extract the content by paragraph with title, sectionHeading & pageHeader and write as a chunk
+    logging.info(f"Extracting chunks form the document json structure \n")
     blob_service_client = BlobServiceClient(
     f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
     file_number = 0
@@ -306,7 +224,7 @@ def analyze_layout(myblob: func.InputStream):
     title_name = ""
     target_size_reached = False
     
-    for paragraph_element in pargraph_elements:
+    for paragraph_element in pargraph_elements:   
 
         if paragraph_element["role"] == None and contains_real_words(paragraph_element["content"]) == True:
             title_name = paragraph_element["title"]
@@ -334,12 +252,10 @@ def analyze_layout(myblob: func.InputStream):
             file_number += 1            
 
             # if we wrote the file because we hit the token target, then start with the last paragraph porcessed
-            if target_size_reached == True:
+            if target_size_reached is True:
                 chunk_text = paragraph_element["content"]
                 chunk_size = paragraph_size   
                 target_size_reached = False 
             else:
                 chunk_text = ""
-                chunk_size = 0    
-
-    print("done")
+                chunk_size = 0                   

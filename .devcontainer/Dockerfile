@@ -52,12 +52,16 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prom
 COPY ./scripts/azure-cli.sh /tmp/
 RUN /tmp/azure-cli.sh
 
-# Install Powershell
+# Install dotnet 6 & Azure Functions Core Tools
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/microsoft.list \
     && echo "deb [arch=amd64] https://packages.microsoft.com/debian/$(lsb_release -rs | cut -d'.' -f 1)/prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list \
     && wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb \
     && dpkg -i packages-microsoft-prod.deb \
     && apt-get update \
+    && apt-get install -y azure-functions-core-tools-4
+
+# Install Powershell
+RUN apt-get update \
     && apt-get install -y powershell \
     # Alias Powershell
     && echo "alias powershell=pwsh" >> "/home/$USERNAME/.bashrc"

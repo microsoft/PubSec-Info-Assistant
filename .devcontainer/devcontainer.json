@@ -69,7 +69,9 @@
     	"ms-azuretools.vscode-azurestorage",
 		"ms-azuretools.vscode-bicep",
 		"GitHub.copilot",
-		"BelkacemBerras.spellcheck"
+		"BelkacemBerras.spellcheck",
+		"ms-azuretools.vscode-azurefunctions",
+		"ms-python.python"
 	],
 
 	"remoteUser": "vscode"

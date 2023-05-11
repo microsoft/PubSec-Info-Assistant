@@ -8,12 +8,9 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    {
-        text: "Do we have any images of an airplane with a tailsign of Z-102?",
-        value: "Do we have any images of an airplane with a tailsign of Z-102?"
-    },
-    { text: "What services does Toyota provide to the defense industry?", value: "What services does Toyota provide to the defense industry?" },
-    { text: "Compare the destroyers of the US Navy and the Chinese Navy.", value: "Compare the destroyers of the US Navy and the Chinese Navy." }
+    { text: "What impact does China have on climate change?", value: "What impact does China have on climate change?" },
+    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
+    { text: "Provide a report comparing the Arleigh Burke destroyers with the Chinese Type 055.", value: "Provide a report comparing the Arleigh Burke destroyers with the Chinese Type 055." }
 ];
 
 interface Props {

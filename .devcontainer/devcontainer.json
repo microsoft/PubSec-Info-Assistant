@@ -70,8 +70,10 @@
 		"ms-azuretools.vscode-bicep",
 		"GitHub.copilot",
 		"BelkacemBerras.spellcheck",
+		"ms-azuretools.vscode-azureresourcegroups",
 		"ms-azuretools.vscode-azurefunctions",
-		"ms-python.python"
+		"ms-python.python",
+		"ms-python.pylint"
 	],
 
 	"remoteUser": "vscode"

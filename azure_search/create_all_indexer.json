@@ -10,7 +10,7 @@
   },
   "parameters": {
     "batchSize": null,
-    "maxFailedItems": 0,
+    "maxFailedItems": -1,
     "maxFailedItemsPerBatch": 0,
     "base64EncodeKeys": null,
     "configuration": {

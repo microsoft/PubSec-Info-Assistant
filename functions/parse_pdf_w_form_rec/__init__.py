@@ -185,7 +185,7 @@ def analyze_layout(myblob: func.InputStream):
     title = ""
     section_heading = ""
     for paragraph in result.paragraphs: 
-        # only porcess content, titles and sectionHeading 
+        # only process content, titles and sectionHeading 
         if paragraph.role == "title" or paragraph.role == "sectionHeading" or paragraph.role is None:
             polygon_elements = []
             # store the most recent title and subheading as context data
@@ -226,7 +226,7 @@ def analyze_layout(myblob: func.InputStream):
     
     for paragraph_element in pargraph_elements:   
 
-        if paragraph_element["role"] == None and contains_real_words(paragraph_element["content"]) == True:
+        if paragraph_element["role"] is None and contains_real_words(paragraph_element["content"]) is True:
             title_name = paragraph_element["title"]
             section_name = paragraph_element["section_heading"]
             # build chunck from paragraphs until target size is reached  
@@ -258,4 +258,4 @@ def analyze_layout(myblob: func.InputStream):
                 target_size_reached = False 
             else:
                 chunk_text = ""
-                chunk_size = 0                   
+                chunk_size = 0                 

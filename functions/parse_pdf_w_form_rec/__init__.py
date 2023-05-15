@@ -10,6 +10,7 @@ import numpy as np
 from enum import Enum
 from datetime import datetime, timedelta
 import json
+import html
 import tiktoken
 import nltk
 nltk.download('words')
@@ -179,6 +180,23 @@ def  get_blob_and_sas(myblob):
     return source_blob_path
 
 
+def table_to_html(table):
+    """ Function to take an output FR table json structure and convert to HTML """
+    table_html = "<table>"
+    rows = [sorted([cell for cell in table.cells if cell.row_index == i], key=lambda cell: cell.column_index) for i in range(table.row_count)]
+    for row_cells in rows:
+        table_html += "<tr>"
+        for cell in row_cells:
+            tag = "th" if (cell.kind == "columnHeader" or cell.kind == "rowHeader") else "td"
+            cell_spans = ""
+            if cell.column_span > 1: cell_spans += f" colSpan={cell.column_span}"
+            if cell.row_span > 1: cell_spans += f" rowSpan={cell.row_span}"
+            table_html += f"<{tag}{cell_spans}>{html.escape(cell.content)}</{tag}>"
+        table_html +="</tr>"
+    table_html += "</table>"
+    return table_html
+
+
 def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, section_name, title_name):    
     chunk_output = {
         'file_name': document_map['file_name'],
@@ -218,18 +236,24 @@ def build_document_map(myblob, result):
         'content': result.content,
         'content_type': list,
         "structure": [],
-        "content_type": []
+        "content_type": [],
+        "table_index": []
     }
     document_map['content_type'].extend([content_type.not_processed] * len(result.content))
+    document_map['table_index'].extend([-1] * len(result.content))
    
     # update content_type array where spans are tables
-    for table in result.tables:
+    for index, table in enumerate(result.tables):
         start_char = table.spans[0].offset
         end_char = start_char + table.spans[0].length - 1
         document_map['content_type'][start_char] = content_type.table_start
+        document_map['content_type'][start_char]
         for i in range(start_char+1, end_char):
             document_map['content_type'][i] = content_type.table_char                    
-        document_map['content_type'][end_char] = content_type.table_end     
+        document_map['content_type'][end_char] = content_type.table_end 
+        # tag the end point in content of a table with the index of which table this is
+        document_map['table_index'][end_char] = index        
+
     
     # update content_type array where spans are titles, section headings or regular content, BUT skip over the table paragraphs
     for paragraph in result.paragraphs:
@@ -288,14 +312,17 @@ def build_document_map(myblob, result):
                     property_type = 'text'
                     output_text = document_map['content'][start_position:index+1]
                 elif item == content_type.table_end:
+                    # now we have reached the end of the table in the content dictionary, write out 
+                    # the table text to the output json document map
                     property_type = 'table'
-                    table_text = document_map['content'][start_position:index+1]   
-                                    
+                    table_index = document_map['table_index'][index]
+                    table_json = result.tables[table_index] 
+                    output_text = table_to_html(table_json)
                 else:
                     property_type = 'unknown'
                 document_map["structure"].append({
                     'offset': start_position,
-                    'text': document_map['content'][start_position:index+1],
+                    'text': output_text,
                     'type': property_type,
                     'title': current_title,
                     'section': current_section,
@@ -304,6 +331,7 @@ def build_document_map(myblob, result):
                 })                 
                 
     del document_map['content_type']
+    del document_map['table_index']
     # sort to order columns in the document logically
     document_map['structure'].sort(key=sort_key)
     
@@ -327,12 +355,7 @@ def build_chunks(document_map, myblob):
     page_list = []   
     
     # iterate over the paragraphs and build a chuck bae don a section and/or title of teh document
-    for index, paragraph_element in enumerate(document_map['structure']):            
-                
-        if index == 16:
-            print('hello')
-                
-                
+    for index, paragraph_element in enumerate(document_map['structure']):          
         # if this paragraph would put the chunk_size greater than the target token size, OR
         # if this is a new (section OR title)
         # then write out the stash of content from previous loops and start a new chunk
@@ -349,8 +372,9 @@ def build_chunks(document_map, myblob):
             chunk_size = 0  
             page_number = 0   
         
-        # Now process this paragraph if it passes the minimum threshold for real words - if it is real text
-        if contains_real_words(paragraph_element["text"]) is True:
+        # Now process this paragraph if it passes the minimum threshold for real words, 
+        # only for textual paragraphs not tables - if it is real text
+        if (contains_real_words(paragraph_element['text']) is True) or (paragraph_element['type'] != 'text'):
             if page_number != paragraph_element["page_number"]:
                 page_list.append(paragraph_element["page_number"])
                 page_number = paragraph_element["page_number"]   

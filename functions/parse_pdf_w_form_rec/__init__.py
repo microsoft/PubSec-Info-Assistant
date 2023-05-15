@@ -11,6 +11,7 @@ from enum import Enum
 from datetime import datetime, timedelta
 import json
 import html
+from decimal import Decimal
 import tiktoken
 import nltk
 nltk.download('words')
@@ -21,12 +22,11 @@ azure_blob_storage_account = os.environ["AZURE_BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ["AZURE_BLOB_DROP_STORAGE_CONTAINER"]
 azure_blob_content_storage_container = os.environ["AZURE_BLOB_CONTENT_STORAGE_CONTAINER"]
 azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_storage_key = os.environ["XY_ROUNDING_FACTOR"]
-azure_blob_storage_key = os.environ["CHUNK_TARGET_SIZE"]
-azure_blob_storage_key = os.environ["REAL_WORDS_TARGET"]
-azure_blob_storage_key = os.environ["FR_API_VERSION"]
-azure_blob_storage_key = os.environ["TARGET_PAGES"]     # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
-azure_blob_storage_key = os.environ["WRITE_DOCUMENT_MAP_JSON"]
+XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
+CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
+REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
+FR_API_VERSION = os.environ["FR_API_VERSION"]
+TARGET_PAGES = os.environ["TARGET_PAGES"]     # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
 
 
 def main(myblob: func.InputStream):
@@ -332,10 +332,6 @@ def build_document_map(myblob, result):
     # sort to order columns in the document logically
     document_map['structure'].sort(key=sort_key)
     
-    if WRITE_DOCUMENT_MAP_JSON is True:
-        json_str = json.dumps(document_map, indent=2)
-        with open("document_map.json", 'w') as file:
-            file.write(json_str)        
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      
         

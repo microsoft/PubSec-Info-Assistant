@@ -7,7 +7,7 @@ type HtmlParsedAnswer = {
     followupQuestions: string[];
 };
 
-export function parseAnswerToHtml(answer: string, onCitationClicked: (citationFilePath: string) => void): HtmlParsedAnswer {
+export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitationClicked: (citationFilePath: string) => void): HtmlParsedAnswer {
     const citations: string[] = [];
     const followupQuestions: string[] = [];
 
@@ -27,17 +27,17 @@ export function parseAnswerToHtml(answer: string, onCitationClicked: (citationFi
             return part;
         } else {
             let citationIndex: number;
-            if (citations.indexOf(part) !== -1) {
-                citationIndex = citations.indexOf(part) + 1;
+            if (citations.indexOf((citation_lookup as any)[part]) !== -1) {
+                citationIndex = citations.indexOf((citation_lookup as any)[part]) + 1;
             } else {
-                citations.push(part);
+                citations.push((citation_lookup as any)[part].split("/").slice(4).join("/"));
                 citationIndex = citations.length;
             }
 
-            const path = getCitationFilePath(part);
+            const path = getCitationFilePath((citation_lookup as any)[part]);
 
             return renderToStaticMarkup(
-                <a className="supContainer" title={part} onClick={() => onCitationClicked(path)}>
+                <a className="supContainer" title={(citation_lookup as any)[part].split("/").slice(4).join("/")} onClick={() => onCitationClicked(path)}>
                     <sup>{citationIndex}</sup>
                 </a>
             );

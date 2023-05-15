@@ -17,23 +17,20 @@ nltk.download('words')
 nltk.download('punkt')
 
 
-XY_ROUNDING_FACTOR = 1
-CHUNK_TARGET_SIZE = 750
-REAL_WORDS_TARGET = 0.2
-FR_API_VERSION = '2023-02-28-preview'
-TARGET_PAGES = "ALL"          # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
-#TARGET_PAGES = "3" 
-WRITE_DOCUMENT_MAP_JSON = True
-
-
 azure_blob_storage_account = os.environ["AZURE_BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ["AZURE_BLOB_DROP_STORAGE_CONTAINER"]
 azure_blob_content_storage_container = os.environ["AZURE_BLOB_CONTENT_STORAGE_CONTAINER"]
 azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
+azure_blob_storage_key = os.environ["XY_ROUNDING_FACTOR"]
+azure_blob_storage_key = os.environ["CHUNK_TARGET_SIZE"]
+azure_blob_storage_key = os.environ["REAL_WORDS_TARGET"]
+azure_blob_storage_key = os.environ["FR_API_VERSION"]
+azure_blob_storage_key = os.environ["TARGET_PAGES"]     # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
+azure_blob_storage_key = os.environ["WRITE_DOCUMENT_MAP_JSON"]
 
 
 def main(myblob: func.InputStream):
-    """ Function to read PDF files and extract text using Azure Form Recognizer"""    
+    """ Function to read PDF files and extract text using Azure Form Recognizer"""
     logging.info(f"Python blob trigger function processed blob \n"
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
@@ -197,7 +194,7 @@ def table_to_html(table):
     return table_html
 
 
-def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, section_name, title_name):    
+def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, section_name, title_name):
     chunk_output = {
         'file_name': document_map['file_name'],
         'file_uri': document_map['file_uri'],
@@ -418,9 +415,9 @@ def analyze_layout(myblob: func.InputStream):
             "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES, api_version=FR_API_VERSION
         )        
     result = poller.result()
-    logging.info(f"Form Recognizer has returned results \n") 
+    logging.info(f"Form Recognizer has returned results \n")
 
-    document_map = build_document_map(myblob, result)        
-    build_chunks(document_map, myblob)     
+    document_map = build_document_map(myblob, result)
+    build_chunks(document_map, myblob)
    
     logging.info(f"Done!\n")

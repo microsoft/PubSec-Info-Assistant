@@ -286,8 +286,11 @@ def build_document_map(myblob, result):
             case content_type.text_end | content_type.table_end:
                 if item == content_type.text_end:
                     property_type = 'text'
+                    output_text = document_map['content'][start_position:index+1]
                 elif item == content_type.table_end:
                     property_type = 'table'
+                    table_text = document_map['content'][start_position:index+1]   
+                                    
                 else:
                     property_type = 'unknown'
                 document_map["structure"].append({
@@ -362,116 +365,6 @@ def build_chunks(document_map, myblob):
             
         previous_section_name = section_name
         previous_title_name = title_name    
-            
-            
-            
-            
-            
-        # If the token max size is reached or if is a new section or title or if this is 
-        # the last paragraph in the document map, then write out the file
-        # if (target_size_reached == True or 
-        #     section_name != previous_section_name or 
-        #     title_name != previous_title_name or
-        #     index == len(document_map['structure'])
-        #     ) and chunk_text != '':
-        #     # if it's a new section or new title then write out file and if there is text to write            
-        #     chunk_output = {
-        #         'file_name': document_map['file_name'],
-        #         'file_uri': document_map['file_uri'],
-        #         'processed_datetime': datetime.now().isoformat(),
-        #         'title': title_name,
-        #         'section': section_name,
-        #         'pages': page_list,
-        #         'token_count': chunk_size,
-        #         'content': chunk_text                       
-        #    }            
-            # json_str = json.dumps(chunk_output, indent=2)
-            # output_filename = os.path.splitext(os.path.basename(base_filename))[0] + f'-{file_number}' + '.json'
-            # block_blob_client = blob_service_client.get_blob_client(
-            #     container=azure_blob_content_storage_container, blob=f'{folder_set}/{os.path.basename(myblob.name)}/{output_filename}')
-            # block_blob_client.upload_blob(json_str, overwrite=True)      
-            # write_chunk(myblob, chunk_output, file_number)     
- 
-            # reset counters
-            # file_number += 1
-            # page_list = [] 
-            # previous_section_name = section_name       
-            # previous_title_name = title_name
-            
-            
-            
-            
-            # # if we wrote the file because we hit the token target, then start with the last paragraph processed
-            # if target_size_reached is True:
-            #     page_list.append(paragraph_element["page_number"]) 
-            #     chunk_text = paragraph_element["text"]
-            #     chunk_size = paragraph_size   
-            #     target_size_reached = False 
-            # else:
-            #     chunk_text = ""
-            #     chunk_size = 0     
-                   
-                   
-                   
-                   
-        
-
-    
-
-    
-    
-    
-    
-    # # extract the content by paragraph with title, sectionHeading & pageHeader and write as a chunk
-    # logging.info(f"Extracting chunks form the document json structure \n")
-    # blob_service_client = BlobServiceClient(
-    # f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
-    # file_number = 0
-    # chunk_text = ""
-    # chunk_size = 0
-    # paragraph_size = 0
-    # section_name = ""
-    # title_name = ""
-    # target_size_reached = False
-    
-    # for paragraph_element in pargraph_elements:   
-
-    #     if paragraph_element["role"] is None and contains_real_words(paragraph_element["content"]) is True:
-    #         title_name = paragraph_element["title"]
-    #         section_name = paragraph_element["section_heading"]
-    #         # build chunck from paragraphs until target size is reached  
-    #         paragraph_size = token_count(paragraph_element["content"])
-    #         if chunk_size + paragraph_size <= CHUNK_TARGET_SIZE:
-    #             chunk_size = chunk_size + paragraph_size
-    #             chunk_text = chunk_text + "\n" + paragraph_element["content"]
-    #         else:
-    #             # if target chunk size is hit then write out file
-    #             target_size_reached = True 
-
-    #     if (paragraph_element["role"] != None or target_size_reached == True) and chunk_text != ""  :
-    #         # if its a new section then write out file and if there is text to write
-    #         chunk_output = title_name + "\n" + \
-    #             section_name + "\n\n" + \
-    #             chunk_text       
-    #         output_filename = os.path.splitext(os.path.basename(base_filename))[0] + f"-{file_number}" + ".txt"
-    #         block_blob_client = blob_service_client.get_blob_client(
-    #             container=azure_blob_content_storage_container, blob=f'{folder_set}/{os.path.basename(myblob.name)}/{output_filename}')
-    #         block_blob_client.upload_blob(chunk_output.encode('utf-8'), overwrite=True)
-
-    #         # reset counters
-    #         file_number += 1            
-
-    #         # if we wrote the file because we hit the token target, then start with the last paragraph porcessed
-    #         if target_size_reached is True:
-    #             chunk_text = paragraph_element["content"]
-    #             chunk_size = paragraph_size   
-    #             target_size_reached = False 
-    #         else:
-    #             chunk_text = ""
-    #             chunk_size = 0     
-    
-    
-    
     
     logging.info(f"Chunking is complete \n")
         

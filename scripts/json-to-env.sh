@@ -57,6 +57,10 @@ jq -r  '
         {
             "path": "azurE_OPENAI_SERVICE_KEY",
             "env_var": "AZURE_OPENAI_SERVICE_KEY"
+        },
+        {
+            "path": "azurE_STORAGE_KEY",
+            "env_var": "AZURE_BLOB_STORAGE_KEY"
         }
     ]
         as $env_vars_to_extract

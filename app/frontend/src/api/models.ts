@@ -26,6 +26,7 @@ export type AskResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
+    citation_lookup: {}
     error?: string;
 };
 

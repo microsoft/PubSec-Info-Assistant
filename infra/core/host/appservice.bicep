@@ -35,6 +35,8 @@ param scmDoBuildDuringDeployment bool = false
 param use32BitWorkerProcess bool = false
 param ftpsState string = 'FtpsOnly'
 param healthCheckPath string = ''
+param aadClientId string = ''
+param tenantId string = subscription().tenantId
 
 param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
 
@@ -87,6 +89,31 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     dependsOn: [
       configAppSettings
     ]
+  }
+
+  resource authSettingsV2 'config' = {
+    name: 'authsettingsV2'
+    properties: {
+      globalValidation: {
+        unauthenticatedClientAction: 'RedirectToLoginPage'
+        redirectToProvider: 'AzureActiveDirectory'
+        requireAuthentication: true
+      }
+      identityProviders: {
+        azureActiveDirectory: {
+          enabled: true
+          registration: {
+            openIdIssuer: 'https://sts.windows.net/${tenantId}/v2.0'
+            clientId: aadClientId
+          }
+          validation: {
+            allowedAudiences: [
+              'api://${name}'
+            ]
+          }
+        }
+      }
+    }
   }
 }
 

@@ -9,9 +9,9 @@ from text import nonewlines
 # (answer) with that prompt.
 class ChatReadRetrieveReadApproach(Approach):
     prompt_prefix = """<|im_start|>system
-Be brief in your answers. Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. 
-Do not generate answers that don't use the sources below. If asking a clarifying question to the user would help, ask the question. 
-Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response. Use square brakets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+Assistant helps the analysts with their questions about their agencies data. Be brief in your answers.
+Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. For tabular information return it as an html table. Do not return markdown format.
+Each source has a file name followed by a pipe character and the actual information, always include the source name for each fact you use in the response. Use square brakets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
 {follow_up_questions_prompt}
 {injected_prompt}
 Sources:
@@ -20,9 +20,7 @@ Sources:
 {chat_history}
 """
 
-    follow_up_questions_prompt_content = """Generate three very brief follow-up questions that the user would likely ask next about their military intelligence data. 
-    Use double angle brackets to reference the questions, e.g. <<Are there exclusions for prescriptions?>>.
-    Try not to repeat questions that have already been asked.
+    follow_up_questions_prompt_content = """Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use double angle brackets to reference the questions, e.g. <<Are there exclusions for prescriptions?>>. Try not to repeat questions that have already been asked.
     Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'"""
 
     query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a knowledge base.
@@ -59,7 +57,7 @@ Search query:
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         prompt = self.query_prompt_template.format(chat_history=self.get_chat_history_as_text(history, include_last_turn=False), question=history[-1]["user"])
         completion = openai.Completion.create(
-            engine=self.gpt_deployment, 
+            engine=self.chatgpt_deployment, 
             prompt=prompt, 
             temperature=0.0, 
             max_tokens=32, 
@@ -79,11 +77,25 @@ Search query:
                                           query_caption="extractive|highlight-false" if use_semantic_captions else None)
         else:
             r = self.search_client.search(q, filter=filter, top=top)
-        if use_semantic_captions:
-            results = ["/".join(doc[self.sourcepage_field].split("/")[4:]) + ": " + nonewlines(" . ".join([c.text for c in doc['@search.captions']])) for doc in r]
-        else:
-            results = ["/".join(doc[self.sourcepage_field].split("/")[4:]) + ": " + nonewlines(doc[self.content_field]) for doc in r]
-        content = "\n".join(results)
+        
+        citation_lookup = {} # dict of "FileX" monikor to the actual file name
+        results = [] # list of results to be used in the prompt
+        data_points = [] # list of data points to be used in the response
+        for idx,doc in enumerate(r): # for each document in the search results
+            if use_semantic_captions:
+                # if using semantic captions, use the captions instead of the content
+                # include the "FileX" monikor in the prompt, and the actual file name in the response
+                results.append(f"File{idx} " + "| " + nonewlines(" . ".join([c.text for c in doc['@search.captions']])))
+                data_points.append("/".join(doc[self.sourcepage_field].split("/")[4:]) + "| " + nonewlines(" . ".join([c.text for c in doc['@search.captions']])))
+            else:
+                # if not using semantic captions, use the content instead of the captions
+                # include the "FileX" monikor in the prompt, and the actual file name in the response
+                results.append(f"File{idx} " + "| " + nonewlines(doc[self.content_field]))
+                data_points.append("/".join(doc[self.sourcepage_field].split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
+            # add the "FileX" monikor and full file name to the citation lookup
+            citation_lookup[f"File{idx}"] = doc[self.sourcepage_field]
+        # create a single string of all the results to be used in the prompt
+        content = "\n ".join(results)
 
         follow_up_questions_prompt = self.follow_up_questions_prompt_content if overrides.get("suggest_followup_questions") else ""
         
@@ -92,7 +104,7 @@ Search query:
         if prompt_override is None:
             prompt = self.prompt_prefix.format(injected_prompt="", sources=content, chat_history=self.get_chat_history_as_text(history), follow_up_questions_prompt=follow_up_questions_prompt)
         elif prompt_override.startswith(">>>"):
-            prompt = self.prompt_prefix.format(injected_prompt=prompt_override[3:] + "\n", sources=content, chat_history=self.get_chat_history_as_text(history), follow_up_questions_prompt=follow_up_questions_prompt)
+            prompt = self.prompt_prefix.format(injected_prompt=prompt_override[3:] + "\n ", sources=content, chat_history=self.get_chat_history_as_text(history), follow_up_questions_prompt=follow_up_questions_prompt)
         else:
             prompt = prompt_override.format(sources=content, chat_history=self.get_chat_history_as_text(history), follow_up_questions_prompt=follow_up_questions_prompt)
 
@@ -105,7 +117,7 @@ Search query:
             n=1, 
             stop=["<|im_end|>", "<|im_start|>"])
 
-        return {"data_points": results, "answer": completion.choices[0].text, "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>')}
+        return {"data_points": data_points, "answer": completion.choices[0].text, "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>'), "citation_lookup": citation_lookup}
     
     def get_chat_history_as_text(self, history, include_last_turn=True, approx_max_tokens=1000) -> str:
         history_text = ""

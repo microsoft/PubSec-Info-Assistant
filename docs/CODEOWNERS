@@ -1,0 +1,20 @@
+# Each line is a file pattern followed by one or more owners.
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# they will be requested for review when someone opens a pull request.
+*       @dayland @asbanger @georearl
+
+
+/app/ @dayland @georearl
+
+/infra/  @asbanger @dayland 
+
+/artifacts/ @georearl @dayland
+
+/azure_search/ @dayland @georearl
+
+/docs/ @dayland @georearl
+
+/scripts/ @dayland @asbanger
+
+/.devcontrainer/  @asbanger @dayland

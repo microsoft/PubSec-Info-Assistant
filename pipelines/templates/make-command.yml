@@ -24,7 +24,6 @@ steps:
   displayName: ${{ parameters.displayName }}
   condition: or(succeeded(), eq('${{ parameters.force }}', 'true'))
   env:
-
     AZURE_STORAGE_ACCOUNT: $(AZURE_STORAGE_ACCOUNT)
     AZURE_STORAGE_ACCOUNT_KEY: $(AZURE_STORAGE_ACCOUNT_KEY)
     ARM_CLIENT_ID: $(CLIENT_ID)

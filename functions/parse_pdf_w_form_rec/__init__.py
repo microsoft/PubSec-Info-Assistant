@@ -194,9 +194,12 @@ def table_to_html(table):
     return table_html
 
 
-def remove_suffix(filename):
-    """ Function to remove the file type from a file name and path"""
-    return filename[:filename.rfind('.')]
+def get_filename_and_extension(path):
+    """ Function to return the file name & type"""
+    # Split the path into base and extension
+    base_name = os.path.basename(path)
+    file_name, file_extension = os.path.splitext(base_name)
+    return file_name, file_extension
 
 
 def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, section_name, title_name):
@@ -212,13 +215,13 @@ def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_
         'content': chunk_text                       
     }                
     # Get path and file name minus the root container
-    base_filename = os.path.basename(myblob.name)
+    file_name, file_extension = get_filename_and_extension(myblob.name)
     # Get the folders to use when creating the new files        
-    folder_set = base_filename + "/"
+    folder_set = file_name + "." + file_extension + "/"
     blob_service_client = BlobServiceClient(
         f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
     json_str = json.dumps(chunk_output, indent=2)
-    output_filename = os.path.splitext(os.path.basename(base_filename))[0] + f'-{file_number}' + '.json'
+    output_filename = file_name + f'-{file_number}' + '.json'
     block_blob_client = blob_service_client.get_blob_client(
         container=azure_blob_content_storage_container, blob=f'{folder_set}{output_filename}')
     block_blob_client.upload_blob(json_str, overwrite=True)   
@@ -233,7 +236,7 @@ def write_blob(output_container, content, output_filename, folder_set=""):
     block_blob_client = blob_service_client.get_blob_client(
         container=output_container, blob=f'{folder_set}{output_filename}')
     block_blob_client.upload_blob(content, overwrite=True)   
-   
+       
         
 def build_document_map(myblob, result):
     """ Function to build a json structure representing the paragraphs in a document, including metadata
@@ -347,10 +350,18 @@ def build_document_map(myblob, result):
     # sort to order columns in the document logically
     document_map['structure'].sort(key=sort_key)
     
-    # Output document map to logging container
+    # Output document map to log container
     json_str = json.dumps(document_map, indent=2)
     base_filename = os.path.basename(myblob.name)
-    output_filename = os.path.splitext(os.path.basename(base_filename))[0] + '_Document_Map' + '.json'    
+    file_name, file_extension = get_filename_and_extension(os.path.basename(base_filename))
+    output_filename =  file_name + "_Document_Map" + file_extension + ".json"
+    write_blob(azure_blob_log_storage_container, json_str, output_filename)
+    
+    # Output FR result to log container
+    result_dict = result.to_dict() 
+    json_str = json.dumps(result_dict, indent=2)
+    base_filename = os.path.basename(myblob.name)
+    output_filename = os.path.splitext(os.path.basename(base_filename))[0] + '_FR_Result' + file_extension + ".json"
     write_blob(azure_blob_log_storage_container, json_str, output_filename)
     
     logging.info(f"Constructing the JSON structure of the document complete\n")  

@@ -187,7 +187,11 @@ module storage 'core/storage/storage-account.bicep' = {
       {
         name: 'content'
         publicAccess: 'None'
-      }
+      },
+      {
+        name: 'log'
+        publicAccess: 'None'
+      }      
     ]
   }
 }

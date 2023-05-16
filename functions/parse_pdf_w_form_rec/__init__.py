@@ -27,7 +27,7 @@ CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
 TARGET_PAGES = os.environ["TARGET_PAGES"]     # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
-
+azure_blob_log_storage_container = os.environ["AZURE_BLOB_LOG_STORAGE_CONTAINER"]
 
 def main(myblob: func.InputStream):
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
@@ -194,7 +194,13 @@ def table_to_html(table):
     return table_html
 
 
+def remove_suffix(filename):
+    """ Function to remove the file type from a file name and path"""
+    return filename[:filename.rfind('.')]
+
+
 def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, section_name, title_name):
+    """ Function to write a json chunk to blob"""
     chunk_output = {
         'file_name': document_map['file_name'],
         'file_uri': document_map['file_uri'],
@@ -206,18 +212,27 @@ def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_
         'content': chunk_text                       
     }                
     # Get path and file name minus the root container
-    separator = "/"
-    file_path_w_name_no_cont = separator.join(myblob.name.split(separator)[1:])
     base_filename = os.path.basename(myblob.name)
     # Get the folders to use when creating the new files        
-    folder_set = file_path_w_name_no_cont.removesuffix(f'/{base_filename}')
+    folder_set = base_filename + "/"
     blob_service_client = BlobServiceClient(
         f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
     json_str = json.dumps(chunk_output, indent=2)
     output_filename = os.path.splitext(os.path.basename(base_filename))[0] + f'-{file_number}' + '.json'
     block_blob_client = blob_service_client.get_blob_client(
-        container=azure_blob_content_storage_container, blob=f'{folder_set}/{os.path.basename(myblob.name)}/{output_filename}')
+        container=azure_blob_content_storage_container, blob=f'{folder_set}{output_filename}')
     block_blob_client.upload_blob(json_str, overwrite=True)   
+    
+    
+def write_blob(output_container, content, output_filename, folder_set=""):
+    """ Function to write a generic blob """
+    # folder_set should be in the format of "<my_folder_name>/"
+    # Get path and file name minus the root container
+    blob_service_client = BlobServiceClient(
+        f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
+    block_blob_client = blob_service_client.get_blob_client(
+        container=output_container, blob=f'{folder_set}{output_filename}')
+    block_blob_client.upload_blob(content, overwrite=True)   
    
         
 def build_document_map(myblob, result):
@@ -331,6 +346,12 @@ def build_document_map(myblob, result):
     del document_map['table_index']
     # sort to order columns in the document logically
     document_map['structure'].sort(key=sort_key)
+    
+    # Output document map to logging container
+    json_str = json.dumps(document_map, indent=2)
+    base_filename = os.path.basename(myblob.name)
+    output_filename = os.path.splitext(os.path.basename(base_filename))[0] + '_Document_Map' + '.json'    
+    write_blob(azure_blob_log_storage_container, json_str, output_filename)
     
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      

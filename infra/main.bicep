@@ -27,6 +27,7 @@ param resourceGroupName string = ''
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
+param functionsAppName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
@@ -194,8 +195,34 @@ module storage 'core/storage/storage-account.bicep' = {
         name: 'website'
         publicAccess: 'None'
       }
+      {
+        name: 'function'
+        publicAccess: 'None'
+      }
     ]
   }
+}
+
+// Function App for the backend
+
+module functions 'core/function/function.bicep' = {
+  name: 'functions'
+  scope: rg
+  params: {
+    name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
+    location: location
+    tags: tags
+    serverFarmId: appServicePlan.outputs.id
+    runtime: 'python'
+    storageAccountKey: storage.outputs.key
+    storageAccountName: storage.outputs.name
+    appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
+    appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
+  }
+  dependsOn: [
+    appServicePlan
+    storage
+  ]
 }
 
 // USER ROLES

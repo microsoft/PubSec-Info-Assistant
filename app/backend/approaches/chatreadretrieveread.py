@@ -78,17 +78,23 @@ Search query:
         else:
             r = self.search_client.search(q, filter=filter, top=top)
         
-        citation_lookup = {}
-        results = []
-        data_points = []
-        for idx,doc in enumerate(r):
+        citation_lookup = {} # dict of "FileX" monikor to the actual file name
+        results = [] # list of results to be used in the prompt
+        data_points = [] # list of data points to be used in the response
+        for idx,doc in enumerate(r): # for each document in the search results
             if use_semantic_captions:
+                # if using semantic captions, use the captions instead of the content
+                # include the "FileX" monikor in the prompt, and the actual file name in the response
                 results.append(f"File{idx} " + "| " + nonewlines(" . ".join([c.text for c in doc['@search.captions']])))
                 data_points.append("/".join(doc[self.sourcepage_field].split("/")[4:]) + "| " + nonewlines(" . ".join([c.text for c in doc['@search.captions']])))
             else:
+                # if not using semantic captions, use the content instead of the captions
+                # include the "FileX" monikor in the prompt, and the actual file name in the response
                 results.append(f"File{idx} " + "| " + nonewlines(doc[self.content_field]))
                 data_points.append("/".join(doc[self.sourcepage_field].split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
+            # add the "FileX" monikor and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = doc[self.sourcepage_field]
+        # create a single string of all the results to be used in the prompt
         content = "\n ".join(results)
 
         follow_up_questions_prompt = self.follow_up_questions_prompt_content if overrides.get("suggest_followup_questions") else ""

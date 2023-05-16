@@ -51,14 +51,6 @@ def main(myblob: func.InputStream):
     logging.info(f"chunking complete for file {myblob.name}")
 
 
-def is_pdf(file_name):
-    """ Function to check whether a file is a PDF """
-    # Get the file extension using os.path.splitext
-    file_ext = os.path.splitext(file_name)[1]
-    # Return True if the extension is .pdf, False otherwise
-    return file_ext == ".pdf"
-
-
 def sort_key(element):
     """ Function to sort elements by page number and role priority """
     return (element["page_number"])
@@ -422,8 +414,7 @@ def build_chunks(document_map, myblob):
 def analyze_layout(myblob: func.InputStream):
     """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer"""
  
-    if is_pdf(myblob.name):
-        source_blob_path = get_blob_and_sas(myblob)
+    source_blob_path = get_blob_and_sas(myblob)
 
     # [START extract_layout]
     logging.info(f"Calling form recognizer \n")

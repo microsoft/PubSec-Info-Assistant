@@ -5,7 +5,7 @@
       "name": "myblob",
       "type": "blobTrigger",
       "direction": "in",
-      "path": "upload",
+      "path": "upload/{name}.pdf",
       "connection": "infoasststore_STORAGE"
     }
   ]

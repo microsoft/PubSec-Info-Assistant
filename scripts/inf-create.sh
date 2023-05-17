@@ -53,12 +53,14 @@ aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --ou
 if [ -z $aadAppId ]
   then
     aadAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+    aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
   fi
 export AZURE_AD_APP_CLIENT_ID=$aadAppId
 
 aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
 if [ -z $aadSPId ]; then
     aadSPId=$(az ad sp create --id $aadAppId --output tsv --query "[].id")
+    aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
 fi
 if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
   # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
@@ -93,7 +95,7 @@ echo $parameter_json > $DIR/../infra/main.parameters.json
 az bicep upgrade
 
 #deploy bicep
-az deployment sub what-if --location $LOCATION --template-file main.bicep --parameters main.parameters.json
+az deployment sub what-if --location $LOCATION --template-file main.bicep --parameters main.parameters.json --name $RG_NAME
 if [ -z $SKIP_PLAN_CHECK ]
     then
         printInfo "Are you happy with the plan, would you like to apply? (y/N)"
@@ -106,7 +108,7 @@ if [ -z $SKIP_PLAN_CHECK ]
             exit 1
         fi
     fi
-results=$(az deployment sub create --location $LOCATION --template-file main.bicep --parameters main.parameters.json)
+results=$(az deployment sub create --location $LOCATION --template-file main.bicep --parameters main.parameters.json --name $RG_NAME)
 
 #save deployment output
 printInfo "Writing output to infra_output.json"

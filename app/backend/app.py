@@ -5,6 +5,7 @@ import logging
 import openai
 from flask import Flask, request, jsonify
 from azure.identity import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from approaches.retrievethenread import RetrieveThenReadApproach
 from approaches.readretrieveread import ReadRetrieveReadApproach
@@ -14,8 +15,10 @@ from azure.storage.blob import BlobServiceClient
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
+AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
+AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
 AZURE_OPENAI_GPT_DEPLOYMENT = os.environ.get("AZURE_OPENAI_GPT_DEPLOYMENT") or "davinci"
@@ -31,6 +34,7 @@ KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "file_storage_p
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
 azure_credential = DefaultAzureCredential()
+azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
 
 # Used by the OpenAI SDK
 openai.api_type = "azure"
@@ -46,10 +50,10 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 search_client = SearchClient(
     endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
     index_name=AZURE_SEARCH_INDEX,
-    credential=azure_credential)
+    credential=azure_search_key_credential)
 blob_client = BlobServiceClient(
     account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net", 
-    credential=azure_credential)
+    credential=AZURE_BLOB_STORAGE_KEY)
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
 # Various approaches to integrate GPT and external knowledge, most applications will use a single one of these patterns

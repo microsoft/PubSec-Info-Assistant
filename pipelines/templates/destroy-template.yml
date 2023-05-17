@@ -1,0 +1,13 @@
+# Template for destroy pipeline. Modify and add steps here.
+parameters:
+- name: fullBuild  
+  type: boolean
+  default: true
+
+steps:
+- ${{ if eq(parameters.fullBuild, true) }}:
+  - template: make-command.yml
+    parameters:
+      displayName: 'Destroy Infrastructure'
+      makeCommand: 'destroy-inf'
+      force: true

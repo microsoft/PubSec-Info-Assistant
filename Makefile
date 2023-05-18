@@ -29,4 +29,11 @@ extract-env-debug: ## Extract infrastructure.debug.env file from BICEP output
 
 # Utils (used by other Makefile rules)
 check-subscription:
-	@./scripts/check-subscription.sh
+	@./scripts/check-subscription.sh 
+
+# CI rules (used by automated builds)
+take-dir-ownership:
+	@sudo chown -R vscode .
+
+destroy-inf: check-subscription
+	@./scripts/inf-destroy.sh

@@ -12,8 +12,6 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "<your parameter 1 goes here>",
-                "<your parameter 2 goes here>" 
             ] 
         },
         {

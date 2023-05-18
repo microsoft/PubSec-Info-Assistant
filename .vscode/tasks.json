@@ -1,6 +1,22 @@
 {
   "version": "2.0.0",
-  "tasks": [
+  "tasks": [    
+    {
+      "version": "2.0.0",
+      "tasks": [
+        {
+          "label": "fun host start",
+          "type": "shell",
+          "command": "func host start",
+          "group": "build",
+          "presentation": {
+            "reveal": "always",
+            "panel": "new"
+          },
+          "problemMatcher": []
+        }
+      ]
+    }
     {
       "label": "pip_install",
       "type": "shell",

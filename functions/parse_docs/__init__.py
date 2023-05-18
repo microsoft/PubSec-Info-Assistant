@@ -11,6 +11,10 @@ from enum import Enum
 from datetime import datetime, timedelta
 import json
 import html
+from bs4 import BeautifulSoup
+import codecs
+import requests
+import json
 from decimal import Decimal
 import tiktoken
 import nltk
@@ -230,7 +234,7 @@ def write_blob(output_container, content, output_filename, folder_set=""):
     block_blob_client.upload_blob(content, overwrite=True)   
        
         
-def build_document_map(myblob, result):
+def build_document_map_pdf(myblob, result):
     """ Function to build a json structure representing the paragraphs in a document, including metadata
         such as section heading, title, page number, eal word pernetage etc.
         We construct this map from the Content key/value output of FR, because the paragraphs value does not distinguish between
@@ -359,6 +363,64 @@ def build_document_map(myblob, result):
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      
         
+
+def build_document_map_html(myblob, source_blob_path):
+    """ Function to build a json structure representing the paragraphs in a document, including metadata
+        such as section heading, title, page number, eal word pernetage etc."""
+        
+    logging.info(f"Constructing the JSON structure of the document\n")   
+         
+    # html_file
+    # Download the content from the URL
+    response = requests.get(source_blob_path)
+    if response.status_code == 200:
+        html = response.text
+        soup = BeautifulSoup(html, 'lxml')
+    
+    # with codecs.open(content, "r", encoding='utf-8', errors='replace') as page:
+    #     soup = bs4.BeautifulSoup(page, 'lxml')
+        
+    # with codecs.open(content, "r", encoding='utf-8', errors='replace') as page:
+    #     soup = bs4.BeautifulSoup(page, 'lxml')
+
+    # soup = bs4.BeautifulSoup(content, 'lxml')
+    
+    document_map = {
+        'file_name': myblob.name,
+        'file_uri': myblob.uri,
+        'content': soup.text,
+        "structure": []
+    }      
+
+    title = '' 
+    section = ''   
+    title = soup.title.string if soup.title else "No title"
+    
+    for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+        if tag.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+            section = tag.get_text(strip=True)
+        elif tag.name == 'p' and tag.get_text(strip=True):
+            document_map["structure"].append({
+                "type": "text", 
+                "text": tag.get_text(strip=True),
+                "type": "text",
+                "title": title.text.strip(),
+                "section": section,
+                "page_number": 1                
+                })            
+            
+    
+    # Output document map to log container
+    json_str = json.dumps(document_map, indent=2)
+    base_filename = os.path.basename(myblob.name)
+    file_name, file_extension = get_filename_and_extension(os.path.basename(base_filename))
+    output_filename =  file_name + "_Document_Map" + file_extension + ".json"
+    write_blob(azure_blob_log_storage_container, json_str, output_filename)
+  
+    logging.info(f"Constructing the JSON structure of the document complete\n")  
+    return document_map      
+                
+ 
         
 def build_chunks(document_map, myblob):
     """ Function to build chunk outputs based on the document map """
@@ -409,34 +471,49 @@ def build_chunks(document_map, myblob):
     
     logging.info(f"Chunking is complete \n")
         
-        
-
+    
 def analyze_layout(myblob: func.InputStream):
     """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer"""
  
     source_blob_path = get_blob_and_sas(myblob)
 
-    # [START extract_layout]
-    logging.info(f"Calling form recognizer \n")
-    endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
-    key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 
-    document_analysis_client = DocumentAnalysisClient(
-        endpoint=endpoint, credential=AzureKeyCredential(key)
-    )
+    
+    # Get file extension
+    file_extension = os.path.splitext(myblob.name)[1][1:].lower()
+    if file_extension == 'pdf':
+        # Process pdf file        
+        # [START extract_layout]
+        logging.info("PDF file detected")        
+        endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
+        key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
+        logging.info(f"Calling form recognizer \n")
+        document_analysis_client = DocumentAnalysisClient(
+            endpoint=endpoint, credential=AzureKeyCredential(key)
+        )                
+        if TARGET_PAGES == "ALL":
+            poller = document_analysis_client.begin_analyze_document_from_url(
+                "prebuilt-layout", document_url=source_blob_path
+            )
+        else :
+            poller = document_analysis_client.begin_analyze_document_from_url(
+                "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES, api_version=FR_API_VERSION
+            )        
+        result = poller.result()
+        logging.info(f"Form Recognizer has returned results \n")
+        document_map = build_document_map_pdf(myblob, result)
+        build_chunks(document_map, myblob)    
+        
+    elif file_extension in ['htm', 'html']:
+        # Process html file
+        logging.info("PDF file detected")
+        document_map = build_document_map_html(myblob, source_blob_path)
+        build_chunks(document_map, myblob)      
+        
+    else:
+        # Unknown file type
+        logging.info("Unknown file type")
  
-    if TARGET_PAGES == "ALL":
-        poller = document_analysis_client.begin_analyze_document_from_url(
-            "prebuilt-layout", document_url=source_blob_path
-        )
-    else :
-        poller = document_analysis_client.begin_analyze_document_from_url(
-            "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES, api_version=FR_API_VERSION
-        )        
-    result = poller.result()
-    logging.info(f"Form Recognizer has returned results \n")
 
-    document_map = build_document_map(myblob, result)
-    build_chunks(document_map, myblob)
    
     logging.info(f"Done!\n")

@@ -10,7 +10,7 @@ figlet Check Subscription
 
 # This is called if we are in a CI system and we will login
 # with a Service Principal.
-if [ -n "${TF_IN_AUTOMATION}" ]
+if [ -n "${IN_AUTOMATION}" ]
 then
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"

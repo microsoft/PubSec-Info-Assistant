@@ -80,7 +80,11 @@ fi
 export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 export AZURE_AD_APP_CLIENT_ID=$aadAppId
 
-IF [ -n "${IN_AUTOMATION}" ]; then export IS_IN_AUTOMATION=true; else export IS_IN_AUTOMATION=false; fi
+if [ -n "${IN_AUTOMATION}" ]; then 
+  export IS_IN_AUTOMATION=true 
+else 
+  export IS_IN_AUTOMATION=false
+fi
 
 #set up parameter file
 declare -A REPLACE_TOKENS=(

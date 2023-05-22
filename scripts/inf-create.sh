@@ -80,6 +80,8 @@ fi
 export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 export AZURE_AD_APP_CLIENT_ID=$aadAppId
 
+IF [ -n "${IN_AUTOMATION}" ]; then export IS_IN_AUTOMATION=true; else export IS_IN_AUTOMATION=false; fi
+
 #set up parameter file
 declare -A REPLACE_TOKENS=(
     [\${WORKSPACE}]=${WORKSPACE}
@@ -93,6 +95,7 @@ declare -A REPLACE_TOKENS=(
     [\${AZURE_OPENAI_SERVICE_KEY}]=${AZURE_OPENAI_SERVICE_KEY}
     [\${BUILD_NUMBER}]=${BUILD_NUMBER}
     [\${AZURE_AD_APP_CLIENT_ID}]=${AZURE_AD_APP_CLIENT_ID}
+    [\${IS_IN_AUTOMATION}]=${IS_IN_AUTOMATION}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

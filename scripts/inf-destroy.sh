@@ -28,5 +28,3 @@ else
     echo az group delete --resource-group $TF_VAR_resource_group_name --yes --no-wait
     echo
 fi
-
-

@@ -40,6 +40,9 @@
     },
     "aadClientId": {
       "value": "${AZURE_AD_APP_CLIENT_ID}"
+    },
+    "isInAutomation": {
+      "value": "${IS_IN_AUTOMATION}
     }
   }
 }

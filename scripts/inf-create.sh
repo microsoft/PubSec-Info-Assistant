@@ -45,15 +45,17 @@ if [ -n "${IN_AUTOMATION}" ]; then
 fi
 randomString="${randomString,,}"
 export RANDOM_STRING=$randomString
-signedInUserId=$(az ad signed-in-user show --query id --output tsv)
-export SINGED_IN_USER_PRINCIPAL=$signedInUserId
+
+
 
 if [ -n "${IN_AUTOMATION}" ]; then
+  signedInUserId=$ARM_CLIENT_ID
   #if in automation, get the app registration and service principal values from the already logged in SP
   aadAppId=$ARM_CLIENT_ID
   aadAppName=$(az ad app list --app-id $ARM_CLIENT_ID --output tsv --query [].displayName)
   aadSPId=$(az ad sp list --display-name $aadAppName --output tsv --query "[?appId == '$aadAppId'].id")
 else
+  signedInUserId=$(az ad signed-in-user show --query id --output tsv)
   #if not in automation, create the app registration and service principal values
   #set up azure ad app registration since there is no bicep support for this yet
   aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
@@ -69,6 +71,8 @@ else
       aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
   fi
 fi
+
+export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 export AZURE_AD_APP_CLIENT_ID=$aadAppId
 
 if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then

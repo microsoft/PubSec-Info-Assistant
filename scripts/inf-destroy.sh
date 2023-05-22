@@ -9,7 +9,7 @@ source "${DIR}/load-env.sh"
 
 figlet Infrastructure DESTROY
 
-if [ -n "${TF_IN_AUTOMATION}" ]
+if [ -n "${IN_AUTOMATION}" ]
 then
     echo "Delete the resource group $TF_VAR_resource_group_name, but don't wait (fire and forget)"
 

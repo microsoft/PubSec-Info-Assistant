@@ -46,14 +46,11 @@ fi
 randomString="${randomString,,}"
 export RANDOM_STRING=$randomString
 
-
-
 if [ -n "${IN_AUTOMATION}" ]; then
   signedInUserId=$ARM_CLIENT_ID
   #if in automation, get the app registration and service principal values from the already logged in SP
   aadAppId=$ARM_CLIENT_ID
-  aadAppName=$(az ad app list --app-id $ARM_CLIENT_ID --output tsv --query [].displayName)
-  aadSPId=$(az ad sp list --display-name $aadAppName --output tsv --query "[?appId == '$aadAppId'].id")
+  aadSPId=$ARM_SERVICE_PRINCIPAL_ID
 else
   signedInUserId=$(az ad signed-in-user show --query id --output tsv)
   #if not in automation, create the app registration and service principal values

@@ -1,0 +1,71 @@
+# Template for deploy pipeline. Modify and add steps here.
+parameters:
+- name: fullBuild  
+  type: boolean
+  default: true
+
+steps:
+- bash: |
+    sudo chown -R $(whoami) .
+  displayName: Take ownership of Directory
+
+- checkout: self
+  clean: true
+
+- bash: |
+    docker login $(CONTAINER_REGISTRY_ADDRESS) -u $(CLIENT_ID) -p $(CLIENT_SECRET)
+    docker pull $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
+  displayName: Pull latest dev container from container registry for layer caching
+  continueOnError: true # for first build, no cache
+
+- bash: |
+    set -e
+    docker build '$(Build.SourcesDirectory)/.devcontainer' \
+      -t 'info-asst-devcontainer:$(Build.BuildId)' \
+      -t 'info-asst-devcontainer:latest' \
+      -f '$(Build.SourcesDirectory)/.devcontainer/Dockerfile' \
+      --cache-from $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      --build-arg USER_UID=$(id -u) \
+      --build-arg USER_GID=$(id -g)
+  displayName: Build dev container Docker Image
+
+- bash: |
+    set -e
+    docker image tag info-asst-devcontainer:latest $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
+    docker image push $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
+  displayName: Push latest dev container image to container registry
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+- template: make-command.yml
+  parameters:
+    displayName: 'Dev container take ownership of Directory'
+    makeCommand: 'take-dir-ownership'
+
+- template: make-command.yml
+  parameters:
+    displayName: 'Build'
+    makeCommand: 'build'
+
+
+- ${{ if eq(parameters.fullBuild, true) }}:
+  - template: make-command.yml
+    parameters:
+      displayName: 'Deploy Infrastructure'
+      makeCommand: 'infrastructure'
+
+  - template: make-command.yml
+    parameters:
+      displayName: 'Extract environment variables'
+      makeCommand: 'extract-env'
+
+  - template: make-command.yml
+    parameters:
+      displayName: 'Deploy search indexes'
+      makeCommand: 'deploy-search-indexes'
+      
+  - template: make-command.yml
+    parameters:
+      displayName: 'Deploy Web App'
+      makeCommand: 'deploy-webapp'
+  

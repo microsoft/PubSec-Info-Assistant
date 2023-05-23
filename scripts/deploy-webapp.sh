@@ -32,6 +32,12 @@ else
     echo "Azure CLI version checked successfully"
 fi
 
+if [ -n "${IN_AUTOMATION}" ]
+then
+    az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
+    az account set -s "$ARM_SUBSCRIPTION_ID"
+fi
+
 # deploy the zip file to the webapp
 az webapp deploy --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --type zip --src-path webapp.zip --async true --timeout 600000 --verbose
 

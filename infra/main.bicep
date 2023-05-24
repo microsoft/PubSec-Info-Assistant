@@ -31,6 +31,7 @@ param functionsAppName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
+param functionStorageAccountName string = ''
 param containerName string = 'content'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
@@ -204,6 +205,32 @@ module storage 'core/storage/storage-account.bicep' = {
   }
 }
 
+// Function Storage Account
+
+module functionstorage 'core/storage/storage-account.bicep' = {
+  name: 'functionstorage'
+  scope: rg
+  params: {
+    name: !empty(functionStorageAccountName) ? functionStorageAccountName : '${prefix}func${abbrs.storageStorageAccounts}${randomString}'
+    location: location
+    tags: tags
+    publicNetworkAccess: 'Enabled'
+    sku: {
+      name: 'Standard_LRS'
+    }
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+    containers: [
+      {
+        name: 'function'
+        publicAccess: 'None'
+      }
+    ]
+  }
+}
+
 // Function App for the backend
 
 module functions 'core/function/function.bicep' = {
@@ -215,14 +242,14 @@ module functions 'core/function/function.bicep' = {
     tags: tags
     serverFarmId: appServicePlan.outputs.id
     runtime: 'python'
-    storageAccountKey: storage.outputs.key
-    storageAccountName: storage.outputs.name
+    storageAccountKey: functionstorage.outputs.key
+    storageAccountName: functionstorage.outputs.name
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
   }
   dependsOn: [
     appServicePlan
-    storage
+    functionstorage
   ]
 }
 

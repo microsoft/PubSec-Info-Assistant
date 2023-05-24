@@ -30,17 +30,20 @@ param appInsightsConnectionString string
 
 // Create function app resource
 
-resource functionApp 'Microsoft.Web/sites@2018-11-01' = {
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: name
   location: location
   tags: tags
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
+    reserved: true
     serverFarmId: serverFarmId
     siteConfig: {
+      linuxFxVersion: 'python|3.10'
+      alwaysOn: true
       appSettings: [
         {
           name: 'AzureWebJobsStorage'

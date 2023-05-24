@@ -23,6 +23,9 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
+    // Setting responseLength to 1024 by default, this will effect the default display of the ResponseLengthButtonGroup below.
+    // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
+    // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
     const [responseLength, setResponseLength] = useState<number>(1024);
 
     const lastQuestionRef = useRef<string>("");
@@ -112,6 +115,7 @@ const Chat = () => {
                 }
             }
         }
+        // the or value here needs to match the default value assigned to responseLength above.
         setResponseLength(_ev.target.value as number || 1024)
     };
 

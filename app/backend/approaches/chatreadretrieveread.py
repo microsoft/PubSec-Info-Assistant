@@ -113,7 +113,7 @@ Search query:
             engine=self.chatgpt_deployment, 
             prompt=prompt, 
             temperature=overrides.get("temperature") or 0.7, 
-            max_tokens=1024, 
+            max_tokens=int(overrides.get("response_length")) or 1024, 
             n=1, 
             stop=["<|im_end|>", "<|im_start|>"])
 

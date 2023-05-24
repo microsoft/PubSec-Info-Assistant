@@ -21,6 +21,8 @@ param azureOpenAIServiceKey string
 param cognitiveServicesAccountName string = ''
 param cognitiveServicesSkuName string = 'S0'
 param cognitiveServiesForSearchName string = ''
+param formRecognizerName string = ''
+param formRecognizerSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
 param resourceGroupName string = ''
@@ -33,6 +35,7 @@ param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
 param functionStorageAccountName string = ''
 param containerName string = 'content'
+param uploadContainerName string = 'upload'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
@@ -150,6 +153,20 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
   }
 }
 
+module formrecognizer 'core/ai/formrecognizer.bicep' = {
+  scope: rg
+  name: 'formrecognizer'
+  params: {
+    name: !empty(formRecognizerName) ? formRecognizerName : '${prefix}-${abbrs.formRecognizer}${randomString}'
+    location: location
+    tags: tags
+    sku: {
+      name: formRecognizerSkuName
+    }
+  }
+}
+
+
 module searchServices 'core/search/search-services.bicep' = {
   scope: rg
   name: 'search-services'
@@ -198,7 +215,7 @@ module storage 'core/storage/storage-account.bicep' = {
         publicAccess: 'None'
       }
       {
-        name: 'function'
+        name: uploadContainerName
         publicAccess: 'None'
       }
     ]
@@ -246,10 +263,17 @@ module functions 'core/function/function.bicep' = {
     storageAccountName: functionstorage.outputs.name
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
+    blobStorageAccountKey: storage.outputs.key
+    blobStorageAccountName: storage.outputs.name
+    blobStorageAccountOutputContainerName: containerName
+    blobStorageAccountUploadContainerName: uploadContainerName
+    formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
+    formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
   }
   dependsOn: [
     appServicePlan
     functionstorage
+    storage
   ]
 }
 

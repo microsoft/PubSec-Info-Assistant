@@ -45,29 +45,45 @@ if [ -n "${IN_AUTOMATION}" ]; then
 fi
 randomString="${randomString,,}"
 export RANDOM_STRING=$randomString
-signedInUserId=$(az ad signed-in-user show --query id --output tsv)
-export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 
-#set up azure ad app registration since there is no bicep support for this yet
-aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
-if [ -z $aadAppId ]
-  then
-    aadAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
-    aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+if [ -n "${IN_AUTOMATION}" ]; then
+  signedInUserId=$ARM_CLIENT_ID
+  #if in automation, get the app registration and service principal values from the already logged in SP
+  aadAppId=$ARM_CLIENT_ID
+  aadSPId=$ARM_SERVICE_PRINCIPAL_ID
+else
+  signedInUserId=$(az ad signed-in-user show --query id --output tsv)
+  #if not in automation, create the app registration and service principal values
+  #set up azure ad app registration since there is no bicep support for this yet
+  aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+  if [ -z $aadAppId ]
+    then
+      aadAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+      aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+    fi
+  
+  aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
+  if [ -z $aadSPId ]; then
+      aadSPId=$(az ad sp create --id $aadAppId --output tsv --query "[].id")
+      aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
   fi
+
+  if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
+    # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
+    az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=true"
+  else
+    # otherwise the default is to allow all users in the tenant to access the app
+    az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=false"
+  fi
+fi
+
+export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 export AZURE_AD_APP_CLIENT_ID=$aadAppId
 
-aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-if [ -z $aadSPId ]; then
-    aadSPId=$(az ad sp create --id $aadAppId --output tsv --query "[].id")
-    aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-fi
-if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
-  # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
-  az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=true"
-else
-  # otherwise the default is to allow all users in the tenant to access the app
-  az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=false"
+if [ -n "${IN_AUTOMATION}" ]; then 
+  export IS_IN_AUTOMATION=true 
+else 
+  export IS_IN_AUTOMATION=false
 fi
 
 #set up parameter file
@@ -83,6 +99,7 @@ declare -A REPLACE_TOKENS=(
     [\${AZURE_OPENAI_SERVICE_KEY}]=${AZURE_OPENAI_SERVICE_KEY}
     [\${BUILD_NUMBER}]=${BUILD_NUMBER}
     [\${AZURE_AD_APP_CLIENT_ID}]=${AZURE_AD_APP_CLIENT_ID}
+    [\${IS_IN_AUTOMATION}]=${IS_IN_AUTOMATION}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

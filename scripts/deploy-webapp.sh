@@ -17,19 +17,25 @@ cd $BINARIES_OUTPUT_PATH
 version=$(az version --output tsv --query '"azure-cli"')
 version_parts=(${version//./ })
 if [ ${version_parts[0]} -lt 2 ]; then
-    ehco "Azure CLI version 2.48.1 or higher is required for webapp deployment"
+    echo "Azure CLI version 2.48.1 or higher is required for webapp deployment. Please run 'az upgrade' to upgrade your Azure CLI version."
     exit 1
 else
-    if [ ${version_parts[0]} -eq 2 ] & [ ${version_parts[1]} -lt 48 ]; then
-        ehco "Azure CLI version 2.48.1 or higher is required for webapp deployment"
+    if [ ${version_parts[0]} -le 2 ] && [ ${version_parts[1]} -lt 48 ]; then
+        echo "Azure CLI version 2.48.1 or higher is required for webapp deployment. Please run 'az upgrade' to upgrade your Azure CLI version."
         exit 1
     else
-        if [ ${version_parts[0]} -eq 2 ] & [ ${version_parts[1]} -eq 48 ] &  [ ${version_parts[2]} -lt 1 ]; then
-            echo "Azure CLI version 2.48.1 or later is required to run this script"
+        if [ ${version_parts[0]} -le 2 ] && [ ${version_parts[1]} -le 48 ] && [ ${version_parts[2]} -lt 1 ]; then
+            echo "Azure CLI version 2.48.1 or later is required to run this script. Please run 'az upgrade' to upgrade your Azure CLI version."
             exit 1
         fi
     fi
     echo "Azure CLI version checked successfully"
+fi
+
+if [ -n "${IN_AUTOMATION}" ]
+then
+    az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
+    az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
 # deploy the zip file to the webapp

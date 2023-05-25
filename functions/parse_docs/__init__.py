@@ -383,9 +383,11 @@ def build_document_map_html(myblob, html):
     section = ''   
     title = soup.title.string if soup.title else "No title"
     
-    for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'table']):
-        if tag.name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+    for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+        if tag.name in ['h2', 'h3', 'h4', 'h5', 'h6']:
             section = tag.get_text(strip=True)
+        elif tag.name == 'h1':
+            title = tag.get_text(strip=True)  
         elif tag.name == 'p' and tag.get_text(strip=True):
             document_map["structure"].append({
                 "type": "text", 
@@ -395,7 +397,6 @@ def build_document_map_html(myblob, html):
                 "page_number": 1                
                 })       
         elif tag.name == 'table' and tag.get_text(strip=True):
-            x = str(tag)
             document_map["structure"].append({
                 "type": "table", 
                 "text": str(tag),

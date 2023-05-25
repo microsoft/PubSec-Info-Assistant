@@ -17,7 +17,7 @@ cd $BINARIES_OUTPUT_PATH
 version=$(az version --output tsv --query '"azure-cli"')
 version_parts=(${version//./ })
 if [ ${version_parts[0]} -lt 2 ]; then
-    ehco "Azure CLI version 2.48.1 or higher is required for webapp deployment. Please run 'az upgrade' to upgrade your Azure CLI version."
+    echo "Azure CLI version 2.48.1 or higher is required for webapp deployment. Please run 'az upgrade' to upgrade your Azure CLI version."
     exit 1
 else
     if [ ${version_parts[0]} -le 2 ] && [ ${version_parts[1]} -lt 48 ]; then

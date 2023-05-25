@@ -8,17 +8,17 @@ from text import nonewlines
 # Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
 # top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion 
 # (answer) with that prompt.
-class ChatReadRetrieveReadApproach(Approach):
-    prompt_prefix = """
-    system
-    you are {systemPersona} who helps the analysts with their questions about their agencies data. Be brief in your answers.
+class ChatReadRetrieveReadApproachTest(Approach):
+    prompt_prefix = """<|im_start|>
+    You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agencies data. Be brief in your answers.
     Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. For tabular information return it as an html table. Do not return markdown format.
-    Each source has a file name followed by a pipe character and the actual information, always include the source name for each fact you use in the response. Use square brakets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    User persona: {userPersona}
+    Each source has a file name followed by a pipe character and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     {follow_up_questions_prompt}
     {injected_prompt}
     Sources:
     {sources}
-
+    <|im_end|>
     {chat_history}
     """
 
@@ -123,20 +123,26 @@ class ChatReadRetrieveReadApproach(Approach):
                 injected_prompt="",
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
-                follow_up_questions_prompt=follow_up_questions_prompt
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                userPersona=userPersona,
+                systemPersona=systemPersona
             )
         elif prompt_override.startswith(">>>"):
             prompt = self.prompt_prefix.format(
                 injected_prompt=prompt_override[3:] + "\n ",
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
-                follow_up_questions_prompt=follow_up_questions_prompt
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                userPersona=userPersona,
+                systemPersona=systemPersona
             )
         else:
             prompt = prompt_override.format(
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
-                follow_up_questions_prompt=follow_up_questions_prompt
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                userPersona=userPersona,
+                systemPersona=systemPersona
             )
 
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history
@@ -146,7 +152,7 @@ class ChatReadRetrieveReadApproach(Approach):
             temperature=overrides.get("temperature") or 0.7,
             max_tokens=1024,
             n=1,
-            stop=["", ""]
+            stop=["<|im_end|>", "<|im_start|>"]
         )
 
         return {
@@ -160,7 +166,7 @@ class ChatReadRetrieveReadApproach(Approach):
         history_text = ""
         for h in reversed(history if include_last_turn else history[:-1]):
             history_text = (
-                """user""" + "\n" + h["user"] + "\n" + """""" + "\n" + """assistant""" + "\n" + (h.get("bot") + """""" if h.get("bot") else "") + "\n" + history_text
+                """User:""" + " " + h["user"] + "\n" + """""" + "\n" + """Assistant:""" + " " + (h.get("bot") + """""" if h.get("bot") else "") + "\n" + history_text
             )
             if len(history_text) > approx_max_tokens * 4:
                 break

@@ -157,6 +157,3 @@ Search query:
 
 
 
-
-    
-   

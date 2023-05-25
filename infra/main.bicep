@@ -260,8 +260,8 @@ module functions 'core/function/function.bicep' = {
     tags: tags
     serverFarmId: appServicePlan.outputs.id
     runtime: 'python'
-    storageAccountKey: functionstorage.outputs.key
-    storageAccountName: functionstorage.outputs.name
+    funcStorageAccountKey: functionstorage.outputs.key
+    funcStorageAccountName: functionstorage.outputs.name
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
     blobStorageAccountKey: storage.outputs.key

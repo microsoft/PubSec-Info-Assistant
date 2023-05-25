@@ -11,11 +11,11 @@ param tags object = {}
 param serverFarmId string
 
 @description('Name of the storage account')
-param storageAccountName string
+param funcStorageAccountName string
 
 @description('Storage account key')
 @secure()
-param storageAccountKey string
+param funcStorageAccountKey string
 
 @description('Runtime of the function app')
 param runtime string = 'python'
@@ -89,11 +89,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccountKey}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${funcStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${funcStorageAccountKey}'
         }
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccountKey}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${funcStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${funcStorageAccountKey}'
         }
         {
           name: 'WEBSITE_CONTENTSHARE'

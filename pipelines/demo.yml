@@ -1,0 +1,21 @@
+trigger:
+  batch: true
+  branches:
+    include: [ main ]
+
+pr: none
+
+stages:
+- stage: Deploy
+  jobs:
+
+  - deployment: Demo
+    environment: demo-ia
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+        runOnce:    #rolling, canary are the other strategies that are supported
+          deploy:
+            steps:
+            - template: templates/deploy-template.yml

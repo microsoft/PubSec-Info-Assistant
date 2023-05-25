@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton } from "@fluentui/react";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, ExpandingCardBase} from "@fluentui/react";
 import { SparkleFilled } from "@fluentui/react-icons";
 
 import styles from "./Chat.module.css";
+import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
+import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
 import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
@@ -12,6 +14,8 @@ import { UserChatMessage } from "../../components/UserChatMessage";
 import { AnalysisPanel, AnalysisPanelTabs } from "../../components/AnalysisPanel";
 import { SettingsButton } from "../../components/SettingsButton";
 import { ClearChatButton } from "../../components/ClearChatButton";
+import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
+import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -21,6 +25,14 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
+    // Setting responseLength to 1024 by default, this will effect the default display of the ResponseLengthButtonGroup below.
+    // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
+    // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
+    const [responseLength, setResponseLength] = useState<number>(1024);
+    // Setting responseTemp to 0.7 by default, this will effect the default display of the ResponseTempButtonGroup below.
+    // It must match a valid value of one of the buttons in the ResponseTempButtonGroup.tsx file.
+    // If you update the default value here, you must also update the default value in the onResponseTempChange method.
+    const [responseTemp, setResponseTemp] = useState<number>(0.7);
 
     const lastQuestionRef = useRef<string>("");
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -53,7 +65,9 @@ const Chat = () => {
                     top: retrieveCount,
                     semanticRanker: useSemanticRanker,
                     semanticCaptions: useSemanticCaptions,
-                    suggestFollowupQuestions: useSuggestFollowupQuestions
+                    suggestFollowupQuestions: useSuggestFollowupQuestions,
+                    responseLength: responseLength,
+                    responseTemp: responseTemp
                 }
             };
             const result = await chatApi(request);
@@ -71,6 +85,84 @@ const Chat = () => {
         setActiveCitation(undefined);
         setActiveAnalysisPanelTab(undefined);
         setAnswers([]);
+    };
+
+    const onResponseLengthChange = (_ev: any) => {
+        for (let node of _ev.target.parentNode.childNodes) {
+            if (node.value == _ev.target.value) {
+                switch (node.value) {
+                    case "1024":
+                        node.className = `${rlbgstyles.buttonleftactive}`;
+                        break;
+                    case "2048":
+                        node.className = `${rlbgstyles.buttonmiddleactive}`;
+                        break;
+                    case "4096":
+                        node.className = `${rlbgstyles.buttonrightactive}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }                
+            }
+            else {
+                switch (node.value) {
+                    case "1024":
+                        node.className = `${rlbgstyles.buttonleft}`;
+                        break;
+                    case "2048":
+                        node.className = `${rlbgstyles.buttonmiddle}`;
+                        break;
+                    case "4096":
+                        node.className = `${rlbgstyles.buttonright}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }
+            }
+        }
+        // the or value here needs to match the default value assigned to responseLength above.
+        setResponseLength(_ev.target.value as number || 1024)
+    };
+
+    const onResponseTempChange = (_ev: any) => {
+        for (let node of _ev.target.parentNode.childNodes) {
+            if (node.value == _ev.target.value) {
+                switch (node.value) {
+                    case "1.7":
+                        node.className = `${rlbgstyles.buttonleftactive}`;
+                        break;
+                    case "0.7":
+                        node.className = `${rlbgstyles.buttonmiddleactive}`;
+                        break;
+                    case "0":
+                        node.className = `${rlbgstyles.buttonrightactive}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }                
+            }
+            else {
+                switch (node.value) {
+                    case "1.7":
+                        node.className = `${rlbgstyles.buttonleft}`;
+                        break;
+                    case "0.7":
+                        node.className = `${rlbgstyles.buttonmiddle}`;
+                        break;
+                    case "0":
+                        node.className = `${rlbgstyles.buttonright}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }
+            }
+        }
+        // the or value here needs to match the default value assigned to responseLength above.
+        setResponseTemp(_ev.target.value as number || 0.7)
     };
 
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
@@ -245,6 +337,9 @@ const Chat = () => {
                         label="Suggest follow-up questions"
                         onChange={onUseSuggestFollowupQuestionsChange}
                     />
+                    <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
+
+                    <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
                 </Panel>
             </div>
         </div>

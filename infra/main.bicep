@@ -15,6 +15,7 @@ param location string
 
 param aadClientId string = ''
 param buildNumber string = 'local'
+param isInAutomation bool = false
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
 param azureOpenAIServiceKey string
@@ -284,7 +285,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -294,7 +295,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -304,7 +305,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -314,7 +315,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -324,7 +325,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 

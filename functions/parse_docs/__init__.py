@@ -11,7 +11,8 @@ from datetime import datetime, timedelta
 import json
 import html
 from bs4 import BeautifulSoup
-import codecs
+import mammoth
+from io import BytesIO
 import requests
 import json
 from decimal import Decimal
@@ -19,6 +20,7 @@ import tiktoken
 import nltk
 nltk.download('words')
 nltk.download('punkt')
+
 
 
 azure_blob_storage_account = os.environ["AZURE_BLOB_STORAGE_ACCOUNT"]
@@ -363,27 +365,13 @@ def build_document_map_pdf(myblob, result):
     return document_map      
         
 
-def build_document_map_html(myblob, source_blob_path):
+def build_document_map_html(myblob, html):
     """ Function to build a json structure representing the paragraphs in a document, including metadata
         such as section heading, title, page number, eal word pernetage etc."""
         
     logging.info(f"Constructing the JSON structure of the document\n")   
-         
-    # html_file
-    # Download the content from the URL
-    response = requests.get(source_blob_path)
-    if response.status_code == 200:
-        html = response.text
-        soup = BeautifulSoup(html, 'lxml')
-    
-    # with codecs.open(content, "r", encoding='utf-8', errors='replace') as page:
-    #     soup = bs4.BeautifulSoup(page, 'lxml')
-        
-    # with codecs.open(content, "r", encoding='utf-8', errors='replace') as page:
-    #     soup = bs4.BeautifulSoup(page, 'lxml')
 
-    # soup = bs4.BeautifulSoup(content, 'lxml')
-    
+    soup = BeautifulSoup(html, 'lxml')
     document_map = {
         'file_name': myblob.name,
         'file_uri': myblob.uri,
@@ -403,7 +391,7 @@ def build_document_map_html(myblob, source_blob_path):
                 "type": "text", 
                 "text": tag.get_text(strip=True),
                 "type": "text",
-                "title": title.text.strip(),
+                "title": title,
                 "section": section,
                 "page_number": 1                
                 })            
@@ -418,8 +406,7 @@ def build_document_map_html(myblob, source_blob_path):
   
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      
-                
- 
+                 
         
 def build_chunks(document_map, myblob):
     """ Function to build chunk outputs based on the document map """
@@ -475,8 +462,6 @@ def analyze_layout(myblob: func.InputStream):
     """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer"""
  
     source_blob_path = get_blob_and_sas(myblob)
-
-
     
     # Get file extension
     file_extension = os.path.splitext(myblob.name)[1][1:].lower()
@@ -506,8 +491,27 @@ def analyze_layout(myblob: func.InputStream):
     elif file_extension in ['htm', 'html']:
         # Process html file
         logging.info("PDF file detected")
-        document_map = build_document_map_html(myblob, source_blob_path)
-        build_chunks(document_map, myblob)      
+        # Download the content from the URL
+        response = requests.get(source_blob_path)
+        if response.status_code == 200:
+            html = response.text   
+            document_map = build_document_map_html(myblob, html)
+            build_chunks(document_map, myblob) 
+        
+    elif file_extension in ['docx']:      
+        logging.info("Office file detected")
+        response = requests.get(source_blob_path)
+        # Ensure the request was successful
+        response.raise_for_status()
+        # Create a BytesIO object from the content of the response
+        docx_file = BytesIO(response.content)
+        # Convert the downloaded Word document to HTML
+        result = mammoth.convert_to_html(docx_file)
+        html = result.value # The generated HTML
+        document_map = build_document_map_html(myblob, html)
+        build_chunks(document_map, myblob) 
+
+           
         
     else:
         # Unknown file type

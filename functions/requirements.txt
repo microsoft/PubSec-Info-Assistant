@@ -10,3 +10,4 @@ nltk == 3.8.1
 azure-core == 1.26.4
 beautifulsoup4 == 4.12.2
 lxml == 4.9.2
+mammoth == 1.5.1

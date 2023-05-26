@@ -10,7 +10,7 @@ import urllib.parse
 # (answer) with that prompt.
 class ChatReadRetrieveReadApproach(Approach):
     prompt_prefix = """<|im_start|>
-    You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agencies data. Be brief in your answers.
+    You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agencies data. {response_length_prompt}
     Answer ONLY with the facts listed in the list of sources below. If there isn't enough information below, say you don't know. Do not generate answers that don't use the sources below. For tabular information return it as an html table. Do not return markdown format.
     User persona: {userPersona}
     Each source has a file name followed by a pipe character and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
@@ -54,24 +54,22 @@ class ChatReadRetrieveReadApproach(Approach):
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 
+
     def run(self, history: list[dict], overrides: dict) -> any:
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         top = overrides.get("top") or 3
         exclude_category = overrides.get("exclude_category") or None
         filter = "category ne '{}'".format(exclude_category.replace("'", "''")) if exclude_category else None
-        userPersona = overrides.get("user_persona", "")
-        systemPersona = overrides.get("system_persona", "") 
-        aiPersona = overrides.get("ai_persona","") 
-       
+        user_persona = overrides.get("user_persona", "")
+        system_persona = overrides.get("system_persona", "")
+        #aiPersona = overrides.get("ai_persona","")
+        response_length = int(overrides.get("response_length") or 1024)
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         prompt = self.query_prompt_template.format(
                 chat_history=self.get_chat_history_as_text(history, include_last_turn=False),
-                question=history[-1]["user"],
-                systemPersona=systemPersona
+                question=history[-1]["user"]
                     )
-            
-            
             
         completion = openai.Completion.create(
             engine=self.chatgpt_deployment,
@@ -114,6 +112,8 @@ class ChatReadRetrieveReadApproach(Approach):
         # create a single string of all the results to be used in the prompt
         content = "\n ".join(results)
 
+
+        # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = self.follow_up_questions_prompt_content if overrides.get("suggest_followup_questions") else ""
 
         # Allow client to replace the entire prompt, or to inject into the existing prompt using >>>
@@ -124,8 +124,9 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                userPersona=userPersona,
-                systemPersona=systemPersona
+                response_length_prompt=self.get_repsonse_lenth_prompt_text(response_length),
+                userPersona=user_persona,
+                systemPersona=system_persona
             )
         elif prompt_override.startswith(">>>"):
             prompt = self.prompt_prefix.format(
@@ -133,16 +134,18 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                userPersona=userPersona,
-                systemPersona=systemPersona
+                response_length_prompt=self.get_repsonse_lenth_prompt_text(response_length),
+                userPersona=user_persona,
+                systemPersona=system_persona
             )
         else:
             prompt = prompt_override.format(
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                userPersona=userPersona,
-                systemPersona=systemPersona
+                response_length_prompt=self.get_repsonse_lenth_prompt_text(response_length),
+                userPersona=user_persona,
+                systemPersona=system_persona
             )
 
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history
@@ -150,18 +153,19 @@ class ChatReadRetrieveReadApproach(Approach):
             engine=self.chatgpt_deployment,
             prompt=prompt,
             temperature=float(overrides.get("response_temp")) or 0.7,
-            max_tokens=int(overrides.get("response_length")) or 1024,
+            max_tokens=response_length,
             n=1,
             stop=["<|im_end|>", "<|im_start|>"]
         )
 
         return {
             "data_points": data_points,
-            "answer": completion.choices[0].text,
+            "answer": f"{completion.choices[0].text}",
             "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }
-      
+    
+    # Get the chat history as a single string
     def get_chat_history_as_text(self, history, include_last_turn=True, approx_max_tokens=1000) -> str:
         history_text = ""
         for h in reversed(history if include_last_turn else history[:-1]):
@@ -171,4 +175,16 @@ class ChatReadRetrieveReadApproach(Approach):
             if len(history_text) > approx_max_tokens * 4:
                 break
         return history_text
+    
+    # Get the prompt text for the response length
+    def get_repsonse_lenth_prompt_text(self, response_length: int):
+        if response_length == 1024:
+            return "Provide concise and succinct answers."
+        elif response_length == 2048:
+            return "Provide answers that strike a balance between being concise and detailed. Respond with enough information to cover the key points, but avoid unnecessary verbosity."
+        elif response_length == 4096:
+            return "Provide detailed and comprehensive answers."
+        else:
+            return "Provide answers that strike a balance between being concise and detailed. Respond with enough information to cover the key points, but avoid unnecessary verbosity."
+        
       

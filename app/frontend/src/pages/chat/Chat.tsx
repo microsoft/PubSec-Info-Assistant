@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton, ExpandingCardBase} from "@fluentui/react";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton} from "@fluentui/react";
 import { SparkleFilled } from "@fluentui/react-icons";
+import { Accordion } from "react-bootstrap"
 
 import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
@@ -25,8 +26,8 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
-    const [userPersona, setUserPersona] = useState<string>("");
-    const [systemPersona, setSystemPersona] = useState<string>("");
+    const [userPersona, setUserPersona] = useState<string>("analyst");
+    const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
     // Setting responseLength to 1024 by default, this will effect the default display of the ResponseLengthButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
@@ -71,7 +72,7 @@ const Chat = () => {
                     suggestFollowupQuestions: useSuggestFollowupQuestions,
                     userPersona: userPersona,
                     systemPersona: systemPersona,
-                    aiPersona: aiPersona
+                    aiPersona: aiPersona,
                     responseLength: responseLength,
                     responseTemp: responseTemp
                 }
@@ -136,14 +137,14 @@ const Chat = () => {
         for (let node of _ev.target.parentNode.childNodes) {
             if (node.value == _ev.target.value) {
                 switch (node.value) {
-                    case "1.7":
-                        node.className = `${rlbgstyles.buttonleftactive}`;
+                    case "1.3":
+                        node.className = `${rtbgstyles.buttonleftactive}`;
                         break;
                     case "0.7":
-                        node.className = `${rlbgstyles.buttonmiddleactive}`;
+                        node.className = `${rtbgstyles.buttonmiddleactive}`;
                         break;
                     case "0":
-                        node.className = `${rlbgstyles.buttonrightactive}`;
+                        node.className = `${rtbgstyles.buttonrightactive}`;
                         break;
                     default:
                         //do nothing
@@ -152,14 +153,14 @@ const Chat = () => {
             }
             else {
                 switch (node.value) {
-                    case "1.7":
-                        node.className = `${rlbgstyles.buttonleft}`;
+                    case "1.3":
+                        node.className = `${rtbgstyles.buttonleft}`;
                         break;
                     case "0.7":
-                        node.className = `${rlbgstyles.buttonmiddle}`;
+                        node.className = `${rtbgstyles.buttonmiddle}`;
                         break;
                     case "0":
-                        node.className = `${rlbgstyles.buttonright}`;
+                        node.className = `${rtbgstyles.buttonright}`;
                         break;
                     default:
                         //do nothing
@@ -172,10 +173,6 @@ const Chat = () => {
     };
 
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
-
-    const onPromptTemplateChange = (_ev?: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
-        setPromptTemplate(newValue || "");
-    };
 
     const onRetrieveCountChange = (_ev?: React.SyntheticEvent<HTMLElement, Event>, newValue?: string) => {
         setRetrieveCount(parseInt(newValue || "5"));
@@ -195,10 +192,6 @@ const Chat = () => {
 
     const onSystemPersonaChange = (_ev?: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
         setSystemPersona(newValue || "");
-    }
-
-    const onAiPersonaChange = (_ev?: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
-        setAiPersona(newValue || "");
     }
 
     const onExcludeCategoryChanged = (_ev?: React.FormEvent, newValue?: string) => {
@@ -318,51 +311,38 @@ const Chat = () => {
                     onRenderFooterContent={() => <DefaultButton onClick={() => setIsConfigPanelOpen(false)}>Close</DefaultButton>}
                     isFooterAtBottom={true}
                 >
-                    <TextField
-                        className={styles.chatSettingsSeparator}
-                        defaultValue={promptTemplate}
-                        label="Override prompt template"
-                        multiline
-                        autoAdjustHeight
-                        onChange={onPromptTemplateChange}
-                    />
-
-                    <SpinButton
-                        className={styles.chatSettingsSeparator}
-                        label="Retrieve this many documents from search:"
-                        min={1}
-                        max={50}
-                        defaultValue={retrieveCount.toString()}
-                        onChange={onRetrieveCountChange}
-                    />
-                    <TextField className={styles.chatSettingsSeparator} label="Exclude category" onChange={onExcludeCategoryChanged} />
-                    <Checkbox
-                        className={styles.chatSettingsSeparator}
-                        checked={useSemanticRanker}
-                        label="Use semantic ranker for retrieval"
-                        onChange={onUseSemanticRankerChange}
-                    />
-                    <Checkbox
-                        className={styles.chatSettingsSeparator}
-                        checked={useSemanticCaptions}
-                        label="Use query-contextual summaries instead of whole documents"
-                        onChange={onUseSemanticCaptionsChange}
-                        disabled={!useSemanticRanker}
-                    />
-                    <Checkbox
-                        className={styles.chatSettingsSeparator}
-                        checked={useSuggestFollowupQuestions}
-                        label="Suggest follow-up questions"
-                        onChange={onUseSuggestFollowupQuestionsChange}
-                    />
-
-                    <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
-
-                    <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
-
-                    <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
-
-                    <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
+                            <SpinButton
+                                className={styles.chatSettingsSeparator}
+                                label="Retrieve this many documents from search:"
+                                min={1}
+                                max={50}
+                                defaultValue={retrieveCount.toString()}
+                                onChange={onRetrieveCountChange}
+                            />
+                            <TextField className={styles.chatSettingsSeparator} label="Exclude category" onChange={onExcludeCategoryChanged} />
+                            <Checkbox
+                                className={styles.chatSettingsSeparator}
+                                checked={useSemanticRanker}
+                                label="Use semantic ranker for retrieval"
+                                onChange={onUseSemanticRankerChange}
+                            />
+                            <Checkbox
+                                className={styles.chatSettingsSeparator}
+                                checked={useSemanticCaptions}
+                                label="Use query-contextual summaries instead of whole documents"
+                                onChange={onUseSemanticCaptionsChange}
+                                disabled={!useSemanticRanker}
+                            />
+                            <Checkbox
+                                className={styles.chatSettingsSeparator}
+                                checked={useSuggestFollowupQuestions}
+                                label="Suggest follow-up questions"
+                                onChange={onUseSuggestFollowupQuestionsChange}
+                            />
+                            <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
+                            <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
+                            <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
+                            <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
                 </Panel>
             </div>
         </div>

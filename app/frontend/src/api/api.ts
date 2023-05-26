@@ -55,6 +55,8 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
                 user_persona: options.overrides?.userPersona,
                 system_persona: options.overrides?.systemPersona,
                 ai_persona: options.overrides?.aiPersona,
+                response_length: options.overrides?.responseLength,
+                response_temp: options.overrides?.responseTemp
             }
         })
     });

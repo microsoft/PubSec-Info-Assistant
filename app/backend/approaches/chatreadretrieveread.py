@@ -3,6 +3,7 @@ from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
 from approaches.approach import Approach
 from text import nonewlines
+import urllib.parse
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
 # top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion 
@@ -107,9 +108,9 @@ class ChatReadRetrieveReadApproach(Approach):
                 # if not using semantic captions, use the content instead of the captions
                 # include the "FileX" monikor in the prompt, and the actual file name in the response
                 results.append(f"File{idx} " + "| " + nonewlines(doc[self.content_field]))
-                data_points.append("/".join(doc[self.sourcepage_field].split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
+                data_points.append("/".join(urllib.parse.unquote(doc[self.sourcepage_field]).split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
             # add the "FileX" monikor and full file name to the citation lookup
-            citation_lookup[f"File{idx}"] = doc[self.sourcepage_field]
+            citation_lookup[f"File{idx}"] = urllib.parse.unquote(doc[self.sourcepage_field])
         # create a single string of all the results to be used in the prompt
         content = "\n ".join(results)
 
@@ -148,8 +149,8 @@ class ChatReadRetrieveReadApproach(Approach):
         completion = openai.Completion.create(
             engine=self.chatgpt_deployment,
             prompt=prompt,
-            temperature=overrides.get("temperature") or 0.7,
-            max_tokens=1024,
+            temperature=float(overrides.get("response_temp")) or 0.7,
+            max_tokens=int(overrides.get("response_length")) or 1024,
             n=1,
             stop=["<|im_end|>", "<|im_start|>"]
         )
@@ -160,7 +161,7 @@ class ChatReadRetrieveReadApproach(Approach):
             "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }
-
+      
     def get_chat_history_as_text(self, history, include_last_turn=True, approx_max_tokens=1000) -> str:
         history_text = ""
         for h in reversed(history if include_last_turn else history[:-1]):
@@ -170,8 +171,4 @@ class ChatReadRetrieveReadApproach(Approach):
             if len(history_text) > approx_max_tokens * 4:
                 break
         return history_text
-
-
-
-    
-   
+      

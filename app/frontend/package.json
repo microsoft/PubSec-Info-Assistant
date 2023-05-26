@@ -15,7 +15,8 @@
     "dompurify": "^3.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.8.1"
+    "react-router-dom": "^6.8.1",
+    "react-bootstrap": "^2.7.4"
   },
   "devDependencies": {
     "@types/dompurify": "^2.4.0",

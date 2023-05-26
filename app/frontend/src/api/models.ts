@@ -17,6 +17,8 @@ export type AskRequestOverrides = {
     userPersona?: string;
     systemPersona?: string;
     aiPersona?: string;
+    responseLength?: number;
+    responseTemp?: number;
 };
 
 export type AskRequest = {

@@ -353,6 +353,7 @@ MigrationBackup/
 npm-debug.log*
 node_modules
 static
+package-lock.json
 
 #devcontainer tools
 local.env

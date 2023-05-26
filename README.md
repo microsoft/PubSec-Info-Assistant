@@ -36,13 +36,7 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 ## Deployment Configuration
 
->You will also need some development tools to edit and run the deployment scripts provided. It is recommended you use the following:
->
->* A windows based computer (local or cloud)
->* [Visual Studio Code](https://visualstudio.microsoft.com/downloads/)
->* [Docker Desktop](https://www.docker.com/products/docker-desktop)
->* [Windows Store Ubuntu 22.04 LTS](https://apps.microsoft.com/store/detail/ubuntu-22042-lts/9PN20MSR04DW)
->* [Git for Windows](https://gitforwindows.org/)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=468576060&machine=basicLinux32gb&location=EastUs)
 
 The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. Follow our [Configuring your System for Development Containers](docs/developing_inside_a_container.md) guide.
 

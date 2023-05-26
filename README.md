@@ -42,7 +42,7 @@ The deployment process for the PS Info Assistant, uses a concept of **Developing
 
 *More information can be found at [Developing in a codespaces](docs/developing_in_a_codespaces.md).*
 
-Once you have the prerequisites completed, please move on to the Sizing Estimation step.
+Once you have the completed the setting up codespaces, please move on to the Sizing Estimation step.
 
 ---
 

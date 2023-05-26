@@ -36,7 +36,7 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 ## Deployment Configuration
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=468576060&machine=basicLinux32gb&location=EastUs)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 
 When you work in a codespace, the environment you are working in is created using a development container, or dev container, hosted on a virtual machine.
 

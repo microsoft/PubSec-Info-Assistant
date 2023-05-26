@@ -22,7 +22,7 @@ You can develop code in a codespace using your choice of tool:
 GitHub Codespaces provides you with the full development experience of Visual Studio Code. You can edit code, debug, and use Git commands while developing in a codespace with VS Code.
 >
 >
-![Codespaces in vscode](/docs/images/codespaces_vscode.png)
+![Codespaces in vscode](/docs/images/codespaces_open_in_vs_code_desktop.png)
 
 The main components of the user interface are:
 

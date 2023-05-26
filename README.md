@@ -38,9 +38,9 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=468576060&machine=basicLinux32gb&location=EastUs)
 
-The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. Follow our [Configuring your System for Development Containers](docs/developing_inside_a_container.md) guide.
+The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine.
 
-*More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*More information can be found at [Developing in a codespaces](docs/developing_in_a_codespaces.md).*
 
 Once you have the prerequisites completed, please move on to the Sizing Estimation step.
 

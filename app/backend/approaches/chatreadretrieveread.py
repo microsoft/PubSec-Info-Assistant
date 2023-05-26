@@ -113,7 +113,7 @@ Search query:
         completion = openai.Completion.create(
             engine=self.chatgpt_deployment, 
             prompt=prompt, 
-            temperature=overrides.get("temperature") or 0.7, 
+            temperature=float(overrides.get("response_temp")) or 0.7, 
             max_tokens=int(overrides.get("response_length")) or 1024, 
             n=1, 
             stop=["<|im_end|>", "<|im_start|>"])

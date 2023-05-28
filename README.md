@@ -7,6 +7,7 @@ This sample demonstrates a few approaches for creating ChatGPT-like experiences 
 ## Features
 
 * Chat and Q&A interfaces
+* File Upload and automated chunking and indexing for PDF, HTML, and DOCX
 * Explores various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, etc.
 * Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
 * Settings directly in the UX to tweak the behavior and experiment with options
@@ -36,13 +37,15 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 ## Deployment Configuration
 
+The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container, hosted on a virtual machine using GitHub Codespaces.
+
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 
-When you work in a codespace, the environment you are working in is created using a development container, or dev container, hosted on a virtual machine.
+Begin by setting up your own Codespace using our  [Developing in a Codespaces](docs/developing_in_a_codespaces.md) documentation.
 
-*More information can be found at [Developing in a codespaces](docs/developing_in_a_codespaces.md).*
+*More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once you have the completed the setting up codespaces, please move on to the Sizing Estimation step.
+Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
 
 ---
 

@@ -1,4 +1,4 @@
-import { AskRequest, AskResponse, ChatRequest } from "./models";
+import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -78,4 +78,20 @@ export function getCitationFilePath(citation: string): string {
     //xhr.send(body);
     //return xhr.response;
     return `/content/${citation}`;
+}
+
+export async function getBlobClientUrl(): Promise<string> {
+    const response = await fetch("/getblobclienturl", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    const parsedResponse: BlobClientUrlResponse = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+
+    return parsedResponse.url;
 }

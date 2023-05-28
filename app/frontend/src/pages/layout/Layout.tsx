@@ -25,6 +25,11 @@ const Layout = () => {
                                     Ask a question
                                 </NavLink>
                             </li>
+                            <li className={styles.headerNavLeftMargin}>
+                                <NavLink to="/upload" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                                    Upload files
+                                </NavLink>
+                            </li>
                         </ul>
                     </nav>
                 </div>

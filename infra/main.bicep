@@ -219,28 +219,6 @@ module storage 'core/storage/storage-account.bicep' = {
         name: uploadContainerName
         publicAccess: 'None'
       }
-    ]
-  }
-}
-
-// Function Storage Account
-
-module functionstorage 'core/storage/storage-account.bicep' = {
-  name: 'functionstorage'
-  scope: rg
-  params: {
-    name: !empty(functionStorageAccountName) ? functionStorageAccountName : '${prefix}func${abbrs.storageStorageAccounts}${randomString}'
-    location: location
-    tags: tags
-    publicNetworkAccess: 'Enabled'
-    sku: {
-      name: 'Standard_LRS'
-    }
-    deleteRetentionPolicy: {
-      enabled: true
-      days: 7
-    }
-    containers: [
       {
         name: 'function'
         publicAccess: 'None'
@@ -250,7 +228,6 @@ module functionstorage 'core/storage/storage-account.bicep' = {
 }
 
 // Function App for the backend
-
 module functions 'core/function/function.bicep' = {
   name: 'functions'
   scope: rg
@@ -260,8 +237,6 @@ module functions 'core/function/function.bicep' = {
     tags: tags
     serverFarmId: appServicePlan.outputs.id
     runtime: 'python'
-    funcStorageAccountKey: functionstorage.outputs.key
-    funcStorageAccountName: functionstorage.outputs.name
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
     blobStorageAccountKey: storage.outputs.key
@@ -273,7 +248,6 @@ module functions 'core/function/function.bicep' = {
   }
   dependsOn: [
     appServicePlan
-    functionstorage
     storage
   ]
 }

@@ -1,10 +1,11 @@
 import { BlobServiceClient } from "@azure/storage-blob";
 import classNames from "classnames";
 import { nanoid } from "nanoid";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
+import { getBlobClientUrl } from "../../api"
 
 
 const FilePicker = ({ uploadURL }: { uploadURL: string }) => {
@@ -40,20 +41,15 @@ const FilePicker = ({ uploadURL }: { uploadURL: string }) => {
       const data = new FormData();
       console.log("files", files);
       setUploadStarted(true);
-      
-      // initialize Azure Blob Storage credentials from environment variables
-      const AZURE_STORAGE_ACCOUNT_CONNECTION_STRING = process.env.AZURE_STORAGE_ACCOUNT_CONNECTION_STRING;
-      const AZURE_STORAGE_ACCOUNT_CONTAINER = process.env.AZURE_STORAGE_ACCOUNT_CONTAINER;
-      
+
       // create an instance of the BlobServiceClient
-      const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_ACCOUNT_CONNECTION_STRING as string);
+      const blobClientUrl = await getBlobClientUrl();
+      const blobServiceClient = new BlobServiceClient(blobClientUrl);
 
-      const containerClient = blobServiceClient.getContainerClient(AZURE_STORAGE_ACCOUNT_CONTAINER as string);
-      const reader = new FileReader();
-      var test = 1;
+      const containerClient = blobServiceClient.getContainerClient("upload");
       var counter = 1;
-
       files.forEach((indexedFile: any) => {
+        // add each file into Azure Blob Storage
         const file = indexedFile.file as File;
         const blobClient = containerClient.getBlockBlobClient(file.name);
         // set mimetype as determined from browser with file upload control

@@ -42,3 +42,8 @@ export type ChatRequest = {
     approach: Approaches;
     overrides?: AskRequestOverrides;
 };
+
+export type BlobClientUrlResponse = {
+    url: string;
+    error?: string;
+};

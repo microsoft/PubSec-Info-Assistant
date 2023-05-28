@@ -35,6 +35,9 @@ export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitatio
             } else {
                 // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                 // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
+                if(typeof (citation_lookup as any)[part] === 'undefined') {
+                    part = part.split(".")[0];
+                }
                 citations.push((citation_lookup as any)[part].split("/").slice(4).join("/"));
                 citationIndex = citations.length;
             }

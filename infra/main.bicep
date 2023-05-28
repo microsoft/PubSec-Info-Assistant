@@ -212,6 +212,10 @@ module storage 'core/storage/storage-account.bicep' = {
         publicAccess: 'None'
       }
       {
+        name: 'upload'
+        publicAccess: 'None'
+      }
+      {
         name: 'website'
         publicAccess: 'None'
       }

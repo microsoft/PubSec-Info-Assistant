@@ -14,6 +14,9 @@ export type AskRequestOverrides = {
     promptTemplatePrefix?: string;
     promptTemplateSuffix?: string;
     suggestFollowupQuestions?: boolean;
+    userPersona?: string;
+    systemPersona?: string;
+    aiPersona?: string;
     responseLength?: number;
     responseTemp?: number;
 };
@@ -41,4 +44,9 @@ export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
     overrides?: AskRequestOverrides;
+};
+
+export type BlobClientUrlResponse = {
+    url: string;
+    error?: string;
 };

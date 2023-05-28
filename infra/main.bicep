@@ -22,16 +22,21 @@ param azureOpenAIServiceKey string
 param cognitiveServicesAccountName string = ''
 param cognitiveServicesSkuName string = 'S0'
 param cognitiveServiesForSearchName string = ''
+param formRecognizerName string = ''
+param formRecognizerSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
 param resourceGroupName string = ''
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
+param functionsAppName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
+param functionStorageAccountName string = ''
 param containerName string = 'content'
+param uploadContainerName string = 'upload'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
@@ -149,6 +154,20 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
   }
 }
 
+module formrecognizer 'core/ai/formrecognizer.bicep' = {
+  scope: rg
+  name: 'formrecognizer'
+  params: {
+    name: !empty(formRecognizerName) ? formRecognizerName : '${prefix}-${abbrs.formRecognizer}${randomString}'
+    location: location
+    tags: tags
+    sku: {
+      name: formRecognizerSkuName
+    }
+  }
+}
+
+
 module searchServices 'core/search/search-services.bicep' = {
   scope: rg
   name: 'search-services'
@@ -193,15 +212,44 @@ module storage 'core/storage/storage-account.bicep' = {
         publicAccess: 'None'
       }
       {
-        name: 'upload'
+        name: 'website'
         publicAccess: 'None'
       }
       {
-        name: 'website'
+        name: uploadContainerName
+        publicAccess: 'None'
+      }
+      {
+        name: 'function'
         publicAccess: 'None'
       }
     ]
   }
+}
+
+// Function App for the backend
+module functions 'core/function/function.bicep' = {
+  name: 'functions'
+  scope: rg
+  params: {
+    name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
+    location: location
+    tags: tags
+    serverFarmId: appServicePlan.outputs.id
+    runtime: 'python'
+    appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
+    appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
+    blobStorageAccountKey: storage.outputs.key
+    blobStorageAccountName: storage.outputs.name
+    blobStorageAccountOutputContainerName: containerName
+    blobStorageAccountUploadContainerName: uploadContainerName
+    formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
+    formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
+  }
+  dependsOn: [
+    appServicePlan
+    storage
+  ]
 }
 
 // USER ROLES

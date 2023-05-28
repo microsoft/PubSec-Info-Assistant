@@ -43,6 +43,7 @@
   "eventGridEventSubscriptions": "evgs-",
   "eventHubNamespaces": "evhns-",
   "eventHubNamespacesEventHubs": "evh-",
+  "formRecognizer": "fr-",
   "hdInsightClustersHadoop": "hadoop-",
   "hdInsightClustersHbase": "hbase-",
   "hdInsightClustersKafka": "kafka-",

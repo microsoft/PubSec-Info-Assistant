@@ -16,7 +16,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-12-01-previ
   }
 }
 
-resource applicatoinInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
   name: applicationInsightsName
   location: location
   tags: tags
@@ -28,8 +28,9 @@ resource applicatoinInsights 'Microsoft.Insights/components@2020-02-02-preview' 
   }
 }
 
-output applicationInsightsId string = applicatoinInsights.id
+output applicationInsightsId string = applicationInsights.id
 output logAnalyticsId string = logAnalytics.id
-output applicationInsightsName string = applicatoinInsights.name
+output applicationInsightsName string = applicationInsights.name
 output logAnalyticsName string = logAnalytics.name
-output applicationInsightsInstrumentationKey string = applicatoinInsights.properties.InstrumentationKey
+output applicationInsightsInstrumentationKey string = applicationInsights.properties.InstrumentationKey
+output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString

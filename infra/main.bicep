@@ -13,23 +13,30 @@ param randomString string
 @description('Primary location for all resources')
 param location string
 
+param aadClientId string = ''
 param buildNumber string = 'local'
+param isInAutomation bool = false
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
 param azureOpenAIServiceKey string
 param cognitiveServicesAccountName string = ''
 param cognitiveServicesSkuName string = 'S0'
 param cognitiveServiesForSearchName string = ''
+param formRecognizerName string = ''
+param formRecognizerSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
 param resourceGroupName string = ''
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
+param functionsAppName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
+param functionStorageAccountName string = ''
 param containerName string = 'content'
+param uploadContainerName string = 'upload'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
@@ -100,11 +107,13 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_SERVICE: azureOpenAIServiceName//cognitiveServices.outputs.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
+      AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_OPENAI_GPT_DEPLOYMENT: gptDeploymentName
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeploymentName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
     }
+    aadClientId: aadClientId
   }
 }
 
@@ -144,6 +153,20 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
     ]
   }
 }
+
+module formrecognizer 'core/ai/formrecognizer.bicep' = {
+  scope: rg
+  name: 'formrecognizer'
+  params: {
+    name: !empty(formRecognizerName) ? formRecognizerName : '${prefix}-${abbrs.formRecognizer}${randomString}'
+    location: location
+    tags: tags
+    sku: {
+      name: formRecognizerSkuName
+    }
+  }
+}
+
 
 module searchServices 'core/search/search-services.bicep' = {
   scope: rg
@@ -185,7 +208,19 @@ module storage 'core/storage/storage-account.bicep' = {
     }
     containers: [
       {
-        name: 'content'
+        name: containerName
+        publicAccess: 'None'
+      }
+      {
+        name: 'website'
+        publicAccess: 'None'
+      }
+      {
+        name: uploadContainerName
+        publicAccess: 'None'
+      }
+      {
+        name: 'function'
         publicAccess: 'None'
       },
       {
@@ -196,6 +231,31 @@ module storage 'core/storage/storage-account.bicep' = {
   }
 }
 
+// Function App for the backend
+module functions 'core/function/function.bicep' = {
+  name: 'functions'
+  scope: rg
+  params: {
+    name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
+    location: location
+    tags: tags
+    serverFarmId: appServicePlan.outputs.id
+    runtime: 'python'
+    appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
+    appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
+    blobStorageAccountKey: storage.outputs.key
+    blobStorageAccountName: storage.outputs.name
+    blobStorageAccountOutputContainerName: containerName
+    blobStorageAccountUploadContainerName: uploadContainerName
+    formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
+    formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
+  }
+  dependsOn: [
+    appServicePlan
+    storage
+  ]
+}
+
 // USER ROLES
 module openAiRoleUser 'core/security/role.bicep' = {
   scope: rg
@@ -203,7 +263,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -213,7 +273,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -223,7 +283,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -233,7 +293,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -243,7 +303,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
-    principalType: 'User'
+    principalType: isInAutomation ? 'ServicePrincipal': 'User'
   }
 }
 
@@ -282,8 +342,10 @@ output AZURE_LOCATION string = location
 output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName//cognitiveServices.outputs.name
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name
+output AZURE_SEARCH_KEY string = searchServices.outputs.searchServiceKey
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output AZURE_STORAGE_CONTAINER string = containerName
+output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name

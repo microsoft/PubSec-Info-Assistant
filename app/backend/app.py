@@ -3,19 +3,23 @@ import mimetypes
 import time
 import logging
 import openai
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from azure.identity import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from approaches.retrievethenread import RetrieveThenReadApproach
 from approaches.readretrieveread import ReadRetrieveReadApproach
 from approaches.readdecomposeask import ReadDecomposeAsk
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, generate_account_sas, ResourceTypes, AccountSasPermissions
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
+AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
+AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
 AZURE_OPENAI_GPT_DEPLOYMENT = os.environ.get("AZURE_OPENAI_GPT_DEPLOYMENT") or "davinci"
@@ -31,11 +35,12 @@ KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "file_storage_p
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
 azure_credential = DefaultAzureCredential()
+azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
 
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
-openai.api_version = "2022-12-01"
+openai.api_version = "2023-03-15-preview"
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 #openai.api_type = "azure_ad"
@@ -46,10 +51,10 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 search_client = SearchClient(
     endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
     index_name=AZURE_SEARCH_INDEX,
-    credential=azure_credential)
+    credential=azure_search_key_credential)
 blob_client = BlobServiceClient(
     account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net", 
-    credential=azure_credential)
+    credential=AZURE_BLOB_STORAGE_KEY)
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
 # Various approaches to integrate GPT and external knowledge, most applications will use a single one of these patterns
@@ -87,7 +92,6 @@ def content_file(path):
     
 @app.route("/ask", methods=["POST"])
 def ask():
-    #ensure_openai_token()
     approach = request.json["approach"]
     try:
         impl = ask_approaches.get(approach)
@@ -101,7 +105,6 @@ def ask():
     
 @app.route("/chat", methods=["POST"])
 def chat():
-    #ensure_openai_token()
     approach = request.json["approach"]
     try:
         impl = chat_approaches.get(approach)
@@ -112,12 +115,15 @@ def chat():
     except Exception as e:
         logging.exception("Exception in /chat")
         return jsonify({"error": str(e)}), 500
-
-def ensure_openai_token():
-    global openai_token
-    if openai_token.expires_on < int(time.time()) - 60:
-        openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-        openai.api_key = openai_token.token
+  
+@app.route("/getblobclienturl")
+def get_blob_client_url():
     
+    sas_token = generate_account_sas(AZURE_BLOB_STORAGE_ACCOUNT, AZURE_BLOB_STORAGE_KEY, 
+                                     resource_types=ResourceTypes(object=True,service=True,container=True), 
+                                     permission=AccountSasPermissions(read=True,write=True,list=True,delete=False,add=True,create=True,update=True,process=False), 
+                                     expiry=datetime.utcnow() + timedelta(hours=1))
+    return jsonify({"url": f"{blob_client.url}?{sas_token}"})
+
 if __name__ == "__main__":
     app.run()

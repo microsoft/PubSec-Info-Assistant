@@ -56,5 +56,7 @@ resource cogService 'Microsoft.CognitiveServices/accounts@2022-10-01' = {
 output id string = search.id
 output endpoint string = 'https://${name}.search.windows.net/'
 output name string = search.name
+#disable-next-line outputs-should-not-contain-secrets
+output searchServiceKey string = search.listAdminKeys().primaryKey
 #disable-next-line outputs-should-not-contain-secrets 
 output cogServiceKey string = cogService.listKeys().key1

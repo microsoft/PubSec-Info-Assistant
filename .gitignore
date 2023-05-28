@@ -352,7 +352,8 @@ MigrationBackup/
 # NPM
 npm-debug.log*
 node_modules
-static/
+static
+package-lock.json
 
 #devcontainer tools
 local.env
@@ -365,3 +366,9 @@ random.txt
 
 # Azure Developer CLI outputs
 .azure
+
+# Python env
+.venv
+app/backend/cd
+app/backend/lib
+app/backend/lib64

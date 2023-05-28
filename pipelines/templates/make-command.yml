@@ -1,0 +1,41 @@
+parameters:
+- name: makeCommand
+  displayName: 'The make command to run'
+  type: string
+- name: displayName
+  displayName: 'The display name of the step'
+  type: string
+- name: force
+  displayName: 'Whether to force the step to run'
+  type: boolean
+  default: false
+  
+steps:
+- bash: |
+    set -e
+    docker run --rm \
+      --env-file '$(Build.SourcesDirectory)/pipelines/devcontainer-ci.env' \
+      --mount "type=bind,src=$(Build.SourcesDirectory),dst=/workspaces/info-asst" \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      --workdir /workspaces/info-asst \
+      --user vscode \
+      'info-asst-devcontainer:$(Build.BuildId)' \
+      bash -c -i "make ${{ parameters.makeCommand }}"
+  displayName: ${{ parameters.displayName }}
+  condition: or(succeeded(), eq('${{ parameters.force }}', 'true'))
+  env: 
+    ARM_CLIENT_ID: $(CLIENT_ID)
+    ARM_CLIENT_SECRET: $(CLIENT_SECRET)
+    ARM_SERVICE_PRINCIPAL_ID: $(SERVICE_PRINCIPAL_ID)
+    ARM_TENANT_ID: $(TENANT_ID)
+    ARM_SUBSCRIPTION_ID: $(SUBSCRIPTION_ID)
+    AZURE_STORAGE_ACCOUNT: $(AZURE_STORAGE_ACCOUNT)
+    AZURE_STORAGE_ACCOUNT_KEY: $(AZURE_STORAGE_ACCOUNT_KEY)
+    AZURE_OPENAI_SERVICE_NAME: $(AZURE_OPENAI_SERVICE_NAME)
+    AZURE_OPENAI_SERVICE_KEY: $(AZURE_OPENAI_SERVICE_KEY)
+    AZURE_OPENAI_GPT_DEPLOYMENT: $(AZURE_OPENAI_GPT_DEPLOYMENT)  
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT: $(AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+
+    
+    BUILD_BUILDID: $(Build.BuildId)
+    BUILD_BUILDNUMBER: $(Build.BuildNumber)

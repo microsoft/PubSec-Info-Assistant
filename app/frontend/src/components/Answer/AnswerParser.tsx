@@ -7,7 +7,7 @@ type HtmlParsedAnswer = {
     followupQuestions: string[];
 };
 
-export function parseAnswerToHtml(answer: string, onCitationClicked: (citationFilePath: string) => void): HtmlParsedAnswer {
+export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitationClicked: (citationFilePath: string) => void): HtmlParsedAnswer {
     const citations: string[] = [];
     const followupQuestions: string[] = [];
 
@@ -20,24 +20,34 @@ export function parseAnswerToHtml(answer: string, onCitationClicked: (citationFi
     // trim any whitespace from the end of the answer after removing follow-up questions
     parsedAnswer = parsedAnswer.trim();
 
+    // Split the answer into parts, where the odd parts are citations
     const parts = parsedAnswer.split(/\[([^\]]+)\]/g);
 
     const fragments: string[] = parts.map((part, index) => {
         if (index % 2 === 0) {
+            // Even parts are just text
             return part;
         } else {
+            // Odd parts are citations as the "FileX" moniker
             let citationIndex: number;
-            if (citations.indexOf(part) !== -1) {
-                citationIndex = citations.indexOf(part) + 1;
+            if (citations.indexOf((citation_lookup as any)[part]) !== -1) {
+                citationIndex = citations.indexOf((citation_lookup as any)[part]) + 1;
             } else {
-                citations.push(part);
+                // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
+                // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
+                if(typeof (citation_lookup as any)[part] === 'undefined') {
+                    part = part.split(".")[0];
+                }
+                citations.push((citation_lookup as any)[part].split("/").slice(4).join("/"));
                 citationIndex = citations.length;
             }
 
-            const path = getCitationFilePath(part);
+            const path = getCitationFilePath((citation_lookup as any)[part]);
 
             return renderToStaticMarkup(
-                <a className="supContainer" title={part} onClick={() => onCitationClicked(path)}>
+                // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
+                // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
+                <a className="supContainer" title={(citation_lookup as any)[part].split("/").slice(4).join("/")} onClick={() => onCitationClicked(path)}>
                     <sup>{citationIndex}</sup>
                 </a>
             );

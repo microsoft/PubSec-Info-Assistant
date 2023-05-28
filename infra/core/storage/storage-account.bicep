@@ -44,6 +44,16 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     name: 'default'
     properties: {
       deleteRetentionPolicy: deleteRetentionPolicy
+      cors: {
+        corsRules: [
+          {
+            allowedHeaders: [ '*' ]
+            allowedMethods: [ 'GET', 'PUT', 'OPTIONS', 'POST', 'PATCH', 'HEAD' ]
+            allowedOrigins: [ '*' ]
+            exposedHeaders: [ '*' ]
+            maxAgeInSeconds: 86400}
+        ]
+      }
     }
     resource container 'containers' = [for container in containers: {
       name: container.name

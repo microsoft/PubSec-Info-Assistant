@@ -8,6 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}"/../scripts/load-env.sh
 BINARIES_OUTPUT_PATH="${DIR}/../artifacts/build/"
 WEBAPP_ROOT_PATH="${DIR}/..//app/frontend"
+FUNCTIONS_ROOT_PATH="${DIR}/../functions"
 
 # reset the current directory on exit using a trap so that the directory is reset even on error
 #function finish {
@@ -28,3 +29,7 @@ npm run build
 cd ../backend
 zip -r ${BINARIES_OUTPUT_PATH}/webapp.zip .
 cd $DIR
+
+# Build the Azure Functions
+cd ${FUNCTIONS_ROOT_PATH}
+zip -r ${BINARIES_OUTPUT_PATH}/functions.zip .

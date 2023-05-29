@@ -30,9 +30,16 @@ param blobStorageAccountUploadContainerName string
 @description('Azure Blob Storage Account Output Container Name')
 param blobStorageAccountOutputContainerName string
 
+@description('Azure Blob Storage Account Log Container Name')
+param blobStorageAccountLogContainerName string
+
 @description('Azure Blob Storage Account Key')
 @secure()
 param blobStorageAccountKey string
+
+@description('Azure Blob Storage Account Connection String')
+@secure()
+param blobStorageAccountConnectionString string
 
 @description('XY Rounding Factor')
 param xyRoundingFactor string = '1'
@@ -121,6 +128,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: blobStorageAccountOutputContainerName
         }
         {
+          name: 'BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME'
+          value: blobStorageAccountLogContainerName
+        }
+        {
           name: 'BLOB_STORAGE_ACCOUNT_KEY'
           value: blobStorageAccountKey
         }
@@ -152,7 +163,13 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'AZURE_FORM_RECOGNIZER_KEY'
           value: formRecognizerApiKey
         }
+        {
+          name: 'infoasststore_STORAGE'
+          value: blobStorageAccountConnectionString
+        }
       ]
     }
   }
 }
+
+output name string = functionApp.name

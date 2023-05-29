@@ -34,9 +34,9 @@ param functionsAppName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
-param functionStorageAccountName string = ''
 param containerName string = 'content'
 param uploadContainerName string = 'upload'
+param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
@@ -103,7 +103,7 @@ module backend 'core/host/appservice.bicep' = {
     appSettings: {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
-      AZURE_BLOB_STORATE_KEY: storage.outputs.key
+      AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       AZURE_OPENAI_SERVICE: azureOpenAIServiceName//cognitiveServices.outputs.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
@@ -222,9 +222,9 @@ module storage 'core/storage/storage-account.bicep' = {
       {
         name: 'function'
         publicAccess: 'None'
-      },
+      }
       {
-        name: 'log'
+        name: functionLogsContainerName
         publicAccess: 'None'
       }      
     ]
@@ -245,8 +245,10 @@ module functions 'core/function/function.bicep' = {
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
     blobStorageAccountKey: storage.outputs.key
     blobStorageAccountName: storage.outputs.name
+    blobStorageAccountConnectionString: storage.outputs.connectionString
     blobStorageAccountOutputContainerName: containerName
     blobStorageAccountUploadContainerName: uploadContainerName
+    blobStorageAccountLogContainerName: functionLogsContainerName
     formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
     formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
   }
@@ -354,3 +356,4 @@ output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = chatGptDeploymentName
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey
+output AZURE_FUNCTION_APP_NAME string = functions.outputs.name

@@ -23,16 +23,19 @@ nltk.download('punkt')
 
 
 
-azure_blob_storage_account = os.environ["AZURE_BLOB_STORAGE_ACCOUNT"]
-azure_blob_drop_storage_container = os.environ["AZURE_BLOB_DROP_STORAGE_CONTAINER"]
-azure_blob_content_storage_container = os.environ["AZURE_BLOB_CONTENT_STORAGE_CONTAINER"]
-azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
+azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
+azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
-TARGET_PAGES = os.environ["TARGET_PAGES"]     # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6". Separate each page number or range with a comma.
-azure_blob_log_storage_container = os.environ["AZURE_BLOB_LOG_STORAGE_CONTAINER"]
+# ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
+# ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
+# Separate each page number or range with a comma.
+TARGET_PAGES = os.environ["TARGET_PAGES"]
+azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 
 def main(myblob: func.InputStream):
     """ Function to read PDF files and extract text using Azure Form Recognizer"""

@@ -3,6 +3,7 @@ import mimetypes
 import time
 import logging
 import openai
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
@@ -11,7 +12,7 @@ from approaches.retrievethenread import RetrieveThenReadApproach
 from approaches.readretrieveread import ReadRetrieveReadApproach
 from approaches.readdecomposeask import ReadDecomposeAsk
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, generate_account_sas, ResourceTypes, AccountSasPermissions
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
@@ -91,7 +92,6 @@ def content_file(path):
     
 @app.route("/ask", methods=["POST"])
 def ask():
-    #ensure_openai_token()
     approach = request.json["approach"]
     try:
         impl = ask_approaches.get(approach)
@@ -105,7 +105,6 @@ def ask():
     
 @app.route("/chat", methods=["POST"])
 def chat():
-    #ensure_openai_token()
     approach = request.json["approach"]
     try:
         impl = chat_approaches.get(approach)
@@ -116,12 +115,15 @@ def chat():
     except Exception as e:
         logging.exception("Exception in /chat")
         return jsonify({"error": str(e)}), 500
-
-def ensure_openai_token():
-    global openai_token
-    if openai_token.expires_on < int(time.time()) - 60:
-        openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-        openai.api_key = openai_token.token
+  
+@app.route("/getblobclienturl")
+def get_blob_client_url():
     
+    sas_token = generate_account_sas(AZURE_BLOB_STORAGE_ACCOUNT, AZURE_BLOB_STORAGE_KEY, 
+                                     resource_types=ResourceTypes(object=True,service=True,container=True), 
+                                     permission=AccountSasPermissions(read=True,write=True,list=True,delete=False,add=True,create=True,update=True,process=False), 
+                                     expiry=datetime.utcnow() + timedelta(hours=1))
+    return jsonify({"url": f"{blob_client.url}?{sas_token}"})
+
 if __name__ == "__main__":
     app.run()

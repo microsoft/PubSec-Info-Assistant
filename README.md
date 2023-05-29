@@ -7,6 +7,7 @@ This sample demonstrates a few approaches for creating ChatGPT-like experiences 
 ## Features
 
 * Chat and Q&A interfaces
+* File Upload and automated chunking and indexing for PDF, HTML, and DOCX
 * Explores various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, etc.
 * Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
 * Settings directly in the UX to tweak the behavior and experiment with options
@@ -36,19 +37,15 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 ## Deployment Configuration
 
->You will also need some development tools to edit and run the deployment scripts provided. It is recommended you use the following:
->
->* A windows based computer (local or cloud)
->* [Visual Studio Code](https://visualstudio.microsoft.com/downloads/)
->* [Docker Desktop](https://www.docker.com/products/docker-desktop)
->* [Windows Store Ubuntu 22.04 LTS](https://apps.microsoft.com/store/detail/ubuntu-22042-lts/9PN20MSR04DW)
->* [Git for Windows](https://gitforwindows.org/)
+The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container, hosted on a virtual machine using GitHub Codespaces.
 
-The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. Follow our [Configuring your System for Development Containers](docs/developing_inside_a_container.md) guide.
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
+
+Begin by setting up your own Codespace using our  [Developing in a Codespaces](docs/developing_in_a_codespaces.md) documentation.
 
 *More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once you have the prerequisites completed, please move on to the Sizing Estimation step.
+Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
 
 ---
 

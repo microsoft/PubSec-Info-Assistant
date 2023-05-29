@@ -2,22 +2,6 @@
   "version": "2.0.0",
   "tasks": [    
     {
-      "version": "2.0.0",
-      "tasks": [
-        {
-          "label": "fun host start",
-          "type": "shell",
-          "command": "func host start",
-          "group": "build",
-          "presentation": {
-            "reveal": "always",
-            "panel": "new"
-          },
-          "problemMatcher": []
-        }
-      ]
-    }
-    {
       "label": "pip_install",
       "type": "shell",
       "command": "pip",
@@ -36,9 +20,9 @@
       }
     },
     {
-      "type": "func",
+      "type": "shell",
       "label": "func: host start",
-      "command": "host start",
+      "command": "func host start",
       "problemMatcher": "$func-python-watch",
       "isBackground": true,
       "dependsOn": "pip install (functions)",

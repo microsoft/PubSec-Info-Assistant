@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "tasks": [
+  "tasks": [    
     {
       "label": "pip_install",
       "type": "shell",
@@ -20,9 +20,9 @@
       }
     },
     {
-      "type": "func",
+      "type": "shell",
       "label": "func: host start",
-      "command": "host start",
+      "command": "func host start",
       "problemMatcher": "$func-python-watch",
       "isBackground": true,
       "dependsOn": "pip install (functions)",

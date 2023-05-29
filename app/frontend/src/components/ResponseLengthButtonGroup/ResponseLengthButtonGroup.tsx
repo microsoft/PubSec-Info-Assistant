@@ -14,9 +14,9 @@ export const ResponseLengthButtonGroup = ({ className, onClick, defaultValue }: 
         <div className={`${styles.container} ${className ?? ""}`}>
             <Label>Response length:</Label>
             <ButtonGroup className={`${styles.buttongroup ?? ""}`} onClick={onClick}>
-                <Button id="Succinct" className={`${defaultValue == 1024? styles.buttonleftactive : styles.buttonleft ?? ""}`} size="sm" value={1024}>{"Succinct"}</Button>
-                <Button id="Standard" className={`${defaultValue == 2048? styles.buttonmiddleactive : styles.buttonmiddle ?? ""}`} size="sm" value={2048}>{"Standard"}</Button>
-                <Button id="Thorough" className={`${defaultValue == 4096? styles.buttonrightactive : styles.buttonright ?? ""}`} size="sm" value={4096}>{"Thorough"}</Button>
+                <Button id="Succinct" className={`${defaultValue == 1024? styles.buttonleftactive : styles.buttonleft ?? ""}`} size="sm" value={1024} bsPrefix='ia'>{"Succinct"}</Button>
+                <Button id="Standard" className={`${defaultValue == 2048? styles.buttonmiddleactive : styles.buttonmiddle ?? ""}`} size="sm" value={2048} bsPrefix='ia'>{"Standard"}</Button>
+                <Button id="Thorough" className={`${defaultValue == 4096? styles.buttonrightactive : styles.buttonright ?? ""}`} size="sm" value={4096} bsPrefix='ia'>{"Thorough"}</Button>
             </ButtonGroup>
         </div>
     );

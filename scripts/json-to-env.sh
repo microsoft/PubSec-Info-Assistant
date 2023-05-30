@@ -65,7 +65,12 @@ jq -r  '
         {
             "path": "azurE_SEARCH_KEY",
             "env_var": "AZURE_SEARCH_SERVICE_KEY"
+        },
+        {
+            "path": "azurE_FUNCTION_APP_NAME",
+            "env_var": "AZURE_FUNCTION_APP_NAME"
         }
+        
     ]
         as $env_vars_to_extract
     |

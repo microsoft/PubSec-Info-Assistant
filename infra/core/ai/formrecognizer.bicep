@@ -24,4 +24,5 @@ resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2022-12-01'
 
 output formRecognizerAccountName string = formRecognizerAccount.name
 output formRecognizerAccountEndpoint string = formRecognizerAccount.properties.endpoint
+#disable-next-line outputs-should-not-contain-secrets
 output formRecognizerAccountKey string = formRecognizerAccount.listKeys().key1

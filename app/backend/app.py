@@ -3,6 +3,7 @@ import mimetypes
 import time
 import logging
 import openai
+import urllib.parse
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from azure.identity import DefaultAzureCredential
@@ -87,7 +88,7 @@ def content_file(path):
     if mime_type == "text/plain" and file_extension[0] in ["htm","html"]:
         mime_type = "text/html"
     print("Using mime type: " + mime_type + "for file with extension: " + file_extension[0])
-    return blob.readall(), 200, {"Content-Type": mime_type, "Content-Disposition": f"inline; filename={path}"}
+    return blob.readall(), 200, {"Content-Type": mime_type, "Content-Disposition": f"inline; filename={urllib.parse.quote(path, safe='')}"}
 
     
 @app.route("/ask", methods=["POST"])

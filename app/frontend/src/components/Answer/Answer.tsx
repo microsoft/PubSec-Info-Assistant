@@ -11,7 +11,7 @@ import { AnswerIcon } from "./AnswerIcon";
 interface Props {
     answer: AskResponse;
     isSelected?: boolean;
-    onCitationClicked: (filePath: string) => void;
+    onCitationClicked: (filePath: string, sourcePath: string) => void;
     onThoughtProcessClicked: () => void;
     onSupportingContentClicked: () => void;
     onFollowupQuestionClicked?: (question: string) => void;
@@ -68,7 +68,7 @@ export const Answer = ({
                         {parsedAnswer.citations.map((x, i) => {
                             const path = getCitationFilePath(x);
                             return (
-                                <a key={i} className={styles.citation} title={x} onClick={() => onCitationClicked(path)}>
+                                <a key={i} className={styles.citation} title={x} onClick={() => onCitationClicked(path, parsedAnswer.sourceFiles[i])}>
                                     {`${++i}. ${x}`}
                                 </a>
                             );

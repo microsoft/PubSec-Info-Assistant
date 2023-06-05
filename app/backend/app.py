@@ -1,6 +1,5 @@
 import os
 import mimetypes
-import time
 import logging
 import openai
 import urllib.parse
@@ -56,7 +55,8 @@ search_client = SearchClient(
 blob_client = BlobServiceClient(
     account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net", 
     credential=AZURE_BLOB_STORAGE_KEY)
-blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
+content_blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
+upload_blob_container = blob_client.get_container_client("upload")
 
 # Various approaches to integrate GPT and external knowledge, most applications will use a single one of these patterns
 # or some derivative, here we include several for exploration purposes
@@ -67,7 +67,7 @@ ask_approaches = {
 }
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_SERVICE, AZURE_OPENAI_SERVICE_KEY, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
+    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_SERVICE, AZURE_OPENAI_SERVICE_KEY, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT, blob_client)
 }
 
 app = Flask(__name__)
@@ -80,7 +80,7 @@ def static_file(path):
 # Return blob path with SAS token for citation access
 @app.route("/content/<path:path>")
 def content_file(path):
-    blob = blob_container.get_blob_client(path).download_blob()
+    blob = content_blob_container.get_blob_client(path).download_blob()
     mime_type = blob.properties["content_settings"]["content_type"]
     file_extension = blob.properties["name"].split(".")[-1:]
     if mime_type == "application/octet-stream":
@@ -90,7 +90,6 @@ def content_file(path):
     print("Using mime type: " + mime_type + "for file with extension: " + file_extension[0])
     return blob.readall(), 200, {"Content-Type": mime_type, "Content-Disposition": f"inline; filename={urllib.parse.quote(path, safe='')}"}
 
-    
 @app.route("/ask", methods=["POST"])
 def ask():
     approach = request.json["approach"]

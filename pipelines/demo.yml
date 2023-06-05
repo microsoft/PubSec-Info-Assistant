@@ -1,4 +1,4 @@
-trigger:
+trigger: none
   batch: true
   branches:
     include: [ main ]

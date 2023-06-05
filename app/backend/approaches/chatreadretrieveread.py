@@ -113,7 +113,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 results.append(f"File{idx} " + "| " + nonewlines(doc[self.content_field]))
                 data_points.append("/".join(urllib.parse.unquote(doc[self.sourcepage_field]).split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
             # add the "FileX" monikor and full file name to the citation lookup
-            citation_lookup[f"File{idx}"] = {'citation': urllib.parse.unquote(doc[self.sourcepage_field]), 'source_path': self.get_source_file_name(doc[self.content_field])}
+            citation_lookup[f"File{idx}"] = {'citation': urllib.parse.unquote(doc[self.sourcepage_field]), 'source_path': self.get_source_file_name(doc[self.content_field]), 'page_number': self.get_first_page_num_for_chunk(doc[self.content_field])}
         # create a single string of all the results to be used in the prompt
         content = "\n ".join(results)
 
@@ -204,5 +204,16 @@ class ChatReadRetrieveReadApproach(Approach):
         except Exception as e:
             logging.exception("Unable to parse source file name: " + str(e) + "")
             return ""
+    
+    # Parse the search document content for the first page from the "pages" attribute
+    def get_first_page_num_for_chunk(self, content: str) -> str:
+        try:
+            page_num = str(json.loads(content)['pages'][0])
+            if page_num is None:
+                return "0"
+            return page_num
+        except Exception as e:
+            logging.exception("Unable to parse first page num: " + str(e) + "")
+            return "0"
         
       

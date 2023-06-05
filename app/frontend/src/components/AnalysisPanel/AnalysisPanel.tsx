@@ -13,13 +13,14 @@ interface Props {
     onActiveTabChanged: (tab: AnalysisPanelTabs) => void;
     activeCitation: string | undefined;
     sourceFile: string | undefined;
+    pageNumber: string | undefined;
     citationHeight: string;
     answer: AskResponse;
 }
 
 const pivotItemDisabledStyle = { disabled: true, style: { color: "grey" } };
 
-export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, citationHeight, className, onActiveTabChanged }: Props) => {
+export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, pageNumber, citationHeight, className, onActiveTabChanged }: Props) => {
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points.length;
     const isDisabledCitationTab: boolean = !activeCitation;
@@ -58,7 +59,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, c
                     </PivotItem>
                     <PivotItem itemKey="rawFile" headerText="Document">
                         {isSourceFilePdf ? (
-                            <object data={sourceFile} type="application/pdf" width="100%" height={citationHeight} />
+                            <object data={sourceFile + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
                         ) : (
                             <iframe title="Source File" src={sourceFile} width="100%" height={citationHeight} />
                         )}

@@ -165,6 +165,7 @@ const OneShot = () => {
                         className={styles.oneshotAnalysisPanel}
                         activeCitation={activeCitation}
                         sourceFile=""
+                        pageNumber=""
                         onActiveTabChanged={x => onToggleTab(x)}
                         citationHeight="600px"
                         answer={answer}

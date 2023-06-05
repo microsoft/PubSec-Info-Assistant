@@ -45,18 +45,16 @@ export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitatio
                 } else {
                     // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                     // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                    citations.push((citation_lookup as any)[part].citation.split("/").slice(4).join("/"));
-                    sourceFiles.push((citation_lookup as any)[part].source_path);
+                    citations.push((citation_lookup as any)[part].split("/").slice(4).join("/"));
                     citationIndex = citations.length;
                 }
-                
-                const path = getCitationFilePath((citation_lookup as any)[part].citation);
-                const sourcePath = (citation_lookup as any)[part].source_path;
+
+                const path = getCitationFilePath((citation_lookup as any)[part]);
 
                 return renderToStaticMarkup(
                     // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                     // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                    <a className="supContainer" title={(citation_lookup as any)[part].citation.split("/").slice(4).join("/")} onClick={() => onCitationClicked(path, sourcePath)}>
+                    <a className="supContainer" title={(citation_lookup as any)[part].split("/").slice(4).join("/")} onClick={() => onCitationClicked(path)}>
                         <sup>{citationIndex}</sup>
                     </a>
                 );

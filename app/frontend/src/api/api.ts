@@ -70,14 +70,7 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
 }
 
 export function getCitationFilePath(citation: string): string {
-    //const xhr = new XMLHttpRequest();
-    //const url = '/contenturl';
-    //xhr.open('GET', url, true);
-    //xhr.setRequestHeader('Content-Type', 'application/json');
-    //const body = JSON.stringify({"path": citation});
-    //xhr.send(body);
-    //return xhr.response;
-    return `/content/${citation}`;
+    return `/content/${encodeURIComponent(citation)}`;
 }
 
 export async function getBlobClientUrl(): Promise<string> {

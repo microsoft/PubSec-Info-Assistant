@@ -179,12 +179,12 @@ class ChatReadRetrieveReadApproach(Approach):
     # Get the prompt text for the response length
     def get_repsonse_lenth_prompt_text(self, response_length: int):
         if response_length == 1024:
-            return "Provide concise and succinct answers."
+            return "Provide concise and succinct answers in no more than 3-4 sentences."
         elif response_length == 2048:
-            return "Provide answers that strike a balance between being concise and detailed. Respond with enough information to cover the key points, but avoid unnecessary verbosity."
+            return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
         elif response_length == 4096:
-            return "Provide detailed and comprehensive answers."
+            return "Provide detailed and comprehensive answers in no more than 2-3 paragraphs."
         else:
-            return "Provide answers that strike a balance between being concise and detailed. Respond with enough information to cover the key points, but avoid unnecessary verbosity."
+            return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
         
       

@@ -21,10 +21,8 @@ import tiktoken
 import nltk
 nltk.download('words')
 nltk.download('punkt')
-
-# Append the scripts folder to the path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from scripts.status_log import upsert_document
+# from shared_code import status_log as Status
+from shared_code.status_log import StatusLog
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -44,14 +42,22 @@ cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
 cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+statusLog = StatusLog()
 
-def main(myblob: func.InputStream):
+
+def main(myblob: func.InputStream):    
+    statusLog.url = cosmosdb_url
+    statusLog.key = cosmosdb_key
+    statusLog.database_name = cosmosdb_database_name
+    statusLog.container_name = cosmosdb_container_name
+    statusLog.document_path = myblob.name
+    
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
-    upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'File Uploaded')
+    statusLog.upsert_document('File Uploaded', True)
     logging.info(f"Python blob trigger function processed blob \n"
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
-    upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Parser function started')
+    statusLog.upsert_document('Parser function started')
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -488,7 +494,7 @@ def analyze_layout(myblob: func.InputStream):
     # Get file extension
     file_extension = os.path.splitext(myblob.name)[1][1:].lower()
     if file_extension == 'pdf':
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Analyzing PDF')
+        statusLog.upsert_document('Analyzing PDF')
         # Process pdf file        
         # [START extract_layout]
         logging.info("PDF file detected")        
@@ -498,7 +504,7 @@ def analyze_layout(myblob: func.InputStream):
         document_analysis_client = DocumentAnalysisClient(
             endpoint=endpoint, credential=AzureKeyCredential(key)
         ) 
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Calling Form Recognizer')               
+        statusLog.upsert_document('Calling Form Recognizer')               
         if TARGET_PAGES == "ALL":
             poller = document_analysis_client.begin_analyze_document_from_url(
                 "prebuilt-layout", document_url=source_blob_path
@@ -508,31 +514,31 @@ def analyze_layout(myblob: func.InputStream):
                 "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES, api_version=FR_API_VERSION
             )        
         result = poller.result()
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Form Recognizer response received')
+        statusLog.upsert_document('Form Recognizer response received')
         logging.info(f"Form Recognizer has returned results \n")
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Starting document map build')
+        statusLog.upsert_document('Starting document map build')
         document_map = build_document_map_pdf(myblob, result)
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Starting document map build complete, starting chunking')
+        statusLog.upsert_document('Starting document map build complete, starting chunking')
         build_chunks(document_map, myblob)
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Chunking complete')    
+        statusLog.upsert_document('Chunking complete')    
         
     elif file_extension in ['htm', 'html']:
         # Process html file
         logging.info("PDF file detected")
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Analyzing HTML')
+        statusLog.upsert_document('Analyzing HTML')
         # Download the content from the URL
         response = requests.get(source_blob_path)
         if response.status_code == 200:
             html = response.text   
-            upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Starting document map build')
+            statusLog.upsert_document('Starting document map build')
             document_map = build_document_map_html(myblob, html)
-            upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Starting document map build complete, starting chunking')
+            statusLog.upsert_document('Document map build complete, starting chunking')
             build_chunks(document_map, myblob) 
-            upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Chunking complete')
+            statusLog.upsert_document('Chunking complete')
         
     elif file_extension in ['docx']:      
         logging.info("Office file detected")
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Analyzing DocX')
+        statusLog.upsert_document('Analyzing DocX')
         response = requests.get(source_blob_path)
         # Ensure the request was successful
         response.raise_for_status()
@@ -540,13 +546,13 @@ def analyze_layout(myblob: func.InputStream):
         docx_file = BytesIO(response.content)
         # Convert the downloaded Word document to HTML
         result = mammoth.convert_to_html(docx_file)
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'HTML generated from DocX')
+        statusLog.upsert_document('HTML generated from DocX')
         html = result.value # The generated HTML
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Starting document map build')
+        statusLog.upsert_document('Starting document map build')
         document_map = build_document_map_html(myblob, html)
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Starting document map build complete, starting chunking')
+        statusLog.upsert_document('Document map build complete, starting chunking')
         build_chunks(document_map, myblob) 
-        upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'Chunking complete')
+        statusLog.upsert_document('Chunking complete')
 
            
         
@@ -555,5 +561,5 @@ def analyze_layout(myblob: func.InputStream):
         logging.info("Unknown file type")
  
 
-    upsert_document(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name, myblob.name, 'File processing complete')
+    statusLog.upsert_document('File processing complete')
     logging.info(f"Done!\n")

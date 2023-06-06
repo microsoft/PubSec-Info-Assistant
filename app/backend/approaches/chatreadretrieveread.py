@@ -23,7 +23,7 @@ class ChatReadRetrieveReadApproach(Approach):
     """
 
     follow_up_questions_prompt_content = """
-    Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use double angle brackets to reference the questions, e.g. <<Are there exclusions for prescriptions?>>. Try not to repeat questions that have already been asked.
+    Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
     Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
     """
 
@@ -31,7 +31,7 @@ class ChatReadRetrieveReadApproach(Approach):
     Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a knowledge base.
     Generate a search query based on the conversation and the new question. 
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
-    Do not include any text inside [] or <<>> in the search query terms.
+    Do not include any text inside [] or <<<>>> in the search query terms.
     If the question is not in English, translate the question to English before generating the search query.
 
     Chat History:
@@ -160,7 +160,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         return {
             "data_points": data_points,
-            "answer": f"{completion.choices[0].text}",
+            "answer": f"{urllib.parse.unquote(completion.choices[0].text)}",
             "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>" + prompt.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }
@@ -179,12 +179,12 @@ class ChatReadRetrieveReadApproach(Approach):
     # Get the prompt text for the response length
     def get_repsonse_lenth_prompt_text(self, response_length: int):
         if response_length == 1024:
-            return "Provide concise and succinct answers."
+            return "Provide concise and succinct answers in no more than 3-4 sentences."
         elif response_length == 2048:
-            return "Provide answers that strike a balance between being concise and detailed. Respond with enough information to cover the key points, but avoid unnecessary verbosity."
+            return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
         elif response_length == 4096:
-            return "Provide detailed and comprehensive answers."
+            return "Provide detailed and comprehensive answers in no more than 2-3 paragraphs."
         else:
-            return "Provide answers that strike a balance between being concise and detailed. Respond with enough information to cover the key points, but avoid unnecessary verbosity."
+            return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
         
       

@@ -20,9 +20,9 @@
       }
     },
     {
-      "type": "shell",
+      "type": "func",
       "label": "func: host start",
-      "command": "func host start",
+      "command": "host start",
       "problemMatcher": "$func-python-watch",
       "isBackground": true,
       "dependsOn": "pip install (functions)",

@@ -81,3 +81,13 @@ RUN if [ -z "$TZ" ]; then TZ="Europe/London"; fi && sudo ln -snf /usr/share/zone
 # Install gettext-base so that we have envsubst
 RUN sudo apt-get update \
     && sudo apt-get -y install gettext-base
+
+RUN pip install azure-functions
+RUN pip install tiktoken
+RUN pip install azure.ai.formrecognizer
+RUN pip install azure-storage-blob
+RUN pip install nltk
+RUN pip install azure-core
+RUN pip install beautifulsoup4
+RUN pip install lxml
+RUN pip install mammoth

@@ -6,7 +6,6 @@ from azure.ai.formrecognizer import DocumentAnalysisClient
 from azure.core.exceptions import HttpResponseError
 import logging
 import os
-import sys
 from enum import Enum
 from datetime import datetime, timedelta
 import json

@@ -67,8 +67,6 @@ export const Answer = ({
                         <span className={styles.citationLearnMore}>Citations:</span>
                         {parsedAnswer.citations.map((x, i) => {
                             const path = getCitationFilePath(x);
-                            console.log(parsedAnswer.sourceFiles);
-                            console.log(parsedAnswer.pageNumbers);
                             return (
                                 <a key={i} className={styles.citation} title={x} onClick={() => onCitationClicked(path, (parsedAnswer.sourceFiles as any)[x], (parsedAnswer.pageNumbers as any)[x])}>
                                     {`${++i}. ${x}`}

@@ -55,8 +55,7 @@ search_client = SearchClient(
 blob_client = BlobServiceClient(
     account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net", 
     credential=AZURE_BLOB_STORAGE_KEY)
-content_blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
-upload_blob_container = blob_client.get_container_client("upload")
+blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
 # Various approaches to integrate GPT and external knowledge, most applications will use a single one of these patterns
 # or some derivative, here we include several for exploration purposes
@@ -80,7 +79,7 @@ def static_file(path):
 # Return blob path with SAS token for citation access
 @app.route("/content/<path:path>")
 def content_file(path):
-    blob = content_blob_container.get_blob_client(path).download_blob()
+    blob = blob_container.get_blob_client(path).download_blob()
     mime_type = blob.properties["content_settings"]["content_type"]
     file_extension = blob.properties["name"].split(".")[-1:]
     if mime_type == "application/octet-stream":

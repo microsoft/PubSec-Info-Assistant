@@ -53,23 +53,16 @@ def main(myblob: func.InputStream):
     
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
     statusLog.upsert_document('File Uploaded', True)
+    
     logging.info(f"Python blob trigger function processed blob \n"
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
-    statusLog.upsert_document('Parser function started')
-
-    from azure.core.exceptions import HttpResponseError
+    statusLog.upsert_document('Parser function started')    
     try:
+        result = 10/0
         analyze_layout(myblob)
-    except HttpResponseError as error:
-        # Check by error code:
-        if error.error is not None:
-            raise
-        # If the inner error is None and then it is possible to check the message to get more information:
-        if "Invalid request".casefold() in error.message.casefold():
-            print(f"Uh-oh! Seems there was an invalid request: {error}")
-        # Raise the error again
-        raise
+    except Exception as e:
+        statusLog.upsert_document(f"An error occurred - {str(e)}")
     
     logging.info(f"chunking complete for file {myblob.name}")
 
@@ -78,7 +71,7 @@ def sort_key(element):
     """ Function to sort elements by page number and role priority """
     return (element["page_number"])
     # to do, more complex sorting logic to cope with indented bulleted lists
-    return (element["page_number"], element["role_priority"], element["bounding_region"][0]["x"], element["bounding_region"][0]["y"])
+    # return (element["page_number"], element["role_priority"], element["bounding_region"][0]["x"], element["bounding_region"][0]["y"])
 
 
 def num_tokens_from_string(string: str, encoding_name: str) -> int:

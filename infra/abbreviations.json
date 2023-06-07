@@ -27,6 +27,7 @@
   "containerInstanceContainerGroups": "ci",
   "containerRegistryRegistries": "cr",
   "containerServiceManagedClusters": "aks-",
+  "cosmosDBAccounts": "cosmos-",
   "databricksWorkspaces": "dbw-",
   "dataFactoryFactories": "adf-",
   "dataLakeAnalyticsAccounts": "dla",

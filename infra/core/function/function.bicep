@@ -63,6 +63,19 @@ param formRecognizerEndpoint string
 @secure()
 param formRecognizerApiKey string
 
+@description('CosmosDB Endpoint')
+param CosmosDBEndpointURL string
+
+@description('CosmosDB Key')
+@secure()
+param CosmosDBKey string
+
+@description('CosmosDB Database Name')
+param CosmosDBDatabaseName string
+
+@description('CosmosDB Container Name')
+param CosmosDBContainerName string
+
 
 // Create function app resource
 
@@ -167,9 +180,26 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'infoasststore_STORAGE'
           value: blobStorageAccountConnectionString
         }
+        {
+          name: 'COSMOSDB_URL'
+          value: CosmosDBEndpointURL
+        }
+        {
+          name: 'COSMOSDB_KEY'
+          value: CosmosDBKey
+        }
+        {
+          name: 'COSMOSDB_DATABASE_NAME'
+          value: CosmosDBDatabaseName
+        }
+        {
+          name: 'COSMOSDB_CONTAINER_NAME'
+          value: CosmosDBContainerName
+        }
       ]
     }
   }
 }
+
 
 output name string = functionApp.name

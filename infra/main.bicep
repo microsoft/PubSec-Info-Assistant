@@ -22,6 +22,7 @@ param azureOpenAIServiceKey string
 param cognitiveServicesAccountName string = ''
 param cognitiveServicesSkuName string = 'S0'
 param cognitiveServiesForSearchName string = ''
+param cosmosdbName string = ''
 param formRecognizerName string = ''
 param formRecognizerSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
@@ -231,6 +232,19 @@ module storage 'core/storage/storage-account.bicep' = {
   }
 }
 
+module cosmosdb 'core/db/cosmosdb.bicep' = {
+  name: 'cosmosdb'
+  scope: rg
+  params: {
+    name: !empty(cosmosdbName) ? cosmosdbName : '${prefix}-${abbrs.cosmosDBAccounts}${randomString}'
+    location: location
+    tags: tags
+    databaseName: 'statusdb'
+    containerName: 'statuscontainer'
+  }
+}
+
+
 // Function App for the backend
 module functions 'core/function/function.bicep' = {
   name: 'functions'
@@ -251,10 +265,15 @@ module functions 'core/function/function.bicep' = {
     blobStorageAccountLogContainerName: functionLogsContainerName
     formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
     formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
+    CosmosDBEndpointURL: cosmosdb.outputs.CosmosDBEndpointURL
+    CosmosDBKey: cosmosdb.outputs.CosmosDBKey
+    CosmosDBDatabaseName: cosmosdb.outputs.CosmosDBDatabaseName
+    CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
   }
   dependsOn: [
     appServicePlan
     storage
+    cosmosdb
   ]
 }
 

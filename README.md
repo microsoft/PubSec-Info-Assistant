@@ -14,6 +14,8 @@ This sample demonstrates a few approaches for creating ChatGPT-like experiences 
 
 ![Chat screen](docs/images/chatscreen.png)
 
+For a detailed review see our [Features](/docs/features/features.md) page.
+
 # Getting Started
 
 ---

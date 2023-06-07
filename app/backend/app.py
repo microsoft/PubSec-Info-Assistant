@@ -1,6 +1,5 @@
 import os
 import mimetypes
-import time
 import logging
 import openai
 import urllib.parse
@@ -67,7 +66,7 @@ ask_approaches = {
 }
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_SERVICE, AZURE_OPENAI_SERVICE_KEY, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT)
+    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_SERVICE, AZURE_OPENAI_SERVICE_KEY, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT, blob_client)
 }
 
 app = Flask(__name__)
@@ -90,7 +89,6 @@ def content_file(path):
     print("Using mime type: " + mime_type + "for file with extension: " + file_extension[0])
     return blob.readall(), 200, {"Content-Type": mime_type, "Content-Disposition": f"inline; filename={urllib.parse.quote(path, safe='')}"}
 
-    
 @app.route("/ask", methods=["POST"])
 def ask():
     approach = request.json["approach"]

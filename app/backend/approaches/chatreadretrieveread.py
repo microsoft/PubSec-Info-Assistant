@@ -3,7 +3,11 @@ from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
 from approaches.approach import Approach
 from text import nonewlines
+from datetime import datetime, timedelta
 import urllib.parse
+import json
+import logging
+from azure.storage.blob import BlobServiceClient, generate_account_sas, ResourceTypes, AccountSasPermissions
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
 # top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion 
@@ -43,12 +47,13 @@ class ChatReadRetrieveReadApproach(Approach):
     Search query:
     """
 
-    def __init__(self, search_client: SearchClient, oai_service_name: str, oai_service_key: str, chatgpt_deployment: str, gpt_deployment: str, sourcepage_field: str, content_field: str):
+    def __init__(self, search_client: SearchClient, oai_service_name: str, oai_service_key: str, chatgpt_deployment: str, gpt_deployment: str, sourcepage_field: str, content_field: str, blob_client: BlobServiceClient):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
         self.gpt_deployment = gpt_deployment
         self.sourcepage_field = sourcepage_field
         self.content_field = content_field
+        self.blob_client = blob_client
        
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
@@ -108,7 +113,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 results.append(f"File{idx} " + "| " + nonewlines(doc[self.content_field]))
                 data_points.append("/".join(urllib.parse.unquote(doc[self.sourcepage_field]).split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
             # add the "FileX" monikor and full file name to the citation lookup
-            citation_lookup[f"File{idx}"] = urllib.parse.unquote(doc[self.sourcepage_field])
+            citation_lookup[f"File{idx}"] = {'citation': urllib.parse.unquote(doc[self.sourcepage_field]), 'source_path': self.get_source_file_name(doc[self.content_field]), 'page_number': self.get_first_page_num_for_chunk(doc[self.content_field])}
         # create a single string of all the results to be used in the prompt
         content = "\n ".join(results)
 
@@ -186,5 +191,29 @@ class ChatReadRetrieveReadApproach(Approach):
             return "Provide detailed and comprehensive answers in no more than 2-3 paragraphs."
         else:
             return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
+        
+    # Parse the search document content for "file_name" attribute
+    def get_source_file_name(self, content: str) -> str:
+        try:
+            source_path = urllib.parse.unquote(json.loads(content)['file_name'])
+            sas_token = generate_account_sas(self.blob_client.account_name, self.blob_client.credential.account_key, 
+                                     resource_types=ResourceTypes(object=True,service=True,container=True), 
+                                     permission=AccountSasPermissions(read=True,write=True,list=True,delete=False,add=True,create=True,update=True,process=False), 
+                                     expiry=datetime.utcnow() + timedelta(hours=1))
+            return self.blob_client.url + source_path + "?" + sas_token
+        except Exception as e:
+            logging.exception("Unable to parse source file name: " + str(e) + "")
+            return ""
+    
+    # Parse the search document content for the first page from the "pages" attribute
+    def get_first_page_num_for_chunk(self, content: str) -> str:
+        try:
+            page_num = str(json.loads(content)['pages'][0])
+            if page_num is None:
+                return "0"
+            return page_num
+        except Exception as e:
+            logging.exception("Unable to parse first page num: " + str(e) + "")
+            return "0"
         
       

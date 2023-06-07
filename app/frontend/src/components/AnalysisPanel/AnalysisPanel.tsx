@@ -12,16 +12,20 @@ interface Props {
     activeTab: AnalysisPanelTabs;
     onActiveTabChanged: (tab: AnalysisPanelTabs) => void;
     activeCitation: string | undefined;
+    sourceFile: string | undefined;
+    pageNumber: string | undefined;
     citationHeight: string;
     answer: AskResponse;
 }
 
 const pivotItemDisabledStyle = { disabled: true, style: { color: "grey" } };
 
-export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeight, className, onActiveTabChanged }: Props) => {
+export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, pageNumber, citationHeight, className, onActiveTabChanged }: Props) => {
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points.length;
     const isDisabledCitationTab: boolean = !activeCitation;
+    // the first split on ? separates the file from the sas token, then the second split on . separates the file extension
+    const isSourceFilePdf: boolean = sourceFile?.split("?")[0].split(".").pop() === "pdf";
 
     const sanitizedThoughts = DOMPurify.sanitize(answer.thoughts!);
 
@@ -50,7 +54,19 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, citationHeigh
                 headerText="Citation"
                 headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
             >
-                <iframe title="Citation" src={activeCitation} width="100%" height={citationHeight} />
+                <Pivot className={className}>
+                    <PivotItem itemKey="indexedFile" headerText="Document Section">
+                        <iframe title="Document Section" src={activeCitation} width="100%" height={citationHeight} />
+                    </PivotItem>
+                    <PivotItem itemKey="rawFile" headerText="Document">
+                        {isSourceFilePdf ? (
+                            //use object tag for pdfs because iframe does not support page numbers
+                            <object data={sourceFile + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
+                        ) : (
+                            <iframe title="Source File" src={sourceFile} width="100%" height={citationHeight} />
+                        )}
+                    </PivotItem>
+                </Pivot>
             </PivotItem>
         </Pivot>
     );

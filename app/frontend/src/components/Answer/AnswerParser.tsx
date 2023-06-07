@@ -4,11 +4,15 @@ import { getCitationFilePath } from "../../api";
 type HtmlParsedAnswer = {
     answerHtml: string;
     citations: string[];
+    sourceFiles: {};
+    pageNumbers: {};
     followupQuestions: string[];
 };
 
-export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitationClicked: (citationFilePath: string) => void): HtmlParsedAnswer {
+export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
     const citations: string[] = [];
+    const sourceFiles: {} = {};
+    const pageNumbers: {} = {};
     const followupQuestions: string[] = [];
 
     // Extract any follow-up questions that might be in the answer
@@ -22,7 +26,6 @@ export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitatio
 
     // Split the answer into parts, where the odd parts are citations
     const parts = parsedAnswer.split(/\[([^\]]+)\]/g);
-
     const fragments: string[] = parts.map((part, index) => {
         if (index % 2 === 0) {
             // Even parts are just text
@@ -42,16 +45,23 @@ export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitatio
                 } else {
                     // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                     // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                    citations.push((citation_lookup as any)[part].split("/").slice(4).join("/"));
+                    let citationShortName: string = (citation_lookup as any)[part].citation.split("/").slice(4).join("/");
+                    citations.push(citationShortName);
+                    // switch these to the citationShortName as key to allow dynamic lookup of the source path and page number
+                    // The "FileX" moniker will not be used beyond this point in the UX code
+                    (sourceFiles as any)[citationShortName] = ((citation_lookup as any)[part].source_path);
+                    (pageNumbers as any)[citationShortName] = ((citation_lookup as any)[part].page_number);
                     citationIndex = citations.length;
                 }
-
-                const path = getCitationFilePath((citation_lookup as any)[part]);
+                
+                const path = getCitationFilePath((citation_lookup as any)[part].citation);
+                const sourcePath = (citation_lookup as any)[part].source_path;
+                const pageNumber = (citation_lookup as any)[part].page_number;
 
                 return renderToStaticMarkup(
                     // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                     // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                    <a className="supContainer" title={(citation_lookup as any)[part].split("/").slice(4).join("/")} onClick={() => onCitationClicked(path)}>
+                    <a className="supContainer" title={(citation_lookup as any)[part].citation.split("/").slice(4).join("/")} onClick={() => onCitationClicked(path, sourcePath, pageNumber)}>
                         <sup>{citationIndex}</sup>
                     </a>
                 );
@@ -62,6 +72,8 @@ export function parseAnswerToHtml(answer: string, citation_lookup: {}, onCitatio
     return {
         answerHtml: fragments.join(""),
         citations,
+        sourceFiles,
+        pageNumbers,
         followupQuestions
     };
 }

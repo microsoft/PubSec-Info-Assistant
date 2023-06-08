@@ -206,8 +206,9 @@ def get_filename_and_extension(path):
     """ Function to return the file name & type"""
     # Split the path into base and extension
     base_name = os.path.basename(path)
-    file_name, file_extension = os.path.splitext(base_name)
-    return file_name, file_extension
+    directory = os.path.dirname(path)
+    file_name, file_extension = os.path.splitext(base_name)    
+    return file_name, file_extension, directory
 
 
 def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, section_name, title_name):
@@ -223,9 +224,9 @@ def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_
         'content': chunk_text                       
     }                
     # Get path and file name minus the root container
-    file_name, file_extension = get_filename_and_extension(myblob.name)
+    file_name, file_extension, file_directory = get_filename_and_extension(myblob.name)
     # Get the folders to use when creating the new files        
-    folder_set = file_name + "." + file_extension + "/"
+    folder_set = file_directory + "/" + file_name + file_extension + "/"
     blob_service_client = BlobServiceClient(
         f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
     json_str = json.dumps(chunk_output, indent=2)
@@ -360,17 +361,15 @@ def build_document_map_pdf(myblob, result):
     
     # Output document map to log container
     json_str = json.dumps(document_map, indent=2)
-    base_filename = os.path.basename(myblob.name)
-    file_name, file_extension = get_filename_and_extension(os.path.basename(base_filename))
+    file_name, file_extension, file_directory  = get_filename_and_extension(myblob.name)
     output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-    write_blob(azure_blob_log_storage_container, json_str, output_filename)
+    write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
     
     # Output FR result to log container
     result_dict = result.to_dict() 
     json_str = json.dumps(result_dict, indent=2)
-    base_filename = os.path.basename(myblob.name)
-    output_filename = os.path.splitext(os.path.basename(base_filename))[0] + '_FR_Result' + file_extension + ".json"
-    write_blob(azure_blob_log_storage_container, json_str, output_filename)
+    output_filename =  file_name + '_FR_Result' + file_extension + ".json"
+    write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
     
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      
@@ -420,9 +419,9 @@ def build_document_map_html(myblob, html):
     # Output document map to log container
     json_str = json.dumps(document_map, indent=2)
     base_filename = os.path.basename(myblob.name)
-    file_name, file_extension = get_filename_and_extension(os.path.basename(base_filename))
+    file_name, file_extension, file_directory  = get_filename_and_extension(os.path.basename(base_filename))
     output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-    write_blob(azure_blob_log_storage_container, json_str, output_filename)
+    write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
   
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      

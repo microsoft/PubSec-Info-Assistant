@@ -29,6 +29,8 @@ deploy-search-indexes: extract-env ## Deploy search indexes
 extract-env-debug: ## Extract infrastructure.debug.env file from BICEP output
 	@./scripts/json-to-env.debug.sh < infra_output.json > ./scripts/environments/infrastructure.debug.env
 
+extract-env-debug-functions: ## Extract local.settings.json to debug functions from BICEP output
+	@./scripts/json-to-local.debug.sh < infra_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
 check-subscription:

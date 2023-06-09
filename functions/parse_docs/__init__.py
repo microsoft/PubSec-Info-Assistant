@@ -59,10 +59,10 @@ def main(myblob: func.InputStream):
                  f"Blob Size: {myblob.length} bytes")
     statusLog.upsert_document('Parser function started')    
     try:
-        result = 10/0
         analyze_layout(myblob)
     except Exception as e:
         statusLog.upsert_document(f"An error occurred - {str(e)}")
+        raise
     
     logging.info(f"chunking complete for file {myblob.name}")
 

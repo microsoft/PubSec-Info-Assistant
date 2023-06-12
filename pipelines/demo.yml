@@ -1,7 +1,13 @@
 trigger: none
-  batch: true
-  branches:
-    include: [ main ]
+
+parameters:
+  - name: environment
+    displayName: 'Demo Environment'
+    type: string
+    default: 'demo-red'
+    values:
+      - demo-red
+      - demo-blue
 
 pr: none
 
@@ -9,8 +15,21 @@ stages:
 - stage: Deploy
   jobs:
 
-  - deployment: Demo
-    environment: demo-ia
+  - deployment: Deploy to demo-red
+    environment: demo-red
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+        runOnce:    #rolling, canary are the other strategies that are supported
+          deploy:
+            steps:
+            - template: templates/deploy-template.yml
+
+jobs:
+
+  - deployment: Deploy to demo-blue
+    environment: demo-blue
     timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-latest'

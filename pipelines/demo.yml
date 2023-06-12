@@ -12,7 +12,7 @@ parameters:
 pr: none
 
 stages:
-- stage: Deploy-red
+- stage: Deployred
   jobs:
 
   - deployment: Deploy to demo-red
@@ -26,7 +26,7 @@ stages:
             steps:
             - template: templates/deploy-template.yml
 
-- stage: Deploy-blue
+- stage: Deployblue
   jobs:
 
   - deployment: Deploy to demo-blue

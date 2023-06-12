@@ -11,11 +11,16 @@ parameters:
 
 pr: none
 
+if: ${{ eq(parameters.environment, 'demo-red') }} || ${{ eq(parameters.environment, 'demo-blue') }}
+
 stages:
-- stage: Deployred
+- stage: DeployDemoRed
+  displayName: 'Deploy to Demo Red'
+  condition: eq(parameters.environment, 'demo-red')
+
   jobs:
 
-  - deployment: 'Demo Environment'
+  - deployment: 'DeployRed'
     environment: demo-red
     timeoutInMinutes: 120
     pool:
@@ -26,10 +31,12 @@ stages:
             steps:
             - template: templates/deploy-template.yml
 
-- stage: Deployblue
+- stage: DeployDemoBlue
+  displayName: 'Deploy to $(environment)'
+  condition: eq(parameters.environment, 'demo-blue')
   jobs:
 
-  - deployment: 'Demo Environment'
+  - deployment: 'DemoBlue'
     environment: demo-blue
     timeoutInMinutes: 120
     pool:

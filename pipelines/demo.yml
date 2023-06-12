@@ -4,17 +4,17 @@ parameters:
   - name: poc
     displayName: 'POC Environment'
     type: string
-    default: 'demo-red'
+    default: 'red'
     values:
-      - demo-red
-      - demo-blue
+      - red
+      - blue
 
 pr: none
 
 stages:
 - stage: DeployDemoRed
   displayName: 'Deploy to Demo Red'
-  condition: eq(parameters.environment, 'demo-red')
+  condition: eq(parameters.environment, 'red')
 
   jobs:
 
@@ -31,7 +31,7 @@ stages:
 
 - stage: DeployDemoBlue
   displayName: 'Deploy to Demo Blue'
-  condition: eq(parameters.environment, 'demo-blue')
+  condition: eq(parameters.environment, 'blue')
   jobs:
 
   - deployment: 'DemoBlue'

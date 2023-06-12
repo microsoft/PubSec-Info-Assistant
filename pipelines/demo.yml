@@ -11,8 +11,6 @@ parameters:
 
 pr: none
 
-if: ${{ eq(parameters.environment, 'demo-red') }} || ${{ eq(parameters.environment, 'demo-blue') }}
-
 stages:
 - stage: DeployDemoRed
   displayName: 'Deploy to Demo Red'

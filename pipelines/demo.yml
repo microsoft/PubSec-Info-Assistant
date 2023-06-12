@@ -1,8 +1,8 @@
 trigger: none
 
 parameters:
-  - name: poc
-    displayName: 'POC Environment'
+  - name: Demo
+    displayName: 'Select Demo Environment'
     type: string
     default: 'red'
     values:
@@ -12,29 +12,13 @@ parameters:
 pr: none
 
 stages:
-- stage: DeployDemoRed
-  displayName: 'Deploy to Demo Red'
+- stage: Deploy_Demo_Environment
+  displayName: 'Deploy to $(Demo)'
 
   jobs:
 
-  - deployment: DeployRed
-    environment: demo-red
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-        runOnce:    #rolling, canary are the other strategies that are supported
-          deploy:
-            steps:
-            - template: templates/deploy-template.yml
-
-- stage: DeployDemoBlue
-  displayName: 'Deploy to Demo Blue'
-
-  jobs:
-
-  - deployment: DemoBlue
-    environment: demo-blue
+  - deployment: Deploy
+    environment: demo-$(Demo)
     timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-latest'

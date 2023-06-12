@@ -12,7 +12,7 @@ parameters:
 pr: none
 
 stages:
-- stage: Deploy_Demo_Environment
+- stage: DeployDemoEnvironment
   displayName: 'Deploy to $(Demo)'
 
   jobs:

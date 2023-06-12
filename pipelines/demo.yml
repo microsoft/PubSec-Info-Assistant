@@ -14,11 +14,10 @@ pr: none
 stages:
 - stage: DeployDemoRed
   displayName: 'Deploy to Demo Red'
-  condition: eq(parameters.environment, red)
 
   jobs:
 
-  - deployment: 'DeployRed'
+  - deployment: DeployRed
     environment: demo-red
     timeoutInMinutes: 120
     pool:
@@ -31,10 +30,10 @@ stages:
 
 - stage: DeployDemoBlue
   displayName: 'Deploy to Demo Blue'
-  condition: eq(parameters.environment, blue)
+
   jobs:
 
-  - deployment: 'DemoBlue'
+  - deployment: DemoBlue
     environment: demo-blue
     timeoutInMinutes: 120
     pool:

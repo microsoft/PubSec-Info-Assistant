@@ -1,8 +1,8 @@
 trigger: none
 
 parameters:
-  - name: environment
-    displayName: 'Demo Environment'
+  - name: poc
+    displayName: 'POC Environment'
     type: string
     default: 'demo-red'
     values:

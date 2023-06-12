@@ -38,3 +38,5 @@ The Analysis Panel in the UX allows the user to explore three details about the 
 View the details of the [Analysis Panel](./ux_analysispanel.md) feature or you can click on each section to get more specifics of that detail tab.
 
 ### Developer Settings
+### Debugging functions
+Check out hoe to [Debug the Azure functions locally in VSCode](https://learn.microsoft.com/azure/cognitive-services/openai/overview)

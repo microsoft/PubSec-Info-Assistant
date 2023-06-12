@@ -15,7 +15,7 @@ stages:
 - stage: Deployred
   jobs:
 
-  - deployment: Deploy to demo-red
+  - deployment: 'Demo Environment'
     environment: demo-red
     timeoutInMinutes: 120
     pool:
@@ -29,7 +29,7 @@ stages:
 - stage: Deployblue
   jobs:
 
-  - deployment: Deploy to demo-blue
+  - deployment: 'Demo Environment'
     environment: demo-blue
     timeoutInMinutes: 120
     pool:

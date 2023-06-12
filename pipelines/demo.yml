@@ -30,7 +30,7 @@ stages:
             - template: templates/deploy-template.yml
 
 - stage: DeployDemoBlue
-  displayName: 'Deploy to $(environment)'
+  displayName: 'Deploy to Demo Blue'
   condition: eq(parameters.environment, 'demo-blue')
   jobs:
 

@@ -5,12 +5,16 @@ import base64
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from enum import Enum
 
+
 class State(Enum):
     STARTED = "Processing"
     COMPLETE = "Complete"
     ERROR = "Error"
 
-
+class StatusClassification(Enum):
+    DEBUG = "Debug"
+    INFO = "Info"
+    ERROR = "Error"
 
 
 class StatusLog:
@@ -50,9 +54,8 @@ class StatusLog:
 
     @state_description.setter
     def state_description(self, value):
-        self._state_description = value
+        self._state_description = value               
                
-        
         
     def encode_document_id(self, document_id):
         """ encode a path/file name to remove unsafe chars for a cosmos db id """
@@ -60,7 +63,7 @@ class StatusLog:
         return safe_id
         
 
-    def upsert_document(self, document_path, status, fresh_start=False):
+    def upsert_document(self, document_path, status, status_classification: StatusClassification, fresh_start=False):
         """ Function to upsert a status item for a specified id """
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
@@ -87,7 +90,8 @@ class StatusLog:
             status_updates = json_document["status_updates"]     
             new_item = {
                 "status": status,
-                "timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "status_classification": str(status_classification.value)
             }
             status_updates.append(new_item)
 
@@ -103,7 +107,8 @@ class StatusLog:
                 "status_updates": [
                     {
                         "status": status,
-                        "timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                        "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        "status_classification": str(status_classification.value)
                     }
                 ]
             }

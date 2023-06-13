@@ -21,7 +21,7 @@ import nltk
 nltk.download('words')
 nltk.download('punkt')
 # from shared_code import status_log as Status
-from shared_code.status_log import StatusLog, State
+from shared_code.status_log import StatusLog, State, StatusClassification
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -49,22 +49,22 @@ def main(myblob: func.InputStream):
     
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
     statusLog.state = State.STARTED
-    statusLog.upsert_document(myblob.name, 'File Uploaded', True)
+    statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, True)
     
     logging.info(f"Python blob trigger function processed blob \n"
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
-    statusLog.upsert_document(myblob.name, 'Parser function started')    
+    statusLog.upsert_document(myblob.name, 'Parser function started', StatusClassification.INFO)    
     try:
         analyze_layout(myblob)
         statusLog.state = State.COMPLETE
         statusLog.state_description = ""
-        statusLog.upsert_document(myblob.name, 'Processing complete')
+        statusLog.upsert_document(myblob.name, 'Processing complete', StatusClassification.INFO)
         
     except Exception as e:
         statusLog.state = State.ERROR
         statusLog.state_description = str(e)
-        statusLog.upsert_document(myblob.name, f"An error occurred - {str(e)}")
+        statusLog.upsert_document(myblob.name, f"An error occurred - {str(e)}", StatusClassification.ERROR)
         raise
     
 
@@ -487,7 +487,7 @@ def analyze_layout(myblob: func.InputStream):
     file_extension = os.path.splitext(myblob.name)[1][1:].lower()
     
     if file_extension == 'pdf':
-        statusLog.upsert_document(myblob.name, 'Analyzing PDF')
+        statusLog.upsert_document(myblob.name, 'Analyzing PDF', StatusClassification.INFO)
         # Process pdf file        
         # [START extract_layout]
         logging.info("PDF file detected")        
@@ -497,7 +497,7 @@ def analyze_layout(myblob: func.InputStream):
         document_analysis_client = DocumentAnalysisClient(
             endpoint=endpoint, credential=AzureKeyCredential(key)
         ) 
-        statusLog.upsert_document(myblob.name, 'Calling Form Recognizer')               
+        statusLog.upsert_document(myblob.name, 'Calling Form Recognizer', StatusClassification.INFO)               
         if TARGET_PAGES == "ALL":
             poller = document_analysis_client.begin_analyze_document_from_url(
                 "prebuilt-layout", document_url=source_blob_path
@@ -507,31 +507,31 @@ def analyze_layout(myblob: func.InputStream):
                 "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES, api_version=FR_API_VERSION
             )        
         result = poller.result()
-        statusLog.upsert_document(myblob.name, 'Form Recognizer response received')
+        statusLog.upsert_document(myblob.name, 'Form Recognizer response received', StatusClassification.INFO)
         logging.info(f"Form Recognizer has returned results \n")
-        statusLog.upsert_document(myblob.name, 'Starting document map build')
+        statusLog.upsert_document(myblob.name, 'Starting document map build', StatusClassification.INFO)
         document_map = build_document_map_pdf(myblob, result)
-        statusLog.upsert_document(myblob.name, 'Starting document map build complete, starting chunking')
+        statusLog.upsert_document(myblob.name, 'Starting document map build complete, starting chunking', StatusClassification.INFO)
         build_chunks(document_map, myblob)
-        statusLog.upsert_document(myblob.name, 'Chunking complete')    
+        statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)    
         
     elif file_extension in ['htm', 'html']:
         # Process html file
         logging.info("PDF file detected")
-        statusLog.upsert_document(myblob.name, 'Analyzing HTML')
+        statusLog.upsert_document(myblob.name, 'Analyzing HTML', StatusClassification.INFO)
         # Download the content from the URL
         response = requests.get(source_blob_path)
         if response.status_code == 200:
             html = response.text   
-            statusLog.upsert_document(myblob.name, 'Starting document map build')
+            statusLog.upsert_document(myblob.name, 'Starting document map build', StatusClassification.INFO)
             document_map = build_document_map_html(myblob, html)
-            statusLog.upsert_document(myblob.name, 'Document map build complete, starting chunking')
+            statusLog.upsert_document(myblob.name, 'Document map build complete, starting chunking', StatusClassification.INFO)
             build_chunks(document_map, myblob) 
-            statusLog.upsert_document(myblob.name, 'Chunking complete')
+            statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)
         
     elif file_extension in ['docx']:      
         logging.info("Office file detected")
-        statusLog.upsert_document(myblob.name, 'Analyzing DocX')
+        statusLog.upsert_document(myblob.name, 'Analyzing DocX', StatusClassification.INFO)
         response = requests.get(source_blob_path)
         # Ensure the request was successful
         response.raise_for_status()
@@ -539,13 +539,13 @@ def analyze_layout(myblob: func.InputStream):
         docx_file = BytesIO(response.content)
         # Convert the downloaded Word document to HTML
         result = mammoth.convert_to_html(docx_file)
-        statusLog.upsert_document(myblob.name, 'HTML generated from DocX')
+        statusLog.upsert_document(myblob.name, 'HTML generated from DocX', StatusClassification.INFO)
         html = result.value # The generated HTML
-        statusLog.upsert_document(myblob.name, 'Starting document map build')
+        statusLog.upsert_document(myblob.name, 'Starting document map build', StatusClassification.INFO)
         document_map = build_document_map_html(myblob, html)
-        statusLog.upsert_document(myblob.name, 'Document map build complete, starting chunking')
+        statusLog.upsert_document(myblob.name, 'Document map build complete, starting chunking', StatusClassification.INFO)
         build_chunks(document_map, myblob) 
-        statusLog.upsert_document(myblob.name, 'Chunking complete')
+        statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)
 
            
         
@@ -553,5 +553,5 @@ def analyze_layout(myblob: func.InputStream):
         # Unknown file type
         logging.info("Unknown file type")
  
-    statusLog.upsert_document(myblob.name, 'Chunking complete')
+    statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)
     logging.info(f"Done!\n")

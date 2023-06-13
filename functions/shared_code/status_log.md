@@ -11,59 +11,68 @@ Finally you will need to supply 4 properties to the class before you can call th
 
 ````json
 {
-{
-    "id": "dXBsb2FkL25hbi9QZXJrc1BsdXMucGRm",
-    "file_path": "upload/nan/PerksPlus.pdf",
-    "file_name": "PerksPlus.pdf",
+    "id": "dXBsb2FkL25hbi90ZXN0X2Nhc2UucGRm",
+    "file_path": "upload/nan/test_case.pdf",
+    "file_name": "test_case.pdf",
     "state": "Complete",
     "state_description": "",
-    "state_timestamp": "2023-06-13 20:47:06",
+    "state_timestamp": "2023-06-13 21:40:18",
     "status_updates": [
         {
             "status": "File Uploaded",
-            "timestamp": "2023-06-13 20:45:13"
+            "status_timestamp": "2023-06-13 21:40:05",
+            "status_classification": "Info"
         },
         {
             "status": "Parser function started",
-            "timestamp": "2023-06-13 20:45:13"
+            "status_timestamp": "2023-06-13 21:40:05",
+            "status_classification": "Info"
         },
         {
             "status": "Analyzing PDF",
-            "timestamp": "2023-06-13 20:45:37"
+            "status_timestamp": "2023-06-13 21:40:05",
+            "status_classification": "Info"
         },
         {
             "status": "Calling Form Recognizer",
-            "timestamp": "2023-06-13 20:45:38"
+            "status_timestamp": "2023-06-13 21:40:06",
+            "status_classification": "Info"
         },
         {
             "status": "Form Recognizer response received",
-            "timestamp": "2023-06-13 20:45:45"
+            "status_timestamp": "2023-06-13 21:40:18",
+            "status_classification": "Info"
         },
         {
             "status": "Starting document map build",
-            "timestamp": "2023-06-13 20:45:45"
+            "status_timestamp": "2023-06-13 21:40:18",
+            "status_classification": "Info"
         },
         {
             "status": "Starting document map build complete, starting chunking",
-            "timestamp": "2023-06-13 20:45:49"
+            "status_timestamp": "2023-06-13 21:40:21",
+            "status_classification": "Info"
         },
         {
             "status": "Chunking complete",
-            "timestamp": "2023-06-13 20:45:52"
+            "status_timestamp": "2023-06-13 21:40:23",
+            "status_classification": "Info"
         },
         {
             "status": "Chunking complete",
-            "timestamp": "2023-06-13 20:45:52"
+            "status_timestamp": "2023-06-13 21:40:23",
+            "status_classification": "Info"
         },
         {
             "status": "Processing complete",
-            "timestamp": "2023-06-13 20:47:06"
+            "status_timestamp": "2023-06-13 21:40:23",
+            "status_classification": "Info"
         }
-    ]
-    "_rid": "apU1AMBOkxELAAAAAAAAAA==",
-    "_self": "dbs/apU1AA==/colls/apU1AMBOkxE=/docs/apU1AMBOkxELAAAAAAAAAA==/",
-    "_etag": "\"a701b77c-0000-0d00-0000-647f98db0000\"",
+    ],
+    "_rid": "u05JAIH9a5A3AAAAAAAAAA==",
+    "_self": "dbs/u05JAA==/colls/u05JAIH9a5A=/docs/u05JAIH9a5A3AAAAAAAAAA==/",
+    "_etag": "\"6000c1b2-0000-0d00-0000-6488d4390000\"",
     "_attachments": "attachments/",
-    "_ts": 1686083803
+    "_ts": 1686688825
 }
 ````

@@ -5,7 +5,8 @@
   * Having a conversation with your Private Data
   * Ask your data
   * [Analysis Panel](#analysis-panel)
-  * Developer Settings
+* [Developer Settings](#developer-settings)
+  * [Debugging Functions](#debugging-functions)
 
 ---
 
@@ -37,6 +38,8 @@ The Analysis Panel in the UX allows the user to explore three details about the 
 
 View the details of the [Analysis Panel](./ux_analysispanel.md) feature or you can click on each section to get more specifics of that detail tab.
 
-### Developer Settings
+## Developer Settings
+
 ### Debugging functions
-Check out hoe to [Debug the Azure functions locally in VSCode](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
+
+Check out how to [Debug the Azure functions locally in VSCode](https://learn.microsoft.com/azure/cognitive-services/openai/overview)

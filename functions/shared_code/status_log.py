@@ -93,21 +93,26 @@ class StatusLog:
             from_time_string = str(from_time.strftime('%Y-%m-%d %H:%M:%S'))
             conditions.append(f"c.start_timestamp > '{from_time_string}'")
 
-        if status_query_level == StatusQueryLevel.CONCISE:
-            # select info & error class states, for concise, all for verbose
-            conditions.append(f"(c.state = '{StatusClassification.INFO.value}' OR c.state = '{StatusClassification.ERROR.value}')")            
+        # if status_query_level == StatusQueryLevel.CONCISE:
+        #     # select info & error class states, for concise, all for verbose
+        #     conditions.append(f"(c.state = '{StatusClassification.INFO.value}' OR c.state = '{StatusClassification.ERROR.value}')")            
             
         if document_id != "":
             conditions.append(f"c.id = '{self.encode_document_id(document_id)}'")
                 
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)
-               
 
         items = list(self.container.query_items(
             query=query_string,
             enable_cross_partition_query=True
         ))
+                            
+        # Now we have the documents, remove the status updates that are considered 'non-verbose' if required 
+        if status_query_level == StatusQueryLevel.CONCISE:
+            for item in items:
+                # Filter out status updates that have status_classification == "debug"
+                item['status_updates'] = [update for update in item['status_updates'] if update['status_classification'] != 'Debug']
 
         return items
        

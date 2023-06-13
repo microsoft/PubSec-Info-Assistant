@@ -43,6 +43,12 @@ param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
+param chunkTargetSize string = '750'
+param realWordsTarget string = '0.1'
+param targetPages string = 'ALL'
+param xyRoundingFactor string = '1'
+param formRecognizerApiVersion string = '2023-02-28 (Preview)'
+
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -269,6 +275,11 @@ module functions 'core/function/function.bicep' = {
     CosmosDBKey: cosmosdb.outputs.CosmosDBKey
     CosmosDBDatabaseName: cosmosdb.outputs.CosmosDBDatabaseName
     CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
+    xyRoundingFactor: xyRoundingFactor
+    chunkTargetSize: chunkTargetSize
+    realWordsTarget: realWordsTarget
+    targetPages: targetPages
+    formRecognizerApiVersion: formRecognizerApiVersion
   }
   dependsOn: [
     appServicePlan
@@ -376,3 +387,20 @@ output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey
 output AZURE_FUNCTION_APP_NAME string = functions.outputs.name
+output AZURE_COSMOSDB_URL string = cosmosdb.outputs.CosmosDBEndpointURL
+output AZURE_COSMOSDB_KEY string = cosmosdb.outputs.CosmosDBKey
+output AZURE_COSMOSDB_DATABASE_NAME string = cosmosdb.outputs.CosmosDBDatabaseName
+output AZURE_COSMOSDB_CONTAINER_NAME string = cosmosdb.outputs.CosmosDBContainerName
+output AZURE_FORM_RECOGNIZER_ENDPOINT string = formrecognizer.outputs.formRecognizerAccountEndpoint
+output AZURE_FORM_RECOGNIZER_KEY string = formrecognizer.outputs.formRecognizerAccountKey
+output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
+output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
+output XY_ROUNDING_FACTOR string = xyRoundingFactor
+output CHUNK_TARGET_SIZE string = chunkTargetSize
+output REAL_WORDS_TARGET string = realWordsTarget
+output FR_API_VERSION string = formRecognizerApiVersion
+output TARGET_PAGES string = targetPages
+output infoasststore_STORAGE string = storage.outputs.connectionString
+output AzureWebJobsStorage string = storage.outputs.connectionString
+
+

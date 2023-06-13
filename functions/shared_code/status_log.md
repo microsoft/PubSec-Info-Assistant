@@ -7,51 +7,59 @@ Currently the status logger provides a class, StatusLog, with the following func
 - **upsert_document** - this function will insert or update a status entry in the Cosmos DB instance if you supply the document id and the status you wish to log. Please note the document id is generated using the encode_document_id function
 - **encode_document_id** - this function is used to generate the id from the file name by the upsert_document function initially. It can also be called to retrieve the encoded id of a file if you pass in the file name. The id is used as the partition key.
 
-Finally you will need to supply 4 properties to the class before you can call the above functions. These are COSMOSDB_URL, COSMOSDB_KEY, COSMOSDB_DATABASE_NAME and COSMOSDB_CONTAINER_NAME.
+Finally you will need to supply 4 properties to the class before you can call the above functions. These are COSMOSDB_URL, COSMOSDB_KEY, COSMOSDB_DATABASE_NAME and COSMOSDB_CONTAINER_NAME. The resulting json includes verbos status updates but also a snapshot status for the end user UI, specifically the state, state_description and state_timestamp. These values are just select high level state snapshots, including 'Processing', 'Error' and 'Complete'.
 
 ````json
 {
-    "id": "dXBsb2FkL3dhci1hbmQtcGVhY2UucGRm",
-    "file_path": "upload/war-and-peace.pdf",
-    "file_name": "war-and-peace.pdf",
-    "StatusUpdates": [
+{
+    "id": "dXBsb2FkL25hbi9QZXJrc1BsdXMucGRm",
+    "file_path": "upload/nan/PerksPlus.pdf",
+    "file_name": "PerksPlus.pdf",
+    "state": "Complete",
+    "state_description": "",
+    "state_timestamp": "2023-06-13 20:47:06",
+    "status_updates": [
         {
             "status": "File Uploaded",
-            "datetime": "2023-06-06 21:33:09"
+            "timestamp": "2023-06-13 20:45:13"
         },
         {
             "status": "Parser function started",
-            "datetime": "2023-06-06 21:33:12"
+            "timestamp": "2023-06-13 20:45:13"
         },
         {
             "status": "Analyzing PDF",
-            "datetime": "2023-06-06 21:33:14"
+            "timestamp": "2023-06-13 20:45:37"
         },
         {
             "status": "Calling Form Recognizer",
-            "datetime": "2023-06-06 21:33:16"
+            "timestamp": "2023-06-13 20:45:38"
         },
         {
             "status": "Form Recognizer response received",
-            "datetime": "2023-06-06 21:33:26"
+            "timestamp": "2023-06-13 20:45:45"
         },
         {
             "status": "Starting document map build",
-            "datetime": "2023-06-06 21:33:28"
+            "timestamp": "2023-06-13 20:45:45"
         },
         {
             "status": "Starting document map build complete, starting chunking",
-            "datetime": "2023-06-06 21:33:36"
+            "timestamp": "2023-06-13 20:45:49"
         },
         {
             "status": "Chunking complete",
-            "datetime": "2023-06-06 21:36:42"
+            "timestamp": "2023-06-13 20:45:52"
         },
         {
-            "status": "File processing complete",
-            "datetime": "2023-06-06 21:36:44"
+            "status": "Chunking complete",
+            "timestamp": "2023-06-13 20:45:52"
+        },
+        {
+            "status": "Processing complete",
+            "timestamp": "2023-06-13 20:47:06"
         }
-    ],
+    ]
     "_rid": "apU1AMBOkxELAAAAAAAAAA==",
     "_self": "dbs/apU1AA==/colls/apU1AMBOkxE=/docs/apU1AMBOkxELAAAAAAAAAA==/",
     "_etag": "\"a701b77c-0000-0d00-0000-647f98db0000\"",

@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { FilePicker } from "../../components/filepicker/file-picker";
 import styles from "./Upload.module.css";
 

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 """ Python function to read PDF files and extract text using Azure Form Recognizer"""
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient

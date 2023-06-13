@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { renderToStaticMarkup } from "react-dom/server";
 import { getCitationFilePath } from "../../api";
 

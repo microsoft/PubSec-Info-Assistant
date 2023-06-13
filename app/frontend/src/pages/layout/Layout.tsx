@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Outlet, NavLink, Link } from "react-router-dom";
 
 import openai from "../../assets/openai.svg";

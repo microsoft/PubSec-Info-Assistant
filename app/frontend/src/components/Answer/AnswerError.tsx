@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Stack, PrimaryButton } from "@fluentui/react";
 import { ErrorCircle24Regular } from "@fluentui/react-icons";
 

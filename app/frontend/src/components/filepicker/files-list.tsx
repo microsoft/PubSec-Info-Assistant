@@ -1,4 +1,7 @@
-import React, { useCallback } from "react";
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+import { useCallback } from "react";
 import CheckIcon from "./check";
 import ClearIcon from "./clear";
 import styles from "./files-list.module.css";

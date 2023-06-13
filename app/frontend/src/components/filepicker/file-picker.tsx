@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { BlobServiceClient } from "@azure/storage-blob";
 import classNames from "classnames";
 import { nanoid } from "nanoid";

@@ -1,3 +1,9 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+#!/bin/bash
+set -e
+
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/environments/infrastructure.env"

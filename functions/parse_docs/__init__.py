@@ -21,7 +21,7 @@ import nltk
 nltk.download('words')
 nltk.download('punkt')
 # from shared_code import status_log as Status
-from shared_code.status_log import StatusLog
+from shared_code.status_log import StatusLog, State
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -41,16 +41,14 @@ cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
 cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
-statusLog = StatusLog()
+statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 
 
 def main(myblob: func.InputStream):
-    statusLog.url = cosmosdb_url
-    statusLog.key = cosmosdb_key
-    statusLog.database_name = cosmosdb_database_name
-    statusLog.container_name = cosmosdb_container_name
+
     
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
+    statusLog.state = State.STARTED
     statusLog.upsert_document(myblob.name, 'File Uploaded', True)
     
     logging.info(f"Python blob trigger function processed blob \n"
@@ -59,12 +57,16 @@ def main(myblob: func.InputStream):
     statusLog.upsert_document(myblob.name, 'Parser function started')    
     try:
         analyze_layout(myblob)
+        statusLog.state = State.COMPLETE
+        statusLog.state_description = ""
+        statusLog.upsert_document(myblob.name, 'Processing complete')
+        
     except Exception as e:
+        statusLog.state = State.ERROR
+        statusLog.state_description = str(e)
         statusLog.upsert_document(myblob.name, f"An error occurred - {str(e)}")
         raise
     
-    logging.info(f"chunking complete for file {myblob.name}")
-
 
 def sort_key(element):
     """ Function to sort elements by page number and role priority """
@@ -551,6 +553,5 @@ def analyze_layout(myblob: func.InputStream):
         # Unknown file type
         logging.info("Unknown file type")
  
-
-    statusLog.upsert_document(myblob.name, 'File processing complete')
+    statusLog.upsert_document(myblob.name, 'Chunking complete')
     logging.info(f"Done!\n")

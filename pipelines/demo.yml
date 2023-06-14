@@ -14,7 +14,7 @@ pr: none
 stages:
 - stage: DeployDemoRed
   displayName: 'Deploy to Demo Red'
-  condition: eq(parameters.Demo, 'red')
+  condition: eq(parameters.Demo, red )
 
   jobs:
 
@@ -31,7 +31,7 @@ stages:
 
 - stage: DeployDemoBlue
   displayName: 'Deploy to Demo Blue'
-  condition: eq(parameters.Demo, 'blue')
+  condition: eq(parameters.Demo, blue)
 
   jobs:
 

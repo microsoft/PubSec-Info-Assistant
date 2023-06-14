@@ -1,5 +1,7 @@
-# usage: non-root-user.sh [username] [user UID] [user GID]
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 
+# usage: non-root-user.sh [username] [user UID] [user GID]
 USERNAME=${1:-"automatic"}
 USER_UID=${2:-"automatic"}
 USER_GID=${3:-"automatic"}

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 import openai
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType

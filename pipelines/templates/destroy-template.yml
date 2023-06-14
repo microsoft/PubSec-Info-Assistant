@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # Template for destroy pipeline. Modify and add steps here.
 parameters:
 - name: fullBuild  

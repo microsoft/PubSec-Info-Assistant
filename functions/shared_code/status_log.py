@@ -10,6 +10,7 @@ class State(Enum):
     STARTED = "Processing"
     COMPLETE = "Complete"
     ERROR = "Error"
+    ALL = "All"
 
 class StatusClassification(Enum):
     DEBUG = "Debug"
@@ -72,34 +73,55 @@ class StatusLog:
         return safe_id
     
     
-    def read_documents(self, 
-                       within_n_minutes: int = -1,
-                       status_query_level: StatusQueryLevel = StatusQueryLevel.CONCISE,
-                       document_id: str = ""
+    def read_document(self, 
+                       document_id: str,
+                       status_query_level: StatusQueryLevel = StatusQueryLevel.CONCISE
                        ):
         """ 
-        Function to issue a query and return resulting docs   
-        
+        Function to issue a query and return resulting single doc        
         args
-            within_n_minutes - integer representing from how many mn8inutes ago to return docs for
-            status_query_level - the StatusQueryLevel value reprenting concise or verbose status updates to be included
+            status_query_level - the StatusQueryLevel value representing concise or verbose status updates to be included
             document_id - if you wish to return a single document by its path        
         """
-        conditions = []
-        query_string = "SELECT * FROM c" 
+        query_string = f"SELECT * FROM c WHERE c.id = '{self.encode_document_id(document_id)}'"
         
+        items = list(self.container.query_items(
+            query=query_string,
+            enable_cross_partition_query=True
+        ))
+        
+        # Now we have the document, remove the status updates that are considered 'non-verbose' if required 
+        if status_query_level == StatusQueryLevel.CONCISE:
+            for item in items:
+                # Filter out status updates that have status_classification == "debug"
+                item['status_updates'] = [update for update in item['status_updates'] if update['status_classification'] != 'Debug']
+
+        return items
+
+
+    def read_documents(self, 
+                       within_n_minutes: int,
+                       state: State = State.ALL
+                       ):
+        """ 
+        Function to issue a query and return resulting docs          
+        args
+            within_n_minutes - integer representing from how many minutes ago to return docs for
+        """
+
+        query_string = "SELECT c.id,  c.file_path, c.file_name, c.state, \
+            c.start_timestamp, c.state_description, c.state_timestamp \
+            FROM c"   
+
+        conditions = []    
         if within_n_minutes != -1:
             from_time = datetime.now() - timedelta(minutes=within_n_minutes)
             from_time_string = str(from_time.strftime('%Y-%m-%d %H:%M:%S'))
             conditions.append(f"c.start_timestamp > '{from_time_string}'")
-
-        # if status_query_level == StatusQueryLevel.CONCISE:
-        #     # select info & error class states, for concise, all for verbose
-        #     conditions.append(f"(c.state = '{StatusClassification.INFO.value}' OR c.state = '{StatusClassification.ERROR.value}')")            
             
-        if document_id != "":
-            conditions.append(f"c.id = '{self.encode_document_id(document_id)}'")
-                
+        if state != State.ALL:
+            conditions.append(f"c.state = '{state.value}'")         
+            
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)
 
@@ -108,14 +130,7 @@ class StatusLog:
             enable_cross_partition_query=True
         ))
                             
-        # Now we have the documents, remove the status updates that are considered 'non-verbose' if required 
-        if status_query_level == StatusQueryLevel.CONCISE:
-            for item in items:
-                # Filter out status updates that have status_classification == "debug"
-                item['status_updates'] = [update for update in item['status_updates'] if update['status_classification'] != 'Debug']
-
-        return items
-       
+        return items       
 
 
     def upsert_document(self, document_path, status, status_classification: StatusClassification, fresh_start=False):

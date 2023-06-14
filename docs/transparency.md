@@ -11,22 +11,23 @@ Updated 14 Jun 2023
 - [Capabilities](#capabilities)
   - [System behavior](#system-behavior)
     - [Data Preparation](#data-preparation)
-    - [Anomaly Detection](#anomaly-detection)
+    - [Prompt Engineering](#prompt-engineering)
   - [Use Cases](#use-cases)
     - [Intended uses](#intended-uses)
     - [Considerations when choosing a use case](#considerations-when-choosing-a-use-case)
 - [Limitations of IA](#limitations-of-ia)
+  - [Qualitative limitations, human oversight requirements](#qualitative-limitations-human-oversight-requirements)
+    - [Confidence scoring](#confidence-scoring)
+    - [Accuracy](#accuracy)
   - [Technical limitations, operational factors and ranges](#technical-limitations-operational-factors-and-ranges)
     - [Non-Production Status](#non-production-status)
     - [Non-Real Time Usage](#non-real-time-usage)
-    - [Anomalous transactions](#anomalous-transactions)
-    - [Feature extraction](#feature-extraction)
+    - [Request Throttling](#request-throttling)
 - [System Performance](#system-performance)
-- [Evaluation of e-AID](#evaluation-of-ia)
+- [Evaluation of IA](#evaluation-of-ia)
   - [Evaluating and Integrating IA for your use](#evaluating-and-integrating-ia-for-your-use)
     - [Human-in-the-loop](#human-in-the-loop)
     - [Data Quality Evaluation](#data-quality-evaluation)
-    - [Model Training](#model-training)
     - [Evaluation of system performance](#evaluation-of-system-performance)
     - [Use technical documentation](#use-technical-documentation)
   - [Technical limitations, operational factors and ranges](#technical-limitations-operational-factors-and-ranges-1)
@@ -44,7 +45,7 @@ Microsoft’s Transparency Notes are part of a broader effort at Microsoft to pu
 
 ## Introduction
 
-The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services, intended to create a system that allows the end user to ‘have an accurate conversation’ with your data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
+The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services, intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
 
 The system aims to provide the functionality mentioned above while also focusing on the following key areas:
 
@@ -79,12 +80,14 @@ Terminology | Definition
 [Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant. 
 
 # Capabilities
-
+**NOTE:** This project is developed with an agile methodology. As such, features and capabilities are subject to change, and may change faster than the documentation. Those deploying this project should review approved pull requests to understand changes which have been committed since the update of the documentation.
 ## System behavior
 
 This system is implemented primarily on top of Azure OpenAI service and Azure Cognitive Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Semantic Search and ChatGPT. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
 
-#### Data Preparation
+By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.** 
+
+### Data Preparation
 
 The system receives and process files from the end user. Data is chunked with strategies to ensure that the data can be used by Azure OpenAI service while maintaining logical relevance based on the input data element (for example, being aware of page breaks in PDF documents to keep related content together). All historically-processed data is available to the end user.
 
@@ -106,6 +109,16 @@ This system is intended for the purpose of enabling ChatGPT capabilities with da
 
 In this section we describe several known limitations of the IA system.
 
+## Qualitative limitations, human oversight requirements
+
+### Confidence Scoring
+
+This system does not provide a confidence score for results returned. It is required that the end user evaluate the response quality to ensure that it is relevant to the asked question.
+
+### Accuracy 
+
+This system provides citations for all answers given. At the time of this writing, this is an early release and the system at times may not give citations. All answers should be validated by a human reviewing the citations. If no citations are given, the answer must not be assumed to accurate. 
+
 ## Technical limitations, operational factors and ranges
 
 ### Non-Production Status
@@ -118,39 +131,30 @@ This software is an accelerator codebase that is not configured for production u
 
 This software is not intended for real-time data usage. This is a batch-processing system, intended for offline data analysis.  
 
-### Anomalous transactions
+### Request Throttling
 
-This system was not designed to detect anomalous business-to-business transactions, rather it identifies anomalous businesses based on the transaction data and the feature set that is extracted from the data input to the system.
-
-### Feature extraction
-
-A core component to detecting anomalies are the features which are extracted from the data. These features are used as inputs to the anomaly detection. To improve anomaly detection, users of the system should understand their local economic drivers and policies and understand if additional features are desired to be considered for anomaly detection. These economic drivers and policies often include incentives, export or import policies, and other activities related directly to taxation. We advise careful consideration of the features with respect to your local policies and activities.
-
-**This system has not been evaluated for its intended purpose against your data!** This system makes no claim for precision or accuracy. The behavior and performance of IA depends on the type, volume and quality of electronic invoicing data ingested to it. This data will differ across countries, and therefore it is not possible to make a generic evaluation of IA for your purposes.
+The Azure OpenAI API may be subject to throttling. As such this accelerator may have performance limitations and should not be placed into a mission-critical operation at the time of this writing. 
 
 # System performance
 
-The central part of IA (the system) is to produce anomaly detection capabilities at the company (business) level. The two primary outputs for anomaly detection are (a) the score of those results marked as an anomaly and (b) the list of features with their weights that influenced the score.
-
-The system detects an anomaly at the company level for a summarized time period. Individual electronic invoicing transactions are not flagged as an anomaly.
-
-The better the tax user establishes data segmentation criteria to filter out what they already knows to be irregular, the better the system will detect unknown irregular transactions in the invoicing data.
+The central part of IA (the system) is to produce answers to questions with the data provided by the end user. This relies on the several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
+- documents with the answers available to the system
+- submitted documents having been successfully processed
+- input questions with sufficient detail to identify the best source documents available
 
 The system outcomes are evaluated as follows:
 Outcomes | Examples
 ---|---
-True positive | - The company issues irregular e-Invoicing transactions in a period. <br>- The system detects irregular invoicing transactions. <br>- The outcome is an anomaly score detected.
-False positive | - The company does not issue irregular e-Invoicing transactions in a period.<br>- The system detects irregular invoicing transactions. <br>- The outcome is an incorrect anomaly detected.
-False Negative | - The company issues irregular e-Invoicing transactions in a period. <br>- The system does not detect irregular invoicing transactions. <br>- The outcome is an anomaly score that is not detected.
-True Negative | - The company does not issue irregular e-Invoicing transactions in a period. <br>- The system does not detect irregular invoicing transactions. <br>- The outcome is an anomaly that is not detected.
+True positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
+False positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents do not answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Tennessee". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
+False Negative | The user asks a question and the system does not find any document available to answer yet the document was uploaded.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was uploaded, but failed processing. It is not found, summarized or cited.
+True Negative | The user asks a question and the system does not find any document available to answer and document was available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited.
 
-Data with known anomalies should be used to evaluate the performance of the system. The synthetic data provided with the system may be used for this purpose. With real data it is suggested that humans verify outputs from the system to determine if they fit within one of the categories listed above.
+All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. 
 
 # Evaluation of IA
 
-Microsoft and CIAT ([Inter-American Center of Tax Administrations](https://www.ciat.org/)) team members worked with the Government of Costa Rica to evaluate initial system output compared to known anomalies in a shared dataset from the year 2021 as well as anomalies in the sample datasets provided with this project.
-
-Initial results from evaluation with the Government of Costa Rica have demonstrated the system’s effectiveness at detecting anomalous events. Future efforts will be conducted with CIAT member(s) to continue evaluation of this system via investigation of real customer data. This document will be updated over time as future evaluations are performed.
+At the time of this writing, this accelerator is in an **Alpha** state. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated. 
 
 ## Evaluating and Integrating IA for your use
 
@@ -162,31 +166,26 @@ Always include a human-in-the-loop to evaluate the results against your data. Se
 
 ### Data Quality Evaluation
 
-The supplied reports should be used to understand the quality of the input data. If the reports show that there are significant amounts of data cleanliness issues, the data should be investigated before attempting to investigate anomalies; low quality datasets should not be applied to a machine learning system.
-
-### Model Training
-
-Once cleaned and valid data is confirmed, the iJungle toolkit is used to train models on a sample of the data. It is critical to train models on the supplied data as anomalies in economies may differ between countries and across timespans (especially when economic policies change). The models must be tuned for the specific data provided, and documentation provided on tuning this system should be reviewed before operating. It is also suggested that you review the documentation of iJungle (linked above).
+There are **minimal** administrative tools at this Alpha stage which will give insight to the quality of data available to the system. There are **no** tools available to the end user at this time which will give insight the quality of the data available to the system. 
 
 ### Evaluation of system performance
 
-The system outcomes need to be evaluated by the user to determine the accuracy of the system’s anomaly detection against the user’s data. Do not assume that the system is performing well with your data. Use the information about system performance listed above to understand the outcomes, both True and False.
+The system outcomes need to be evaluated by the user to determine the accuracy of the system’s answers provided with the data available to the system. Do not assume that the system is performing well with your data. Use the information about system performance listed above to understand the outcomes, both True and False.
 
 ### Use technical documentation
 
-The technical documentation provided with this system and the iJungle toolkit should be used when tuning the system to the best outcomes. Care should be used when tuning. Trade-offs between accuracy versus computational performance should be understood and stated explicitly when choices are made.
+The technical documentation provided with this system should be used to achieve the best outcomes. Care should be used when tuning, especially in the form of prompt engineering. Trade-offs between accuracy versus creativity should be understood and when choices are made.
 
-You can find the technical documentation on preparing your data and tuning the accelerator in our [Using IA for the first time](../README.md#using-IA-for-the-first-time) section.
+You can find the technical documentation in our [Using IA for the first time](../README.md#using-IA-for-the-first-time) section.
 
 # Technical limitations, operational factors and ranges
 
 **This system has not been evaluated for its intended purpose against your data!**
 
-This system makes no claim for precision or accuracy. The behaviour and performance of IA depends on the type, volume and quality of electronic invoicing data ingested to it. This data will differ across countries, and therefore it is not possible to make a generic evaluation of IA for your purposes.
+This system makes no claim for precision or accuracy. The behaviour and performance of IA depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA for your purposes.
 
 # Learn more about responsible AI
 
----
 
 [Microsoft AI principles](https://www.microsoft.com/en-us/ai/responsible-ai)
 
@@ -196,15 +195,13 @@ This system makes no claim for precision or accuracy. The behaviour and performa
 
 # Learn more about the IA Accelerator
 
----
 
-[e-EIAD Accelerator](https://github.com/microsoft/eIAD)
+[Information Assistant Accelerator](https://github.com/microsoft/PubSec-Info-Assistant)
 
-[iJungle](https://github.com/microsoft/dstoolkit-anomaly-detection-ijungle)
 
 # Contact us
 
-Give us feedback on this document in our [Q&A Discussions](https://github.com/microsoft/eIAD/discussions/categories/q-a) on GitHub.
+Give us feedback on this document in our [Q&A Discussions](https://github.com/microsoft/PubSec-Info-Assistant/discussions/categories/q-a) on GitHub.
 
 ## About this document
 

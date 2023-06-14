@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { parseSupportingContentItem } from "./SupportingContentParser";
 
 import styles from "./SupportingContent.module.css";

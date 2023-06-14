@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # Pipeline for build validation in PRs
 trigger: none
 

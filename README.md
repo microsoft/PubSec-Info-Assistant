@@ -4,6 +4,18 @@ This sample demonstrates a few approaches for creating ChatGPT-like experiences 
 
 > **NOTICE:** This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. You can request access [here](https://aka.ms/oaiapply).
 
+---
+
+## Responsible AI
+
+The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first. 
+
+**Read our [Transparency Note](./docs/transparency.md)**
+
+Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
+
+---
+
 ![Process Flow](docs/process_flow.drawio.png)
 
 ## Features
@@ -25,9 +37,9 @@ For a detailed review see our [Features](/docs/features/features.md) page.
 
 ---
 
-The Information Assistant (IA) Accelerator requires a variety of services in Azure. There are a few prerequisites required to deploy and configure the PS Info Assistant Accelerator. Please obtain these items first before continuing on to the deployment section of this guide.
+The IA Accelerator requires a variety of services in Azure. There are a few prerequisites required to deploy and configure the IA Accelerator. Please obtain these items first before continuing on to the deployment section of this guide.
 
->To get started with the PS Info Assistant Accelerator you will need the following:
+>To get started with the ISt Accelerator you will need the following:
 >
 >* An active Azure Subscription *
 >* Administrative rights on the Azure Subscription
@@ -38,7 +50,7 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 ## Deployment Configuration
 
-The deployment process for the PS Info Assistant, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container, hosted on a virtual machine using GitHub Codespaces.
+The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container, hosted on a virtual machine using GitHub Codespaces.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 

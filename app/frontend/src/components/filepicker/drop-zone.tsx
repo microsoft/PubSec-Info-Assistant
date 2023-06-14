@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { array, func } from "prop-types";
 import React from "react";
 import styles from "./drop-zone.module.css";

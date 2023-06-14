@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Outlet, NavLink, Link } from "react-router-dom";
 
 import openai from "../../assets/openai.svg";
@@ -11,7 +14,7 @@ const Layout = () => {
                 <div className={styles.headerContainer}>
                     <Link to="/" className={styles.headerTitleContainer}>
                         <img src={openai} alt="Azure OpenAI" className={styles.headerLogo} />
-                        <h3 className={styles.headerTitle}> Azure OpenAI Information Assistant</h3>
+                        <h3 className={styles.headerTitle}> Information Assistant powered by Azure OpenAI</h3>
                     </Link>
                     <nav>
                         <ul className={styles.headerNavList}>

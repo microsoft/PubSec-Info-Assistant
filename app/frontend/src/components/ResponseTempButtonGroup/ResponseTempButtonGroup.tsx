@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Button, ButtonGroup } from "react-bootstrap";
 import { Label } from "@fluentui/react";
 

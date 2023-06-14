@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 import openai
 from approaches.approach import Approach
 from azure.search.documents import SearchClient

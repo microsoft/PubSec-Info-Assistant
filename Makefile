@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 SHELL := /bin/bash
 
 .PHONY: help
@@ -14,7 +17,7 @@ build: ## Build application code
 infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts/inf-create.sh
 
-extract-env: extract-env-debug## Extract infrastructure.env file from BICEP output
+extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
 	@./scripts/json-to-env.sh < infra_output.json > ./scripts/environments/infrastructure.env
 
 deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
@@ -26,9 +29,11 @@ deploy-functions: extract-env ## Deploys the function code to Azure Function Hos
 deploy-search-indexes: extract-env ## Deploy search indexes
 	@./scripts/deploy-search-indexes.sh
 
-extract-env-debug: ## Extract infrastructure.debug.env file from BICEP output
+extract-env-debug-webapp: ## Extract infrastructure.debug.env file from BICEP output
 	@./scripts/json-to-env.debug.sh < infra_output.json > ./scripts/environments/infrastructure.debug.env
 
+extract-env-debug-functions: ## Extract local.settings.json to debug functions from BICEP output
+	@./scripts/json-to-local.debug.sh < infra_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
 check-subscription:

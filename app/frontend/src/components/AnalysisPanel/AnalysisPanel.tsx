@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Pivot, PivotItem } from "@fluentui/react";
 import DOMPurify from "dompurify";
 

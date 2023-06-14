@@ -42,19 +42,19 @@ param blobStorageAccountKey string
 param blobStorageAccountConnectionString string
 
 @description('XY Rounding Factor')
-param xyRoundingFactor string = '1'
+param xyRoundingFactor string
 
 @description('Chunk Target Size ')
-param chunkTargetSize string = '750'
+param chunkTargetSize string
 
-@description(' Real Words Target')
-param realWordsTarget string = '0.1'
+@description('Real Words Target')
+param realWordsTarget string
 
 @description('Target Pages')
-param targetPages string = 'ALL'
+param targetPages string
 
 @description('Form Recognizer API Version')
-param formRecognizerApiVersion string = '2023-02-28 (Preview)'
+param formRecognizerApiVersion string
 
 @description('Form Recognizer Endpoint')
 param formRecognizerEndpoint string

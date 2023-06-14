@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 """ Python function to read PDF files and extract text using Azure Form Recognizer"""
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
@@ -21,7 +24,7 @@ import nltk
 nltk.download('words')
 nltk.download('punkt')
 # from shared_code import status_log as Status
-from shared_code.status_log import StatusLog
+from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -41,31 +44,32 @@ cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
 cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
-statusLog = StatusLog()
+statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 
 
-def main(myblob: func.InputStream):    
-    statusLog.url = cosmosdb_url
-    statusLog.key = cosmosdb_key
-    statusLog.database_name = cosmosdb_database_name
-    statusLog.container_name = cosmosdb_container_name
-    statusLog.document_path = myblob.name
+def main(myblob: func.InputStream):
+
     
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
-    statusLog.upsert_document('File Uploaded', True)
+    statusLog.state = State.STARTED
+    statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, True)
     
     logging.info(f"Python blob trigger function processed blob \n"
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
-    statusLog.upsert_document('Parser function started')    
+    statusLog.upsert_document(myblob.name, 'Parser function started', StatusClassification.INFO)    
     try:
-        result = 10/0
         analyze_layout(myblob)
+        statusLog.state = State.COMPLETE
+        statusLog.state_description = ""
+        statusLog.upsert_document(myblob.name, 'Processing complete', StatusClassification.INFO)
+        
     except Exception as e:
-        statusLog.upsert_document(f"An error occurred - {str(e)}")
+        statusLog.state = State.ERROR
+        statusLog.state_description = str(e)
+        statusLog.upsert_document(myblob.name, f"An error occurred - {str(e)}", StatusClassification.ERROR)
+        raise
     
-    logging.info(f"chunking complete for file {myblob.name}")
-
 
 def sort_key(element):
     """ Function to sort elements by page number and role priority """
@@ -206,7 +210,8 @@ def get_filename_and_extension(path):
     """ Function to return the file name & type"""
     # Split the path into base and extension
     base_name = os.path.basename(path)
-    directory = os.path.dirname(path)
+    segments = path.split("/")
+    directory = "/".join(segments[1:-1]) + "/"
     file_name, file_extension = os.path.splitext(base_name)    
     return file_name, file_extension, directory
 
@@ -226,7 +231,7 @@ def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_
     # Get path and file name minus the root container
     file_name, file_extension, file_directory = get_filename_and_extension(myblob.name)
     # Get the folders to use when creating the new files        
-    folder_set = file_directory + "/" + file_name + file_extension + "/"
+    folder_set = file_directory + file_name + file_extension + "/"
     blob_service_client = BlobServiceClient(
         f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
     json_str = json.dumps(chunk_output, indent=2)
@@ -358,7 +363,7 @@ def build_document_map_pdf(myblob, result):
     del document_map['table_index']
     # sort to order columns in the document logically
     document_map['structure'].sort(key=sort_key)
-    
+       
     # Output document map to log container
     json_str = json.dumps(document_map, indent=2)
     file_name, file_extension, file_directory  = get_filename_and_extension(myblob.name)
@@ -418,10 +423,9 @@ def build_document_map_html(myblob, html):
     
     # Output document map to log container
     json_str = json.dumps(document_map, indent=2)
-    base_filename = os.path.basename(myblob.name)
-    file_name, file_extension, file_directory  = get_filename_and_extension(os.path.basename(base_filename))
+    file_name, file_extension, file_directory  = get_filename_and_extension(myblob.name)
     output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-    write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
+    write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)  
   
     logging.info(f"Constructing the JSON structure of the document complete\n")  
     return document_map      
@@ -484,8 +488,9 @@ def analyze_layout(myblob: func.InputStream):
     
     # Get file extension
     file_extension = os.path.splitext(myblob.name)[1][1:].lower()
+    
     if file_extension == 'pdf':
-        statusLog.upsert_document('Analyzing PDF')
+        statusLog.upsert_document(myblob.name, 'Analyzing PDF', StatusClassification.INFO)
         # Process pdf file        
         # [START extract_layout]
         logging.info("PDF file detected")        
@@ -495,7 +500,7 @@ def analyze_layout(myblob: func.InputStream):
         document_analysis_client = DocumentAnalysisClient(
             endpoint=endpoint, credential=AzureKeyCredential(key)
         ) 
-        statusLog.upsert_document('Calling Form Recognizer')               
+        statusLog.upsert_document(myblob.name, 'Calling Form Recognizer', StatusClassification.INFO)               
         if TARGET_PAGES == "ALL":
             poller = document_analysis_client.begin_analyze_document_from_url(
                 "prebuilt-layout", document_url=source_blob_path
@@ -505,31 +510,31 @@ def analyze_layout(myblob: func.InputStream):
                 "prebuilt-layout", document_url=source_blob_path, pages=TARGET_PAGES, api_version=FR_API_VERSION
             )        
         result = poller.result()
-        statusLog.upsert_document('Form Recognizer response received')
+        statusLog.upsert_document(myblob.name, 'Form Recognizer response received', StatusClassification.INFO)
         logging.info(f"Form Recognizer has returned results \n")
-        statusLog.upsert_document('Starting document map build')
+        statusLog.upsert_document(myblob.name, 'Starting document map build', StatusClassification.INFO)
         document_map = build_document_map_pdf(myblob, result)
-        statusLog.upsert_document('Starting document map build complete, starting chunking')
+        statusLog.upsert_document(myblob.name, 'Starting document map build complete, starting chunking', StatusClassification.INFO)
         build_chunks(document_map, myblob)
-        statusLog.upsert_document('Chunking complete')    
+        statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)    
         
     elif file_extension in ['htm', 'html']:
         # Process html file
         logging.info("PDF file detected")
-        statusLog.upsert_document('Analyzing HTML')
+        statusLog.upsert_document(myblob.name, 'Analyzing HTML', StatusClassification.INFO)
         # Download the content from the URL
         response = requests.get(source_blob_path)
         if response.status_code == 200:
             html = response.text   
-            statusLog.upsert_document('Starting document map build')
+            statusLog.upsert_document(myblob.name, 'Starting document map build', StatusClassification.INFO)
             document_map = build_document_map_html(myblob, html)
-            statusLog.upsert_document('Document map build complete, starting chunking')
+            statusLog.upsert_document(myblob.name, 'Document map build complete, starting chunking', StatusClassification.INFO)
             build_chunks(document_map, myblob) 
-            statusLog.upsert_document('Chunking complete')
+            statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)
         
     elif file_extension in ['docx']:      
         logging.info("Office file detected")
-        statusLog.upsert_document('Analyzing DocX')
+        statusLog.upsert_document(myblob.name, 'Analyzing DocX', StatusClassification.INFO)
         response = requests.get(source_blob_path)
         # Ensure the request was successful
         response.raise_for_status()
@@ -537,13 +542,13 @@ def analyze_layout(myblob: func.InputStream):
         docx_file = BytesIO(response.content)
         # Convert the downloaded Word document to HTML
         result = mammoth.convert_to_html(docx_file)
-        statusLog.upsert_document('HTML generated from DocX')
+        statusLog.upsert_document(myblob.name, 'HTML generated from DocX', StatusClassification.INFO)
         html = result.value # The generated HTML
-        statusLog.upsert_document('Starting document map build')
+        statusLog.upsert_document(myblob.name, 'Starting document map build', StatusClassification.INFO)
         document_map = build_document_map_html(myblob, html)
-        statusLog.upsert_document('Document map build complete, starting chunking')
+        statusLog.upsert_document(myblob.name, 'Document map build complete, starting chunking', StatusClassification.INFO)
         build_chunks(document_map, myblob) 
-        statusLog.upsert_document('Chunking complete')
+        statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)
 
            
         
@@ -551,6 +556,5 @@ def analyze_layout(myblob: func.InputStream):
         # Unknown file type
         logging.info("Unknown file type")
  
-
-    statusLog.upsert_document('File processing complete')
+    statusLog.upsert_document(myblob.name, 'Chunking complete', StatusClassification.INFO)
     logging.info(f"Done!\n")

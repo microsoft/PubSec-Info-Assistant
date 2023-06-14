@@ -117,7 +117,7 @@ This system does not provide a confidence score for results returned. It is requ
 
 ### Accuracy 
 
-This system provides citations for all answers given. At the time of this writing, this is an early release and the system at times may not give citations. All answers should be validated by a human reviewing the citations. If no citations are given, the answer must not be assumed to accurate. 
+This system provides citations for all answers given. At the time of this writing, this is an early release and the system at times may not give citations. All answers should be validated by a human reviewing the citations. If no citations are given, the answer must not be assumed daccurate. 
 
 ## Technical limitations, operational factors and ranges
 

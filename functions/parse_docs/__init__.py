@@ -20,9 +20,7 @@ import requests
 import json
 from decimal import Decimal
 import tiktoken
-import nltk
-nltk.download('words')
-nltk.download('punkt')
+
 # from shared_code import status_log as Status
 from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
 
@@ -33,7 +31,6 @@ azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_C
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
-REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
 # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
@@ -134,27 +131,6 @@ def role_prioroty(role):
     return (priority)
 
 
-# Load a pre-trained tokenizer
-tokenizer = nltk.tokenize.word_tokenize
-
-
-# Load a set of known English words
-word_set = set(nltk.corpus.words.words())
-
-
-# Define a function to check whether a token is a real English word
-def is_real_word(token):
-    """ Function to check whether a token is a real English word"""
-    return token.lower() in word_set
-
-
-# Define a function to check whether a string contains real English words
-def contains_real_words(string):
-    """ Function to check whether a string contains real English words"""
-    tokens = tokenizer(string)
-    real_word_count = sum(1 for token in tokens if is_real_word(token))
-    return (real_word_count / len(tokens) > REAL_WORDS_TARGET) and (len(tokens) >= 1)  # Require at least 50% of tokens to be real words and at least one word
-
 
 def token_count(input_text):
     """ Function to return the number of tokens in a text string"""
@@ -234,7 +210,7 @@ def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_
     folder_set = file_directory + file_name + file_extension + "/"
     blob_service_client = BlobServiceClient(
         f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
-    json_str = json.dumps(chunk_output, indent=2)
+    json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
     output_filename = file_name + f'-{file_number}' + '.json'
     block_blob_client = blob_service_client.get_blob_client(
         container=azure_blob_content_storage_container, blob=f'{folder_set}{output_filename}')
@@ -460,16 +436,14 @@ def build_chunks(document_map, myblob):
             chunk_size = 0  
             page_number = 0   
         
-        # Now process this paragraph if it passes the minimum threshold for real words, 
-        # only for textual paragraphs not tables - if it is real text
-        if (contains_real_words(paragraph_element['text']) is True) or (paragraph_element['type'] != 'text'):
-            if page_number != paragraph_element["page_number"]:
-                page_list.append(paragraph_element["page_number"])
-                page_number = paragraph_element["page_number"]   
 
-            # add paragraph to the chunk
-            chunk_size = chunk_size + paragraph_size
-            chunk_text = chunk_text + "\n" + paragraph_element["text"]
+        if page_number != paragraph_element["page_number"]:
+            page_list.append(paragraph_element["page_number"])
+            page_number = paragraph_element["page_number"]   
+
+        # add paragraph to the chunk
+        chunk_size = chunk_size + paragraph_size
+        chunk_text = chunk_text + "\n" + paragraph_element["text"]
 
         # If this is the last paragraph then write the chunk
         if index == len(document_map['structure'])-1:

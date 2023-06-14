@@ -36,10 +36,6 @@ jq -r  '
             "env_var": "CHUNK_TARGET_SIZE"
         },
         {
-            "path": "reaL_WORDS_TARGET",
-            "env_var": "REAL_WORDS_TARGET"
-        },
-        {
             "path": "fR_API_VERSION",
             "env_var": "FR_API_VERSION"
         },

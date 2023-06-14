@@ -157,10 +157,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: chunkTargetSize
         }
         {
-          name: 'REAL_WORDS_TARGET'
-          value: realWordsTarget
-        }
-        {
           name: 'TARGET_PAGES'
           value: targetPages
         }

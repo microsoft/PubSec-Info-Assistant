@@ -31,7 +31,6 @@ Next you will need to create local configuration values that are used by the fun
     "CHUNK_TARGET_SIZE": "750",
     "FR_API_VERSION": "2023-02-28 (Preview)",
     "infoasststore_STORAGE": "<YOUR AZURE VALUE>",
-    "REAL_WORDS_TARGET": "0.1",
     "TARGET_PAGES": "ALL",
     "XY_ROUNDING_FACTOR": "1",
     "FUNCTIONS_WORKER_RUNTIME": "python",

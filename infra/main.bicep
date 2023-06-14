@@ -397,7 +397,6 @@ output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
 output XY_ROUNDING_FACTOR string = xyRoundingFactor
 output CHUNK_TARGET_SIZE string = chunkTargetSize
-output REAL_WORDS_TARGET string = realWordsTarget
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
 output infoasststore_STORAGE string = storage.outputs.connectionString

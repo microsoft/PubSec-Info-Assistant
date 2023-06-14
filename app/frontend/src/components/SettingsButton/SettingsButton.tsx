@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Text } from "@fluentui/react";
 import { Settings24Regular } from "@fluentui/react-icons";
 

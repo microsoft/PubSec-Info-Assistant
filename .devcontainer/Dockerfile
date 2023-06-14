@@ -70,8 +70,6 @@ RUN apt-get update \
 COPY ./scripts/nodejs.sh /tmp/
 RUN /tmp/nodejs.sh
 
-RUN pip install pypdf
-
 # Sync timezone (if TZ value not already present on host it defaults to Europe/London)
 # Note: if running on WSL (Windows) you can add the below to your $profile so your tz is automatically synced
 # $tz =  [Windows.Globalization.Calendar,Windows.Globalization,ContentType=WindowsRuntime]::New().GetTimeZone()

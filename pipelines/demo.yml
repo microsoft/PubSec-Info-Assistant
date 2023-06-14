@@ -12,34 +12,37 @@ parameters:
 pr: none
 
 stages:
-- stage: DeployDemoRed
-  displayName: 'Deploy to Red Demo environment'
+- ${{ if eq(parameters.sandbox, 'red' ) }}:
+  
+  - stage: DeployDemoRed
+    displayName: 'Deploy to Red Demo environment'
 
-  jobs:
+    jobs:
 
-  - deployment: DeployRed
-    environment: demo-red
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-        runOnce:    #rolling, canary are the other strategies that are supported
-          deploy:
-            steps:
-            - template: templates/deploy-template.yml    # Path: pipelines/templates/deploy-template.yml
+     - deployment: DeployRed
+       environment: demo-red
+       timeoutInMinutes: 120
+       pool:
+         vmImage: 'ubuntu-latest'
+       strategy:
+         runOnce:    #rolling, canary are the other strategies that are supported
+           deploy:
+             steps:
+             - template: templates/deploy-template.yml    # Path: pipelines/templates/deploy-template.yml
 
-- stage: DeployDemoBlue
-  displayName: 'Deploy to Blue Demo environment'
+- ${{ if eq(parameters.sandbox, 'blue' ) }}:
+  - stage: DeployDemoBlue
+    displayName: 'Deploy to Blue Demo environment'
 
-  jobs:
+    jobs:
 
-  - deployment: DemoBlue
-    environment: demo-blue
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-        runOnce:    #rolling, canary are the other strategies that are supported
-          deploy:
-            steps:
-            - template: templates/deploy-template.yml     # Path: pipelines/templates/deploy-template.yml
+      - deployment: DemoBlue
+        environment: demo-blue
+        timeoutInMinutes: 120
+        pool:
+         vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:    #rolling, canary are the other strategies that are supported
+            deploy:
+              steps:
+                - template: templates/deploy-template.yml     # Path: pipelines/templates/deploy-template.yml

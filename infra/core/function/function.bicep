@@ -47,9 +47,6 @@ param xyRoundingFactor string
 @description('Chunk Target Size ')
 param chunkTargetSize string
 
-@description('Real Words Target')
-param realWordsTarget string
-
 @description('Target Pages')
 param targetPages string
 

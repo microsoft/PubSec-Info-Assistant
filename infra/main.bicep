@@ -44,7 +44,6 @@ param gptModelName string = 'text-davinci-003'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chunkTargetSize string = '750'
-param realWordsTarget string = '0.1'
 param targetPages string = 'ALL'
 param xyRoundingFactor string = '1'
 param formRecognizerApiVersion string = '2023-02-28 (Preview)'
@@ -277,7 +276,6 @@ module functions 'core/function/function.bicep' = {
     CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
     xyRoundingFactor: xyRoundingFactor
     chunkTargetSize: chunkTargetSize
-    realWordsTarget: realWordsTarget
     targetPages: targetPages
     formRecognizerApiVersion: formRecognizerApiVersion
   }

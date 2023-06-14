@@ -12,13 +12,31 @@ parameters:
 pr: none
 
 stages:
-- stage: DeployDemoEnvironment
-  displayName: 'Deploy to $(Demo)'
+- stage: DeployDemoRed
+  displayName: 'Deploy to Demo Red'
+  condition: eq(parameters.Demo, 'red')
 
   jobs:
 
-  - deployment: Deploy
-    environment: demo-$(Demo)
+  - deployment: DeployRed
+    environment: demo-red
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+        runOnce:    #rolling, canary are the other strategies that are supported
+          deploy:
+            steps:
+            - template: templates/deploy-template.yml
+
+- stage: DeployDemoBlue
+  displayName: 'Deploy to Demo Blue'
+  condition: eq(parameters.Demo, 'blue')
+
+  jobs:
+
+  - deployment: DemoBlue
+    environment: demo-blue
     timeoutInMinutes: 120
     pool:
       vmImage: 'ubuntu-latest'

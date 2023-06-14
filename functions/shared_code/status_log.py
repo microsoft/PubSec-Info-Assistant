@@ -12,7 +12,6 @@ class StatusLog:
         self._key = None
         self._database_name = None
         self._container_name = None
-        self._document_path = None
 
     @property
     def url(self):
@@ -45,14 +44,6 @@ class StatusLog:
     @container_name.setter
     def container_name(self, value):
         self._container_name = value
-          
-    @property
-    def document_path(self):
-        return self._document_path
-
-    @document_path.setter
-    def document_path(self, value):
-        self._document_path = value
 
 
     def encode_document_id(self, document_id):
@@ -61,7 +52,7 @@ class StatusLog:
         return safe_id
 
 
-    def upsert_document(self, status, fresh_start=False):
+    def upsert_document(self, document_path, status, fresh_start=False):
         """ Function to upsert a status item for a specified id """
         cosmos_client = CosmosClient(url=self._url, credential=self._key)
 
@@ -76,8 +67,8 @@ class StatusLog:
             container = database.create_container(id=self._container_name, 
                 partition_key=PartitionKey(path="/file_name"))
             
-        base_name = os.path.basename(self._document_path)
-        document_id = self.encode_document_id(self._document_path)
+        base_name = os.path.basename(document_path)
+        document_id = self.encode_document_id(document_path)
         
         # If this event is the start of an upload, remove any existing status files for this path
         if fresh_start == True:
@@ -102,7 +93,7 @@ class StatusLog:
         except Exception:
                 json_document = {
                     "id": document_id,
-                    "file_path": self._document_path,
+                    "file_path": document_path,
                     "file_name": base_name,
                     "StatusUpdates": [
                         {

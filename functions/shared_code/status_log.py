@@ -3,7 +3,7 @@
 
 """ Library of code for status logs reused across various calling features """
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import base64
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from enum import Enum
@@ -18,11 +18,16 @@ class StatusClassification(Enum):
     DEBUG = "Debug"
     INFO = "Info"
     ERROR = "Error"
+    
+class StatusQueryLevel(Enum):
+    CONCISE = "Concise"
+    VERBOSE = "Verbose"
 
 
 class StatusLog:
 
     def __init__(self, url, key, database_name, container_name):
+        """ Constructor function """
         self._url = url
         self._key = key
         self._database_name = database_name
@@ -43,17 +48,21 @@ class StatusLog:
             self.container = self.database.create_container(id=self._container_name, 
                 partition_key=PartitionKey(path="/file_name"))
         
+        
     @property
     def state(self):
         return self._state
+
 
     @state.setter
     def state(self, value: State):
         self._state = value
         
+        
     @property
     def state_description(self):
         return self._state
+
 
     @state_description.setter
     def state_description(self, value):
@@ -64,7 +73,53 @@ class StatusLog:
         """ encode a path/file name to remove unsafe chars for a cosmos db id """
         safe_id = base64.urlsafe_b64encode(document_id.encode()).decode()
         return safe_id
+    
+    
+    def read_documents(self, 
+                       within_n_minutes: int = -1,
+                       status_query_level: StatusQueryLevel = StatusQueryLevel.CONCISE,
+                       document_id: str = ""
+                       ):
+        """ 
+        Function to issue a query and return resulting docs   
         
+        args
+            within_n_minutes - integer representing from how many mn8inutes ago to return docs for
+            status_query_level - the StatusQueryLevel value reprenting concise or verbose status updates to be included
+            document_id - if you wish to return a single document by its path        
+        """
+        conditions = []
+        query_string = "SELECT * FROM c" 
+        
+        if within_n_minutes != -1:
+            from_time = datetime.now() - timedelta(minutes=within_n_minutes)
+            from_time_string = str(from_time.strftime('%Y-%m-%d %H:%M:%S'))
+            conditions.append(f"c.start_timestamp > '{from_time_string}'")
+
+        # if status_query_level == StatusQueryLevel.CONCISE:
+        #     # select info & error class states, for concise, all for verbose
+        #     conditions.append(f"(c.state = '{StatusClassification.INFO.value}' OR c.state = '{StatusClassification.ERROR.value}')")            
+            
+        if document_id != "":
+            conditions.append(f"c.id = '{self.encode_document_id(document_id)}'")
+                
+        if conditions:
+            query_string += " WHERE " + " AND ".join(conditions)
+
+        items = list(self.container.query_items(
+            query=query_string,
+            enable_cross_partition_query=True
+        ))
+                            
+        # Now we have the documents, remove the status updates that are considered 'non-verbose' if required 
+        if status_query_level == StatusQueryLevel.CONCISE:
+            for item in items:
+                # Filter out status updates that have status_classification == "debug"
+                item['status_updates'] = [update for update in item['status_updates'] if update['status_classification'] != 'Debug']
+
+        return items
+       
+
 
     def upsert_document(self, document_path, status, status_classification: StatusClassification, fresh_start=False):
         """ Function to upsert a status item for a specified id """
@@ -105,6 +160,7 @@ class StatusLog:
                 "file_path": document_path,
                 "file_name": base_name,
                 "state": str(self._state.value),
+                "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "state_description": "",
                 "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "status_updates": [

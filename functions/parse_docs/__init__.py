@@ -24,7 +24,7 @@ import nltk
 nltk.download('words')
 nltk.download('punkt')
 # from shared_code import status_log as Status
-from shared_code.status_log import StatusLog, State, StatusClassification
+from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]

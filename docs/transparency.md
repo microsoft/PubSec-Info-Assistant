@@ -1,4 +1,4 @@
-# Transparency Note: Electronic-Invoicing Anomaly Detector (IA)
+# Transparency Note: Information Assistant (IA)
 
 Updated 14 Jun 2023
 

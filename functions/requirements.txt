@@ -11,3 +11,4 @@ beautifulsoup4 == 4.12.2
 lxml == 4.9.2
 mammoth == 1.5.1
 azure-cosmos == 4.3.1
+azure-storage-queue == 12.6.0

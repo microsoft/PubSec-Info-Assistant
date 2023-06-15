@@ -66,6 +66,22 @@ jq -r  '
         {
             "path": "azurE_SEARCH_KEY",
             "env_var": "AZURE_SEARCH_SERVICE_KEY"
+        },
+        {
+            "path": "nonpdfsubmitqueue",
+            "env_var": "NON_PDF_SUBMIT_QUEUE"
+        },
+        {
+            "path": "pdfpollingqueue",
+            "env_var": "PDF_POLLING_QUEUE"
+        },
+        {
+            "path": "pdfsubmitqueue",
+            "env_var": "PDF_SUBMIT_QUEUE"
+        },
+        {
+            "path": "bloB_CONNECTION_STRING",
+            "env_var": "BLOB_CONNECTION_STRING"
         }
     ]
         as $env_vars_to_extract

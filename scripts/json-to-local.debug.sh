@@ -68,12 +68,24 @@ jq -r  '
             "env_var": "COSMOSDB_CONTAINER_NAME"
         },
         {
-            "path": "infoasststore_STORAGE",
-            "env_var": "infoasststore_STORAGE"
+            "path": "bloB_CONNECTION_STRING",
+            "env_var": "BLOB_CONNECTION_STRING"
         },
         {
             "path": "azureWebJobsStorage",
             "env_var": "AzureWebJobsStorage"
+        },
+        {
+            "path": "nonpdfsubmitqueue",
+            "env_var": "NON_PDF_SUBMIT_QUEUE"
+        },
+        {
+            "path": "pdfpollingqueue",
+            "env_var": "PDF_POLLING_QUEUE"
+        },
+        {
+            "path": "pdfsubmitqueue",
+            "env_var": "PDF_SUBMIT_QUEUE"
         }
     ]
         as $env_vars_to_extract

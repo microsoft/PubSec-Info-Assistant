@@ -72,7 +72,7 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 
 # Deployment
 
-There are several steps to deploying the IA Accelerator. The following checklist will guide you through configuring the IA Assistant Accelerator in your environments. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
+There are several steps to deploying the IA Accelerator. The following checklist will guide you through configuring the IA Accelerator in your environments. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
 >1. Configure Local Development Environment
 >       * [Configuring your Development Environment](/docs/development_environment.md)

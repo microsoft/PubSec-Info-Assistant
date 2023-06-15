@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 """ Library of code for status logs reused across various calling features """
 import os
 from datetime import datetime, timedelta

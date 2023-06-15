@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {

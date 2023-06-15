@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Example } from "./Example";
 
 import styles from "./Example.module.css";

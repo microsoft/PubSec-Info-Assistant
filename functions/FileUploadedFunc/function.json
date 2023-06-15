@@ -6,7 +6,7 @@
       "type": "blobTrigger",
       "direction": "in",
       "path": "upload",
-      "connection": "infoasststore_STORAGE"
+      "connection": "BLOB_CONNECTION_STRING"
     }
   ]
 }

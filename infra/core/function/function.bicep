@@ -76,6 +76,16 @@ param CosmosDBDatabaseName string
 @description('CosmosDB Container Name')
 param CosmosDBContainerName string
 
+@description('')
+param pdfSubmitQueue string
+
+@description('')
+param pdfPollingQueue string
+
+@description('')
+param nonPdfSubmitQueue string
+
+
 
 // Create function app resource
 
@@ -95,15 +105,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       alwaysOn: true
       connectionStrings:[
         {
-          name: 'infoasststore_STORAGE'
+          name: 'BLOB_CONNECTION_STRING'
           connectionString: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
         }
       ]
       appSettings: [
-        {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
-        }
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
           value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
@@ -177,7 +183,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: formRecognizerApiKey
         }
         {
-          name: 'infoasststore_STORAGE'
+          name: 'BLOB_CONNECTION_STRING'
           value: blobStorageAccountConnectionString
         }
         {
@@ -195,6 +201,18 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'COSMOSDB_CONTAINER_NAME'
           value: CosmosDBContainerName
+        }
+        {
+          name: 'PDFSUBMITQUEUE'
+          value: pdfSubmitQueue
+        }
+        {
+          name: 'PDFPOLLINGQUEUE'
+          value: pdfPollingQueue
+        }
+        {
+          name: 'NONPDFSUBMITQUEUE'
+          value: nonPdfSubmitQueue
         }
       ]
     }

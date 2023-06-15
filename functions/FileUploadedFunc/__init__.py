@@ -9,11 +9,6 @@ import os
 from enum import Enum
 from shared_code.status_log import StatusLog, State, StatusClassification
 
-azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
-azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
-azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
-azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
-azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]

@@ -18,6 +18,7 @@ param publicNetworkAccess string = 'Disabled'
 param sku object = { name: 'Standard_LRS' }
 
 param containers array = []
+param queueNames array = []
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
@@ -62,6 +63,20 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
       }
     }]
   }
+  
+
+  // resource queueServices 'queueServices' = [for queueName in queueNames: {
+  //   name: queueName.name   
+  // }]
+
+  resource queueServices 'queueServices' = {
+    name: 'default'
+    resource queue 'queues' = [for queueName in queueNames: {
+      name: queueName.name         
+    }]
+  }
+  
+
 }
 
 output name string = storage.name

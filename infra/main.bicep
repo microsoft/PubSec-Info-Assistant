@@ -269,7 +269,7 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
 }
 
 
-// Function App for the backend
+// Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
   scope: rg

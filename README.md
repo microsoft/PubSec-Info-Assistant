@@ -39,7 +39,7 @@ For a detailed review see our [Features](/docs/features/features.md) page.
 
 The IA Accelerator requires a variety of services in Azure. There are a few prerequisites required to deploy and configure the IA Accelerator. Please obtain these items first before continuing on to the deployment section of this guide.
 
->To get started with the ISt Accelerator you will need the following:
+>To get started with the IA Accelerator you will need the following:
 >
 >* An active Azure Subscription *
 >* Administrative rights on the Azure Subscription
@@ -72,7 +72,7 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 
 # Deployment
 
-There are several steps to deploying the IA Accelerator. The following checklist will guide you through configuring the IS Assistant Accelerator in your environments. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
+There are several steps to deploying the IA Accelerator. The following checklist will guide you through configuring the IA Assistant Accelerator in your environments. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
 >1. Configure Local Development Environment
 >       * [Configuring your Development Environment](/docs/development_environment.md)
@@ -81,7 +81,7 @@ There are several steps to deploying the IA Accelerator. The following checklist
 
 ---
 
-# Using IA for the first time
+# Using IA Accelerator for the first time
 
 TBD
 

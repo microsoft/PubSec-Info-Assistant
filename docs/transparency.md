@@ -1,6 +1,6 @@
 # Transparency Note: Information Assistant (IA)
 
-Updated 14 Jun 2023
+Updated 15 Jun 2023
 
 ## Table of Contents
 
@@ -15,7 +15,7 @@ Updated 14 Jun 2023
   - [Use Cases](#use-cases)
     - [Intended uses](#intended-uses)
     - [Considerations when choosing a use case](#considerations-when-choosing-a-use-case)
-- [Limitations of IA](#limitations-of-ia)
+- [Limitations of IA Accelerator](#limitations-of-ia-accelerator)
   - [Qualitative limitations, human oversight requirements](#qualitative-limitations-human-oversight-requirements)
     - [Confidence scoring](#confidence-scoring)
     - [Accuracy](#accuracy)
@@ -24,8 +24,8 @@ Updated 14 Jun 2023
     - [Non-Real Time Usage](#non-real-time-usage)
     - [Request Throttling](#request-throttling)
 - [System Performance](#system-performance)
-- [Evaluation of IA](#evaluation-of-ia)
-  - [Evaluating and Integrating IA for your use](#evaluating-and-integrating-ia-for-your-use)
+- [Evaluation of IA Accelerator](#evaluation-of-ia-accelerator)
+  - [Evaluating and Integrating IA Accelerator for your use](#evaluating-and-integrating-ia-accelerator-for-your-use)
     - [Human-in-the-loop](#human-in-the-loop)
     - [Data Quality Evaluation](#data-quality-evaluation)
     - [Evaluation of system performance](#evaluation-of-system-performance)
@@ -93,7 +93,9 @@ The system receives and process files from the end user. Data is chunked with st
 
 ### Prompt Engineering
 
-This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work goes into prompt engineering to ensure prevent hallucinations. The prompt engineering is visible to the end user when looking at the provided citations and choosing the "Thought process" tab. 
+This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work goes into prompt engineering to prevent hallucinations. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
+
+**NOTE:** Hallucinations may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
 
 ## Use cases
 
@@ -103,11 +105,11 @@ This system is intended for the purpose of enabling ChatGPT capabilities with da
 
 ### Considerations when choosing a use case
 
-**Avoid using IA for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
+**Avoid using IA Accelerator for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
 
-# Limitations of IA
+# Limitations of IA Accelerator
 
-In this section we describe several known limitations of the IA system.
+In this section we describe several known limitations of the IA Accelerator system.
 
 ## Qualitative limitations, human oversight requirements
 
@@ -117,7 +119,7 @@ This system does not provide a confidence score for results returned. It is requ
 
 ### Accuracy 
 
-This system provides citations for all answers given. At the time of this writing, this is an early release and the system at times may not give citations. All answers should be validated by a human reviewing the citations. If no citations are given, the answer must not be assumed daccurate. 
+This system provides citations for all answers given. At the time of this writing, this is an early release and the system at times may not give citations. All answers should be validated by a human reviewing the citations. If no citations are given, the answer must not be assumed accurate. 
 
 ## Technical limitations, operational factors and ranges
 
@@ -137,7 +139,7 @@ The Azure OpenAI API may be subject to throttling. As such this accelerator may 
 
 # System performance
 
-The central part of IA (the system) is to produce answers to questions with the data provided by the end user. This relies on the several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
+The central part of IA Accelerator (the system) is to produce answers to questions with the data provided by the end user. This relies on the several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
 - documents with the answers available to the system
 - submitted documents having been successfully processed
 - input questions with sufficient detail to identify the best source documents available
@@ -147,18 +149,20 @@ Outcomes | Examples
 ---|---
 True positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
 False positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents do not answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Tennessee". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
-False Negative | The user asks a question and the system does not find any document available to answer yet the document was uploaded.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was uploaded, but failed processing. It is not found, summarized or cited.
-True Negative | The user asks a question and the system does not find any document available to answer and document was available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited.
+False Negative | The user asks a question and the system does not find any document available to answer yet the document was available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was uploaded, but failed processing. It is not found, summarized or cited.
+True Negative | The user asks a question and the system does not find any document available to answer and there was no document was available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited.
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. 
 
-# Evaluation of IA
+**NOTE:** Due to generative AI's capability to hallucinate, end users should always leverage citations to verify results.
+
+# Evaluation of IA Accelerator
 
 At the time of this writing, this accelerator is in an **Alpha** state. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated. 
 
-## Evaluating and Integrating IA for your use
+## Evaluating and Integrating IA Accelerator for your use
 
-This section outlines best practices for using IA responsibly to achieve best performance from the system.
+This section outlines best practices for using IA Accelerator responsibly to achieve best performance from the system.
 
 ### Human-in-the-loop
 
@@ -176,13 +180,13 @@ The system outcomes need to be evaluated by the user to determine the accuracy o
 
 The technical documentation provided with this system should be used to achieve the best outcomes. Care should be used when tuning, especially in the form of prompt engineering. Trade-offs between accuracy versus creativity should be understood and when choices are made.
 
-You can find the technical documentation in our [Using IA for the first time](../README.md#using-IA-for-the-first-time) section.
+You can find the technical documentation in our [Using IA Accelerator for the first time](../README.md#using-IA-for-the-first-time) section.
 
 # Technical limitations, operational factors and ranges
 
 **This system has not been evaluated for its intended purpose against your data!**
 
-This system makes no claim for precision or accuracy. The behaviour and performance of IA depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA for your purposes.
+This system makes no claim for precision or accuracy. The behaviour and performance of IA Accelerator depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA Accelerator for your purposes.
 
 # Learn more about responsible AI
 
@@ -206,5 +210,3 @@ Give us feedback on this document in our [Q&A Discussions](https://github.com/mi
 ## About this document
 
 © 2023 Microsoft Corporation. All rights reserved. This document is provided "as-is" and for informational purposes only. Information and views expressed in this document, including URL and other Internet Web site references, may change without notice. You bear the risk of using it. Some examples are for illustration only and are fictitious. No real association is intended or inferred.
-
-Published: 14 Jun 2023

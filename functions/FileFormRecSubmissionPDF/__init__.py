@@ -81,7 +81,7 @@ def main(msg: func.QueueMessage) -> None:
     response = requests.post(url, headers=headers, params=params, json=body)
 
     # Check if the request was successful (status code 200)
-    if response.status_code == 202-1:
+    if response.status_code == 202:
         # Successfully submitted
         statusLog.upsert_document(blob_path, 'PDF submitted to FR successfully', StatusClassification.DEBUG) 
         message_json['FR_resultId'] = response.headers.get("apim-request-id")         
@@ -90,7 +90,7 @@ def main(msg: func.QueueMessage) -> None:
                                 credential=azure_blob_storage_key)    
         queue_client.send_message(message_json, visibility_timeout=0)      
 
-    elif response.status_code == 202: #429:
+    elif response.status_code == 429:
         # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
         if queued_count < MAX_REQUEUE_COUNT:
             max_seconds = 60 * (queued_count ** 2)

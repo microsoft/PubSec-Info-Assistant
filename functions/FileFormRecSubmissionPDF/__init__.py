@@ -43,12 +43,12 @@ api_version = os.environ["FR_API_VERSION"]
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
+MAX_REQUEUE_COUNT = 5   #max times we will retry the submission
 
 
 def main(msg: func.QueueMessage) -> None:
     logging.info('Python queue trigger function processed a queue item: %s',
                  msg.get_body().decode('utf-8'))
-
 
     # Receive message from the queue
     message_body = msg.get_body().decode('utf-8')
@@ -81,7 +81,7 @@ def main(msg: func.QueueMessage) -> None:
     response = requests.post(url, headers=headers, params=params, json=body)
 
     # Check if the request was successful (status code 200)
-    if response.status_code == 202:
+    if response.status_code == 202-1:
         # Successfully submitted
         statusLog.upsert_document(blob_path, 'PDF submitted to FR successfully', StatusClassification.DEBUG) 
         message_json['FR_resultId'] = response.headers.get("apim-request-id")         
@@ -90,16 +90,21 @@ def main(msg: func.QueueMessage) -> None:
                                 credential=azure_blob_storage_key)    
         queue_client.send_message(message_json, visibility_timeout=0)      
 
-    elif response.status_code == 429:
-        # throttled, so requeue with random backoff seconds to mitigate throttling
-        backoff =  random.randint(1, 60)
-        queued_count += 1
-        message_json['queued_count'] = queued_count
-        statusLog.upsert_document(blob_path, f'Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds - {response.code} {response.message}', StatusClassification.DEBUG) 
-        queue_client = QueueClient(account_url=f"https://{azure_blob_storage_account}.queue.core.windows.net", 
-                                queue_name=pdf_submit_queue, 
-                                credential=azure_blob_storage_key)     
-        queue_client.send_message(message_json, visibility_timeout=backoff)
+    elif response.status_code == 202: #429:
+        # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
+        if queued_count < MAX_REQUEUE_COUNT:
+            max_seconds = 60 * (queued_count ** 2)
+            max_seconds = max_seconds * queued_count
+            backoff =  random.randint(1, max_seconds)
+            queued_count += 1
+            message_json['queued_count'] = queued_count
+            statusLog.upsert_document(blob_path, f"Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
+            queue_client = QueueClient(account_url=f"https://{azure_blob_storage_account}.queue.core.windows.net", 
+                                    queue_name=pdf_submit_queue, 
+                                    credential=azure_blob_storage_key)     
+            queue_client.send_message(message_json, visibility_timeout=backoff)
+        else:
+            statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
 
     else:
         # general error occurred

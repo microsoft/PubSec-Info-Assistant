@@ -49,6 +49,10 @@ From the following locations:
 
 <https://github.com/Azure/azure-sdk-for-python>
 
+### nltk
+
+<https://github.com/nltk/nltk>
+
 ### azure-core
 
 <https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/core/azure-core>

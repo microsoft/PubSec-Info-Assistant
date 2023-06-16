@@ -20,7 +20,7 @@ import requests
 import json
 from decimal import Decimal
 import tiktoken
-
+from nltk.tokenize import sent_tokenize
 # from shared_code import status_log as Status
 from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
 
@@ -129,7 +129,6 @@ def role_prioroty(role):
         case other:     # content
             priority = paragraph_roles.other.value         
     return (priority)
-
 
 
 def token_count(input_text):
@@ -418,7 +417,7 @@ def build_chunks(document_map, myblob):
     previous_title_name = document_map['structure'][0]["title"]
     page_list = []   
     
-    # iterate over the paragraphs and build a chuck bae don a section and/or title of teh document
+    # iterate over the paragraphs and build a chuck based on a section and/or title of the document
     for index, paragraph_element in enumerate(document_map['structure']):          
         # if this paragraph would put the chunk_size greater than the target token size, OR
         # if this is a new (section OR title)
@@ -426,8 +425,12 @@ def build_chunks(document_map, myblob):
         paragraph_size = token_count(paragraph_element["text"])
         section_name = paragraph_element["section"]
         title_name = paragraph_element["title"]
-            
-        if (chunk_size + paragraph_size >= CHUNK_TARGET_SIZE) or section_name != previous_section_name or title_name != previous_title_name:
+        
+        # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
+        # and treat each slice as a new para and. Build a list of chunks that fall under the max size
+        # and ensure the first chunk, which will be added to the current                
+        if (chunk_size + paragraph_size >= CHUNK_TARGET_SIZE and index > 0) or section_name != previous_section_name or title_name != previous_title_name:
+            # if this para will put us over the max token count or it is a new section, then write out the chunk text we have to this point 
             write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, previous_section_name, previous_title_name) 
             # reset chunk specific variables 
             file_number += 1
@@ -435,9 +438,36 @@ def build_chunks(document_map, myblob):
             chunk_text = ''
             chunk_size = 0  
             page_number = 0   
-        
 
+        if paragraph_size >= CHUNK_TARGET_SIZE:
+            # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
+            # and treat each slice as a new para 
+                 
+            sentences = sent_tokenize(paragraph_element["text"])
+            chunks = []
+            chunk = ""
+            for sentence in sentences:
+                temp_chunk = chunk + " " + sentence if chunk else sentence
+                if token_count(temp_chunk) <= CHUNK_TARGET_SIZE:
+                    chunk = temp_chunk
+                else:
+                    chunks.append(chunk)
+                    chunk = sentence
+            if chunk:
+                chunks.append(chunk)
+        
+            # Now write out each chunk, apart from teh last, as this will be less than or equal to CHUNK_TARGET_SIZE
+            # the last chunk will be processed like a regular para
+            for i, chunk_text in enumerate(chunks):
+                if i < len(chunks) - 1:
+                    # Process all but the ;ast chunk in this large para
+                    write_chunk(myblob, document_map, f"{file_number}.{i}", token_count(chunk_text), chunk_text, page_list, previous_section_name, previous_title_name) 
+                else:
+                    # Reset the paragraph token count to just the tokens left in the last chunk
+                    paragraph_size = token_count(chunk_text)          
+        
         if page_number != paragraph_element["page_number"]:
+            # increment page number if necessary
             page_list.append(paragraph_element["page_number"])
             page_number = paragraph_element["page_number"]   
 
@@ -456,8 +486,7 @@ def build_chunks(document_map, myblob):
         
     
 def analyze_layout(myblob: func.InputStream):
-    """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer"""
- 
+    """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer""" 
     source_blob_path = get_blob_and_sas(myblob)
     
     # Get file extension

@@ -22,7 +22,7 @@ statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmos
 
 
 def main(myblob: func.InputStream):
-    """ Function to read PDF files and pass to the correct queue for processing"""
+    """ Function to read supported file types and pass to the correct queue for processing"""
     statusLog.state = State.STARTED
     statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, True)    
     logging.info(f"Python blob trigger function processed blob \n"

@@ -27,7 +27,7 @@
       "sourceFieldName": "metadata_storage_path",
       "targetFieldName": "metadata_storage_path",
       "mappingFunction": {
-        "name": "base64Encode",
+        "name": "fixedLengthEncode",
         "parameters": null
       }
     },

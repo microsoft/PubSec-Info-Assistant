@@ -44,7 +44,6 @@ param gptModelName string = 'text-davinci-003'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chunkTargetSize string = '750'
-param realWordsTarget string = '0.1'
 param targetPages string = 'ALL'
 param xyRoundingFactor string = '1'
 param formRecognizerApiVersion string = '2023-02-28 (Preview)'
@@ -295,7 +294,6 @@ module functions 'core/function/function.bicep' = {
     CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
     xyRoundingFactor: xyRoundingFactor
     chunkTargetSize: chunkTargetSize
-    realWordsTarget: realWordsTarget
     targetPages: targetPages
     formRecognizerApiVersion: formRecognizerApiVersion
     pdfSubmitQueue: pdfSubmitQueue
@@ -418,7 +416,6 @@ output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
 output XY_ROUNDING_FACTOR string = xyRoundingFactor
 output CHUNK_TARGET_SIZE string = chunkTargetSize
-output REAL_WORDS_TARGET string = realWordsTarget
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
 output BLOB_CONNECTION_STRING string = storage.outputs.connectionString

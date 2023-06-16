@@ -47,9 +47,6 @@ param xyRoundingFactor string
 @description('Chunk Target Size ')
 param chunkTargetSize string
 
-@description('Real Words Target')
-param realWordsTarget string
-
 @description('Target Pages')
 param targetPages string
 
@@ -161,10 +158,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'CHUNK_TARGET_SIZE'
           value: chunkTargetSize
-        }
-        {
-          name: 'REAL_WORDS_TARGET'
-          value: realWordsTarget
         }
         {
           name: 'TARGET_PAGES'

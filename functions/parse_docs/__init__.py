@@ -20,9 +20,7 @@ import requests
 import json
 from decimal import Decimal
 import tiktoken
-import nltk
-nltk.download('words')
-nltk.download('punkt')
+from nltk.tokenize import sent_tokenize
 # from shared_code import status_log as Status
 from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
 
@@ -33,7 +31,6 @@ azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_C
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
-REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
 # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
@@ -134,28 +131,6 @@ def role_prioroty(role):
     return (priority)
 
 
-# Load a pre-trained tokenizer
-tokenizer = nltk.tokenize.word_tokenize
-
-
-# Load a set of known English words
-word_set = set(nltk.corpus.words.words())
-
-
-# Define a function to check whether a token is a real English word
-def is_real_word(token):
-    """ Function to check whether a token is a real English word"""
-    return token.lower() in word_set
-
-
-# Define a function to check whether a string contains real English words
-def contains_real_words(string):
-    """ Function to check whether a string contains real English words"""
-    tokens = tokenizer(string)
-    real_word_count = sum(1 for token in tokens if is_real_word(token))
-    return (real_word_count / len(tokens) > REAL_WORDS_TARGET) and (len(tokens) >= 1)  # Require at least 50% of tokens to be real words and at least one word
-
-
 def token_count(input_text):
     """ Function to return the number of tokens in a text string"""
     # calc token count
@@ -234,7 +209,7 @@ def write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_
     folder_set = file_directory + file_name + file_extension + "/"
     blob_service_client = BlobServiceClient(
         f'https://{azure_blob_storage_account}.blob.core.windows.net/', azure_blob_storage_key)
-    json_str = json.dumps(chunk_output, indent=2)
+    json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
     output_filename = file_name + f'-{file_number}' + '.json'
     block_blob_client = blob_service_client.get_blob_client(
         container=azure_blob_content_storage_container, blob=f'{folder_set}{output_filename}')
@@ -442,7 +417,7 @@ def build_chunks(document_map, myblob):
     previous_title_name = document_map['structure'][0]["title"]
     page_list = []   
     
-    # iterate over the paragraphs and build a chuck bae don a section and/or title of teh document
+    # iterate over the paragraphs and build a chuck based on a section and/or title of the document
     for index, paragraph_element in enumerate(document_map['structure']):          
         # if this paragraph would put the chunk_size greater than the target token size, OR
         # if this is a new (section OR title)
@@ -450,8 +425,12 @@ def build_chunks(document_map, myblob):
         paragraph_size = token_count(paragraph_element["text"])
         section_name = paragraph_element["section"]
         title_name = paragraph_element["title"]
-            
-        if (chunk_size + paragraph_size >= CHUNK_TARGET_SIZE) or section_name != previous_section_name or title_name != previous_title_name:
+        
+        # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
+        # and treat each slice as a new para and. Build a list of chunks that fall under the max size
+        # and ensure the first chunk, which will be added to the current                
+        if (chunk_size + paragraph_size >= CHUNK_TARGET_SIZE and index > 0) or section_name != previous_section_name or title_name != previous_title_name:
+            # if this para will put us over the max token count or it is a new section, then write out the chunk text we have to this point 
             write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, previous_section_name, previous_title_name) 
             # reset chunk specific variables 
             file_number += 1
@@ -459,17 +438,42 @@ def build_chunks(document_map, myblob):
             chunk_text = ''
             chunk_size = 0  
             page_number = 0   
-        
-        # Now process this paragraph if it passes the minimum threshold for real words, 
-        # only for textual paragraphs not tables - if it is real text
-        if (contains_real_words(paragraph_element['text']) is True) or (paragraph_element['type'] != 'text'):
-            if page_number != paragraph_element["page_number"]:
-                page_list.append(paragraph_element["page_number"])
-                page_number = paragraph_element["page_number"]   
 
-            # add paragraph to the chunk
-            chunk_size = chunk_size + paragraph_size
-            chunk_text = chunk_text + "\n" + paragraph_element["text"]
+        if paragraph_size >= CHUNK_TARGET_SIZE:
+            # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
+            # and treat each slice as a new para 
+                 
+            sentences = sent_tokenize(paragraph_element["text"])
+            chunks = []
+            chunk = ""
+            for sentence in sentences:
+                temp_chunk = chunk + " " + sentence if chunk else sentence
+                if token_count(temp_chunk) <= CHUNK_TARGET_SIZE:
+                    chunk = temp_chunk
+                else:
+                    chunks.append(chunk)
+                    chunk = sentence
+            if chunk:
+                chunks.append(chunk)
+        
+            # Now write out each chunk, apart from teh last, as this will be less than or equal to CHUNK_TARGET_SIZE
+            # the last chunk will be processed like a regular para
+            for i, chunk_text in enumerate(chunks):
+                if i < len(chunks) - 1:
+                    # Process all but the ;ast chunk in this large para
+                    write_chunk(myblob, document_map, f"{file_number}.{i}", token_count(chunk_text), chunk_text, page_list, previous_section_name, previous_title_name) 
+                else:
+                    # Reset the paragraph token count to just the tokens left in the last chunk
+                    paragraph_size = token_count(chunk_text)          
+        
+        if page_number != paragraph_element["page_number"]:
+            # increment page number if necessary
+            page_list.append(paragraph_element["page_number"])
+            page_number = paragraph_element["page_number"]   
+
+        # add paragraph to the chunk
+        chunk_size = chunk_size + paragraph_size
+        chunk_text = chunk_text + "\n" + paragraph_element["text"]
 
         # If this is the last paragraph then write the chunk
         if index == len(document_map['structure'])-1:
@@ -482,8 +486,7 @@ def build_chunks(document_map, myblob):
         
     
 def analyze_layout(myblob: func.InputStream):
-    """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer"""
- 
+    """ Function to analyze the layout of a PDF file and extract text using Azure Form Recognizer""" 
     source_blob_path = get_blob_and_sas(myblob)
     
     # Get file extension

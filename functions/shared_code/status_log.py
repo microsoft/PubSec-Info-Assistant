@@ -49,26 +49,7 @@ class StatusLog:
             self.container = self.database.create_container(id=self._container_name, 
                 partition_key=PartitionKey(path="/file_name"))
         
-        
-    @property
-    def state(self):
-        return self._state
-
-
-    @state.setter
-    def state(self, value: State):
-        self._state = value
-        
-        
-    @property
-    def state_description(self):
-        return self._state
-
-
-    @state_description.setter
-    def state_description(self, value):
-        self._state_description = value               
-               
+       
         
     def encode_document_id(self, document_id):
         """ encode a path/file name to remove unsafe chars for a cosmos db id """
@@ -134,9 +115,9 @@ class StatusLog:
         ))
                             
         return items       
+    
 
-
-    def upsert_document(self, document_path, status, status_classification: StatusClassification, fresh_start=False):
+    def upsert_document(self, document_path, status, status_classification: StatusClassification, state=State.STARTED, fresh_start=False):
         """ Function to upsert a status item for a specified id """
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
@@ -154,9 +135,7 @@ class StatusLog:
             json_document = self.container.read_item(item=document_id, partition_key=base_name)
             
             # Check if there has been a state change, and therefore to update state
-            if json_document['state'] != str(self._state.value):
-                json_document['state'] = str(self._state.value)
-                json_document['state_description'] = self._state_description
+            if json_document['state'] != str(state.value):
                 json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             
             # Append a new item to the array

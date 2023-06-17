@@ -44,6 +44,8 @@ statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmos
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 MAX_REQUEUE_COUNT = 5   #max times we will retry the submission
+POLL_QUEUE_SUBMIT_BACKOFF = 1    # Hold for n seconds to give FR time to process the file
+PDF_SUBMIT_QUEUE_BACKOFF = 60 
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -55,7 +57,7 @@ def main(msg: func.QueueMessage) -> None:
     message_json = json.loads(message_body)
     blob_path =  message_json['blob_name']
     queued_count =  message_json['queued_count']
-    statusLog.upsert_document(blob_path, 'Subitting to Form Regignizer', StatusClassification.INFO)
+    statusLog.upsert_document(blob_path, 'Submitting to Form Recognizer', StatusClassification.INFO)
     statusLog.upsert_document(blob_path, 'Queue message received from pdf submit queue', StatusClassification.DEBUG)
 
     # construct blob url
@@ -88,12 +90,14 @@ def main(msg: func.QueueMessage) -> None:
         queue_client = QueueClient(account_url=f"https://{azure_blob_storage_account}.queue.core.windows.net", 
                                 queue_name=pdf_polling_queue, 
                                 credential=azure_blob_storage_key)    
-        queue_client.send_message(message_json, visibility_timeout=0)      
+        message_json_str = json.dumps(message_json)    
+        queue_client.send_message(message_json_str, visibility_timeout = POLL_QUEUE_SUBMIT_BACKOFF)   
+        statusLog.upsert_document(blob_path, 'message sent to polling queue', StatusClassification.DEBUG) 
 
     elif response.status_code == 429:
         # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
         if queued_count < MAX_REQUEUE_COUNT:
-            max_seconds = 60 * (queued_count ** 2)
+            max_seconds = PDF_SUBMIT_QUEUE_BACKOFF * (queued_count ** 2)
             max_seconds = max_seconds * queued_count
             backoff =  random.randint(1, max_seconds)
             queued_count += 1
@@ -101,8 +105,9 @@ def main(msg: func.QueueMessage) -> None:
             statusLog.upsert_document(blob_path, f"Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
             queue_client = QueueClient(account_url=f"https://{azure_blob_storage_account}.queue.core.windows.net", 
                                     queue_name=pdf_submit_queue, 
-                                    credential=azure_blob_storage_key)     
-            queue_client.send_message(message_json, visibility_timeout=backoff)
+                                    credential=azure_blob_storage_key)   
+            message_json_str = json.dumps(message_json)  
+            queue_client.send_message(message_json_str, visibility_timeout=backoff)
         else:
             statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
 

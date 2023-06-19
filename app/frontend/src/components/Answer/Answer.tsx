@@ -10,6 +10,7 @@ import styles from "./Answer.module.css";
 import { AskResponse, getCitationFilePath } from "../../api";
 import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
+import { RAIPanel } from "../RAIPanel";
 
 interface Props {
     answer: AskResponse;
@@ -19,6 +20,7 @@ interface Props {
     onSupportingContentClicked: () => void;
     onFollowupQuestionClicked?: (question: string) => void;
     showFollowupQuestions?: boolean;
+    onAdjustClick?: () => void;
 }
 
 export const Answer = ({
@@ -28,7 +30,8 @@ export const Answer = ({
     onThoughtProcessClicked,
     onSupportingContentClicked,
     onFollowupQuestionClicked,
-    showFollowupQuestions
+    showFollowupQuestions,
+    onAdjustClick
 }: Props) => {
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.citation_lookup, onCitationClicked), [answer]);
 
@@ -94,6 +97,9 @@ export const Answer = ({
                     </Stack>
                 </Stack.Item>
             )}
+            <Stack.Item align="center">
+                <RAIPanel onAdjustClick={onAdjustClick}/>
+            </Stack.Item>
         </Stack>
     );
 };

@@ -99,7 +99,7 @@ def main(msg: func.QueueMessage) -> None:
             statusLog.upsert_document(blob_path, f'unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
                           
     else:
-        statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
+        statusLog.upsert_document(blob_path, f'Error raised by FR polling', StatusClassification.ERROR, State.ERROR) 
 
     
     

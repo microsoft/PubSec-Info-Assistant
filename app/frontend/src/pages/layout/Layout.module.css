@@ -79,3 +79,24 @@
 .githubLogo {
     height: 20px;
 }
+
+.raibanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgb(242, 242, 242);
+    height: fit-content;
+    -webkit-box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
+    box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
+    opacity: 25.0;
+}
+
+.raiwarning {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(133, 133, 133);
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+}

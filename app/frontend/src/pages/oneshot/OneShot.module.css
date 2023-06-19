@@ -31,6 +31,18 @@
     margin-top: 130px;
 }
 
+.oneshotEmptyObjectives {
+    padding-left: 120px;
+    padding-right: 120px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.oneshotEmptyObjectivesList {
+    font-size: 14px;
+}
+
+
 @media only screen and (max-width: 800px) {
     .oneshotTitle {
         font-size: 3rem;
@@ -44,6 +56,7 @@
     width: 100%;
     padding-left: 10px;
     padding-right: 10px;
+    padding-top: 20px;
 }
 
 .oneshotAnswerContainer {

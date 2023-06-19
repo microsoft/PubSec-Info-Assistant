@@ -1,8 +1,7 @@
 import logging
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
-from azure.core.credentials import AzureKeyCredential
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
 from enum import Enum
@@ -21,7 +20,6 @@ azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
-REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
 # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
@@ -44,6 +42,7 @@ statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmos
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 MAX_REQUEUE_COUNT = 5   #max times we will retry the submission
+POLLING_BACKOFF = 5
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -55,6 +54,8 @@ def main(msg: func.QueueMessage) -> None:
     message_json = json.loads(message_body)
     blob_path =  message_json['blob_name']
     FR_resultId = message_json['FR_resultId']
+    queued_count = message_json['polling_queue_count']      
+    
     statusLog.upsert_document(blob_path, 'Polling Form Recognizer', StatusClassification.INFO)
     statusLog.upsert_document(blob_path, 'Queue message received from pdf polling queue', StatusClassification.DEBUG)
     
@@ -66,25 +67,40 @@ def main(msg: func.QueueMessage) -> None:
     params = {
         'api-version': api_version
     }
-    
     url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}/analyzeResults/{FR_resultId}"
- 
-    # Send the HTTP POST request with headers, query parameters, and request body
     response = requests.get(url, headers=headers, params=params)
     statusLog.upsert_document(blob_path, 'FR response received', StatusClassification.DEBUG)
+        
+    # Check response and process
+    if response.status_code == 200:
+        # FR processing is complete OR still running- create document map 
+        response_json = response.json()
+        response_status = response_json['status']
+        if response_status == "succeeded":
+            # successful, so continue to document map and chunking
+            statusLog.upsert_document(blob_path, f'Form Recognizer processing was successful', StatusClassification.INFO)  
+            
+        elif response_status == "running":
+            # still running so requeue with a backoff
+            if queued_count < MAX_REQUEUE_COUNT:
+                backoff = POLLING_BACKOFF * (queued_count ** 2)
+                backoff += random.randint(0, 10)
+                queued_count += 1
+                message_json['polling_queue_count'] = queued_count
+                statusLog.upsert_document(blob_path, f"FR has not completed processing, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
+                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())   
+                message_json_str = json.dumps(message_json)  
+                queue_client.send_message(message_json_str, visibility_timeout=backoff)       
+            else:
+                statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)        
+        
+        else:
+            # unexpected status returned by FR
+            statusLog.upsert_document(blob_path, f'unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
+                          
+    else:
+        statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
+
     
     
     
-    
-    
-    
-    # dump detail
-    root_folder = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(root_folder, 'responses.txt')
-    with open(file_path, 'w') as file:
-        response_code = response.status_code
-        file.write(f"Response Code: {response_code}\n")
-        response_headers = response.headers
-        file.write(str(response_headers) + '\n')
-        response_body = response.text
-        file.write(response_body + '\n')  

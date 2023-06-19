@@ -108,6 +108,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       ]
       appSettings: [
         {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
+        }
+        {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
           value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
         }
@@ -211,6 +215,5 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
     }
   }
 }
-
 
 output name string = functionApp.name

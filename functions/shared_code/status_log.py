@@ -33,8 +33,6 @@ class StatusLog:
         self._key = key
         self._database_name = database_name
         self._container_name = container_name
-        self._state = ""
-        self._state_description = ""
                 
         self.cosmos_client = CosmosClient(url=self._url, credential=self._key)
 
@@ -153,7 +151,7 @@ class StatusLog:
                 "id": document_id,
                 "file_path": document_path,
                 "file_name": base_name,
-                "state": str(self._state.value),
+                "state": str(state.value),
                 "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "state_description": "",
                 "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),

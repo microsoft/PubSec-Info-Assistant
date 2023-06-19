@@ -2,10 +2,10 @@ import logging
 
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
-from azure.core.credentials import AzureKeyCredential
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
+import json
 from enum import Enum
 from shared_code.status_log import StatusLog, State, StatusClassification
 
@@ -53,12 +53,13 @@ def main(myblob: func.InputStream):
         # Create message
         message = {
             "blob_name": f"{myblob.name}",
-            "queued_count": 1
+            "submit_queued_count": 1
         }        
+        message_string = json.dumps(message)
         
         # Queue message
-        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name)   
-        queue_client.send_message(message)
+        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())
+        queue_client.send_message(message_string)
         statusLog.upsert_document(myblob.name, f'{file_extension} file queued for by function FileUploadedFunc', StatusClassification.DEBUG)          
         
     except Exception as e:

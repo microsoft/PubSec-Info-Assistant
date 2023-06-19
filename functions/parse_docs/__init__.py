@@ -48,8 +48,7 @@ def main(myblob: func.InputStream):
 
     
     """ Function to read PDF files and extract text using Azure Form Recognizer"""
-    statusLog.state = State.STARTED
-    statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, True)
+    statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, State.STARTED, True)    
     
     logging.info(f"Python blob trigger function processed blob \n"
                  f"Name: {myblob.name}\n"

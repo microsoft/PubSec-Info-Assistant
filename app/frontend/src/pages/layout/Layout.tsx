@@ -37,6 +37,9 @@ const Layout = () => {
                     </nav>
                 </div>
             </header>
+            <div className={styles.raibanner}>
+                        <span className={styles.raiwarning}>AI-generated content may be incorrect</span>
+            </div>
 
             <Outlet />
         </div>

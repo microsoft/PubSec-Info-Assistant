@@ -12,7 +12,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
 5. **Configure your pipeline:** Azure DevOps provides a visual editor for configuring pipelines. Select **Existing Azure Pipelines YAML file**
 
-![pipeline_configuration](docs/images/sandbox_environment_build_pipeline_configuration.png)
+    ![pipeline_configuration](/docs/images/sandbox_environment_build_pipeline_configuration.png)
 
 6. **Define your build steps:** In the pipeline configuration, steps for building sandbox environment already defined
 
@@ -22,18 +22,18 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
 9. **Configure variables :** To Configure the deployment, please add below variables to the build pipeline and save the varibles.
 
-> AZURE_OPENAI_CHATGPT_DEPLOYMENT = gpt-35-turbo \
-> AZURE_OPENAI_GPT_DEPLOYMENT = text-davinci-003 \
-> AZURE_OPENAI_SERVICE_KEY = "" \
-> AZURE_OPENAI_SERVICE_NAME = "" \
-> AZURE_STORAGE_ACCOUNT = "" \
-> AZURE_STORAGE_ACCOUNT_KEY = "" \
-> CLIENT_ID = "" \
-> CLIENT_SECRET = "" \
-> CONTAINER_REGISTRY_ADDRESS = "" \
-> SERVICE_PRINCIPAL_ID = "" \
-> TENANT_ID = "" \
-> SUBSCRIPTION_ID = "" 
+    > AZURE_OPENAI_CHATGPT_DEPLOYMENT = gpt-35-turbo \
+    > AZURE_OPENAI_GPT_DEPLOYMENT = text-davinci-003 \
+    > AZURE_OPENAI_SERVICE_KEY = "" \
+    > AZURE_OPENAI_SERVICE_NAME = "" \
+    > AZURE_STORAGE_ACCOUNT = "" \
+    > AZURE_STORAGE_ACCOUNT_KEY = "" \
+    > CLIENT_ID = "" \
+    > CLIENT_SECRET = "" \
+    > CONTAINER_REGISTRY_ADDRESS = "" \
+    > SERVICE_PRINCIPAL_ID = "" \
+    > TENANT_ID = "" \
+    > SUBSCRIPTION_ID = "" 
 
 10. **Save and run the pipeline:** After updating the variable, save your pipeline configuration, review the settings, and click on **Run** to start the pipeline manually for the first time.
 

@@ -28,14 +28,25 @@
     justify-content: center;
     align-items: center;
     max-height: 1024px;
-    padding-top: 60px;
+    padding-top: 10px;
 }
 
 .chatEmptyStateTitle {
     font-size: 4rem;
     font-weight: 600;
     margin-top: 0;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+}
+
+.chatEmptyObjectives {
+    padding-left: 120px;
+    padding-right: 120px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.chatEmptyObjectivesList {
+    font-size: 14px;
 }
 
 .chatEmptyStateSubtitle {

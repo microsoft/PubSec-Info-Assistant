@@ -29,9 +29,9 @@
 
 .exampleText {
     margin: 0;
-    font-size: 22px;
+    font-size: 21px;
     width: 280px;
-    height: 100px;
+    height: 90px;
 }
 
 @media only screen and (max-height: 780px) {

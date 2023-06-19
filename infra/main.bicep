@@ -44,10 +44,12 @@ param gptModelName string = 'text-davinci-003'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chunkTargetSize string = '750'
-param realWordsTarget string = '0.1'
 param targetPages string = 'ALL'
 param xyRoundingFactor string = '1'
-param formRecognizerApiVersion string = '2023-02-28 (Preview)'
+param formRecognizerApiVersion string = '2023-02-28-preview'
+param pdfSubmitQueue string = 'pdf-submit-queue'
+param pdfPollingQueue string = 'pdf-polling-queue'
+param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 
 
 @description('Id of the user or app to assign application roles')
@@ -119,6 +121,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeploymentName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
+
     }
     aadClientId: aadClientId
   }
@@ -235,8 +238,22 @@ module storage 'core/storage/storage-account.bicep' = {
         publicAccess: 'None'
       }      
     ]
+    queueNames: [
+      {
+        name: pdfSubmitQueue
+      }
+      {
+        name: pdfPollingQueue
+      }      
+      {
+        name: nonPdfSubmitQueue
+      }    
+    ]
   }
 }
+
+
+
 
 module cosmosdb 'core/db/cosmosdb.bicep' = {
   name: 'cosmosdb'
@@ -251,7 +268,7 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
 }
 
 
-// Function App for the backend
+// Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
   scope: rg
@@ -277,9 +294,11 @@ module functions 'core/function/function.bicep' = {
     CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
     xyRoundingFactor: xyRoundingFactor
     chunkTargetSize: chunkTargetSize
-    realWordsTarget: realWordsTarget
     targetPages: targetPages
     formRecognizerApiVersion: formRecognizerApiVersion
+    pdfSubmitQueue: pdfSubmitQueue
+    pdfPollingQueue: pdfPollingQueue
+    nonPdfSubmitQueue: nonPdfSubmitQueue
   }
   dependsOn: [
     appServicePlan
@@ -397,10 +416,12 @@ output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
 output XY_ROUNDING_FACTOR string = xyRoundingFactor
 output CHUNK_TARGET_SIZE string = chunkTargetSize
-output REAL_WORDS_TARGET string = realWordsTarget
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
-output infoasststore_STORAGE string = storage.outputs.connectionString
+output BLOB_CONNECTION_STRING string = storage.outputs.connectionString
 output AzureWebJobsStorage string = storage.outputs.connectionString
+output PDFSUBMITQUEUE string = pdfSubmitQueue
+output PDFPOLLINGQUEUE string = pdfPollingQueue
+output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
 
 

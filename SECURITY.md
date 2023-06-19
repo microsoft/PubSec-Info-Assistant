@@ -1,6 +1,6 @@
 <!-- BEGIN MICROSOFT SECURITY.MD V0.0.8 BLOCK -->
 
-## Security
+# Security
 
 Microsoft takes the security of our software products and services seriously, which includes all source code repositories managed through our GitHub organizations, which include [Microsoft](https://github.com/microsoft), [Azure](https://github.com/Azure), [DotNet](https://github.com/dotnet), [AspNet](https://github.com/aspnet), [Xamarin](https://github.com/xamarin), and [our GitHub organizations](https://opensource.microsoft.com/).
 
@@ -30,6 +30,9 @@ This information will help us triage your report more quickly.
 
 If you are reporting for a bug bounty, more complete reports can contribute to a higher bounty award. Please visit our [Microsoft Bug Bounty Program](https://aka.ms/opensource/security/bounty) page for more details about our active programs.
 
+## Providing Feedback
+
+Please refer to the [Contributing](./CONTRIBUTING.md) guidelines for acceptable methods to provide feedback for issues which are not security related.
 ## Preferred Languages
 
 We prefer all communications to be in English.

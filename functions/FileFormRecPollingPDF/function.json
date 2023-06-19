@@ -6,7 +6,7 @@
       "type": "queueTrigger",
       "direction": "in",
       "queueName": "pdf-polling-queue",
-      "connection": "infoasststore_STORAGE"
+      "connection": "BLOB_CONNECTION_STRING"
     }
   ]
 }

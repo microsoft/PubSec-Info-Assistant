@@ -6,27 +6,16 @@ import os
 import json
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
 from datetime import datetime, timedelta
-import azure.functions as func
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.formrecognizer import DocumentAnalysisClient
-from azure.core.exceptions import HttpResponseError
 import logging
 import os
 from enum import Enum
 from datetime import datetime, timedelta
 import json
 import html
-from bs4 import BeautifulSoup
-import mammoth
-from io import BytesIO
-import requests
 import json
-from decimal import Decimal
 import tiktoken
 from nltk.tokenize import sent_tokenize
-# from shared_code import status_log as Status
-from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
 
 
 class paragraph_roles(Enum):

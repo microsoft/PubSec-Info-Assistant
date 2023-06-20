@@ -1,11 +1,9 @@
 import logging
 import azure.functions as func
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
+from azure.storage.blob import generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
-from enum import Enum
-from decimal import Decimal
 import json
 import requests
 from shared_code.status_log import StatusLog, State, StatusClassification

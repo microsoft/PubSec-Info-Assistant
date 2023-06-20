@@ -37,14 +37,13 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
-azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 
 
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
-MAX_REQUEUE_COUNT = 5   #max times we will retry the submission
-POLLING_BACKOFF = 5
+MAX_REQUEUE_COUNT = 10   #max times we will retry the submission
+POLLING_BACKOFF = 30
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -59,8 +58,8 @@ def main(msg: func.QueueMessage) -> None:
     FR_resultId = message_json['FR_resultId']
     queued_count = message_json['polling_queue_count']      
     
-    statusLog.upsert_document(blob_name, 'Polling Form Recognizer', StatusClassification.INFO)
-    statusLog.upsert_document(blob_name, 'Queue message received from pdf polling queue', StatusClassification.DEBUG)
+    statusLog.upsert_document(blob_name, 'Polling Form Recognizer function started', StatusClassification.INFO)
+    statusLog.upsert_document(blob_name, f'Queue message received from pdf polling queue attemp {queued_count}', StatusClassification.DEBUG)
     
     # Construct and submmit the polling message to FR
     headers = {
@@ -72,7 +71,6 @@ def main(msg: func.QueueMessage) -> None:
     }
     url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}/analyzeResults/{FR_resultId}"
     response = requests.get(url, headers=headers, params=params)
-    statusLog.upsert_document(blob_name, 'FR response received', StatusClassification.DEBUG)
         
     # Check response and process
     if response.status_code == 200:
@@ -82,12 +80,20 @@ def main(msg: func.QueueMessage) -> None:
         
         if response_status == "succeeded":
             # successful, so continue to document map and chunking
-            statusLog.upsert_document(blob_name, f'Form Recognizer processing was successful', StatusClassification.INFO)  
+            statusLog.upsert_document(blob_name, f'Form Recognizer processing was successful', StatusClassification.DEBUG)  
             # extract the result section  from the response and convert to an object (named tuple)
             result_dict = json.dumps(response_json["analyzeResult"])
-            result = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+            result_obj = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
             # build the document map     
-            utilities.build_document_map_pdf(blob_name, blob_uri, result, result_dict, azure_blob_log_storage_container)      
+            statusLog.upsert_document(blob_name, f'Starting document map build', StatusClassification.DEBUG)  
+            document_map = utilities.build_document_map_pdf(blob_name, blob_uri, result_obj, response_json["analyzeResult"], azure_blob_log_storage_container)  
+            statusLog.upsert_document(blob_name, f'Document map build complete', StatusClassification.DEBUG)     
+            # create chunks
+            statusLog.upsert_document(blob_name, f'Starting chunking', StatusClassification.DEBUG)  
+            utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
+            statusLog.upsert_document(blob_name, f'Chunking complete', StatusClassification.DEBUG)  
+            statusLog.upsert_document(blob_name, f'Processing of file {blob_name} is now complete', StatusClassification.INFO, State.COMPLETE)  
+            
 
         elif response_status == "running":
             # still running so requeue with a backoff
@@ -96,7 +102,7 @@ def main(msg: func.QueueMessage) -> None:
                 backoff += random.randint(0, 10)
                 queued_count += 1
                 message_json['polling_queue_count'] = queued_count
-                statusLog.upsert_document(blob_name, f"FR has not completed processing, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
+                statusLog.upsert_document(blob_name, f"FR has not completed processing, requeuing. Back off of attempt {queued_count} of {MAX_REQUEUE_COUNT} for {backoff} seconds", StatusClassification.DEBUG) 
                 queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())   
                 message_json_str = json.dumps(message_json)  
                 queue_client.send_message(message_json_str, visibility_timeout=backoff)       

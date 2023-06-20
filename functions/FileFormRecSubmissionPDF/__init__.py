@@ -1,8 +1,7 @@
 import logging
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
-from azure.core.credentials import AzureKeyCredential
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
 from enum import Enum
@@ -19,20 +18,10 @@ azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONT
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
-XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
-CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
-REAL_WORDS_TARGET = Decimal(os.environ["REAL_WORDS_TARGET"])
-FR_API_VERSION = os.environ["FR_API_VERSION"]
-# ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
-# ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
-# Separate each page number or range with a comma.
-TARGET_PAGES = os.environ["TARGET_PAGES"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
 cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
-non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
@@ -44,6 +33,9 @@ statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmos
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 MAX_REQUEUE_COUNT = 5   #max times we will retry the submission
+POLL_QUEUE_SUBMIT_BACKOFF = 60    # Hold for n seconds to give FR time to process the file
+PDF_SUBMIT_QUEUE_BACKOFF = 60 
+
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -54,8 +46,8 @@ def main(msg: func.QueueMessage) -> None:
     message_body = msg.get_body().decode('utf-8')
     message_json = json.loads(message_body)
     blob_path =  message_json['blob_name']
-    queued_count =  message_json['queued_count']
-    statusLog.upsert_document(blob_path, 'Subitting to Form Regignizer', StatusClassification.INFO)
+    queued_count =  message_json['submit_queued_count']
+    statusLog.upsert_document(blob_path, 'Submitting to Form Recognizer', StatusClassification.INFO)
     statusLog.upsert_document(blob_path, 'Queue message received from pdf submit queue', StatusClassification.DEBUG)
 
     # construct blob url
@@ -84,25 +76,24 @@ def main(msg: func.QueueMessage) -> None:
     if response.status_code == 202:
         # Successfully submitted
         statusLog.upsert_document(blob_path, 'PDF submitted to FR successfully', StatusClassification.DEBUG) 
-        message_json['FR_resultId'] = response.headers.get("apim-request-id")         
-        queue_client = QueueClient(account_url=f"https://{azure_blob_storage_account}.queue.core.windows.net", 
-                                queue_name=pdf_polling_queue, 
-                                credential=azure_blob_storage_key)    
-        queue_client.send_message(message_json, visibility_timeout=0)      
+        message_json['FR_resultId'] = response.headers.get("apim-request-id")   
+        message_json['polling_queue_count'] = 1     
+        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())    
+        message_json_str = json.dumps(message_json)    
+        queue_client.send_message(message_json_str, visibility_timeout = POLL_QUEUE_SUBMIT_BACKOFF)  
+        statusLog.upsert_document(blob_path, 'message sent to polling queue', StatusClassification.DEBUG) 
 
     elif response.status_code == 429:
         # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
         if queued_count < MAX_REQUEUE_COUNT:
-            max_seconds = 60 * (queued_count ** 2)
-            max_seconds = max_seconds * queued_count
-            backoff =  random.randint(1, max_seconds)
+            max_seconds = PDF_SUBMIT_QUEUE_BACKOFF * (queued_count ** 2)
+            backoff =  random.randint(PDF_SUBMIT_QUEUE_BACKOFF * queued_count, max_seconds)
             queued_count += 1
             message_json['queued_count'] = queued_count
             statusLog.upsert_document(blob_path, f"Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
-            queue_client = QueueClient(account_url=f"https://{azure_blob_storage_account}.queue.core.windows.net", 
-                                    queue_name=pdf_submit_queue, 
-                                    credential=azure_blob_storage_key)     
-            queue_client.send_message(message_json, visibility_timeout=backoff)
+            queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_submit_queue, message_encode_policy=TextBase64EncodePolicy())   
+            message_json_str = json.dumps(message_json)  
+            queue_client.send_message(message_json_str, visibility_timeout=backoff)
         else:
             statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
 

@@ -25,9 +25,28 @@ We also log the status of the pre-processing in Azure Cosmos DB. View our [Statu
 
 ## User Experience
 
+The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
+
+### Uploading documents
+You can upload documents in the [supported formats listed above](#document-pre-processing) through the user interface. To do so:
+> 1. Click on the Upload Files link in the top of the interface
+> ![Upload Link](/docs/images/upload-files-link.jpg)
+> 2. Drag files to the user interface, or click to open a browse window
+> ![Upload Link Drag and Drop](/docs/images/upload-files-drag-drop.jpg)
+
 ### Having a conversation with your data
 
+When you engage with IA Accelerator in the "Chat" method, the system maintains a history for your conversation and will be able to understand the context of your questions from one question to the next.
+
+> You may activate the Chat engagement pattern by choosing the "Chat" link at the top of the page
+> ![Chat Link](/docs/images/chat-interface.jpg)
+
 ### Ask your data
+
+When you engage with IA Accelerator in the "Ask a question" method, the system does not maintain a history for your conversation. Each question will be treated with on its own as a new and unique query.
+
+> You may activate the **Ask a question** engagement pattern by choosing the "Chat" link at the top of the page
+> ![Chat Link](/docs/images/ask-a-question-interface.jpg)
 
 ### Analysis Panel
 

@@ -53,6 +53,7 @@ def main(myblob: func.InputStream):
         # Create message
         message = {
             "blob_name": f"{myblob.name}",
+            "blob_uri": f"{myblob.uri}",
             "submit_queued_count": 1
         }        
         message_string = json.dumps(message)

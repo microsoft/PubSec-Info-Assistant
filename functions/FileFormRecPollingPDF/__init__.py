@@ -11,6 +11,8 @@ import requests
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities
 import random
+from collections import namedtuple
+from azure.ai.formrecognizer import AnalyzeResult
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -18,13 +20,12 @@ azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONT
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
-XY_ROUNDING_FACTOR = int(os.environ["XY_ROUNDING_FACTOR"])
+azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
 # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
 # Separate each page number or range with a comma.
-TARGET_PAGES = os.environ["TARGET_PAGES"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
@@ -36,6 +37,7 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
+azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 
 
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
@@ -52,12 +54,13 @@ def main(msg: func.QueueMessage) -> None:
     # Receive message from the queue
     message_body = msg.get_body().decode('utf-8')
     message_json = json.loads(message_body)
-    blob_path =  message_json['blob_name']
+    blob_name =  message_json['blob_name']
+    blob_uri =  message_json['blob_uri']
     FR_resultId = message_json['FR_resultId']
     queued_count = message_json['polling_queue_count']      
     
-    statusLog.upsert_document(blob_path, 'Polling Form Recognizer', StatusClassification.INFO)
-    statusLog.upsert_document(blob_path, 'Queue message received from pdf polling queue', StatusClassification.DEBUG)
+    statusLog.upsert_document(blob_name, 'Polling Form Recognizer', StatusClassification.INFO)
+    statusLog.upsert_document(blob_name, 'Queue message received from pdf polling queue', StatusClassification.DEBUG)
     
     # Construct and submmit the polling message to FR
     headers = {
@@ -69,17 +72,23 @@ def main(msg: func.QueueMessage) -> None:
     }
     url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}/analyzeResults/{FR_resultId}"
     response = requests.get(url, headers=headers, params=params)
-    statusLog.upsert_document(blob_path, 'FR response received', StatusClassification.DEBUG)
+    statusLog.upsert_document(blob_name, 'FR response received', StatusClassification.DEBUG)
         
     # Check response and process
     if response.status_code == 200:
         # FR processing is complete OR still running- create document map 
         response_json = response.json()
         response_status = response_json['status']
+        
         if response_status == "succeeded":
             # successful, so continue to document map and chunking
-            statusLog.upsert_document(blob_path, f'Form Recognizer processing was successful', StatusClassification.INFO)  
-            
+            statusLog.upsert_document(blob_name, f'Form Recognizer processing was successful', StatusClassification.INFO)  
+            # extract the result section  from the response and convert to an object (named tuple)
+            result_dict = json.dumps(response_json["analyzeResult"])
+            result = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+            # build the document map     
+            utilities.build_document_map_pdf(blob_name, blob_uri, result, result_dict, azure_blob_log_storage_container)      
+
         elif response_status == "running":
             # still running so requeue with a backoff
             if queued_count < MAX_REQUEUE_COUNT:
@@ -87,20 +96,19 @@ def main(msg: func.QueueMessage) -> None:
                 backoff += random.randint(0, 10)
                 queued_count += 1
                 message_json['polling_queue_count'] = queued_count
-                statusLog.upsert_document(blob_path, f"FR has not completed processing, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
+                statusLog.upsert_document(blob_name, f"FR has not completed processing, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
                 queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())   
                 message_json_str = json.dumps(message_json)  
                 queue_client.send_message(message_json_str, visibility_timeout=backoff)       
             else:
-                statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)        
+                statusLog.upsert_document(blob_name, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)        
         
         else:
             # unexpected status returned by FR
-            statusLog.upsert_document(blob_path, f'unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
+            statusLog.upsert_document(blob_name, f'unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
                           
     else:
-        statusLog.upsert_document(blob_path, f'Error raised by FR polling', StatusClassification.ERROR, State.ERROR) 
+        statusLog.upsert_document(blob_name, f'Error raised by FR polling', StatusClassification.ERROR, State.ERROR) 
 
-    
     
     

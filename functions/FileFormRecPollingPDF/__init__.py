@@ -37,7 +37,6 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
-azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 
 
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)

@@ -28,10 +28,6 @@ jq -r  '
             "env_var": "BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"
         },
         {
-            "path": "xY_ROUNDING_FACTOR",
-            "env_var": "XY_ROUNDING_FACTOR"
-        },
-        {
             "path": "chunK_TARGET_SIZE",
             "env_var": "CHUNK_TARGET_SIZE"
         },

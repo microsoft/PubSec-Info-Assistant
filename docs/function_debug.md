@@ -30,8 +30,6 @@ Next you will need to create local configuration values that are used by the fun
     "CHUNK_TARGET_SIZE": "750",
     "FR_API_VERSION": "2023-02-28-preview",
     "BLOB_CONNECTION_STRING": "<YOUR AZURE VALUE>",
-    "TARGET_PAGES": "ALL",
-    "XY_ROUNDING_FACTOR": "1",
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobs.parse_html_w_form_rec.Disabled": "true"
   }

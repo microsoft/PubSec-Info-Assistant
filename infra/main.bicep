@@ -414,7 +414,6 @@ output AZURE_FORM_RECOGNIZER_ENDPOINT string = formrecognizer.outputs.formRecogn
 output AZURE_FORM_RECOGNIZER_KEY string = formrecognizer.outputs.formRecognizerAccountKey
 output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
-output XY_ROUNDING_FACTOR string = xyRoundingFactor
 output CHUNK_TARGET_SIZE string = chunkTargetSize
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages

@@ -156,10 +156,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: blobStorageAccountKey
         }
         {
-          name: 'XY_ROUNDING_FACTOR'
-          value: xyRoundingFactor
-        }
-        {
           name: 'CHUNK_TARGET_SIZE'
           value: chunkTargetSize
         }

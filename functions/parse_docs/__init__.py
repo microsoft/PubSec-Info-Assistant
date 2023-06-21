@@ -21,9 +21,10 @@ import json
 from decimal import Decimal
 import tiktoken
 from nltk.tokenize import sent_tokenize
+import nltk
 # from shared_code import status_log as Status
 from shared_code.status_log import StatusLog, State, StatusClassification, StatusQueryLevel
-
+nltk.download('punkt')
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]

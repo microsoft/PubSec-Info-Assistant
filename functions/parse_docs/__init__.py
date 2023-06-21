@@ -186,6 +186,7 @@ def get_filename_and_extension(path):
     base_name = os.path.basename(path)
     segments = path.split("/")
     directory = "/".join(segments[1:-1]) + "/"
+    if directory == "/": directory = ""
     file_name, file_extension = os.path.splitext(base_name)    
     return file_name, file_extension, directory
 
@@ -427,20 +428,10 @@ def build_chunks(document_map, myblob):
         
         # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
         # and treat each slice as a new para and. Build a list of chunks that fall under the max size
-        # and ensure the first chunk, which will be added to the current                
-        if (chunk_size + paragraph_size >= CHUNK_TARGET_SIZE and index > 0) or section_name != previous_section_name or title_name != previous_title_name:
-            # if this para will put us over the max token count or it is a new section, then write out the chunk text we have to this point 
-            write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, previous_section_name, previous_title_name) 
-            # reset chunk specific variables 
-            file_number += 1
-            page_list = [] 
-            chunk_text = ''
-            chunk_size = 0  
-            page_number = 0   
-
-        if paragraph_size >= CHUNK_TARGET_SIZE:
+        # and ensure the first chunk, which will be added to the current
+        if (paragraph_size >= CHUNK_TARGET_SIZE and index == 0 ) :
             # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
-            # and treat each slice as a new para 
+            # and treat each slice as a new paragraph
                  
             sentences = sent_tokenize(paragraph_element["text"])
             chunks = []
@@ -463,7 +454,19 @@ def build_chunks(document_map, myblob):
                     write_chunk(myblob, document_map, f"{file_number}.{i}", token_count(chunk_text), chunk_text, page_list, previous_section_name, previous_title_name) 
                 else:
                     # Reset the paragraph token count to just the tokens left in the last chunk
-                    paragraph_size = token_count(chunk_text)          
+                    paragraph_size = token_count(chunk_text)
+
+        if (chunk_size + paragraph_size >= CHUNK_TARGET_SIZE) or section_name != previous_section_name or title_name != previous_title_name:
+            # if this para will put us over the max token count or it is a new section, then write out the chunk text we have to this point 
+            write_chunk(myblob, document_map, file_number, chunk_size, chunk_text, page_list, previous_section_name, previous_title_name) 
+            # reset chunk specific variables 
+            file_number += 1
+            page_list = [] 
+            chunk_text = ''
+            chunk_size = 0  
+            page_number = 0   
+
+                  
         
         if page_number != paragraph_element["page_number"]:
             # increment page number if necessary

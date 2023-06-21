@@ -45,7 +45,6 @@ param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
-param xyRoundingFactor string = '1'
 param formRecognizerApiVersion string = '2023-02-28-preview'
 param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
@@ -292,7 +291,6 @@ module functions 'core/function/function.bicep' = {
     CosmosDBKey: cosmosdb.outputs.CosmosDBKey
     CosmosDBDatabaseName: cosmosdb.outputs.CosmosDBDatabaseName
     CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
-    xyRoundingFactor: xyRoundingFactor
     chunkTargetSize: chunkTargetSize
     targetPages: targetPages
     formRecognizerApiVersion: formRecognizerApiVersion

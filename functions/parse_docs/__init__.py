@@ -450,7 +450,7 @@ def build_chunks(document_map, myblob):
             # the last chunk will be processed like a regular para
             for i, chunk_text in enumerate(chunks):
                 if i < len(chunks) - 1:
-                    # Process all but the last chunk in this large para
+                    # Process all but the ;ast chunk in this large para
                     write_chunk(myblob, document_map, f"{file_number}.{i}", token_count(chunk_text), chunk_text, page_list, previous_section_name, previous_title_name) 
                 else:
                     # Reset the paragraph token count to just the tokens left in the last chunk

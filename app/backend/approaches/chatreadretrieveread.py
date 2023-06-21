@@ -118,8 +118,11 @@ class ChatReadRetrieveReadApproach(Approach):
             # add the "FileX" monikor and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = {'citation': urllib.parse.unquote(doc[self.sourcepage_field]), 'source_path': self.get_source_file_name(doc[self.content_field]), 'page_number': self.get_first_page_num_for_chunk(doc[self.content_field])}
         # create a single string of all the results to be used in the prompt
-        content = "\n ".join(results)
-
+        results_text = "".join(results)
+        if results_text == "":
+            content = "\n NONE"
+        else:
+            content = "\n " + results_text
 
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = self.follow_up_questions_prompt_content if overrides.get("suggest_followup_questions") else ""

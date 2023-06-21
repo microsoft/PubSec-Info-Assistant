@@ -187,6 +187,7 @@ def get_filename_and_extension(path):
     base_name = os.path.basename(path)
     segments = path.split("/")
     directory = "/".join(segments[1:-1]) + "/"
+    if directory == "/": directory = ""
     file_name, file_extension = os.path.splitext(base_name)    
     return file_name, file_extension, directory
 

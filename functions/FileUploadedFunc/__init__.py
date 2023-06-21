@@ -1,7 +1,6 @@
 import logging
-
 import azure.functions as func
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
+from azure.storage.blob import generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
@@ -53,6 +52,7 @@ def main(myblob: func.InputStream):
         # Create message
         message = {
             "blob_name": f"{myblob.name}",
+            "blob_uri": f"{myblob.uri}",
             "submit_queued_count": 1
         }        
         message_string = json.dumps(message)

@@ -193,7 +193,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: CosmosDBContainerName
         }
         {
-          name: 'PDF_SUBMIT_QUEUE"'
+          name: 'PDF_SUBMIT_QUEUE'
           value: pdfSubmitQueue
         }
         {

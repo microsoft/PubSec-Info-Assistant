@@ -16,6 +16,8 @@ import html
 import json
 import tiktoken
 from nltk.tokenize import sent_tokenize
+from bs4 import BeautifulSoup
+
 
 
 class paragraph_roles(Enum):
@@ -48,8 +50,7 @@ class content_type(Enum):
 
 
 class Utilities:
-    
-   
+       
     def __init__(self, 
                  azure_blob_storage_account,
                  azure_blob_drop_storage_container,
@@ -84,6 +85,7 @@ class Utilities:
         base_name = os.path.basename(path)
         segments = path.split("/")
         directory = "/".join(segments[1:-1]) + "/"
+        if directory == "/": directory = ""
         file_name, file_extension = os.path.splitext(base_name)    
         return file_name, file_extension, directory
     
@@ -250,8 +252,58 @@ class Utilities:
         
         logging.info(f"Constructing the JSON structure of the document complete\n")  
         return document_map      
+        
     
+    def build_document_map_html(self, myblob_name, myblob_uri, html, azure_blob_log_storage_container):
+        """ Function to build a json structure representing the paragraphs in a document, including metadata
+            such as section heading, title, page number, eal word pernetage etc."""
+            
+        logging.info(f"Constructing the JSON structure of the document\n")   
+
+        soup = BeautifulSoup(html, 'lxml')
+        document_map = {
+            'file_name': myblob_name,
+            'file_uri': myblob_uri,
+            'content': soup.text,
+            "structure": []
+        }      
+
+        title = '' 
+        section = ''   
+        title = soup.title.string if soup.title else "No title"
+        
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'table']):
+            if tag.name in ['h2', 'h3', 'h4', 'h5', 'h6']:
+                section = tag.get_text(strip=True)
+            elif tag.name == 'h1':
+                title = tag.get_text(strip=True)  
+            elif tag.name == 'p' and tag.get_text(strip=True):
+                document_map["structure"].append({
+                    "type": "text", 
+                    "text": tag.get_text(strip=True),
+                    "title": title,
+                    "section": section,
+                    "page_number": 1                
+                    })       
+            elif tag.name == 'table' and tag.get_text(strip=True):
+                document_map["structure"].append({
+                    "type": "table", 
+                    "text": str(tag),
+                    "title": title,
+                    "section": section,
+                    "page_number": 1                
+                    })                           
+        
+        # Output document map to log container
+        json_str = json.dumps(document_map, indent=2)
+        file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
+        output_filename =  file_name + "_Document_Map" + file_extension + ".json"
+        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)  
     
+        logging.info(f"Constructing the JSON structure of the document complete\n")  
+        return document_map      
+          
+        
     def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
         """ Function to return the number of tokens in a text string"""
         encoding = tiktoken.get_encoding(encoding_name)

@@ -41,9 +41,6 @@ param blobStorageAccountKey string
 @secure()
 param blobStorageAccountConnectionString string
 
-@description('XY Rounding Factor')
-param xyRoundingFactor string
-
 @description('Chunk Target Size ')
 param chunkTargetSize string
 
@@ -196,15 +193,15 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: CosmosDBContainerName
         }
         {
-          name: 'PDFSUBMITQUEUE'
+          name: 'PDF_SUBMIT_QUEUE'
           value: pdfSubmitQueue
         }
         {
-          name: 'PDFPOLLINGQUEUE'
+          name: 'PDF_POLLING_QUEUE'
           value: pdfPollingQueue
         }
         {
-          name: 'NONPDFSUBMITQUEUE'
+          name: 'NON_PDF_SUBMIT_QUEUE'
           value: nonPdfSubmitQueue
         }
       ]

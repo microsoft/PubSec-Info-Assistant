@@ -5,8 +5,8 @@ from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
 import json
-from enum import Enum
 from shared_code.status_log import StatusLog, State, StatusClassification
+import random
 
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -57,13 +57,12 @@ def main(myblob: func.InputStream):
         }        
         message_string = json.dumps(message)
         
-        # Queue message
+        # Queue message with a random backoff so as not to put the next function under unnecessary load
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())
-        queue_client.send_message(message_string)
-        statusLog.upsert_document(myblob.name, f'{file_extension} file queued for by function FileUploadedFunc', StatusClassification.DEBUG)          
+        backoff =  random.randint(1, 60)        
+        queue_client.send_message(message_string, visibility_timeout = backoff)  
+        statusLog.upsert_document(myblob.name, f'{file_extension} file sent to submit queue', StatusClassification.DEBUG)          
         
     except Exception as e:
-        statusLog.state = State.ERROR
-        statusLog.state_description = str(e)
-        statusLog.upsert_document(myblob.name, f"An error occurred - {str(e)}", StatusClassification.ERROR)
+        statusLog.upsert_document(myblob.name, f"An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
         raise

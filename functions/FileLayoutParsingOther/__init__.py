@@ -37,35 +37,40 @@ def main(msg: func.QueueMessage) -> None:
     logging.info('Python queue trigger function processed a queue item: %s',
                  msg.get_body().decode('utf-8'))
 
-    # Receive message from the queue
-    message_body = msg.get_body().decode('utf-8')
-    message_json = json.loads(message_body)
-    blob_name =  message_json['blob_name']
-    blob_uri =  message_json['blob_uri']
-    statusLog.upsert_document(blob_name, 'Starting to parse the non-PDF file', StatusClassification.INFO)
-    statusLog.upsert_document(blob_name, 'Queue message received from non-pdf submit queue', StatusClassification.DEBUG)
+    try:
+        # Receive message from the queue
+        message_body = msg.get_body().decode('utf-8')
+        message_json = json.loads(message_body)
+        blob_name =  message_json['blob_name']
+        blob_uri =  message_json['blob_uri']
+        statusLog.upsert_document(blob_name, 'Starting to parse the non-PDF file', StatusClassification.INFO)
+        statusLog.upsert_document(blob_name, 'Queue message received from non-pdf submit queue', StatusClassification.DEBUG)
 
-    # construct blob url
-    blob_path_plus_sas = utilities.get_blob_and_sas(blob_name)
-    statusLog.upsert_document(blob_name, 'SAS token generated to access the file', StatusClassification.DEBUG)
+        # construct blob url
+        blob_path_plus_sas = utilities.get_blob_and_sas(blob_name)
+        statusLog.upsert_document(blob_name, 'SAS token generated to access the file', StatusClassification.DEBUG)
 
-    file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_name)
+        file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_name)
 
-    response = requests.get(blob_path_plus_sas)
-    response.raise_for_status()
-    if file_extension in ['.docx']:   
-        docx_file = BytesIO(response.content)
-        # Convert the downloaded Word document to HTML
-        result = mammoth.convert_to_html(docx_file)
-        statusLog.upsert_document(blob_name, 'HTML generated from DocX by mammoth', StatusClassification.DEBUG)
-        html = result.value # The generated HTML
-    else:
-        html = response.text 
-        
-               
-    # build the document map from HTML for all non-pdf file types
-    statusLog.upsert_document(blob_name, 'Starting document map build', StatusClassification.DEBUG)
-    document_map = utilities.build_document_map_html(blob_name, blob_uri, html, azure_blob_log_storage_container)
-    statusLog.upsert_document(blob_name, 'Document map build complete, starting chunking', StatusClassification.DEBUG)
-    utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
-    statusLog.upsert_document(blob_name, 'Chunking complete', StatusClassification.DEBUG)       
+        response = requests.get(blob_path_plus_sas)
+        response.raise_for_status()
+        if file_extension in ['.docx']:   
+            docx_file = BytesIO(response.content)
+            # Convert the downloaded Word document to HTML
+            result = mammoth.convert_to_html(docx_file)
+            statusLog.upsert_document(blob_name, 'HTML generated from DocX by mammoth', StatusClassification.DEBUG)
+            html = result.value # The generated HTML
+        else:
+            html = response.text 
+            
+                
+        # build the document map from HTML for all non-pdf file types
+        statusLog.upsert_document(blob_name, 'Starting document map build', StatusClassification.DEBUG)
+        document_map = utilities.build_document_map_html(blob_name, blob_uri, html, azure_blob_log_storage_container)
+        statusLog.upsert_document(blob_name, 'Document map build complete, starting chunking', StatusClassification.DEBUG)
+        chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
+        statusLog.upsert_document(blob_name, f'Chunking complete. {chunk_count} chunks created', StatusClassification.DEBUG, State.COMPLETE)       
+
+    except Exception as e:
+        statusLog.upsert_document(blob_name, f"An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
+        raise

@@ -133,7 +133,8 @@ class StatusLog:
             json_document = self.container.read_item(item=document_id, partition_key=base_name)
             
             # Check if there has been a state change, and therefore to update state
-            if json_document['state'] != str(state.value):
+            if json_document['state'] != state.value:
+                json_document['state'] = state.value
                 json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             
             # Append a new item to the array

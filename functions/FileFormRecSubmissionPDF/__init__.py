@@ -33,25 +33,26 @@ FR_MODEL = "prebuilt-layout"
 MAX_REQUEUE_COUNT = 5   #max times we will retry the submission
 POLL_QUEUE_SUBMIT_BACKOFF = 60    # Hold for n seconds to give FR time to process the file
 PDF_SUBMIT_QUEUE_BACKOFF = 60 
+function_name = "FileFormRecSubmissionPDF"
 
 
 
 def main(msg: func.QueueMessage) -> None:
-    logging.info('Python queue trigger function processed a queue item: %s',
-                 msg.get_body().decode('utf-8'))
-
     try:
+        logging.info('Python queue trigger function processed a queue item: %s',
+                    msg.get_body().decode('utf-8'))
+
         # Receive message from the queue
         message_body = msg.get_body().decode('utf-8')
         message_json = json.loads(message_body)
         blob_path =  message_json['blob_name']
         queued_count =  message_json['submit_queued_count']
-        statusLog.upsert_document(blob_path, 'Submitting to Form Recognizer', StatusClassification.INFO)
-        statusLog.upsert_document(blob_path, 'Queue message received from pdf submit queue', StatusClassification.DEBUG)
+        statusLog.upsert_document(blob_path, f'{function_name} - Submitting to Form Recognizer', StatusClassification.INFO)
+        statusLog.upsert_document(blob_path, f'{function_name} - Queue message received from pdf submit queue', StatusClassification.DEBUG)
 
         # construct blob url
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
-        statusLog.upsert_document(blob_path, 'SAS token generated', StatusClassification.DEBUG)
+        statusLog.upsert_document(blob_path, f'{function_name} - SAS token generated', StatusClassification.DEBUG)
 
         # Construct and submmit the message to FR
         headers = {
@@ -74,13 +75,13 @@ def main(msg: func.QueueMessage) -> None:
         # Check if the request was successful (status code 200)
         if response.status_code == 202:
             # Successfully submitted
-            statusLog.upsert_document(blob_path, 'PDF submitted to FR successfully', StatusClassification.DEBUG) 
+            statusLog.upsert_document(blob_path, f'{function_name} - PDF submitted to FR successfully', StatusClassification.DEBUG) 
             message_json['FR_resultId'] = response.headers.get("apim-request-id")   
             message_json['polling_queue_count'] = 1     
             queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())    
             message_json_str = json.dumps(message_json)    
             queue_client.send_message(message_json_str, visibility_timeout = POLL_QUEUE_SUBMIT_BACKOFF)  
-            statusLog.upsert_document(blob_path, 'message sent to polling queue', StatusClassification.DEBUG) 
+            statusLog.upsert_document(blob_path, f'{function_name} - message sent to polling queue', StatusClassification.DEBUG) 
 
         elif response.status_code == 429:
             # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
@@ -89,17 +90,16 @@ def main(msg: func.QueueMessage) -> None:
                 backoff =  random.randint(PDF_SUBMIT_QUEUE_BACKOFF * queued_count, max_seconds)
                 queued_count += 1
                 message_json['queued_count'] = queued_count
-                statusLog.upsert_document(blob_path, f"Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
+                statusLog.upsert_document(blob_path, f"{function_name} - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds", StatusClassification.DEBUG) 
                 queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_submit_queue, message_encode_policy=TextBase64EncodePolicy())   
                 message_json_str = json.dumps(message_json)  
                 queue_client.send_message(message_json_str, visibility_timeout=backoff)
             else:
-                statusLog.upsert_document(blob_path, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
+                statusLog.upsert_document(blob_path, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
 
         else:
             # general error occurred
-            statusLog.upsert_document(blob_path, f'Error on PDF submission to FR - {response.code} {response.message}', StatusClassification.ERROR, State.ERROR) 
+            statusLog.upsert_document(blob_path, f'{function_name} - Error on PDF submission to FR - {response.code} {response.message}', StatusClassification.ERROR, State.ERROR) 
             
     except Exception as e:
-        statusLog.upsert_document(blob_path, f"An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
-        raise
+        statusLog.upsert_document(blob_path, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)

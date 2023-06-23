@@ -87,7 +87,8 @@ class Utilities:
         base_name = os.path.basename(path)
         segments = path.split("/")
         directory = "/".join(segments[1:-1]) + "/"
-        if directory == "/": directory = ""
+        if directory == "/": 
+            directory = ""
         file_name, file_extension = os.path.splitext(base_name)    
         return file_name, file_extension, directory
     
@@ -345,8 +346,98 @@ class Utilities:
             container=self.azure_blob_content_storage_container, blob=f'{folder_set}{output_filename}')
         block_blob_client.upload_blob(json_str, overwrite=True)   
         
-        
+
     def build_chunks(self, document_map, myblob_name, myblob_uri, chunk_target_size):
+        """ Function to build chunk outputs based on the document map """
+        
+        chunk_text = ''
+        chunk_size = 0    
+        file_number = 0
+        page_number = 0
+        previous_section_name = document_map['structure'][0]['section']
+        previous_title_name = document_map['structure'][0]["title"]
+        page_list = []   
+        chunk_count = 0
+        
+        # iterate over the paragraphs and build a chuck based on a section and/or title of the document
+        for index, paragraph_element in enumerate(document_map['structure']):
+            paragraph_size = self.token_count(paragraph_element["text"])
+            paragraph_text = paragraph_element["text"]
+            section_name = paragraph_element["section"]
+            title_name = paragraph_element["title"]
+            
+            #if the collected tokens in the current in-memory chunk + the next paragraph will be larger than the allowed chunk size
+            # prepare to write out the total chunk
+            if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name:
+                # If the current paragraph just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up
+                # and treat each slice as a new in-memory chunk that fall under the max size
+                # and ensure the first chunk, which will be added to the current
+                if (paragraph_size >= chunk_target_size) :
+                    # start by keeping the existing in-memory chunk in front of the large paragraph and begin to process it on sentence boundaries
+                    # to break it down into sub-chunks that are below the CHUNK_TARGET_SIZE
+                    sentences = sent_tokenize(chunk_text + paragraph_text)
+                    chunks = []
+                    chunk = ""
+                    for sentence in sentences:
+                        temp_chunk = chunk + " " + sentence if chunk else sentence
+                        if self.token_count(temp_chunk) <= chunk_target_size:
+                            chunk = temp_chunk
+                        else:
+                            chunks.append(chunk)
+                            chunk = sentence
+                    if chunk:
+                        chunks.append(chunk)
+            
+                    # Now write out each chunk, apart from the last, as this will be less than or equal to CHUNK_TARGET_SIZE
+                    # the last chunk will be processed like a regular paragraph
+                    for i, chunk_text_p in enumerate(chunks):
+                        if i < len(chunks) - 1:
+                            # Process all but the ;ast chunk in this large para
+                            self.write_chunk(myblob_name, myblob_uri, f"{file_number}.{i}", self.token_count(chunk_text_p), chunk_text_p, page_list, previous_section_name, previous_title_name) 
+                            chunk_count += 1
+                        else:
+                            # Reset the paragraph token count to just the tokens left in the last chunk
+                            # and leave the remaining text from the large paragraph to be combined with the next in the outer loop
+                            paragraph_size = self.token_count(chunk_text_p)
+                            paragraph_text = chunk_text_p
+                            chunk_text = ''
+                else:
+                    # if this para is not large by itslef but will put us over the max token count or it is a new section, then write out the chunk text we have to this point
+                    self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, previous_section_name, previous_title_name)
+                    chunk_count += 1
+                
+                    # reset chunk specific variables
+                    file_number += 1
+                    page_list = []
+                    chunk_text = ''
+                    chunk_size = 0
+                    page_number = 0
+            
+            if page_number != paragraph_element["page_number"]:
+                # increment page number if necessary
+                page_list.append(paragraph_element["page_number"])
+                page_number = paragraph_element["page_number"]
+
+            # add paragraph to the chunk
+            chunk_size = chunk_size + paragraph_size
+            chunk_text = chunk_text + "\n" + paragraph_text
+
+            # If this is the last paragraph then write the chunk
+            if index == len(document_map['structure'])-1:
+                self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name)
+                chunk_count += 1
+                
+            previous_section_name = section_name
+            previous_title_name = title_name
+        
+        logging.info(f"Chunking is complete \n") 
+        return chunk_count
+        
+        
+        
+        
+        
+    def build_chunks_old(self, document_map, myblob_name, myblob_uri, chunk_target_size):
         """ Function to build chunk outputs based on the document map """
         
         chunk_text = ''
@@ -365,6 +456,7 @@ class Utilities:
             paragraph_size = self.token_count(paragraph_element["text"])
             section_name = paragraph_element["section"]
             title_name = paragraph_element["title"]
+            chunk_count = 0
             
             # If this para just by itself is larger than CHUNK_TARGET_SIZE, then we need to split this up 
             # and treat each slice as a new para and. Build a list of chunks that fall under the max size
@@ -402,6 +494,7 @@ class Utilities:
                     if i < len(chunks) - 1:
                         # Process all but the ;ast chunk in this large para
                         self.write_chunk(myblob_name, myblob_uri, f"{file_number}.{i}", self.token_count(chunk_text), chunk_text, page_list, previous_section_name, previous_title_name) 
+                        chunk_count += 1
                     else:
                         # Reset the paragraph token count to just the tokens left in the last chunk
                         paragraph_size = self.token_count(chunk_text)          
@@ -418,8 +511,10 @@ class Utilities:
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:
                 self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name) 
+                chunk_count += 1
                 
             previous_section_name = section_name
             previous_title_name = title_name    
         
         logging.info(f"Chunking is complete \n")
+        return chunk_count

@@ -37,6 +37,7 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
+function_name = "FileFormRecPollingPDF"
 
 
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
@@ -47,74 +48,76 @@ POLLING_BACKOFF = 30
 
 
 def main(msg: func.QueueMessage) -> None:
-    logging.info('Python queue trigger function processed a queue item: %s',
-                 msg.get_body().decode('utf-8'))
-
-    # Receive message from the queue
-    message_body = msg.get_body().decode('utf-8')
-    message_json = json.loads(message_body)
-    blob_name =  message_json['blob_name']
-    blob_uri =  message_json['blob_uri']
-    FR_resultId = message_json['FR_resultId']
-    queued_count = message_json['polling_queue_count']      
     
-    statusLog.upsert_document(blob_name, 'Polling Form Recognizer function started', StatusClassification.INFO)
-    statusLog.upsert_document(blob_name, f'Queue message received from pdf polling queue attemp {queued_count}', StatusClassification.DEBUG)
-    
-    # Construct and submmit the polling message to FR
-    headers = {
-        'Ocp-Apim-Subscription-Key': FR_key
-    }
+    try:
+        logging.info('Python queue trigger function processed a queue item: %s',
+                    msg.get_body().decode('utf-8'))
 
-    params = {
-        'api-version': api_version
-    }
-    url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}/analyzeResults/{FR_resultId}"
-    response = requests.get(url, headers=headers, params=params)
+        # Receive message from the queue
+        message_body = msg.get_body().decode('utf-8')
+        message_json = json.loads(message_body)
+        blob_name =  message_json['blob_name']
+        blob_uri =  message_json['blob_uri']
+        FR_resultId = message_json['FR_resultId']
+        queued_count = message_json['polling_queue_count']      
         
-    # Check response and process
-    if response.status_code == 200:
-        # FR processing is complete OR still running- create document map 
-        response_json = response.json()
-        response_status = response_json['status']
+        statusLog.upsert_document(blob_name, f'{function_name} - Polling Form Recognizer function started', StatusClassification.INFO)
+        statusLog.upsert_document(blob_name, f'{function_name} - Queue message received from pdf polling queue attempt {queued_count}', StatusClassification.DEBUG)
         
-        if response_status == "succeeded":
-            # successful, so continue to document map and chunking
-            statusLog.upsert_document(blob_name, f'Form Recognizer processing was successful', StatusClassification.DEBUG)  
-            # extract the result section  from the response and convert to an object (named tuple)
-            result_dict = json.dumps(response_json["analyzeResult"])
-            result_obj = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
-            # build the document map     
-            statusLog.upsert_document(blob_name, f'Starting document map build', StatusClassification.DEBUG)  
-            document_map = utilities.build_document_map_pdf(blob_name, blob_uri, result_obj, response_json["analyzeResult"], azure_blob_log_storage_container)  
-            statusLog.upsert_document(blob_name, f'Document map build complete', StatusClassification.DEBUG)     
-            # create chunks
-            statusLog.upsert_document(blob_name, f'Starting chunking', StatusClassification.DEBUG)  
-            utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
-            statusLog.upsert_document(blob_name, f'Chunking complete', StatusClassification.DEBUG)  
-            statusLog.upsert_document(blob_name, f'Processing of file {blob_name} is now complete', StatusClassification.INFO, State.COMPLETE)  
+        # Construct and submmit the polling message to FR
+        headers = {
+            'Ocp-Apim-Subscription-Key': FR_key
+        }
+
+        params = {
+            'api-version': api_version
+        }
+        url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}/analyzeResults/{FR_resultId}"
+        response = requests.get(url, headers=headers, params=params)        
+
+        # Check response and process
+        if response.status_code == 200:
+            # FR processing is complete OR still running- create document map 
+            response_json = response.json()
+            response_status = response_json['status']
             
+            if response_status == "succeeded":
+                # successful, so continue to document map and chunking
+                statusLog.upsert_document(blob_name, f'{function_name} - Form Recognizer processing was successful', StatusClassification.DEBUG)  
+                # extract the result section  from the response and convert to an object (named tuple)
+                result_dict = json.dumps(response_json["analyzeResult"])
+                result_obj = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+                # build the document map     
+                statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)  
+                document_map = utilities.build_document_map_pdf(blob_name, blob_uri, result_obj, response_json["analyzeResult"], azure_blob_log_storage_container)  
+                statusLog.upsert_document(blob_name, f'{function_name} - Document map build complete', StatusClassification.DEBUG)     
+                # create chunks
+                statusLog.upsert_document(blob_name, f'{function_name} - Starting chunking', StatusClassification.DEBUG)  
+                chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
+                statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete', StatusClassification.DEBUG)  
+                statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete. {chunk_count} chunks created.', StatusClassification.INFO, State.COMPLETE)          
 
-        elif response_status == "running":
-            # still running so requeue with a backoff
-            if queued_count < MAX_REQUEUE_COUNT:
-                backoff = POLLING_BACKOFF * (queued_count ** 2)
-                backoff += random.randint(0, 10)
-                queued_count += 1
-                message_json['polling_queue_count'] = queued_count
-                statusLog.upsert_document(blob_name, f"FR has not completed processing, requeuing. Back off of attempt {queued_count} of {MAX_REQUEUE_COUNT} for {backoff} seconds", StatusClassification.DEBUG) 
-                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())   
-                message_json_str = json.dumps(message_json)  
-                queue_client.send_message(message_json_str, visibility_timeout=backoff)       
+            elif response_status == "running":
+                # still running so requeue with a backoff
+                if queued_count < MAX_REQUEUE_COUNT:
+                    backoff = POLLING_BACKOFF * (queued_count ** 2)
+                    backoff += random.randint(0, 10)
+                    queued_count += 1
+                    message_json['polling_queue_count'] = queued_count
+                    statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Back off of attempt {queued_count} of {MAX_REQUEUE_COUNT} for {backoff} seconds", StatusClassification.DEBUG) 
+                    queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())
+                    message_json_str = json.dumps(message_json)  
+                    queue_client.send_message(message_json_str, visibility_timeout=backoff)       
+                else:
+                    statusLog.upsert_document(blob_name, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)        
+            
             else:
-                statusLog.upsert_document(blob_name, f'maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)        
-        
+                # unexpected status returned by FR
+                statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
+                            
         else:
-            # unexpected status returned by FR
-            statusLog.upsert_document(blob_name, f'unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
-                          
-    else:
-        statusLog.upsert_document(blob_name, f'Error raised by FR polling', StatusClassification.ERROR, State.ERROR) 
+            statusLog.upsert_document(blob_name, f'{function_name} - Error raised by FR polling', StatusClassification.ERROR, State.ERROR)
+            
+    except Exception as e:
+        statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
-    
-    

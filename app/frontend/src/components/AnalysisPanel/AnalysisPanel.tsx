@@ -28,9 +28,11 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const isDisabledSupportingContentTab: boolean = !answer.data_points.length;
     const isDisabledCitationTab: boolean = !activeCitation;
     // the first split on ? separates the file from the sas token, then the second split on . separates the file extension
-    const isSourceFilePdf: boolean = sourceFile?.split("?")[0].split(".").pop() === "pdf";
-
+    const sourceFileExt: any = sourceFile?.split("?")[0].split(".").pop();
+    
     const sanitizedThoughts = DOMPurify.sanitize(answer.thoughts!);
+    
+    console.log(sourceFile?.split("?")[0].split(".").pop())
 
     return (
         <Pivot
@@ -62,12 +64,14 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                         <iframe title="Document Section" src={activeCitation} width="100%" height={citationHeight} />
                     </PivotItem>
                     <PivotItem itemKey="rawFile" headerText="Document">
-                        {isSourceFilePdf ? (
+                        { sourceFileExt === "pdf" ? (
                             //use object tag for pdfs because iframe does not support page numbers
                             <object data={sourceFile + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
+                        ) : ( sourceFileExt === "docx" ? (
+                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src='+encodeURIComponent(sourceFile as string)+"&action=embedview&wdStartOn="+pageNumber} width="100%" height={citationHeight} />
                         ) : (
                             <iframe title="Source File" src={sourceFile} width="100%" height={citationHeight} />
-                        )}
+                        )) }
                     </PivotItem>
                 </Pivot>
             </PivotItem>

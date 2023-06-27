@@ -7,7 +7,7 @@
   * [Analysis Panel](#analysis-panel)
 * [Developer Settings](#developer-settings)
   * [Debugging Functions](#debugging-functions)
-  * [Build sandox environment](#build-sandbox-environment)
+  * [Build pipeline for sandbox environment](#build-pipeline-for-sandbox)
 
 ---
 
@@ -65,4 +65,5 @@ View the details of the [Analysis Panel](./ux_analysispanel.md) feature or you c
 Check out how to [Debug the Azure functions locally in VSCode](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
 
 ### Build pipeline for Sandbox
-View the details of the [Procedure to setup sandbox environment](/docs/features/setting_up_sandox_environment.md) feature or you can click on each section to get more specifics of that detail tab.
+
+Setting up a pipeline to deploy a new Sandbox environment requires some manual configuration. Review the details of the [Procedure to setup sandbox environment](setting_up_sandbox_environment.md) here.

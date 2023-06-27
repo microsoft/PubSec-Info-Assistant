@@ -45,8 +45,7 @@ param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
-param xyRoundingFactor string = '1'
-param formRecognizerApiVersion string = '2023-02-28 (Preview)'
+param formRecognizerApiVersion string = '2023-02-28-preview'
 param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
@@ -292,7 +291,6 @@ module functions 'core/function/function.bicep' = {
     CosmosDBKey: cosmosdb.outputs.CosmosDBKey
     CosmosDBDatabaseName: cosmosdb.outputs.CosmosDBDatabaseName
     CosmosDBContainerName: cosmosdb.outputs.CosmosDBContainerName
-    xyRoundingFactor: xyRoundingFactor
     chunkTargetSize: chunkTargetSize
     targetPages: targetPages
     formRecognizerApiVersion: formRecognizerApiVersion
@@ -414,7 +412,6 @@ output AZURE_FORM_RECOGNIZER_ENDPOINT string = formrecognizer.outputs.formRecogn
 output AZURE_FORM_RECOGNIZER_KEY string = formrecognizer.outputs.formRecognizerAccountKey
 output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
-output XY_ROUNDING_FACTOR string = xyRoundingFactor
 output CHUNK_TARGET_SIZE string = chunkTargetSize
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages

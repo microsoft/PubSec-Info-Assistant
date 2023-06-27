@@ -28,10 +28,8 @@ Next you will need to create local configuration values that are used by the fun
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": "content",
     "BLOB_STORAGE_ACCOUNT_KEY": "<YOUR AZURE VALUE>",
     "CHUNK_TARGET_SIZE": "750",
-    "FR_API_VERSION": "2023-02-28 (Preview)",
+    "FR_API_VERSION": "2023-02-28-preview",
     "BLOB_CONNECTION_STRING": "<YOUR AZURE VALUE>",
-    "TARGET_PAGES": "ALL",
-    "XY_ROUNDING_FACTOR": "1",
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AzureWebJobs.parse_html_w_form_rec.Disabled": "true"
   }

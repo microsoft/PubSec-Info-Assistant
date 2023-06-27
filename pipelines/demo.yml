@@ -2,23 +2,50 @@
 # Licensed under the MIT license.
 
 trigger: none
-  batch: true
-  branches:
-    include: [ main ]
+
+parameters:
+  - name: sandbox
+    displayName: 'Select sandbox environment'
+    type: string
+    default: 'red'
+    values:
+      - red
+      - blue
 
 pr: none
 
 stages:
-- stage: Deploy
-  jobs:
+- ${{ if eq(parameters.sandbox, 'red' ) }}:
+  
+  - stage: DeployDemoRed
+    displayName: 'Deploy to Red Demo environment'
 
-  - deployment: Demo
-    environment: demo-ia
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-        runOnce:    #rolling, canary are the other strategies that are supported
-          deploy:
-            steps:
-            - template: templates/deploy-template.yml
+    jobs:
+
+     - deployment: DeployRed
+       environment: demo-red
+       timeoutInMinutes: 120
+       pool:
+         vmImage: 'ubuntu-latest'
+       strategy:
+         runOnce:    #rolling, canary are the other strategies that are supported
+           deploy:
+             steps:
+             - template: templates/deploy-template.yml    # Path: pipelines/templates/deploy-template.yml
+
+- ${{ if eq(parameters.sandbox, 'blue' ) }}:
+  - stage: DeployDemoBlue
+    displayName: 'Deploy to Blue Demo environment'
+
+    jobs:
+
+      - deployment: DemoBlue
+        environment: demo-blue
+        timeoutInMinutes: 120
+        pool:
+         vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:    #rolling, canary are the other strategies that are supported
+            deploy:
+              steps:
+                - template: templates/deploy-template.yml     # Path: pipelines/templates/deploy-template.yml

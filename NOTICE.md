@@ -73,6 +73,12 @@ From the following locations:
 
 <https://github.com/Azure/azure-sdk-for-python>
 
+
+### tenacity
+
+<https://github.com/jd/tenacity>
+
+
 ## NPM Modules
 
 From the following locations:

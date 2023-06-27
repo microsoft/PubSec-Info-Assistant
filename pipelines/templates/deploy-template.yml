@@ -71,4 +71,9 @@ steps:
     parameters:
       displayName: 'Deploy Web App'
       makeCommand: 'deploy-webapp'
+
+  - template: make-command.yml
+    parameters:
+      displayName: 'Deploy Azure Functions'
+      makeCommand: 'deploy-functions'
   

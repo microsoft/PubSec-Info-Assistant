@@ -51,9 +51,26 @@ export RANDOM_STRING=$randomString
 
 if [ -n "${IN_AUTOMATION}" ]; then
   signedInUserId=$ARM_CLIENT_ID
-  #if in automation, get the app registration and service principal values from the already logged in SP
-  aadAppId=$ARM_CLIENT_ID
-  aadSPId=$ARM_SERVICE_PRINCIPAL_ID
+  workspace=$WORKSPACE
+  if [[ $workspace = tmp* ]]; then
+    # if in automation for PR builds, get the app registration and service principal values from the already logged in SP
+    aadAppId=$ARM_CLIENT_ID
+    aadSPId=$ARM_SERVICE_PRINCIPAL_ID
+  else
+    # if in automation for non-PR builds, get the app registration and service principal values from the manually created AD objects
+    aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+    if [ -z $aadAppId ]; then
+      echo "An Azure AD App Registration and Service Principal must be manually created for the targeted workspace."
+      echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh"
+      exit 1  
+    fi
+    aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
+    if [ -z $aadSPId ]; then
+      echo "An Azure AD App Registration and Service Principal must be manually created for the targeted workspace."
+      echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh"
+      exit 1
+    fi
+  fi
 else
   signedInUserId=$(az ad signed-in-user show --query id --output tsv)
   #if not in automation, create the app registration and service principal values

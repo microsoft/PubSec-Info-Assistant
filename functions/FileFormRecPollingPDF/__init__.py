@@ -4,15 +4,16 @@ from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServic
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
-from enum import Enum
-from decimal import Decimal
 import json
 import requests
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities
 import random
 from collections import namedtuple
-from azure.ai.formrecognizer import AnalyzeResult
+import time
+from requests.exceptions import RequestException
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -45,6 +46,7 @@ utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_contai
 FR_MODEL = "prebuilt-layout"
 MAX_REQUEUE_COUNT = 10   #max times we will retry the submission
 POLLING_BACKOFF = 30
+MAX_READ_ATTEMPTS = 5
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -60,9 +62,8 @@ def main(msg: func.QueueMessage) -> None:
         blob_uri =  message_json['blob_uri']
         FR_resultId = message_json['FR_resultId']
         queued_count = message_json['polling_queue_count']      
-        
+        statusLog.upsert_document(blob_name, f'{function_name} - Message received from pdf polling queue attempt {queued_count}', StatusClassification.DEBUG, State.PROCESSING)        
         statusLog.upsert_document(blob_name, f'{function_name} - Polling Form Recognizer function started', StatusClassification.INFO)
-        statusLog.upsert_document(blob_name, f'{function_name} - Queue message received from pdf polling queue attempt {queued_count}', StatusClassification.DEBUG)
         
         # Construct and submmit the polling message to FR
         headers = {
@@ -73,8 +74,11 @@ def main(msg: func.QueueMessage) -> None:
             'api-version': api_version
         }
         url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}/analyzeResults/{FR_resultId}"
-        response = requests.get(url, headers=headers, params=params)        
-
+        
+        # retry logic to handle 'Connection broken: IncompleteRead' errors, up to n times
+     
+        response = durable_get(url, headers, params)   
+        
         # Check response and process
         if response.status_code == 200:
             # FR processing is complete OR still running- create document map 
@@ -83,7 +87,7 @@ def main(msg: func.QueueMessage) -> None:
             
             if response_status == "succeeded":
                 # successful, so continue to document map and chunking
-                statusLog.upsert_document(blob_name, f'{function_name} - Form Recognizer processing was successful', StatusClassification.DEBUG)  
+                statusLog.upsert_document(blob_name, f'{function_name} - Form Recognizer has completed processing and the analyze results have been received', StatusClassification.DEBUG)  
                 # extract the result section  from the response and convert to an object (named tuple)
                 result_dict = json.dumps(response_json["analyzeResult"])
                 result_obj = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
@@ -95,7 +99,8 @@ def main(msg: func.QueueMessage) -> None:
                 statusLog.upsert_document(blob_name, f'{function_name} - Starting chunking', StatusClassification.DEBUG)  
                 chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete', StatusClassification.DEBUG)  
-                statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete. {chunk_count} chunks created.', StatusClassification.INFO, State.COMPLETE)          
+                statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete. {chunk_count} chunks created.', StatusClassification.INFO, State.COMPLETE)
+                return          
 
             elif response_status == "running":
                 # still running so requeue with a backoff
@@ -104,20 +109,25 @@ def main(msg: func.QueueMessage) -> None:
                     backoff += random.randint(0, 10)
                     queued_count += 1
                     message_json['polling_queue_count'] = queued_count
-                    statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Back off of attempt {queued_count} of {MAX_REQUEUE_COUNT} for {backoff} seconds", StatusClassification.DEBUG) 
+                    statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Back off of attempt {queued_count} of {MAX_REQUEUE_COUNT} for {backoff} seconds", StatusClassification.DEBUG, State.QUEUED) 
                     queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())
                     message_json_str = json.dumps(message_json)  
-                    queue_client.send_message(message_json_str, visibility_timeout=backoff)       
+                    queue_client.send_message(message_json_str, visibility_timeout=backoff)
                 else:
-                    statusLog.upsert_document(blob_name, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)        
-            
+                    statusLog.upsert_document(blob_name, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)     
             else:
                 # unexpected status returned by FR
                 statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
-                            
         else:
-            statusLog.upsert_document(blob_name, f'{function_name} - Error raised by FR polling', StatusClassification.ERROR, State.ERROR)
-            
+            statusLog.upsert_document(blob_name, f'{function_name} - Error raised by FR polling', StatusClassification.ERROR, State.ERROR)    
+                            
     except Exception as e:
+        # a general error 
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
+
+@retry(stop=stop_after_attempt(MAX_READ_ATTEMPTS), wait=wait_fixed(5))
+def durable_get(url, headers, params):
+    response = requests.get(url, headers=headers, params=params)   
+    response.raise_for_status()  # Raise stored HTTPError, if one occurred.
+    return response

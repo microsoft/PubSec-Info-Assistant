@@ -19,7 +19,8 @@
       "imageAction": "generateNormalizedImages",
       "parsingMode": "default",
       "failOnUnprocessableDocument": false,
-      "failOnUnsupportedContentType": false
+      "failOnUnsupportedContentType": false,
+      "allowSkillsetToReadFileData": true
     }
   },
   "fieldMappings": [

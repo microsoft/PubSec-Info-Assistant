@@ -7,10 +7,13 @@ from datetime import datetime, timedelta
 import base64
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from enum import Enum
+import logging
 
 
 class State(Enum):
-    STARTED = "Processing"
+    PROCESSING = "Processing"
+    SKIPPED = "Skipped"
+    QUEUED = "Queued"
     COMPLETE = "Complete"
     ERROR = "Error"
     ALL = "All"
@@ -115,7 +118,7 @@ class StatusLog:
         return items       
     
 
-    def upsert_document(self, document_path, status, status_classification: StatusClassification, state=State.STARTED, fresh_start=False):
+    def upsert_document(self, document_path, status, status_classification: StatusClassification, state=State.PROCESSING, fresh_start=False):
         """ Function to upsert a status item for a specified id """
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
@@ -166,3 +169,6 @@ class StatusLog:
             }
 
         self.container.upsert_item(body=json_document)
+        
+        # Write the status update to the logger also
+        logging.info(status)

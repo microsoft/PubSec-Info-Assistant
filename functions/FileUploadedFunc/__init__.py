@@ -24,7 +24,7 @@ statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmos
 def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
     try:
-        statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, State.STARTED, True)    
+        statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, State.PROCESSING, True)    
         logging.info(f"Python blob trigger function processed blob \n"
                     f"Name: {myblob.name}\n"
                     f"Blob Size: {myblob.length} bytes")
@@ -47,7 +47,7 @@ def main(myblob: func.InputStream):
             logging.info("Unknown file type")
             error_message = f"{function_name} - Unexpected file type submitted {file_extension}"
             statusLog.state_description = error_message
-            statusLog.upsert_document(myblob.name, error_message, StatusClassification.ERROR, State.ERROR) 
+            statusLog.upsert_document(myblob.name, error_message, StatusClassification.ERROR, State.SKIPPED) 
             raise Exception(error_message)    
         
         # Create message
@@ -62,7 +62,7 @@ def main(myblob: func.InputStream):
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())
         backoff =  random.randint(1, 60)        
         queue_client.send_message(message_string, visibility_timeout = backoff)  
-        statusLog.upsert_document(myblob.name, f'{function_name} - {file_extension} file sent to submit queue', StatusClassification.DEBUG)          
+        statusLog.upsert_document(myblob.name, f'{function_name} - {file_extension} file sent to submit queue. Visible in {backoff} seconds', StatusClassification.DEBUG, State.QUEUED)          
         
     except Exception as e:
         statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)

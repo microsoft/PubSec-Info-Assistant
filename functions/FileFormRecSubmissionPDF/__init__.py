@@ -47,9 +47,8 @@ def main(msg: func.QueueMessage) -> None:
         message_json = json.loads(message_body)
         blob_path =  message_json['blob_name']
         queued_count =  message_json['submit_queued_count']
+        statusLog.upsert_document(blob_path, f'{function_name} - Received message from pdf-submit-queue ', StatusClassification.DEBUG, State.PROCESSING)
         statusLog.upsert_document(blob_path, f'{function_name} - Submitting to Form Recognizer', StatusClassification.INFO)
-        statusLog.upsert_document(blob_path, f'{function_name} - Queue message received from pdf submit queue', StatusClassification.DEBUG)
-
         # construct blob url
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
         statusLog.upsert_document(blob_path, f'{function_name} - SAS token generated', StatusClassification.DEBUG)
@@ -76,12 +75,13 @@ def main(msg: func.QueueMessage) -> None:
         if response.status_code == 202:
             # Successfully submitted
             statusLog.upsert_document(blob_path, f'{function_name} - PDF submitted to FR successfully', StatusClassification.DEBUG) 
-            message_json['FR_resultId'] = response.headers.get("apim-request-id")   
+            resultId = response.headers.get("apim-request-id")  
+            message_json['FR_resultId'] = resultId  
             message_json['polling_queue_count'] = 1     
             queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())    
             message_json_str = json.dumps(message_json)    
             queue_client.send_message(message_json_str, visibility_timeout = POLL_QUEUE_SUBMIT_BACKOFF)  
-            statusLog.upsert_document(blob_path, f'{function_name} - message sent to polling queue', StatusClassification.DEBUG) 
+            statusLog.upsert_document(blob_path, f'{function_name} - message sent to pdf-polling-queue. Visible in {POLL_QUEUE_SUBMIT_BACKOFF} seconds. FR Result ID is {resultId}', StatusClassification.DEBUG, State.QUEUED) 
 
         elif response.status_code == 429:
             # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
@@ -94,6 +94,7 @@ def main(msg: func.QueueMessage) -> None:
                 queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_submit_queue, message_encode_policy=TextBase64EncodePolicy())   
                 message_json_str = json.dumps(message_json)  
                 queue_client.send_message(message_json_str, visibility_timeout=backoff)
+                statusLog.upsert_document(blob_path, f'{function_name} - message sent to pdf-submit-queue. Visible in {backoff} seconds.', StatusClassification.DEBUG, State.QUEUED) 
             else:
                 statusLog.upsert_document(blob_path, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR) 
 

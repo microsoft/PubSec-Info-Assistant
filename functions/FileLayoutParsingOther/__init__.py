@@ -43,8 +43,8 @@ def main(msg: func.QueueMessage) -> None:
         message_json = json.loads(message_body)
         blob_name =  message_json['blob_name']
         blob_uri =  message_json['blob_uri']
-        statusLog.upsert_document(blob_name, f'{function_name} - Starting to parse the non-PDF file', StatusClassification.INFO)
-        statusLog.upsert_document(blob_name, f'{function_name} - Queue message received from non-pdf submit queue', StatusClassification.DEBUG)
+        statusLog.upsert_document(blob_name, f'{function_name} - Starting to parse the non-PDF file', StatusClassification.INFO, State.PROCESSING)
+        statusLog.upsert_document(blob_name, f'{function_name} - Message received from non-pdf submit queue', StatusClassification.DEBUG)
 
         # construct blob url
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_name)

@@ -391,9 +391,9 @@ module searchRoleBackend 'core/security/role.bicep' = {
   }
 }
 
-module storageRoleBackend 'core/security/role.bicep' = {
+module storageRoleFunc 'core/security/role.bicep' = {
   scope: rg
-  name: 'storage-role-backend'
+  name: 'storage-role-Func'
   params: {
     principalId: functions.outputs.identityPrincipalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'

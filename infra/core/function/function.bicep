@@ -107,11 +107,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   ] 
   properties: {
     reserved: true
-    serverFarmId: hostingPlanName
+    serverFarmId: hostingPlan.id
     siteConfig: {
       linuxFxVersion: 'python|3.10'
       alwaysOn: false
-      ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'    
       connectionStrings:[
         {

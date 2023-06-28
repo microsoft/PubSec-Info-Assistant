@@ -46,6 +46,10 @@ jq -r  '
             "env_var": "RESOURCE_GROUP_NAME"
         },
         {
+            "path": "resourcE_GROUP_FUNC_NAME",
+            "env_var": "RESOURCE_GROUP_FUNC_NAME"
+        },
+        {
             "path": "coG_SERVICES_FOR_SEARCH_KEY",
             "env_var": "COGNITIVE_SERVICES_KEY"
         },

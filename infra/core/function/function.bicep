@@ -1,14 +1,14 @@
 @description('Name of the function app')
 param name string
 
+@description('Name of the function app hosting plan')
+param hostingPlanName string
+
 @description('Location of the function app')
 param location string = resourceGroup().location
 
 @description('Tags for the function app')
 param tags object = {}
-
-@description('Name of the app service plan')
-param serverFarmId string
 
 @description('Runtime of the function app')
 param runtime string = 'python'
@@ -79,10 +79,21 @@ param pdfPollingQueue string
 @description('')
 param nonPdfSubmitQueue string
 
+resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
+  name: hostingPlanName
+  location: location
+  kind: 'linux'
+  sku: {
+    name: 'Y1'
+    tier: 'Dynamic'
+  }
+  properties: {
+    reserved: true
+  }
+}
 
 
 // Create function app resource
-
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: name
   location: location
@@ -91,12 +102,17 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   identity: {
     type: 'SystemAssigned'
   }
+  dependsOn: [
+    hostingPlan
+  ] 
   properties: {
     reserved: true
-    serverFarmId: serverFarmId
+    serverFarmId: hostingPlanName
     siteConfig: {
       linuxFxVersion: 'python|3.10'
-      alwaysOn: true
+      alwaysOn: false
+      ftpsState: 'FtpsOnly'
+      minTlsVersion: '1.2'    
       connectionStrings:[
         {
           name: 'BLOB_CONNECTION_STRING'
@@ -123,6 +139,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
+        }
+        {
+          name: 'WEBSITE_NODE_DEFAULT_VERSION'
+          value: '~14'
         }
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'

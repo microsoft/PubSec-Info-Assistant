@@ -172,3 +172,6 @@ class StatusLog:
         
         # Write the status update to the logger also
         logging.info(status)
+        
+        # add status to standard logger
+        logging.info(status)

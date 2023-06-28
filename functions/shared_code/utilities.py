@@ -77,15 +77,32 @@ class Utilities:
         # to do, more complex sorting logic to cope with indented bulleted lists
         # return (element["page_number"], element["role_priority"], element["bounding_region"][0]["x"], element["bounding_region"][0]["y"])
         
-    
     def get_filename_and_extension(self, path):
+
         """ Function to return the file name & type"""
+
         # Split the path into base and extension
+
         base_name = os.path.basename(path)
+
         segments = path.split("/")
+
         directory = "/".join(segments[1:-1]) + "/"
+
+        if directory == "/": directory = ""
+
         file_name, file_extension = os.path.splitext(base_name)    
+
         return file_name, file_extension, directory
+    
+    # def get_filename_and_extension(self, path):
+    #     """ Function to return the file name & type"""
+    #     # Split the path into base and extension
+    #     base_name = os.path.basename(path)
+    #     segments = path.split("/")
+    #     directory = "/".join(segments[1:-1]) + "/"
+    #     file_name, file_extension = os.path.splitext(base_name)    
+    #     return file_name, file_extension, directory
     
     
     def table_to_html(self, table):

@@ -4,7 +4,7 @@
 trigger:
   batch: true
   branches:
-    include: [ 0.2-Dev ]
+    include: [ 0.2-Beta ]
 
 pr: none
 

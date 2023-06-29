@@ -58,17 +58,11 @@ if [ -n "${IN_AUTOMATION}" ]; then
     aadSPId=$ARM_SERVICE_PRINCIPAL_ID
   else
     # if in automation for non-PR builds, get the app registration and service principal values from the manually created AD objects
-    aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+    aadAppId=$AD_WEBAPP_CLIENT_ID
     if [ -z $aadAppId ]; then
       echo "An Azure AD App Registration and Service Principal must be manually created for the targeted workspace."
-      echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh"
+      echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh and set the AD_WEBAPP_CLIENT_ID pipeline variable in Azure DevOps."
       exit 1  
-    fi
-    aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-    if [ -z $aadSPId ]; then
-      echo "An Azure AD App Registration and Service Principal must be manually created for the targeted workspace."
-      echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh"
-      exit 1
     fi
   fi
 else

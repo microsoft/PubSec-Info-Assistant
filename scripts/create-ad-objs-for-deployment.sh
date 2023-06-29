@@ -77,5 +77,7 @@ fi
 
 #output the values to the console
 echo -e "\n\n"
-echo "Remember to use this value in your pipeline configuration" 
+echo "Remember to use these values in your pipeline configuration"
+echo -e "\n" 
 echo "WORKSPACE: " $WORKSPACE
+echo "Website App Registration: " $aadAppId

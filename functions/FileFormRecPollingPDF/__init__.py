@@ -1,6 +1,4 @@
-import logging
 import azure.functions as func
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
@@ -88,12 +86,9 @@ def main(msg: func.QueueMessage) -> None:
             if response_status == "succeeded":
                 # successful, so continue to document map and chunking
                 statusLog.upsert_document(blob_name, f'{function_name} - Form Recognizer has completed processing and the analyze results have been received', StatusClassification.DEBUG)  
-                # extract the result section  from the response and convert to an object (named tuple)
-                result_dict = json.dumps(response_json["analyzeResult"])
-                result_obj = json.loads(result_dict, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
                 # build the document map     
                 statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)  
-                document_map = utilities.build_document_map_pdf(blob_name, blob_uri, result_obj, response_json["analyzeResult"], azure_blob_log_storage_container)  
+                document_map = utilities.build_document_map_pdf(blob_name, blob_uri, response_json["analyzeResult"], azure_blob_log_storage_container)  
                 statusLog.upsert_document(blob_name, f'{function_name} - Document map build complete', StatusClassification.DEBUG)     
                 # create chunks
                 statusLog.upsert_document(blob_name, f'{function_name} - Starting chunking', StatusClassification.DEBUG)  

@@ -96,20 +96,20 @@ class Utilities:
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
         table_html = "<table>"
-        rows = [sorted([cell for cell in table.cells if cell.rowIndex == i], key=lambda cell: cell.columnIndex) for i in range(table.rowCount)]
+        rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i], key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
         for row_cells in rows:
             table_html += "<tr>"
             for cell in row_cells:
                 tag = "td"
                 if hasattr(cell, 'kind'):
-                    if (cell.kind == "columnHeader" or cell.kind == "rowHeader"):
+                    if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
                         tag = "th"                   
                 cell_spans = ""
                 if hasattr(cell, 'columnSpan'):
-                    if cell.columnSpan > 1: cell_spans += f" colSpan={cell.columnSpan}"
+                    if cell["columnSpan"] > 1: cell_spans += f" colSpan={cell['columnSpan']}"
                 if hasattr(cell, 'rowSpan'):             
-                    if cell.rowSpan > 1: cell_spans += f" rowSpan={cell.rowSpan}"
-                table_html += f"<{tag}{cell_spans}>{html.escape(cell.content)}</{tag}>"
+                    if cell["rowSpan"] > 1: cell_spans += f" rowSpan={cell['rowSpan']}"
+                table_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
             table_html +="</tr>"
         table_html += "</table>"
         return table_html
@@ -118,7 +118,6 @@ class Utilities:
     def  get_blob_and_sas(self, blob_path):
         """ Function to retrieve the uri and sas token for a given blob in azure storage"""
         logging.info("processing pdf " + blob_path)
-        base_filename = os.path.basename(blob_path)
 
         # Get path and file name minus the root container
         separator = "/"
@@ -140,28 +139,27 @@ class Utilities:
         return source_blob_path
     
     
-    def build_document_map_pdf(self, myblob_name, myblob_uri, result, result_dict, azure_blob_log_storage_container):
+    def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
         """ Function to build a json structure representing the paragraphs in a document, including metadata
         such as section heading, title, page number, eal word pernetage etc.
         We construct this map from the Content key/value output of FR, because the paragraphs value does not distinguish between
         a table and a text paragraph"""
             
-        logging.info(f"Constructing the JSON structure of the document\n")        
         document_map = {
             'file_name': myblob_name,
             'file_uri': myblob_uri,
-            'content': result.content,
+            'content': result["content"],
             "structure": [],
             "content_type": [],
             "table_index": []
         }
-        document_map['content_type'].extend([content_type.not_processed] * len(result.content))
-        document_map['table_index'].extend([-1] * len(result.content))
+        document_map['content_type'].extend([content_type.not_processed] * len(result['content']))
+        document_map['table_index'].extend([-1] * len(result["content"]))
     
         # update content_type array where spans are tables
-        for index, table in enumerate(result.tables):
-            start_char = table.spans[0].offset
-            end_char = start_char + table.spans[0].length - 1
+        for index, table in enumerate(result["tables"]):
+            start_char = table["spans"][0]["offset"]
+            end_char = start_char + table["spans"][0]["length"] - 1
             document_map['content_type'][start_char] = content_type.table_start
             document_map['content_type'][start_char]
             for i in range(start_char+1, end_char):
@@ -171,9 +169,9 @@ class Utilities:
             document_map['table_index'][end_char] = index        
         
         # update content_type array where spans are titles, section headings or regular content, BUT skip over the table paragraphs
-        for paragraph in result.paragraphs:
-            start_char = paragraph.spans[0].offset
-            end_char = start_char + paragraph.spans[0].length - 1
+        for paragraph in result["paragraphs"]:
+            start_char = paragraph["spans"][0]["offset"]
+            end_char = start_char + paragraph["spans"][0]["length"] - 1
             
             # if this span has already been identified as a non textual paragraph such as a table, then skip over it
             if document_map['content_type'][start_char] == content_type.not_processed:
@@ -203,11 +201,10 @@ class Utilities:
         for index, item in enumerate(document_map['content_type']):
         
             # identify the current paragraph being referenced for use in enriching the document_map metadata
-            if current_paragraph_index <= len(result.paragraphs)-1:
-                if index == result.paragraphs[current_paragraph_index].spans[0].offset:
+            if current_paragraph_index <= len(result["paragraphs"])-1:
+                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]:
                     # we have reached a new paragraph, so collect its metadata
-                    current_paragraph_offset = result.paragraphs[current_paragraph_index].spans[0].offset    
-                    page_number = result.paragraphs[current_paragraph_index].boundingRegions[0].pageNumber
+                    page_number = result["paragraphs"][current_paragraph_index]["boundingRegions"][0]["pageNumber"]
                     current_paragraph_index += 1
                         
             match item:
@@ -226,7 +223,7 @@ class Utilities:
                         # the table text to the output json document map
                         property_type = 'table'
                         table_index = document_map['table_index'][index]
-                        table_json = result.tables[table_index] 
+                        table_json = result["tables"][table_index] 
                         output_text = self.table_to_html(table_json)
                     else:
                         property_type = 'unknown'
@@ -249,11 +246,10 @@ class Utilities:
         self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
         
         # Output FR result to log container
-        json_str = json.dumps(result_dict, indent=2)
+        json_str = json.dumps(result, indent=2)
         output_filename =  file_name + '_FR_Result' + file_extension + ".json"
         self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
         
-        logging.info(f"Constructing the JSON structure of the document complete\n")  
         return document_map      
         
     

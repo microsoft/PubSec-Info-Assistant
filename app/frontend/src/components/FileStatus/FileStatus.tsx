@@ -67,7 +67,7 @@ export const FileStatus = ({ className }: Props) => {
                 timeframe = 43200;
                 break;
             default:
-                timeframe = -4;
+                timeframe = 4;
                 break;
         }
 

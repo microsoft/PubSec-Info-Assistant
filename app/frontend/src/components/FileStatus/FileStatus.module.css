@@ -1,4 +1,7 @@
-.container {
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+   .container {
     display: flex;
     flex-direction: column;
     align-items: center;

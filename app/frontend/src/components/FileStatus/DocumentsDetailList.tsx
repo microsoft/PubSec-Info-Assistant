@@ -24,11 +24,6 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items}: Props) => {
-    const [selectionDetails, setSelectionDetails] = useState<string>("");
-    const selection = new Selection({
-            onSelectionChanged: () => {
-            setSelectionDetails(getSelectionDetails())}
-          });
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
         const newColumns: IColumn[] = columns.slice();
@@ -58,19 +53,6 @@ export const DocumentsDetailList = ({ items}: Props) => {
 
     function onItemInvoked(item: any): void {
         alert(`Item invoked: ${item.name}`);
-    }
-
-    function getSelectionDetails(): string {
-        const selectionCount = selection?.getSelectedCount();
-
-        switch (selectionCount) {
-            case 0:
-                return 'No items selected';
-            case 1:
-                return '1 item selected: ' + (selection?.getSelection()[0] as IDocument).name;
-            default:
-                return `${selectionCount} items selected`;
-        }
     }
 
     const [columns, setColumns] = useState<IColumn[]> ([
@@ -115,6 +97,7 @@ export const DocumentsDetailList = ({ items}: Props) => {
             minWidth: 70,
             maxWidth: 90,
             isResizable: true,
+            ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
             onRender: (item: IDocument) => (
@@ -132,6 +115,7 @@ export const DocumentsDetailList = ({ items}: Props) => {
             maxWidth: 90,
             isResizable: true,
             isCollapsible: true,
+            ariaLabel: 'Column operations for submitted on date, Press to sort by submitted date',
             data: 'string',
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => {
@@ -147,6 +131,7 @@ export const DocumentsDetailList = ({ items}: Props) => {
             maxWidth: 90,
             isResizable: true,
             isCollapsible: true,
+            ariaLabel: 'Column operations for last updated on date, Press to sort by last updated date',
             data: 'number',
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => {
@@ -157,7 +142,6 @@ export const DocumentsDetailList = ({ items}: Props) => {
 
     return (
         <div>
-            <div className={styles.selectionDetails}>{selectionDetails}</div>
             <DetailsList
                 items={items}
                 compact={true}

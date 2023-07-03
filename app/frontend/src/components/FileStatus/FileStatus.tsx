@@ -124,6 +124,7 @@ export const FileStatus = ({ className }: Props) => {
                     placeholder="Select a time range"
                     options={dropdownTimespanOptions}
                     styles={dropdownTimespanStyles}
+                    aria-label="timespan options for file statuses to be displayed"
                 />
             <Dropdown
                     label="File State:"
@@ -132,8 +133,9 @@ export const FileStatus = ({ className }: Props) => {
                     placeholder="Select file states"
                     options={dropdownFileStateOptions}
                     styles={dropdownFileStateStyles}
+                    aria-label="file state options for file statuses to be displayed"
                 />
-            <div className={styles.refresharea} onClick={onGetStatusClick}>
+            <div className={styles.refresharea} onClick={onGetStatusClick} aria-label="Refresh displayed file statuses">
                 <ArrowClockwise24Filled className={styles.refreshicon} />
                 <span className={styles.refreshtext}>Refresh</span>
             </div>

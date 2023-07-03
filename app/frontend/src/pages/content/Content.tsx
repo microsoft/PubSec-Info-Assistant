@@ -12,12 +12,12 @@ const Content = () => {
     return (
         <div className={styles.contentArea} >
             <Pivot aria-label="Upload Files Section" className={styles.topPivot}>
-                <PivotItem headerText="Upload Files">
+                <PivotItem headerText="Upload Files" aria-label="Upload Files Tab">
                     <div className={styles.App} >
                         <FilePicker />
                     </div>
                 </PivotItem>
-                <PivotItem headerText="Upload Status">
+                <PivotItem headerText="Upload Status" aria-label="Upload Status Tab">
                     <FileStatus className=""/>
                 </PivotItem>
             </Pivot>

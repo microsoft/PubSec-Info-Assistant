@@ -119,6 +119,7 @@ const FilePicker = () => {
             styles.upload_button,
             uploadComplete || uploadStarted ? styles.disabled : ""
           )}
+          aria-label="upload files"
         >
           {`Upload ${files.length} Files`}
         </button>

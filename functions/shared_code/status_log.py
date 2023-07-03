@@ -5,12 +5,12 @@
 import os
 from datetime import datetime, timedelta
 import base64
-from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from enum import Enum
 import logging
-
+from azure.cosmos import CosmosClient, PartitionKey, exceptions
 
 class State(Enum):
+    """ Enum for state of a process """
     PROCESSING = "Processing"
     SKIPPED = "Skipped"
     QUEUED = "Queued"
@@ -19,16 +19,19 @@ class State(Enum):
     ALL = "All"
 
 class StatusClassification(Enum):
+    """ Enum for classification of a status message """
     DEBUG = "Debug"
     INFO = "Info"
     ERROR = "Error"
-    
+
 class StatusQueryLevel(Enum):
+    """ Enum for level of detail of a status query """
     CONCISE = "Concise"
     VERBOSE = "Verbose"
 
 
 class StatusLog:
+    """ Class for logging status of various processes to Cosmos DB"""
 
     def __init__(self, url, key, database_name, container_name):
         """ Constructor function """
@@ -36,7 +39,6 @@ class StatusLog:
         self._key = key
         self._database_name = database_name
         self._container_name = container_name
-                
         self.cosmos_client = CosmosClient(url=self._url, credential=self._key)
 
         # Select a database (will create it if it doesn't exist)
@@ -46,45 +48,45 @@ class StatusLog:
 
         # Select a container (will create it if it doesn't exist)
         self.container = self.database.get_container_client(self._container_name)
-        if self._container_name not in [container['id'] for container in self.database.list_containers()]:
-            self.container = self.database.create_container(id=self._container_name, 
+        if self._container_name not in [container['id'] for container
+                                        in self.database.list_containers()]:
+            self.container = self.database.create_container(id=self._container_name,
                 partition_key=PartitionKey(path="/file_name"))
-        
-       
-        
+
     def encode_document_id(self, document_id):
         """ encode a path/file name to remove unsafe chars for a cosmos db id """
         safe_id = base64.urlsafe_b64encode(document_id.encode()).decode()
         return safe_id
-    
-    
-    def read_document(self, 
+
+    def read_document(self,
                        document_id: str,
                        status_query_level: StatusQueryLevel = StatusQueryLevel.CONCISE
                        ):
         """ 
         Function to issue a query and return resulting single doc        
         args
-            status_query_level - the StatusQueryLevel value representing concise or verbose status updates to be included
+            status_query_level - the StatusQueryLevel value representing concise 
+            or verbose status updates to be included
             document_id - if you wish to return a single document by its path        
         """
         query_string = f"SELECT * FROM c WHERE c.id = '{self.encode_document_id(document_id)}'"
-        
+
         items = list(self.container.query_items(
             query=query_string,
             enable_cross_partition_query=True
         ))
-        
-        # Now we have the document, remove the status updates that are considered 'non-verbose' if required 
+
+        # Now we have the document, remove the status updates that are
+        # considered 'non-verbose' if required
         if status_query_level == StatusQueryLevel.CONCISE:
             for item in items:
                 # Filter out status updates that have status_classification == "debug"
-                item['status_updates'] = [update for update in item['status_updates'] if update['status_classification'] != 'Debug']
+                item['status_updates'] = [update for update in item['status_updates']
+                                          if update['status_classification'] != 'Debug']
 
         return items
 
-
-    def read_documents(self, 
+    def read_documents(self,
                        within_n_minutes: int,
                        state: State = State.ALL
                        ):
@@ -96,17 +98,17 @@ class StatusLog:
 
         query_string = "SELECT c.id,  c.file_path, c.file_name, c.state, \
             c.start_timestamp, c.state_description, c.state_timestamp \
-            FROM c"   
+            FROM c"
 
-        conditions = []    
+        conditions = []
         if within_n_minutes != -1:
             from_time = datetime.now() - timedelta(minutes=within_n_minutes)
             from_time_string = str(from_time.strftime('%Y-%m-%d %H:%M:%S'))
             conditions.append(f"c.start_timestamp > '{from_time_string}'")
-            
+
         if state != State.ALL:
-            conditions.append(f"c.state = '{state.value}'")         
-            
+            conditions.append(f"c.state = '{state.value}'")
+
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)
 
@@ -114,17 +116,17 @@ class StatusLog:
             query=query_string,
             enable_cross_partition_query=True
         ))
-                            
-        return items       
-    
 
-    def upsert_document(self, document_path, status, status_classification: StatusClassification, state=State.PROCESSING, fresh_start=False):
+        return items
+
+    def upsert_document(self, document_path, status, status_classification: StatusClassification,
+                        state=State.PROCESSING, fresh_start=False):
         """ Function to upsert a status item for a specified id """
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
-        
+
         # If this event is the start of an upload, remove any existing status files for this path
-        if fresh_start == True:
+        if fresh_start:
             try:
                 self.container.delete_item(item=document_id, partition_key=base_name)
             except exceptions.CosmosResourceNotFoundError:
@@ -132,16 +134,16 @@ class StatusLog:
 
         json_document = ""
         try:
-            # if the document exists then update it        
+            # if the document exists then update it
             json_document = self.container.read_item(item=document_id, partition_key=base_name)
-            
+
             # Check if there has been a state change, and therefore to update state
             if json_document['state'] != state.value:
                 json_document['state'] = state.value
                 json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            
+
             # Append a new item to the array
-            status_updates = json_document["status_updates"]     
+            status_updates = json_document["status_updates"]
             new_item = {
                 "status": status,
                 "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
@@ -169,9 +171,6 @@ class StatusLog:
             }
 
         self.container.upsert_item(body=json_document)
-        
-        # Write the status update to the logger also
-        logging.info(status)
-        
+
         # add status to standard logger
         logging.info(status)

@@ -82,6 +82,22 @@ jq -r  '
         {
             "path": "bloB_CONNECTION_STRING",
             "env_var": "BLOB_CONNECTION_STRING"
+        },
+        {
+            "path": "azurE_COSMOSDB_URL",
+            "env_var": "COSMOSDB_URL"
+        },
+        {
+            "path": "azurE_COSMOSDB_KEY",
+            "env_var": "COSMOSDB_KEY"
+        },
+        {
+            "path": "azurE_COSMOSDB_DATABASE_NAME",
+            "env_var": "COSMOSDB_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_CONTAINER_NAME",
+            "env_var": "COSMOSDB_CONTAINER_NAME"
         }
     ]
         as $env_vars_to_extract

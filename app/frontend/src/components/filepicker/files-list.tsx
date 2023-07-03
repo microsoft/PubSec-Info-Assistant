@@ -24,7 +24,7 @@ const FilesListItem = ({ name, id, onClear, uploadComplete }: {name: any, id: an
           <ClearIcon />
         </span>
       ) : (
-        <span role="img" className={styles.file_list_item_check}>
+        <span role="img" className={styles.file_list_item_check} aria-label="file uploaded successfully">
           <CheckIcon />
         </span>
       )}

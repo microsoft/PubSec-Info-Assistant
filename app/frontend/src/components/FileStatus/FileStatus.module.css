@@ -1,0 +1,46 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+   .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.options {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    width: 80%;
+}
+
+.refresharea {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    cursor: pointer;
+    height: 30px;
+}
+
+.refresharea:hover {
+    background-color: lightgrey;
+}
+
+.refreshicon {
+    margin-top: 3px;
+    margin-left: 3px;
+}
+
+.refreshtext {
+    margin-top: 3px;
+    margin-right: 5px;
+
+}
+
+.resultspanel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 80%;
+}

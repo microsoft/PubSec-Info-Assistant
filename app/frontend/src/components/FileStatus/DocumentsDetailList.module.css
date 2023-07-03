@@ -1,0 +1,47 @@
+.fileIconHeaderIcon {
+    padding: 0;
+    font-size: 16px;
+  }
+
+.fileIconCell {
+    text-align: center;
+  }
+
+.fileIconCell:before {
+    content: '.';
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+    width: 0px;
+    visibility: hidden;
+  }
+
+.fileIconImg {
+    vertical-align: middle;
+    max-height: 16px;
+    max-width: 16px;
+  }
+
+.controlWrapper {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+.Toggle {
+    display: inline-block;
+    margin-bottom: 10px;
+    margin-right: 30px;
+  }
+
+.selectionDetails {
+    margin-bottom: 20px;
+  }
+
+.footer {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    font-size: small;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: dimgrey;
+}

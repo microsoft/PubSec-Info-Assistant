@@ -53,3 +53,33 @@ export type BlobClientUrlResponse = {
     url: string;
     error?: string;
 };
+
+export type FileUploadBasicStatus = {
+    id: string;
+    file_path: string;
+    file_name: string;
+    state: string;
+    start_timestamp: string;
+    state_description: string;
+    state_timestamp: string;
+}
+
+export type AllFilesUploadStatus = {
+    statuses: FileUploadBasicStatus[];
+}
+
+export type GetUploadStatusRequest = {
+    timeframe: number;
+    state: FileState
+}
+
+// These keys need to match case with the defined Enum in the 
+// shared code (functions/shared_code/status_log.py)
+export const enum FileState {
+    All = "ALL",
+    Processing = "PROCESSING",
+    Skipped = "SKIPPED",
+    Queued = "QUEUED",
+    Complete = "COMPLETE",
+    Error = "ERROR"
+}

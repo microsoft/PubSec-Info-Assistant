@@ -9,7 +9,8 @@
     "watch": "tsc && vite build --watch"
   },
   "dependencies": {
-    "@fluentui/react": "^8.105.3",
+    "@fluentui/react": "^8.110.7",
+    "@fluentui/react-components": "^9.24.0",
     "@fluentui/react-icons": "^2.0.195",
     "@react-spring/web": "^9.7.1",
     "dompurify": "^3.0.1",
@@ -26,7 +27,7 @@
     "@types/dompurify": "^2.4.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
-    "@vitejs/plugin-react": "^3.1.0",
+    "@vitejs/plugin-react": "^4.0.1",
     "prettier": "^2.8.3",
     "typescript": "^4.9.3",
     "vite": "^4.1.0",

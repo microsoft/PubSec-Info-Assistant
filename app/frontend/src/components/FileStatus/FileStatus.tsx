@@ -3,8 +3,10 @@
 
 import { useState } from "react";
 import { Dropdown, DropdownMenuItemType, IDropdownOption, IDropdownStyles } from '@fluentui/react/lib/Dropdown';
+import { Stack } from "@fluentui/react";
 import { DocumentsDetailList, IDocument } from "./DocumentsDetailList";
 import { ArrowClockwise24Filled } from "@fluentui/react-icons";
+import { animated, useSpring } from "@react-spring/web";
 import { getAllUploadStatus, FileUploadBasicStatus, GetUploadStatusRequest, FileState } from "../../api";
 
 import styles from "./FileStatus.module.css";
@@ -39,6 +41,7 @@ export const FileStatus = ({ className }: Props) => {
     const [selectedTimeFrameItem, setSelectedTimeFrameItem] = useState<IDropdownOption>();
     const [selectedFileStateItem, setSelectedFileStateItem] = useState<IDropdownOption>();
     const [files, setFiles] = useState<IDocument[]>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const onTimeSpanChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption<any> | undefined): void => {
         setSelectedTimeFrameItem(item);
@@ -48,7 +51,12 @@ export const FileStatus = ({ className }: Props) => {
         setSelectedFileStateItem(item);
     };
 
+    const onFilesSorted = (items: IDocument[]): void => {
+        setFiles(items);
+    };
+
     const onGetStatusClick = async () => {
+        setIsLoading(true);
         var timeframe = 4;
         switch (selectedTimeFrameItem?.key as string) {
             case "4hours":
@@ -77,6 +85,7 @@ export const FileStatus = ({ className }: Props) => {
         }
         const response = await getAllUploadStatus(request);
         const list = convertStatusToItems(response.statuses);
+        setIsLoading(false);
         setFiles(list);
     }
 
@@ -114,6 +123,11 @@ export const FileStatus = ({ className }: Props) => {
         "html": 'xsn'
     };
 
+    const animatedStyles = useSpring({
+        from: { opacity: 0 },
+        to: { opacity: 1 }
+    });
+
     return (
         <div className={styles.container}>
             <div className={`${styles.options} ${className ?? ""}`} >
@@ -140,9 +154,22 @@ export const FileStatus = ({ className }: Props) => {
                 <span className={styles.refreshtext}>Refresh</span>
             </div>
             </div>
-            <div className={styles.resultspanel}>
-                <DocumentsDetailList items={files == undefined ? [] : files}/>
-            </div>
+            {isLoading ? (
+                <animated.div style={{ ...animatedStyles }}>
+                     <Stack className={styles.loadingContainer} verticalAlign="space-between">
+                        <Stack.Item grow>
+                            <p className={styles.loadingText}>
+                                Getting file statuses
+                                <span className={styles.loadingdots} />
+                            </p>
+                        </Stack.Item>
+                    </Stack>
+                </animated.div>
+            ) : (
+                <div className={styles.resultspanel}>
+                    <DocumentsDetailList items={files == undefined ? [] : files} onFilesSorted={onFilesSorted}/>
+                </div>
+            )}
         </div>
     );
 };

@@ -44,3 +44,35 @@
     gap: 6px;
     width: 80%;
 }
+
+@keyframes loading {
+    0% {
+        content: "";
+    }
+    25% {
+        content: ".";
+    }
+    50% {
+        content: "..";
+    }
+    75% {
+        content: "...";
+    }
+    100% {
+        content: "";
+    }
+}
+
+.loadingdots::after {
+    content: "";
+    animation: loading 1s infinite;
+}
+
+.loadingText {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    white-space: pre-line;
+}

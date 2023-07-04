@@ -86,24 +86,24 @@ class StatusLog:
 
         return items
 
-    def read_files_status_by_timeframe(self,
-                       within_n_minutes: int,
+
+    def read_files_status_by_timeframe(self, 
+                       within_n_hours: int,
                        state: State = State.ALL
                        ):
         """ 
         Function to issue a query and return resulting docs          
         args
-            within_n_minutes - integer representing from how many minutes ago to return docs for
-            state - the State value representing the state of the docs to be returned
+            within_n_hours - integer representing from how many minutes ago to return docs for
         """
 
         query_string = "SELECT c.id,  c.file_path, c.file_name, c.state, \
             c.start_timestamp, c.state_description, c.state_timestamp \
             FROM c"
 
-        conditions = []
-        if within_n_minutes != -1:
-            from_time = datetime.utcnow() - timedelta(minutes=within_n_minutes)
+        conditions = []    
+        if within_n_hours != -1:
+            from_time = datetime.utcnow() - timedelta(hours=within_n_hours)
             from_time_string = str(from_time.strftime('%Y-%m-%d %H:%M:%S'))
             conditions.append(f"c.start_timestamp > '{from_time_string}'")
 

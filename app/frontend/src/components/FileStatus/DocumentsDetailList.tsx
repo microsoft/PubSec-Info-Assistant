@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useState } from "react";
-import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label } from "@fluentui/react";
+import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, BaseSelectedItemsList } from "@fluentui/react";
 import { TooltipHost } from '@fluentui/react';
 
 import styles from "./DocumentsDetailList.module.css";
@@ -21,9 +21,10 @@ export interface IDocument {
 
 interface Props {
     items: IDocument[];
+    onFilesSorted?: (items: IDocument[]) => void;
 }
 
-export const DocumentsDetailList = ({ items}: Props) => {
+export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
         const newColumns: IColumn[] = columns.slice();
@@ -40,6 +41,7 @@ export const DocumentsDetailList = ({ items}: Props) => {
         const newItems = copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
         items = newItems as IDocument[];
         setColumns(newColumns);
+        onFilesSorted == undefined ? console.log("onFileSorted event undefined") : onFilesSorted(items);
     };
 
     function copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {

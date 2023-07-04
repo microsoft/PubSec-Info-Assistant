@@ -120,7 +120,10 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeploymentName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
-
+      COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
+      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
+      COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName
+      COSMOSDB_CONTAINER_NAME: cosmosdb.outputs.CosmosDBContainerName
     }
     aadClientId: aadClientId
   }

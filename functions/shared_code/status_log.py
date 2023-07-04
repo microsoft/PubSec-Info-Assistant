@@ -58,8 +58,8 @@ class StatusLog:
         safe_id = base64.urlsafe_b64encode(document_id.encode()).decode()
         return safe_id
 
-    def read_document(self,
-                       document_id: str,
+    def read_file_status(self,
+                       file_id: str,
                        status_query_level: StatusQueryLevel = StatusQueryLevel.CONCISE
                        ):
         """ 
@@ -67,9 +67,9 @@ class StatusLog:
         args
             status_query_level - the StatusQueryLevel value representing concise 
             or verbose status updates to be included
-            document_id - if you wish to return a single document by its path        
+            file_id - if you wish to return a single document by its path     
         """
-        query_string = f"SELECT * FROM c WHERE c.id = '{self.encode_document_id(document_id)}'"
+        query_string = f"SELECT * FROM c WHERE c.id = '{self.encode_document_id(file_id)}'"
 
         items = list(self.container.query_items(
             query=query_string,
@@ -86,7 +86,7 @@ class StatusLog:
 
         return items
 
-    def read_documents(self,
+    def read_files_status_by_timeframe(self,
                        within_n_minutes: int,
                        state: State = State.ALL
                        ):
@@ -94,6 +94,7 @@ class StatusLog:
         Function to issue a query and return resulting docs          
         args
             within_n_minutes - integer representing from how many minutes ago to return docs for
+            state - the State value representing the state of the docs to be returned
         """
 
         query_string = "SELECT c.id,  c.file_path, c.file_name, c.state, \
@@ -102,7 +103,7 @@ class StatusLog:
 
         conditions = []
         if within_n_minutes != -1:
-            from_time = datetime.now() - timedelta(minutes=within_n_minutes)
+            from_time = datetime.utcnow() - timedelta(minutes=within_n_minutes)
             from_time_string = str(from_time.strftime('%Y-%m-%d %H:%M:%S'))
             conditions.append(f"c.start_timestamp > '{from_time_string}'")
 

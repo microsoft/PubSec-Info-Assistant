@@ -23,11 +23,6 @@ then
         --yes \
         --no-wait
 
-    az group delete \
-        --resource-group $RG_NAME_FUNC \
-        --yes \
-        --no-wait
-
     echo "Resource group will be deleted."
 else
     echo "ERROR: inf-destroy.sh does not run outside of build automation"

@@ -23,6 +23,6 @@ then
 fi
 
 # deploy the zip file to the webapp
-az functionapp deploy --resource-group $RESOURCE_GROUP_FUNC_NAME --name $AZURE_FUNCTION_APP_NAME --src-path functions.zip --type zip --async true --verbose
+az functionapp deploy --resource-group $RESOURCE_GROUP_NAME --name $AZURE_FUNCTION_APP_NAME --src-path functions.zip --type zip --async true --verbose
 
 echo "Functions deployed successfully"

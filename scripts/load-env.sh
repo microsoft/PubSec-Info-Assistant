@@ -28,7 +28,7 @@ if [[ -n $IN_AUTOMATION ]]; then
     export BUILD_NUMBER=$BUILD_BUILDNUMBER
 fi
 
-# Pull in variables dependent on the envionment we are deploying to.
+# Pull in variables dependent on the environment we are deploying to.
 if [ -f "$ENV_DIR/environments/$ENVIRONMENT_NAME.env" ]; then
     echo "Loading environment variables for $ENVIRONMENT_NAME."
     source "$ENV_DIR/environments/$ENVIRONMENT_NAME.env"
@@ -45,6 +45,5 @@ fi
 
 # Set the name of the resource group
 export RG_NAME="infoasst-$WORKSPACE"
-export RG_NAME_FUNC="infoasst-$WORKSPACE-func"
 
 echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$RG_NAME\e[0m\n"

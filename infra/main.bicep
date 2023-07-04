@@ -32,7 +32,6 @@ param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
 param functionsAppName string = ''
-param appServicePlanNameConsumption string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
@@ -66,13 +65,6 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// Organize resources in a resource group
-resource rgfunc 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${prefix}-${environmentName}-func'
-  location: location
-  tags: tags
-}
-
 module logging 'core/logging/logging.bicep' = {
   name: 'logging'
   scope: rg
@@ -94,8 +86,8 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B1'
-      capacity: 1
+      name: 'B2'
+      capacity: 3
     }
     kind: 'linux'
   }
@@ -274,12 +266,12 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
 // Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
-  scope: rgfunc
+  scope: rg
   params: {
     name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
-    hostingPlanName: !empty(appServicePlanNameConsumption) ? appServicePlanNameConsumption : '${prefix}-${abbrs.webServerFarms}func-${randomString}'
     location: location
     tags: tags
+    appServicePlanId: appServicePlan.outputs.id
     runtime: 'python'
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
@@ -412,7 +404,6 @@ output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
-output RESOURCE_GROUP_FUNC_NAME string = rgfunc.name
 output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeploymentName
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = chatGptDeploymentName
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey

@@ -1,8 +1,8 @@
 @description('Name of the function app')
 param name string
 
-@description('Name of the function app hosting plan')
-param hostingPlanName string
+@description('Id of the function app hosting plan')
+param appServicePlanId string
 
 @description('Location of the function app')
 param location string = resourceGroup().location
@@ -79,36 +79,20 @@ param pdfPollingQueue string
 @description('')
 param nonPdfSubmitQueue string
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: hostingPlanName
-  location: location
-  kind: 'linux'
-  sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
-  }
-  properties: {
-    reserved: true
-  }
-}
-
-
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: name
   location: location
   tags: tags
-  kind: 'functionapp,linux'
+  kind: 'functionapp'
   identity: {
     type: 'SystemAssigned'
-  }
-  dependsOn: [
-    hostingPlan
-  ] 
+  } 
   properties: {
     reserved: true
-    serverFarmId: hostingPlan.id
+    serverFarmId: appServicePlanId
     siteConfig: {
+      http20Enabled: true
       linuxFxVersion: 'python|3.10'
       alwaysOn: false
       minTlsVersion: '1.2'    

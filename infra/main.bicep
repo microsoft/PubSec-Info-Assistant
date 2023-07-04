@@ -16,12 +16,7 @@ param location string
 param aadClientId string = ''
 param buildNumber string = 'local'
 param isInAutomation bool = false
-param useExistingAOAIService bool
-param azureOpenAIServiceName string
-param azureOpenAIServiceKey string
-param cognitiveServicesAccountName string = ''
-param cognitiveServicesSkuName string = 'S0'
-param cognitiveServiesForSearchName string = ''
+
 param cosmosdbName string = ''
 param formRecognizerName string = ''
 param formRecognizerSkuName string = 'S0'
@@ -39,10 +34,22 @@ param containerName string = 'content'
 param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
+
+param useExistingAOAIService bool
+param azureOpenAIServiceName string
+param azureOpenAIServiceKey string
+param openAiSkuName string = 'S0'
+
+param cognitiveServiesForSearchName string = ''
+
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
+param gptDeploymentCapacity int = 30
+
 param chatGptDeploymentName string = 'chat'
+param chatGptDeploymentCapacity int = 30
 param chatGptModelName string = 'gpt-35-turbo'
+
 param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
 param formRecognizerApiVersion string = '2023-02-28-preview'
@@ -126,15 +133,15 @@ module backend 'core/host/appservice.bicep' = {
   }
 }
 
-module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
-  scope: rg
+module openAi 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
   name: 'openai'
+  scope: rg
   params: {
-    name: !empty(cognitiveServicesAccountName) ? cognitiveServicesAccountName : '${prefix}-${abbrs.openAIServices}${randomString}'
+    name: !empty(azureOpenAIServiceName) ? azureOpenAIServiceName : '${prefix}-${abbrs.openAIServices}${randomString}'
     location: location
     tags: tags
     sku: {
-      name: cognitiveServicesSkuName
+      name: openAiSkuName
     }
     deployments: [
       {
@@ -144,19 +151,21 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
           name: gptModelName
           version: '1'
         }
-        scaleSettings: {
-          scaleType: 'Standard'
+        sku: {
+          name: 'Standard'
+          capacity: gptDeploymentCapacity
         }
       }
       {
         name: chatGptDeploymentName
         model: {
-         format: 'OpenAI'
+          format: 'OpenAI'
           name: chatGptModelName
           version: '0301'
         }
-        scaleSettings: {
-          scaleType: 'Standard'
+        sku: {
+          name: 'Standard'
+          capacity: chatGptDeploymentCapacity
         }
       }
     ]

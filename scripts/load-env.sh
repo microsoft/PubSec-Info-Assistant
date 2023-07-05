@@ -28,7 +28,7 @@ if [[ -n $IN_AUTOMATION ]]; then
     export BUILD_NUMBER=$BUILD_BUILDNUMBER
 fi
 
-# Pull in variables dependent on the envionment we are deploying to.
+# Pull in variables dependent on the environment we are deploying to.
 if [ -f "$ENV_DIR/environments/$ENVIRONMENT_NAME.env" ]; then
     echo "Loading environment variables for $ENVIRONMENT_NAME."
     source "$ENV_DIR/environments/$ENVIRONMENT_NAME.env"

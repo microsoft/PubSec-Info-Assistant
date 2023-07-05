@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse } from "./models";
+import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -90,4 +90,24 @@ export async function getBlobClientUrl(): Promise<string> {
     }
 
     return parsedResponse.url;
+}
+
+export async function getAllUploadStatus(options: GetUploadStatusRequest): Promise<AllFilesUploadStatus> {
+    const response = await fetch("/getalluploadstatus", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            timeframe: options.timeframe,
+            state: options.state as string
+            })
+        });
+    
+    const parsedResponse: any = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    const results: AllFilesUploadStatus = {statuses: parsedResponse};
+    return results;
 }

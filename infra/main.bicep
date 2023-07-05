@@ -88,8 +88,8 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B1'
-      capacity: 1
+      name: 'B2'
+      capacity: 3
     }
     kind: 'linux'
   }
@@ -122,7 +122,10 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
-
+      COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
+      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
+      COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName
+      COSMOSDB_CONTAINER_NAME: cosmosdb.outputs.CosmosDBContainerName
     }
     aadClientId: aadClientId
   }
@@ -255,9 +258,6 @@ module storage 'core/storage/storage-account.bicep' = {
   }
 }
 
-
-
-
 module cosmosdb 'core/db/cosmosdb.bicep' = {
   name: 'cosmosdb'
   scope: rg
@@ -270,7 +270,6 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
   }
 }
 
-
 // Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
@@ -279,7 +278,7 @@ module functions 'core/function/function.bicep' = {
     name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
     location: location
     tags: tags
-    serverFarmId: appServicePlan.outputs.id
+    appServicePlanId: appServicePlan.outputs.id
     runtime: 'python'
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
@@ -387,6 +386,16 @@ module searchRoleBackend 'core/security/role.bicep' = {
   params: {
     principalId: backend.outputs.identityPrincipalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+    principalType: 'ServicePrincipal'
+  }
+}
+
+module storageRoleFunc 'core/security/role.bicep' = {
+  scope: rg
+  name: 'storage-role-Func'
+  params: {
+    principalId: functions.outputs.identityPrincipalId
+    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
     principalType: 'ServicePrincipal'
   }
 }

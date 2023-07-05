@@ -47,4 +47,16 @@
   button {
     font-size: calc(10px + 2vmin);
   }
+
+  .contentArea {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .topPivot {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+  }
   

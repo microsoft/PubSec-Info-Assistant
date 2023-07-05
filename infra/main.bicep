@@ -19,8 +19,8 @@ param isInAutomation bool = false
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
 param azureOpenAIServiceKey string
-param cognitiveServicesAccountName string = ''
-param cognitiveServicesSkuName string = 'S0'
+param openAiServiceName string = ''
+param openAiSkuName string = 'S0'
 param cognitiveServiesForSearchName string = ''
 param cosmosdbName string = ''
 param formRecognizerName string = ''
@@ -41,8 +41,10 @@ param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
 param gptModelName string = 'text-davinci-003'
+param gptDeploymentCapacity int = 30
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
+param chatGptDeploymentCapacity int = 30
 param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
 param formRecognizerApiVersion string = '2023-02-28-preview'
@@ -116,8 +118,8 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
-      AZURE_OPENAI_GPT_DEPLOYMENT: gptDeploymentName
-      AZURE_OPENAI_CHATGPT_DEPLOYMENT: chatGptDeploymentName
+      AZURE_OPENAI_GPT_DEPLOYMENT: !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
+      AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
@@ -130,36 +132,38 @@ module backend 'core/host/appservice.bicep' = {
 }
 
 module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
-  scope: rg
   name: 'openai'
+  scope: rg
   params: {
-    name: !empty(cognitiveServicesAccountName) ? cognitiveServicesAccountName : '${prefix}-${abbrs.openAIServices}${randomString}'
+    name: !empty(openAiServiceName) ? openAiServiceName : '${prefix}-${abbrs.openAIServices}${randomString}'
     location: location
     tags: tags
     sku: {
-      name: cognitiveServicesSkuName
+      name: openAiSkuName
     }
     deployments: [
       {
-        name: gptDeploymentName
+        name: !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
         model: {
           format: 'OpenAI'
           name: gptModelName
           version: '1'
         }
-        scaleSettings: {
-          scaleType: 'Standard'
+        sku: {
+          name: 'Standard'
+          capacity: gptDeploymentCapacity
         }
       }
       {
-        name: chatGptDeploymentName
+        name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
         model: {
-         format: 'OpenAI'
+          format: 'OpenAI'
           name: chatGptModelName
           version: '0301'
         }
-        scaleSettings: {
-          scaleType: 'Standard'
+        sku: {
+          name: 'Standard'
+          capacity: chatGptDeploymentCapacity
         }
       }
     ]
@@ -407,8 +411,8 @@ output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
-output AZURE_OPENAI_GPT_DEPLOYMENT string = gptDeploymentName
-output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = chatGptDeploymentName
+output AZURE_OPENAI_GPT_DEPLOYMENT string = !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
+output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey

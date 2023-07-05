@@ -20,6 +20,9 @@
     "azureOpenAIServiceKey": {
       "value": "${AZURE_OPENAI_SERVICE_KEY}"
     },
+    "openAiSkuName": {
+      "value": "S0"
+    },
     "gptDeploymentName": {
       "value": "${GPT_MODEL_DEPLOYMENT_NAME}"
     },
@@ -28,9 +31,6 @@
     },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
-    },
-    "cognitiveServicesSkuName": {
-      "value": "S0"
     },
     "searchServicesSkuName": {
       "value": "standard"

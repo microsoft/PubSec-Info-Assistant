@@ -7,6 +7,9 @@ ENV_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 export ARM_ENVIRONMENT=public
 
+#setting up necessary permissions to access the Docker daemon socket
+sudo chmod 666 /var/run/docker.sock
+
 #Ensure hw time sync is enabled to avoid time drift when the host OS sleeps. 
 #Time sync is required else Azure authentication tokens will be invalid
 source "${ENV_DIR}/time-sync.sh"
@@ -47,3 +50,4 @@ fi
 export RG_NAME="infoasst-$WORKSPACE"
 
 echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$RG_NAME\e[0m\n"
+

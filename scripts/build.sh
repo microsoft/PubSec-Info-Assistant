@@ -4,8 +4,6 @@
 #!/bin/bash
 set -e
 
-#setting up necessary permissions to access the Docker daemon socket
-sudo chmod 666 /var/run/docker.sock
 
 
 figlet Build

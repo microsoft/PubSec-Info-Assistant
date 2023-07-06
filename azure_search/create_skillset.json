@@ -16,7 +16,7 @@
         "Location",
         "DateTime"
       ],
-      "defaultLanguageCode": "en",
+      "defaultLanguageCode": "$ACS_ENTITY_RECOGNITION_SKILL_LANGUAGE",
       "minimumPrecision": null,
       "inputs": [
         {
@@ -52,7 +52,7 @@
       "name": "#2",
       "description": null,
       "context": "/document/content",
-      "defaultLanguageCode": "en",
+      "defaultLanguageCode": "$ACS_KEY_PHRASE_EXTRACTION_SKILL_LANGUAGE",
       "maxKeyPhraseCount": null,
       "modelVersion": null,
       "inputs": [
@@ -98,8 +98,8 @@
       "description": null,
       "context": "/document/content",
       "defaultFromLanguageCode": null,
-      "defaultToLanguageCode": "en",
-      "suggestedFrom": "en",
+      "defaultToLanguageCode": "$ACS_TEXT_TRANSLATION_SKILL_TO_LANGUAGE",
+      "suggestedFrom": "$ACS_TEXT_TRANSLATION_SKILL_FROM_LANGUAGE",
       "inputs": [
         {
           "name": "text",
@@ -118,7 +118,7 @@
       "name": "#5",
       "description": null,
       "context": "/document/content",
-      "defaultLanguageCode": "en",
+      "defaultLanguageCode": "$ACS_PII_DETECTION_SKILL_LANGUAGE",
       "minimumPrecision": 0.5,
       "maskingMode": "replace",
       "maskingCharacter": "*",
@@ -151,7 +151,7 @@
       "name": "#6",
       "textSplitMode" : "pages", 
       "maximumPageLength": 5000,
-      "defaultLanguageCode": "en",
+      "defaultLanguageCode": "$ACS_TEXT_SPLITTING_SKILL_LANGUAGE",
       "context": "/document/content",
       "inputs": [
           {
@@ -205,7 +205,7 @@
       "context": "/document/normalized_images/*",
       "textExtractionAlgorithm": null,
       "lineEnding": "Space",
-      "defaultLanguageCode": "en",
+      "defaultLanguageCode": "$ACS_OCR_SKILL_LANGUAGE",
       "detectOrientation": true,
       "inputs": [
         {
@@ -229,7 +229,7 @@
       "name": "#9",
       "description": null,
       "context": "/document/normalized_images/*",
-      "defaultLanguageCode": "en",
+      "defaultLanguageCode": "$ACS_IMAGE_ANALYSIS_SKILL_LANGUAGE",
       "visualFeatures": [
         "tags",
         "description"

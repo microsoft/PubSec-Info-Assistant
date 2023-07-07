@@ -51,7 +51,7 @@ param formRecognizerApiVersion string = '2023-02-28-preview'
 param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
-param queryTermLanguage string = 'en'
+param queryTermLanguage string = 'English'
 
 
 @description('Id of the user or app to assign application roles')

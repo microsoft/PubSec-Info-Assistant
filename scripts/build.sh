@@ -4,6 +4,8 @@
 #!/bin/bash
 set -e
 
+
+
 figlet Build
 
 # Get the directory that this script is in

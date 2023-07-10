@@ -23,9 +23,12 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 * Chat and Q&A interfaces
 * File Upload and automated chunking and indexing for PDF, HTML, and DOCX
 * Monitoring the status of files uploaded and processed by the accelerator
+* Interacting with your data in supported native languages*
 * Explores various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, etc.
 * Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
 * Settings directly in the UX to tweak the behavior and experiment with options
+
+*\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
 
 ![Chat screen](docs/images/chatscreen.png)
 

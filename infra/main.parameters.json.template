@@ -43,6 +43,9 @@
     },
     "isInAutomation": {
       "value": ${IS_IN_AUTOMATION}
+    },
+    "queryTermLanguage": {
+      "value": "${QUERYTERM_LANGUAGE}"
     }
   }
 }

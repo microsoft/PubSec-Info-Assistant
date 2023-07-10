@@ -34,6 +34,15 @@ if [ -f "$ENV_DIR/environments/$ENVIRONMENT_NAME.env" ]; then
     source "$ENV_DIR/environments/$ENVIRONMENT_NAME.env"
 fi
 
+# Pull in variables dependent on the Language being targeted
+if [ -f "$ENV_DIR/environments/languages/$DEFAULT_LANGUAGE.env" ]; then
+    echo "Loading environment variables for Language: $DEFAULT_LANGUAGE."
+    source "$ENV_DIR/environments/languages/$DEFAULT_LANGUAGE.env"
+else
+    echo "No Language set, please check local.env.example for DEFAULT_LANGUAGE"
+    exit 1
+fi
+
 # Fail if the following environment variables are not set
 if [[ -z $WORKSPACE ]]; then
     echo "WORKSPACE must be set."

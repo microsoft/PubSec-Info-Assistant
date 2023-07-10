@@ -9,6 +9,7 @@
     * [Uploading files](#uploading-files)
     * [View upload status](#view-upload-status)
 * [Developer Settings](#developer-settings)
+  * [Configuring your own language ENV file]()
   * [Debugging Functions](#debugging-functions)
   * [Build pipeline for sandbox environment](#build-pipeline-for-sandbox)
 
@@ -84,6 +85,10 @@ You can view the status up files that have been uploaded to the system through t
 > ![Upload Status Options and Refresh Links](../images/view-upload-status-options-and-refresh.png)
 
 ## Developer Settings
+
+### Configuring your own language ENV file
+
+At deployment time, you can alter the behavior of the IA Accelerator to use a language of your choosing across it's Azure Cognitive Search and Azure OpenAI prompting. See [Configuring your own language ENV file](./configuring_language_env_files.md) more information.
 
 ### Debugging functions
 

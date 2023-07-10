@@ -114,6 +114,7 @@ declare -A REPLACE_TOKENS=(
     [\${BUILD_NUMBER}]=${BUILD_NUMBER}
     [\${AZURE_AD_APP_CLIENT_ID}]=${AZURE_AD_APP_CLIENT_ID}
     [\${IS_IN_AUTOMATION}]=${IS_IN_AUTOMATION}
+    [\${QUERYTERM_LANGUAGE}]=${PROMPT_QUERYTERM_LANGUAGE}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

@@ -78,7 +78,7 @@ class ChatReadRetrieveReadApproach(Approach):
     Generate a search query based on the conversation and the new question. 
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<<>>> in the search query terms.
-    If the question is not in English, translate the question to English before generating the search query.
+    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
     Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
 
     Chat History:
@@ -91,13 +91,14 @@ class ChatReadRetrieveReadApproach(Approach):
     """
    
 
-    def __init__(self, search_client: SearchClient, oai_service_name: str, oai_service_key: str, chatgpt_deployment: str, gpt_deployment: str, sourcepage_field: str, content_field: str, blob_client: BlobServiceClient):
+    def __init__(self, search_client: SearchClient, oai_service_name: str, oai_service_key: str, chatgpt_deployment: str, gpt_deployment: str, sourcepage_field: str, content_field: str, blob_client: BlobServiceClient, query_term_language: str):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
         self.gpt_deployment = gpt_deployment
         self.sourcepage_field = sourcepage_field
         self.content_field = content_field
         self.blob_client = blob_client
+        self.query_term_language = query_term_language
        
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
@@ -119,7 +120,8 @@ class ChatReadRetrieveReadApproach(Approach):
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         prompt = self.query_prompt_template.format(
                 chat_history=self.get_chat_history_as_text(history, include_last_turn=False),
-                question=history[-1]["user"]
+                question=history[-1]["user"],
+                query_term_language=self.query_term_language
                     )
             
         completion = openai.Completion.create(

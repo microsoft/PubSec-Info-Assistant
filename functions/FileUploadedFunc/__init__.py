@@ -60,7 +60,8 @@ def main(myblob: func.InputStream):
         
         # Queue message with a random backoff so as not to put the next function under unnecessary load
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())
-        backoff =  random.randint(1, 60)        
+        MAX_SECONDS_HIDE = 180    # number of minutes that a message will be hidden for before being processed by the FR function
+        backoff =  random.randint(1, MAX_SECONDS_HIDE)        
         queue_client.send_message(message_string, visibility_timeout = backoff)  
         statusLog.upsert_document(myblob.name, f'{function_name} - {file_extension} file sent to submit queue. Visible in {backoff} seconds', StatusClassification.DEBUG, State.QUEUED)          
         

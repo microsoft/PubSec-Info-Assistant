@@ -100,7 +100,7 @@ def main(msg: func.QueueMessage) -> None:
 
         else:
             # general error occurred
-            statusLog.upsert_document(blob_path, f'{function_name} - Error on PDF submission to FR - {response.code} {response.message}', StatusClassification.ERROR, State.ERROR) 
+            statusLog.upsert_document(blob_path, f'{function_name} - Error on PDF submission to FR - {response.status_code} - {response.message}', StatusClassification.ERROR, State.ERROR) 
             
     except Exception as e:
         statusLog.upsert_document(blob_path, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)

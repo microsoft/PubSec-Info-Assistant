@@ -51,7 +51,7 @@ azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
-openai.api_version = "2023-03-15-preview"
+openai.api_version = "2023-06-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(COSMOSDB_URL, COSMODB_KEY, COSMOSDB_DATABASE_NAME, COSMOSDB_CONTAINER_NAME)
@@ -124,7 +124,17 @@ def chat():
         if not impl:
             return jsonify({"error": "unknown approach"}), 400
         r = impl.run(request.json["history"], request.json.get("overrides") or {})
-        return jsonify(r)
+                      
+        # return jsonify(r)
+        #To fix citation bug,below code is added.aparmar            
+        return jsonify({
+                "data_points": r["data_points"],
+                "answer": r["answer"],
+                "thoughts": r["thoughts"],
+                "citation_lookup": r["citation_lookup"]
+            })
+       
+
     except Exception as e:
         logging.exception("Exception in /chat")
         return jsonify({"error": str(e)}), 500

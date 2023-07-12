@@ -34,7 +34,10 @@ export type AskResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
-    citation_lookup: {}
+    // citation_lookup: {}
+    // added this for citation bug. aparmar.
+    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    
     error?: string;
 };
 

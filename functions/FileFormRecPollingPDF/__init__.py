@@ -112,13 +112,13 @@ def main(msg: func.QueueMessage) -> None:
                     statusLog.upsert_document(blob_name, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)     
             else:
                 # unexpected status returned by FR
-                statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from form Recognizer - {response.text}', StatusClassification.ERROR, State.ERROR)  
+                statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from form Recognizer- code: {response.status_code} status: {response_status} - text: {response.text}', StatusClassification.ERROR, State.ERROR)  
         else:
             statusLog.upsert_document(blob_name, f'{function_name} - Error raised by FR polling', StatusClassification.ERROR, State.ERROR)    
                             
     except Exception as e:
         # a general error 
-        statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
+        statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - code: {response.status_code} - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
 
 @retry(stop=stop_after_attempt(MAX_READ_ATTEMPTS), wait=wait_fixed(5))

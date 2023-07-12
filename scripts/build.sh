@@ -4,6 +4,8 @@
 #!/bin/bash
 set -e
 
+
+
 figlet Build
 
 # Get the directory that this script is in
@@ -29,6 +31,7 @@ npm run build
 
 # copy the shared_code files from functions to the webapp
 cd ../backend
+mkdir -p ./shared_code
 cp  ../../functions/shared_code/status_log.py ./shared_code
 cp  ../../functions/shared_code/__init__.py ./shared_code
 

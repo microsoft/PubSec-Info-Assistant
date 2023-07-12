@@ -13,6 +13,7 @@ import logging
 from azure.storage.blob import BlobServiceClient, generate_account_sas, ResourceTypes, AccountSasPermissions
 import re
 
+
 # Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
 # top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion 
 # (answer) with that prompt.
@@ -39,24 +40,24 @@ class ChatReadRetrieveReadApproach(Approach):
     - Search for flight details matching the given flight to determine its current status.
 
     2. If there is specific flight information available in the source document, provide an answer along with the appropriate citation.
-    - If the source document contains information about the current status of the specified flight, provide a response citing the relevant section of source documents. 
-    
+    - If the source document contains information about the current status of the specified flight, provide a response citing the relevant section of source documents.Don't exclude citation if you are using source document to answer your question.
+     
     
     3. If there is no relevant information about the specific flight in the source document, respond with "I'm not sure" without providing any citation.
-    - If the source document does not contain information about specified flight and status, respond with "I'm not sure" as there is no basis to determine its current status.
+    
 
     Example Response:
 
     Question: Is my flight on time?
 
-    <Response>I'm not sure. The provided source document does not include information about the current status of your specific flight.[no citations provided]</Response>
+    <Response>I'm not sure. The provided source document does not include information about the current status of your specific flight.</Response>
     
         
     User persona: {userPersona}
     Emphasize the use of facts listed in the provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
-    the actual information. Each source document has a file name followed by a pipe character and the actual information, always include the source name for each fact you use in the response. Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
-    
+    Your goal is to provide accurate and relevant answers based on the information available in the provided source documents. Make sure to reference the source documents appropriately and avoid making assumptions or adding personal opinions.
 
 
     {follow_up_questions_prompt}
@@ -150,7 +151,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
                
     
-            
+           
         citation_lookup = {}  # dict of "FileX" monikor to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
@@ -170,7 +171,18 @@ class ChatReadRetrieveReadApproach(Approach):
                 results.append(f"File{idx} " + "| " + nonewlines(doc[self.content_field]))
                 data_points.append("/".join(urllib.parse.unquote(doc[self.sourcepage_field]).split("/")[4:]) + "| " + nonewlines(doc[self.content_field]))
             # add the "FileX" monikor and full file name to the citation lookup
-            citation_lookup[f"File{idx}"] = {'citation': urllib.parse.unquote(doc[self.sourcepage_field]), 'source_path': self.get_source_file_name(doc[self.content_field]), 'page_number': self.get_first_page_num_for_chunk(doc[self.content_field])}
+           
+            citation_lookup[f"File{idx}"] = {'citation': urllib.parse.unquote(doc[self.sourcepage_field]), 
+                                             'source_path': self.get_source_file_name(doc[self.content_field]), 
+                                             'page_number': self.get_first_page_num_for_chunk(doc[self.content_field])}
+           
+            
+                 
+            
+                           
+            
+        
+        
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
         if results_text == "":
@@ -214,6 +226,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
 
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history
+        
         completion = openai.Completion.create(
             engine=self.chatgpt_deployment,
             prompt=prompt,
@@ -223,7 +236,7 @@ class ChatReadRetrieveReadApproach(Approach):
             stop=["<|im_end|>", "<|im_start|>"]
         )
   
-
+            
 
 
         return {
@@ -278,5 +291,7 @@ class ChatReadRetrieveReadApproach(Approach):
         except Exception as e:
             logging.exception("Unable to parse first page num: " + str(e) + "")
             return "0"
+        
+  
         
       

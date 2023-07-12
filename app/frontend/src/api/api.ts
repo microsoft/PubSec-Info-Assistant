@@ -32,7 +32,7 @@ export async function askApi(options: AskRequest): Promise<AskResponse> {
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
     }
-
+    
     return parsedResponse;
 }
 
@@ -68,7 +68,7 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
     }
-
+   
     return parsedResponse;
 }
 

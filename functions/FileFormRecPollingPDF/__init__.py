@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 import azure.functions as func
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging

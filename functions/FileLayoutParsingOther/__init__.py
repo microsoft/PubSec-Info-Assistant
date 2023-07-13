@@ -1,17 +1,17 @@
-import logging
-import azure.functions as func
-from azure.storage.blob import generate_blob_sas
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 import logging
 import os
 import json
 from enum import Enum
+from io import BytesIO
+import azure.functions as func
+from azure.storage.blob import generate_blob_sas
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities
-
 import mammoth
 import requests
-from io import BytesIO
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]

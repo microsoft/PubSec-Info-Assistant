@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 import json
 import logging
 import os
@@ -42,10 +45,14 @@ FR_MODEL = "prebuilt-layout"
 MAX_REQUEUE_COUNT = 5  # max times we will retry the submission
 POLL_QUEUE_SUBMIT_BACKOFF = 60  # Hold for n seconds to give FR time to process the file
 PDF_SUBMIT_QUEUE_BACKOFF = 60
-function_name = "FileFormRecSubmissionPDF"
+FUNCTION_NAME = "FileFormRecSubmissionPDF"
 
 
 def main(msg: func.QueueMessage) -> None:
+    '''This function is triggered by a message in the pdf-submit-queue.
+    It will submit the PDF to Form Recognizer for processing. If the submission
+    is throttled, it will requeue the message with a backoff. If the submission
+    is successful, it will queue the message to the pdf-polling-queue for polling.'''
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)
     blob_path = message_json["blob_name"]
@@ -60,20 +67,20 @@ def main(msg: func.QueueMessage) -> None:
         queued_count = message_json["submit_queued_count"]
         statusLog.upsert_document(
             blob_path,
-            f"{function_name} - Received message from pdf-submit-queue ",
+            f"{FUNCTION_NAME} - Received message from pdf-submit-queue ",
             StatusClassification.DEBUG,
             State.PROCESSING,
         )
         statusLog.upsert_document(
             blob_path,
-            f"{function_name} - Submitting to Form Recognizer",
+            f"{FUNCTION_NAME} - Submitting to Form Recognizer",
             StatusClassification.INFO,
         )
         # construct blob url
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
         statusLog.upsert_document(
             blob_path,
-            f"{function_name} - SAS token generated",
+            f"{FUNCTION_NAME} - SAS token generated",
             StatusClassification.DEBUG,
         )
 
@@ -98,11 +105,11 @@ def main(msg: func.QueueMessage) -> None:
             # Successfully submitted
             statusLog.upsert_document(
                 blob_path,
-                f"{function_name} - PDF submitted to FR successfully",
+                f"{FUNCTION_NAME} - PDF submitted to FR successfully",
                 StatusClassification.DEBUG,
             )
-            resultId = response.headers.get("apim-request-id")
-            message_json["FR_resultId"] = resultId
+            result_id = response.headers.get("apim-request-id")
+            message_json["FR_resultId"] = result_id
             message_json["polling_queue_count"] = 1
             queue_client = QueueClient.from_connection_string(
                 azure_blob_connection_string,
@@ -115,13 +122,14 @@ def main(msg: func.QueueMessage) -> None:
             )
             statusLog.upsert_document(
                 blob_path,
-                f"{function_name} - message sent to pdf-polling-queue. Visible in {POLL_QUEUE_SUBMIT_BACKOFF} seconds. FR Result ID is {resultId}",
+                f"{FUNCTION_NAME} - message sent to pdf-polling-queue. Visible in {POLL_QUEUE_SUBMIT_BACKOFF} seconds. FR Result ID is {result_id}",
                 StatusClassification.DEBUG,
                 State.QUEUED,
             )
 
         elif response.status_code == 429:
-            # throttled, so requeue with random backoff seconds to mitigate throttling, unless it has hit the max tries
+            # throttled, so requeue with random backoff seconds to mitigate throttling,
+            # unless it has hit the max tries
             if queued_count < MAX_REQUEUE_COUNT:
                 max_seconds = PDF_SUBMIT_QUEUE_BACKOFF * (queued_count**2)
                 backoff = random.randint(
@@ -131,7 +139,7 @@ def main(msg: func.QueueMessage) -> None:
                 message_json["queued_count"] = queued_count
                 statusLog.upsert_document(
                     blob_path,
-                    f"{function_name} - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds",
+                    f"{FUNCTION_NAME} - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds",
                     StatusClassification.DEBUG,
                 )
                 queue_client = QueueClient.from_connection_string(
@@ -143,14 +151,14 @@ def main(msg: func.QueueMessage) -> None:
                 queue_client.send_message(message_json_str, visibility_timeout=backoff)
                 statusLog.upsert_document(
                     blob_path,
-                    f"{function_name} - message sent to pdf-submit-queue. Visible in {backoff} seconds.",
+                    f"{FUNCTION_NAME} - message sent to pdf-submit-queue. Visible in {backoff} seconds.",
                     StatusClassification.DEBUG,
                     State.QUEUED,
                 )
             else:
                 statusLog.upsert_document(
                     blob_path,
-                    f"{function_name} - maximum submissions to FR reached",
+                    f"{FUNCTION_NAME} - maximum submissions to FR reached",
                     StatusClassification.ERROR,
                     State.ERROR,
                 )
@@ -159,7 +167,7 @@ def main(msg: func.QueueMessage) -> None:
             # general error occurred
             statusLog.upsert_document(
                 blob_path,
-                f"{function_name} - Error on PDF submission to FR - {response.status_code} - {response.reason}",
+                f"{FUNCTION_NAME} - Error on PDF submission to FR - {response.status_code} - {response.reason}",
                 StatusClassification.ERROR,
                 State.ERROR,
             )
@@ -167,7 +175,7 @@ def main(msg: func.QueueMessage) -> None:
     except Exception as error:
         statusLog.upsert_document(
             blob_path,
-            f"{function_name} - An error occurred - {str(error)}",
+            f"{FUNCTION_NAME} - An error occurred - {str(error)}",
             StatusClassification.ERROR,
             State.ERROR,
         )

@@ -13,7 +13,6 @@ import logging
 from azure.storage.blob import BlobServiceClient, generate_account_sas, ResourceTypes, AccountSasPermissions
 import re
 
-
 # Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
 # top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion 
 # (answer) with that prompt.
@@ -176,13 +175,7 @@ class ChatReadRetrieveReadApproach(Approach):
                                              'source_path': self.get_source_file_name(doc[self.content_field]), 
                                              'page_number': self.get_first_page_num_for_chunk(doc[self.content_field])}
            
-            
-                 
-            
-                           
-            
-        
-        
+                                       
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
         if results_text == "":
@@ -220,12 +213,13 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_lenth_prompt_text(response_length),
+                response_length_prompt=self.get_repsonse_lenth_prompt_text(response_length),             
                 userPersona=user_persona,
                 systemPersona=system_persona
             )
 
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history
+        
         
         completion = openai.Completion.create(
             engine=self.chatgpt_deployment,
@@ -238,7 +232,7 @@ class ChatReadRetrieveReadApproach(Approach):
   
             
 
-
+       
         return {
             "data_points": data_points,
             "answer": f"{urllib.parse.unquote(completion.choices[0].text)}",
@@ -257,17 +251,19 @@ class ChatReadRetrieveReadApproach(Approach):
                 break
         return history_text
     
-    # Get the prompt text for the response length
+    #Get the prompt text for the response length
+    
     def get_repsonse_lenth_prompt_text(self, response_length: int):
-        if response_length == 1024:
-            return "Provide concise and succinct answers in no more than 3-4 sentences."
-        elif response_length == 2048:
-            return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
-        elif response_length == 4096:
-            return "Provide detailed and comprehensive answers in no more than 2-3 paragraphs."
-        else:
-            return "Provide answers in no more than 1 paragraph that strike a balance between being concise and detailed. Respond with enough information to cover the key points.avoid unnecessary verbosity."
-        
+        levels = {
+            1024: "succinct",
+            2048: "standard",
+            4096: "thorough",
+        }
+        level = levels[response_length]
+        return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."   
+    
+    
+    
     # Parse the search document content for "file_name" attribute
     def get_source_file_name(self, content: str) -> str:
         try:

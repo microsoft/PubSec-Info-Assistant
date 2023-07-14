@@ -13,6 +13,7 @@ fi
 
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source "${DIR}/load-env.sh"
 source "${DIR}/environments/infrastructure.env"
 
 search_url="https://${AZURE_SEARCH_SERVICE}.search.windows.net"
@@ -38,7 +39,7 @@ echo "Creating skillset $skillset_name ... "
 curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$skillset_json" $search_url/skillsets/$skillset_name?api-version=2021-04-30-Preview
 
 # Create all files index
-index_all_json=$(cat ${DIR}/../azure_search/create_all_index.json)
+index_all_json=$(cat ${DIR}/../azure_search/create_all_index.json | envsubst)
 index_all_name=$(echo $index_all_json | jq -r .name )
 echo "Creating index $index_all_name ..."
 curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$index_all_json" $search_url/indexes/$index_all_name?api-version=2021-04-30-Preview

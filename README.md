@@ -1,13 +1,9 @@
 # Information Assistant Accelerator
 
-This sample demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (gpt-35-turbo), and Azure Cognitive Search for data indexing and retrieval.
-
-> **NOTICE:** This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. You can request access [here](https://aka.ms/oaiapply).
+This accelerator demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (gpt-35-turbo), and Azure Cognitive Search for data indexing and retrieval.
 
 ---
-
 ## Responsible AI
-
 The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first. 
 
 **Read our [Transparency Note](./docs/transparency.md)**
@@ -22,41 +18,48 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 
 * Chat and Q&A interfaces
 * File Upload and automated chunking and indexing for PDF, HTML, and DOCX
+* Monitoring the status of files uploaded and processed by the accelerator
+* Interacting with your data in supported native languages*
 * Explores various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, etc.
 * Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
 * Settings directly in the UX to tweak the behavior and experiment with options
+
+*\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
 
 ![Chat screen](docs/images/chatscreen.png)
 
 For a detailed review see our [Features](/docs/features/features.md) page.
 
+---
 # Getting Started
 
-
-## Prerequisites
+The IA Accelerator relies on multiple Azure services and has certain prerequisites that need to be met before deployment. It's essential to procure these prerequisites prior to proceeding with the deployment instructions in this guide.
 
 ---
-
-The IA Accelerator requires a variety of services in Azure. There are a few prerequisites required to deploy and configure the IA Accelerator. Please obtain these items first before continuing on to the deployment section of this guide.
-
->To get started with the IA Accelerator you will need the following:
+## Prerequisites
+To get started with the IA Accelerator you will need the following:
 >
->* An active Azure Subscription *
+>* An azure subscription with access enabled for the Azure OpenAI service.
+You can request access [here](https://aka.ms/oaiapply) *
 >* Administrative rights on the Azure Subscription
+>* [Visual studio code](https://code.visualstudio.com/)
 >
->\* *The Azure Subscription needs to be a paid subscription. While you can create a free tier of any of the Cognitive Services, you can only create one free Cognitive Service in an account so the trial would therefore not be able to handle all of the services in this example.*
+>
+You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/). 
 
-You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/). Once you have your prerequisite items, please move on to the Deployment Configuration step.
+Once you have your prerequisite items, please move on to the Deployment Configuration step.
+
+**NOTICE:** This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. 
 
 ## Deployment Configuration
 
-The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container, hosted on a virtual machine using GitHub Codespaces.
+The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub Codespaces.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 
 Begin by setting up your own Codespace using our  [Developing in a Codespaces](docs/developing_in_a_codespaces.md) documentation.
 
-*More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*If you want to configure your local deskop for development container, follow our [Configuring your System for Development Containers](/docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
 Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
 

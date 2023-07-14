@@ -16,6 +16,7 @@ from approaches.readretrieveread import ReadRetrieveReadApproach
 from approaches.readdecomposeask import ReadDecomposeAsk
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from azure.storage.blob import BlobServiceClient, generate_account_sas, ResourceTypes, AccountSasPermissions
+from shared_code.status_log import StatusLog, State
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
@@ -33,6 +34,13 @@ KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "merged_content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
 KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "file_storage_path"
 
+COSMOSDB_URL = os.environ.get("COSMOSDB_URL")
+COSMODB_KEY = os.environ.get("COSMOSDB_KEY")
+COSMOSDB_DATABASE_NAME = os.environ.get("COSMOSDB_DATABASE_NAME") or "statusdb"
+COSMOSDB_CONTAINER_NAME = os.environ.get("COSMOSDB_CONTAINER_NAME") or "statuscontainer"
+
+QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
+
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed, 
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the 
 # keys for each service
@@ -43,7 +51,10 @@ azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
-openai.api_version = "2023-03-15-preview"
+openai.api_version = "2023-06-01-preview"
+
+# Setup StatusLog to allow access to CosmosDB for logging
+statusLog = StatusLog(COSMOSDB_URL, COSMODB_KEY, COSMOSDB_DATABASE_NAME, COSMOSDB_CONTAINER_NAME)
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 #openai.api_type = "azure_ad"
@@ -69,7 +80,7 @@ ask_approaches = {
 }
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_SERVICE, AZURE_OPENAI_SERVICE_KEY, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT, blob_client)
+    "rrr": ChatReadRetrieveReadApproach(search_client, AZURE_OPENAI_SERVICE, AZURE_OPENAI_SERVICE_KEY, AZURE_OPENAI_CHATGPT_DEPLOYMENT, AZURE_OPENAI_GPT_DEPLOYMENT, KB_FIELDS_SOURCEPAGE, KB_FIELDS_CONTENT, blob_client, QUERY_TERM_LANGUAGE)
 }
 
 app = Flask(__name__)
@@ -113,7 +124,17 @@ def chat():
         if not impl:
             return jsonify({"error": "unknown approach"}), 400
         r = impl.run(request.json["history"], request.json.get("overrides") or {})
-        return jsonify(r)
+                      
+        # return jsonify(r)
+        #To fix citation bug,below code is added.aparmar            
+        return jsonify({
+                "data_points": r["data_points"],
+                "answer": r["answer"],
+                "thoughts": r["thoughts"],
+                "citation_lookup": r["citation_lookup"]
+            })
+       
+
     except Exception as e:
         logging.exception("Exception in /chat")
         return jsonify({"error": str(e)}), 500
@@ -129,3 +150,14 @@ def get_blob_client_url():
 
 if __name__ == "__main__":
     app.run()
+
+@app.route("/getalluploadstatus", methods=["POST"])
+def get_all_upload_status():
+    timeframe = request.json["timeframe"]
+    state = request.json["state"]
+    try:
+        results = statusLog.read_files_status_by_timeframe(timeframe,State[state])
+    except Exception as e:
+        logging.exception("Exception in /getalluploadstatus")
+        return jsonify({"error": str(e)}), 500
+    return jsonify(results)

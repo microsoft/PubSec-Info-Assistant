@@ -38,7 +38,7 @@ steps:
     docker image tag info-asst-devcontainer:latest $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
     docker image push $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
   displayName: Push latest dev container image to container registry
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/0.2-Beta')))
 
 - template: make-command.yml
   parameters:
@@ -71,4 +71,9 @@ steps:
     parameters:
       displayName: 'Deploy Web App'
       makeCommand: 'deploy-webapp'
+
+  - template: make-command.yml
+    parameters:
+      displayName: 'Deploy Azure Functions'
+      makeCommand: 'deploy-functions'
   

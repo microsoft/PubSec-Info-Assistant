@@ -11,7 +11,7 @@ import { FilesList } from "./files-list";
 import { getBlobClientUrl } from "../../api"
 
 
-const FilePicker = ({ uploadURL }: { uploadURL: string }) => {
+const FilePicker = () => {
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
@@ -119,6 +119,7 @@ const FilePicker = ({ uploadURL }: { uploadURL: string }) => {
             styles.upload_button,
             uploadComplete || uploadStarted ? styles.disabled : ""
           )}
+          aria-label="upload files"
         >
           {`Upload ${files.length} Files`}
         </button>

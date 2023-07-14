@@ -372,5 +372,6 @@ random.txt
 app/backend/cd
 app/backend/lib
 app/backend/lib64
+app/backend/shared_code
 
 packages-microsoft*

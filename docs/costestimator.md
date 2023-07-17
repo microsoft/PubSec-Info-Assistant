@@ -1,20 +1,16 @@
-# Info Assistant, version 0.2 beta - Estimation
+# IA Accelerator, version 0.2 beta - Estimation
 
-In general, use the Azure pricing calculator to estimate costs. The ideal individual pricing tier and the total overall cost of each service included in the architecture is dependent on the amount of data to be processed and stored and the acceptable performance level expected.
-
-The Azure pricing calculator allows you to mix and match different combinations of Azure services deployed for Info Assistant, version 0.2 beta to see an estimate of the costs.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 0.2 beta, and provides cost estimates based on the chosen configurations.
 
 
-| Solution            | Env  |    Azure Pricing Calculator Link                                          |
+| Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| Info Assistant, version 0.2 beta | Sandbox  |  [Azure Calculator](https://azure.com/e/cc64fb55d2e14bd0ae8d6d3018f252e4) | 
+| IA Accelerator, version 0.2 beta | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/2a79f53411a740398783f0000865ea25) | 
 
-*The proposed the cost estimation prepared based on Sandbox environment, estimation may vary customer to customer.*
 ---
+### Azure Services
 
-## Azure Services
-
-The following list of Azure Services will be deployed for Info Assistant, version 0.2 beta:
+The following list of Azure Services will be deployed for IA Accelerator, version 0.2 beta:
 
 - App Service
 - App Service plan
@@ -29,5 +25,13 @@ The following list of Azure Services will be deployed for Info Assistant, versio
 - Log Analytics workspace
 - Storage account 
 
+---
+**NOTE:**
+
+- The proposed the cost estimation prepared based on Sandbox environment, estimation may vary customer to customer.
+- For detailed Azure OpenAI Service [pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing)
+- To calculate total count of tokens [OpenAI Tokenizer](https://platform.openai.com/tokenizer)
+
+---
 
 At this point this step is complete, please return to the [Deployment](../#deployment) step and continue.

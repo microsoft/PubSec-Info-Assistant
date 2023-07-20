@@ -257,7 +257,7 @@ class ChatReadRetrieveReadApproach(Approach):
         levels = {
             1024: "succinct",
             2048: "standard",
-            3500: "thorough",
+            3072: "thorough",
         }
         level = levels[response_length]
         return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."   

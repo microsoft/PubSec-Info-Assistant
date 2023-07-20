@@ -108,7 +108,7 @@ const Chat = () => {
                     case "2048":
                         node.className = `${rlbgstyles.buttonmiddleactive}`;
                         break;
-                    case "4096":
+                    case "3072":
                         node.className = `${rlbgstyles.buttonrightactive}`;
                         break;
                     default:
@@ -124,7 +124,7 @@ const Chat = () => {
                     case "2048":
                         node.className = `${rlbgstyles.buttonmiddle}`;
                         break;
-                    case "4096":
+                    case "3072":
                         node.className = `${rlbgstyles.buttonright}`;
                         break;
                     default:

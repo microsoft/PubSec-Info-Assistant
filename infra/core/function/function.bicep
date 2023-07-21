@@ -70,14 +70,40 @@ param CosmosDBDatabaseName string
 @description('CosmosDB Container Name')
 param CosmosDBContainerName string
 
-@description('')
+@description('Name of the submit queue for PDF files')
 param pdfSubmitQueue string
 
-@description('')
+@description('Name of the queue used to poll for completed FR processing')
 param pdfPollingQueue string
 
-@description('')
+@description('The queue which is used to trigger processing of non-PDF files')
 param nonPdfSubmitQueue string
+
+@description('The maximum number of seconds that between uploading a file and submitting it to FR')
+param maxSecondsHideOnUpload string
+
+@description('The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capoavity limitations')
+param maxSubmitRequeueCount string
+
+@description('the number of seconds that a message sleeps before we try to poll for FR completion')
+param pollQueueSubmitBackoff string
+
+@description('The number of seconds a message sleeps before trying to resubmit due to throttling requet from FR')
+param pdfSubmitQueueBackoff string
+
+@description('max times we will retry the submission due to throttling or internal errors in FR')
+param maxPollingRequeueCount string
+
+@description('number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error')
+param submitRequeueHideSeconds string
+
+@description('The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is teh default value that escalates exponentially')
+param pollingBackoff string
+
+@description('The maximum number of times we will rety to read a full processed document from FR. Failures in read may be due to network issues downloading the large response')
+param maxReadAttempts string
+
+
 
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
@@ -206,6 +232,38 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'NON_PDF_SUBMIT_QUEUE'
           value: nonPdfSubmitQueue
+        }
+        {
+          name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
+          value: maxSecondsHideOnUpload
+        }
+        {
+          name: 'MAX_SUBMIT_REQUEUE_COUNT'
+          value: maxSubmitRequeueCount
+        }
+        {
+          name: 'POLL_QUEUE_SUBMIT_BACKOFF'
+          value: pollQueueSubmitBackoff
+        }
+        {
+          name: 'PDF_SUBMIT_QUEUE_BACKOFF'
+          value: pdfSubmitQueueBackoff
+        }
+        {
+          name: 'MAX_POLLING_REQUEUE_COUNT'
+          value: maxPollingRequeueCount
+        }
+        {
+          name: 'SUBMIT_REQUEUE_HIDE_SECONDS'
+          value: submitRequeueHideSeconds
+        }
+        {
+          name: 'POLLING_BACKOFF'
+          value: pollingBackoff
+        }        
+        {
+          name: 'MAX_READ_ATTEMPTS'
+          value: maxReadAttempts
         }
       ]
     }

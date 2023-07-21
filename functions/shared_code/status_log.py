@@ -16,6 +16,7 @@ class State(Enum):
     QUEUED = "Queued"
     COMPLETE = "Complete"
     ERROR = "Error"
+    THROTTLED = "Throttled"
     ALL = "All"
 
 class StatusClassification(Enum):

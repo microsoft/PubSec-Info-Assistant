@@ -52,6 +52,14 @@ param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param queryTermLanguage string = 'English'
+param maxSecondsHideOnUpload string = '300'
+param maxSubmitRequeueCount string = '10'
+param pollQueueSubmitBackoff string = '60'
+param pdfSubmitQueueBackoff string = '60'
+param maxPollingRequeueCount string = '10'
+param submitRequeueHideSeconds  string = '1200'
+param pollingBackoff string = '30'
+param maxReadAttempts string = '5'
 
 
 @description('Id of the user or app to assign application roles')
@@ -302,6 +310,14 @@ module functions 'core/function/function.bicep' = {
     pdfSubmitQueue: pdfSubmitQueue
     pdfPollingQueue: pdfPollingQueue
     nonPdfSubmitQueue: nonPdfSubmitQueue
+    maxSecondsHideOnUpload: maxSecondsHideOnUpload
+    maxSubmitRequeueCount: maxSubmitRequeueCount
+    pollQueueSubmitBackoff: pollQueueSubmitBackoff
+    pdfSubmitQueueBackoff: pdfSubmitQueueBackoff
+    maxPollingRequeueCount: maxPollingRequeueCount
+    submitRequeueHideSeconds: submitRequeueHideSeconds
+    pollingBackoff: pollingBackoff
+    maxReadAttempts: maxReadAttempts
   }
   dependsOn: [
     appServicePlan
@@ -435,5 +451,11 @@ output AzureWebJobsStorage string = storage.outputs.connectionString
 output PDFSUBMITQUEUE string = pdfSubmitQueue
 output PDFPOLLINGQUEUE string = pdfPollingQueue
 output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
-
-
+output MAX_SECONDS_HIDE_ON_UPLOAD string = maxSecondsHideOnUpload
+output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
+output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff
+output PDF_SUBMIT_QUEUE_BACKOFF string = pdfSubmitQueueBackoff
+output MAX_POLLING_REQUEUE_COUNT string = maxPollingRequeueCount 
+output SUBMIT_REQUEUE_HIDE_SECONDS string = submitRequeueHideSeconds
+output POLLING_BACKOFF string = pollingBackoff
+output MAX_READ_ATTEMPTS string = maxReadAttempts 

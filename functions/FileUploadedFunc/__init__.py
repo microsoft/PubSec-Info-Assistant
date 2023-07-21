@@ -70,3 +70,4 @@ def main(myblob: func.InputStream):
     except Exception as e:
         statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
+    statusLog.save_document()

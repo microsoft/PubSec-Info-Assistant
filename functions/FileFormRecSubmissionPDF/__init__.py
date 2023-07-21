@@ -178,3 +178,5 @@ def main(msg: func.QueueMessage) -> None:
             StatusClassification.ERROR,
             State.ERROR,
         )
+        
+    statusLog.save_document()

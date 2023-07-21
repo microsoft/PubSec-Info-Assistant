@@ -101,8 +101,7 @@ def main(msg: func.QueueMessage) -> None:
                 chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete', StatusClassification.DEBUG)  
                 statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete. {chunk_count} chunks created.', StatusClassification.INFO, State.COMPLETE)
-                return          
-
+ 
             elif response_status == "running":
                 # still running so requeue with a backoff
                 if queued_count < max_read_attempts:
@@ -135,6 +134,8 @@ def main(msg: func.QueueMessage) -> None:
     except Exception as e:
         # a general error 
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - code: {response.status_code} - {str(e)}", StatusClassification.ERROR, State.ERROR)
+        
+    statusLog.save_document()
 
 
 @retry(stop=stop_after_attempt(max_read_attempts), wait=wait_fixed(5))

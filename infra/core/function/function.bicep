@@ -79,16 +79,16 @@ param pdfPollingQueue string
 @description('The queue which is used to trigger processing of non-PDF files')
 param nonPdfSubmitQueue string
 
-@description('The maximum number of seconds that between uploading a file and submitting it to FR')
+@description('The maximum number of seconds  between uploading a file and submitting it to FR')
 param maxSecondsHideOnUpload string
 
-@description('The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capoavity limitations')
+@description('The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capacity limitations')
 param maxSubmitRequeueCount string
 
 @description('the number of seconds that a message sleeps before we try to poll for FR completion')
 param pollQueueSubmitBackoff string
 
-@description('The number of seconds a message sleeps before trying to resubmit due to throttling requet from FR')
+@description('The number of seconds a message sleeps before trying to resubmit due to throttling request from FR')
 param pdfSubmitQueueBackoff string
 
 @description('max times we will retry the submission due to throttling or internal errors in FR')
@@ -97,10 +97,10 @@ param maxPollingRequeueCount string
 @description('number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error')
 param submitRequeueHideSeconds string
 
-@description('The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is teh default value that escalates exponentially')
+@description('The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is the default value that escalates exponentially')
 param pollingBackoff string
 
-@description('The maximum number of times we will rety to read a full processed document from FR. Failures in read may be due to network issues downloading the large response')
+@description('The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response')
 param maxReadAttempts string
 
 

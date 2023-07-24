@@ -19,6 +19,7 @@ cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
+max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
 function_name = "FileUploadedFunc"
 
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
@@ -51,7 +52,6 @@ def main(myblob: func.InputStream):
             error_message = f"{function_name} - Unexpected file type submitted {file_extension}"
             statusLog.state_description = error_message
             statusLog.upsert_document(myblob.name, error_message, StatusClassification.ERROR, State.SKIPPED) 
-            raise Exception(error_message)    
         
         # Create message
         message = {
@@ -63,11 +63,11 @@ def main(myblob: func.InputStream):
         
         # Queue message with a random backoff so as not to put the next function under unnecessary load
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())
-        MAX_SECONDS_HIDE = 180    # number of minutes that a message will be hidden for before being processed by the FR function
-        backoff =  random.randint(1, MAX_SECONDS_HIDE)        
+        backoff =  random.randint(1, max_seconds_hide_on_upload)        
         queue_client.send_message(message_string, visibility_timeout = backoff)  
         statusLog.upsert_document(myblob.name, f'{function_name} - {file_extension} file sent to submit queue. Visible in {backoff} seconds', StatusClassification.DEBUG, State.QUEUED)          
         
     except Exception as e:
         statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
+    statusLog.save_document()

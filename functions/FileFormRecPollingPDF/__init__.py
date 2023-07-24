@@ -7,6 +7,7 @@ import logging
 import os
 import json
 import requests
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities
 import random
@@ -39,15 +40,16 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
+max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
+max_polling_requeue_count = int(os.environ["MAX_POLLING_REQUEUE_COUNT"])
+submit_requeue_hide_seconds = int(os.environ["SUBMIT_REQUEUE_HIDE_SECONDS"])
+polling_backoff = int(os.environ["POLLING_BACKOFF"])
+max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
+
 function_name = "FileFormRecPollingPDF"
-
-
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
-MAX_REQUEUE_COUNT = 10   #max times we will retry the submission
-POLLING_BACKOFF = 30
-MAX_READ_ATTEMPTS = 5
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -63,6 +65,7 @@ def main(msg: func.QueueMessage) -> None:
         blob_uri =  message_json['blob_uri']
         FR_resultId = message_json['FR_resultId']
         queued_count = message_json['polling_queue_count']      
+        submit_queued_count = message_json["submit_queued_count"]
         statusLog.upsert_document(blob_name, f'{function_name} - Message received from pdf polling queue attempt {queued_count}', StatusClassification.DEBUG, State.PROCESSING)        
         statusLog.upsert_document(blob_name, f'{function_name} - Polling Form Recognizer function started', StatusClassification.INFO)
         
@@ -98,33 +101,44 @@ def main(msg: func.QueueMessage) -> None:
                 chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete', StatusClassification.DEBUG)  
                 statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete. {chunk_count} chunks created.', StatusClassification.INFO, State.COMPLETE)
-                return          
-
+ 
             elif response_status == "running":
                 # still running so requeue with a backoff
-                if queued_count < MAX_REQUEUE_COUNT:
-                    backoff = POLLING_BACKOFF * (queued_count ** 2)
+                if queued_count < max_read_attempts:
+                    backoff = polling_backoff * (queued_count ** 2)
                     backoff += random.randint(0, 10)
                     queued_count += 1
                     message_json['polling_queue_count'] = queued_count
-                    statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Back off of attempt {queued_count} of {MAX_REQUEUE_COUNT} for {backoff} seconds", StatusClassification.DEBUG, State.QUEUED) 
+                    statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Polling back off of attempt {queued_count} of {max_polling_requeue_count} for {backoff} seconds", StatusClassification.DEBUG, State.QUEUED) 
                     queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())
                     message_json_str = json.dumps(message_json)  
                     queue_client.send_message(message_json_str, visibility_timeout=backoff)
                 else:
                     statusLog.upsert_document(blob_name, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)     
             else:
-                # unexpected status returned by FR
-                statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from form Recognizer- code: {response.status_code} status: {response_status} - text: {response.text}', StatusClassification.ERROR, State.ERROR)  
+                # unexpected status returned by FR, such as internal capacity overload, so requeue
+                if submit_queued_count < max_submit_requeue_count:
+                    statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from Form Recognizer- code: {response.status_code} status: {response_status} - text: {response.text}. Document will be resubmitted', StatusClassification.ERROR)                  
+                    queue_client = QueueClient.from_connection_string(azure_blob_connection_string, pdf_submit_queue, message_encode_policy=TextBase64EncodePolicy())  
+                    submit_queued_count += 1
+                    message_json["submit_queued_count"] = submit_queued_count
+                    message_string = json.dumps(message_json)    
+                    queue_client.send_message(message_string, visibility_timeout = submit_requeue_hide_seconds)  
+                    statusLog.upsert_document(blob_name, f'{function_name} file resent to submit queue. Visible in {submit_requeue_hide_seconds} seconds', StatusClassification.DEBUG, State.THROTTLED)      
+                else:
+                    statusLog.upsert_document(blob_name, f'{function_name} - maximum submissions to FR reached', StatusClassification.ERROR, State.ERROR)     
+                
         else:
             statusLog.upsert_document(blob_name, f'{function_name} - Error raised by FR polling', StatusClassification.ERROR, State.ERROR)    
                             
     except Exception as e:
         # a general error 
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - code: {response.status_code} - {str(e)}", StatusClassification.ERROR, State.ERROR)
+        
+    statusLog.save_document()
 
 
-@retry(stop=stop_after_attempt(MAX_READ_ATTEMPTS), wait=wait_fixed(5))
+@retry(stop=stop_after_attempt(max_read_attempts), wait=wait_fixed(5))
 def durable_get(url, headers, params):
     response = requests.get(url, headers=headers, params=params)   
     response.raise_for_status()  # Raise stored HTTPError, if one occurred.

@@ -82,6 +82,38 @@ jq -r  '
         {
             "path": "pdfsubmitqueue",
             "env_var": "PDF_SUBMIT_QUEUE"
+        },
+        {
+            "path": "maX_SECONDS_HIDE_ON_UPLOAD",
+            "env_var": "MAX_SECONDS_HIDE_ON_UPLOAD"
+        },
+        {
+            "path": "maX_SUBMIT_REQUEUE_COUNT",
+            "env_var": "MAX_SUBMIT_REQUEUE_COUNT"
+        },
+        {
+            "path": "polL_QUEUE_SUBMIT_BACKOFF",
+            "env_var": "POLL_QUEUE_SUBMIT_BACKOFF"
+        },
+        {
+            "path": "pdF_SUBMIT_QUEUE_BACKOFF",
+            "env_var": "PDF_SUBMIT_QUEUE_BACKOFF"
+        },
+        {
+            "path": "maX_POLLING_REQUEUE_COUNT",
+            "env_var": "MAX_POLLING_REQUEUE_COUNT"
+        },
+        {
+            "path": "submiT_REQUEUE_HIDE_SECONDS",
+            "env_var": "SUBMIT_REQUEUE_HIDE_SECONDS"
+        },
+        {
+            "path": "pollinG_BACKOFF",
+            "env_var": "POLLING_BACKOFF"
+        },
+        {
+            "path": "maX_READ_ATTEMPTS",
+            "env_var": "MAX_READ_ATTEMPTS"
         }
     ]
         as $env_vars_to_extract

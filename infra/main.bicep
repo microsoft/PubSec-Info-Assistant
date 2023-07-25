@@ -32,6 +32,8 @@ param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
 param functionsAppName string = ''
+param mediaServiceName string = ''
+param videoIndexerName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
@@ -268,6 +270,24 @@ module storage 'core/storage/storage-account.bicep' = {
   }
 }
 
+module storageMedia 'core/storage/storage-account.bicep' = {
+  name: 'storage-media'
+  scope: rg
+  params: {
+    name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}media${randomString}'
+    location: location
+    tags: tags
+    publicNetworkAccess: 'Enabled'
+    sku: {
+      name: 'Standard_LRS'
+    }
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+  }
+}
+
 module cosmosdb 'core/db/cosmosdb.bicep' = {
   name: 'cosmosdb'
   scope: rg
@@ -325,6 +345,31 @@ module functions 'core/function/function.bicep' = {
     cosmosdb
   ]
 }
+
+// Media Service
+module media_service 'core/video_indexer/media_service.bicep' = {
+  name: 'media_service'
+  scope: rg
+  params: {
+    name: !empty(mediaServiceName) ? mediaServiceName : '${prefix}${abbrs.mediaService}${randomString}'
+    location: location
+    tags: tags
+    storageAccountID: storageMedia.outputs.id
+  }
+}
+
+// AVAM Service
+module avam 'core/video_indexer/video_indexer.bicep' = {
+  name: 'avam'
+  scope: rg
+  params: {
+    name: !empty(videoIndexerName) ? videoIndexerName : '${prefix}${abbrs.videoIndexer}${randomString}'
+    location: location
+    tags: tags
+    mediaServiceAccountResourceId: media_service.outputs.id
+  }
+}
+
 
 // USER ROLES
 module openAiRoleUser 'core/security/role.bicep' = {

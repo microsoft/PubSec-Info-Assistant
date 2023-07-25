@@ -79,6 +79,9 @@ param pdfPollingQueue string
 @description('The queue which is used to trigger processing of non-PDF files')
 param nonPdfSubmitQueue string
 
+@description('The queue which is used to trigger processing of non-PDF files')
+param mediaSubmitQueue string
+
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
 param maxSecondsHideOnUpload string
 
@@ -233,6 +236,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'NON_PDF_SUBMIT_QUEUE'
           value: nonPdfSubmitQueue
         }
+        {
+          name: 'MEDIA_SUBMIT_QUEUE'
+          value: mediaSubmitQueue
+        }        
         {
           name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
           value: maxSecondsHideOnUpload

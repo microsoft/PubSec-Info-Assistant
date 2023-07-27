@@ -53,27 +53,27 @@ class ChatReadRetrieveReadApproach(Approach):
     Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
     Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
     """
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a knowledge base about employee healthcare plans and the employee handbook.
+    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
     Generate a search query based on the conversation and the new question. 
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
-    Do not include any text inside [] or <<>> in the search query terms.
-    Do not include any special characters like '+'.
-    If the question is not in English, translate the question to English before generating the search query.
+    Do not include any text inside [] or <<<>>> in the search query terms.
+    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
     If you cannot generate a search query, return just the number 0.
     """
+    
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are my health plans?' },
-    {'role' : ASSISTANT, 'content' : 'Show available health plans' },
-    {'role' : USER, 'content' : 'does my plan cover cardio?' },
-    {'role' : ASSISTANT, 'content' : 'Health plan cardio coverage' }
+    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
+    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
+    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
+    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
     ]
     
     #Few Shot prompting for Response. This will feed into Chain of thought system message.
     response_prompt_few_shots = [
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'Is my flight to Denver on time?'}, 
+    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'}, 
     {'role': ASSISTANT, 'content': 'I am not sure. The provided source document does not include information about the current status of your specific flight'}
     ]
     
@@ -107,10 +107,13 @@ class ChatReadRetrieveReadApproach(Approach):
         response_length = int(overrides.get("response_length") or 1024)
         
         user_q = 'Generate search query for: ' + history[-1]["user"]
-
+        
+        query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
+        
+        
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
-            self.query_prompt_template,
+            query_prompt,
             self.gpt_deployment,
             history,
             user_q,

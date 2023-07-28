@@ -106,6 +106,7 @@ def main(msg: func.QueueMessage) -> None:
                 message_json["text_enrichment_queued_count"] = 1
                 message_string = json.dumps(message_json)
                 queue_client.send_message(message_string)
+                statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED) 
 
             elif response_status == "running":
                 # still running so requeue with a backoff

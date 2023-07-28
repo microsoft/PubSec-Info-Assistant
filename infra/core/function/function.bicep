@@ -80,7 +80,7 @@ param pdfPollingQueue string
 param nonPdfSubmitQueue string
 
 @description('The queue which is used to trigger processing of non-PDF files')
-param enrichmentQueue string
+param textEnrichmentQueue string
 
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
 param maxSecondsHideOnUpload string
@@ -237,8 +237,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: nonPdfSubmitQueue
         }
         {
-          name: 'ENRICHMENT_QUEUE'
-          value: enrichmentQueue
+          name: 'TEXT_ENRICHMENT_QUEUE'
+          value: textEnrichmentQueue
         }
         {
           name: 'MAX_SECONDS_HIDE_ON_UPLOAD'

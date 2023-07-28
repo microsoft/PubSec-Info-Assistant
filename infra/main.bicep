@@ -51,7 +51,7 @@ param formRecognizerApiVersion string = '2022-08-31'
 param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
-param enrichmentQueue string = 'enrichment-queue'
+param textEnrichmentQueue string = 'text-enrichment-queue'
 param queryTermLanguage string = 'English'
 param maxSecondsHideOnUpload string = '300'
 param maxSubmitRequeueCount string = '10'
@@ -266,7 +266,7 @@ module storage 'core/storage/storage-account.bicep' = {
         name: nonPdfSubmitQueue
       }    
       {
-        name: enrichmentQueue
+        name: textEnrichmentQueue
       }
     ]
   }
@@ -318,7 +318,7 @@ module functions 'core/function/function.bicep' = {
     maxSubmitRequeueCount: maxSubmitRequeueCount
     pollQueueSubmitBackoff: pollQueueSubmitBackoff
     pdfSubmitQueueBackoff: pdfSubmitQueueBackoff
-    enrichmentQueue: enrichmentQueue
+    textEnrichmentQueue: textEnrichmentQueue
     maxPollingRequeueCount: maxPollingRequeueCount
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
@@ -456,7 +456,7 @@ output AzureWebJobsStorage string = storage.outputs.connectionString
 output PDFSUBMITQUEUE string = pdfSubmitQueue
 output PDFPOLLINGQUEUE string = pdfPollingQueue
 output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
-output ENRICHMENTQUEUE string = enrichmentQueue
+output TEXTENRICHMENTQUEUE string = textEnrichmentQueue
 output MAX_SECONDS_HIDE_ON_UPLOAD string = maxSecondsHideOnUpload
 output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
 output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff

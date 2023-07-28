@@ -37,7 +37,7 @@ cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
-enrichment_queue = os.environ["ENRICHMENT_QUEUE"]
+text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
@@ -102,8 +102,8 @@ def main(msg: func.QueueMessage) -> None:
                 chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete, {chunk_count} chunks created.', StatusClassification.DEBUG)  
                 # submit message to the enrichment queue to continue processing                
-                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
-                message_json["enrichment_queued_count"] = 1
+                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+                message_json["text_enrichment_queued_count"] = 1
                 message_string = json.dumps(message_json)
                 queue_client.send_message(message_string)
                 statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED) 

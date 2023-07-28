@@ -28,7 +28,7 @@ cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
-enrichment_queue = os.environ["ENRICHMENT_QUEUE"]
+text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
@@ -73,7 +73,7 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete. {chunk_count} chunks created', StatusClassification.DEBUG)       
         
         # submit message to the enrichment queue to continue processing                
-        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
         message_json["enrichment_queued_count"] = 1
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string)

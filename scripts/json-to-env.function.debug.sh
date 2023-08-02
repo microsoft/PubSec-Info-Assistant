@@ -118,6 +118,30 @@ jq -r  '
         {
             "path": "maX_READ_ATTEMPTS",
             "env_var": "MAX_READ_ATTEMPTS"
+        },
+        {
+            "path": "enrichmenT_KEY",
+            "env_var": "ENRICHMENT_KEY"
+        },
+        {
+            "path": "enrichmenT_ENDPOINT",
+            "env_var": "ENRICHMENT_ENDPOINT"
+        },
+        {
+            "path": "enrichmenT_NAME",
+            "env_var": "ENRICHMENT_NAME"
+        },
+        {
+            "path": "targeT_LANGUAGE",
+            "env_var": "TARGET_LANGUAGE"
+        },
+        {
+            "path": "maX_ENRICHMENT_REQUEUE_COUNT",
+            "env_var": "MAX_ENRICHMENT_REQUEUE_COUNT"
+        },
+        {
+            "path": "enrichmenT_BACKOFF",
+            "env_var": "ENRICHMENT_BACKOFF"
         }
     ]
         as $env_vars_to_extract

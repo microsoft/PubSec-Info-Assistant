@@ -22,17 +22,14 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
 function_name = "FileUploadedFunc"
 
-statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
+
 
 
 def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
     try:
-        statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, State.PROCESSING, True)    
-        logging.info(f"Python blob trigger function processed blob \n"
-                    f"Name: {myblob.name}\n"
-                    f"Blob Size: {myblob.length} bytes")
-        
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
+        statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, State.PROCESSING, True)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
         # Create message structure to send to queue

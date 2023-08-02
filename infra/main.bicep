@@ -24,7 +24,9 @@ param openAiSkuName string = 'S0'
 param cognitiveServiesForSearchName string = ''
 param cosmosdbName string = ''
 param formRecognizerName string = ''
+param enrichmentName string = ''
 param formRecognizerSkuName string = 'S0'
+param encichmentSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
 param resourceGroupName string = ''
@@ -61,6 +63,10 @@ param maxPollingRequeueCount string = '10'
 param submitRequeueHideSeconds  string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
+param targetLanguage string = 'en'
+param maxEnrichmentRequeueCount string = '10'
+param enrichmentBackoff string = '60'
+
 
 
 @description('Id of the user or app to assign application roles')
@@ -194,6 +200,16 @@ module formrecognizer 'core/ai/formrecognizer.bicep' = {
   }
 }
 
+module enrichment 'core/ai/enrichment.bicep' = {
+  scope: rg
+  name: 'enrichment'
+  params: {
+    name: !empty(enrichmentName) ? enrichmentName : '${prefix}-enrichment-${abbrs.cognitiveServicesAccounts}${randomString}'
+    location: location
+    tags: tags
+    sku: encichmentSkuName
+  }
+}
 
 module searchServices 'core/search/search-services.bicep' = {
   scope: rg
@@ -323,6 +339,12 @@ module functions 'core/function/function.bicep' = {
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
     maxReadAttempts: maxReadAttempts
+    enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
+    enrichmentEndpoint: enrichment.outputs.cognitiveServiceEndpoint
+    enrichmentName: enrichment.outputs.cognitiveServicerAccountName
+    targetLanguage: targetLanguage
+    maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
+    enrichmentBackoff: enrichmentBackoff
   }
   dependsOn: [
     appServicePlan
@@ -465,3 +487,9 @@ output MAX_POLLING_REQUEUE_COUNT string = maxPollingRequeueCount
 output SUBMIT_REQUEUE_HIDE_SECONDS string = submitRequeueHideSeconds
 output POLLING_BACKOFF string = pollingBackoff
 output MAX_READ_ATTEMPTS string = maxReadAttempts 
+output ENRICHMENT_KEY string = enrichment.outputs.cognitiveServiceAccountKey
+output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
+output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
+output TARGET_LANGUAGE string = targetLanguage
+output MAX_ENRICHMENT_REQUEUE_COUNT string = maxEnrichmentRequeueCount
+output ENRICHMENT_BACKOFF string = enrichmentBackoff

@@ -155,19 +155,7 @@ def main(msg: func.QueueMessage) -> None:
                 json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
                 block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
                 block_blob_client.upload_blob(json_str, overwrite=True)
-                
-            )
-            message_json_str = json.dumps(message_json)
-            queue_client.send_message(
-                message_json_str, visibility_timeout=poll_queue_submit_backoff
-            )
-            statusLog.upsert_document(
-                blob_path,
-                f"{FUNCTION_NAME} - message sent to pdf-polling-queue. Visible in {poll_queue_submit_backoff} seconds. FR Result ID is {result_id}",
-                StatusClassification.DEBUG,
-                State.QUEUED,
-            )
-    
+  
    
         statusLog.upsert_document(
             blob_path,

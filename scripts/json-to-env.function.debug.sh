@@ -84,6 +84,10 @@ jq -r  '
             "env_var": "PDF_SUBMIT_QUEUE"
         },
         {
+            "path": "textenrichmentqueue",
+            "env_var": "TEXT_ENRICHMENT_QUEUE"
+        },
+        {
             "path": "maX_SECONDS_HIDE_ON_UPLOAD",
             "env_var": "MAX_SECONDS_HIDE_ON_UPLOAD"
         },

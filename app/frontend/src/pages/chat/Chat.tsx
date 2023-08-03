@@ -35,10 +35,10 @@ const Chat = () => {
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
     const [responseLength, setResponseLength] = useState<number>(1024);
-    // Setting responseTemp to 0.7 by default, this will effect the default display of the ResponseTempButtonGroup below.
+    // Setting responseTemp to 0.6 by default, this will effect the default display of the ResponseTempButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseTempButtonGroup.tsx file.
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
-    const [responseTemp, setResponseTemp] = useState<number>(0.7);
+    const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
     const lastQuestionRef = useRef<string>("");
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -144,7 +144,7 @@ const Chat = () => {
                     case "1.3":
                         node.className = `${rtbgstyles.buttonleftactive}`;
                         break;
-                    case "0.7":
+                    case "0.6":
                         node.className = `${rtbgstyles.buttonmiddleactive}`;
                         break;
                     case "0":
@@ -160,7 +160,7 @@ const Chat = () => {
                     case "1.3":
                         node.className = `${rtbgstyles.buttonleft}`;
                         break;
-                    case "0.7":
+                    case "0.6":
                         node.className = `${rtbgstyles.buttonmiddle}`;
                         break;
                     case "0":
@@ -173,7 +173,7 @@ const Chat = () => {
             }
         }
         // the or value here needs to match the default value assigned to responseLength above.
-        setResponseTemp(_ev.target.value as number || 0.7)
+        setResponseTemp(_ev.target.value as number || 0.6)
     };
 
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);

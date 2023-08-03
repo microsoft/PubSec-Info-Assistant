@@ -40,8 +40,7 @@ param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param gptDeploymentName string = 'davinci'
-param gptModelName string = 'text-davinci-003'
-param gptDeploymentCapacity int = 30
+param gptModelName string = 'gpt-35-turbo'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chatGptDeploymentCapacity int = 30
@@ -144,18 +143,6 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
       name: openAiSkuName
     }
     deployments: [
-      {
-        name: !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
-        model: {
-          format: 'OpenAI'
-          name: gptModelName
-          version: '1'
-        }
-        sku: {
-          name: 'Standard'
-          capacity: gptDeploymentCapacity
-        }
-      }
       {
         name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
         model: {
@@ -415,6 +402,7 @@ output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_GPT_DEPLOYMENT string = !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+output AZURE_OPENAI_SERVICE_NAME  string = azureOpenAIServiceName
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey

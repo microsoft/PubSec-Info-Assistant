@@ -41,6 +41,8 @@ const Chat = () => {
     const [responseTemp, setResponseTemp] = useState<number>(0.7);
 
     const lastQuestionRef = useRef<string>("");
+    const testQuestion = "This is a test question.";
+    const thisquestion = "";
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -281,6 +283,7 @@ const Chat = () => {
                                             onFollowupQuestionClicked={q => makeApiRequest(q)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
+                                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current)}
                                         />
                                     </div>
                                 </div>
@@ -314,6 +317,7 @@ const Chat = () => {
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
                             showClearChat={true}
                             onClearClick={clearChat}
+                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current)}
                         />
                     </div>
                 </div>

@@ -21,6 +21,7 @@ interface Props {
     onFollowupQuestionClicked?: (question: string) => void;
     showFollowupQuestions?: boolean;
     onAdjustClick?: () => void;
+    onRegenerateClick?: () => void;
 }
 
 export const Answer = ({
@@ -31,7 +32,8 @@ export const Answer = ({
     onSupportingContentClicked,
     onFollowupQuestionClicked,
     showFollowupQuestions,
-    onAdjustClick
+    onAdjustClick,
+    onRegenerateClick
 }: Props) => {
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.citation_lookup, onCitationClicked), [answer]);
 
@@ -98,7 +100,7 @@ export const Answer = ({
                 </Stack.Item>
             )}
             <Stack.Item align="center">
-                <RAIPanel onAdjustClick={onAdjustClick}/>
+                <RAIPanel onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick}/>
             </Stack.Item>
         </Stack>
     );

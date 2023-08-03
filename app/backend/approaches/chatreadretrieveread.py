@@ -243,6 +243,7 @@ class ChatReadRetrieveReadApproach(Approach):
     # Get the chat history as a single string
     def get_chat_history_as_text(self, history, include_last_turn=True, approx_max_tokens=1000) -> str:
         history_text = ""
+        thisquestion = history[-1]["user"]
         for h in reversed(history if include_last_turn else history[:-1]):
             history_text = (
                 """User:""" + " " + h["user"] + "\n" + """""" + "\n" + """Assistant:""" + " " + (h.get("bot") + """""" if h.get("bot") else "") + "\n" + history_text

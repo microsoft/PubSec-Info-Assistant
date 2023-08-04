@@ -26,7 +26,7 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 
 *\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
 
-![Chat screen](docs/images/chatscreen.png)
+![Chat screen](docs/images/info_assistant_chatscreen.png)
 
 For a detailed review see our [Features](/docs/features/features.md) page.
 

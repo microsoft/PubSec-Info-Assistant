@@ -22,9 +22,9 @@ from shared_code.status_log import StatusLog, State
 AZURE_BLOB_STORAGE_ACCOUNT = os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
 AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
-AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
-AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
-AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
+AZURE_SEARCH_SERVICE = "infoasst-search-rset9"#os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
+AZURE_SEARCH_SERVICE_KEY = "EFSwniDt3Y9qLNevXm64NSj6N3QMfoKi42nrS8PE6WAzSeBs3JjI"#os.environ.get("AZURE_SEARCH_SERVICE_KEY")
+AZURE_SEARCH_INDEX = "all-files-index"#os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
 AZURE_OPENAI_GPT_DEPLOYMENT = os.environ.get("AZURE_OPENAI_GPT_DEPLOYMENT") or "davinci"
 AZURE_OPENAI_CHATGPT_DEPLOYMENT = os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
@@ -46,7 +46,7 @@ QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
 azure_credential = DefaultAzureCredential()
-azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
+azure_search_key_credential = AzureKeyCredential("AZURE_SEARCH_SERVICE_KEY")
 
 # Used by the OpenAI SDK
 openai.api_type = "azure"
@@ -63,8 +63,8 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
-    endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
-    index_name=AZURE_SEARCH_INDEX,
+    endpoint="https://infoasst-search-rset9.search.windows.net",
+    index_name= "all-files-index",
     credential=azure_search_key_credential)
 blob_client = BlobServiceClient(
     account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net", 

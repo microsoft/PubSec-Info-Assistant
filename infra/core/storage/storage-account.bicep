@@ -85,3 +85,4 @@ output primaryEndpoints object = storage.properties.primaryEndpoints
 output key string = storage.listKeys().keys[0].value
 #disable-next-line outputs-should-not-contain-secrets
 output connectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+output id string = storage.id

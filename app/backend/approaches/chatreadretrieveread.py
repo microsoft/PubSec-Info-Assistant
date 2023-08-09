@@ -101,14 +101,14 @@ class ChatReadRetrieveReadApproach(Approach):
         oai_service_name: str,
         oai_service_key: str,
         chatgpt_deployment: str,
-        sourcepage_field: str,
+        source_page_field: str,
         content_field: str,
         blob_client: BlobServiceClient,
         query_term_language: str,
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
-        self.sourcepage_field = sourcepage_field
+        self.source_page_field = source_page_field
         self.content_field = content_field
         self.blob_client = blob_client
         self.query_term_language = query_term_language
@@ -196,7 +196,7 @@ class ChatReadRetrieveReadApproach(Approach):
                     + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
                 )
                 data_points.append(
-                    "/".join(doc[self.sourcepage_field].split("/")[4:])
+                    "/".join(doc[self.source_page_field].split("/")[4:])
                     + "| "
                     + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
                 )
@@ -208,7 +208,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 )
                 data_points.append(
                     "/".join(
-                        urllib.parse.unquote(doc[self.sourcepage_field]).split("/")[4:]
+                        urllib.parse.unquote(doc[self.source_page_field]).split("/")[4:]
                     )
                     + "| "
                     + nonewlines(doc[self.content_field])
@@ -216,7 +216,7 @@ class ChatReadRetrieveReadApproach(Approach):
             # add the "FileX" moniker and full file name to the citation lookup
 
             citation_lookup[f"File{idx}"] = {
-                "citation": urllib.parse.unquote(doc[self.sourcepage_field]),
+                "citation": urllib.parse.unquote(doc[self.source_page_field]),
                 "source_path": self.get_source_file_name(doc[self.content_field]),
                 "page_number": self.get_first_page_num_for_chunk(
                     doc[self.content_field]
@@ -245,7 +245,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_lenth_prompt_text(
+                response_length_prompt=self.get_repsonse_length_prompt_text(
                     response_length
                 ),
                 userPersona=user_persona,
@@ -257,7 +257,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_lenth_prompt_text(
+                response_length_prompt=self.get_repsonse_length_prompt_text(
                     response_length
                 ),
                 userPersona=user_persona,
@@ -268,7 +268,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_lenth_prompt_text(
+                response_length_prompt=self.get_repsonse_length_prompt_text(
                     response_length
                 ),
                 userPersona=user_persona,
@@ -324,7 +324,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
     # Get the prompt text for the response length
 
-    def get_repsonse_lenth_prompt_text(self, response_length: int):
+    def get_repsonse_length_prompt_text(self, response_length: int):
         """
         Get the prompt text for the response length
         """

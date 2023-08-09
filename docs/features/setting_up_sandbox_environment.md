@@ -21,7 +21,7 @@ The CI/CD pipeline process for Information Assistant requires the use of an Azur
 
 To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub repository, follow these steps:
 
-1. **Create a new pipeline:** In your Azure DevOps project, go to **Pipelines** and click on **New Pipeline**. 
+1. **Create a new pipeline:** In your Azure DevOps project, go to **Pipelines** and click on **New Pipeline**.
 
    1. Select **GitHub** as the source repository.
 
@@ -44,7 +44,6 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
    6. Next **Configure variables :** To Configure the deployment, please add the following variables to the build pipeline and populate with values for your target Azure subscription. Then save the pipeline variables.
 
        > AZURE_OPENAI_CHATGPT_DEPLOYMENT = gpt-35-turbo \
-       > AZURE_OPENAI_GPT_DEPLOYMENT = text-davinci-003 \
        > AZURE_OPENAI_SERVICE_KEY = "" \
        > AZURE_OPENAI_SERVICE_NAME = "" \
        > AZURE_STORAGE_ACCOUNT = "" \
@@ -54,7 +53,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
        > CONTAINER_REGISTRY_ADDRESS = "" \
        > SERVICE_PRINCIPAL_ID = "" \
        > TENANT_ID = "" \
-       > SUBSCRIPTION_ID = "" 
+       > SUBSCRIPTION_ID = ""
 
 2. **Save and pipeline:** After updating the variable, save your pipeline configuration.
 

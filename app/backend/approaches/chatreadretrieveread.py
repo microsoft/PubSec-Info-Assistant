@@ -10,15 +10,22 @@ import openai
 from approaches.approach import Approach
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
-from azure.storage.blob import (AccountSasPermissions, BlobServiceClient,
-                                ResourceTypes, generate_account_sas)
+from azure.storage.blob import (
+    AccountSasPermissions,
+    BlobServiceClient,
+    ResourceTypes,
+    generate_account_sas,
+)
 from text import nonewlines
 
 
-# Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
-# top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion
-# (answer) with that prompt.
 class ChatReadRetrieveReadApproach(Approach):
+    """
+    Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
+    top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion
+    (answer) with that prompt.
+    """
+
     prompt_prefix = """<|im_start|>
     You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
    
@@ -115,20 +122,33 @@ class ChatReadRetrieveReadApproach(Approach):
         openai.api_key = oai_service_key
 
     def run(self, history: list[dict], overrides: dict) -> any:
+        """
+        Run the approach on the query and documents.
+
+        Args:
+            history: The chat history. (e.g. [{"user": "hello", "bot": "hi"}])
+            overrides: Overrides from the user interface for the approach. (e.g. temperature, top,
+                semantic_captions etc.)
+        """
+        # Overrides
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         top = overrides.get("top") or 3
+        response_length = int(overrides.get("response_length") or 1024)
+
+        ## Category filter
         exclude_category = overrides.get("exclude_category") or None
-        filter = (
+        category_filter = (
             "category ne '{}'".format(exclude_category.replace("'", "''"))
             if exclude_category
             else None
         )
+
+        ## Personas
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
-        # aiPersona = overrides.get("ai_persona","")
-        response_length = int(overrides.get("response_length") or 1024)
 
-        # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
+        # STEP 1: Generate an optimized keyword search query based on the chat history and the last question.
+
         prompt = self.query_prompt_template.format(
             chat_history=self.get_chat_history_as_text(
                 history, include_last_turn=False
@@ -145,15 +165,14 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1,
             stop=["\n"],
         )
-        q = completion.choices[0].text
+        raw_query_proposal = completion.choices[0].text
+        generated_query = raw_query_proposal.strip('"')
 
-        generated_query = q.strip('"')
-
-        # STEP 2: Retrieve relevant documents from the search index with the GPT optimized query
+        # STEP 2: Retrieve relevant documents from the search index with the optimized query term
         if overrides.get("semantic_ranker"):
-            r = self.search_client.search(
+            raw_search_results = self.search_client.search(
                 generated_query,
-                filter=filter,
+                filter=category_filter,
                 query_type=QueryType.SEMANTIC,
                 query_language="en-us",
                 query_speller="lexicon",
@@ -164,16 +183,20 @@ class ChatReadRetrieveReadApproach(Approach):
                 else None,
             )
         else:
-            r = self.search_client.search(generated_query, filter=filter, top=top)
+            raw_search_results = self.search_client.search(
+                generated_query, filter=category_filter, top=top
+            )
 
-        citation_lookup = {}  # dict of "FileX" monikor to the actual file name
+        citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
 
-        for idx, doc in enumerate(r):  # for each document in the search results
+        for idx, doc in enumerate(
+            raw_search_results
+        ):  # for each document in the search results
             if use_semantic_captions:
                 # if using semantic captions, use the captions instead of the content
-                # include the "FileX" monikor in the prompt, and the actual file name in the response
+                # include the "FileX" moniker in the prompt, and the actual file name in the response
                 results.append(
                     f"File{idx} "
                     + "| "
@@ -186,7 +209,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 )
             else:
                 # if not using semantic captions, use the content instead of the captions
-                # include the "FileX" monikor in the prompt, and the actual file name in the response
+                # include the "FileX" moniker in the prompt, and the actual file name in the response
                 results.append(
                     f"File{idx} " + "| " + nonewlines(doc[self.content_field])
                 )
@@ -197,7 +220,7 @@ class ChatReadRetrieveReadApproach(Approach):
                     + "| "
                     + nonewlines(doc[self.content_field])
                 )
-            # add the "FileX" monikor and full file name to the citation lookup
+            # add the "FileX" moniker and full file name to the citation lookup
 
             citation_lookup[f"File{idx}"] = {
                 "citation": urllib.parse.unquote(doc[self.sourcepage_field]),
@@ -278,10 +301,14 @@ class ChatReadRetrieveReadApproach(Approach):
             "citation_lookup": citation_lookup,
         }
 
-    # Get the chat history as a single string
-    def get_chat_history_as_text(
-        self, history, include_last_turn=True, approx_max_tokens=1000
-    ) -> str:
+    def get_chat_history_as_text(self, history, include_last_turn=True) -> str:
+        """
+        Get the chat history as a single string of text for presenting to the user.
+
+        Args:
+            history: The chat history. (e.g. [{"user": "hello", "bot": "hi"}])
+            include_last_turn: Whether to include the last turn in the chat history.
+        """
         history_text = ""
         for h in reversed(history if include_last_turn else history[:-1]):
             history_text = (
@@ -297,8 +324,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 + "\n"
                 + history_text
             )
-            if len(history_text) > approx_max_tokens * 4:
-                break
+
         return history_text
 
     # Get the prompt text for the response length

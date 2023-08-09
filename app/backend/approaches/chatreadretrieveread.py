@@ -10,12 +10,8 @@ import openai
 from approaches.approach import Approach
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
-from azure.storage.blob import (
-    AccountSasPermissions,
-    BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
-)
+from azure.storage.blob import (AccountSasPermissions, BlobServiceClient,
+                                ResourceTypes, generate_account_sas)
 from text import nonewlines
 
 

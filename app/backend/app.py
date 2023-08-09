@@ -1,25 +1,21 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import os
-import mimetypes
 import logging
-import openai
+import mimetypes
+import os
 import urllib.parse
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify
-from azure.identity import DefaultAzureCredential
-from azure.core.credentials import AzureKeyCredential
-from azure.search.documents import SearchClient
 
+import openai
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
-from azure.storage.blob import (
-    BlobServiceClient,
-    generate_account_sas,
-    ResourceTypes,
-    AccountSasPermissions,
-)
-from shared_code.status_log import StatusLog, State
+from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
+from azure.search.documents import SearchClient
+from azure.storage.blob import (AccountSasPermissions, BlobServiceClient,
+                                ResourceTypes, generate_account_sas)
+from flask import Flask, jsonify, request
+from shared_code.status_log import State, StatusLog
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = (

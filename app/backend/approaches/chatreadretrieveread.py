@@ -10,12 +10,8 @@ import openai
 from approaches.approach import Approach
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
-from azure.storage.blob import (
-    AccountSasPermissions,
-    BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
-)
+from azure.storage.blob import (AccountSasPermissions, BlobServiceClient,
+                                ResourceTypes, generate_account_sas)
 from text import nonewlines
 
 
@@ -127,7 +123,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         Args:
             history: The chat history. (e.g. [{"user": "hello", "bot": "hi"}])
-            overrides: Overrides from the user interface for the approach. (e.g. temperature, top,
+            overrides: Overrides from the user interface for the approach. (e.g. temperature, top, 
                 semantic_captions etc.)
         """
         # Overrides
@@ -147,8 +143,9 @@ class ChatReadRetrieveReadApproach(Approach):
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
 
+        
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question.
-
+    
         prompt = self.query_prompt_template.format(
             chat_history=self.get_chat_history_as_text(
                 history, include_last_turn=False
@@ -183,17 +180,13 @@ class ChatReadRetrieveReadApproach(Approach):
                 else None,
             )
         else:
-            raw_search_results = self.search_client.search(
-                generated_query, filter=category_filter, top=top
-            )
+            raw_search_results = self.search_client.search(generated_query, filter=category_filter, top=top)
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
 
-        for idx, doc in enumerate(
-            raw_search_results
-        ):  # for each document in the search results
+        for idx, doc in enumerate(raw_search_results):  # for each document in the search results
             if use_semantic_captions:
                 # if using semantic captions, use the captions instead of the content
                 # include the "FileX" moniker in the prompt, and the actual file name in the response
@@ -301,7 +294,9 @@ class ChatReadRetrieveReadApproach(Approach):
             "citation_lookup": citation_lookup,
         }
 
-    def get_chat_history_as_text(self, history, include_last_turn=True) -> str:
+    def get_chat_history_as_text(
+        self, history, include_last_turn=True
+    ) -> str:
         """
         Get the chat history as a single string of text for presenting to the user.
 
@@ -330,6 +325,9 @@ class ChatReadRetrieveReadApproach(Approach):
     # Get the prompt text for the response length
 
     def get_repsonse_lenth_prompt_text(self, response_length: int):
+        """
+        Get the prompt text for the response length
+        """
         levels = {
             1024: "succinct",
             2048: "standard",

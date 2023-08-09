@@ -10,9 +10,14 @@ import openai
 from approaches.approach import Approach
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType
-from azure.storage.blob import (AccountSasPermissions, BlobServiceClient,
-                                ResourceTypes, generate_account_sas)
+from azure.storage.blob import (
+    AccountSasPermissions,
+    BlobServiceClient,
+    ResourceTypes,
+    generate_account_sas,
+)
 from text import nonewlines
+
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and OpenAI APIs directly. It first retrieves
 # top documents from search, then constructs a prompt with them, and then uses OpenAI to generate an completion

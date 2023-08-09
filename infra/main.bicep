@@ -32,6 +32,8 @@ param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
 param functionsAppName string = ''
+param mediaServiceName string = ''
+param videoIndexerName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
@@ -52,6 +54,7 @@ param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param mediaSubmitQueue string = 'media-submit-queue'
+param textEnrichmentQueue string = 'text-enrichment-queue'
 param queryTermLanguage string = 'English'
 param maxSecondsHideOnUpload string = '300'
 param maxSubmitRequeueCount string = '10'
@@ -267,8 +270,29 @@ module storage 'core/storage/storage-account.bicep' = {
       }  
       {
         name: mediaSubmitQueue
-      }      
+      }          
+      {
+        name: textEnrichmentQueue
+      }
     ]
+  }
+}
+
+module storageMedia 'core/storage/storage-account.bicep' = {
+  name: 'storage-media'
+  scope: rg
+  params: {
+    name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}media${randomString}'
+    location: location
+    tags: tags
+    publicNetworkAccess: 'Enabled'
+    sku: {
+      name: 'Standard_LRS'
+    }
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
   }
 }
 
@@ -319,6 +343,7 @@ module functions 'core/function/function.bicep' = {
     maxSubmitRequeueCount: maxSubmitRequeueCount
     pollQueueSubmitBackoff: pollQueueSubmitBackoff
     pdfSubmitQueueBackoff: pdfSubmitQueueBackoff
+    textEnrichmentQueue: textEnrichmentQueue
     maxPollingRequeueCount: maxPollingRequeueCount
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
@@ -330,6 +355,31 @@ module functions 'core/function/function.bicep' = {
     cosmosdb
   ]
 }
+
+// Media Service
+module media_service 'core/video_indexer/media_service.bicep' = {
+  name: 'media_service'
+  scope: rg
+  params: {
+    name: !empty(mediaServiceName) ? mediaServiceName : '${prefix}${abbrs.mediaService}${randomString}'
+    location: location
+    tags: tags
+    storageAccountID: storageMedia.outputs.id
+  }
+}
+
+// AVAM Service
+module avam 'core/video_indexer/video_indexer.bicep' = {
+  name: 'avam'
+  scope: rg
+  params: {
+    name: !empty(videoIndexerName) ? videoIndexerName : '${prefix}${abbrs.videoIndexer}${randomString}'
+    location: location
+    tags: tags
+    mediaServiceAccountResourceId: media_service.outputs.id
+  }
+}
+
 
 // USER ROLES
 module openAiRoleUser 'core/security/role.bicep' = {
@@ -457,6 +507,7 @@ output PDFSUBMITQUEUE string = pdfSubmitQueue
 output PDFPOLLINGQUEUE string = pdfPollingQueue
 output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
 output MEDIASUBMITQUEUE string = mediaSubmitQueue
+output TEXTENRICHMENTQUEUE string = textEnrichmentQueue
 output MAX_SECONDS_HIDE_ON_UPLOAD string = maxSecondsHideOnUpload
 output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
 output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff

@@ -245,7 +245,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_length_prompt_text(
+                response_length_prompt=self.get_response_length_prompt_text(
                     response_length
                 ),
                 userPersona=user_persona,
@@ -257,7 +257,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_length_prompt_text(
+                response_length_prompt=self.get_response_length_prompt_text(
                     response_length
                 ),
                 userPersona=user_persona,
@@ -268,7 +268,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 sources=content,
                 chat_history=self.get_chat_history_as_text(history),
                 follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_repsonse_length_prompt_text(
+                response_length_prompt=self.get_response_length_prompt_text(
                     response_length
                 ),
                 userPersona=user_persona,
@@ -289,7 +289,7 @@ class ChatReadRetrieveReadApproach(Approach):
         return {
             "data_points": data_points,
             "answer": f"{urllib.parse.unquote(completion.choices[0].text)}",
-            "thoughts": f"Searched for:<br>{q}<br><br>Prompt:<br>"
+            "thoughts": f"Searched for:<br>{generated_query}<br><br>Prompt:<br>"
             + prompt.replace("\n", "<br>"),
             "citation_lookup": citation_lookup,
         }
@@ -324,7 +324,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
     # Get the prompt text for the response length
 
-    def get_repsonse_length_prompt_text(self, response_length: int):
+    def get_response_length_prompt_text(self, response_length: int):
         """
         Get the prompt text for the response length
 

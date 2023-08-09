@@ -327,6 +327,9 @@ class ChatReadRetrieveReadApproach(Approach):
     def get_repsonse_length_prompt_text(self, response_length: int):
         """
         Get the prompt text for the response length
+
+        Args:
+            response_length: The response length mapped to a prompt text.
         """
         levels = {
             1024: "succinct",

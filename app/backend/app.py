@@ -12,8 +12,12 @@ from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
-from azure.storage.blob import (AccountSasPermissions, BlobServiceClient,
-                                ResourceTypes, generate_account_sas)
+from azure.storage.blob import (
+    AccountSasPermissions,
+    BlobServiceClient,
+    ResourceTypes,
+    generate_account_sas,
+)
 from flask import Flask, jsonify, request
 from shared_code.status_log import State, StatusLog
 

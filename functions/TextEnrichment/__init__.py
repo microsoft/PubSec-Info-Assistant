@@ -33,14 +33,10 @@ max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 
-
-
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
 API_DETECT_ENDPOINT = "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
 API_TRANSLATE_ENDPOINT = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
-
-
 
 utilities = Utilities(
     azure_blob_storage_account,

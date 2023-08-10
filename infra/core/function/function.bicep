@@ -79,7 +79,10 @@ param pdfPollingQueue string
 @description('The queue which is used to trigger processing of non-PDF files')
 param nonPdfSubmitQueue string
 
-@description('The queue which is used to trigger processing of non-PDF files')
+@description('The queue which is used to trigger processing of media files')
+param mediaSubmitQueue string
+
+@description('The queue which is used to trigger processing of media files')
 param textEnrichmentQueue string
 
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
@@ -255,6 +258,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: nonPdfSubmitQueue
         }
         {
+          name: 'MEDIA_SUBMIT_QUEUE'
+          value: mediaSubmitQueue
+        }
+        {        
           name: 'TEXT_ENRICHMENT_QUEUE'
           value: textEnrichmentQueue
         }

@@ -66,9 +66,9 @@ param maxPollingRequeueCount string = '10'
 param submitRequeueHideSeconds  string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
-param targetLanguage string = 'en'
 param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
+param targetTranslationLanguage string = 'en'
 
 
 
@@ -367,7 +367,7 @@ module functions 'core/function/function.bicep' = {
     enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     enrichmentEndpoint: enrichment.outputs.cognitiveServiceEndpoint
     enrichmentName: enrichment.outputs.cognitiveServicerAccountName
-    targetLanguage: targetLanguage
+    targetTranslationLanguage: targetTranslationLanguage
     maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
     enrichmentBackoff: enrichmentBackoff
   }
@@ -541,6 +541,6 @@ output MAX_READ_ATTEMPTS string = maxReadAttempts
 output ENRICHMENT_KEY string = enrichment.outputs.cognitiveServiceAccountKey
 output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
 output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
-output TARGET_LANGUAGE string = targetLanguage
+output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage
 output MAX_ENRICHMENT_REQUEUE_COUNT string = maxEnrichmentRequeueCount
 output ENRICHMENT_BACKOFF string = enrichmentBackoff

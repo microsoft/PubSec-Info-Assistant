@@ -136,8 +136,8 @@ jq -r  '
             "env_var": "ENRICHMENT_NAME"
         },
         {
-            "path": "targeT_LANGUAGE",
-            "env_var": "TARGET_LANGUAGE"
+            "path": "targeT_TRANSLATION_LANGUAGE",
+            "env_var": "TARGET_TRANSLATION_LANGUAGE"
         },
         {
             "path": "maX_ENRICHMENT_REQUEUE_COUNT",

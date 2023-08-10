@@ -119,7 +119,7 @@ param enrichmentEndpoint string
 param enrichmentName string
 
 @description('Target language to translate content to')
-param targetLanguage string
+param targetTranslationLanguage string
 
 @description('Max times we will retry the enriichment due to throttling or internal errors')
 param maxEnrichmentRequeueCount string
@@ -310,8 +310,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: enrichmentName
         }
         {
-          name: 'TARGET_LANGUAGE'
-          value: targetLanguage
+          name: 'TARGET_TRANSLATION_LANGUAGE'
+          value: targetTranslationLanguage
         }
         {
           name: 'MAX_ENRICHMENT_REQUEUE_COUNT'

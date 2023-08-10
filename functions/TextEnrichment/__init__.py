@@ -28,7 +28,7 @@ cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 enrichmentKey =  os.environ["ENRICHMENT_KEY"]
 enrichmentEndpoint = os.environ["ENRICHMENT_ENDPOINT"] 
-targetLanguage = os.environ["TARGET_LANGUAGE"] 
+targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"] 
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
@@ -120,7 +120,7 @@ def main(msg: func.QueueMessage) -> None:
             return
             
         # If the language of the document is not equal to target language then translate the generated chunks
-        if detected_language != targetLanguage:
+        if detected_language != targetTranslationLanguage:
             statusLog.upsert_document(
                 blob_path,
                 f"{FUNCTION_NAME} - Non-target language detected",
@@ -137,7 +137,7 @@ def main(msg: func.QueueMessage) -> None:
                 chunk_dict = json.loads(response.text)  
                 data = [{"text": chunk_dict["content"]}]
                 params = {
-                    'to': targetLanguage
+                    'to': targetTranslationLanguage
                 }    
                 response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
                 if response.status_code == 200:

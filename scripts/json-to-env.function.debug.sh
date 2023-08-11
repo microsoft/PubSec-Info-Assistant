@@ -76,6 +76,10 @@ jq -r  '
             "env_var": "NON_PDF_SUBMIT_QUEUE"
         },
         {
+            "path": "mediasubmitqueue",
+            "env_var": "MEDIA_SUBMIT_QUEUE"
+        },
+        {
             "path": "pdfpollingqueue",
             "env_var": "PDF_POLLING_QUEUE"
         },

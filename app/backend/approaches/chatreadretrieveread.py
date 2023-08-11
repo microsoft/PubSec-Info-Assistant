@@ -25,14 +25,13 @@ from core.modelhelper import num_tokens_from_messages
 
 class ChatReadRetrieveReadApproach(Approach):
     
-     # Chat roles
+    # Chat roles
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
-    
-    
+     
                                 
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
+    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions on data about the processes of a court system for employees of the court system. {response_length_prompt}
     Emphasize the use of facts listed in the provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
     the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
@@ -50,7 +49,7 @@ class ChatReadRetrieveReadApproach(Approach):
     
     """
     follow_up_questions_prompt_content = """
-    Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
+    Generate three very brief follow-up questions that the user would likely ask next about the processes data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for certain court cases?>>>. Try not to repeat questions that have already been asked.
     Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
     """
     query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
@@ -63,21 +62,19 @@ class ChatReadRetrieveReadApproach(Approach):
     
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
+    {'role' : USER, 'content' : 'How do I allocate a hearing?' },
+    {'role' : ASSISTANT, 'content' : 'Hearing allocation' },
+    {'role' : USER, 'content' : 'How do discontinue a case?' },
+    {'role' : ASSISTANT, 'content' : 'Case discontinuance process' }
     ]
     
     #Few Shot prompting for Response. This will feed into Chain of thought system message.
     response_prompt_few_shots = [
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'}, 
-    {'role': ASSISTANT, 'content': 'I am not sure. The provided source document does not include information about the current status of your specific flight'}
+    {'role': USER, 'content': 'What is the process to become a astronaut'}, 
+    {'role': ASSISTANT, 'content': 'I am not sure. The provided source document does not include information about a process outside of the court system'}
     ]
-    
-       
 
     def __init__(self, search_client: SearchClient, oai_service_name: str, oai_service_key: str, chatgpt_deployment: str, gpt_deployment: str, sourcepage_field: str, content_field: str, blob_client: BlobServiceClient, query_term_language: str):
         self.search_client = search_client

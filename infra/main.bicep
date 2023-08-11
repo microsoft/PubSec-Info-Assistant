@@ -69,7 +69,7 @@ param maxReadAttempts string = '5'
 param principalId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
-var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
+var tags = { environment: 'sandbox', application: 'core', businessArea: 'Cross-Cutting', builtFrom: 'git', expiresAfter: '2023-12-30', ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 
 // Organize resources in a resource group

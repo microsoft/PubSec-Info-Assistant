@@ -48,7 +48,6 @@ polling_backoff = int(os.environ["POLLING_BACKOFF"])
 max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
 
 function_name = "FileFormRecPollingPDF"
-statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 
@@ -56,9 +55,7 @@ FR_MODEL = "prebuilt-layout"
 def main(msg: func.QueueMessage) -> None:
     
     try:
-        logging.info('Python queue trigger function processed a queue item: %s',
-                    msg.get_body().decode('utf-8'))
-
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
         # Receive message from the queue
         message_body = msg.get_body().decode('utf-8')
         message_json = json.loads(message_body)

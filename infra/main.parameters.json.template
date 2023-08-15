@@ -49,6 +49,12 @@
     },
     "queryTermLanguage": {
       "value": "${QUERYTERM_LANGUAGE}"
+    },
+    "targetTranslationLanguage": {
+      "value": "${TARGET_TRANSLATION_LANGUAGE}"
+    },
+    "enableDevCode": {
+      "value": ${ENABLE_DEV_CODE}
     }
   }
 }

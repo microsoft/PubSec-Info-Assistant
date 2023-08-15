@@ -16,7 +16,8 @@ import time
 from requests.exceptions import RequestException
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-
+def string_to_bool(s):
+    return s.lower() == 'true'
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
@@ -46,19 +47,19 @@ max_polling_requeue_count = int(os.environ["MAX_POLLING_REQUEUE_COUNT"])
 submit_requeue_hide_seconds = int(os.environ["SUBMIT_REQUEUE_HIDE_SECONDS"])
 polling_backoff = int(os.environ["POLLING_BACKOFF"])
 max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
+enableDevCode = string_to_bool(os.environ["ENABLE_DEV_CODE"])
 
 function_name = "FileFormRecPollingPDF"
-statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
+
+
 
 
 def main(msg: func.QueueMessage) -> None:
     
     try:
-        logging.info('Python queue trigger function processed a queue item: %s',
-                    msg.get_body().decode('utf-8'))
-
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
         # Receive message from the queue
         message_body = msg.get_body().decode('utf-8')
         message_json = json.loads(message_body)
@@ -101,12 +102,19 @@ def main(msg: func.QueueMessage) -> None:
                 statusLog.upsert_document(blob_name, f'{function_name} - Starting chunking', StatusClassification.DEBUG)  
                 chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete, {chunk_count} chunks created.', StatusClassification.DEBUG)  
-                # submit message to the enrichment queue to continue processing                
-                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
-                message_json["text_enrichment_queued_count"] = 1
-                message_string = json.dumps(message_json)
-                queue_client.send_message(message_string)
-                statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED) 
+                
+                # create chunks
+                if enableDevCode:
+                    # Dev code
+                    # submit message to the enrichment queue to continue processing                
+                    queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+                    message_json["text_enrichment_queued_count"] = 1
+                    message_string = json.dumps(message_json)
+                    queue_client.send_message(message_string)
+                    statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED) 
+                else:                    
+                    # Released code
+                    statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete.', StatusClassification.INFO, State.COMPLETE)
 
             elif response_status == "running":
                 # still running so requeue with a backoff

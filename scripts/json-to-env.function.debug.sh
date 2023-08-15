@@ -76,6 +76,10 @@ jq -r  '
             "env_var": "NON_PDF_SUBMIT_QUEUE"
         },
         {
+            "path": "mediasubmitqueue",
+            "env_var": "MEDIA_SUBMIT_QUEUE"
+        },
+        {
             "path": "pdfpollingqueue",
             "env_var": "PDF_POLLING_QUEUE"
         },
@@ -118,6 +122,34 @@ jq -r  '
         {
             "path": "maX_READ_ATTEMPTS",
             "env_var": "MAX_READ_ATTEMPTS"
+        },
+        {
+            "path": "enrichmenT_KEY",
+            "env_var": "ENRICHMENT_KEY"
+        },
+        {
+            "path": "enrichmenT_ENDPOINT",
+            "env_var": "ENRICHMENT_ENDPOINT"
+        },
+        {
+            "path": "enrichmenT_NAME",
+            "env_var": "ENRICHMENT_NAME"
+        },
+        {
+            "path": "targeT_TRANSLATION_LANGUAGE",
+            "env_var": "TARGET_TRANSLATION_LANGUAGE"
+        },
+        {
+            "path": "maX_ENRICHMENT_REQUEUE_COUNT",
+            "env_var": "MAX_ENRICHMENT_REQUEUE_COUNT"
+        },
+        {
+            "path": "enrichmenT_BACKOFF",
+            "env_var": "ENRICHMENT_BACKOFF"
+        },
+        {
+            "path": "enablE_DEV_CODE",
+            "env_var": "ENABLE_DEV_CODE"
         }
     ]
         as $env_vars_to_extract

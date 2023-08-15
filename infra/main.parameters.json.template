@@ -8,6 +8,9 @@
     "location": {
       "value": "${LOCATION}"
     },
+    "varCuaid": {
+      "value": "${CUSTOMER_ATTRIBUTION_ID}"
+    },
     "principalId": {
       "value": "${SINGED_IN_USER_PRINCIPAL}"
     },

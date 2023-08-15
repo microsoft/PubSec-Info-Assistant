@@ -61,6 +61,7 @@ param maxPollingRequeueCount string = '10'
 param submitRequeueHideSeconds  string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
+param varCuaid string 
 
 
 @description('Id of the user or app to assign application roles')
@@ -423,7 +424,22 @@ module storageRoleFunc 'core/security/role.bicep' = {
   }
 }
 
+// DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
+resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = {
+  name: 'pid-${varCuaid}' 
+  location: location
+  properties: {
+    mode: 'Incremental'
+    template: {
+      '$schema': 'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
+      contentVersion: '1.0.0.0'
+      resources: []
+    }
+  }
+}
+
 output AZURE_LOCATION string = location
+output CUSTOMER_ATTRIBUTION_ID string = customerAttribution.name
 output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName//cognitiveServices.outputs.name
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name

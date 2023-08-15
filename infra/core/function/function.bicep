@@ -127,6 +127,8 @@ param maxEnrichmentRequeueCount string
 @description('The number of seconds we will hide a message before trying to call enrichment service throttling. This is the default value that escalates exponentially')
 param enrichmentBackoff string
 
+@description('A boolean value that flags if a user wishes to enable or disable code under development')
+param enableDevCode bool
 
 
 // Create function app resource
@@ -320,6 +322,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'ENRICHMENT_BACKOFF'
           value: enrichmentBackoff
+        }        
+        {
+          name: 'ENABLE_DEV_CODE'
+          value: string(enableDevCode)
         }        
       ]
     }

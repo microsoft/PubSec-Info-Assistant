@@ -146,6 +146,10 @@ jq -r  '
         {
             "path": "enrichmenT_BACKOFF",
             "env_var": "ENRICHMENT_BACKOFF"
+        },
+        {
+            "path": "enablE_DEV_CODE",
+            "env_var": "ENABLE_DEV_CODE"
         }
     ]
         as $env_vars_to_extract

@@ -69,6 +69,9 @@ param maxReadAttempts string = '5'
 param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
 param targetTranslationLanguage string = 'en'
+param enableDevCode bool = false
+
+
 
 
 
@@ -370,6 +373,7 @@ module functions 'core/function/function.bicep' = {
     targetTranslationLanguage: targetTranslationLanguage
     maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
     enrichmentBackoff: enrichmentBackoff
+    enableDevCode: enableDevCode
   }
   dependsOn: [
     appServicePlan
@@ -544,3 +548,4 @@ output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
 output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage
 output MAX_ENRICHMENT_REQUEUE_COUNT string = maxEnrichmentRequeueCount
 output ENRICHMENT_BACKOFF string = enrichmentBackoff
+output ENABLE_DEV_CODE bool = enableDevCode

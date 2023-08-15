@@ -116,6 +116,7 @@ declare -A REPLACE_TOKENS=(
     [\${IS_IN_AUTOMATION}]=${IS_IN_AUTOMATION}
     [\${QUERYTERM_LANGUAGE}]=${PROMPT_QUERYTERM_LANGUAGE}
     [\${TARGET_TRANSLATION_LANGUAGE}]=${TARGET_TRANSLATION_LANGUAGE}
+    [\${ENABLE_DEV_CODE}]=${ENABLE_DEV_CODE}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

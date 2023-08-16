@@ -34,7 +34,7 @@ From this output, grab the Subscription ID of the subscription you intend to dep
 
 ## Configure Dev Container and ENV files
 
-Now that the Codespace is running and logged into Azure, we need to set up your local environment variables. 
+Now that the Codespace is running and logged into Azure, we need to set up your local environment variables.
 
 1. Open `scripts/environments` and copy `local.env.example` to `local.env`.
 1. Then open `local.env` and update values as needed:
@@ -49,6 +49,5 @@ SKIP_PLAN_CHECK | No | If this value is set to 1, then the BICEP deployment will
 USE_EXISTING_AOAI | Yes | Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. Set the value to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure Open AI service instance in your subscription.
-AZURE_OPENAI_GPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
 DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file located in the `scripts/environments/languages` folder. You can then use this file to customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. See [Configuring your own language ENV file](./features/configuring_language_env_files.md) more information.

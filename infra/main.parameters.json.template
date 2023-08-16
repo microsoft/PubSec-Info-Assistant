@@ -29,9 +29,6 @@
     "openAiSkuName": {
       "value": "S0"
     },
-    "gptDeploymentName": {
-      "value": "${GPT_MODEL_DEPLOYMENT_NAME}"
-    },
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
     },

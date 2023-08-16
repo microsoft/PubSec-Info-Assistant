@@ -43,9 +43,6 @@ param containerName string = 'content'
 param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
-param gptDeploymentName string = 'davinci'
-param gptModelName string = 'gpt-35-turbo'
-param gptDeploymentCapacity int = 30
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chatGptDeploymentCapacity int = 30
@@ -70,7 +67,6 @@ param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
 param targetTranslationLanguage string = 'en'
 param enableDevCode bool = false
-
 
 
 
@@ -136,11 +132,10 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
-      AZURE_OPENAI_SERVICE: azureOpenAIServiceName//cognitiveServices.outputs.name
+      AZURE_OPENAI_SERVICE: azureOpenAIServiceName //cognitiveServices.outputs.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
-      AZURE_OPENAI_GPT_DEPLOYMENT: !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
       AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
@@ -165,18 +160,6 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
       name: openAiSkuName
     }
     deployments: [
-      {
-        name: !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
-        model: {
-          format: 'OpenAI'
-          name: gptModelName
-          version: '1'
-        }
-        sku: {
-          name: 'Standard'
-          capacity: gptDeploymentCapacity
-        }
-      }
       {
         name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
         model: {
@@ -275,7 +258,7 @@ module storage 'core/storage/storage-account.bicep' = {
       {
         name: functionLogsContainerName
         publicAccess: 'None'
-      }      
+      }
     ]
     queueNames: [
       {
@@ -283,7 +266,7 @@ module storage 'core/storage/storage-account.bicep' = {
       }
       {
         name: pdfPollingQueue
-      }      
+      }
       {
         name: nonPdfSubmitQueue
       }  
@@ -414,7 +397,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-    principalType: isInAutomation ? 'ServicePrincipal': 'User'
+    principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
 
@@ -424,7 +407,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
-    principalType: isInAutomation ? 'ServicePrincipal': 'User'
+    principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
 
@@ -434,7 +417,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-    principalType: isInAutomation ? 'ServicePrincipal': 'User'
+    principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
 
@@ -444,7 +427,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
-    principalType: isInAutomation ? 'ServicePrincipal': 'User'
+    principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
 
@@ -454,7 +437,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   params: {
     principalId: principalId
     roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
-    principalType: isInAutomation ? 'ServicePrincipal': 'User'
+    principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
 
@@ -500,7 +483,7 @@ module storageRoleFunc 'core/security/role.bicep' = {
 }
 
 output AZURE_LOCATION string = location
-output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName//cognitiveServices.outputs.name
+output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName //cognitiveServices.outputs.name
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name
 output AZURE_SEARCH_KEY string = searchServices.outputs.searchServiceKey
@@ -510,7 +493,6 @@ output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
-output AZURE_OPENAI_GPT_DEPLOYMENT string = !empty(gptDeploymentName) ? gptDeploymentName : gptModelName
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets

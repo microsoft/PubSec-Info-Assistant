@@ -68,7 +68,7 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 
 The following checklist will guide you through configuring the IA Accelerator in your azure subscription. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
->1. Configure Local Development Environment
+>1. Configure your deployment settings
 >       * [Configuring your Development Environment](/docs/development_environment.md)
 >1. Configure Azure resources
 >       * [Configure Azure resources](/infra/README.md)

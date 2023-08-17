@@ -146,7 +146,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
     siteConfig: {
       http20Enabled: true
       linuxFxVersion: 'python|3.10'
-      alwaysOn: false
+      alwaysOn: true
       minTlsVersion: '1.2'    
       connectionStrings:[
         {

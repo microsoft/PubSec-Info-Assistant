@@ -3,15 +3,6 @@
 This accelerator demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (gpt-35-turbo), and Azure Cognitive Search for data indexing and retrieval.
 
 ---
-## Responsible AI
-The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first. 
-
-**Read our [Transparency Note](./docs/transparency.md)**
-
-Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
-
----
-
 ![Process Flow](docs/process_flow.drawio.png)
 
 ## Features
@@ -49,7 +40,7 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 Once you have your prerequisite items, please move on to the Deployment Configuration step.
 
-**NOTICE:** This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. 
+**NOTICE:** * This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. 
 
 ## Deployment Configuration
 
@@ -75,7 +66,7 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 
 # Deployment
 
-There are several steps to deploying the IA Accelerator. The following checklist will guide you through configuring the IA Accelerator in your environments. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
+The following checklist will guide you through configuring the IA Accelerator in your azure subscription. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
 >1. Configure Local Development Environment
 >       * [Configuring your Development Environment](/docs/development_environment.md)
@@ -83,7 +74,14 @@ There are several steps to deploying the IA Accelerator. The following checklist
 >       * [Configure Azure resources](/infra/README.md)
 
 ---
+## Responsible AI
+The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first. 
 
+**Read our [Transparency Note](./docs/transparency.md)**
+
+Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
+
+---
 # Using IA Accelerator for the first time
 
 Now that you have successfully deployed the IA Accelerator, you are ready to use the accelerator to process some data.

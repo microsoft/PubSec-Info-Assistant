@@ -8,6 +8,12 @@
     "location": {
       "value": "${LOCATION}"
     },
+    "cuaEnabled": {
+      "value": ${ENABLE_CUSTOMER_USAGE_ATTRIBUTION}
+    },
+    "cuaId": {
+      "value": "${CUSTOMER_USAGE_ATTRIBUTION_ID}"
+    },
     "principalId": {
       "value": "${SINGED_IN_USER_PRINCIPAL}"
     },

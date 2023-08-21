@@ -63,6 +63,8 @@ param maxPollingRequeueCount string = '10'
 param submitRequeueHideSeconds  string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
+param cuaEnabled bool = false
+param cuaId string = ''
 param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
 param targetTranslationLanguage string = 'en'
@@ -479,6 +481,20 @@ module storageRoleFunc 'core/security/role.bicep' = {
     principalId: functions.outputs.identityPrincipalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
     principalType: 'ServicePrincipal'
+  }
+}
+
+// DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
+resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (cuaEnabled) {
+  name: 'pid-${cuaId}' 
+  location: location
+  properties: {
+    mode: 'Incremental'
+    template: {
+      '$schema': 'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
+      contentVersion: '1.0.0.0'
+      resources: []
+    }
   }
 }
 

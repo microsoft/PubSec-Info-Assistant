@@ -149,25 +149,25 @@
     {
       "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
       "name": "#6",
-      "textSplitMode" : "pages", 
+      "textSplitMode": "pages",
       "maximumPageLength": 5000,
       "defaultLanguageCode": "$ACS_TEXT_SPLITTING_SKILL_LANGUAGE",
       "context": "/document/content",
       "inputs": [
-          {
-              "name": "text",
-              "source": "/document/content"
-          },
-          {
-              "name": "languageCode",
-              "source": "/document/language"
-          }
+        {
+          "name": "text",
+          "source": "/document/content"
+        },
+        {
+          "name": "languageCode",
+          "source": "/document/language"
+        }
       ],
       "outputs": [
-          {
-              "name": "textItems",
-              "targetName": "chunks"
-          }
+        {
+          "name": "textItems",
+          "targetName": "chunks"
+        }
       ]
     },
     {
@@ -176,9 +176,9 @@
       "parsingMode": "default",
       "dataToExtract": "contentAndMetadata",
       "configuration": {
-          "imageAction": "generateNormalizedImages",
-          "normalizedImageMaxWidth": 2000,
-          "normalizedImageMaxHeight": 2000
+        "imageAction": "generateNormalizedImages",
+        "normalizedImageMaxWidth": 2000,
+        "normalizedImageMaxHeight": 2000
       },
       "context": "/document",
       "inputs": [
@@ -261,18 +261,18 @@
       "insertPostTag": " ",
       "inputs": [
         {
-          "name":"text", 
+          "name": "text",
           "source": "/document/content"
         },
         {
-          "name": "itemsToInsert", 
+          "name": "itemsToInsert",
           "source": "/document/normalized_images/*/imageTags/*/name"
         }
       ],
       "outputs": [
         {
-          "name": "mergedText", 
-          "targetName" : "merged_content_imgCaption"
+          "name": "mergedText",
+          "targetName": "merged_content_imgCaption"
         }
       ]
     },
@@ -285,18 +285,18 @@
       "insertPostTag": " ",
       "inputs": [
         {
-          "name":"text", 
+          "name": "text",
           "source": "/document/merged_content_imgCaption"
         },
         {
-          "name": "itemsToInsert", 
+          "name": "itemsToInsert",
           "source": "/document/normalized_images/*/ocr_text"
         }
       ],
       "outputs": [
         {
-          "name": "mergedText", 
-          "targetName" : "merged_content_imgCaption_ocrtext"
+          "name": "mergedText",
+          "targetName": "merged_content_imgCaption_ocrtext"
         }
       ]
     },
@@ -309,18 +309,18 @@
       "insertPostTag": " ",
       "inputs": [
         {
-          "name":"text", 
+          "name": "text",
           "source": "/document/merged_content_imgCaption_ocrtext"
         },
         {
-          "name": "itemsToInsert", 
+          "name": "itemsToInsert",
           "source": "/document/normalized_images/*/ocr_text"
         }
       ],
       "outputs": [
         {
-          "name": "mergedText", 
-          "targetName" : "merged_content"
+          "name": "mergedText",
+          "targetName": "merged_content"
         }
       ]
     }

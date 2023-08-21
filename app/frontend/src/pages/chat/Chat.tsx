@@ -182,14 +182,6 @@ const Chat = () => {
         setRetrieveCount(parseInt(newValue || "5"));
     };
 
-    const onUseSemanticRankerChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-        setUseSemanticRanker(!!checked);
-    };
-
-    const onUseSemanticCaptionsChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-        setUseSemanticCaptions(!!checked);
-    };
-
     const onUserPersonaChange = (_ev?: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
         setUserPersona(newValue || "");
     }
@@ -197,10 +189,6 @@ const Chat = () => {
     const onSystemPersonaChange = (_ev?: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, newValue?: string) => {
         setSystemPersona(newValue || "");
     }
-
-    const onExcludeCategoryChanged = (_ev?: React.FormEvent, newValue?: string) => {
-        setExcludeCategory(newValue || "");
-    };
 
     const onUseSuggestFollowupQuestionsChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
         setUseSuggestFollowupQuestions(!!checked);
@@ -347,20 +335,6 @@ const Chat = () => {
                                 max={50}
                                 defaultValue={retrieveCount.toString()}
                                 onChange={onRetrieveCountChange}
-                            />
-                            <TextField className={styles.chatSettingsSeparator} label="Exclude category" onChange={onExcludeCategoryChanged} />
-                            <Checkbox
-                                className={styles.chatSettingsSeparator}
-                                checked={useSemanticRanker}
-                                label="Use semantic ranker for retrieval"
-                                onChange={onUseSemanticRankerChange}
-                            />
-                            <Checkbox
-                                className={styles.chatSettingsSeparator}
-                                checked={useSemanticCaptions}
-                                label="Use query-contextual summaries instead of whole documents"
-                                onChange={onUseSemanticCaptionsChange}
-                                disabled={!useSemanticRanker}
                             />
                             <Checkbox
                                 className={styles.chatSettingsSeparator}

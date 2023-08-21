@@ -79,6 +79,12 @@ param pdfPollingQueue string
 @description('The queue which is used to trigger processing of non-PDF files')
 param nonPdfSubmitQueue string
 
+@description('The queue which is used to trigger processing of media files')
+param mediaSubmitQueue string
+
+@description('The queue which is used to trigger processing of media files')
+param textEnrichmentQueue string
+
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
 param maxSecondsHideOnUpload string
 
@@ -91,10 +97,10 @@ param pollQueueSubmitBackoff string
 @description('The number of seconds a message sleeps before trying to resubmit due to throttling request from FR')
 param pdfSubmitQueueBackoff string
 
-@description('max times we will retry the submission due to throttling or internal errors in FR')
+@description('Max times we will retry the submission due to throttling or internal errors in FR')
 param maxPollingRequeueCount string
 
-@description('number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error')
+@description('Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error')
 param submitRequeueHideSeconds string
 
 @description('The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is the default value that escalates exponentially')
@@ -103,6 +109,26 @@ param pollingBackoff string
 @description('The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response')
 param maxReadAttempts string
 
+@description('Key to access the enrichment service')
+param enrichmentKey string
+
+@description('Endpoint of the enrichment service')
+param enrichmentEndpoint string
+
+@description('Name of the enrichment service')
+param enrichmentName string
+
+@description('Target language to translate content to')
+param targetTranslationLanguage string
+
+@description('Max times we will retry the enriichment due to throttling or internal errors')
+param maxEnrichmentRequeueCount string
+
+@description('The number of seconds we will hide a message before trying to call enrichment service throttling. This is the default value that escalates exponentially')
+param enrichmentBackoff string
+
+@description('A boolean value that flags if a user wishes to enable or disable code under development')
+param enableDevCode bool
 
 
 // Create function app resource
@@ -120,7 +146,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
     siteConfig: {
       http20Enabled: true
       linuxFxVersion: 'python|3.10'
-      alwaysOn: false
+      alwaysOn: true
       minTlsVersion: '1.2'    
       connectionStrings:[
         {
@@ -234,6 +260,14 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: nonPdfSubmitQueue
         }
         {
+          name: 'MEDIA_SUBMIT_QUEUE'
+          value: mediaSubmitQueue
+        }
+        {        
+          name: 'TEXT_ENRICHMENT_QUEUE'
+          value: textEnrichmentQueue
+        }
+        {
           name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
           value: maxSecondsHideOnUpload
         }
@@ -265,6 +299,34 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'MAX_READ_ATTEMPTS'
           value: maxReadAttempts
         }
+        {
+          name: 'ENRICHMENT_KEY'
+          value: enrichmentKey
+        }
+        {
+          name: 'ENRICHMENT_ENDPOINT'
+          value: enrichmentEndpoint
+        }
+        {
+          name: 'ENRICHMENT_NAME'
+          value: enrichmentName
+        }
+        {
+          name: 'TARGET_TRANSLATION_LANGUAGE'
+          value: targetTranslationLanguage
+        }
+        {
+          name: 'MAX_ENRICHMENT_REQUEUE_COUNT'
+          value: maxEnrichmentRequeueCount
+        }
+        {
+          name: 'ENRICHMENT_BACKOFF'
+          value: enrichmentBackoff
+        }        
+        {
+          name: 'ENABLE_DEV_CODE'
+          value: string(enableDevCode)
+        }        
       ]
     }
   }

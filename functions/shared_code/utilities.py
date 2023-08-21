@@ -108,17 +108,19 @@ class Utilities:
 
     def  get_blob_and_sas(self, blob_path):
         """ Function to retrieve the uri and sas token for a given blob in azure storage"""
-        logging.info("processing pdf " + blob_path)
 
         # Get path and file name minus the root container
         separator = "/"
         file_path_w_name_no_cont = separator.join(
             blob_path.split(separator)[1:])
+        
+        container_name = separator.join(
+            blob_path.split(separator)[0:1])
 
         # Gen SAS token
         sas_token = generate_blob_sas(
             account_name=self.azure_blob_storage_account,
-            container_name=self.azure_blob_drop_storage_container,
+            container_name=container_name,
             blob_name=file_path_w_name_no_cont,
             account_key=self.azure_blob_storage_key,
             permission=BlobSasPermissions(read=True),

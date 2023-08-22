@@ -16,12 +16,15 @@ import { ExampleList } from "../../components/Example";
 import { UserChatMessage } from "../../components/UserChatMessage";
 import { AnalysisPanel, AnalysisPanelTabs } from "../../components/AnalysisPanel";
 import { SettingsButton } from "../../components/SettingsButton";
+import { InfoButton } from "../../components/InfoButton";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
+import { InfoContent } from "./InfoContent";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
+    const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [promptTemplate, setPromptTemplate] = useState<string>("");
     const [retrieveCount, setRetrieveCount] = useState<number>(5);
     const [useSemanticRanker, setUseSemanticRanker] = useState<boolean>(true);
@@ -226,6 +229,7 @@ const Chat = () => {
             <div className={styles.commandsContainer}>
                 <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                 <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />
+                <InfoButton className={styles.commandButton} onClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)} />
             </div>
             <div className={styles.chatRoot}>
                 <div className={styles.chatContainer}>
@@ -268,7 +272,7 @@ const Chat = () => {
                                             onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
                                             onFollowupQuestionClicked={q => makeApiRequest(q)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
-                                            onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
+                                            onAdjustClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
                                         />
                                     </div>
                                 </div>
@@ -300,6 +304,7 @@ const Chat = () => {
                             disabled={isLoading}
                             onSend={question => makeApiRequest(question)}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
+                            onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
                             showClearChat={true}
                             onClearClick={clearChat}
                         />
@@ -346,6 +351,19 @@ const Chat = () => {
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
+                </Panel>
+
+                <Panel
+                    headerText="Information"
+                    isOpen={isInfoPanelOpen}
+                    isBlocking={false}
+                    onDismiss={() => setIsInfoPanelOpen(false)}
+                    closeButtonAriaLabel="Close"
+                    onRenderFooterContent={() => <DefaultButton onClick={() => setIsInfoPanelOpen(false)}>Close</DefaultButton>}
+                    isFooterAtBottom={true}                >
+                        <div className={styles.resultspanel}>
+                            <InfoContent/>
+                        </div>
                 </Panel>
             </div>
         </div>

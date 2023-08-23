@@ -35,32 +35,32 @@ class ChatReadRetrieveReadApproach(Approach):
     USER = "user"
     ASSISTANT = "assistant"
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-    Emphasize the use of facts listed in the provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
-    the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
-    Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
-    Your goal is to provide accurate and relevant answers based on the information available in the provided source documents. Make sure to reference the source documents appropriately and avoid making assumptions or adding personal opinions.
+    system_message_chat_conversation = """You are an Azure OpenAI Completion system.
+    Your persona is {systemPersona} who helps answer questions about an agency's data.
+    {response_length_prompt}
+    Emphasize the use of facts listed in the provided source documents.
+    Instruct the model to use a source name for each fact used in the response.
+    Each source has a file name followed by a pipe character and the actual information.
+    Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     User persona is {userPersona}
-    
     Here is how you should answer every question:
-    
-    -Look for relevant information in the provided source document to answer the question.       
-    -If there is specific information related to question available in the source document, provide an answer along with the appropriate citation.Do not exclude citation if you are using the source document to answer your question.
-    -If there is no specific information related to question available in the source document, respond with "I\'m not sure" without providing any citation. Do not provide personal opinions or assumptions.
-    
+    - Look for relevant information in the provided source document to provide accurate and relevant answers to the question.       
+    - If there is specific information related to question available in the source document, provide an answer along with the appropriate citation. Do not exclude citation if you are using the source document to answer your question.
+    - If there is no specific information related to the question in the source document, respond with "I\'m not sure" without providing any citation. Do not provide personal opinions or assumptions. Do not generating speculative or generalized information.
     {follow_up_questions_prompt}
     {injected_prompt}
-    
     """
     follow_up_questions_prompt_content = """
     Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
     Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
     """
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
+    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in a search index.
     Generate a search query based on the conversation and the new question. 
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<<>>> in the search query terms.
+    Do not include any special characters like '+'.
     If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
+    Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
     If you cannot generate a search query, return just the number 0.
     """
 
@@ -77,7 +77,7 @@ class ChatReadRetrieveReadApproach(Approach):
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
     {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'I am not sure. The provided source document does not include information about the current status of your specific flight'}
+    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.[info1.txt]'},
     ]
 
     def __init__(
@@ -137,6 +137,9 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
+
+        #remove any special characters from the query. Commenting below beacuse with gpt-4 we dont need this.
+        generated_query = generated_query.strip('\"')
 
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":

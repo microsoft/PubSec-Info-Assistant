@@ -38,11 +38,11 @@ fi
 # Create or update a non-root user to match UID/GID.
 if id -u ${USERNAME} > /dev/null 2>&1; then
     # User exists, update if needed
-    if [ "${USER_GID}" != "automatic" ] && [ "$USER_GID" != "$(id -G $USERNAME)" ]; then 
+    if [ "${USER_GID}" != "automatic" ] && [ "${USER_GID}" != "999" ] && [ "$USER_GID" != "$(id -G $USERNAME)" ]; then 
         groupmod --gid $USER_GID $USERNAME 
         usermod --gid $USER_GID $USERNAME
     fi
-    if [ "${USER_UID}" != "automatic" ] && [ "$USER_UID" != "$(id -u $USERNAME)" ]; then 
+    if [ "${USER_UID}" != "automatic" ] && [ "${USER_GID}" != "999" ] && [ "$USER_UID" != "$(id -u $USERNAME)" ]; then 
         usermod --uid $USER_UID $USERNAME
     fi
 else

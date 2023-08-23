@@ -238,7 +238,7 @@ module storage 'core/storage/storage-account.bicep' = {
     }
     deleteRetentionPolicy: {
       enabled: true
-      days: 7
+      days: 0
     }
     containers: [
       {
@@ -295,7 +295,7 @@ module storageMedia 'core/storage/storage-account.bicep' = {
     }
     deleteRetentionPolicy: {
       enabled: true
-      days: 7
+      days: 0
     }
   }
 }

@@ -13,7 +13,6 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-
 # If in automatic mode, determine if a user already exists, if not use vscode
 if [ "${USERNAME}" = "auto" ] || [ "${USERNAME}" = "automatic" ]; then
     USERNAME=""

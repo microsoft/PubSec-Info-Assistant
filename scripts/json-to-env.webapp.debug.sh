@@ -48,10 +48,6 @@ jq -r  '
             "env_var": "COGNITIVE_SERVICES_KEY"
         },
         {
-            "path": "azurE_OPENAI_GPT_DEPLOYMENT",
-            "env_var": "AZURE_OPENAI_GPT_DEPLOYMENT"
-        },
-        {
             "path": "azurE_OPENAI_CHAT_GPT_DEPLOYMENT",
             "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
         },

@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import random
-
 import azure.functions as func
 import requests
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
@@ -34,9 +33,7 @@ max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
 poll_queue_submit_backoff = int(os.environ["POLL_QUEUE_SUBMIT_BACKOFF"])
 pdf_submit_queue_backoff = int(os.environ["PDF_SUBMIT_QUEUE_BACKOFF"])
 
-statusLog = StatusLog(
-    cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
-)
+
 utilities = Utilities(
     azure_blob_storage_account,
     azure_blob_drop_storage_container,
@@ -56,9 +53,8 @@ def main(msg: func.QueueMessage) -> None:
     message_json = json.loads(message_body)
     blob_path = message_json["blob_name"]
     try:
-        logging.info(
-            "Python queue trigger function processed a queue item: %s",
-            msg.get_body().decode("utf-8"),
+        statusLog = StatusLog(
+            cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
         )
 
         # Receive message from the queue
@@ -101,7 +97,7 @@ def main(msg: func.QueueMessage) -> None:
 
         # Check if the request was successful (status code 200)
         if response.status_code == 202:
-            # Successfully submitted
+            # Successfully submitted so submit to the polling queue
             statusLog.upsert_document(
                 blob_path,
                 f"{FUNCTION_NAME} - PDF submitted to FR successfully",

@@ -12,6 +12,7 @@
   * [Configuring your own language ENV file]()
   * [Debugging Functions](#debugging-functions)
   * [Build pipeline for sandbox environment](#build-pipeline-for-sandbox)
+  * [Customer Usage Attribution](#customer-usage-attribution)
 
 ---
 
@@ -97,3 +98,9 @@ Check out how to [Debug the Azure functions locally in VSCode](https://learn.mic
 ### Build pipeline for Sandbox
 
 Setting up a pipeline to deploy a new Sandbox environment requires some manual configuration. Review the details of the [Procedure to setup sandbox environment](setting_up_sandbox_environment.md) here.
+
+### Customer Usage Attribution
+
+A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant Accelerator.
+
+Check out how to [enable Customer Usage Attribution](enable_customer_usage_attribution.md)

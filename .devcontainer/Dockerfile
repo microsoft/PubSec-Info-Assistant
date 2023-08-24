@@ -12,7 +12,7 @@ ARG USER_GID=$USER_UID
 
 # Set up non-root user
 COPY ./scripts/non-root-user.sh /tmp/
-RUN bash /tmp/non-root-user.sh "${USERNAME}" "${USER_UID}" "${USER_GID}"
+RUN bash "/tmp/non-root-user.sh" "${USERNAME}" "${USER_UID}" "${USER_GID}"
 
 # Set env for tracking that we're running in a devcontainer
 ENV DEVCONTAINER=true

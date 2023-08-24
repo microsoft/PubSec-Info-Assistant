@@ -1,6 +1,6 @@
 # Transparency Note: Information Assistant (IA)
 
-Updated 15 Jun 2023
+Updated 24 Aug 2023
 
 ## Table of Contents
 

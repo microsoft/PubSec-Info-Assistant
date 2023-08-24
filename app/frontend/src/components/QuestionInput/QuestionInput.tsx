@@ -18,9 +18,10 @@ interface Props {
     onInfoClick?: () => void;
     showClearChat?: boolean;
     onClearClick?: () => void;
+    onRegenerateClick?: () => void;
 }
 
-export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, onAdjustClick, showClearChat, onClearClick }: Props) => {
+export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, onAdjustClick, showClearChat, onClearClick, onRegenerateClick }: Props) => {
     const [question, setQuestion] = useState<string>("");
 
     const sendQuestion = () => {
@@ -103,7 +104,7 @@ export const QuestionInput = ({ onSend, disabled, placeholder, clearOnSend, onAd
             </Stack>
             </Stack.Item>
             <Stack.Item align="center">
-                <RAIPanel onAdjustClick={onAdjustClick} />
+                <RAIPanel onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} />
             </Stack.Item>
         </Stack>
     );

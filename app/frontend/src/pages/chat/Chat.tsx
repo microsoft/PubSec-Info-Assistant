@@ -44,6 +44,8 @@ const Chat = () => {
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
     const lastQuestionRef = useRef<string>("");
+    const testQuestion = "This is a test question.";
+    const thisquestion = "";
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -272,7 +274,8 @@ const Chat = () => {
                                             onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
                                             onFollowupQuestionClicked={q => makeApiRequest(q)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
-                                            onAdjustClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
+                                            onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
+                                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current)}
                                         />
                                     </div>
                                 </div>
@@ -307,6 +310,7 @@ const Chat = () => {
                             onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
                             showClearChat={true}
                             onClearClick={clearChat}
+                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current)}
                         />
                     </div>
                 </div>

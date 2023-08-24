@@ -76,6 +76,7 @@ export type GetUploadStatusRequest = {
     state: FileState
 }
 
+
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
 export const enum FileState {
@@ -86,3 +87,9 @@ export const enum FileState {
     Complete = "COMPLETE",
     Error = "ERROR"
 }
+
+
+export type GetInfoResponse = {
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT: string;
+    error?: string;
+};

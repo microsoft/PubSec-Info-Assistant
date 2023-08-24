@@ -236,10 +236,6 @@ module storage 'core/storage/storage-account.bicep' = {
     sku: {
       name: 'Standard_LRS'
     }
-    deleteRetentionPolicy: {
-      enabled: true
-      days: 0
-    }
     containers: [
       {
         name: containerName
@@ -292,10 +288,6 @@ module storageMedia 'core/storage/storage-account.bicep' = {
     publicNetworkAccess: 'Enabled'
     sku: {
       name: 'Standard_LRS'
-    }
-    deleteRetentionPolicy: {
-      enabled: true
-      days: 0
     }
   }
 }

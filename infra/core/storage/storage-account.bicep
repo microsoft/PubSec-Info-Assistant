@@ -8,7 +8,6 @@ param allowBlobPublicAccess bool = false
 param allowCrossTenantReplication bool = true
 param allowSharedKeyAccess bool = true
 param defaultToOAuthAuthentication bool = false
-param deleteRetentionPolicy object = {}
 @allowed([ 'AzureDnsZone', 'Standard' ])
 param dnsEndpointType string = 'Standard'
 param kind string = 'StorageV2'
@@ -44,7 +43,6 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   resource blobServices 'blobServices' = if (!empty(containers)) {
     name: 'default'
     properties: {
-      deleteRetentionPolicy: deleteRetentionPolicy
       cors: {
         corsRules: [
           {
@@ -64,10 +62,6 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     }]
   }
   
-
-  // resource queueServices 'queueServices' = [for queueName in queueNames: {
-  //   name: queueName.name   
-  // }]
 
   resource queueServices 'queueServices' = {
     name: 'default'

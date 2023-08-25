@@ -1,5 +1,5 @@
 # Debugging the Azure Functions Locally in VSCode
-IF you wish to debug any of the functions that are part of this accelerator, you can do this locally in VSCode and step through the logic. To do this you will need create a virtual environment. When you open your dev container, you will see a prompt notification in the bottom right of the VS Code window that will do this automatically for you. Click the 'Create virtual environment' button.
+If you wish to debug any of the functions that are part of this accelerator, you can do this locally in VSCode and step through the logic. To do this you will need create a virtual environment. When you open your dev container, you will see a prompt notification in the bottom right of the VS Code window that will do this automatically for you. Click the 'Create virtual environment' button.
 
 ![Process Flow](images/virtual_env.jpg)
 

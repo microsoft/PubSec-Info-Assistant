@@ -275,7 +275,7 @@ const Chat = () => {
                                             onFollowupQuestionClicked={q => makeApiRequest(q)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current)}
+                                            onRegenerateClick={() => makeApiRequest(answers[index][0])}
                                         />
                                     </div>
                                 </div>

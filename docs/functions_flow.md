@@ -1,5 +1,5 @@
 # Functions Flow
-This document outlines the flow of data through the various functions and queues to pre-process the files. Blow is an outline of this flow.
+This document outlines the flow of data through the various functions and queues to pre-process the files. Below is an outline of this flow.
 
 ## Diagram
 ![Process Flow](images/func-flow.png)

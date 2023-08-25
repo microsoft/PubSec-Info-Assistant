@@ -68,12 +68,12 @@
             "name": "Vite: Debug",
             "type": "msedge",
             "request": "launch",
-            "url": "http://localhost:5000", // Update with your Vite dev server URL
+            "url": "http://localhost:5000",
             "webRoot": "${workspaceFolder}/app/backend/static",
             "sourceMapPathOverrides": {
               "webpack:///src/*": "${webRoot}/*"
             },
             "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
-          }
+        }
     ]
 }

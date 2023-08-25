@@ -154,7 +154,7 @@ True Negative | The user asks a question and the system does not find any docume
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. False Positive outcomes may be mitigated by human review of citations.
 
-**NOTE:** Due to generative AI's capability to fabticate, end users should always leverage citations to verify results.
+**NOTE:** Due to generative AI's capability to fabricate, end users should always leverage citations to verify results.
 
 # Evaluation of IA Accelerator
 

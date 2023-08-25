@@ -1,4 +1,4 @@
-# Configure Local Development Environment
+# Configure Development/Deployment Environment
 
 Follow these steps to get the accelerator up and running in a subscription of your choice.
 
@@ -13,6 +13,8 @@ You can use the bash prompt in your Codespace to issue the following commands:
 ```
 
 This will launch a browser session where you can complete you login.
+
+> **NOTICE:** if your organization requires managed devices, ensure that you are running the Codespace from your managed device's VS Code installation. For more information, please see the [Developing in a Codespace](./developing_in_a_codespaces.md#opening-a-codespace-in-vs-code) documentation.
 
 Next from the bash prompt run:
 
@@ -32,11 +34,12 @@ From this output, grab the Subscription ID of the subscription you intend to dep
     az account set --subscription mysubscription
 ```
 
-## Configure Dev Container and ENV files
+## Configure ENV files
 
 Now that the Codespace is running and logged into Azure, we need to set up your local environment variables.
 
 1. Open `scripts/environments` and copy `local.env.example` to `local.env`.
+   1. Note: choose the best example ENV file for your deployment, specifically if you have non-English language settings.
 1. Then open `local.env` and update values as needed:
 
 Variable | Required | Description

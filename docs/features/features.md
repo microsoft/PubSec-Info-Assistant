@@ -93,7 +93,11 @@ At deployment time, you can alter the behavior of the IA Accelerator to use a la
 
 ### Debugging functions
 
-Check out how to [Debug the Azure functions locally in VSCode](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
+Check out how to [Debug the Azure functions locally in VSCode](../function_debug.md)
+
+### Debugging the web app
+
+Check out how to [Debug the Information Assistant Web App](../webapp_debug.md)
 
 ### Build pipeline for Sandbox
 

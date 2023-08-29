@@ -1,6 +1,10 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
-
+   
+.adjustInputContainer {
+    display: flex;
+    flex-direction: row;
+}
 .adjustInput {
     padding: 6px;
     cursor: pointer;

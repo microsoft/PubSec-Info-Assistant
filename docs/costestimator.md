@@ -5,12 +5,12 @@ The Azure pricing calculator helps estimate costs by considering the amount of d
 
 | Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA Accelerator, version 0.3 gama | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/10d4b470c4144c9aa006927ac571300c) | 
+| IA Accelerator, version 0.3 gamma | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/10d4b470c4144c9aa006927ac571300c) | 
 
 ---
 ### Azure Services
 
-The following list of Azure Services will be deployed for IA Accelerator, version 0.3 gama:
+The following list of Azure Services will be deployed for IA Accelerator, version 0.3 gamma:
 
 - App Service [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Azure Function(App Service plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/functions/#pricing)

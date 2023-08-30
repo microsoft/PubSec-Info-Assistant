@@ -288,7 +288,7 @@ class ChatReadRetrieveReadApproach(Approach):
             model=self.chatgpt_deployment,
             messages=messages,
             temperature=float(overrides.get("response_temp")) or 0.6,
-            max_tokens=response_length,
+            max_tokens=1024,
             n=1
 
         )

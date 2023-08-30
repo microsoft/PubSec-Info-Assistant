@@ -1,0 +1,264 @@
+[
+    {
+        "type": "Title",
+        "element_id": "a2934635645798f3d190241991492ae9",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        156.43651176452636,
+                        112.10977730129076
+                    ],
+                    [
+                        156.43651176452636,
+                        149.5837115743886
+                    ],
+                    [
+                        458.8957369995117,
+                        149.5837115743886
+                    ],
+                    [
+                        458.8957369995117,
+                        112.10977730129076
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "filetype": "JPEG",
+            "page_number": 1
+        },
+        "text": "LayoutParser: A Unified Toolkit for Deep Learning Based Document Image Analysis"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "19c6784e14457c6fd332cfc952ccbdeb",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        130.2761521911621,
+                        170.11836043648097
+                    ],
+                    [
+                        130.2761521911621,
+                        193.64709048063858
+                    ],
+                    [
+                        482.12313354492187,
+                        193.64709048063858
+                    ],
+                    [
+                        482.12313354492187,
+                        170.11836043648097
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "filetype": "JPEG",
+            "page_number": 1
+        },
+        "text": "\u2018Zejiang Shen! (F), Ruochen Zhang?, Melissa Dal\u00a5, Benjamin Charles Germain Lee, Jacob Carlson, and Welning LI"
+    },
+    {
+        "type": "ListItem",
+        "element_id": "cd0ccfd1090105f12b9cfba97cc668f6",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        205.147001953125,
+                        202.4188922384511
+                    ],
+                    [
+                        205.147001953125,
+                        314.37616550611415
+                    ],
+                    [
+                        404.2669674682617,
+                        314.37616550611415
+                    ],
+                    [
+                        404.2669674682617,
+                        202.4188922384511
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "page_number": 1
+        },
+        "text": "\"Aten tte for AL nwa University ugehenshangthroen at T fnvaed Univers Lseeadel jacob co"
+    },
+    {
+        "type": "ListItem",
+        "element_id": "01f1be4e421148f4adc2a018521e81a1",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        205.147001953125,
+                        202.4188922384511
+                    ],
+                    [
+                        205.147001953125,
+                        314.37616550611415
+                    ],
+                    [
+                        404.2669674682617,
+                        314.37616550611415
+                    ],
+                    [
+                        404.2669674682617,
+                        202.4188922384511
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "page_number": 1
+        },
+        "text": "aon)efar-harvard.eds"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "92710f421a0e0e0e1bf184c140cfaf9b",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        163.4102847290039,
+                        338.3722274116848
+                    ],
+                    [
+                        163.4102847290039,
+                        571.0001825747282
+                    ],
+                    [
+                        452.89003875732425,
+                        571.0001825747282
+                    ],
+                    [
+                        452.89003875732425,
+                        338.3722274116848
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "filetype": "JPEG",
+            "page_number": 1
+        },
+        "text": "\u201cAbstract. lect advances in document image anaes (DIA) have ben \u2018pamurliy driven bythe application of neural networks Melly roach (utc coud be aly deployed in production and extended fo farther \u2018vestigation. However, mio econ Hs looelycrpined codbeees sd sophisticated mada congurations compat the ey ree of \u2018orient inoreie by wide ibe, hgh hers hare boos reg \u2018Harts ta improne somabity and spi dep lenraing (DL) sada esc tpl He stra iguage fever \u2018son, none of them are optimized for challenge inthe domain af DIA, \"Ths tepals a sajor gp in the existing toi, sw DIA i eal to scademic reser acon Wide range of dnpins in the social sensor [rary for streamlining the nage of DL in DIA reward and appice \u2018Som The core LayoutFareer brary comes with sac of mpl and Jnttive interface or applying and cating DL. model for Iago de Ts promote extnsblty, LayoueParser ln incorporates commanity platform or saring both pretrined modes aad al document dist {tion pipeline We demonstrate that LayoutPareer hap fr both Seltecht cml breve Sptieatnn belies tremor tc es The beary i pblely sable at tape: //layost-pareer-gsthsb so"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "3f9c29105ffb873948a5b162d1c8bb0b",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        161.84129699707032,
+                        579.5738960597827
+                    ],
+                    [
+                        161.84129699707032,
+                        600.7982167119566
+                    ],
+                    [
+                        449.6223999023438,
+                        600.7982167119566
+                    ],
+                    [
+                        449.6223999023438,
+                        579.5738960597827
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "filetype": "JPEG",
+            "page_number": 1
+        },
+        "text": "\u2018Keywords: Document Image Analy: Dop Lari (Character Recognition - Open Source library = Tool Layout Analy"
+    },
+    {
+        "type": "Title",
+        "element_id": "b605350bc00209520b7cd8f546322663",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        153.55613548278808,
+                        618.2517493206522
+                    ],
+                    [
+                        153.55613548278808,
+                        632.6422639266304
+                    ],
+                    [
+                        228.24482849121094,
+                        632.6422639266304
+                    ],
+                    [
+                        228.24482849121094,
+                        618.2517493206522
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "filetype": "JPEG",
+            "page_number": 1
+        },
+        "text": "Introduction"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "ad66d53b32c37d846b86d4b8a9dadd48",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        132.95006858825684,
+                        642.7983016304348
+                    ],
+                    [
+                        132.95006858825684,
+                        666.9307659646739
+                    ],
+                    [
+                        479.9718045043945,
+                        666.9307659646739
+                    ],
+                    [
+                        479.9718045043945,
+                        642.7983016304348
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 612,
+                "layout_height": 792
+            },
+            "last_modified": "2023-08-31T00:35:34",
+            "filetype": "JPEG",
+            "page_number": 1
+        },
+        "text": "\u2018Deep Learning(DL)-basd approaches are the stateaftheart fora wide rage of doctment image analysis (DIA) tasks including document image claeifcation (I)"
+    }
+]

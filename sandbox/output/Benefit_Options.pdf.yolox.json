@@ -1,0 +1,633 @@
+[
+    {
+        "type": "UncategorizedText",
+        "element_id": "d5f2e2805a1bc70dad1e292395bd4b75",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        436.3074951171875,
+                        497.5970458984375
+                    ],
+                    [
+                        436.3074951171875,
+                        723.23876953125
+                    ],
+                    [
+                        1271.2555555555557,
+                        723.23876953125
+                    ],
+                    [
+                        1271.2555555555557,
+                        497.5970458984375
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 1
+        },
+        "text": "Contoso Electronics Plan and Benefit Packages"
+    },
+    {
+        "type": "UncategorizedText",
+        "element_id": "f268324726501ec535e6423c9a3f9177",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        984.5242309570312,
+                        1730.8780517578125
+                    ],
+                    [
+                        984.5242309570312,
+                        1942.6619873046875
+                    ],
+                    [
+                        1540.3663330078125,
+                        1942.6619873046875
+                    ],
+                    [
+                        1540.3663330078125,
+                        1730.8780517578125
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 1
+        },
+        "text": "SP Contoso G \u00bb Electronics"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "49b1d60bc4d172596348469ed285b5a0",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        1250.115478515625,
+                        1772.6107177734375
+                    ],
+                    [
+                        1250.115478515625,
+                        1917.498291015625
+                    ],
+                    [
+                        1543.48486328125,
+                        1917.498291015625
+                    ],
+                    [
+                        1543.48486328125,
+                        1772.6107177734375
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 1
+        },
+        "text": "Contoso Electronics"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "cd45e7c2e4f06019a19547fa2019da07",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        207.49949645996094
+                    ],
+                    [
+                        200.06666666666666,
+                        399.6235555555554
+                    ],
+                    [
+                        1496.929302666667,
+                        399.6235555555554
+                    ],
+                    [
+                        1496.929302666667,
+                        207.49949645996094
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 2
+        },
+        "text": "This document contains information generated using a language model (Azure OpenAI). The information contained in this document is only for demonstration purposes and does not reflect the opinions or beliefs of Microsoft. Microsoft makes no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability or availability with respect to the information contained in this document."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "1e84655886c219e2aa6dcdfd596cd83c",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        199.39756774902344,
+                        428.4879455566406
+                    ],
+                    [
+                        199.39756774902344,
+                        461.9568888888889
+                    ],
+                    [
+                        587.1622924804688,
+                        461.9568888888889
+                    ],
+                    [
+                        587.1622924804688,
+                        428.4879455566406
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 2
+        },
+        "text": "All rights reserved to Microsoft"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "20440cee5b2466ce7f0b969740d21bd9",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        207.95688888888907
+                    ],
+                    [
+                        200.06666666666666,
+                        278.9568888888889
+                    ],
+                    [
+                        1435.9656982421875,
+                        278.9568888888889
+                    ],
+                    [
+                        1435.9656982421875,
+                        207.95688888888907
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Welcome to Contoso Electronics! We are excited to offer our employees two comprehensive health insurance plans through Northwind Health."
+    },
+    {
+        "type": "UncategorizedText",
+        "element_id": "cd8935f079b112abbcafae2f08dc7f91",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        356.472222222222
+                    ],
+                    [
+                        200.06666666666666,
+                        609.2902222222222
+                    ],
+                    [
+                        1501.9496168888886,
+                        609.2902222222222
+                    ],
+                    [
+                        1501.9496168888886,
+                        356.472222222222
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Northwind Health Plus Northwind Health Plus is a comprehensive plan that provides comprehensive coverage for medical, vision, and dental services. This plan also offers prescription drug coverage, mental health and substance abuse coverage, and coverage for preventive care services. With Northwind Health Plus, you can choose from a variety of in-network providers, including primary care physicians, specialists, hospitals, and pharmacies. This plan also offers coverage for emergency services, both in-network and out-of-network."
+    },
+    {
+        "type": "UncategorizedText",
+        "element_id": "97631bd9badf9cf52457e5dac8645c78",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        686.8888888888888
+                    ],
+                    [
+                        200.06666666666666,
+                        939.7068888888889
+                    ],
+                    [
+                        1475.462728,
+                        939.7068888888889
+                    ],
+                    [
+                        1475.462728,
+                        686.8888888888888
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Northwind Standard Northwind Standard is a basic plan that provides coverage for medical, vision, and dental services. This plan also offers coverage for preventive care services, as well as prescription drug coverage. With Northwind Standard, you can choose from a variety of in-network providers, including primary care physicians, specialists, hospitals, and pharmacies. This plan does not offer coverage for emergency services, mental health and substance abuse coverage, or out-of-network services."
+    },
+    {
+        "type": "UncategorizedText",
+        "element_id": "0d7a5ec43e9ee8f0582059d8377531fc",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        1017.2222222222222
+                    ],
+                    [
+                        200.06666666666666,
+                        1189.429111111111
+                    ],
+                    [
+                        1469.3354942222227,
+                        1189.429111111111
+                    ],
+                    [
+                        1469.3354942222227,
+                        1017.2222222222222
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Comparison of Plans Both plans offer coverage for routine physicals, well-child visits, immunizations, and other preventive care services. The plans also cover preventive care services such as mammograms, colonoscopies, and other cancer screenings."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "850fe082e015f3c0f462bc3b48a9b960",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        197.97511291503906,
+                        1220.8358154296875
+                    ],
+                    [
+                        197.97511291503906,
+                        1372.7624444444443
+                    ],
+                    [
+                        1490.704736000001,
+                        1372.7624444444443
+                    ],
+                    [
+                        1490.704736000001,
+                        1220.8358154296875
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Northwind Health Plus offers more comprehensive coverage than Northwind Standard. This plan offers coverage for emergency services, both in-network and out-of-network, as well as mental health and substance abuse coverage. Northwind Standard does not offer coverage for emergency services, mental health and substance abuse coverage, or out-of-network services."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "7ba785b78019f6874fff4689473210fb",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        196.1377716064453,
+                        1404.1348876953125
+                    ],
+                    [
+                        196.1377716064453,
+                        1515.7624444444443
+                    ],
+                    [
+                        1440.65673828125,
+                        1515.7624444444443
+                    ],
+                    [
+                        1440.65673828125,
+                        1404.1348876953125
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Both plans offer coverage for prescription drugs. Northwind Health Plus offers a wider range of prescription drug coverage than Northwind Standard. Northwind Health Plus covers generic, brand- name, and specialty drugs, while Northwind Standard only covers generic and brand-name drugs."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "750372f7af66977080ce6024f0abd77e",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        1545.6737060546875
+                    ],
+                    [
+                        200.06666666666666,
+                        1658.8457777777778
+                    ],
+                    [
+                        1500.6735173333336,
+                        1658.8457777777778
+                    ],
+                    [
+                        1500.6735173333336,
+                        1545.6737060546875
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Both plans offer coverage for vision and dental services. Northwind Health Plus offers coverage for vision exams, glasses, and contact lenses, as well as dental exams, cleanings, and fillings. Northwind Standard only offers coverage for vision exams and glasses."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "719621708ca1858fe7af145e25f120b8",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        199.43080139160156,
+                        1690.100830078125
+                    ],
+                    [
+                        199.43080139160156,
+                        1801.8457777777778
+                    ],
+                    [
+                        1489.451416015625,
+                        1801.8457777777778
+                    ],
+                    [
+                        1489.451416015625,
+                        1690.100830078125
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Both plans offer coverage for medical services. Northwind Health Plus offers coverage for hospital stays, doctor visits, lab tests, and X-rays. Northwind Standard only offers coverage for doctor visits and lab tests."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "b48fb0f88686b46ba1788022ff4248d5",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        200.06666666666666,
+                        1832.8236083984375
+                    ],
+                    [
+                        200.06666666666666,
+                        1944.8346666666666
+                    ],
+                    [
+                        1488.8882911111111,
+                        1944.8346666666666
+                    ],
+                    [
+                        1488.8882911111111,
+                        1832.8236083984375
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 3
+        },
+        "text": "Northwind Health Plus is a comprehensive plan that offers more coverage than Northwind Standard. Northwind Health Plus offers coverage for emergency services, mental health and substance abuse coverage, and out-of-network services, while Northwind Standard does not. Northwind Health Plus also"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "1a2a087710be5b29565f58900b91e038",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        196.333740234375,
+                        205.51512145996094
+                    ],
+                    [
+                        196.333740234375,
+                        278.9568888888889
+                    ],
+                    [
+                        1479.1575093333336,
+                        278.9568888888889
+                    ],
+                    [
+                        1479.1575093333336,
+                        205.51512145996094
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 4
+        },
+        "text": "offers a wider range of prescription drug coverage than Northwind Standard. Both plans offer coverage for vision and dental services, as well as medical services."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "f15364945e8d40c6a6cb44fbcc2544fb",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        194.22666931152344,
+                        357.31455555555584
+                    ],
+                    [
+                        194.22666931152344,
+                        595.4902222222229
+                    ],
+                    [
+                        1466.2701416015625,
+                        595.4902222222229
+                    ],
+                    [
+                        1466.2701416015625,
+                        357.31455555555584
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 4
+        },
+        "text": "Cost Comparison Contoso Electronics deducts the employee's portion of the healthcare cost from each paycheck. This means that the cost of the health insurance will be spread out over the course of the year, rather than being paid in one lump sum. The employee's portion of the cost will be calculated based on the selected health plan and the number of people covered by the insurance. The table below shows a cost comparison between the different health plans offered by Contoso Electronics:"
+    },
+    {
+        "type": "Table",
+        "element_id": "48891e24c039656330ae672639c6091d",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        214.5164337158203,
+                        640.5958862304688
+                    ],
+                    [
+                        214.5164337158203,
+                        1105.953857421875
+                    ],
+                    [
+                        1426.5208740234375,
+                        1105.953857421875
+                    ],
+                    [
+                        1426.5208740234375,
+                        640.5958862304688
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 4,
+            "text_as_html": "<table><thead><th></th><th></th><th>Employee's cost per paycheck</th></thead><thead><th></th><th>Northwind Standard</th><th>Northwind Health Plus</th></thead><tr><td>Employee Only</td><td>$45.00</td><td>$55.00</td></tr><tr><td>Employee +1</td><td>$65.00</td><td>$71.00</td></tr><tr><td>Employee +2 or more</td><td>$78.00</td><td>$89.00</td></tr></table>"
+        },
+        "text": "Northwind Standard Northwind Health Plus $45.00 $55.00 $65.00 $71.00 $78.00 $89.00"
+    },
+    {
+        "type": "UncategorizedText",
+        "element_id": "9d90824230193c047a460ed41c73e96f",
+        "metadata": {
+            "coordinates": {
+                "points": [
+                    [
+                        199.43333333333334,
+                        1227.222222222222
+                    ],
+                    [
+                        199.43333333333334,
+                        1399.3735555555554
+                    ],
+                    [
+                        1469.589111111111,
+                        1399.3735555555554
+                    ],
+                    [
+                        1469.589111111111,
+                        1227.222222222222
+                    ]
+                ],
+                "system": "PixelSpace",
+                "layout_width": 1700,
+                "layout_height": 2200
+            },
+            "filename": "Benefit_Options.pdf",
+            "file_directory": "pdf",
+            "last_modified": "2023-08-25T19:24:43",
+            "filetype": "application/pdf",
+            "page_number": 4
+        },
+        "text": "Next Steps We hope that this information has been helpful in understanding the differences between Northwind Health Plus and Northwind Standard. We are confident that you will find the right plan for you and your family. Thank you for choosing Contoso Electronics!"
+    }
+]

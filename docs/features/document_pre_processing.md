@@ -1,6 +1,6 @@
 # Document Pre-processing
 The Information Assistant relies on a multi-step process to preprocess documents in preparation for them being used in the NLP based chat interface. 
-The pre-processing of documents is a crucial step as it involves several steps, such as extracting text, tokenizing, cleaning, and normalizing the text, to convert the raw data into a format that can be easily analyzed by the OpenAI model. Information Assistant preprocess different types of documents, ensuring that the text is cleaned and processed effectively for better understanding and analysis of large complex documents. 
+The pre-processing of documents is a crucial step as it involves several steps, such as text extraction and normalizing the text, to convert the raw data into a format that can be easily analyzed by the OpenAI model. Information Assistant preprocess different types of documents, ensuring that the text is cleaned and processed effectively for better understanding and analysis of large complex documents. 
 
 ```mermaid
 graph LR
@@ -46,42 +46,9 @@ subgraph "Chunking"
 ```
 ## PDF Pre-Processing
 PDF documents often contain a mix of text, images, and other media, which requires a series of steps to extract and process the relevant information.
-
-- Text Extraction: Azure OpenAI uses Optical Character Recognition (OCR) technology to extract text from images and scanned documents within the PDF. This ensures that all textual content, regardless of its format, is extracted for further processing.
-
-- Tokenization: The extracted text is then tokenized into smaller parts called tokens, which can be words or subwords. This step is essential for the OpenAI model to understand the structure and meaning of the text.
-
-- Text Cleaning: This involves removing any noise from the text, such as special characters, punctuation, and irrelevant whitespaces.
-
-- Normalization: All characters are converted to lowercase, and stemming or lemmatization is applied to reduce words to their base form.
-
-The processed text is then fed into the OpenAI model for further analysis.
+For PDF's we use a service, known as Azure Form Recognizer. Azure Form Recognizer 'cracks' a PDF file and process each page using the Layout API. It provides a JSON representation of the file including titles, sub-headings, headers, footers, tables and content paragraphs. We take this content and build a standardized JSON 'document map' of the content.
 
 
-
-## HTML Pre-Processing
-HTML documents contain a lot of irrelevant information, such as HTML tags, scripts, and styling information, which need to be removed before processing the text.
-
-- Web Scraping: Azure OpenAI uses web scraping techniques to extract the relevant text from the HTML document, discarding any irrelevant content such as HTML tags, scripts, and styling information.
-
-- Tokenization: Similar to PDF documents, the extracted text is then tokenized into smaller parts, which can be words or subwords.
-
-- Text Cleaning: The text is cleaned by removing any noise, such as special characters, punctuation, and irrelevant whitespaces.
-
-- Normalization: All characters are converted to lowercase, and stemming or lemmatization is applied to reduce words to their base form.
-
-The cleaned and processed text is then used for further analysis by the OpenAI model.
-
-## DOCX
-DOCX is a proprietary document format used by Microsoft Word, and requires specialized libraries to extract text and other relevant information.
-
-- Text Extraction: Azure OpenAI uses specialized libraries like python-docx to extract text and other relevant information from the DOCX documents.
-
-- Tokenization: The extracted text is then tokenized into smaller parts, which can be words or subwords.
-
-- Text Cleaning: The text is cleaned by removing any noise, such as special characters, punctuation, and irrelevant whitespaces.
-
-- Normalization: All characters are converted to lowercase, and stemming or lemmatization is applied to reduce words to their base form.
-
-The processed text is then fed into the OpenAI model for further analysis.
+## HTML/DOCX Pre-Processing
+For HTML and docx documents, we firstly use a library called [Mammoth](https://pypi.org/project/mammoth/) to convert these to html format. Now that we have these all as HTML, we use another library, [Beautiful Soup](https://pypi.org/project/beautifulsoup4/), to extract titles, sub-headings, headers, footers, tables and content paragraphs, similarly to using Azure Form Recognizer for PDF's. Again we create a 'document map' of the content, a json based representation.
 

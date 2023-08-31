@@ -21,18 +21,19 @@ We use this two function polling and queue pattern, rather than the SDK which us
 The other main path through the flow is for non-PDF files. The **FileLayoutParsingOther** function listens to the **non-pdf-submit-queue** and starts processing new messages when they are received. this will convert DocX to html, if the file type is html or htm, and then it will build the same document map structure as was created for PDF files. Likewise, this function will call the same shared code functions to generate the chunks.
 
 ## Function Configuration
+
 There are a number of settings that are configured during deployment, but which can also be updated through the configuration blade in the Azure Function App. Many of the settings relate to hard values, such as storage container names and endpoints for services, but we anticipate customers may wish to change certain configurations and these are described below.
 
 Setting | Description
 --- | ---
 CHUNK_TARGET_SIZE | The number of tokens the function targets as the maximum per chunk generated
-MAX_SECONDS_HIDE_ON_UPLOAD | The maximum number of seconds a message will be hidden when initially submitting to the process. The actual time a message is invisible is a random value form 0 to this cap. This spreads out initial processing so as not to hit a throttling even unnecessarily
+MAX_SECONDS_HIDE_ON_UPLOAD | The maximum number of seconds a message will be hidden when initially submitting to the process. The actual time a message is invisible is a random value from 0 to this cap. This spreads out initial processing so as not to hit a throttling event unnecessarily
 MAX_SUBMIT_REQUEUE_COUNT | The maximum number of times the process will try to process a PDF through Form Recognizer
 PDF_SUBMIT_QUEUE_BACKOFF | The number of seconds a message will remain invisible after resubmitting to the queue due to throttling during submitting to Form Recognizer
-POLL_QUEUE_SUBMIT_BACKOFF | How much time we will initially wait before trying to retrieve processed results form Form Recognizer
-POLLING_BACKOFF | If, on polling the Form Recognizer service, we learn the request is still being processed, the process will pass a new message back to the polling queue which will become visible after this number of seconds. The delay in visibility will increase from this initial value exponentially
+POLL_QUEUE_SUBMIT_BACKOFF | How many seconds we will initially wait before trying to retrieve processed results form Form Recognizer
+POLLING_BACKOFF | If, on polling the Form Recognizer service, we learn the request is still being processed, the flow will pass a new message back to the polling queue which will become visible after this number of seconds. The delay in visibility will increase from this initial value exponentially
 MAX_READ_ATTEMPTS | The maximum number of times we will try to retrieve processed results from Azure Form Recognizer
-MAX_POLLING_REQUEUE_COUNT | The maximum number oi times the process will submit a message to the polling queue
+MAX_POLLING_REQUEUE_COUNT | The maximum number of times the process will submit a message to the polling queue
 SUBMIT_REQUEUE_HIDE_SECONDS | If a throttling event occurs on upload, the message will be resubmitted to the queue up to a maximum amount of times specified in this setting
 TARGET_TRANSLATION_LANGUAGE | The target language that the process will translate chunks into
 ENRICHMENT_BACKOFF | The number of seconds a message will be invisible when resubmitted to the enrichment queue after a failure due to throttling. This will increase exponentially for every subsequent time a failure occurs

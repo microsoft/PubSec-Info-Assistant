@@ -1,0 +1,634 @@
+[
+    {
+        "type": "Header",
+        "element_id": "2238bfdd37fcd2235ab98bedfb60d6ce",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "header_footer_type": "first_page"
+        },
+        "text": "War & Peace Sample Text\n"
+    },
+    {
+        "type": "Title",
+        "element_id": "4c0cfb82e983c61610b67106d725808c",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1
+        },
+        "text": "Section 1"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "dcaad8b872d85c7338f27dc3d5120b90",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1
+        },
+        "text": "Well, Prince, so Genoa and Lucca are now just family estates of the Buonapartes. But I warn you, if you don\u2019t tell me that this means war, if you still try to defend the infamies and horrors perpetrated by that Antichrist\u2014I really believe he is Antichrist\u2014I will have nothing more to do with you and you are no longer my friend, no longer my \u2018faithful slave,\u2019 as you call yourself! But how do you do? I see I have frightened you\u2014sit down and tell me all the news.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "ac805b4c62cf0024826776aa4db47e8f",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1,
+            "emphasized_text_contents": [
+                "la grippe",
+                "grippe"
+            ],
+            "emphasized_text_tags": [
+                "i",
+                "i"
+            ]
+        },
+        "text": "It was in July, 1805, and the speaker was the well-known Anna P\u00e1vlovna Sch\u00e9rer, maid of honor and favorite of the Empress M\u00e1rya F\u00ebdorovna. With these words she greeted Prince Vas\u00edli Kur\u00e1gin, a man of high rank and importance, who was the first to arrive at her reception. Anna P\u00e1vlovna had had a cough for some days. She was, as she said, suffering from\u00a0la grippe;\u00a0grippe\u00a0being then a new word in St. Petersburg, used only by the elite."
+    },
+    {
+        "type": "Table",
+        "element_id": "3bf5707210e99657ab6bb07893c21762",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1,
+            "text_as_html": "<table>\n<thead>\n<tr><th>H1  </th><th>H2  </th><th>H3  </th></tr>\n</thead>\n<tbody>\n<tr><td>C1  </td><td>C2  </td><td>C3  </td></tr>\n</tbody>\n</table>"
+        },
+        "text": "H1    H2    H3\nC1    C2    C3"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "40a11496528c0849b69a9a3691d895ac",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1
+        },
+        "text": "All her invitations without exception, written in French, and delivered by a scarlet-liveried footman that morning, ran as follows:"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "196dcddb2622e428c53659f0518142a5",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1
+        },
+        "text": "\u201cIf you have nothing better to do, Count [or Prince], and if the prospect of spending an evening with a poor invalid is not too terrible, I shall be very charmed to see you tonight between 7 and 10\u2014Annette Sch\u00e9rer.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "553be7de7e386656ee06d23ae121294f",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 1
+        },
+        "text": "\u201cHeavens! what a virulent attack!\u201d replied the prince, not in the least disconcerted by this reception. He had just entered, wearing an embroidered court uniform, knee breeches, and shoes, and had stars on his breast and a serene expression on his flat face. He spoke in that refined French in which our grandfathers not only spoke but thought, and with the gentle, patronizing intonation natural to a man of importance who had grown old in society and at court. He went up to Anna P\u00e1vlovna, kissed her hand, presenting to her his bald, scented, and shining head, and complacently seated himself on the sofa."
+    },
+    {
+        "type": "PageBreak",
+        "element_id": "e3b0c44298fc1c149afbf4c8996fb924",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        "text": ""
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "f1c262660520a4d5c3c92c006f435ddf",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cFirst of all, dear friend, tell me how you are. Set your friend\u2019s mind at rest,\u201d said he without altering his tone, beneath the politeness and affected sympathy of which indifference and even irony could be discerned."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "e2da5945397dd5c379c5fac877cc0406",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cCan one be well while suffering morally? Can one be calm in times like these if one has any feeling?\u201d said Anna P\u00e1vlovna. \u201cYou are staying the whole evening, I hope?\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "1bc5ad532f29a6a65d8d33a025d0bd83",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cAnd the fete at the English ambassador\u2019s? Today is Wednesday. I must put in an appearance there,\u201d said the prince. \u201cMy daughter is coming for me to take me there.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "6e6fc61de574cec5af8a2bca7e65e287",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cI thought today\u2019s fete had been canceled. I confess all these festivities and fireworks are becoming wearisome.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "ff78a324e8a7111e9e69f147b18faabf",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cIf they had known that you wished it, the entertainment would have been put off,\u201d said the prince, who, like a wound-up clock, by force of habit said things he did not even wish to be believed."
+    },
+    {
+        "type": "Title",
+        "element_id": "7b0d4c438cdc7fbd912d6f6d27b82250",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "Section 2"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "55774854a8887100aadcf6b2fce60bd5",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cDon\u2019t tease! Well, and what has been decided about Novos\u00edltsev\u2019s dispatch? You know everything.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "83d8af99357f28f5695fb3b803d9c5cb",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cWhat can one say about it?\u201d replied the prince in a cold, listless tone. \u201cWhat has been decided? They have decided that Buonaparte has burnt his boats, and I believe that we are ready to burn ours.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "e6e3d1fa213f9b4e1a43ed9fd2034fa6",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "Prince Vas\u00edli always spoke languidly, like an actor repeating a stale part. Anna P\u00e1vlovna Sch\u00e9rer on the contrary, despite her forty years, overflowed with animation and impulsiveness. To be an enthusiast had become her social vocation and, sometimes even when she did not feel like it, she became enthusiastic in order not to disappoint the expectations of those who knew her. The subdued smile which, though it did not suit her faded features, always played round her lips expressed, as in a spoiled child, a continual consciousness of her charming defect, which she neither wished, nor could, nor considered it necessary, to correct."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "d61f907c7de17415ace02fe2e365a34e",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "In the midst of a conversation on political matters Anna P\u00e1vlovna burst out:"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "865b3045ace69a37cb453c950eace9bd",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cOh, don\u2019t speak to me of Austria. Perhaps\u00a0I don\u2019t understand things, but Austria never has wished, and does not wish, for war. She is betraying us! Russia alone must save Europe. Our gracious sovereign recognizes his high vocation and will be true to it. That is the one thing I have faith in! Our good and wonderful sovereign has to perform the noblest role on earth, and he is so virtuous and noble that God will not forsake him. He will fulfill his vocation and crush the hydra of revolution, which has become more terrible than ever in the person of this murderer and villain! We alone must avenge the blood of the just one\u2026. Whom, I ask you, can we rely on?\u2026 England with her commercial spirit will not and cannot understand the Emperor Alexander\u2019s loftiness of soul. She has refused to evacuate Malta. She wanted to find, and still seeks, some secret motive in our actions. What answer did Novos\u00edltsev get? None. The English have not understood and cannot understand the self-abnegation of our Emperor who wants nothing for himself, but only desires the good of mankind. And what have they promised? Nothing! And what little they have promised they will not perform! Prussia has always declared that Buonaparte is invincible and that all Europe is powerless before him\u2026. And I don\u2019t believe a word that Hardenburg says, or Haugwitz either. This famous Prussian neutrality is just a trap. I have faith only in God and the lofty destiny of our adored monarch. He will save Europe!\u201d"
+    },
+    {
+        "type": "Title",
+        "element_id": "4f8c7289360c0bbea6eb45baa1d66462",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "Section 3"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "99dce29cbb745ec2fc7f2a5abe08e655",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "She suddenly paused, smiling at her own impetuosity."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "80239ca3307b6f82671ed657554ebd4a",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 2
+        },
+        "text": "\u201cI think,\u201d said the prince with a smile, \u201cthat if you had been sent instead of our dear Wintzingerode you would have captured the King of Prussia\u2019s consent by assault. You are so eloquent. Will you give me a cup of tea?\u201d"
+    },
+    {
+        "type": "PageBreak",
+        "element_id": "e3b0c44298fc1c149afbf4c8996fb924",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        "text": ""
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "3ac8d6734075313ad8b9312b3b080d45",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3,
+            "emphasized_text_contents": [
+                "\u00c0",
+                "propos",
+                "\u00e9migr\u00e9s"
+            ],
+            "emphasized_text_tags": [
+                "i",
+                "i",
+                "i"
+            ]
+        },
+        "text": "\u201cIn a moment.\u00a0\u00c0 propos,\u201d she added, becoming calm again, \u201cI am expecting two very interesting men tonight, le Vicomte de Mortemart, who is connected with the Montmorencys through the Rohans, one of the best French families. He is one of the genuine\u00a0\u00e9migr\u00e9s, the good ones. And also the Abb\u00e9 Morio. Do you know that profound thinker? He has been received by the Emperor. Had you heard?\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "2f87089e90a9174a52daf15d4be1797c",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cI shall be delighted to meet them,\u201d said the prince. \u201cBut tell me,\u201d he added with studied carelessness as if it had only just occurred to him, though the question he was about to ask was the chief motive of his visit, \u201cis it true that the Dowager Empress wants Baron Funke to be appointed first secretary at Vienna? The baron by all accounts is a poor creature.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "91d143e949a5f7385b5b8cc5e23c4f9d",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "Prince Vas\u00edli wished to obtain this post for his son, but others were trying through the Dowager Empress M\u00e1rya F\u00ebdorovna to secure it for the baron."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "d46f463d505ddf3770729413f3d8c00f",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "Anna P\u00e1vlovna almost closed her eyes to indicate that neither she nor anyone else had a right to criticize what the Empress desired or was pleased with."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "7aac6503f74f2d5b17e576ecf24664da",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cBaron Funke has been recommended to the Dowager Empress by her sister,\u201d was all she said, in a dry and mournful tone."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "830be0715da486ad95d6b80a468c620a",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3,
+            "emphasized_text_contents": [
+                "beaucoup d\u2019estime"
+            ],
+            "emphasized_text_tags": [
+                "i"
+            ]
+        },
+        "text": "As she named the Empress, Anna P\u00e1vlovna\u2019s face suddenly assumed an expression of profound and sincere devotion and respect mingled with sadness, and this occurred every time she mentioned her illustrious patroness. She added that Her Majesty had deigned to show Baron Funke\u00a0beaucoup d\u2019estime, and again her face clouded over with sadness."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "7a02bee32d79c158f08dfdf8e00ab240",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "The prince was silent and looked indifferent. But, with the womanly and courtier-like quickness and tact habitual to her, Anna P\u00e1vlovna wished both to rebuke him (for daring to speak as he had done of a man recommended to the Empress) and at the same time to console him, so she said:"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "a7b48f64798a120401094dcf71d5bd27",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cNow about your family. Do you know that since your daughter came out everyone has been enraptured by her? They say she is amazingly beautiful.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "408a4d45ca0bd89dc95dacda1de7a4e5",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "The prince bowed to signify his respect and gratitude."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "6e6c1588feb85c2d60d9bd24a4f891f4",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cI often think,\u201d she continued after a short pause, drawing nearer to the prince and smiling amiably at him as if to show that political and social topics were ended and the time had come for intimate conversation\u2014\u201cI often think how unfairly sometimes the joys of life are distributed. Why has fate given you two such splendid children? I don\u2019t speak of Anatole, your youngest. I don't like him,\u201d she added in a tone admitting of no rejoinder and raising her eyebrows. \u201cTwo such charming children. And really you appreciate them less than anyone, and so you don\u2019t deserve to have them.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "e8a23499b0f003681279efd6839a61b0",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "And she smiled her ecstatic smile."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "c6d03af54e4b95b917a9953fec7a61f9",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cI can\u2019t help it,\u201d said the prince. \u201cLavater\u00a0would have said I lack the bump of paternity.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "bc7139d787e3e065f78ee2619ac05811",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cDon\u2019t joke; I mean to have a serious talk with you. Do you know I am dissatisfied with your younger son? Between ourselves\u201d (and her face assumed its melancholy expression), \u201che was mentioned at Her Majesty's and you were pitied\u2026.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "e9e60544fac4d38ce6068d363420e725",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "The prince answered nothing, but she\u00a0looked at him significantly, awaiting a reply. He frowned."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "20a35bedb0906c3f7a39357a49d41c4c",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cWhat would you have me do?\u201d he said at last. \u201cYou know I did all a father could for their education, and they have both turned out fools. Hippolyte is at least a quiet fool, but Anatole is an active one. That is the only difference between them.\u201d He said this smiling in a way more natural and animated than usual, so that the wrinkles round his mouth very clearly revealed something unexpectedly coarse and unpleasant."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "6befad32f30478a0533be32ca3e59f80",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cAnd why are children born to such men as you? If you were not a father there would be nothing I could reproach you with,\u201d said Anna P\u00e1vlovna, looking up pensively."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "dd19170a12ab3b3783ca55bb66dfdfb8",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "\u201cI am your faithful slave and to you alone I can confess that my children are the bane of my life. It is the cross I have to bear. That is how I explain it to myself. It can\u2019t be helped!\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "12fc695761df11814b90ebdf9e5e8507",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 3
+        },
+        "text": "He said no more, but expressed his resignation to cruel fate by a gesture. Anna P\u00e1vlovna meditated."
+    },
+    {
+        "type": "PageBreak",
+        "element_id": "e3b0c44298fc1c149afbf4c8996fb924",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        },
+        "text": ""
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "14fec989185e65fdda5db22db4fbf12c",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4
+        },
+        "text": "\u201cHave you never thought of marrying your prodigal son Anatole?\u201d she asked. \u201cThey say old maids have a mania for matchmaking, and though I don\u2019t feel that weakness in myself as yet, I know a little person who is very unhappy with her father. She is a relation of yours, Princess Mary Bolk\u00f3nskaya.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "dc622870e20cdba902efebfa9b0049b3",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4
+        },
+        "text": "Prince Vas\u00edli did not reply, though, with the quickness of memory and perception befitting a man of the world, he indicated by a movement of the head that he was considering this information."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "eeda08a2e73de32fc2303f87fcd2f109",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4
+        },
+        "text": "\u201cDo you know,\u201d he said at last, evidently unable to check the sad current of his thoughts, \u201cthat Anatole is costing me forty thousand rubles a year? And,\u201d he went on after a pause, \u201cwhat will it be in five years, if he goes on like this?\" Presently he added: \u201cThat\u2019s what we fathers have to put up with\u2026. Is this princess of yours rich?\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "ac51f2fdf4a1c3fefc5a33ea259542ed",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4
+        },
+        "text": "\u201cHer father is very rich and stingy. He lives in the country. He is the well-known Prince Bolk\u00f3nski who had to retire from the army under the late Emperor, and was nicknamed \u2018the King of Prussia.\u2019 He is very clever but eccentric, and a bore. The poor girl is very unhappy. She has a brother; I think you know him, he married Lise Meinen lately. He is an aide-de-camp of Kut\u00fazov\u2019s and will be here tonight.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "bbb8f878b4459fd6c97670fda5b443c1",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4,
+            "emphasized_text_contents": [
+                "slafe",
+                "f"
+            ],
+            "emphasized_text_tags": [
+                "i",
+                "i"
+            ]
+        },
+        "text": "\u201cListen, dear Annette,\u201d said the prince, suddenly taking Anna P\u00e1vlovna\u2019s hand and for some reason drawing it downwards. \u201cArrange that affair for me and I shall always be your most devoted slave\u2014slafe\u00a0with an\u00a0f, as a village elder of mine writes in his reports. She is rich and of good family and that\u2019s all I want.\u201d"
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "ed749df3ea0201788588a1a119f28633",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4
+        },
+        "text": "And with the familiarity and easy grace peculiar to him, he raised the maid of honor\u2019s hand to his lips, kissed it, and swung it to and fro as he lay back in his armchair, looking in another direction."
+    },
+    {
+        "type": "NarrativeText",
+        "element_id": "9e9e9a6a3e083d7697a78c1befe997b4",
+        "metadata": {
+            "filename": "war-and-peace.docx",
+            "file_directory": "docs",
+            "last_modified": "2023-08-31T02:18:49",
+            "filetype": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "page_number": 4,
+            "emphasized_text_contents": [
+                "Attendez"
+            ],
+            "emphasized_text_tags": [
+                "i"
+            ]
+        },
+        "text": "\u201cAttendez,\u201d said Anna P\u00e1vlovna, reflecting, \u201cI\u2019ll speak to Lise, young Bolk\u00f3nski\u2019s wife, this very evening, and perhaps the thing can be arranged. It shall be on your family\u2019s behalf that I\u2019ll start my apprenticeship as old maid.\u201d"
+    }
+]

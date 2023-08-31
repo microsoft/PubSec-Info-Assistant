@@ -211,5 +211,14 @@ def get_all_upload_status():
 # Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.route("/getInfoData")
 def get_info_data():
-    response = jsonify({"AZURE_OPENAI_CHATGPT_DEPLOYMENT": f"{AZURE_OPENAI_CHATGPT_DEPLOYMENT}"})
+    response = jsonify(
+        {
+            "AZURE_OPENAI_CHATGPT_DEPLOYMENT": f"{AZURE_OPENAI_CHATGPT_DEPLOYMENT}",
+            "AZURE_OPENAI_MODEL_NAME": f"{deployment.properties.model.name}",
+            "AZURE_OPENAI_MODEL_VERSION": f"{deployment.properties.model.version}",
+            "AZURE_OPENAI_SERVICE": f"{AZURE_OPENAI_SERVICE}",
+            "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
+            "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",
+            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
+        })
     return response

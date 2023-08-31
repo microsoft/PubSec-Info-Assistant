@@ -11,6 +11,7 @@ import openai
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
+from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
 from azure.storage.blob import (
     AccountSasPermissions,
@@ -33,10 +34,12 @@ AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
 AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
+AZURE_OPENAI_RESOURCE_GROUP = os.environ.get("AZURE_OPENAI_RESOURCE_GROUP") or ""
 AZURE_OPENAI_CHATGPT_DEPLOYMENT = (
     os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
 )
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
+AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "merged_content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
@@ -83,6 +86,15 @@ blob_client = BlobServiceClient(
 )
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
+# Set up OpenAI management client
+openai_mgmt_client = CognitiveServicesManagementClient(
+    credential=azure_credential,
+    subscription_id=AZURE_SUBSCRIPTION_ID)
+
+deployment = openai_mgmt_client.deployments.get(
+    resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+    account_name=AZURE_OPENAI_SERVICE,
+    deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
 
 chat_approaches = {
     "rrr": ChatReadRetrieveReadApproach(
@@ -94,6 +106,8 @@ chat_approaches = {
         KB_FIELDS_CONTENT,
         blob_client,
         QUERY_TERM_LANGUAGE,
+        deployment.properties.model.name,
+        deployment.properties.model.version
     )
 }
 

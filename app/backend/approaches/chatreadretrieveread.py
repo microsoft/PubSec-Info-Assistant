@@ -88,6 +88,8 @@ class ChatReadRetrieveReadApproach(Approach):
         content_field: str,
         blob_client: BlobServiceClient,
         query_term_language: str,
+        model_name: str,
+        model_version: str
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -100,6 +102,9 @@ class ChatReadRetrieveReadApproach(Approach):
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
+
+        self.model_name = model_name
+        self.model_version = model_version
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -254,8 +259,8 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
         #Added conditional block to use different system messages for different models.
-        
-        if self.chatgpt_deployment == "gpt-35-turbo":
+
+        if self.model_name == "gpt-35-turbo":
             messages = self.get_messages_from_history(
                 system_message,
                 self.chatgpt_deployment,
@@ -264,7 +269,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 self.response_prompt_few_shots,
                 max_tokens=self.chatgpt_token_limit
             )
-        elif self.chatgpt_deployment == "gpt-4":
+        elif self.model_name == "gpt-4":
             messages = self.get_messages_from_history(
                 "Sources:\n" + content + "\n\n" + system_message,
                 # system_message + "\n\nSources:\n" + content,

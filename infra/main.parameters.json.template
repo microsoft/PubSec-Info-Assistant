@@ -23,6 +23,9 @@
     "azureOpenAIServiceName": {
       "value": "${AZURE_OPENAI_SERVICE_NAME}"
     },
+    "azureOpenAIResourceGroup": {
+      "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
+    },
     "azureOpenAIServiceKey": {
       "value": "${AZURE_OPENAI_SERVICE_KEY}"
     },
@@ -41,8 +44,17 @@
     "buildNumber": {
       "value": "${BUILD_NUMBER}"
     },
-    "aadClientId": {
-      "value": "${AZURE_AD_APP_CLIENT_ID}"
+    "aadWebClientId": {
+      "value": "${AZURE_AD_WEB_APP_CLIENT_ID}"
+    },
+    "aadMgmtClientId": {
+      "value": "${AZURE_AD_MGMT_APP_CLIENT_ID}"
+    },
+    "aadMgmtServicePrincipalId": {
+      "value": "${AZURE_AD_MGMT_SP_ID}"
+    },
+    "aadMgmtClientSecret": {
+      "value": "${AZURE_AD_MGMT_APP_SECRET}"
     },
     "isInAutomation": {
       "value": ${IS_IN_AUTOMATION}
@@ -55,6 +67,12 @@
     },
     "enableDevCode": {
       "value": ${ENABLE_DEV_CODE}
+    },
+    "tenantId": {
+      "value": "${TENANT_ID}"
+    },
+    "subscriptionId": {
+      "value": "${SUBSCRIPTION_ID}"
     }
   }
 }

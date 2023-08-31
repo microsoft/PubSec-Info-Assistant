@@ -77,15 +77,13 @@ param enableDevCode bool = false
 param tenantId string = ''
 param subscriptionId string = ''
 
-
-
-
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
+
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {

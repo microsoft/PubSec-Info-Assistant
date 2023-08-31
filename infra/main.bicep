@@ -499,7 +499,7 @@ module storageRoleFunc 'core/security/role.bicep' = {
 
 // MANAGEMENT SERVICE PRINCIPAL
 module openAiRoleMgmt 'core/security/role.bicep' = {
-  scope: useExistingAOAIService ? resourceGroup(azureOpenAIResourceGroup) : rg
+  scope: resourceGroup(useExistingAOAIService ? azureOpenAIResourceGroup : rg.name)
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId

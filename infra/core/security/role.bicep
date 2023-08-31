@@ -9,11 +9,11 @@ param principalId string
 ])
 param principalType string = 'ServicePrincipal'
 param roleDefinitionId string
-
-targetScope = 'resourceGroup'
+param location string = resourceGroup().location
 
 resource role 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(subscription().id, resourceGroup().id, principalId, roleDefinitionId)
+  location: location
   properties: {
     principalId: principalId
     principalType: principalType

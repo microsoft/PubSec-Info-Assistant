@@ -408,6 +408,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   scope: rg
   name: 'openai-role-user'
   params: {
+    location: location
     principalId: principalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
@@ -418,6 +419,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   scope: rg
   name: 'storage-role-user'
   params: {
+    location: location
     principalId: principalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
@@ -428,6 +430,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   scope: rg
   name: 'storage-contribrole-user'
   params: {
+    location: location
     principalId: principalId
     roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
@@ -438,6 +441,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   scope: rg
   name: 'search-role-user'
   params: {
+    location: location
     principalId: principalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
@@ -448,6 +452,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   scope: rg
   name: 'search-contrib-role-user'
   params: {
+    location: location
     principalId: principalId
     roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
@@ -459,6 +464,7 @@ module openAiRoleBackend 'core/security/role.bicep' = {
   scope: rg
   name: 'openai-role-backend'
   params: {
+    location: location
     principalId: backend.outputs.identityPrincipalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
     principalType: 'ServicePrincipal'
@@ -469,6 +475,7 @@ module storageRoleBackend 'core/security/role.bicep' = {
   scope: rg
   name: 'storage-role-backend'
   params: {
+    location: location
     principalId: backend.outputs.identityPrincipalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
     principalType: 'ServicePrincipal'
@@ -479,6 +486,7 @@ module searchRoleBackend 'core/security/role.bicep' = {
   scope: rg
   name: 'search-role-backend'
   params: {
+    location: location
     principalId: backend.outputs.identityPrincipalId
     roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
     principalType: 'ServicePrincipal'
@@ -489,6 +497,7 @@ module storageRoleFunc 'core/security/role.bicep' = {
   scope: rg
   name: 'storage-role-Func'
   params: {
+    location: location
     principalId: functions.outputs.identityPrincipalId
     roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
     principalType: 'ServicePrincipal'
@@ -500,6 +509,7 @@ module openAiRoleMgmt 'core/security/role.bicep' = {
   scope: resourceGroup(useExistingAOAIService ? azureOpenAIResourceGroup : rg.name)
   name: 'openai-role-mgmt'
   params: {
+    location: location
     principalId: aadMgmtServicePrincipalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
     principalType: 'ServicePrincipal'

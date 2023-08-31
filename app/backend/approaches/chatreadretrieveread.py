@@ -297,7 +297,6 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1
 
         )
-        # generated_response = chat_completion.choices[0].message.content
 
         #Aparmar.Token Debugging Code. Uncomment to debug token usage.
         # generated_response_message = chat_completion.choices[0].message
@@ -323,7 +322,9 @@ class ChatReadRetrieveReadApproach(Approach):
         user_conv: str,
         few_shots = [],
         max_tokens: int = 4096) -> []:
-
+        """
+        Construct a list of messages from the chat history and the user's question.
+        """
         message_builder = MessageBuilder(system_prompt, model_id)
 
         # Few Shot prompting. Add examples to show the chat what responses we want. It will try to mimic any responses and make sure they match the rules laid out in the system message.

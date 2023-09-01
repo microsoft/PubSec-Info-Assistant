@@ -20,9 +20,9 @@
 
 The Information Assistant Accelerator pre-processes certain document types to allow better understanding of large complex documents. Currently we apply special processing on:
 
-* PDF
-* HTML
-* DOCX
+* [PDF](document_pre_processing.md#pdf-pre-processing)
+* [HTML](document_pre_processing.md#html-pre-processing)
+* [DOCX](document_pre_processing.md#docx-pre-processing)
 
 For more details on how we process each document type click on on the document type in the list above.
 

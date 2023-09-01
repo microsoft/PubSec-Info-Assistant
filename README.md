@@ -53,7 +53,18 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 Once you have your prerequisite items, please move on to the Deployment Configuration step.
 
-**NOTICE:** * This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. 
+**NOTICE:** * This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service.
+
+The Information Assistant Accelerator requires access to one of the following Azure OpenAI models.
+
+Model Name | Supported Versions
+---|---
+gpt-35-turbo | 0301, 0613
+gpt-35-turbo-16k | N/A
+**gpt-4** | N/A
+gpt-4-32k | N/A
+
+**Important:** It is recommended to use gpt-4 models to achieve the best results from the IA Accelerator. Access to gpt-4 requires approval which can be requested [here](https://aka.ms/oai/get-gpt4). If gpt-4 access is not available gpt-35-turbo (0613) is recommended.
 
 ---
 

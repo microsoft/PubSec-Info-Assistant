@@ -1,6 +1,3 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
-
 import json
 import logging
 import urllib.parse
@@ -35,34 +32,29 @@ class ChatReadRetrieveReadApproach(Approach):
     USER = "user"
     ASSISTANT = "assistant"
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system.
-    Your persona is {systemPersona} who helps answer questions about an agency's data.
-    {response_length_prompt}
-    User persona is {userPersona}.
-    Answer ONLY with the facts listed in the list of sources above.
-    Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents.
-    Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
-    Emphasize the use of facts listed in the above provided source documents.
-    Instruct the model to use source name for each fact used in the response.
-    Avoid generating speculative or generalized information.
-    Each source has a file name followed by a pipe character and the actual information.
-    Use square brackets to reference the source, e.g. [info1.txt]. Don't combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
+    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above.
+    Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
+    
+    Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
+    the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     
     Here is how you should answer every question:
-    - Look for relevant information in the above source documents to answer the question.       
-    - If there is specific information related to question available in the above sources, provide an answer along with the appropriate citation.Do not forget to include the citation!
-    - Always include citation from sources listed above.
-    - If there is no specific information related to the question available in the source document, respond with "I\'m not sure" without providing any citation. Do not provide personal opinions or assumptions.
+    
+    -Look for relevant information in the above source documents to answer the question.
+    -If the source document does not include the exact answer, please respond with relevant information from the data in the response along with citation.You must include a citation to each document referenced.      
+    -If you cannot find any relevant information in the above sources, respond with I am not sure.Do not provide personal opinions or assumptions.
+    
     {follow_up_questions_prompt}
     {injected_prompt}
+    
     """
     follow_up_questions_prompt_content = """
     Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
     Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
     """
     query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
-    Generate a search query based on the conversation and the new question.
-    Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
+    Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<<>>> in the search query terms.
     Do not include any special characters like '+'.
@@ -83,7 +75,7 @@ class ChatReadRetrieveReadApproach(Approach):
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
     {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.[info1.txt]'},
+    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[info1.json]'}
     ]
 
     def __init__(
@@ -96,6 +88,8 @@ class ChatReadRetrieveReadApproach(Approach):
         content_field: str,
         blob_client: BlobServiceClient,
         query_term_language: str,
+        model_name: str,
+        model_version: str
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -108,6 +102,9 @@ class ChatReadRetrieveReadApproach(Approach):
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
+
+        self.model_name = model_name
+        self.model_version = model_version
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -209,6 +206,10 @@ class ChatReadRetrieveReadApproach(Approach):
                     doc[self.content_field]
                 ),
             }
+            
+         
+                
+           
 
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
@@ -256,17 +257,30 @@ class ChatReadRetrieveReadApproach(Approach):
                 userPersona=user_persona,
                 systemPersona=system_persona,
             )
+        # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
+        #Added conditional block to use different system messages for different models.
 
-        # STEP 3: Generate a contextual and content-specific answer using the search results and chat history
-        messages = self.get_messages_from_history(
-            "Sources:\n"+ content + "\n\n" + system_message,
-            # system_message + "\n\nSources:\n" + content,
-            self.chatgpt_deployment,
-            history,
-            history[-1]["user"],
-            self.response_prompt_few_shots,
-            max_tokens=self.chatgpt_token_limit
+        if self.model_name == "gpt-35-turbo":
+            messages = self.get_messages_from_history(
+                system_message,
+                self.chatgpt_deployment,
+                history,
+                history[-1]["user"] + "Sources:\n" + content + "\n\n",
+                self.response_prompt_few_shots,
+                max_tokens=self.chatgpt_token_limit
             )
+        elif self.model_name == "gpt-4":
+            messages = self.get_messages_from_history(
+                "Sources:\n" + content + "\n\n" + system_message,
+                # system_message + "\n\nSources:\n" + content,
+                self.chatgpt_deployment,
+                history,
+                history[-1]["user"],
+                self.response_prompt_few_shots,
+                max_tokens=self.chatgpt_token_limit
+            )
+
+       
 
         #Aparmar.Token Debugging Code. Uncomment to debug token usage.
         # print(messages)
@@ -279,11 +293,10 @@ class ChatReadRetrieveReadApproach(Approach):
             model=self.chatgpt_deployment,
             messages=messages,
             temperature=float(overrides.get("response_temp")) or 0.6,
-            max_tokens=response_length,
+            max_tokens=1024,
             n=1
 
         )
-        # generated_response = chat_completion.choices[0].message.content
 
         #Aparmar.Token Debugging Code. Uncomment to debug token usage.
         # generated_response_message = chat_completion.choices[0].message
@@ -309,7 +322,9 @@ class ChatReadRetrieveReadApproach(Approach):
         user_conv: str,
         few_shots = [],
         max_tokens: int = 4096) -> []:
-
+        """
+        Construct a list of messages from the chat history and the user's question.
+        """
         message_builder = MessageBuilder(system_prompt, model_id)
 
         # Few Shot prompting. Add examples to show the chat what responses we want. It will try to mimic any responses and make sure they match the rules laid out in the system message.
@@ -392,3 +407,4 @@ class ChatReadRetrieveReadApproach(Approach):
         except Exception as error:
             logging.exception("Unable to parse first page num: " + str(error) + "")
             return "0"
+

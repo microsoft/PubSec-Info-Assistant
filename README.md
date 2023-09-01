@@ -53,7 +53,18 @@ You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-
 
 Once you have your prerequisite items, please move on to the Deployment Configuration step.
 
-**NOTICE:** * This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service. 
+**NOTICE:** * This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service.
+
+The Information Assistant Accelerator requires access to one of the following Azure OpenAI models.
+
+Model Name | Supported Versions
+---|---
+gpt-35-turbo | 0301, 0613
+gpt-35-turbo-16k | N/A
+**gpt-4** | N/A
+gpt-4-32k | N/A
+
+**Important:** It is recommended to use gpt-4 models to achieve the best results from the IA Accelerator. Access to gpt-4 requires approval which can be requested [here](https://aka.ms/oai/get-gpt4). If gpt-4 access is not available gpt-35-turbo (0613) is recommended.
 
 ---
 
@@ -104,6 +115,30 @@ To use the IA Accelerator, you need to follow these steps:
 > 3. Begin [having conversations with your data](/docs/features/features.md#having-a-conversation-with-your-data) by selecting the appropriate interaction method.
 
 For more detailed information review the [Features](/docs/features/features.md) section of the documentation.
+
+---
+
+## Navigating the Source Code
+
+This project has the following structure:
+
+File/Folder | Description
+---|---
+.devcontainer/ | Dockerfile, devcontainer configuration, and supporting script to enable both CodeSpaces and local DevContainers.
+app/backend/ | The middleware part of the IA website that contains the prompt engineering and provides an API layer for the client code to pass through when communicating with the various Azure services. This code is python based and hosted as a Flask app.
+app/frontend/ | The User Experience layer of the IA website. This code is Typescript based and hosted as a Vite app and compiled using npm.
+azure_search/ | The configuration of the Azure Search Index, Indexer, Skillsets, and Data Source that are applied in the deployment scripts.
+docs/adoption_workshop/ | PPT files that match what is covered in the Adoption Workshop videos in Discussions.
+docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
+docs/ | Deployment and other supporting documentation that is primarily linked to from the README.md
+functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
+infra/ | The BICEP scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.bicep` file but most of the resource deployments are modularized under the **core** folder. 
+pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the accelerator.
+scripts/environments/ | Deployment configuration files. This is where all external configuration values will be set.
+scripts/ | Supporting scripts that perform the various deployment tasks such as infrastructure deployment, Azure WebApp and Function deployments, building of the webapp and functions source code, etc. These scripts align to the available commands in the `Makefile`.
+Makefile | Deployment command definitions and configurations. You can use `make help` to get more details on available commands.
+README.md | Starting point for this repo. It covers overviews of the Accelerator, Responsible AI, Environment, Deployment, and Usage of the Accelerator.
+
 
 ---
 

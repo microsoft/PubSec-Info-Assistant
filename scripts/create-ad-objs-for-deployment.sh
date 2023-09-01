@@ -53,26 +53,40 @@ export RANDOM_STRING=$randomString
 signedInUserId=$(az ad signed-in-user show --query id --output tsv)
 #if not in automation, create the app registration and service principal values
 #set up azure ad app registration since there is no bicep support for this yet
-aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
-if [ -z $aadAppId ]; then
+aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+if [ -z $aadWebAppId ]; then
     echo "Creating new AD App Registration: infoasst_web_access_$RANDOM_STRING"   
-    aadAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
-    aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+    aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+    aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
 fi
 
-aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-if [ -z $aadSPId ]; then
+aadWebSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
+if [ -z $aadWebSPId ]; then
     echo "Creating new AD Service Principal: infoasst_web_access_$RANDOM_STRING"
-    aadSPId=$(az ad sp create --id $aadAppId --output tsv --query "[].id")
-    aadSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
+    aadWebSPId=$(az ad sp create --id $aadWebAppId --output tsv --query "[].id")
+    aadWebSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
 fi
 
 if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
   # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
-  az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=true"
+  az ad sp update --id $aadWebSPId --set "appRoleAssignmentRequired=true"
 else
   # otherwise the default is to allow all users in the tenant to access the app
-  az ad sp update --id $aadSPId --set "appRoleAssignmentRequired=false"
+  az ad sp update --id $aadWebSPId --set "appRoleAssignmentRequired=false"
+fi
+
+aadMgmtAppId=$(az ad app list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query [].appId)
+if [ -z $aadMgmtAppId ]
+  then
+    aadMgmtAppId=$(az ad app create --display-name infoasst_mgmt_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --output tsv --query "[].appId")
+    aadMgmtAppId=$(az ad app list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query [].appId)
+    aadMgmtAppSecret=$(az ad app credential reset --id $aadMgmtAppId --display-name infoasst-mgmt --output tsv --query password)
+  fi
+
+aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
+if [ -z $aadMgmtSPId ]; then
+    aadMgmtSPId=$(az ad sp create --id $aadMgmtAppId --output tsv --query "[].id")
+    aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
 fi
 
 #output the values to the console
@@ -80,4 +94,7 @@ echo -e "\n\n"
 echo "Remember to use these values in your pipeline configuration"
 echo -e "\n" 
 echo "WORKSPACE: " $WORKSPACE
-echo "Website App Registration: " $aadAppId
+echo "Website App Registration: " $aadWebAppId
+echo "Management App Registration: " $aadMgmtAppId
+echo "Management App Secret: " $aadMgmtAppSecret
+echo "Management Service Principal: " $aadMgmtSPId

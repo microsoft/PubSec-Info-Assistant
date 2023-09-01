@@ -13,11 +13,16 @@ param randomString string
 @description('Primary location for all resources')
 param location string
 
-param aadClientId string = ''
+param aadWebClientId string = ''
+param aadMgmtClientId string = ''
+@secure()
+param aadMgmtClientSecret string = ''
+param aadMgmtServicePrincipalId string = ''
 param buildNumber string = 'local'
 param isInAutomation bool = false
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
+param azureOpenAIResourceGroup string
 param azureOpenAIServiceKey string
 param openAiServiceName string = ''
 param openAiSkuName string = 'S0'
@@ -69,9 +74,8 @@ param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
 param targetTranslationLanguage string = 'en'
 param enableDevCode bool = false
-
-
-
+param tenantId string = ''
+param subscriptionId string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -79,6 +83,7 @@ param principalId string = ''
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
+
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -134,20 +139,26 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
-      AZURE_OPENAI_SERVICE: azureOpenAIServiceName //cognitiveServices.outputs.name
+      AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
+      AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : rg.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
-      AZURE_OPENAI_SERVICE_KEY: azureOpenAIServiceKey
+      AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
       COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName
       COSMOSDB_CONTAINER_NAME: cosmosdb.outputs.CosmosDBContainerName
       QUERY_TERM_LANGUAGE: queryTermLanguage
+      AZURE_CLIENT_ID: aadMgmtClientId
+      AZURE_CLIENT_SECRET: aadMgmtClientSecret
+      AZURE_TENANT_ID: tenantId
+      AZURE_SUBSCRIPTION_ID: subscriptionId
+
     }
-    aadClientId: aadClientId
+    aadClientId: aadWebClientId
   }
 }
 
@@ -484,6 +495,17 @@ module storageRoleFunc 'core/security/role.bicep' = {
   }
 }
 
+// MANAGEMENT SERVICE PRINCIPAL
+module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
+  scope: rg
+  name: 'openai-role-mgmt'
+  params: {
+    principalId: aadMgmtServicePrincipalId
+    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (cuaEnabled) {
   name: 'pid-${cuaId}' 
@@ -510,6 +532,7 @@ output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey
@@ -547,3 +570,8 @@ output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage
 output MAX_ENRICHMENT_REQUEUE_COUNT string = maxEnrichmentRequeueCount
 output ENRICHMENT_BACKOFF string = enrichmentBackoff
 output ENABLE_DEV_CODE bool = enableDevCode
+output AZURE_CLIENT_ID string = aadMgmtClientId
+output AZURE_TENANT_ID string = tenantId
+#disable-next-line outputs-should-not-contain-secrets
+output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
+output AZURE_SUBSCRIPTION_ID string = subscriptionId

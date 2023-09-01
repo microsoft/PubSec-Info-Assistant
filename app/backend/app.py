@@ -4,6 +4,7 @@
 import logging
 import mimetypes
 import os
+import json
 import urllib.parse
 from datetime import datetime, timedelta
 
@@ -119,33 +120,6 @@ app = Flask(__name__)
 def static_file(path):
     return app.send_static_file(path)
 
-
-# Return blob path with SAS token for citation access
-@app.route("/content/<path:path>")
-def content_file(path):
-    blob = blob_container.get_blob_client(path).download_blob()
-    mime_type = blob.properties["content_settings"]["content_type"]
-    file_extension = blob.properties["name"].split(".")[-1:]
-    if mime_type == "application/octet-stream":
-        mime_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
-    if mime_type == "text/plain" and file_extension[0] in ["htm", "html"]:
-        mime_type = "text/html"
-    print(
-        "Using mime type: "
-        + mime_type
-        + "for file with extension: "
-        + file_extension[0]
-    )
-    return (
-        blob.readall(),
-        200,
-        {
-            "Content-Type": mime_type,
-            "Content-Disposition": f"inline; filename={urllib.parse.quote(path, safe='')}",
-        },
-    )
-
-
 @app.route("/chat", methods=["POST"])
 def chat():
     approach = request.json["approach"]
@@ -170,7 +144,6 @@ def chat():
         logging.exception("Exception in /chat")
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/getblobclienturl")
 def get_blob_client_url():
     sas_token = generate_account_sas(
@@ -191,11 +164,6 @@ def get_blob_client_url():
     )
     return jsonify({"url": f"{blob_client.url}?{sas_token}"})
 
-
-if __name__ == "__main__":
-    app.run()
-
-
 @app.route("/getalluploadstatus", methods=["POST"])
 def get_all_upload_status():
     timeframe = request.json["timeframe"]
@@ -206,7 +174,6 @@ def get_all_upload_status():
         logging.exception("Exception in /getalluploadstatus")
         return jsonify({"error": str(e)}), 500
     return jsonify(results)
-
 
 # Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.route("/getInfoData")
@@ -222,3 +189,18 @@ def get_info_data():
             "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
         })
     return response
+
+@app.route("/getcitation", methods=["POST"])
+def get_citation():
+    citation = urllib.parse.unquote(request.json["citation"])
+    try:
+        blob = blob_container.get_blob_client(citation).download_blob()
+        decoded_text = blob.readall().decode()
+        results = jsonify(json.loads(decoded_text))
+    except Exception as e:
+        logging.exception("Exception in /getalluploadstatus")
+        return jsonify({"error": str(e)}), 500
+    return jsonify(results.json)
+
+if __name__ == "__main__":
+    app.run()

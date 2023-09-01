@@ -99,3 +99,15 @@ export type GetInfoResponse = {
     TARGET_LANGUAGE: string;
     error?: string;
 };
+
+export type ActiveCitation = {
+    file_name: string;
+    file_uri: string;
+    processed_datetime: string;
+    title: string;
+    section: string;
+    pages: number[];
+    token_count: number;
+    content: string;
+    error?: string;
+}

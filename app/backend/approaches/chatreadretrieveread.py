@@ -269,6 +269,16 @@ class ChatReadRetrieveReadApproach(Approach):
                 self.response_prompt_few_shots,
                 max_tokens=self.chatgpt_token_limit
             )
+            chat_completion = openai.ChatCompletion.create(
+            deployment_id=self.chatgpt_deployment,
+            model=self.chatgpt_deployment,
+            messages=messages,
+            temperature=float(overrides.get("response_temp")) or 0.6,
+            max_tokens=500,
+            n=1
+
+        )
+            
         elif self.model_name == "gpt-4":
             messages = self.get_messages_from_history(
                 "Sources:\n" + content + "\n\n" + system_message,
@@ -279,6 +289,15 @@ class ChatReadRetrieveReadApproach(Approach):
                 self.response_prompt_few_shots,
                 max_tokens=self.chatgpt_token_limit
             )
+            chat_completion = openai.ChatCompletion.create(
+            deployment_id=self.chatgpt_deployment,
+            model=self.chatgpt_deployment,
+            messages=messages,
+            temperature=float(overrides.get("response_temp")) or 0.6,
+            max_tokens=1024,
+            n=1
+
+        )
 
        
 
@@ -288,15 +307,15 @@ class ChatReadRetrieveReadApproach(Approach):
         # (system_message + "\n\nSources:\n" + content).split())
         # print("Total Prompt Tokens:", total_prompt_tokens)
 
-        chat_completion = openai.ChatCompletion.create(
-            deployment_id=self.chatgpt_deployment,
-            model=self.chatgpt_deployment,
-            messages=messages,
-            temperature=float(overrides.get("response_temp")) or 0.6,
-            max_tokens=1024,
-            n=1
+        # chat_completion = openai.ChatCompletion.create(
+        #     deployment_id=self.chatgpt_deployment,
+        #     model=self.chatgpt_deployment,
+        #     messages=messages,
+        #     temperature=float(overrides.get("response_temp")) or 0.6,
+        #     max_tokens=1024,
+        #     n=1
 
-        )
+        # )
 
         #Aparmar.Token Debugging Code. Uncomment to debug token usage.
         # generated_response_message = chat_completion.choices[0].message

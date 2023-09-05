@@ -168,20 +168,21 @@ class Utilities:
             # if this span has already been identified as a non textual paragraph
             # such as a table, then skip over it
             if document_map['content_type'][start_char] == ContentType.NOT_PROCESSED:
-                if not hasattr(paragraph, 'role'):
+                #if not hasattr(paragraph, 'role'):
+                if 'role' not in paragraph:
                     # no assigned role
                     document_map['content_type'][start_char] = ContentType.TEXT_START
                     for i in range(start_char+1, end_char):
                         document_map['content_type'][i] = ContentType.TEXT_CHAR
                     document_map['content_type'][end_char] = ContentType.TEXT_END
 
-                elif paragraph.role == 'title':
+                elif paragraph['role'] == 'title':
                     document_map['content_type'][start_char] = ContentType.TITLE_START
                     for i in range(start_char+1, end_char):
                         document_map['content_type'][i] = ContentType.TITLE_CHAR
                     document_map['content_type'][end_char] = ContentType.TITLE_END
 
-                elif paragraph.role == 'sectionHeading':
+                elif paragraph['role'] == 'sectionHeading':
                     document_map['content_type'][start_char] = ContentType.SECTIONHEADING_START
                     for i in range(start_char+1, end_char):
                         document_map['content_type'][i] = ContentType.SECTIONHEADING_CHAR

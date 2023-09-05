@@ -133,7 +133,7 @@ class Utilities:
 
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
         """ Function to build a json structure representing the paragraphs in a document, 
-        including metadata such as section heading, title, page number, eal word pernetage etc.
+        including metadata such as section heading, title, page number, etc.
         We construct this map from the Content key/value output of FR, because the paragraphs 
         value does not distinguish between a table and a text paragraph"""
 
@@ -189,7 +189,7 @@ class Utilities:
                     document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
 
         # iterate through the content_type and build the document paragraph catalog of content
-        # tagging paragrahs with title and section
+        # tagging paragraphs with title and section
         current_title = ''
         current_section = ''
         current_paragraph_index = 0
@@ -199,11 +199,14 @@ class Utilities:
             # identify the current paragraph being referenced for use in
             # enriching the document_map metadata
             if current_paragraph_index <= len(result["paragraphs"])-1:
-                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]:
+                # Check if we have crossed into the next paragraph
+                # note that sometimes FR returns paragraphs out of sequence (based on the offset position), hence we
+                # also indicate a new paragraph of we see this behaviour
+                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"] or (result["paragraphs"][current_paragraph_index-1]["spans"][0]["offset"] > result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]):
                     # we have reached a new paragraph, so collect its metadata
                     page_number = result["paragraphs"][current_paragraph_index]["boundingRegions"][0]["pageNumber"]
                     current_paragraph_index += 1
-
+            
             match item:
                 case ContentType.TITLE_START | ContentType.SECTIONHEADING_START | ContentType.TEXT_START | ContentType.TABLE_START:
                     start_position = index
@@ -388,7 +391,7 @@ class Utilities:
                     # a regular paragraph
                     for i, chunk_text_p in enumerate(chunks):
                         if i < len(chunks) - 1:
-                            # Process all but the ;ast chunk in this large para
+                            # Process all but the last chunk in this large para
                             self.write_chunk(myblob_name, myblob_uri,
                                              f"{file_number}.{i}",
                                              self.token_count(chunk_text_p),
@@ -403,7 +406,7 @@ class Utilities:
                             paragraph_text = chunk_text_p
                             chunk_text = ''
                 else:
-                    # if this para is not large by itslef but will put us over the max token count
+                    # if this para is not large by itself but will put us over the max token count
                     # or it is a new section, then write out the chunk text we have to this point
                     self.write_chunk(myblob_name, myblob_uri, file_number,
                                      chunk_size, chunk_text, page_list,

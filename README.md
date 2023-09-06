@@ -1,6 +1,8 @@
 # Information Assistant Accelerator
 
-This industry accelerator showcases the fusion of Azure and OpenAI's large language models, integrating Azure Cognitive Search for retrieval and ChatGPT-style Q&A experiences. When a user poses a question, it answers questions by retrieving the most relevant document(s) and utilizing Azure Open AI's GPT models  using Retrieval Augmented Generation (RAG) design pattern. Azure Cognitive Search, a vital component in our stack, simplifies data ingestion with connectors to various data sources, transforms diverse file formats into searchable text, indexes searchable text and offers multilingual translation capabilities. Our dynamic prompt structure adapts to the model type, altering the prompt context to maximize performance. Additionally, users have the flexibility to select temperature and persona settings, allowing for a personalized and tailored AI interaction. With visualizing thought process, proper citations and references, traceable source content, configurable model options, and advanced prompt engineering techniques, this accelerator provides a comprehensive platform for harnessing the power of AI within the Azure ecosystem.
+This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure Cognitive Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides relevant responses to user queries. Azure Cognitive Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+
+The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like visualizing thought processes, proper citations, and traceable content. 
 
 ---
 ![Process Flow](docs/process_flow.drawio.png)
@@ -11,7 +13,9 @@ This industry accelerator showcases the fusion of Azure and OpenAI's large langu
 
 **Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's indexing capabilities to retrieve documents that are contextually relevant for precise answers.
 
-**Dynamic Model Selection:** Use GPT models (GPT-3, GPT-3.5, or GPT-4) tailored to your needs.
+**Dynamic Model Selection:** Use GPT models (GPT-3.5, or GPT-4) tailored to your needs.
+
+Technical overview of RAG: https://learn.microsoft.com/en-us/azure/machine-learning/concept-retrieval-augmented-generation?view=azureml-api-2#why-use-rag
 
 ## Prompt Engineering
 
@@ -22,6 +26,8 @@ This industry accelerator showcases the fusion of Azure and OpenAI's large langu
 **Built-in Chain of Thought (COT):** COT is integrated into our prompts to address hallucinations that may arise with large language models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
 
 **Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate hallucinations and improve response accuracy.
+
+prompt Engineering Techniques: https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions
 
 ## Document Processing
 
@@ -46,8 +52,6 @@ This industry accelerator showcases the fusion of Azure and OpenAI's large langu
 **Visualizing Thought Process:** Gain insights into the AI's decision-making process by visualizing how it arrives at answers, providing transparency and control.
 
 **Proper Citations and References:** The platform generates traceable source content, enhancing trustworthiness and accountability in AI-generated responses.
-
-**Trustworthiness Evaluation:** Explore various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, and more.
 
 ## Things in Progress
 

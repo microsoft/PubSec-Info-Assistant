@@ -1,21 +1,62 @@
 # Information Assistant Accelerator
 
-This accelerator demonstrates a few approaches for creating ChatGPT-like experiences over your own data using the Retrieval Augmented Generation pattern. It uses Azure OpenAI Service to access the ChatGPT model (gpt-35-turbo), and Azure Cognitive Search for data indexing and retrieval.
+This industry accelerator showcases the fusion of Azure and OpenAI's large language models, integrating Azure Cognitive Search for retrieval and ChatGPT-style Q&A experiences. When a user poses a question, it answers questions by retrieving the most relevant document(s) and utilizing Azure Open AI's GPT models  using Retrieval Augmented Generation (RAG) design pattern. Azure Cognitive Search, a vital component in our stack, simplifies data ingestion with connectors to various data sources, transforms diverse file formats into searchable text, indexes searchable text and offers multilingual translation capabilities. Our dynamic prompt structure adapts to the model type, altering the prompt context to maximize performance. Additionally, users have the flexibility to select temperature and persona settings, allowing for a personalized and tailored AI interaction. With visualizing thought process, proper citations and references, traceable source content, configurable model options, and advanced prompt engineering techniques, this accelerator provides a comprehensive platform for harnessing the power of AI within the Azure ecosystem.
 
 ---
 ![Process Flow](docs/process_flow.drawio.png)
 
-## Features
+# Features
 
-* Chat and Q&A interfaces
-* File Upload and automated chunking and indexing for PDF, HTML, and DOCX
-* Monitoring the status of files uploaded and processed by the accelerator
-* Interacting with your data in supported native languages*
-* Explores various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, etc.
-* Shows possible approaches for data preparation, prompt construction, and orchestration of interaction between model (ChatGPT) and retriever (Cognitive Search)
-* Settings directly in the UX to tweak the behavior and experiment with options
+## Retrieval Augmented Generation (RAG)
+
+**Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's indexing capabilities to retrieve documents that are contextually relevant for precise answers.
+
+**Dynamic Model Selection:** Use GPT models (GPT-3, GPT-3.5, or GPT-4) tailored to your needs.
+
+## Prompt Engineering
+
+**Adaptable Prompt Structure:** Our prompt structure is designed to be compatible with current and future Azure OpenAI's Completion API versions and GPT models, ensuring flexibility and sustainability.
+
+**Dynamic Prompts:** Dynamic prompt context based on the selected GPT model.
+
+**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address hallucinations that may arise with large language models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
+
+**Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate hallucinations and improve response accuracy.
+
+## Document Processing
+
+### Azure Cognitive Search Integration
+
+**Data Integration:** Azure Cognitive Search streamlines data ingestion by offering connectors to a wide range of data sources, making it easy to populate the search index.
+
+**Data Transformation:** Utilizes Optical Character Recognition (OCR) to process images and convert tables within text into searchable text.
+
+**Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
 *\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
+
+## Customization and Personalization
+
+**User-Selectable Options:** Users can fine-tune their interactions by adjusting settings such as temperature and persona, tailoring the AI experience to their specific needs.
+
+**UX Settings:** Easily tweak behavior and experiment with various options directly in the user interface.
+
+## Enhanced AI Interaction
+
+**Visualizing Thought Process:** Gain insights into the AI's decision-making process by visualizing how it arrives at answers, providing transparency and control.
+
+**Proper Citations and References:** The platform generates traceable source content, enhancing trustworthiness and accountability in AI-generated responses.
+
+**Trustworthiness Evaluation:** Explore various options to help users evaluate the trustworthiness of responses with citations, tracking of source content, and more.
+
+## Things in Progress
+
+**Incorporating Vector and Hybrid Search in Azure Cognitive Search:** We're actively working on enhancing Azure Cognitive Search by incorporating vector and hybrid search capabilities. This will enable more advanced search and retrieval mechanisms, further improving the precision and efficiency of document retrieval.
+
+**Adding Evaluation Guidance and Metrics:** To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
+
+
+
 
 ![Chat screen](docs/images/info_assistant_chatscreen.png)
 

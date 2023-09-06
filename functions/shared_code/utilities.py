@@ -324,13 +324,14 @@ class Utilities:
         token_count = self.num_tokens_from_string(input_text, encoding)
         return token_count
 
-    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name):
+    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name, subtitle_name):
         """ Function to write a json chunk to blob"""
         chunk_output = {
             'file_name': myblob_name,
             'file_uri': myblob_uri,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
+            'subtitle_name': subtitle_name,
             'section': section_name,
             'pages': page_list,
             'token_count': chunk_size,
@@ -359,6 +360,7 @@ class Utilities:
         page_number = 0
         previous_section_name = document_map['structure'][0]['section']
         previous_title_name = document_map['structure'][0]["title"]
+        previous_subtitle_name = document_map['structure'][0]["subtitle"]
         page_list = []
         chunk_count = 0
 
@@ -369,10 +371,11 @@ class Utilities:
             paragraph_text = paragraph_element["text"]
             section_name = paragraph_element["section"]
             title_name = paragraph_element["title"]
+            subtitle_name = paragraph_element["subtitle"]
 
             #if the collected tokens in the current in-memory chunk + the next paragraph
             # will be larger than the allowed chunk size prepare to write out the total chunk
-            if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name:
+            if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name or subtitle_name != previous_subtitle_name:
                 # If the current paragraph just by itself is larger than CHUNK_TARGET_SIZE,
                 # then we need to split this up and treat each slice as a new in-memory chunk
                 # that fall under the max size and ensure the first chunk,
@@ -404,7 +407,7 @@ class Utilities:
                                              f"{file_number}.{i}",
                                              self.token_count(chunk_text_p),
                                              chunk_text_p, page_list,
-                                             previous_section_name, previous_title_name)
+                                             previous_section_name, previous_title_name, previous_subtitle_name)
                             chunk_count += 1
                         else:
                             # Reset the paragraph token count to just the tokens left in the last
@@ -418,7 +421,7 @@ class Utilities:
                     # or it is a new section, then write out the chunk text we have to this point
                     self.write_chunk(myblob_name, myblob_uri, file_number,
                                      chunk_size, chunk_text, page_list,
-                                     previous_section_name, previous_title_name)
+                                     previous_section_name, previous_title_name, previous_subtitle_name)
                     chunk_count += 1
 
                     # reset chunk specific variables
@@ -440,11 +443,12 @@ class Utilities:
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:
                 self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
-                                 chunk_text, page_list, section_name, title_name)
+                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name)
                 chunk_count += 1
 
             previous_section_name = section_name
             previous_title_name = title_name
+            previous_subtitle_name = subtitle_name
 
         logging.info("Chunking is complete \n")
         return chunk_count

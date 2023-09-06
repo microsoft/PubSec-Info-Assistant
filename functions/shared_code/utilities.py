@@ -190,10 +190,12 @@ class Utilities:
 
         # iterate through the content_type and build the document paragraph catalog of content
         # tagging paragraphs with title and section
+        main_title = ''
         current_title = ''
         current_section = ''
         current_paragraph_index = 0
         start_position = 0
+        page_number = 0
         for index, item in enumerate(document_map['content_type']):
 
             # identify the current paragraph being referenced for use in
@@ -212,6 +214,11 @@ class Utilities:
                     start_position = index
                 case ContentType.TITLE_END:
                     current_title =  document_map['content'][start_position:index+1]
+                    # set the main title from any title elemnts on the first page concatenated
+                    if main_title == '':
+                        main_title = current_title
+                    elif page_number == 1:
+                        main_title = main_title + "; " + current_title
                 case ContentType.SECTIONHEADING_END:
                     current_section = document_map['content'][start_position:index+1]
                 case ContentType.TEXT_END | ContentType.TABLE_END:
@@ -231,7 +238,8 @@ class Utilities:
                         'offset': start_position,
                         'text': output_text,
                         'type': property_type,
-                        'title': current_title,
+                        'title': main_title,
+                        'subtitle': current_title,
                         'section': current_section,
                         'page_number': page_number
                     })

@@ -83,7 +83,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                         ) : (
                             <div>
                             <Separator>Metadata</Separator>
-                            <Label>File Name</Label><span>{activeCitationObj.file_name}</span>
+                            <Label>File Name</Label><Text>{activeCitationObj.file_name}</Text>
                             <Label>File URI</Label><Text>{activeCitationObj.file_uri}</Text>
                             <Label>Title</Label><Text>{activeCitationObj.title}</Text>
                             <Label>Section</Label><Text>{activeCitationObj.section}</Text>

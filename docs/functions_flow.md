@@ -26,7 +26,7 @@ There are a number of settings that are configured during deployment, but which 
 
 Setting | Description
 --- | ---
-CHUNK_TARGET_SIZE | The number of tokens the function targets as the maximum per chunk generated
+CHUNK_TARGET_SIZE | The number of tokens the function targets as the maximum per chunk text content to be generated. Additional metadata are added to the chunk JSON files as they are created that add roughly 180-200 tokens to the overall size of the chunk JSON file that gets indexed by Azure Cognitive Search. So we recommend setting the **CHUNK_TARGET_SIZE** to your overall size target minus 200 tokens. 
 MAX_SECONDS_HIDE_ON_UPLOAD | The maximum number of seconds a message will be hidden when initially submitting to the process. The actual time a message is invisible is a random value from 0 to this cap. This spreads out initial processing so as not to hit a throttling event unnecessarily
 MAX_SUBMIT_REQUEUE_COUNT | The maximum number of times the process will try to process a PDF through Form Recognizer
 PDF_SUBMIT_QUEUE_BACKOFF | The number of seconds a message will remain invisible after resubmitting to the queue due to throttling during submitting to Form Recognizer

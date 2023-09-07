@@ -51,7 +51,8 @@ param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chatGptDeploymentCapacity int = 30
-param chunkTargetSize string = '750'
+// metadata in our chunking strategy adds about 180 tokens to the size of the chunk, our default target size is 750 tokens so the prameter is set to 570
+param chunkTargetSize string = '570' 
 param targetPages string = 'ALL'
 param formRecognizerApiVersion string = '2022-08-31'
 param pdfSubmitQueue string = 'pdf-submit-queue'

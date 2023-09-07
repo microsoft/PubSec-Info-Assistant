@@ -197,6 +197,8 @@ class ChatReadRetrieveReadApproach(Approach):
                     + "| "
                     + nonewlines(doc[self.content_field])
                 )
+                # uncomment to debug size of each search result content_field
+                print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
             # add the "FileX" moniker and full file name to the citation lookup
 
             citation_lookup[f"File{idx}"] = {
@@ -267,16 +269,27 @@ class ChatReadRetrieveReadApproach(Approach):
                 history,
                 history[-1]["user"] + "Sources:\n" + content + "\n\n",
                 self.response_prompt_few_shots,
-                max_tokens=self.chatgpt_token_limit
+                max_tokens=self.chatgpt_token_limit - 500
             )
+
+            #Uncomment to debug token usage.
+            #print(messages)
+            #message_string = ""
+            #for message in messages:
+            #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
+            #    message_string += f"{message['role']}: {message['content']}\n"
+            #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
+            #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
+            #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
+            #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
+            
+
             chat_completion = openai.ChatCompletion.create(
             deployment_id=self.chatgpt_deployment,
             model=self.chatgpt_deployment,
             messages=messages,
             temperature=float(overrides.get("response_temp")) or 0.6,
-            max_tokens=500,
             n=1
-
         )
             
         elif self.model_name == "gpt-4":
@@ -289,6 +302,18 @@ class ChatReadRetrieveReadApproach(Approach):
                 self.response_prompt_few_shots,
                 max_tokens=self.chatgpt_token_limit
             )
+
+            #Uncomment to debug token usage.
+            #print(messages)
+            #message_string = ""
+            #for message in messages:
+            #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
+            #    message_string += f"{message['role']}: {message['content']}\n"
+            #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
+            #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
+            #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
+            #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
+
             chat_completion = openai.ChatCompletion.create(
             deployment_id=self.chatgpt_deployment,
             model=self.chatgpt_deployment,
@@ -298,14 +323,6 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1
 
         )
-
-       
-
-        #Aparmar.Token Debugging Code. Uncomment to debug token usage.
-        # print(messages)
-        # total_prompt_tokens = sum(len(token.split()) for token in
-        # (system_message + "\n\nSources:\n" + content).split())
-        # print("Total Prompt Tokens:", total_prompt_tokens)
 
         # chat_completion = openai.ChatCompletion.create(
         #     deployment_id=self.chatgpt_deployment,
@@ -427,3 +444,8 @@ class ChatReadRetrieveReadApproach(Approach):
             logging.exception("Unable to parse first page num: " + str(error) + "")
             return "0"
 
+    def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
+        """ Function to return the number of tokens in a text string"""
+        encoding = tiktoken.get_encoding(encoding_name)
+        num_tokens = len(encoding.encode(string))
+        return num_tokens

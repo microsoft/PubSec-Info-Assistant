@@ -15,7 +15,7 @@ The accelerator adapts prompts based on the model type for enhanced performance.
 
 **Dynamic Model Selection:** Use GPT models (GPT-3.5, or GPT-4) tailored to your needs.
 
-Technical overview of RAG: https://learn.microsoft.com/en-us/azure/machine-learning/concept-retrieval-augmented-generation?view=azureml-api-2#why-use-rag
+Technical overview of RAG: [Retrieval Augmented Generation using Azure Machine Learning prompt flow](https://learn.microsoft.com/en-us/azure/machine-learning/concept-retrieval-augmented-generation?view=azureml-api-2#why-use-rag)
 
 ## Prompt Engineering
 
@@ -27,17 +27,29 @@ Technical overview of RAG: https://learn.microsoft.com/en-us/azure/machine-learn
 
 **Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate hallucinations and improve response accuracy.
 
-prompt Engineering Techniques: https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions
+prompt Engineering Techniques: [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions)
 
-## Document Processing
+## Document Pre-Processing
+
+The Azure OpenAI GPT models have a maximum token limit, which includes both input and output tokens. Tokens are units of text which can represent a single word, a part of a word, or even a character, depending on the specific language and text encoding being used. Consequently the model will not be able to process a 500 page text based document. Likewise, the models will not be able to process complex file types, such as PDF. This is why we pre-process these documents, before passing these to our search capability to then be exposed by the RAG pattern. Currently pre-processing is performed by the Azure functions component of this code base. The process at a high level is as follows:
+
+- Upload files to Azure Blob Storage
+- Segregate files based on their type which will dictate the path of preprocessing
+- Read the text from the file and generate a standardized document map which represents the structure of the document
+- Read through the document map and generate chunks of an optimal token size as json documents
+- Expose these chunks to search, to empower the RAG pattern
+
+In the future, we will support steps such as language translation. Additional information on this process can be found [here](/docs/functions_flow.md)
 
 ### Azure Cognitive Search Integration
 
-**Data Integration:** Azure Cognitive Search streamlines data ingestion by offering connectors to a wide range of data sources, making it easy to populate the search index.
+Search is used to index the chunks that weer created during pre-processing.  When a question is asked and an optimal search term is generated, this is passed to Search to identify and return the optimal set of chunks to be used in generation of the response. Some further details are listed below
 
-**Data Transformation:** Utilizes Optical Character Recognition (OCR) to process images and convert tables within text into searchable text.
+- **Data Integration:** Azure Cognitive Search streamlines data ingestion by offering connectors to a wide range of data sources, making it easy to populate the search index.
 
-**Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
+- **Data Transformation:** Utilizes Optical Character Recognition (OCR) to process images and convert tables within text into searchable text.
+
+- **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
 *\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
 
@@ -59,8 +71,8 @@ prompt Engineering Techniques: https://learn.microsoft.com/en-us/azure/ai-servic
 
 **Adding Evaluation Guidance and Metrics:** To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
 
-
-
+**Research of [Unstructured.io](https://unstructured-io.github.io/unstructured/):**
+The unstructured library is open source and designed to help pre-process unstructured data, such as documents, for use in downstream machine learning tasks. We have performed a 'tech spike' to understand and assess its capabilities and determine how and if we will implement and build upon these. Our current position is we will continue with the Document Intelligence service, formerly Form Recognizer for PDF pre-processing, but we will introduce unstructured as a catcher for many document types which we don't currently process.
 
 ![Chat screen](docs/images/info_assistant_chatscreen.png)
 

@@ -12,7 +12,7 @@ COPY download_model.py /download_model.py
 RUN mkdir models
 RUN python download_model.py
 
-COPY app.py /app.py
+COPY *.py /
 
 EXPOSE 5000
 

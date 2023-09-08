@@ -173,6 +173,8 @@ def embed_texts(model: str, texts: List[str]):
 @app.on_event("startup") 
 @repeat_every(seconds=5, logger=log, raise_exceptions=True)
 def poll_queue() -> None:
+    """Polls the queue for messages and embeds them"""
+
     if IS_READY == False:
         logging.debug("Skipping poll_queue call, models not yet loaded")
         return

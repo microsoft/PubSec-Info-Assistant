@@ -133,7 +133,7 @@ class Utilities:
 
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
         """ Function to build a json structure representing the paragraphs in a document, 
-        including metadata such as section heading, title, page number, eal word pernetage etc.
+        including metadata such as section heading, title, page number, etc.
         We construct this map from the Content key/value output of FR, because the paragraphs 
         value does not distinguish between a table and a text paragraph"""
 
@@ -189,26 +189,36 @@ class Utilities:
                     document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
 
         # iterate through the content_type and build the document paragraph catalog of content
-        # tagging paragrahs with title and section
+        # tagging paragraphs with title and section
+        main_title = ''
         current_title = ''
         current_section = ''
         current_paragraph_index = 0
         start_position = 0
+        page_number = 0
         for index, item in enumerate(document_map['content_type']):
 
             # identify the current paragraph being referenced for use in
             # enriching the document_map metadata
             if current_paragraph_index <= len(result["paragraphs"])-1:
-                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]:
+                # Check if we have crossed into the next paragraph
+                # note that sometimes FR returns paragraphs out of sequence (based on the offset position), hence we
+                # also indicate a new paragraph of we see this behaviour
+                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"] or (result["paragraphs"][current_paragraph_index-1]["spans"][0]["offset"] > result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]):
                     # we have reached a new paragraph, so collect its metadata
                     page_number = result["paragraphs"][current_paragraph_index]["boundingRegions"][0]["pageNumber"]
                     current_paragraph_index += 1
-
+            
             match item:
                 case ContentType.TITLE_START | ContentType.SECTIONHEADING_START | ContentType.TEXT_START | ContentType.TABLE_START:
                     start_position = index
                 case ContentType.TITLE_END:
                     current_title =  document_map['content'][start_position:index+1]
+                    # set the main title from any title elemnts on the first page concatenated
+                    if main_title == '':
+                        main_title = current_title
+                    elif page_number == 1:
+                        main_title = main_title + "; " + current_title
                 case ContentType.SECTIONHEADING_END:
                     current_section = document_map['content'][start_position:index+1]
                 case ContentType.TEXT_END | ContentType.TABLE_END:
@@ -228,7 +238,8 @@ class Utilities:
                         'offset': start_position,
                         'text': output_text,
                         'type': property_type,
-                        'title': current_title,
+                        'title': main_title,
+                        'subtitle': current_title,
                         'section': current_section,
                         'page_number': page_number
                     })
@@ -313,13 +324,14 @@ class Utilities:
         token_count = self.num_tokens_from_string(input_text, encoding)
         return token_count
 
-    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name):
+    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name, subtitle_name):
         """ Function to write a json chunk to blob"""
         chunk_output = {
             'file_name': myblob_name,
             'file_uri': myblob_uri,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
+            'subtitle_name': subtitle_name,
             'section': section_name,
             'pages': page_list,
             'token_count': chunk_size,
@@ -348,6 +360,7 @@ class Utilities:
         page_number = 0
         previous_section_name = document_map['structure'][0]['section']
         previous_title_name = document_map['structure'][0]["title"]
+        previous_subtitle_name = document_map['structure'][0]["subtitle"]
         page_list = []
         chunk_count = 0
 
@@ -358,10 +371,11 @@ class Utilities:
             paragraph_text = paragraph_element["text"]
             section_name = paragraph_element["section"]
             title_name = paragraph_element["title"]
+            subtitle_name = paragraph_element["subtitle"]
 
             #if the collected tokens in the current in-memory chunk + the next paragraph
             # will be larger than the allowed chunk size prepare to write out the total chunk
-            if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name:
+            if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name or subtitle_name != previous_subtitle_name:
                 # If the current paragraph just by itself is larger than CHUNK_TARGET_SIZE,
                 # then we need to split this up and treat each slice as a new in-memory chunk
                 # that fall under the max size and ensure the first chunk,
@@ -388,12 +402,12 @@ class Utilities:
                     # a regular paragraph
                     for i, chunk_text_p in enumerate(chunks):
                         if i < len(chunks) - 1:
-                            # Process all but the ;ast chunk in this large para
+                            # Process all but the last chunk in this large para
                             self.write_chunk(myblob_name, myblob_uri,
                                              f"{file_number}.{i}",
                                              self.token_count(chunk_text_p),
                                              chunk_text_p, page_list,
-                                             previous_section_name, previous_title_name)
+                                             previous_section_name, previous_title_name, previous_subtitle_name)
                             chunk_count += 1
                         else:
                             # Reset the paragraph token count to just the tokens left in the last
@@ -403,11 +417,11 @@ class Utilities:
                             paragraph_text = chunk_text_p
                             chunk_text = ''
                 else:
-                    # if this para is not large by itslef but will put us over the max token count
+                    # if this para is not large by itself but will put us over the max token count
                     # or it is a new section, then write out the chunk text we have to this point
                     self.write_chunk(myblob_name, myblob_uri, file_number,
                                      chunk_size, chunk_text, page_list,
-                                     previous_section_name, previous_title_name)
+                                     previous_section_name, previous_title_name, previous_subtitle_name)
                     chunk_count += 1
 
                     # reset chunk specific variables
@@ -429,11 +443,12 @@ class Utilities:
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:
                 self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
-                                 chunk_text, page_list, section_name, title_name)
+                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name)
                 chunk_count += 1
 
             previous_section_name = section_name
             previous_title_name = title_name
+            previous_subtitle_name = subtitle_name
 
         logging.info("Chunking is complete \n")
         return chunk_count

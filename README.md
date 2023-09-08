@@ -1,10 +1,11 @@
 # Information Assistant Accelerator
 
-This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure Cognitive Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides relevant responses to user queries. Azure Cognitive Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure Cognitive Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure Cognitive Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
-The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like visualizing thought processes, proper citations, and traceable content. 
+The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
 ---
+
 ![Process Flow](docs/process_flow.drawio.png)
 
 # Features
@@ -13,41 +14,37 @@ The accelerator adapts prompts based on the model type for enhanced performance.
 
 **Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's indexing capabilities to retrieve documents that are contextually relevant for precise answers.
 
-**Dynamic Model Selection:** Use GPT models (GPT-3.5, or GPT-4) tailored to your needs.
+**Dynamic Model Selection:** Use GPT models (GPT-3.5 or GPT-4) tailored to your needs.
 
 Technical overview of RAG: [Retrieval Augmented Generation using Azure Machine Learning prompt flow](https://learn.microsoft.com/en-us/azure/machine-learning/concept-retrieval-augmented-generation?view=azureml-api-2#why-use-rag)
 
 ## Prompt Engineering
 
-**Adaptable Prompt Structure:** Our prompt structure is designed to be compatible with current and future Azure OpenAI's Completion API versions and GPT models, ensuring flexibility and sustainability.
+**Adaptable Prompt Structure:** Our prompt structure is designed to be compatible with current and future Azure OpenAI's Chat Completion API versions and GPT models, ensuring flexibility and sustainability.
 
-**Dynamic Prompts:** Dynamic prompt context based on the selected GPT model.
+**Dynamic Prompts:** Dynamic prompt context based on the selected GPT model and users settings.
 
-**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address hallucinations that may arise with large language models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
+**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address fabrications that may arise with large language models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
 
-**Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate hallucinations and improve response accuracy.
+**Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate fabrications and improve response accuracy.
 
-prompt Engineering Techniques: [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions)
+Go here for more information on [Prompt engineering techniques](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/advanced-prompt-engineering?pivots=programming-language-chat-completions)
 
 ## Document Pre-Processing
 
-The Azure OpenAI GPT models have a maximum token limit, which includes both input and output tokens. Tokens are units of text which can represent a single word, a part of a word, or even a character, depending on the specific language and text encoding being used. Consequently the model will not be able to process a 500 page text based document. Likewise, the models will not be able to process complex file types, such as PDF. This is why we pre-process these documents, before passing these to our search capability to then be exposed by the RAG pattern. Currently pre-processing is performed by the Azure functions component of this code base. The process at a high level is as follows:
+**Custom Document Chunking:** The Azure OpenAI GPT models have a maximum token limit, which includes both input and output tokens. Tokens are units of text which can represent a single word, a part of a word, or even a character, depending on the specific language and text encoding being used. Consequently the model will not be able to process a 500 page text based document. Likewise, the models will not be able to process complex file types, such as PDF. This is why we pre-process these documents, before passing these to our search capability to then be exposed by the RAG pattern. Our process focused on
 
-- Upload files to Azure Blob Storage
-- Segregate files based on their type which will dictate the path of preprocessing
-- Read the text from the file and generate a standardized document map which represents the structure of the document
-- Read through the document map and generate chunks of an optimal token size as json documents
-- Expose these chunks to search, to empower the RAG pattern
+* content extraction from text-based documents
+* creating a standard JSON representation of all a documents text-based content
+* chunking and saving metadata into manageable sized to be used in the RAG pattern
 
-In the future, we will support steps such as language translation. Additional information on this process can be found [here](/docs/functions_flow.md)
+Additional information on this process can be found [here](/docs/functions_flow.md)
 
 ### Azure Cognitive Search Integration
 
-Search is used to index the chunks that weer created during pre-processing.  When a question is asked and an optimal search term is generated, this is passed to Search to identify and return the optimal set of chunks to be used in generation of the response. Some further details are listed below
+Search is used to index the chunks that were created during pre-processing.  When a question is asked and an optimal search term is generated, this is passed to Search to identify and return the optimal set of chunks to be used in generation of the response. Some further details are listed below
 
-- **Data Integration:** Azure Cognitive Search streamlines data ingestion by offering connectors to a wide range of data sources, making it easy to populate the search index.
-
-- **Data Transformation:** Utilizes Optical Character Recognition (OCR) to process images and convert tables within text into searchable text.
+- **Data Enrichments:** Uses many Out-of-the-box Skillsets to extract enrichments from files such as utilizing Optical Character Recognition (OCR) to process images or converting tables within text into searchable text.
 
 - **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
@@ -61,18 +58,20 @@ Search is used to index the chunks that weer created during pre-processing.  Whe
 
 ## Enhanced AI Interaction
 
+**Simple File Upload and Status:** We have put uploading of files into the Accelerator in the hands of the users by providing a simple drag-and-drop user interface for adding new content and a status page for monitoring document pre-processing.
+
 **Visualizing Thought Process:** Gain insights into the AI's decision-making process by visualizing how it arrives at answers, providing transparency and control.
 
-**Proper Citations and References:** The platform generates traceable source content, enhancing trustworthiness and accountability in AI-generated responses.
+**Proper Citations and References:** The platform generates referenceable source content, designed to enhance trustworthiness and accountability in AI-generated responses.
 
-## Things in Progress
+## Works in Progress (Future releases)
 
 **Incorporating Vector and Hybrid Search in Azure Cognitive Search:** We're actively working on enhancing Azure Cognitive Search by incorporating vector and hybrid search capabilities. This will enable more advanced search and retrieval mechanisms, further improving the precision and efficiency of document retrieval.
 
 **Adding Evaluation Guidance and Metrics:** To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
 
 **Research of [Unstructured.io](https://unstructured-io.github.io/unstructured/):**
-The unstructured library is open source and designed to help pre-process unstructured data, such as documents, for use in downstream machine learning tasks. We have performed a 'tech spike' to understand and assess its capabilities and determine how and if we will implement and build upon these. Our current position is we will continue with the Document Intelligence service, formerly Form Recognizer for PDF pre-processing, but we will introduce unstructured as a catcher for many document types which we don't currently process.
+The unstructured library is open source and designed to help pre-process unstructured data, such as documents, for use in downstream machine learning tasks. Our current position is we will continue with the Document Intelligence service, formerly Form Recognizer, for PDF pre-processing, but we will introduce unstructured.io as a catcher for many document types which we don't currently process.
 
 ![Chat screen](docs/images/info_assistant_chatscreen.png)
 

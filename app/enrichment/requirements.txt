@@ -6,3 +6,5 @@ python-multipart
 azure-storage-queue == 12.6.0
 azure-storage-blob==12.16.0
 azure-core == 1.26.4
+tenacity
+openai

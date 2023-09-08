@@ -14,17 +14,33 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
-from sentence_transformers import SentenceTransformer
+import openai
+from tenacity import retry, wait_random_exponential, stop_after_attempt
+
+from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.utilities import Utilities
 
 # === ENV Setup ===
 
 ENV = {
-    "AZURE_STORAGE_CONNECTION_STRING": None,
+    "BLOB_STORAGE_ACCOUNT_KEY": None,
     "EMBEDDING_QUEUE_NAME": None,
     "LOG_LEVEL": "DEBUG", # Will be overwritten by LOG_LEVEL in Environment
     "DEQUEUE_MESSAGE_BATCH_SIZE": 5,
-
-
+    "BLOB_STORAGE_ACCOUNT": None,
+    "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME": None,
+    "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": None,
+    "COSMOSDB_URL": None,
+    "COSMOSDB_KEY": None,
+    "COSMOSDB_DATABASE_NAME": None,
+    "COSMOSDB_CONTAINER_NAME": None,
+    "MAX_EMBEDDING_REQUEUE_COUNT": 5,
+    "AZURE_OPENAI_SERVICE": None,
+    "AZURE_OPENAI_SERVICE_KEY": None,
+    "AZURE_OPENAI_EMBEDDING_MODEL": None,
+    "AZURE_SEARCH_INDEX": None,
+    "AZURE_SEARCH_KEY": None,
+    "AZURE_SEARCH_SERVICE": None
 }
 
 for key, value in ENV.items():
@@ -35,6 +51,23 @@ for key, value in ENV.items():
         raise ValueError(f"Environment variable {key} not set")
 
 
+openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
+openai.api_type = "azure"
+openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
+openai.api_version = "2023-06-01-preview"
+
+class AzOAIEmbedding(object):
+    def __init__(self, deployment_name) -> None:
+        self.deployment_name = deployment_name
+    
+    @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
+    def encode(self, texts):
+        response = openai.Embedding.create(
+            engine=self.deployment_name,
+            documents=texts
+        )
+        return response
+
 # === Get Logger ===
 
 log = logging.getLogger("uvicorn")
@@ -42,6 +75,13 @@ log.setLevel(ENV["LOG_LEVEL"])
 log.info("Starting up")
 
 # === Azure Setup ===
+
+utilities = Utilities(
+    azure_blob_storage_account=ENV["BLOB_STORAGE_ACCOUNT"],
+    azure_blob_drop_storage_container=ENV["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"],
+    azure_blob_content_storage_container=ENV["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"],
+    azure_blob_storage_key=ENV["BLOB_STORAGE_ACCOUNT_KEY"],
+)
 
 log.debug("Setting up Azure Storage Queue Client...")
 queue_client = QueueClient.from_connection_string(
@@ -56,6 +96,15 @@ start_time = datetime.now()
 IS_READY = False
 log.debug("Loading embedding models...")
 models, model_info = load_models()
+
+# Add Azure OpenAI Embedding Model
+models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = AzOAIEmbedding(ENV["AZURE_OPENAI_EMBEDDING_MODEL"])
+model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
+    "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"],
+    "max_seq_length": 8191, # Source: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
+    "vector_size": 1536,
+}
+
 log.debug("Models loaded")
 IS_READY = True
 
@@ -148,25 +197,29 @@ def embed_texts(model: str, texts: List[str]):
         return {"message": f"Model {model} not found"}
 
     model_obj = models[model]
-    embeddings = model_obj.encode(texts)
 
-    reformatted_embeddings = []
+    if model.startswith("azure-openai_"):
+        output = model_obj.encode(texts)
+    else:
+        embeddings = model_obj.encode(texts)
 
-    for i, embedding in enumerate(embeddings):
-        new_embedding = {
-            "object": "embedding",
-            "index": i,
-            "embedding": list(embedding),
+        reformatted_embeddings = []
+
+        for i, embedding in enumerate(embeddings):
+            new_embedding = {
+                "object": "embedding",
+                "index": i,
+                "embedding": list(embedding),
+            }
+            reformatted_embeddings.append(new_embedding)
+
+        output = {
+            "object": "list",
+            "data": reformatted_embeddings,
+            "embedding_id": str(uuid4()),
+            "model": model,
+            "model_info": model_info[model],
         }
-        reformatted_embeddings.append(new_embedding)
-
-    output = {
-        "object": "list",
-        "data": reformatted_embeddings,
-        "embedding_id": str(uuid4()),
-        "model": model,
-        "model_info": model_info[model],
-    }
 
     return output
 

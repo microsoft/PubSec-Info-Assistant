@@ -30,5 +30,6 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 sudo docker tag enrichment-app $CONTAINER_REGISTRY_NAME.azurecr.io/enrichment-app:${tag}
+az acr login --name $CONTAINER_REGISTRY_NAME
 docker push $CONTAINER_REGISTRY_NAME.azurecr.io/enrichment-app:${tag}
 echo "Containers deployed successfully"

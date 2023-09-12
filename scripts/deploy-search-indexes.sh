@@ -16,7 +16,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
 source "${DIR}/environments/infrastructure.env"
 
-search_url="https://${AZURE_SEARCH_SERVICE}.search.windows.net"
+search_url="https://${AZURE_SEARCH_SERVICE}.search.azure.us"
 
 # Get the Search Admin Key
 search_key=$(az search admin-key show --resource-group $RESOURCE_GROUP_NAME --service-name $AZURE_SEARCH_SERVICE --query primaryKey -o tsv)
@@ -30,26 +30,26 @@ export STORAGE_ACCOUNT_CONNECTION_STRING=$conn_string
 data_source_json=$(cat ${DIR}/../azure_search/create_data_source.json | envsubst)
 data_source_name=$(echo $data_source_json | jq -r .name )
 echo "Creating data source $data_source_name ..."
-curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$data_source_json" $search_url/datasources/$data_source_name?api-version=2021-04-30-Preview
+curl -v -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$data_source_json" $search_url/datasources/$data_source_name?api-version=2021-04-30-Preview
 
 # Create shared skillset
 skillset_json=$(cat ${DIR}/../azure_search/create_skillset.json | envsubst)
 skillset_name=$(echo $skillset_json | jq -r .name )
 echo "Creating skillset $skillset_name ... "
-curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$skillset_json" $search_url/skillsets/$skillset_name?api-version=2021-04-30-Preview
+curl -v -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$skillset_json" $search_url/skillsets/$skillset_name?api-version=2021-04-30-Preview
 
 # Create all files index
 index_all_json=$(cat ${DIR}/../azure_search/create_all_index.json | envsubst)
 index_all_name=$(echo $index_all_json | jq -r .name )
 echo "Creating index $index_all_name ..."
-curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$index_all_json" $search_url/indexes/$index_all_name?api-version=2021-04-30-Preview
+curl -v -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$index_all_json" $search_url/indexes/$index_all_name?api-version=2021-04-30-Preview
 
 # Create all files indexer
 indexer_all_json=$(cat ${DIR}/../azure_search/create_all_indexer.json | envsubst)
 indexer_all_name=$(echo $indexer_all_json | jq -r .name )
 echo "Creating indexer $indexer_all_name ... "
-curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$indexer_all_json" $search_url/indexers/$indexer_all_name?api-version=2021-04-30-Preview
+curl -v -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$indexer_all_json" $search_url/indexers/$indexer_all_name?api-version=2021-04-30-Preview
 
 # Run the all files indexer...
 echo "Running indexer $indexer_all_name..."
-curl -s -X POST --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "" $search_url/indexers/$indexer_all_name/run?api-version=2021-04-30-Preview
+curl -v -s -X POST --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "" $search_url/indexers/$indexer_all_name/run?api-version=2021-04-30-Preview

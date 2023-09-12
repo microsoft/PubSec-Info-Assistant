@@ -73,7 +73,7 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
-    endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
+    endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.azure.us",
     index_name=AZURE_SEARCH_INDEX,
     credential=azure_search_key_credential,
 )

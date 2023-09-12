@@ -82,12 +82,21 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
 
 1. In the root of the project, run make project.
 
+1. Review the console for the changes the bicep files will deploy.  Press y to apply or n to cancel.
+
 ## TODO: Upload files for indexing
+
+1. The project supports PDF, HTML and DOCX files.  I downloaded PDF files from USAF's doctrine website <https://www.doctrine.af.mil/> for testing.
+
+1. TODO
 
 ## TODO: Demo of the chat/search
 
 ## Changes I made
 
-- infra/main.bicep - changed semanticSearch from free to disabled.  Semantic search is not available yet in Azure Government subscriptions
+- app/backend/app.py - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
 - infra/core/ai/formrecognizer.bicep - changed API version from 2023-05-01 to 2022-12-01
 - infra/core/host/appservice.bicep - set days to 0 and enabled to false for all retentionPolicy elements under diagnosticLogs.  This setting is no longer supported in Azure.
+- infra/core/search/search-services.bicep - changed endpoint from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
+- infra/main.bicep - changed semanticSearch from free to disabled.  Semantic search is not available yet in Azure Government subscriptions
+- scripts/deploy-search-indexes.sh - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us

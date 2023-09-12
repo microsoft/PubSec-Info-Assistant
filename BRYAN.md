@@ -98,10 +98,20 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
 
 ## Changes I made
 
-- app/backend/app.py - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
-- app/frontend/src/pages/chat/Chat.tsx - Set Use semantic ranker for retrieval to default to false. Semantic search is not yet available in Azure Government subscriptions.
-- infra/core/ai/formrecognizer.bicep - changed API version from 2023-05-01 to 2022-12-01
-- infra/core/host/appservice.bicep - set days to 0 and enabled to false for all retentionPolicy elements under diagnosticLogs.  This setting is no longer supported in Azure.
-- infra/core/search/search-services.bicep - changed endpoint from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
-- infra/main.bicep - changed semanticSearch from free to disabled.  Semantic search is not yet available in Azure Government subscriptions.
-- scripts/deploy-search-indexes.sh - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
+- app/backend/app.py
+  - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
+  - changed blob service url from blob.core.windows.net to blob.core.usgovcloudapi.net
+- app/frontend/src/pages/chat/Chat.tsx
+  - Set Use semantic ranker for retrieval to default to false. Semantic search is not yet available in Azure Government subscriptions.
+- functions/shared_code/utilities.py
+  - changed blob service url from blob.core.windows.net to blob.core.usgovcloudapi.net
+- infra/core/ai/formrecognizer.bicep
+  - changed API version from 2023-05-01 to 2022-12-01
+- infra/core/host/appservice.bicep
+  - set days to 0 and enabled to false for all retentionPolicy elements under diagnosticLogs.  This setting is no longer supported in Azure.
+- infra/core/search/search-services.bicep
+  - changed endpoint from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
+- infra/main.bicep
+  - changed semanticSearch from free to disabled.  Semantic search is not yet available in Azure Government subscriptions.
+- scripts/deploy-search-indexes.sh
+  - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us

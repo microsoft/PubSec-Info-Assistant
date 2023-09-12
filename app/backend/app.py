@@ -78,7 +78,7 @@ search_client = SearchClient(
     credential=azure_search_key_credential,
 )
 blob_client = BlobServiceClient(
-    account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net",
+    account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.usgovcloudapi.net",
     credential=AZURE_BLOB_STORAGE_KEY,
 )
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)

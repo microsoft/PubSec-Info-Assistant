@@ -25,7 +25,7 @@ An example of a "chunk" would be in JSON format like:
 ```json
 {
   "file_name": "upload/Finance/msft-10k_20200630.htm.pdf",
-  "file_uri": "https://infoasststorebwcqj.blob.core.windows.net/upload/Finance/msft-10k_20200630.htm.pdf",
+  "file_uri": "https://infoasststorebwcqj.blob.core.usgovcloudapi.net/upload/Finance/msft-10k_20200630.htm.pdf",
   "processed_datetime": "2023-05-29T21:17:23.367887",
   "title": "PART II Item 7",
   "section": "Productivity and Business Processes",

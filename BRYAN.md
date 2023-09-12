@@ -92,7 +92,9 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
 
 1. When the site loads, click Manage Content in the upper right-hand corner of the screen.
 
-1. Either click to add files or drop and drop them into the rectangle.  Click the Upload button to upload the files.  You may need to scroll down to see it.
+1. Either click to add files or drop and drop them into the rectangle.  Click the Upload button to upload the files.  You may need to scroll down to see it.  Unfortunately, the screen will not display the upload status of the files.
+
+1. After the files are uploaded, you can check the status of the file processing on the Upload Status tab.  You may need to click the Refresh button to see updates.
 
 ## TODO: Demo of the chat/search
 

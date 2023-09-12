@@ -88,15 +88,20 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
 
 1. The project supports PDF, HTML and DOCX files.  I downloaded PDF files from USAF's doctrine website <https://www.doctrine.af.mil/> for testing.
 
-1. Open your browser and navigate to the url of the web app which is <https://infoasst-web-XXXXXX.azurewebsites.us> where XXXXXX is the value in the file infra/.state/usafcio/random.txt.  This file won't exist until make deploy is run.
+1. Open your browser and navigate to the url of the web app which is <https://infoasst-web-XXXXXX.azurewebsites.us> where XXXXXX is the value in the file infra/.state/usafcio/random.txt.  This file won't exist until "make deploy" is run.
+
+1. When the site loads, click Manage Content in the upper right-hand corner of the screen.
+
+1. Either click to add files or drop and drop them into the rectangle.  Click the Upload button to upload the files.  You may need to scroll down to see it.
 
 ## TODO: Demo of the chat/search
 
 ## Changes I made
 
 - app/backend/app.py - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
+- app/frontend/src/pages/chat/Chat.tsx - Set Use semantic ranker for retrieval to default to false. Semantic search is not yet available in Azure Government subscriptions.
 - infra/core/ai/formrecognizer.bicep - changed API version from 2023-05-01 to 2022-12-01
 - infra/core/host/appservice.bicep - set days to 0 and enabled to false for all retentionPolicy elements under diagnosticLogs.  This setting is no longer supported in Azure.
 - infra/core/search/search-services.bicep - changed endpoint from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us
-- infra/main.bicep - changed semanticSearch from free to disabled.  Semantic search is not available yet in Azure Government subscriptions
+- infra/main.bicep - changed semanticSearch from free to disabled.  Semantic search is not yet available in Azure Government subscriptions.
 - scripts/deploy-search-indexes.sh - changed search_url from https://${AZURE_SEARCH_SERVICE}.search.windows.net to https://${AZURE_SEARCH_SERVICE}.search.azure.us

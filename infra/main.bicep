@@ -183,7 +183,7 @@ module searchServices 'core/search/search-services.bicep' = {
     sku: {
       name: searchServicesSkuName
     }
-    semanticSearch: 'free'
+    semanticSearch: 'disabled'
     cogServicesName: !empty(cognitiveServiesForSearchName) ? cognitiveServiesForSearchName : '${prefix}-${abbrs.cognitiveServicesAccounts}${randomString}'
     cogServicesSku: {
       name: cognitiveServiesForSearchSku

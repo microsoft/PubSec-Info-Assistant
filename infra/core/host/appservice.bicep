@@ -135,16 +135,16 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
         category: 'AppServiceAppLogs'
         enabled: true
         retentionPolicy: {
-          days: 30
-          enabled: true 
+          days: 0
+          enabled: false 
         }
       }
       {
         category: 'AppServicePlatformLogs'
         enabled: true
         retentionPolicy: {
-          days: 30
-          enabled: true 
+          days: 0
+          enabled: false
         }
       }
     ]
@@ -153,8 +153,8 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
         category: 'AllMetrics'
         enabled: true
         retentionPolicy: {
-          days: 30
-          enabled: true 
+          days: 0
+          enabled: false
         }
       }
     ]

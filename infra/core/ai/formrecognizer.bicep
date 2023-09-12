@@ -9,7 +9,7 @@ param sku object = {
 }
 
 // Form Recognizer
-resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2022-12-01' = {
   name: name
   location: location
   tags: tags

@@ -88,7 +88,7 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
 
 1. The project supports PDF, HTML and DOCX files.  I downloaded PDF files from USAF's doctrine website <https://www.doctrine.af.mil/> for testing.
 
-1. TODO
+1. Open your browser and navigate to the url of the web app which is <https://infoasst-web-XXXXXX.azurewebsites.us> where XXXXXX is the value in the file infra/.state/usafcio/random.txt.  This file won't exist until make deploy is run.
 
 ## TODO: Demo of the chat/search
 

@@ -18,7 +18,7 @@ export const ResponseTempButtonGroup = ({ className, onClick, defaultValue }: Pr
             <Label>Conversation Type:</Label>
             <ButtonGroup className={`${styles.buttongroup ?? ""}`} onClick={onClick}>
                 <Button className={`${defaultValue == 1.3? styles.buttonleftactive : styles.buttonleft ?? ""}`} size="sm" value={1.3} bsPrefix='ia'>{"Creative"}</Button>
-                <Button className={`${defaultValue == 0.7? styles.buttonmiddleactive : styles.buttonmiddle ?? ""}`} size="sm" value={0.7} bsPrefix='ia'>{"Balanced"}</Button>
+                <Button className={`${defaultValue == 0.6? styles.buttonmiddleactive : styles.buttonmiddle ?? ""}`} size="sm" value={0.6} bsPrefix='ia'>{"Balanced"}</Button>
                 <Button className={`${defaultValue == 0? styles.buttonrightactive : styles.buttonright ?? ""}`} size="sm" value={0} bsPrefix='ia'>{"Precise"}</Button>
             </ButtonGroup>
         </div>

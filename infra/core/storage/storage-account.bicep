@@ -65,10 +65,6 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
   
 
-  // resource queueServices 'queueServices' = [for queueName in queueNames: {
-  //   name: queueName.name   
-  // }]
-
   resource queueServices 'queueServices' = {
     name: 'default'
     resource queue 'queues' = [for queueName in queueNames: {
@@ -85,3 +81,4 @@ output primaryEndpoints object = storage.properties.primaryEndpoints
 output key string = storage.listKeys().keys[0].value
 #disable-next-line outputs-should-not-contain-secrets
 output connectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+output id string = storage.id

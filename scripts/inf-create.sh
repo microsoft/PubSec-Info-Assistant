@@ -31,6 +31,12 @@ else
   echo $randomString >> .state/${WORKSPACE}/random.txt
 fi
 
+if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
+  WEB_APP_ENDPOINT_SUFFIX="azurewebsites.net"
+else 
+  WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
+fi
+
 if [ -n "${IN_AUTOMATION}" ]; then
   #if in automation, add the random.txt to the state container
   #echo "az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists"
@@ -72,7 +78,7 @@ else
   aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
   if [ -z $aadAppId ]
     then
-      aadAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+      aadAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.$WEB_APP_ENDPOINT_SUFFIX/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
       aadAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
     fi
   

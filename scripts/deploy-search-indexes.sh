@@ -16,7 +16,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
 source "${DIR}/environments/infrastructure.env"
 
-search_url="https://${AZURE_SEARCH_SERVICE}.search.windows.net"
+search_url="${AZURE_SEARCH_SERVICE_ENDPOINT}"
 
 # Get the Search Admin Key
 search_key=$(az search admin-key show --resource-group $RESOURCE_GROUP_NAME --service-name $AZURE_SEARCH_SERVICE --query primaryKey -o tsv)

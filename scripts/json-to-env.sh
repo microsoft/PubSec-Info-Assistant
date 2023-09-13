@@ -22,6 +22,10 @@ jq -r  '
             "env_var": "AZURE_SEARCH_SERVICE"
         },
         {
+            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
+        },
+        {
             "path": "azurE_STORAGE_ACCOUNT",
             "env_var": "AZURE_BLOB_STORAGE_ACCOUNT"
         },

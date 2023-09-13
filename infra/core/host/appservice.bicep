@@ -40,6 +40,8 @@ param tenantId string = subscription().tenantId
 
 param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
 
+param isGovCloudDeployment bool  
+
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: name
   location: location
@@ -134,7 +136,7 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
       {
         category: 'AppServiceAppLogs'
         enabled: true
-        retentionPolicy: {
+        retentionPolicy: (isGovCloudDeployment) ? null : {
           days: 30
           enabled: true 
         }
@@ -142,7 +144,7 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
       {
         category: 'AppServicePlatformLogs'
         enabled: true
-        retentionPolicy: {
+        retentionPolicy: (isGovCloudDeployment) ? null : {
           days: 30
           enabled: true 
         }
@@ -152,7 +154,7 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
       {
         category: 'AllMetrics'
         enabled: true
-        retentionPolicy: {
+        retentionPolicy: (isGovCloudDeployment) ? null :  {
           days: 30
           enabled: true 
         }

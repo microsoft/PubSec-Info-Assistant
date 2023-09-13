@@ -49,6 +49,7 @@ param pdfSubmitQueue string = 'pdf-submit-queue'
 param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param queryTermLanguage string = 'English'
+param isGovCloudDeployment bool = contains(location, 'usgov')
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -107,6 +108,7 @@ module backend 'core/host/appservice.bicep' = {
     managedIdentity: true
     applicationInsightsName: logging.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
+    isGovCloudDeployment: isGovCloudDeployment
     appSettings: {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
@@ -165,6 +167,7 @@ module formrecognizer 'core/ai/formrecognizer.bicep' = {
     sku: {
       name: formRecognizerSkuName
     }
+    isGovCloudDeployment: isGovCloudDeployment
   }
 }
 
@@ -188,6 +191,7 @@ module searchServices 'core/search/search-services.bicep' = {
     cogServicesSku: {
       name: cognitiveServiesForSearchSku
     }
+    isGovCloudDeployment: isGovCloudDeployment
   }
 }
 
@@ -388,6 +392,7 @@ output AZURE_LOCATION string = location
 output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName //cognitiveServices.outputs.name
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name
+output AZURE_SEARCH_SERVICE_ENDPOINT string = searchServices.outputs.endpoint
 output AZURE_SEARCH_KEY string = searchServices.outputs.searchServiceKey
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output AZURE_STORAGE_CONTAINER string = containerName

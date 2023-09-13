@@ -1,0 +1,138 @@
+openapi: 3.0.0
+info:
+  description: "powered by Flasgger"
+  termsOfService: "/tos"
+  title: "A swagger API"
+  version: "0.0.1"
+paths:
+  /chat:
+    post:
+      summary: "Chat Request Body"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                history:
+                  type: array
+                  description: "An array of chat history objects."
+                  items:
+                    type: object
+                    properties:
+                      user:
+                        type: string
+                        description: "The user's message in the chat."
+                      bot:
+                        type: string
+                        description: "The bot's response in the chat."
+                  example:
+                    - user: "Hello, chatbot!"
+                      bot: ""
+                approach:
+                  type: string
+                  description: "The approach used for the chat."
+                overrides:
+                  type: object
+                  properties:
+                    semantic_ranker:
+                      type: boolean
+                      description: "Whether semantic ranking is enabled."
+                    semantic_captions:
+                      type: boolean
+                      description: "Whether semantic captions are enabled."
+                    top:
+                      type: integer
+                      description: "The number of top responses to generate."
+                    suggest_followup_questions:
+                      type: boolean
+                      description: "Whether to suggest follow-up questions."
+                    user_persona:
+                      type: string
+                      description: "The user's persona."
+                    system_persona:
+                      type: string
+                      description: "The system's persona."
+                    ai_persona:
+                      type: string
+                      description: "The AI's persona."
+                    response_length:
+                      type: integer
+                      description: "The maximum response length."
+                    response_temp:
+                      type: number
+                      description: "The response temperature."
+              required:
+                - history
+                - approach
+                - overrides
+      responses:
+        '200':
+          description: "Successful response."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+                    description: "The AI's answer to the user's query."
+                  citation_lookup:
+                    type: object
+                    description: "A lookup table for citations in the response."
+                  data_points:
+                    type: array
+                    description: "An array of data points found in the response."
+                    items:
+                      type: object
+                  thoughts:
+                    type: string
+                    description: "The AI's thought process during the conversation."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                history:
+                  type: array
+                  description: "An array of chat history objects."
+                  items:
+                    type: object
+                    properties:
+                      user:
+                        type: string
+                      bot:
+                        type: string
+                  example:
+                    - user: "Hello, chatbot!"
+                      bot: ""
+                approach:
+                  type: string
+                overrides:
+                  type: object
+                  properties:
+                    semantic_ranker:
+                      type: boolean
+                    semantic_captions:
+                      type: boolean
+                    top:
+                      type: integer
+                    suggest_followup_questions:
+                      type: boolean
+                    user_persona:
+                      type: string
+                    system_persona:
+                      type: string
+                    ai_persona:
+                      type: string
+                    response_length:
+                      type: integer
+                    response_temp:
+                      type: number
+              required:
+                - history
+                - approach
+                - overrides

@@ -21,6 +21,9 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from flask import Flask, jsonify, request
+from flasgger import Flasgger
+from flasgger import Swagger
+
 from shared_code.status_log import State, StatusLog
 
 # Replace these with your own values, either in environment variables or directly here
@@ -114,12 +117,14 @@ chat_approaches = {
 
 app = Flask(__name__)
 
+swagger = Swagger(app, template_file='openapi.yaml')
+
 
 @app.route("/", defaults={"path": "index.html"})
 @app.route("/<path:path>")
 def static_file(path):
     return app.send_static_file(path)
-
+    
 @app.route("/chat", methods=["POST"])
 def chat():
     approach = request.json["approach"]
@@ -130,7 +135,7 @@ def chat():
         r = impl.run(request.json["history"], request.json.get("overrides") or {})
 
         # return jsonify(r)
-        # To fix citation bug,below code is added.aparmar
+        # To fix citation bug, below code is added.aparmar
         return jsonify(
             {
                 "data_points": r["data_points"],

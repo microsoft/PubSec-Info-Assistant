@@ -34,6 +34,7 @@ param formRecognizerSkuName string = 'S0'
 param encichmentSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
+param appServicePlanContainerName string = ''
 param containerRegistryName string = ''
 param resourceGroupName string = ''
 param logAnalyticsName string = ''
@@ -130,6 +131,34 @@ module containerRegistry 'core/host/conteinerregistry.bicep' = {
     location: location
     tags: tags
   }
+}
+
+// // Create an App Service Plan to group applications under the same payment plan and SKU, specifically for containers
+// module appServicePlanContainer 'core/host/appserviceplan.bicep' = {
+//   name: 'appserviceplancontainer'
+//   scope: rg
+//   params: {
+//     name: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+//     location: location
+//     tags: tags
+//   }
+// }
+
+// Create an App Service Plan and supporting services for the enrichment app service
+module appServiceContainer 'core/host/appservicecontainer.bicep' = {
+  name: 'appservicecontainer'
+  scope: rg
+  params: {
+    appServiceName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+    appServicePlanName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+    location: location
+    tags: tags
+    logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
+    applicationInsightsName: logging.outputs.applicationInsightsName
+  }
+  dependsOn: [
+    logging
+  ]
 }
 
 // The application frontend
@@ -599,3 +628,4 @@ output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
 output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
 output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
+output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name

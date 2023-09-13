@@ -37,6 +37,11 @@ else
   WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
 fi
 
+if [ -n "${IS_USGOV_DEPLOYMENT}" ] && [ "${USE_EXISTING_AOAI}" == 'false' ] ; then
+  echo "AOAI doesn't exist in US Gov regions.  Please create AOAI seperately and update the USE_EXISTING_AOAI in the env file. "
+  exit 1  
+fi
+
 if [ -n "${IN_AUTOMATION}" ]; then
   #if in automation, add the random.txt to the state container
   #echo "az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists"

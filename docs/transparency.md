@@ -1,6 +1,6 @@
 # Transparency Note: Information Assistant (IA)
 
-Updated 15 Jun 2023
+Updated 24 Aug 2023
 
 ## Table of Contents
 
@@ -74,7 +74,7 @@ Terminology | Definition
 [ChatGPT](https://en.wikipedia.org/wiki/ChatGPT) | "ChatGPT is an artificial intelligence chatbot developed by OpenAI based on the company's Generative Pre-trained Transformer (GPT) series of large language models (LLMs)."
 [Chunking](https://learn.microsoft.com/en-us/samples/azure-samples/azure-search-power-skills/azure-open-ai-embeddings-generator/) | Chunking is a strategy of breaking down large documents into smaller pieces which satisfy the token limits of OpenAI models. 
 [Generative AI](https://en.wikipedia.org/wiki/Generative_artificial_intelligence) | "A type of artificial intelligence (AI) system capable of generating text, images, or other media in response to prompts."
-[Hallucinations](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)) | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data."
+[Fabrications (aka Hallucinations)](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)) | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data". The term "Fabrication" is prefered as the term "hallucination" may be offensive to people with certain disabilities. 
 [Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering) | "A concept in artificial intelligence, particularly natural language processing. In prompt engineering, the description of the task that the AI is supposed to accomplish is embedded in the input, e.g. as a question, instead of it being explicitly given. Prompt engineering typically works by converting one or more tasks to a prompt-based dataset and training a language model with what has been called "prompt-based learning" or just "prompt learning"."
 [Semantic Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) | "A collection of query-related capabilities that bring semantic relevance and language understanding to textual search results."
 [Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant. 
@@ -93,9 +93,9 @@ The system receives and process files from the end user. Data is chunked with st
 
 ### Prompt Engineering
 
-This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work goes into prompt engineering to prevent hallucinations. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
+This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work goes into prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
 
-**NOTE:** Hallucinations may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
+**NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
 
 ## Use cases
 
@@ -154,11 +154,11 @@ True Negative | The user asks a question and the system does not find any docume
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. False Positive outcomes may be mitigated by human review of citations.
 
-**NOTE:** Due to generative AI's capability to hallucinate, end users should always leverage citations to verify results.
+**NOTE:** Due to generative AI's capability to fabricate, end users should always leverage citations to verify results.
 
 # Evaluation of IA Accelerator
 
-At the time of this writing, this accelerator is in an **Alpha** state. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated. 
+At the time of this writing, this accelerator is in a **Pre-Release** state. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated. 
 
 ## Evaluating and Integrating IA Accelerator for your use
 
@@ -170,7 +170,7 @@ Always include a human-in-the-loop to evaluate the results against your data. Se
 
 ### Data Quality Evaluation
 
-There are **minimal** administrative tools at this Alpha stage which will give insight to the quality of data available to the system. There are **no** tools available to the end user at this time which will give insight the quality of the data available to the system. 
+There are **minimal** administrative tools at this early stage which will give insight to the quality of data available to the system. There are **minimal** tools available to the end user at this time which will give insight the quality of the data available to the system. Leverage the administrative interface before use to verify that submitted documents have been successfully processed. 
 
 ### Evaluation of system performance
 
@@ -178,7 +178,7 @@ The system outcomes need to be evaluated by the user to determine the accuracy o
 
 ### Use technical documentation
 
-The technical documentation provided with this system should be used to achieve the best outcomes. Care should be used when tuning, especially in the form of prompt engineering. Trade-offs between accuracy versus creativity should be understood and when choices are made.
+The technical documentation provided with this system should be used to achieve the best outcomes. Care should be used when tuning, especially in the form of prompt engineering. Trade-offs between accuracy versus creativity should be understood when choices are made.
 
 You can find the technical documentation in our [Using IA Accelerator for the first time](../README.md#using-IA-for-the-first-time) section.
 

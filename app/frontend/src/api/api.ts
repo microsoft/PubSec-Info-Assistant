@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest } from "./models";
+import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -73,7 +73,7 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
 }
 
 export function getCitationFilePath(citation: string): string {
-    return `/content/${encodeURIComponent(citation)}`;
+    return `${encodeURIComponent(citation)}`;
 }
 
 export async function getBlobClientUrl(): Promise<string> {
@@ -110,4 +110,38 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
     }
     const results: AllFilesUploadStatus = {statuses: parsedResponse};
     return results;
+}
+
+export async function getInfoData(): Promise<GetInfoResponse> {
+    const response = await fetch("/getInfoData", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: GetInfoResponse = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getCitationObj(citation: string): Promise<ActiveCitation> {
+    const response = await fetch(`/getcitation`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            citation: citation
+        })
+    });
+    const parsedResponse: ActiveCitation = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    return parsedResponse;
 }

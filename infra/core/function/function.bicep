@@ -24,6 +24,9 @@ param appInsightsConnectionString string
 @description('Azure Blob Storage Account Name')
 param blobStorageAccountName string
 
+@description('Azure Blob Storage Account Endpoint')
+param blobStorageAccountEndpoint string
+
 @description('Azure Blob Storage Account Upload Container Name')
 param blobStorageAccountUploadContainerName string
 
@@ -138,6 +141,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'BLOB_STORAGE_ACCOUNT'
           value: blobStorageAccountName
+        }
+        {
+          name: 'BLOB_STORAGE_ACCOUNT_ENDPOINT'
+          value: blobStorageAccountEndpoint
         }
         {
           name: 'BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME'

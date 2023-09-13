@@ -274,6 +274,7 @@ module functions 'core/function/function.bicep' = {
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
     blobStorageAccountKey: storage.outputs.key
     blobStorageAccountName: storage.outputs.name
+    blobStorageAccountEndpoint: storage.outputs.primaryEndpoints.blob
     blobStorageAccountConnectionString: storage.outputs.connectionString
     blobStorageAccountOutputContainerName: containerName
     blobStorageAccountUploadContainerName: uploadContainerName

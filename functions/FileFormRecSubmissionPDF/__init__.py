@@ -13,6 +13,7 @@ from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
 ]
@@ -37,6 +38,7 @@ statusLog = StatusLog(
 )
 utilities = Utilities(
     azure_blob_storage_account,
+    azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
     azure_blob_storage_key,

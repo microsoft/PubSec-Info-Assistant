@@ -62,7 +62,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       functionAppScaleLimit: functionAppScaleLimit != -1 ? functionAppScaleLimit : null
       healthCheckPath: healthCheckPath
       cors: {
-        allowedOrigins: union([ portalURL, portalURL ], allowedOrigins)
+        allowedOrigins: union([ portalURL, 'https://ms.portal.azure.com' ], allowedOrigins)
       }
     }
     clientAffinityEnabled: clientAffinityEnabled

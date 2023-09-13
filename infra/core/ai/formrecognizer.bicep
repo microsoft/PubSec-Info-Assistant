@@ -10,7 +10,7 @@ param sku object = {
   name: 'S0'
 }
 
-// Form Recognizer 2022-12-01
+// Form Recognizer 
 resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (isGovCloudDeployment == false) {
   name: name
   location: location
@@ -23,6 +23,7 @@ resource formRecognizerAccount 'Microsoft.CognitiveServices/accounts@2023-05-01'
   }
 }
 
+// Form Recognizer Gov - Needed to support a lessor API.
 resource formRecognizerAccountGov 'Microsoft.CognitiveServices/accounts@2022-12-01' = if (isGovCloudDeployment) {
   name: name
   location: location

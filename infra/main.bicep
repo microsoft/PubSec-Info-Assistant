@@ -133,16 +133,6 @@ module containerRegistry 'core/host/conteinerregistry.bicep' = {
   }
 }
 
-// // Create an App Service Plan to group applications under the same payment plan and SKU, specifically for containers
-// module appServicePlanContainer 'core/host/appserviceplan.bicep' = {
-//   name: 'appserviceplancontainer'
-//   scope: rg
-//   params: {
-//     name: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
-//     location: location
-//     tags: tags
-//   }
-// }
 
 // Create an App Service Plan and supporting services for the enrichment app service
 module appServiceContainer 'core/host/appservicecontainer.bicep' = {
@@ -155,11 +145,13 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
     tags: tags
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     applicationInsightsName: logging.outputs.applicationInsightsName
+    storageAccountUri: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${textEnrichmentQueue}'
   }
   dependsOn: [
     logging
   ]
 }
+
 
 // The application frontend
 module backend 'core/host/appservice.bicep' = {

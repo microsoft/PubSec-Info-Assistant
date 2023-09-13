@@ -5,8 +5,10 @@ param tags object = {}
 param applicationInsightsName string = ''
 param logAnalyticsWorkspaceName string = ''
 param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
+param storageAccountUri string
 
 param appSettings object = {}
+
 
 // Create an App Service Plan to group applications under the same payment plan and SKU, specifically for containers
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
@@ -34,6 +36,49 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
     zoneRedundant: false
   }
 }
+
+
+resource scaleOutRule 'Microsoft.Insights/autoscalesettings@2022-10-01' = {
+  name: appServicePlan.name
+  location: location
+  properties: {
+    enabled: true
+    profiles: [
+      {
+        name: 'Scale out condition'
+        capacity: {
+          maximum: '3'
+          default: '1'
+          minimum: '1'
+        }
+        rules: [
+          {
+            scaleAction: {
+              direction: 'Increase'
+              type: 'ChangeCount'
+              value: '1'
+              cooldown: 'PT5M'
+            }
+            metricTrigger: {
+              metricName: 'ApproximateMessageCount'
+              metricNamespace: ''
+              metricResourceUri: storageAccountUri
+              operator: 'GreaterThan'
+              statistic: 'Average'
+              threshold: 10
+              timeAggregation: 'Average'
+              timeGrain: 'PT1M'
+              timeWindow: 'PT10M'
+              dividePerInstance: true
+            }
+          }
+        ]
+      }
+    ]
+    targetResourceUri: appServicePlan.id
+  }
+}
+
 
 resource appService 'Microsoft.Web/sites@2022-09-01' = {
 name: appServiceName

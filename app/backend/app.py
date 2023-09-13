@@ -25,11 +25,13 @@ from shared_code.status_log import State, StatusLog
 AZURE_BLOB_STORAGE_ACCOUNT = (
     os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
 )
+AZURE_BLOB_STORAGE_ENDPOINT = os.environ.get("AZURE_BLOB_STORAGE_ENDPOINT") 
 AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = (
     os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
 )
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
+AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
 AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
@@ -73,12 +75,12 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
-    endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
+    endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
     index_name=AZURE_SEARCH_INDEX,
     credential=azure_search_key_credential,
 )
 blob_client = BlobServiceClient(
-    account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net",
+    account_url=AZURE_BLOB_STORAGE_ENDPOINT,
     credential=AZURE_BLOB_STORAGE_KEY,
 )
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)

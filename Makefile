@@ -11,6 +11,8 @@ help: ## Show this help
 
 deploy: build infrastructure extract-env deploy-search-indexes deploy-webapp deploy-functions ## Deploy infrastructure and application code
  
+build-deploy: build deploy-webapp ##Build and Deploy the Webapp
+
 build: ## Build application code
 	@./scripts/build.sh
 

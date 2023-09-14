@@ -289,6 +289,7 @@ class Utilities:
                     "type": "text", 
                     "text": tag.get_text(strip=True),
                     "title": title,
+                    'subtitle': '',
                     "section": section,
                     "page_number": 1                
                     })
@@ -297,6 +298,7 @@ class Utilities:
                     "type": "table", 
                     "text": str(tag),
                     "title": title,
+                    'subtitle': '',
                     "section": section,
                     "page_number": 1                
                     })

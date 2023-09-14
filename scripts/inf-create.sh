@@ -166,6 +166,7 @@ declare -A REPLACE_TOKENS=(
     [\${TENANT_ID}]=${TENANT_ID}
     [\${SUBSCRIPTION_ID}]=${SUBSCRIPTION_ID}
     [\${AZURE_AD_MGMT_APP_SECRET}]=${AZURE_AD_MGMT_APP_SECRET}
+    [\${CHAT_WARNING_BANNER_TEXT}]=${CHAT_WARNING_BANNER_TEXT}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

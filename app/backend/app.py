@@ -47,6 +47,7 @@ AZURE_OPENAI_CHATGPT_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_VERSION") 
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 IS_GOV_CLOUD_DEPLOYMENT = os.environ.get("IS_GOV_CLOUD_DEPLOYMENT")
+CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT")
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "merged_content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
@@ -204,6 +205,15 @@ def get_info_data():
             "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
             "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",
             "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
+        })
+    return response
+
+# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
+@app.route("/getWarningBanner")
+def get_warning_banner():
+    response = jsonify(
+        {
+            "WARNING_BANNER_TEXT": f"{CHAT_WARNING_BANNER_TEXT}"
         })
     return response
 

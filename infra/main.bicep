@@ -52,6 +52,7 @@ param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param chatGptModelVersion string = ''
 param chatGptDeploymentCapacity int = 30
+param chatWarningBannerText string = ''
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750' 
@@ -166,7 +167,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
-
+      CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
     }
     aadClientId: aadWebClientId
   }

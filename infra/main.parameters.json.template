@@ -35,6 +35,12 @@
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
     },
+    "chatGptModelName": {
+      "value": "${CHATGPT_MODEL_MODEL_NAME}"
+    },
+    "chatGptModelVersion": {
+      "value": "${CHATGPT_MODEL_VERSION}"
+    },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
     },

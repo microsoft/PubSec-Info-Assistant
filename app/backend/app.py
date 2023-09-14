@@ -41,8 +41,12 @@ AZURE_OPENAI_RESOURCE_GROUP = os.environ.get("AZURE_OPENAI_RESOURCE_GROUP") or "
 AZURE_OPENAI_CHATGPT_DEPLOYMENT = (
     os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
 )
+AZURE_OPENAI_CHATGPT_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME") or "")
+AZURE_OPENAI_CHATGPT_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_VERSION") or "")
+
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
+IS_GOV_CLOUD_DEPLOYMENT = os.environ.get("IS_GOV_CLOUD_DEPLOYMENT")
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "merged_content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
@@ -89,15 +93,25 @@ blob_client = BlobServiceClient(
 )
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
-# Set up OpenAI management client
-openai_mgmt_client = CognitiveServicesManagementClient(
-    credential=azure_credential,
-    subscription_id=AZURE_SUBSCRIPTION_ID)
+model_name = ''
+model_version = ''
 
-deployment = openai_mgmt_client.deployments.get(
-    resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
-    account_name=AZURE_OPENAI_SERVICE,
-    deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+if (IS_GOV_CLOUD_DEPLOYMENT):
+    model_name = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME")
+    model_version = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION")
+else:
+    # Set up OpenAI management client
+    openai_mgmt_client = CognitiveServicesManagementClient(
+        credential=azure_credential,
+        subscription_id=AZURE_SUBSCRIPTION_ID)
+
+    deployment = openai_mgmt_client.deployments.get(
+        resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+        account_name=AZURE_OPENAI_SERVICE,
+        deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+
+    model_name = deployment.properties.model.name,
+    model_version = deployment.properties.model.version
 
 chat_approaches = {
     "rrr": ChatReadRetrieveReadApproach(
@@ -109,8 +123,9 @@ chat_approaches = {
         KB_FIELDS_CONTENT,
         blob_client,
         QUERY_TERM_LANGUAGE,
-        deployment.properties.model.name,
-        deployment.properties.model.version
+        model_name,
+        model_version,
+        IS_GOV_CLOUD_DEPLOYMENT
     )
 }
 
@@ -183,8 +198,8 @@ def get_info_data():
     response = jsonify(
         {
             "AZURE_OPENAI_CHATGPT_DEPLOYMENT": f"{AZURE_OPENAI_CHATGPT_DEPLOYMENT}",
-            "AZURE_OPENAI_MODEL_NAME": f"{deployment.properties.model.name}",
-            "AZURE_OPENAI_MODEL_VERSION": f"{deployment.properties.model.version}",
+            "AZURE_OPENAI_MODEL_NAME": f"{model_name}",
+            "AZURE_OPENAI_MODEL_VERSION": f"{model_version}",
             "AZURE_OPENAI_SERVICE": f"{AZURE_OPENAI_SERVICE}",
             "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
             "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",

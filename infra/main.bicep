@@ -50,6 +50,7 @@ param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
+param chatGptModelVersion string = ''
 param chatGptDeploymentCapacity int = 30
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
@@ -151,6 +152,8 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+      AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
+      AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
@@ -162,6 +165,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
+      IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
 
     }
     aadClientId: aadWebClientId
@@ -217,6 +221,7 @@ module enrichment 'core/ai/enrichment.bicep' = {
     location: location
     tags: tags
     sku: encichmentSkuName
+    isGovCloudDeployment: isGovCloudDeployment
   }
 }
 
@@ -506,7 +511,7 @@ module storageRoleFunc 'core/security/role.bicep' = {
 
 // MANAGEMENT SERVICE PRINCIPAL
 module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
-  scope: resourceGroup(useExistingAOAIService? azureOpenAIResourceGroup : rg.name)
+  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment? azureOpenAIResourceGroup : rg.name)
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId

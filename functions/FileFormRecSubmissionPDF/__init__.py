@@ -5,7 +5,6 @@ import json
 import logging
 import os
 import random
-
 import azure.functions as func
 import requests
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
@@ -31,11 +30,11 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
 FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
+max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
+poll_queue_submit_backoff = int(os.environ["POLL_QUEUE_SUBMIT_BACKOFF"])
+pdf_submit_queue_backoff = int(os.environ["PDF_SUBMIT_QUEUE_BACKOFF"])
 
 
-statusLog = StatusLog(
-    cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
-)
 utilities = Utilities(
     azure_blob_storage_account,
     azure_blob_storage_endpoint,
@@ -43,11 +42,8 @@ utilities = Utilities(
     azure_blob_content_storage_container,
     azure_blob_storage_key,
 )
-FR_MODEL = "prebuilt-layout"
-MAX_REQUEUE_COUNT = 5  # max times we will retry the submission
-POLL_QUEUE_SUBMIT_BACKOFF = 60  # Hold for n seconds to give FR time to process the file
-PDF_SUBMIT_QUEUE_BACKOFF = 60
 FUNCTION_NAME = "FileFormRecSubmissionPDF"
+FR_MODEL = "prebuilt-layout"
 
 
 def main(msg: func.QueueMessage) -> None:
@@ -59,13 +55,11 @@ def main(msg: func.QueueMessage) -> None:
     message_json = json.loads(message_body)
     blob_path = message_json["blob_name"]
     try:
-        logging.info(
-            "Python queue trigger function processed a queue item: %s",
-            msg.get_body().decode("utf-8"),
+        statusLog = StatusLog(
+            cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
         )
 
         # Receive message from the queue
-
         queued_count = message_json["submit_queued_count"]
         statusLog.upsert_document(
             blob_path,
@@ -78,6 +72,7 @@ def main(msg: func.QueueMessage) -> None:
             f"{FUNCTION_NAME} - Submitting to Form Recognizer",
             StatusClassification.INFO,
         )
+        
         # construct blob url
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
         statusLog.upsert_document(
@@ -104,7 +99,7 @@ def main(msg: func.QueueMessage) -> None:
 
         # Check if the request was successful (status code 200)
         if response.status_code == 202:
-            # Successfully submitted
+            # Successfully submitted so submit to the polling queue
             statusLog.upsert_document(
                 blob_path,
                 f"{FUNCTION_NAME} - PDF submitted to FR successfully",
@@ -120,11 +115,11 @@ def main(msg: func.QueueMessage) -> None:
             )
             message_json_str = json.dumps(message_json)
             queue_client.send_message(
-                message_json_str, visibility_timeout=POLL_QUEUE_SUBMIT_BACKOFF
+                message_json_str, visibility_timeout=poll_queue_submit_backoff
             )
             statusLog.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - message sent to pdf-polling-queue. Visible in {POLL_QUEUE_SUBMIT_BACKOFF} seconds. FR Result ID is {result_id}",
+                f"{FUNCTION_NAME} - message sent to pdf-polling-queue. Visible in {poll_queue_submit_backoff} seconds. FR Result ID is {result_id}",
                 StatusClassification.DEBUG,
                 State.QUEUED,
             )
@@ -132,10 +127,10 @@ def main(msg: func.QueueMessage) -> None:
         elif response.status_code == 429:
             # throttled, so requeue with random backoff seconds to mitigate throttling,
             # unless it has hit the max tries
-            if queued_count < MAX_REQUEUE_COUNT:
-                max_seconds = PDF_SUBMIT_QUEUE_BACKOFF * (queued_count**2)
+            if queued_count < max_submit_requeue_count:
+                max_seconds = pdf_submit_queue_backoff * (queued_count**2)
                 backoff = random.randint(
-                    PDF_SUBMIT_QUEUE_BACKOFF * queued_count, max_seconds
+                    pdf_submit_queue_backoff * queued_count, max_seconds
                 )
                 queued_count += 1
                 message_json["queued_count"] = queued_count
@@ -181,3 +176,5 @@ def main(msg: func.QueueMessage) -> None:
             StatusClassification.ERROR,
             State.ERROR,
         )
+        
+    statusLog.save_document()

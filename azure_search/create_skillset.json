@@ -4,7 +4,7 @@
   "skills": [
     {
       "@odata.type": "#Microsoft.Skills.Text.V3.EntityRecognitionSkill",
-      "name": "#1",
+      "name": "EntityRecognition",
       "description": null,
       "context": "/document/content",
       "categories": [
@@ -25,7 +25,7 @@
         },
         {
           "name": "languageCode",
-          "source": "/document/language"
+          "source": "/document/languageWithDefault"
         }
       ],
       "outputs": [
@@ -49,7 +49,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
-      "name": "#2",
+      "name": "KeyPhrases",
       "description": null,
       "context": "/document/content",
       "defaultLanguageCode": "$ACS_KEY_PHRASE_EXTRACTION_SKILL_LANGUAGE",
@@ -62,7 +62,7 @@
         },
         {
           "name": "languageCode",
-          "source": "/document/language"
+          "source": "/document/languageWithDefault"
         }
       ],
       "outputs": [
@@ -74,7 +74,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
-      "name": "#3",
+      "name": "LanguageDetection",
       "description": null,
       "context": "/document",
       "defaultCountryHint": null,
@@ -93,8 +93,20 @@
       ]
     },
     {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "LangaugeWithDefault",
+      "description": null,
+      "context": "/document",
+      "inputs": [
+          { "name": "condition", "source": "= $(/document/language) == '(Unknown)'" },
+          { "name": "whenTrue", "source": "= '$ACS_TEXT_TRANSLATION_SKILL_TO_LANGUAGE'" },
+          { "name": "whenFalse", "source": "= $(/document/language)" }
+      ],
+      "outputs": [ { "name": "output", "targetName": "languageWithDefault" } ]
+    },
+    {
       "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
-      "name": "#4",
+      "name": "Translation",
       "description": null,
       "context": "/document/content",
       "defaultFromLanguageCode": null,
@@ -115,7 +127,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.PIIDetectionSkill",
-      "name": "#5",
+      "name": "PIIDetection",
       "description": null,
       "context": "/document/content",
       "defaultLanguageCode": "$ACS_PII_DETECTION_SKILL_LANGUAGE",
@@ -132,7 +144,7 @@
         },
         {
           "name": "languageCode",
-          "source": "/document/language"
+          "source": "/document/languageWithDefault"
         }
       ],
       "outputs": [
@@ -148,7 +160,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
-      "name": "#6",
+      "name": "TextSplit",
       "textSplitMode": "pages",
       "maximumPageLength": 5000,
       "defaultLanguageCode": "$ACS_TEXT_SPLITTING_SKILL_LANGUAGE",
@@ -160,7 +172,7 @@
         },
         {
           "name": "languageCode",
-          "source": "/document/language"
+          "source": "/document/languageWithDefault"
         }
       ],
       "outputs": [
@@ -172,7 +184,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Util.DocumentExtractionSkill",
-      "name": "#7",
+      "name": "DocExtraction",
       "parsingMode": "default",
       "dataToExtract": "contentAndMetadata",
       "configuration": {
@@ -200,7 +212,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Vision.OcrSkill",
-      "name": "#8",
+      "name": "OCR",
       "description": null,
       "context": "/document/normalized_images/*",
       "textExtractionAlgorithm": null,
@@ -226,7 +238,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Vision.ImageAnalysisSkill",
-      "name": "#9",
+      "name": "ImageAnalysis",
       "description": null,
       "context": "/document/normalized_images/*",
       "defaultLanguageCode": "$ACS_IMAGE_ANALYSIS_SKILL_LANGUAGE",
@@ -254,7 +266,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
-      "name": "#10",
+      "name": "MergeContentwImageTags",
       "description": "Create merged_content, which includes all the image caption, ocr text, image tags and the content field.",
       "context": "/document",
       "insertPreTag": " ",
@@ -278,7 +290,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
-      "name": "#11",
+      "name": "MergewOCRText",
       "description": "Create merged_imgCaption_ocrtext_imgTags, which includes all the tags added to the image caption and ocr text.",
       "context": "/document",
       "insertPreTag": " ",
@@ -302,7 +314,7 @@
     },
     {
       "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
-      "name": "#12",
+      "name": "MergewOCRText2",
       "description": "Create merged_imgCaption_ocrtext, which includes the image caption and any ocr text.",
       "context": "/document",
       "insertPreTag": " ",

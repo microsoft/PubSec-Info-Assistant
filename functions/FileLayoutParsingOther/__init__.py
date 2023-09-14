@@ -8,6 +8,7 @@ from enum import Enum
 from io import BytesIO
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities
 import mammoth
@@ -28,14 +29,16 @@ cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
+text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 
-statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
+
 utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 function_name = "FileLayoutParsingOther"
 
 def main(msg: func.QueueMessage) -> None:
     try:
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
         logging.info('Python queue trigger function processed a queue item: %s',
                     msg.get_body().decode('utf-8'))
 
@@ -63,14 +66,22 @@ def main(msg: func.QueueMessage) -> None:
             html = result.value # The generated HTML
         else:
             html = response.text 
-            
-                
+                            
         # build the document map from HTML for all non-pdf file types
         statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)
         document_map = utilities.build_document_map_html(blob_name, blob_uri, html, azure_blob_log_storage_container)
         statusLog.upsert_document(blob_name, f'{function_name} - Document map build complete, starting chunking', StatusClassification.DEBUG)
         chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
-        statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete. {chunk_count} chunks created', StatusClassification.DEBUG, State.COMPLETE)       
-
+        statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete. {chunk_count} chunks created', StatusClassification.DEBUG)       
+        
+        # submit message to the enrichment queue to continue processing                
+        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+        message_json["enrichment_queued_count"] = 1
+        message_string = json.dumps(message_json)
+        queue_client.send_message(message_string)
+        statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)      
+             
     except Exception as e:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
+
+    statusLog.save_document()

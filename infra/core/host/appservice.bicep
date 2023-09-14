@@ -114,6 +114,9 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
             allowedAudiences: [
               'api://${name}'
             ]
+            defaultAuthorizationPolicy: {
+              allowedApplications: []
+            }
           }
         }
       }

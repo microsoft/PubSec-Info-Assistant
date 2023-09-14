@@ -32,6 +32,10 @@ jq -r  '
             "env_var": "AZURE_OPENAI_SERVICE"
         },
         {
+            "path": "azurE_OPENAI_RESOURCE_GROUP",
+            "env_var": "AZURE_OPENAI_RESOURCE_GROUP"
+        },
+        {
             "path": "backenD_URI",
             "env_var": "AZURE_WEBAPP_URI"
         },
@@ -94,6 +98,22 @@ jq -r  '
         {
             "path": "azurE_COSMOSDB_CONTAINER_NAME",
             "env_var": "COSMOSDB_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_CLIENT_ID",
+            "env_var": "AZURE_CLIENT_ID"
+        },
+        {
+            "path": "azurE_CLIENT_SECRET",
+            "env_var": "AZURE_CLIENT_SECRET"
+        },
+        {
+            "path": "azurE_TENANT_ID",
+            "env_var": "AZURE_TENANT_ID"
+        },
+        {
+            "path": "azurE_SUBSCRIPTION_ID",
+            "env_var": "AZURE_SUBSCRIPTION_ID"
         }
     ]
         as $env_vars_to_extract

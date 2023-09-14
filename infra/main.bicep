@@ -34,6 +34,8 @@ param formRecognizerSkuName string = 'S0'
 param encichmentSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
+param appServicePlanContainerName string = ''
+param containerRegistryName string = ''
 param resourceGroupName string = ''
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
@@ -121,6 +123,36 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
     kind: 'linux'
   }
 }
+
+module containerRegistry 'core/host/conteinerregistry.bicep' = {
+  name: 'containerregistry'
+  scope: rg
+  params: {
+    name: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
+    location: location
+    tags: tags
+  }
+}
+
+
+// Create an App Service Plan and supporting services for the enrichment app service
+module appServiceContainer 'core/host/appservicecontainer.bicep' = {
+  name: 'appservicecontainer'
+  scope: rg
+  params: {
+    appServiceName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+    appServicePlanName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+    location: location
+    tags: tags
+    logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
+    applicationInsightsName: logging.outputs.applicationInsightsName
+    storageAccountUri: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${textEnrichmentQueue}'
+  }
+  dependsOn: [
+    logging
+  ]
+}
+
 
 // The application frontend
 module backend 'core/host/appservice.bicep' = {
@@ -497,6 +529,16 @@ module storageRoleFunc 'core/security/role.bicep' = {
   }
 }
 
+module containerRegistryPush 'core/security/role.bicep' = {
+  scope: rg
+  name: 'AcrPush'
+  params: {
+    principalId: aadMgmtServicePrincipalId
+    roleDefinitionId: '8311e382-0749-4cb8-b61a-304f252e45ec'
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // MANAGEMENT SERVICE PRINCIPAL
 module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
   scope: resourceGroup(useExistingAOAIService? azureOpenAIResourceGroup : rg.name)
@@ -577,3 +619,6 @@ output AZURE_TENANT_ID string = tenantId
 #disable-next-line outputs-should-not-contain-secrets
 output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
+output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
+output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
+output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name

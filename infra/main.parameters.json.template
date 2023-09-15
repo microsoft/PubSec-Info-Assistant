@@ -35,6 +35,9 @@
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
     },
+    "embeddingsModelName": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
+    },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
     },

@@ -6,7 +6,6 @@ param applicationInsightsName string = ''
 param logAnalyticsWorkspaceName string = ''
 param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
 param storageAccountUri string
-
 param appSettings object = {}
 
 

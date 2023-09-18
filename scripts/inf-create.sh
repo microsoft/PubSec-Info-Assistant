@@ -197,4 +197,4 @@ results=$(az deployment sub create --location $LOCATION --template-file main.bic
 #save deployment output
 printInfo "Writing output to infra_output.json"
 pushd "$DIR/.."
-echo $results > infra_output.json 
+echo $results > infra_output.json  

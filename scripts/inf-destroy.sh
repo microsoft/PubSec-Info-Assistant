@@ -30,4 +30,4 @@ else
     echo
     echo az group delete --resource-group $RG_NAME --yes --no-wait
     echo
-fi
+fi 

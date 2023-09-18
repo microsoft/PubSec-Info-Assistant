@@ -29,4 +29,3 @@ then
     echo -e "Either use subscription id $ARM_SUBSCRIPTION_ID, or unset the ARM_SUBSCRIPTION_ID environment variable in your .env"
     exit 1
 fi
-

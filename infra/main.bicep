@@ -171,7 +171,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.name}.azurecr.io'
+      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.azurecr.io'
       DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
       DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
     }

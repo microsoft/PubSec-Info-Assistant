@@ -3,4 +3,4 @@
 
 #!/bin/bash
 
-docker run --rm --privileged alpine hwclock -s 
+docker run --rm --privileged alpine hwclock -s

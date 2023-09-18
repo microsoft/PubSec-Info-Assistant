@@ -262,7 +262,7 @@ class ChatReadRetrieveReadApproach(Approach):
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
         #Added conditional block to use different system messages for different models.
 
-        if self.model_name == "gpt-35-turbo":
+        if self.model_name.startswith("gpt-35-turbo"):
             messages = self.get_messages_from_history(
                 system_message,
                 self.chatgpt_deployment,
@@ -292,7 +292,7 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1
         )
             
-        elif self.model_name == "gpt-4":
+        elif self.model_name.startswith("gpt-4"):
             messages = self.get_messages_from_history(
                 "Sources:\n" + content + "\n\n" + system_message,
                 # system_message + "\n\nSources:\n" + content,

@@ -150,6 +150,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     applicationInsightsName: logging.outputs.applicationInsightsName
     storageAccountUri: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
+    managedIdentity: true
     appSettings: {
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
@@ -169,6 +170,10 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
+      BLOB_CONNECTION_STRING: storage.outputs.connectionString
+      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.name}.azurecr.io'
+      DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
+      DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
     }
   }
   dependsOn: [
@@ -532,6 +537,16 @@ module openAiRoleBackend 'core/security/role.bicep' = {
   params: {
     principalId: backend.outputs.identityPrincipalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    principalType: 'ServicePrincipal'
+  }
+}
+
+module ACRRoleContainerAppService 'core/security/role.bicep' = {
+  scope: rg
+  name: 'container-webapp-acrpull-role'
+  params: {
+    principalId: appServiceContainer.outputs.identityPrincipalId
+    roleDefinitionId: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
     principalType: 'ServicePrincipal'
   }
 }

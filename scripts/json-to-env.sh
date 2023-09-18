@@ -88,7 +88,11 @@ jq -r  '
         {
             "path": "azurE_BLOB_DROP_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
-        }
+        },
+        {
+            "path": "bloB_CONNECTION_STRING",
+            "env_var": "BLOB_CONNECTION_STRING"
+        }        
     ]
         as $env_vars_to_extract
     |

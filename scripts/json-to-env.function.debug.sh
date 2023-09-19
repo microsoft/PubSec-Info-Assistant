@@ -150,7 +150,11 @@ jq -r  '
         {
             "path": "enablE_DEV_CODE",
             "env_var": "ENABLE_DEV_CODE"
-        }
+        },
+        {
+            "path": "embeddingsqueue",
+            "env_var": "EMBEDDINGS_QUEUE"
+        }        
     ]
         as $env_vars_to_extract
     |

@@ -90,8 +90,16 @@ jq -r  '
             "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
         },
         {
+            "path": "azurE_STORAGE_CONTAINER",
+            "env_var": "AZURE_STORAGE_CONTAINER"
+        },
+        {
             "path": "bloB_CONNECTION_STRING",
             "env_var": "BLOB_CONNECTION_STRING"
+        },       
+        {
+            "path": "targeT_EMBEDDINGS_MODEL",
+            "env_var": "TARGET_EMBEDDINGS_MODEL"
         }        
     ]
         as $env_vars_to_extract

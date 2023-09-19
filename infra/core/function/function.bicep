@@ -130,6 +130,9 @@ param enrichmentBackoff string
 @description('A boolean value that flags if a user wishes to enable or disable code under development')
 param enableDevCode bool
 
+@description('A boolean value that flags if a user wishes to enable or disable code under development')
+param EMBEDDINGS_QUEUE string
+
 
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {

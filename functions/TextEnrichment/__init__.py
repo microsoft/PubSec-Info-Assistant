@@ -32,6 +32,7 @@ targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+queueName = os.environ["EMBEDDINGS_QUEUE"]
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
@@ -45,6 +46,10 @@ utilities = Utilities(
     azure_blob_storage_key,
 )
 
+statusLog = StatusLog(
+    cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
+)     
+
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from
@@ -55,9 +60,7 @@ def main(msg: func.QueueMessage) -> None:
     blob_path = message_json["blob_name"]
     try:
         
-        statusLog = StatusLog(
-            cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
-        )        
+   
         logging.info(
             "Python queue trigger function processed a queue item: %s",
             msg.get_body().decode("utf-8"),
@@ -151,7 +154,12 @@ def main(msg: func.QueueMessage) -> None:
                 json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
                 block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
                 block_blob_client.upload_blob(json_str, overwrite=True)
-  
+                
+        # Queue message to embeddings queue for downstream processing
+        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queueName, message_encode_policy=TextBase64EncodePolicy())
+        embeddings_queue_backoff =  random.randint(1, 60)
+        message_string = json.dumps(message_json)
+        queue_client.send_message(message_string, visibility_timeout = embeddings_queue_backoff)
    
         statusLog.upsert_document(
             blob_path,

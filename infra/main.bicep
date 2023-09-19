@@ -53,6 +53,7 @@ param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param embeddingsModelName string = 'text-embedding-ada-002'
+param targetEmbeddingsModel string = 'azure-openai_text-embedding-ada-002'
 param chatGptDeploymentCapacity int = 30
 param embeddingsDeploymentCapacity int = 240
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
@@ -175,6 +176,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
       DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
+      TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
     }
   }
   dependsOn: [
@@ -447,6 +449,7 @@ module functions 'core/function/function.bicep' = {
     maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
     enrichmentBackoff: enrichmentBackoff
     enableDevCode: enableDevCode
+    EMBEDDINGS_QUEUE: embeddingsQueue
   }
   dependsOn: [
     appServicePlan
@@ -677,3 +680,4 @@ output AZURE_SUBSCRIPTION_ID string = subscriptionId
 output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
 output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
+output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel

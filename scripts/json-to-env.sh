@@ -72,8 +72,11 @@ jq -r  '
         {
             "path": "azurE_FUNCTION_APP_NAME",
             "env_var": "AZURE_FUNCTION_APP_NAME"
+        },
+        {
+            "path": "containeR_REGISTRY_NAME",
+            "env_var": "CONTAINER_REGISTRY_NAME"
         }
-        
     ]
         as $env_vars_to_extract
     |

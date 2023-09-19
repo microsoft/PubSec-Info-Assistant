@@ -40,7 +40,8 @@ ENV = {
     "AZURE_OPENAI_EMBEDDING_MODEL": None,
     "AZURE_SEARCH_INDEX": None,
     "AZURE_SEARCH_SERVICE_KEY": None,
-    "AZURE_SEARCH_SERVICE": None
+    "AZURE_SEARCH_SERVICE": None,
+    "BLOB_CONNECTION_STRING": None
 }
 
 for key, value in ENV.items():
@@ -85,7 +86,7 @@ utilities = Utilities(
 
 log.debug("Setting up Azure Storage Queue Client...")
 queue_client = QueueClient.from_connection_string(
-    conn_str=ENV["AZURE_STORAGE_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
+    conn_str=ENV["BLOB_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
 )
 log.debug("Azure Storage Queue Client setup")
 

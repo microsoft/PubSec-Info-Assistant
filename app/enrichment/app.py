@@ -77,15 +77,15 @@ log.info("Starting up")
 # === Azure Setup ===
 
 utilities = Utilities(
-    azure_blob_storage_account=ENV["BLOB_STORAGE_ACCOUNT"],
+    azure_blob_storage_account=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
     azure_blob_drop_storage_container=ENV["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"],
-    azure_blob_content_storage_container=ENV["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"],
+    azure_blob_content_storage_container=ENV["AZURE_BLOB_STORAGE_CONTAINER"],
     azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 
 log.debug("Setting up Azure Storage Queue Client...")
 queue_client = QueueClient.from_connection_string(
-    conn_str=ENV["AZURE_STORAGE_CONNECTION_STRING"], queue_name=ENV["EMBEDDING_QUEUE_NAME"]
+    conn_str=ENV["AZURE_STORAGE_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
 )
 log.debug("Azure Storage Queue Client setup")
 

@@ -174,6 +174,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.azurecr.io'
       DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
       DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
+      AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
     }
   }
   dependsOn: [

@@ -141,16 +141,16 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
       {
         category: 'AppServiceAppLogs'
         enabled: true
-        retentionPolicy: (isGovCloudDeployment) ? null : {
-          days: 30
+        retentionPolicy: {
+          days: 0 
           enabled: true 
         }
       }
       {
         category: 'AppServicePlatformLogs'
         enabled: true
-        retentionPolicy: (isGovCloudDeployment) ? null : {
-          days: 30
+        retentionPolicy:  {
+          days: 0
           enabled: true 
         }
       }
@@ -159,8 +159,8 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
       {
         category: 'AllMetrics'
         enabled: true
-        retentionPolicy: (isGovCloudDeployment) ? null :  {
-          days: 30
+        retentionPolicy: {
+          days: 0
           enabled: true 
         }
       }

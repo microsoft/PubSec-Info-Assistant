@@ -31,6 +31,7 @@ then
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
+
 sudo docker tag ${image_name} $CONTAINER_REGISTRY_NAME.azurecr.io/${image_name}:${tag}
 az acr login --name $CONTAINER_REGISTRY_NAME
 docker push $CONTAINER_REGISTRY_NAME.azurecr.io/${image_name}:${tag}

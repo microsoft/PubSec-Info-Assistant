@@ -13,6 +13,14 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Models
+
+models
+
+# Image tags
+
+image_tag.txt
+
 # Mono auto generated files
 mono_crash.*
 

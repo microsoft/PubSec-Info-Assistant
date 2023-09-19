@@ -27,11 +27,13 @@ from shared_code.status_log import State, StatusLog
 AZURE_BLOB_STORAGE_ACCOUNT = (
     os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
 )
+AZURE_BLOB_STORAGE_ENDPOINT = os.environ.get("AZURE_BLOB_STORAGE_ENDPOINT") 
 AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = (
     os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
 )
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
+AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
 AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
@@ -39,8 +41,13 @@ AZURE_OPENAI_RESOURCE_GROUP = os.environ.get("AZURE_OPENAI_RESOURCE_GROUP") or "
 AZURE_OPENAI_CHATGPT_DEPLOYMENT = (
     os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
 )
+AZURE_OPENAI_CHATGPT_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME") or "")
+AZURE_OPENAI_CHATGPT_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_VERSION") or "")
+
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
+IS_GOV_CLOUD_DEPLOYMENT = os.environ.get("IS_GOV_CLOUD_DEPLOYMENT")
+CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT")
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "merged_content"
 KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
@@ -77,25 +84,35 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
-    endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
+    endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
     index_name=AZURE_SEARCH_INDEX,
     credential=azure_search_key_credential,
 )
 blob_client = BlobServiceClient(
-    account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net",
+    account_url=AZURE_BLOB_STORAGE_ENDPOINT,
     credential=AZURE_BLOB_STORAGE_KEY,
 )
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
-# Set up OpenAI management client
-openai_mgmt_client = CognitiveServicesManagementClient(
-    credential=azure_credential,
-    subscription_id=AZURE_SUBSCRIPTION_ID)
+model_name = ''
+model_version = ''
 
-deployment = openai_mgmt_client.deployments.get(
-    resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
-    account_name=AZURE_OPENAI_SERVICE,
-    deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+if (IS_GOV_CLOUD_DEPLOYMENT):
+    model_name = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME")
+    model_version = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION")
+else:
+    # Set up OpenAI management client
+    openai_mgmt_client = CognitiveServicesManagementClient(
+        credential=azure_credential,
+        subscription_id=AZURE_SUBSCRIPTION_ID)
+
+    deployment = openai_mgmt_client.deployments.get(
+        resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+        account_name=AZURE_OPENAI_SERVICE,
+        deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+
+    model_name = deployment.properties.model.name,
+    model_version = deployment.properties.model.version
 
 chat_approaches = {
     "rrr": ChatReadRetrieveReadApproach(
@@ -107,8 +124,9 @@ chat_approaches = {
         KB_FIELDS_CONTENT,
         blob_client,
         QUERY_TERM_LANGUAGE,
-        deployment.properties.model.name,
-        deployment.properties.model.version
+        model_name,
+        model_version,
+        IS_GOV_CLOUD_DEPLOYMENT
     )
 }
 
@@ -181,12 +199,21 @@ def get_info_data():
     response = jsonify(
         {
             "AZURE_OPENAI_CHATGPT_DEPLOYMENT": f"{AZURE_OPENAI_CHATGPT_DEPLOYMENT}",
-            "AZURE_OPENAI_MODEL_NAME": f"{deployment.properties.model.name}",
-            "AZURE_OPENAI_MODEL_VERSION": f"{deployment.properties.model.version}",
+            "AZURE_OPENAI_MODEL_NAME": f"{model_name}",
+            "AZURE_OPENAI_MODEL_VERSION": f"{model_version}",
             "AZURE_OPENAI_SERVICE": f"{AZURE_OPENAI_SERVICE}",
             "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
             "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",
             "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
+        })
+    return response
+
+# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
+@app.route("/getWarningBanner")
+def get_warning_banner():
+    response = jsonify(
+        {
+            "WARNING_BANNER_TEXT": f"{CHAT_WARNING_BANNER_TEXT}"
         })
     return response
 

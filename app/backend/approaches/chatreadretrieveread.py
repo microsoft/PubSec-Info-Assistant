@@ -89,7 +89,8 @@ class ChatReadRetrieveReadApproach(Approach):
         blob_client: BlobServiceClient,
         query_term_language: str,
         model_name: str,
-        model_version: str
+        model_version: str,
+        is_gov_cloud_deployment: str
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -105,6 +106,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         self.model_name = model_name
         self.model_version = model_version
+        self.is_gov_cloud_deployment = is_gov_cloud_deployment
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -146,7 +148,7 @@ class ChatReadRetrieveReadApproach(Approach):
             generated_query = history[-1]["user"]
 
         # STEP 2: Retrieve relevant documents from the search index with the optimized query term
-        if overrides.get("semantic_ranker"):
+        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
             raw_search_results = self.search_client.search(
                 generated_query,
                 filter=category_filter,

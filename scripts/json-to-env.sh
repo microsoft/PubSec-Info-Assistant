@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 #!/bin/bash
-set -e
+set -e 
 
 echo "# Generated environment variables from bicep output"
 
@@ -20,6 +20,10 @@ jq -r  '
         {
             "path": "azurE_SEARCH_SERVICE",
             "env_var": "AZURE_SEARCH_SERVICE"
+        },
+        {
+            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
         },
         {
             "path": "azurE_STORAGE_ACCOUNT",
@@ -68,8 +72,11 @@ jq -r  '
         {
             "path": "azurE_FUNCTION_APP_NAME",
             "env_var": "AZURE_FUNCTION_APP_NAME"
+        },
+        {
+            "path": "containeR_REGISTRY_NAME",
+            "env_var": "CONTAINER_REGISTRY_NAME"
         }
-        
     ]
         as $env_vars_to_extract
     |
@@ -89,3 +96,4 @@ jq -r  '
     |
     .[]
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
+    

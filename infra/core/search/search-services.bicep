@@ -11,6 +11,7 @@ param authOptions object = {}
 param semanticSearch string = 'disabled'
 param kind string = 'CognitiveServices'
 param publicNetworkAccess string = 'Enabled'
+param isGovCloudDeployment bool  
 param cogServicesSku object = {
   name: 'S0'
 }
@@ -37,7 +38,7 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
     partitionCount: 1
     publicNetworkAccess: 'Enabled'
     replicaCount: 1
-    semanticSearch: semanticSearch
+    semanticSearch:  ((isGovCloudDeployment) ? null : semanticSearch)
   }
   sku: sku
 }
@@ -54,7 +55,7 @@ resource cogService 'Microsoft.CognitiveServices/accounts@2022-10-01' = {
 }
 
 output id string = search.id
-output endpoint string = 'https://${name}.search.windows.net/'
+output endpoint string = (isGovCloudDeployment) ? 'https://${name}.search.azure.us/' : 'https://${name}.search.windows.net/'
 output name string = search.name
 #disable-next-line outputs-should-not-contain-secrets
 output searchServiceKey string = search.listAdminKeys().primaryKey

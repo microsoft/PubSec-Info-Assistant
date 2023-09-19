@@ -34,6 +34,7 @@ param formRecognizerSkuName string = 'S0'
 param encichmentSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
+param containerRegistryName string = ''
 param resourceGroupName string = ''
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
@@ -50,7 +51,9 @@ param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
+param chatGptModelVersion string = ''
 param chatGptDeploymentCapacity int = 30
+param chatWarningBannerText string = ''
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750' 
@@ -62,6 +65,7 @@ param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param mediaSubmitQueue string = 'media-submit-queue'
 param textEnrichmentQueue string = 'text-enrichment-queue'
 param queryTermLanguage string = 'English'
+param isGovCloudDeployment bool = contains(location, 'usgov')
 param maxSecondsHideOnUpload string = '300'
 param maxSubmitRequeueCount string = '10'
 param pollQueueSubmitBackoff string = '60'
@@ -122,6 +126,16 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
+module containerRegistry 'core/host/conteinerregistry.bicep' = {
+  name: 'containerregistry'
+  scope: rg
+  params: {
+    name: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
+    location: location
+    tags: tags
+  }
+}
+
 // The application frontend
 module backend 'core/host/appservice.bicep' = {
   name: 'web'
@@ -137,16 +151,21 @@ module backend 'core/host/appservice.bicep' = {
     managedIdentity: true
     applicationInsightsName: logging.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
+    isGovCloudDeployment: isGovCloudDeployment
     appSettings: {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
+      AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : rg.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+      AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
+      AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
@@ -158,7 +177,8 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
-
+      IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
+      CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
     }
     aadClientId: aadWebClientId
   }
@@ -201,6 +221,7 @@ module formrecognizer 'core/ai/formrecognizer.bicep' = {
     sku: {
       name: formRecognizerSkuName
     }
+    isGovCloudDeployment: isGovCloudDeployment
   }
 }
 
@@ -212,6 +233,7 @@ module enrichment 'core/ai/enrichment.bicep' = {
     location: location
     tags: tags
     sku: encichmentSkuName
+    isGovCloudDeployment: isGovCloudDeployment
   }
 }
 
@@ -235,6 +257,7 @@ module searchServices 'core/search/search-services.bicep' = {
     cogServicesSku: {
       name: cognitiveServiesForSearchSku
     }
+    isGovCloudDeployment: isGovCloudDeployment
   }
 }
 
@@ -339,6 +362,7 @@ module functions 'core/function/function.bicep' = {
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
     blobStorageAccountKey: storage.outputs.key
     blobStorageAccountName: storage.outputs.name
+    blobStorageAccountEndpoint: storage.outputs.primaryEndpoints.blob
     blobStorageAccountConnectionString: storage.outputs.connectionString
     blobStorageAccountOutputContainerName: containerName
     blobStorageAccountUploadContainerName: uploadContainerName
@@ -497,9 +521,19 @@ module storageRoleFunc 'core/security/role.bicep' = {
   }
 }
 
+module containerRegistryPush 'core/security/role.bicep' = {
+  scope: rg
+  name: 'AcrPush'
+  params: {
+    principalId: aadMgmtServicePrincipalId
+    roleDefinitionId: '8311e382-0749-4cb8-b61a-304f252e45ec'
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // MANAGEMENT SERVICE PRINCIPAL
 module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
-  scope: resourceGroup(useExistingAOAIService? azureOpenAIResourceGroup : rg.name)
+  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment? azureOpenAIResourceGroup : rg.name)
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId
@@ -526,8 +560,10 @@ output AZURE_LOCATION string = location
 output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName //cognitiveServices.outputs.name
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name
+output AZURE_SEARCH_SERVICE_ENDPOINT string = searchServices.outputs.endpoint
 output AZURE_SEARCH_KEY string = searchServices.outputs.searchServiceKey
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
+output AZURE_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
 output AZURE_STORAGE_CONTAINER string = containerName
 output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
@@ -577,3 +613,5 @@ output AZURE_TENANT_ID string = tenantId
 #disable-next-line outputs-should-not-contain-secrets
 output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
+output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
+output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name

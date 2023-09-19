@@ -26,13 +26,13 @@ from shared_code.utilities import Utilities
 # === ENV Setup ===
 
 ENV = {
-    "BLOB_STORAGE_ACCOUNT_KEY": None,
-    "EMBEDDING_QUEUE_NAME": None,
+    "AZURE_BLOB_STORAGE_KEY": None,
+    "EMBEDDINGS_QUEUE": None,
     "LOG_LEVEL": "DEBUG", # Will be overwritten by LOG_LEVEL in Environment
     "DEQUEUE_MESSAGE_BATCH_SIZE": 5,
-    "BLOB_STORAGE_ACCOUNT": None,
+    "AZURE_BLOB_STORAGE_ACCOUNT": None,
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME": None,
-    "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": None,
+    "AZURE_BLOB_STORAGE_CONTAINER": None,
     "COSMOSDB_URL": None,
     "COSMOSDB_KEY": None,
     "COSMOSDB_DATABASE_NAME": None,
@@ -42,8 +42,9 @@ ENV = {
     "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_OPENAI_EMBEDDING_MODEL": None,
     "AZURE_SEARCH_INDEX": None,
-    "AZURE_SEARCH_KEY": None,
-    "AZURE_SEARCH_SERVICE": None
+    "AZURE_SEARCH_SERVICE_KEY": None,
+    "AZURE_SEARCH_SERVICE": None,
+    "BLOB_CONNECTION_STRING": None
 }
 
 for key, value in ENV.items():
@@ -80,15 +81,15 @@ log.info("Starting up")
 # === Azure Setup ===
 
 utilities = Utilities(
-    azure_blob_storage_account=ENV["BLOB_STORAGE_ACCOUNT"],
+    azure_blob_storage_account=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
     azure_blob_drop_storage_container=ENV["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"],
-    azure_blob_content_storage_container=ENV["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"],
-    azure_blob_storage_key=ENV["BLOB_STORAGE_ACCOUNT_KEY"],
+    azure_blob_content_storage_container=ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+    azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 
 log.debug("Setting up Azure Storage Queue Client...")
 queue_client = QueueClient.from_connection_string(
-    conn_str=ENV["AZURE_STORAGE_CONNECTION_STRING"], queue_name=ENV["EMBEDDING_QUEUE_NAME"]
+    conn_str=ENV["BLOB_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
 )
 log.debug("Azure Storage Queue Client setup")
 

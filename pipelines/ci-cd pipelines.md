@@ -14,4 +14,5 @@ To get started with setting up your deployment pipelines please take the followi
     - AZURE_STORAGE_ACCOUNT_KEY: Bicep is used to create Infrastructure as Code. This is the storage account access key is used to access the Bicep state file.
     - AZURE_OPENAI_SERVICE_NAME : Is used to provide  access to many different models.
     - AZURE_OPENAI_SERVICE_KEY : These keys are used to access your Cognitive Service API.
-    - AZURE_OPENAI_CHATGPT_DEPLOYMENT: TThese are use for the ChatGPT model (gpt-35-turbo) for conversational interfaces.
+    - AZURE_OPENAI_CHATGPT_DEPLOYMENT: These are used for the ChatGPT model (gpt-35-turbo) for conversational interfaces.
+    - AZURE_OPENAI_EMBEDDING_MODEL: Thsi specifies the embeddings model deployed and used

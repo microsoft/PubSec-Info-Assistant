@@ -4,7 +4,7 @@
 #!/bin/bash
 set -e
 
-figlet "Build Docker Containers"
+figlet "Build/Deploy Containers"
 
 image_name="enrichment-app"
 
@@ -39,5 +39,5 @@ echo "Containers deployed successfully"
 
 # Configure the webapp to use the ACR image
 echo "Pushing container to the WebApp"
-az webapp config appsettings set --resource-group $RESOURCE_GROUP_NAME --name $CONTAINER_APP_SERVICE --settings DOCKER_CUSTOM_IMAGE_NAME=$CONTAINER_REGISTRY_NAME.azurecr.io/$RESOURCE_GROUP_NAME:${tag}
+az webapp config container set --name $CONTAINER_APP_SERVICE --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_REGISTRY_NAME.azurecr.io/$image_name:${tag}
 az webapp restart --name $CONTAINER_APP_SERVICE --resource-group $RESOURCE_GROUP_NAME

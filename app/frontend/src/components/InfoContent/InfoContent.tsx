@@ -34,6 +34,7 @@ export const InfoContent = ({ className }: Props) => {
             <Separator>Azure OpenAI</Separator>
             <Label>Instance</Label><Text>{infoData?.AZURE_OPENAI_SERVICE}</Text>
             <Label>Deployment Name</Label><Text>{infoData?.AZURE_OPENAI_CHATGPT_DEPLOYMENT}</Text>
+            <Label>Deployment Name</Label><Text>{infoData?.AZURE_OPENAI_EMBEDDING_MODEL}</Text>
             <Label>Model Name</Label><Text>{infoData?.AZURE_OPENAI_MODEL_NAME}</Text>
             <Label>Model Version</Label><Text>{infoData?.AZURE_OPENAI_MODEL_VERSION}</Text>
             <Separator>Azure Cognitive Search</Separator>

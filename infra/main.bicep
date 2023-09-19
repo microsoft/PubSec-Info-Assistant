@@ -52,7 +52,9 @@ param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
+param embeddingsModelName string = 'text-embedding-ada-002'
 param chatGptDeploymentCapacity int = 30
+param embeddingsDeploymentCapacity int = 240
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750' 
@@ -63,6 +65,7 @@ param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param mediaSubmitQueue string = 'media-submit-queue'
 param textEnrichmentQueue string = 'text-enrichment-queue'
+param embeddingsQueue string = 'embeddings-queue'
 param queryTermLanguage string = 'English'
 param maxSecondsHideOnUpload string = '300'
 param maxSubmitRequeueCount string = '10'
@@ -146,7 +149,33 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
     tags: tags
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     applicationInsightsName: logging.outputs.applicationInsightsName
-    storageAccountUri: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${textEnrichmentQueue}'
+    storageAccountUri: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
+    managedIdentity: true
+    appSettings: {
+      AZURE_BLOB_STORAGE_KEY: storage.outputs.key
+      EMBEDDINGS_QUEUE: embeddingsQueue
+      LOG_LEVEL: 'DEBUG'
+      DEQUEUE_MESSAGE_BATCH_SIZE: 5
+      AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
+      BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME: uploadContainerName
+      AZURE_BLOB_STORAGE_CONTAINER: containerName
+      COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
+      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
+      COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName
+      COSMOSDB_CONTAINER_NAME: cosmosdb.outputs.CosmosDBContainerName
+      MAX_EMBEDDING_REQUEUE_COUNT: 5
+      AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
+      AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
+      AZURE_OPENAI_EMBEDDING_MODEL: embeddingsModelName
+      AZURE_SEARCH_INDEX: searchIndexName
+      AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
+      AZURE_SEARCH_SERVICE: searchServices.outputs.name
+      BLOB_CONNECTION_STRING: storage.outputs.connectionString
+      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.azurecr.io'
+      DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
+      DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
+      AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
+    }
   }
   dependsOn: [
     logging
@@ -190,7 +219,6 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
-
     }
     aadClientId: aadWebClientId
   }
@@ -217,7 +245,19 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         sku: {
           name: 'Standard'
           capacity: chatGptDeploymentCapacity
+        }        
+      }
+      {
+        name: !empty(embeddingsModelName) ? embeddingsModelName : embeddingsModelName
+        model: {
+          format: 'OpenAI'
+          name: embeddingsModelName
+          version: '2'
         }
+        sku: {
+          name: 'Standard'
+          capacity: embeddingsDeploymentCapacity
+        }        
       }
     ]
   }
@@ -322,6 +362,9 @@ module storage 'core/storage/storage-account.bicep' = {
       }          
       {
         name: textEnrichmentQueue
+      }
+      {
+        name: embeddingsQueue
       }
     ]
   }
@@ -499,6 +542,16 @@ module openAiRoleBackend 'core/security/role.bicep' = {
   }
 }
 
+module ACRRoleContainerAppService 'core/security/role.bicep' = {
+  scope: rg
+  name: 'container-webapp-acrpull-role'
+  params: {
+    principalId: appServiceContainer.outputs.identityPrincipalId
+    roleDefinitionId: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+    principalType: 'ServicePrincipal'
+  }
+}
+
 module storageRoleBackend 'core/security/role.bicep' = {
   scope: rg
   name: 'storage-role-backend'
@@ -576,6 +629,7 @@ output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+output AZURE_OPENAI_EMBEDDING_MODEL string = !empty(embeddingsModelName) ? embeddingsModelName : embeddingsModelName
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
@@ -599,6 +653,7 @@ output PDFPOLLINGQUEUE string = pdfPollingQueue
 output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
 output MEDIASUBMITQUEUE string = mediaSubmitQueue
 output TEXTENRICHMENTQUEUE string = textEnrichmentQueue
+output EMBEDDINGSQUEUE string = embeddingsQueue
 output MAX_SECONDS_HIDE_ON_UPLOAD string = maxSecondsHideOnUpload
 output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
 output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff

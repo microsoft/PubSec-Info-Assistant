@@ -56,6 +56,10 @@ jq -r  '
             "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
         },
         {
+            "path": "azurE_OPENAI_EMBEDDING_MODEL",
+            "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
+        },        
+        {
             "path": "azurE_OPENAI_SERVICE_KEY",
             "env_var": "AZURE_OPENAI_SERVICE_KEY"
         },
@@ -114,6 +118,18 @@ jq -r  '
         {
             "path": "azurE_SUBSCRIPTION_ID",
             "env_var": "AZURE_SUBSCRIPTION_ID"
+        },
+        {
+            "path": "embeddingsqueue",
+            "env_var": "EMBEDDINGS_QUEUE"
+        },
+        {
+            "path": "azurE_BLOB_DROP_STORAGE_CONTAINER",
+            "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_STORAGE_CONTAINER",
+            "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
         }
     ]
         as $env_vars_to_extract

@@ -6,6 +6,12 @@ set -e
 
 figlet "Build Docker Containers"
 
+if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
+  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
+else 
+  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
+fi
+
 # Get the required directories of the project
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPTS_DIR="$(realpath "$APP_DIR/../../scripts")"
@@ -20,7 +26,7 @@ echo "Building container"
 sudo docker build -t enrichment-app ${DIR} --build-arg BUILDKIT_INLINE_CACHE=1
 tag=$(date -u +"%Y%m%d-%H%M%S")
 sudo docker tag enrichment-app enrichment-app:${tag}
-sudo docker tag enrichment-app $CONTAINER_REGISTRY_NAME.azurecr.io/enrichment-app:${tag}
+sudo docker tag enrichment-app $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/enrichment-app:${tag}
 
 # Deploying to ACR
 echo "Deploying containers to ACR"
@@ -29,7 +35,7 @@ then
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
-sudo docker tag enrichment-app $CONTAINER_REGISTRY_NAME.azurecr.io/enrichment-app:${tag}
+sudo docker tag enrichment-app $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/enrichment-app:${tag}
 az acr login --name $CONTAINER_REGISTRY_NAME
-docker push $CONTAINER_REGISTRY_NAME.azurecr.io/enrichment-app:${tag}
+docker push $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/enrichment-app:${tag}
 echo "Containers deployed successfully"

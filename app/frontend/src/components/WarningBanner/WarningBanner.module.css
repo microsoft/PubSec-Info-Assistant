@@ -1,0 +1,10 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.warningBanner {
+    background-color: #4CAF50; /* Green color */
+    color: #ffffff; /* White color */
+    padding: 0px; /* Adjust the padding as needed */
+    text-align: center; /* Center the text */
+    font-weight: bold;
+}

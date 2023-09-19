@@ -20,6 +20,7 @@ def string_to_bool(s):
     return s.lower() == 'true'
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
@@ -50,7 +51,7 @@ max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
 enableDevCode = string_to_bool(os.environ["ENABLE_DEV_CODE"])
 
 function_name = "FileFormRecPollingPDF"
-utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
+utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 
 

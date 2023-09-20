@@ -125,6 +125,10 @@ jq -r  '
             "path": "azurE_OPENAI_RESOURCE_GROUP",
             "env_var": "AZURE_OPENAI_RESOURCE_GROUP"
         },
+        {
+            "path": "embeddinG_VECTOR_SIZE",
+            "env_var": "EMBEDDING_VECTOR_SIZE"
+        }        
     ]
         as $env_vars_to_extract
     |

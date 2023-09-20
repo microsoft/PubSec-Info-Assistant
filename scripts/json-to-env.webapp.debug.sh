@@ -138,7 +138,11 @@ jq -r  '
         {
             "path": "targeT_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
-        }        
+        },
+        {
+            "path": "embeddinG_VECTOR_SIZE",
+            "env_var": "EMBEDDING_VECTOR_SIZE"
+        }     
     ]
         as $env_vars_to_extract
     |

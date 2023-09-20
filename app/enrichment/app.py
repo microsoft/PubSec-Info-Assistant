@@ -49,7 +49,8 @@ ENV = {
     "AZURE_SEARCH_SERVICE": None,
     "BLOB_CONNECTION_STRING": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
-    "TARGET_EMBEDDINGS_MODEL": None
+    "TARGET_EMBEDDINGS_MODEL": None,
+    "EMBEDDING_VECTOR_SIZE": None
 }
 
 for key, value in ENV.items():
@@ -140,14 +141,14 @@ model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
 }
 model_info["all-mpnet-base-v2"] = {
     "model": "all-mpnet-base-v2",
-    "max_seq_length": -1,
+    "max_seq_length": 8191,
     "vector_size": 768 , 
     # https://huggingface.co/sentence-transformers/all-mpnet-base-v2
 }
 model_info["paraphrase-multilingual-MiniLM-L12-v2"] = {
     "model": "paraphrase-multilingual-MiniLM-L12-v2",
-    "max_seq_length": -1,
-    "vector_size": -1,
+    "max_seq_length": 8191,
+    "vector_size": 384,
 }
 
 log.debug("Models loaded")

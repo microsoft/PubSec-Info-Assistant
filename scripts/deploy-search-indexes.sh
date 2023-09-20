@@ -44,6 +44,12 @@ index_all_name=$(echo $index_all_json | jq -r .name )
 echo "Creating index $index_all_name ..."
 curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$index_all_json" $search_url/indexes/$index_all_name?api-version=2021-04-30-Preview
 
+# Create vector index
+index_vector_json=$(cat ${DIR}/../azure_search/create_vector_index.json | envsubst | tr -d "\n" | tr -d "\r")
+index_vector_name=$(echo $index_vector_json | jq -r .name )
+echo "Creating index $index_vector_name ..."
+curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$index_vector_json" $search_url/indexes/$index_vector_name?api-version=2023-07-01-Preview
+
 # Create all files indexer
 indexer_all_json=$(cat ${DIR}/../azure_search/create_all_indexer.json | envsubst | tr -d "\n" | tr -d "\r")
 indexer_all_name=$(echo $indexer_all_json | jq -r .name )

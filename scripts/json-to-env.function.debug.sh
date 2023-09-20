@@ -154,7 +154,7 @@ jq -r  '
         {
             "path": "embeddingsqueue",
             "env_var": "EMBEDDINGS_QUEUE"
-        }        
+        }
     ]
         as $env_vars_to_extract
     |

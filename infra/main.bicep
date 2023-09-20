@@ -92,6 +92,8 @@ param subscriptionId string = ''
 param principalId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
+var modelVectorSizeMap = loadJsonContent('embedding_model_vector_size.json')
+var embeddingVectorSize = modelVectorSizeMap[targetEmbeddingsModel]
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 
@@ -180,6 +182,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
+      EMBEDDING_VECTOR_SIZE: embeddingVectorSize
     }
   }
   dependsOn: [
@@ -697,3 +700,4 @@ output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
 output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
 output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel
+output EMBEDDING_VECTOR_SIZE string = embeddingVectorSize

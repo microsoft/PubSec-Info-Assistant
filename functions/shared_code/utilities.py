@@ -333,7 +333,7 @@ class Utilities:
             'file_uri': myblob_uri,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
-            'subtitle_name': subtitle_name,
+            'subtitle': subtitle_name,
             'section': section_name,
             'pages': page_list,
             'token_count': chunk_size,

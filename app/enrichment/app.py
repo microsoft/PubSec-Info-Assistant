@@ -257,6 +257,18 @@ def embed_texts(model: str, texts: List[str]):
     return output
 
 
+
+def generate_and_store_embedding(chunk_dict, field_name, blob_path):
+    try:
+        text = chunk_dict[f"translated_{field_name}"]
+    except KeyError:
+        text = chunk_dict[field_name]
+    
+    embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)
+    chunk_dict[f"embedding_{field_name}"] = embedding
+    statusLog.upsert_document(blob_path, 'Embedding generated', StatusClassification.INFO, State.PROCESSING)
+
+
 @app.on_event("startup") 
 @repeat_every(seconds=5, logger=log, raise_exceptions=True)
 def poll_queue() -> None:
@@ -267,11 +279,10 @@ def poll_queue() -> None:
         return
 
     log.debug("Polling queue for messages...")
-    response = queue_client.receive_messages(max_messages=5)
+    response = queue_client.receive_messages(max_messages=1)
     messages = [x for x in response]
     log.debug(f"Received {len(messages)} messages")
-    
-    # D
+
     
     for message in messages:
         
@@ -295,24 +306,19 @@ def poll_queue() -> None:
                 response = requests.get(blob_path_plus_sas)
                 response.raise_for_status()
                 chunk_dict = json.loads(response.text)  
+                                             
+                # Call the function for each field
+                fields_to_process = ["content", "title", "subtitle", "section"]
+                for field in fields_to_process:
+                    generate_and_store_embedding(chunk_dict, field, blob_path)
                 
-                # read the translated content, or content or base content if already in target language
-                try:
-                    text = chunk_dict["translated_content"]
-                except KeyError:
-                    text = chunk_dict["content"]
-                    
-                # Generate embeddings
-                embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)
-                chunk_dict["embedding"] = embedding
-                statusLog.upsert_document(blob_path, 'Embedding generated', StatusClassification.INFO, State.PROCESSING)
                 
                 # write chunk, and embedding back to content container
                 json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
                 block_blob_client = blob_service_client.get_blob_client(container=ENV["AZURE_BLOB_STORAGE_CONTAINER"], blob=chunk.name)
                 block_blob_client.upload_blob(json_str, overwrite=True)
 
-                # Dequeue message once complete
+                # delete message once complete, in case of failure
                 queue_client.delete_message(message)             
         
         except Exception as error:

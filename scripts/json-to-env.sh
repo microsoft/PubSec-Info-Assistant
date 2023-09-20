@@ -100,7 +100,27 @@ jq -r  '
         {
             "path": "targeT_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
-        }        
+        },
+        {
+            "path": "azurE_COSMOSDB_URL",
+            "env_var": "COSMOSDB_URL"
+        },
+        {
+            "path": "azurE_COSMOSDB_KEY",
+            "env_var": "COSMOSDB_KEY"
+        },
+        {
+            "path": "azurE_COSMOSDB_DATABASE_NAME",
+            "env_var": "COSMOSDB_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_CONTAINER_NAME",
+            "env_var": "COSMOSDB_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_OPENAI_RESOURCE_GROUP",
+            "env_var": "AZURE_OPENAI_RESOURCE_GROUP"
+        },
     ]
         as $env_vars_to_extract
     |

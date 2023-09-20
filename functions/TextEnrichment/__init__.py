@@ -50,6 +50,19 @@ statusLog = StatusLog(
     cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
 )     
 
+def translate_and_set(field_name, chunk_dict, headers, params, message_json):
+    data = [{"text": chunk_dict[field_name]}]
+    response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
+    
+    if response.status_code == 200:
+        translated_content = response.json()[0]['translations'][0]['text']
+        chunk_dict[f"translated_{field_name}"] = translated_content
+    else:
+        # error so requeue
+        requeue(response, message_json)
+        return   
+
+
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from
@@ -133,23 +146,14 @@ def main(msg: func.QueueMessage) -> None:
                 blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
                 response = requests.get(blob_path_plus_sas)
                 response.raise_for_status()
-                chunk_dict = json.loads(response.text)  
-                data = [{"text": chunk_dict["content"]}]
-                params = {
-                    'to': targetTranslationLanguage
-                }    
-                response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
-                if response.status_code == 200:
-                    translated_content = response.json()[0]['translations'][0]['text']
-
-                else:
-                    # error or requeue
-                    requeue(response, message_json)
-                    return
-                                
-                # add translated content to the chunk json
-                chunk_dict["translated_content"] = translated_content
-                                
+                chunk_dict = json.loads(response.text)
+                params = {'to': targetTranslationLanguage}  
+                
+                # Translate content, title, subtitle, and section
+                fields_to_translate = ["content", "title", "subtitle", "section"]
+                for field in fields_to_translate:
+                    translate_and_set(field, chunk_dict, headers, params, message_json)
+                                                
                 # Get path and file name minus the root container
                 json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
                 block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)

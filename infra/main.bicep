@@ -56,6 +56,7 @@ param chatGptModelVersion string = ''
 param embeddingsModelName string = 'text-embedding-ada-002'
 param targetEmbeddingsModel string = 'azure-openai_text-embedding-ada-002'
 param chatGptDeploymentCapacity int = 30
+param embeddingsDeploymentCapacity int = 240
 param chatWarningBannerText string = ''
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each

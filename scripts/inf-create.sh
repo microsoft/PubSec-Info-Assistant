@@ -9,7 +9,7 @@ printInfo() {
 }
 
 figlet Infrastructure
-
+ 
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
@@ -32,6 +32,17 @@ else
   randomString=$(mktemp --dry-run XXXXX)
   mkdir -p .state/${WORKSPACE}
   echo $randomString >> .state/${WORKSPACE}/random.txt
+fi
+
+if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
+  WEB_APP_ENDPOINT_SUFFIX="azurewebsites.net"
+else 
+  WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
+fi
+
+if [ -n "${IS_USGOV_DEPLOYMENT}" ] && [ "${USE_EXISTING_AOAI}" == 'false' ] ; then
+  echo "AOAI doesn't exist in US Gov regions.  Please create AOAI seperately and update the USE_EXISTING_AOAI in the env file. "
+  exit 1  
 fi
 
 if [ -n "${IN_AUTOMATION}" ]; then
@@ -84,7 +95,7 @@ else
   aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
   if [ -z $aadWebAppId ]
     then
-      aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+      aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.$WEB_APP_ENDPOINT_SUFFIX/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
       aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
     fi
   
@@ -141,6 +152,8 @@ declare -A REPLACE_TOKENS=(
     [\${AZURE_OPENAI_RESOURCE_GROUP}]=${AZURE_OPENAI_RESOURCE_GROUP}
     [\${CHATGPT_MODEL_DEPLOYMENT_NAME}]=${AZURE_OPENAI_CHATGPT_DEPLOYMENT}
     [\${AZURE_OPENAI_EMBEDDING_MODEL}]=${AZURE_OPENAI_EMBEDDING_MODEL}
+    [\${CHATGPT_MODEL_MODEL_NAME}]=${AZURE_OPENAI_CHATGPT_MODEL_NAME}
+    [\${CHATGPT_MODEL_VERSION}]=${AZURE_OPENAI_CHATGPT_MODEL_VERSION}
     [\${USE_EXISTING_AOAI}]=${USE_EXISTING_AOAI}
     [\${AZURE_OPENAI_SERVICE_KEY}]=${AZURE_OPENAI_SERVICE_KEY}
     [\${BUILD_NUMBER}]=${BUILD_NUMBER}
@@ -154,6 +167,7 @@ declare -A REPLACE_TOKENS=(
     [\${TENANT_ID}]=${TENANT_ID}
     [\${SUBSCRIPTION_ID}]=${SUBSCRIPTION_ID}
     [\${AZURE_AD_MGMT_APP_SECRET}]=${AZURE_AD_MGMT_APP_SECRET}
+    [\${CHAT_WARNING_BANNER_TEXT}]=${CHAT_WARNING_BANNER_TEXT}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

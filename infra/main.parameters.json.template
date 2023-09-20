@@ -37,6 +37,14 @@
     },
     "embeddingsModelName": {
       "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
+    "chatGptModelName": {
+      "value": "${CHATGPT_MODEL_MODEL_NAME}"
+    },
+    "chatGptModelVersion": {
+      "value": "${CHATGPT_MODEL_VERSION}"
+    },
+     "chatWarningBannerText": {
+       "value": "${CHAT_WARNING_BANNER_TEXT}"
     },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}

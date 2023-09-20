@@ -44,11 +44,13 @@ class Utilities:
     """ Class to hold utility functions """
     def __init__(self,
                  azure_blob_storage_account,
+                 azure_blob_storage_endpoint,
                  azure_blob_drop_storage_container,
                  azure_blob_content_storage_container,
                  azure_blob_storage_key
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
+        self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
         self.azure_blob_storage_key = azure_blob_storage_key
@@ -58,7 +60,7 @@ class Utilities:
         # folder_set should be in the format of "<my_folder_name>/"
         # Get path and file name minus the root container
         blob_service_client = BlobServiceClient(
-            f'https://{self.azure_blob_storage_account}.blob.core.windows.net/',
+            self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         block_blob_client = blob_service_client.get_blob_client(
             container=output_container, blob=f'{folder_set}{output_filename}')
@@ -126,7 +128,7 @@ class Utilities:
             permission=BlobSasPermissions(read=True),
             expiry=datetime.utcnow() + timedelta(hours=1)
         )
-        source_blob_path = f'https://{self.azure_blob_storage_account}.blob.core.windows.net/{blob_path}?{sas_token}'
+        source_blob_path = f'{self.azure_blob_storage_endpoint}{blob_path}?{sas_token}'
         source_blob_path = source_blob_path.replace(" ", "%20")
         logging.info("Path and SAS token for file in azure storage are now generated \n")
         return source_blob_path
@@ -344,7 +346,7 @@ class Utilities:
         # Get the folders to use when creating the new files
         folder_set = file_directory + file_name + file_extension + "/"
         blob_service_client = BlobServiceClient(
-            f'https://{self.azure_blob_storage_account}.blob.core.windows.net/',
+            self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
         output_filename = file_name + f'-{file_number}' + '.json'

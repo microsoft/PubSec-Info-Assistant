@@ -17,6 +17,7 @@ azure_blob_drop_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ[
@@ -93,11 +94,13 @@ analysis_options.model_version = "latest"
 
 FUNCTION_NAME = "ImageEnrichment"
 
+
 utilities = Utilities(
-    azure_blob_storage_account,
-    azure_blob_drop_storage_container,
-    azure_blob_content_storage_container,
-    azure_blob_storage_key,
+    azure_blob_storage_account=azure_blob_storage_account,
+    azure_blob_storage_endpoint=azure_blob_storage_endpoint,
+    azure_blob_drop_storage_container=azure_blob_drop_storage_container,
+    azure_blob_content_storage_container=azure_blob_content_storage_container,
+    azure_blob_storage_key=azure_blob_storage_key
 )
 
 

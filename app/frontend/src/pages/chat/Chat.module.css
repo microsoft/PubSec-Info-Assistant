@@ -1,16 +1,50 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
 
+/* .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f2f2f2;
+    position: relative;
+}
+
+.containerBackground {
+    background: url('/src/assets/2.png') center no-repeat #f2f2f2;
+    background-size: 60%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0.15;
+    pointer-events: none;
+} */
+
 .container {
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-top: 20px;
+    background: #f2f2f2;
+    position: relative;
+}
+
+.containerBackground {
+    background: url('/src/assets/2.png') center no-repeat #f2f2f2;
+    background-size: 60%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0.15;
+    pointer-events: none;
 }
 
 .chatRoot {
     flex: 1;
     display: flex;
+    opacity: .9;
 }
 
 .chatContainer {
@@ -32,21 +66,21 @@
 }
 
 .chatEmptyStateTitle {
-    font-size: 4rem;
+    font-size: 32px;
     font-weight: 600;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 40px;
 }
 
 .chatEmptyObjectives {
     padding-left: 120px;
     padding-right: 120px;
     text-align: center;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .chatEmptyObjectivesList {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .chatEmptyStateSubtitle {
@@ -60,8 +94,8 @@
     }
 
     .chatEmptyStateTitle {
-        font-size: 3rem;
-        margin-bottom: 0px;
+        font-size: 32px;
+        margin-bottom: 20px;
     }
 }
 
@@ -121,9 +155,15 @@
 .commandsContainer {
     display: flex;
     align-self: flex-end;
+    margin-top: 10px;
 }
 
 .commandButton {
     margin-right: 20px;
     margin-bottom: 20px;
+}
+
+.logo {
+    width: 360px;
+    height: 360px;
 }

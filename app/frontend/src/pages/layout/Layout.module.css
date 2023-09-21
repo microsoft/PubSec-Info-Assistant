@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    background-color: #f2f2f2;
 }
 
 .header {
@@ -18,6 +19,7 @@
     justify-content: space-around;
     margin-right: 12px;
     margin-left: 12px;
+    padding: 10px;
 }
 
 .headerTitleContainer {
@@ -29,15 +31,17 @@
 }
 
 .headerLogo {
-    height: 40px;
+    height: 25px;
 }
 
 .headerTitle {
     margin-left: 12px;
-    font-weight: 600;
+    margin-top: 8px;
+    font-size: 16px;
 }
 
 .headerNavList {
+    margin-top: 15px;
     display: flex;
     list-style: none;
     padding-left: 0;
@@ -89,12 +93,14 @@
     -webkit-box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
     box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
     opacity: 25.0;
+    border-bottom: 1px solid #9e9e9e;
 }
 
 .raiwarning {
     font-size: 12px;
     font-weight: 400;
-    color: rgb(133, 133, 133);
+    /* color: rgb(133, 133, 133); */
+    color: red;
     line-height: 22px;
     padding-top: 6px;
     padding-bottom: 6px;

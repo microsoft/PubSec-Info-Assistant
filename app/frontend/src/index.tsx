@@ -11,6 +11,7 @@ import "./index.css";
 import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
+import Help from "./pages/help/Help";
 import Content from "./pages/content/Content";
 
 initializeIcons();
@@ -22,6 +23,7 @@ export default function App() {
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Chat />} />
                     <Route path="content" element={<Content />} />
+                    <Route path="help" element={<Help />} />
                     <Route path="*" element={<NoPage />} />
                 </Route>
             </Routes>

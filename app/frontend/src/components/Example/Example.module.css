@@ -9,6 +9,7 @@
     gap: 10px;
     flex: 1;
     justify-content: center;
+
 }
 
 .example {
@@ -20,6 +21,8 @@
     padding: 20px;
     margin-bottom: 5px;
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #bcbcbc; 
 }
 
 .example:hover {
@@ -29,14 +32,14 @@
 
 .exampleText {
     margin: 0;
-    font-size: 21px;
+    font-size: 17px;
     width: 280px;
     height: 90px;
 }
 
 @media only screen and (max-height: 780px) {
     .exampleText {
-        font-size: 20px;
+        font-size: 17px;
         height: 80px;
     }
 }

@@ -6,13 +6,13 @@ set -e
 
 figlet "Build Docker Containers"
 
+
 image_name="enrichment-app"
-if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
-  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
-else 
+CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
+if $IS_USGOV_DEPLOYMENT; then 
   CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
 fi
-
+echo "IS_USGOV_DEPLOYMENT: "$IS_USGOV_DEPLOYMENT
 
 # Get the required directories of the project
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -46,5 +46,5 @@ echo "Containers deployed successfully"
 
 # Configure the webapp to use the ACR image
 echo "Pushing container to the WebApp"
-az webapp config appsettings set --resource-group $RESOURCE_GROUP_NAME --name $CONTAINER_APP_SERVICE --settings DOCKER_CUSTOM_IMAGE_NAME=$CONTAINER_REGISTRY_NAME.azurecr.io/$RESOURCE_GROUP_NAME:${tag}
+az webapp config appsettings set --resource-group $RESOURCE_GROUP_NAME --name $CONTAINER_APP_SERVICE --settings DOCKER_CUSTOM_IMAGE_NAME=$CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/$RESOURCE_GROUP_NAME:${tag}
 az webapp restart --name $CONTAINER_APP_SERVICE --resource-group $RESOURCE_GROUP_NAME

@@ -37,7 +37,7 @@
     },
     "embeddingsModelName": {
       "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
-    }
+    },
     "chatGptModelName": {
       "value": "${CHATGPT_MODEL_MODEL_NAME}"
     },

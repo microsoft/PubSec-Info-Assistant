@@ -278,10 +278,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: textEnrichmentQueue
         }
         {
-          name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
-          value: maxSecondsHideOnUpload
-        }
-        {
           name: 'MAX_SUBMIT_REQUEUE_COUNT'
           value: maxSubmitRequeueCount
         }

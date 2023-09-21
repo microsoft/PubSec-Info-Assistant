@@ -22,11 +22,6 @@ if $IS_USGOV_DEPLOYMENT; then
   CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
 fi
 
-echo "CONTAINER_REGISTRY_NAME_SUFFIX - $CONTAINER_REGISTRY_NAME_SUFFIX"
-echo "IS_USGOV_DEPLOYMENT - $IS_USGOV_DEPLOYMENT"
-
-
-
 # Build the container
 echo "Building container"
 sudo docker build -t ${image_name} ${DIR} --build-arg BUILDKIT_INLINE_CACHE=1

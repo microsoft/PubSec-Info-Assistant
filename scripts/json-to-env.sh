@@ -133,7 +133,11 @@ jq -r  '
         {
             "path": "iS_USGOV_DEPLOYMENT",
             "env_var": "IS_USGOV_DEPLOYMENT"
-        }               
+        },
+        {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
+        }
     ]
         as $env_vars_to_extract
     |

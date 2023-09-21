@@ -92,10 +92,6 @@ jq -r  '
             "env_var": "TEXT_ENRICHMENT_QUEUE"
         },
         {
-            "path": "maX_SECONDS_HIDE_ON_UPLOAD",
-            "env_var": "MAX_SECONDS_HIDE_ON_UPLOAD"
-        },
-        {
             "path": "maX_SUBMIT_REQUEUE_COUNT",
             "env_var": "MAX_SUBMIT_REQUEUE_COUNT"
         },
@@ -152,9 +148,18 @@ jq -r  '
             "env_var": "ENABLE_DEV_CODE"
         },
         {
+            "path": "azurE_STORAGE_KEY",
+            "env_var": "AZURE_BLOB_STORAGE_KEY"
+        },
+        {
             "path": "embeddingsqueue",
             "env_var": "EMBEDDINGS_QUEUE"
+        },
+        {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
         }
+
     ]
         as $env_vars_to_extract
     |

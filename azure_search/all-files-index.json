@@ -1,5 +1,5 @@
 {
-  "name": "vector-index",
+  "name": "all-files-index",
   "fields": [
     {
       "name": "id",
@@ -60,6 +60,23 @@
     },
     {
       "name": "title",
+      "type": "Edm.String",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "subtitle",
       "type": "Edm.String",
       "searchable": true,
       "filterable": false,

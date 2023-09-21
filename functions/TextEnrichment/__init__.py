@@ -52,18 +52,22 @@ statusLog = StatusLog(
     cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
 )     
 
-def translate_and_set(field_name, chunk_dict, headers, params, message_json):
-    data = [{"text": chunk_dict[field_name]}]
-    response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
-    
-    if response.status_code == 200:
-        translated_content = response.json()[0]['translations'][0]['text']
-        chunk_dict[f"translated_{field_name}"] = translated_content
+def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage):
+    '''Translate text if it is not in target language'''
+    if detected_language != targetTranslationLanguage:
+        data = [{"text": chunk_dict[field_name]}]
+        response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
+        
+        if response.status_code == 200:
+            translated_content = response.json()[0]['translations'][0]['text']
+            chunk_dict[f"translated_{field_name}"] = translated_content
+        else:
+            # error so requeue
+            requeue(response, message_json)
+            return   
     else:
-        # error so requeue
-        requeue(response, message_json)
-        return   
-
+        chunk_dict[f"translated_{field_name}"] = chunk_dict[f"{field_name}"]
+        return
 
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
@@ -140,26 +144,27 @@ def main(msg: func.QueueMessage) -> None:
                 f"{FUNCTION_NAME} - Non-target language detected",
                 StatusClassification.DEBUG,
                 State.ERROR,
-            )         
-            # regenerate the iterator to reset it to the first chunk
-            chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
-            for i, chunk in enumerate(chunk_list):
-                # open the file and extract the content
-                blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
-                response = requests.get(blob_path_plus_sas)
-                response.raise_for_status()
-                chunk_dict = json.loads(response.text)
-                params = {'to': targetTranslationLanguage}  
-                
-                # Translate content, title, subtitle, and section
-                fields_to_translate = ["content", "title", "subtitle", "section"]
-                for field in fields_to_translate:
-                    translate_and_set(field, chunk_dict, headers, params, message_json)
-                                                
-                # Get path and file name minus the root container
-                json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
-                block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
-                block_blob_client.upload_blob(json_str, overwrite=True)
+            )      
+               
+        # regenerate the iterator to reset it to the first chunk
+        chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
+        for i, chunk in enumerate(chunk_list):
+            # open the file and extract the content
+            blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
+            response = requests.get(blob_path_plus_sas)
+            response.raise_for_status()
+            chunk_dict = json.loads(response.text)
+            params = {'to': targetTranslationLanguage}              
+
+            # Translate content, title, subtitle, and section if required
+            fields_to_translate = ["content", "title", "subtitle", "section"]
+            for field in fields_to_translate:
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage)                
+                                            
+            # Get path and file name minus the root container
+            json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
+            block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
+            block_blob_client.upload_blob(json_str, overwrite=True)
                 
         # Queue message to embeddings queue for downstream processing
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queueName, message_encode_policy=TextBase64EncodePolicy())

@@ -183,6 +183,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
       EMBEDDING_VECTOR_SIZE: embeddingVectorSize
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
     }
   }
   dependsOn: [

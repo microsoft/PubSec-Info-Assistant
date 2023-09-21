@@ -6,12 +6,13 @@ import logging
 import os
 from datetime import datetime
 from typing import List
-from uuid import uuid4
 import base64
 import requests
-
+from datetime import datetime, timedelta
 from azure.storage.blob import BlobServiceClient
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.storage.queue import QueueClient
+from azure.search.documents import SearchClient
+from azure.core.credentials import AzureKeyCredential
 from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
 from fastapi import FastAPI
@@ -20,9 +21,7 @@ from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt
-
 from sentence_transformers import SentenceTransformer
-
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
 
@@ -50,7 +49,8 @@ ENV = {
     "BLOB_CONNECTION_STRING": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
     "TARGET_EMBEDDINGS_MODEL": None,
-    "EMBEDDING_VECTOR_SIZE": None
+    "EMBEDDING_VECTOR_SIZE": None,
+    "AZURE_SEARCH_SERVICE_ENDPOINT": None
 }
 
 for key, value in ENV.items():
@@ -59,8 +59,9 @@ for key, value in ENV.items():
         ENV[key] = new_value
     elif value is None:
         raise ValueError(f"Environment variable {key} not set")
-
-
+    
+search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
+    
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
 openai.api_type = "azure"
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
@@ -256,19 +257,48 @@ def embed_texts(model: str, texts: List[str]):
 
 
 
-def generate_and_store_embedding(chunk_dict, field_name, blob_path):
+
+
+
+
+
+
+
+def index_sections(chunks):
+    """ Pushes a batch of content to the search index
+    """    
+    search_client = SearchClient(endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
+                                    index_name=ENV["AZURE_SEARCH_INDEX"],
+                                    credential=search_creds)    
+    i = 0
+    batch = []
+    for c in chunks:
+        batch.append(c)
+        i += 1
+        if i % 1000 == 0:
+            results = search_client.upload_documents(documents=batch)
+            succeeded = sum([1 for r in results if r.succeeded])
+            logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
+            batch = []
+
+    if len(batch) > 0:
+        results = search_client.upload_documents(documents=batch)
+        succeeded = sum([1 for r in results if r.succeeded])
+        logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
+
+
+def generate_and_store_embedding(chunk_dict, field_name):
+    """cerates an embedding for a piece of text"""
     try:
         text = chunk_dict[f"translated_{field_name}"]
     except KeyError:
-        text = chunk_dict[field_name]
-    
+        text = chunk_dict[field_name]    
     embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)
-    chunk_dict[f"embedding_{field_name}"] = embedding
-    statusLog.upsert_document(blob_path, 'Embedding generated', StatusClassification.INFO, State.PROCESSING)
+    chunk_dict[f"{field_name}Vector"] = embedding['data']
 
-
+        
 @app.on_event("startup") 
-@repeat_every(seconds=5, logger=log, raise_exceptions=True)
+@repeat_every(seconds=60, logger=log, raise_exceptions=True)
 def poll_queue() -> None:
     """Polls the queue for messages and embeds them"""
     
@@ -282,8 +312,7 @@ def poll_queue() -> None:
     log.debug(f"Received {len(messages)} messages")
 
     
-    for message in messages:
-        
+    for message in messages:        
         logging.debug(f"Received message {message.id}")
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
@@ -295,6 +324,7 @@ def poll_queue() -> None:
             chunk_folder_path = file_directory + file_name + file_extension
             blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
+            chunks = []
             
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
@@ -308,16 +338,26 @@ def poll_queue() -> None:
                 # Call the function for each field
                 fields_to_process = ["content", "title", "subtitle", "section"]
                 for field in fields_to_process:
-                    generate_and_store_embedding(chunk_dict, field, blob_path)
+                    generate_and_store_embedding(chunk_dict, field)
+                    
+                # Prepare the chunk for the index
+                chunk_dict['id'] = statusLog.encode_document_id(chunk_dict['file_uri'])
+                chunk_dict['title'] = chunk_dict['translated_title'] 
+                chunk_dict['subtitle'] = chunk_dict['translated_subtitle']
+                chunk_dict['section'] = chunk_dict['translated_section']
+                chunk_dict['content'] = chunk_dict['translated_content']   
+                chunk_dict['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"   
+                del chunk_dict['translated_title']
+                del chunk_dict['translated_subtitle']
+                del chunk_dict['translated_section']
+                del chunk_dict['translated_content']                
+                chunks.append(chunk_dict)
                 
-                
-                # write chunk, and embedding back to content container
-                json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
-                block_blob_client = blob_service_client.get_blob_client(container=ENV["AZURE_BLOB_STORAGE_CONTAINER"], blob=chunk.name)
-                block_blob_client.upload_blob(json_str, overwrite=True)
+            # push chunk content to index
+            index_sections(chunks)
 
-                # delete message once complete, in case of failure
-                queue_client.delete_message(message)             
+            # delete message once complete, in case of failure
+            queue_client.delete_message(message)             
         
         except Exception as error:
             statusLog.upsert_document(

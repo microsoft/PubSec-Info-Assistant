@@ -146,7 +146,7 @@ const Chat = () => {
         for (let node of _ev.target.parentNode.childNodes) {
             if (node.value == _ev.target.value) {
                 switch (node.value) {
-                    case "1.3":
+                    case "1.0":
                         node.className = `${rtbgstyles.buttonleftactive}`;
                         break;
                     case "0.6":
@@ -162,7 +162,7 @@ const Chat = () => {
             }
             else {
                 switch (node.value) {
-                    case "1.3":
+                    case "1.0":
                         node.className = `${rtbgstyles.buttonleft}`;
                         break;
                     case "0.6":

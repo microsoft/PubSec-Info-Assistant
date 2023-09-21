@@ -8,12 +8,6 @@ figlet "Build/Deploy Containers"
 
 image_name="enrichment-app"
 
-if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
-  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
-else 
-  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
-fi
-
 # Get the required directories of the project
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPTS_DIR="$(realpath "$APP_DIR/../../scripts")"
@@ -27,6 +21,11 @@ CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
 if $IS_USGOV_DEPLOYMENT; then 
   CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
 fi
+
+echo "CONTAINER_REGISTRY_NAME_SUFFIX - $CONTAINER_REGISTRY_NAME_SUFFIX"
+echo "IS_USGOV_DEPLOYMENT - $IS_USGOV_DEPLOYMENT"
+
+
 
 # Build the container
 echo "Building container"

@@ -135,19 +135,16 @@ models["paraphrase-multilingual-MiniLM-L12-v2"] = Paraphrase_Multilingual_MiniLM
 
 model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
     "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"],
-    "max_seq_length": 8191, 
     "vector_size": 1536,
     # Source: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
 }
 model_info["all-mpnet-base-v2"] = {
     "model": "all-mpnet-base-v2",
-    "max_seq_length": 8191,
-    "vector_size": 768 , 
+    "vector_size": 768, 
     # https://huggingface.co/sentence-transformers/all-mpnet-base-v2
 }
 model_info["paraphrase-multilingual-MiniLM-L12-v2"] = {
     "model": "paraphrase-multilingual-MiniLM-L12-v2",
-    "max_seq_length": 8191,
     "vector_size": 384,
 }
 

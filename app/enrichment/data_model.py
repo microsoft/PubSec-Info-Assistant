@@ -10,7 +10,6 @@ import pydantic
 
 class ModelInfo(pydantic.BaseModel):
     model: str
-    max_seq_length: int
     vector_size: int
 
 

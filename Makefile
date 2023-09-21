@@ -11,10 +11,12 @@ help: ## Show this help
 
 deploy: build infrastructure extract-env build-containers deploy-search-indexes deploy-webapp deploy-functions ## Deploy infrastructure and application code
  
+build-deploy: build extract-env deploy-webapp ##Build and Deploy the Webapp
+
 build: ## Build application code
 	@./scripts/build.sh
 
-build-containers:
+build-containers: extract-env
 	@./app/enrichment/docker-build.sh
 
 infrastructure: check-subscription ## Deploy infrastructure

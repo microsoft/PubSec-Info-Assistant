@@ -112,3 +112,8 @@ export type ActiveCitation = {
     content: string;
     error?: string;
 }
+
+export type GetWarningBanner = {
+    WARNING_BANNER_TEXT: string;
+    error?: string;
+};

@@ -4,13 +4,14 @@
 import { Outlet, NavLink, Link } from "react-router-dom";
 
 import openai from "../../assets/openai.svg";
-
+import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 
 const Layout = () => {
     return (
         <div className={styles.layout}>
             <header className={styles.header} role={"banner"}>
+                <WarningBanner />
                 <div className={styles.headerContainer}>
                     <Link to="/" className={styles.headerTitleContainer}>
                         <img src={openai} alt="Azure OpenAI" className={styles.headerLogo} />
@@ -37,6 +38,10 @@ const Layout = () => {
             </div>
 
             <Outlet />
+
+            <footer>
+                <WarningBanner />
+            </footer>
         </div>
     );
 };

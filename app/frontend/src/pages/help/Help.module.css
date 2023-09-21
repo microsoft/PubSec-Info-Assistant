@@ -49,6 +49,7 @@ background-color: #f2f2f2;
     display: flex;
     list-style: none;
     padding-left: 0;
+    width: 230px;
 }
 
 .headerNavPageLink {

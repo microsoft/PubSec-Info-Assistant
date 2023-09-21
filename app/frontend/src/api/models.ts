@@ -93,6 +93,7 @@ export type GetInfoResponse = {
     AZURE_OPENAI_SERVICE: string;
     AZURE_OPENAI_CHATGPT_DEPLOYMENT: string;
     AZURE_OPENAI_MODEL_NAME: string;
+    AZURE_OPENAI_EMBEDDING_MODEL: string;
     AZURE_OPENAI_MODEL_VERSION: string;
     AZURE_SEARCH_SERVICE: string;
     AZURE_SEARCH_INDEX: string;

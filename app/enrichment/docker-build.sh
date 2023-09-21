@@ -6,9 +6,8 @@ set -e
 
 figlet "Build Docker Containers"
 
-if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
-  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
-else 
+CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
+if $IS_USGOV_DEPLOYMENT; then 
   CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
 fi
 

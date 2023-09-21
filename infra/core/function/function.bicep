@@ -85,8 +85,11 @@ param nonPdfSubmitQueue string
 @description('The queue which is used to trigger processing of media files')
 param mediaSubmitQueue string
 
-@description('The queue which is used to trigger processing of media files')
+@description('The queue which is used to trigger processing of text files')
 param textEnrichmentQueue string
+
+@description('The queue which is used to trigger processing of image files')
+param imageEnrichmentQueue string
 
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
 param maxSecondsHideOnUpload string
@@ -121,6 +124,9 @@ param enrichmentEndpoint string
 @description('Name of the enrichment service')
 param enrichmentName string
 
+@description('Location of the enrichment service')
+param enrichmentLocation string
+
 @description('Target language to translate content to')
 param targetTranslationLanguage string
 
@@ -133,7 +139,6 @@ param enrichmentBackoff string
 @description('A boolean value that flags if a user wishes to enable or disable code under development')
 param enableDevCode bool
 
-
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: name
@@ -142,7 +147,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   kind: 'functionapp'
   identity: {
     type: 'SystemAssigned'
-  } 
+  }
   properties: {
     reserved: true
     serverFarmId: appServicePlanId
@@ -150,8 +155,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       http20Enabled: true
       linuxFxVersion: 'python|3.10'
       alwaysOn: true
-      minTlsVersion: '1.2'    
-      connectionStrings:[
+      minTlsVersion: '1.2'
+      connectionStrings: [
         {
           name: 'BLOB_CONNECTION_STRING'
           connectionString: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
@@ -270,9 +275,13 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'MEDIA_SUBMIT_QUEUE'
           value: mediaSubmitQueue
         }
-        {        
+        {
           name: 'TEXT_ENRICHMENT_QUEUE'
           value: textEnrichmentQueue
+        }
+        {
+          name: 'IMAGE_ENRICHMENT_QUEUE'
+          value: imageEnrichmentQueue
         }
         {
           name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
@@ -301,7 +310,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'POLLING_BACKOFF'
           value: pollingBackoff
-        }        
+        }
         {
           name: 'MAX_READ_ATTEMPTS'
           value: maxReadAttempts
@@ -319,6 +328,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: enrichmentName
         }
         {
+          name: 'ENRICHMENT_LOCATION'
+          value: enrichmentLocation
+        }
+        {
           name: 'TARGET_TRANSLATION_LANGUAGE'
           value: targetTranslationLanguage
         }
@@ -329,11 +342,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'ENRICHMENT_BACKOFF'
           value: enrichmentBackoff
-        }        
+        }
         {
           name: 'ENABLE_DEV_CODE'
           value: string(enableDevCode)
-        }        
+        }
       ]
     }
   }

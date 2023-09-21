@@ -57,7 +57,7 @@ param chatGptDeploymentCapacity int = 30
 param chatWarningBannerText string = ''
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
-param chunkTargetSize string = '750' 
+param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
 param formRecognizerApiVersion string = '2022-08-31'
 param pdfSubmitQueue string = 'pdf-submit-queue'
@@ -65,6 +65,7 @@ param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param mediaSubmitQueue string = 'media-submit-queue'
 param textEnrichmentQueue string = 'text-enrichment-queue'
+param imageEnrichmentQueue string = 'image-enrichment-queue'
 param queryTermLanguage string = 'English'
 param isGovCloudDeployment bool = contains(location, 'usgov')
 param maxSecondsHideOnUpload string = '300'
@@ -72,7 +73,7 @@ param maxSubmitRequeueCount string = '10'
 param pollQueueSubmitBackoff string = '60'
 param pdfSubmitQueueBackoff string = '60'
 param maxPollingRequeueCount string = '10'
-param submitRequeueHideSeconds  string = '1200'
+param submitRequeueHideSeconds string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
 param cuaEnabled bool = false
@@ -90,7 +91,6 @@ param principalId string = ''
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
-
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -137,7 +137,6 @@ module containerRegistry 'core/host/conteinerregistry.bicep' = {
   }
 }
 
-
 // Create an App Service Plan and supporting services for the enrichment app service
 module appServiceContainer 'core/host/appservicecontainer.bicep' = {
   name: 'appservicecontainer'
@@ -155,7 +154,6 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
     logging
   ]
 }
-
 
 // The application frontend
 module backend 'core/host/appservice.bicep' = {
@@ -328,12 +326,15 @@ module storage 'core/storage/storage-account.bicep' = {
       }
       {
         name: nonPdfSubmitQueue
-      }  
+      }
       {
         name: mediaSubmitQueue
-      }          
+      }
       {
         name: textEnrichmentQueue
+      }
+      {
+        name: imageEnrichmentQueue
       }
     ]
   }
@@ -406,6 +407,7 @@ module functions 'core/function/function.bicep' = {
     pollQueueSubmitBackoff: pollQueueSubmitBackoff
     pdfSubmitQueueBackoff: pdfSubmitQueueBackoff
     textEnrichmentQueue: textEnrichmentQueue
+    imageEnrichmentQueue: imageEnrichmentQueue
     maxPollingRequeueCount: maxPollingRequeueCount
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
@@ -413,6 +415,7 @@ module functions 'core/function/function.bicep' = {
     enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     enrichmentEndpoint: enrichment.outputs.cognitiveServiceEndpoint
     enrichmentName: enrichment.outputs.cognitiveServicerAccountName
+    enrichmentLocation: location
     targetTranslationLanguage: targetTranslationLanguage
     maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
     enrichmentBackoff: enrichmentBackoff
@@ -448,7 +451,6 @@ module avam 'core/video_indexer/video_indexer.bicep' = {
     mediaServiceAccountResourceId: media_service.outputs.id
   }
 }
-
 
 // USER ROLES
 module openAiRoleUser 'core/security/role.bicep' = {
@@ -553,8 +555,8 @@ module containerRegistryPush 'core/security/role.bicep' = {
 }
 
 // MANAGEMENT SERVICE PRINCIPAL
-module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
-  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment? azureOpenAIResourceGroup : rg.name)
+module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
+  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment ? azureOpenAIResourceGroup : rg.name)
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId
@@ -565,7 +567,7 @@ module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (cuaEnabled) {
-  name: 'pid-${cuaId}' 
+  name: 'pid-${cuaId}'
   location: location
   properties: {
     mode: 'Incremental'
@@ -618,10 +620,10 @@ output MAX_SECONDS_HIDE_ON_UPLOAD string = maxSecondsHideOnUpload
 output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
 output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff
 output PDF_SUBMIT_QUEUE_BACKOFF string = pdfSubmitQueueBackoff
-output MAX_POLLING_REQUEUE_COUNT string = maxPollingRequeueCount 
+output MAX_POLLING_REQUEUE_COUNT string = maxPollingRequeueCount
 output SUBMIT_REQUEUE_HIDE_SECONDS string = submitRequeueHideSeconds
 output POLLING_BACKOFF string = pollingBackoff
-output MAX_READ_ATTEMPTS string = maxReadAttempts 
+output MAX_READ_ATTEMPTS string = maxReadAttempts
 output ENRICHMENT_KEY string = enrichment.outputs.cognitiveServiceAccountKey
 output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
 output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName

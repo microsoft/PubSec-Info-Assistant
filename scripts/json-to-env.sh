@@ -84,6 +84,7 @@ jq -r  '
         {
             "path": "containeR_APP_SERVICE",
             "env_var": "CONTAINER_APP_SERVICE"
+
         },
         {
             "path": "embeddingsqueue",
@@ -128,7 +129,6 @@ jq -r  '
         {
             "path": "embeddinG_VECTOR_SIZE",
             "env_var": "EMBEDDING_VECTOR_SIZE"
-        }        
         },       
         {
             "path": "iS_USGOV_DEPLOYMENT",

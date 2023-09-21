@@ -13,6 +13,7 @@
   * [Debugging Functions](#debugging-functions)
   * [Build pipeline for sandbox environment](#build-pipeline-for-sandbox)
   * [Customer Usage Attribution](#customer-usage-attribution)
+  * [Sovereign Region Deployment](#sovereign-region-deployment)
 
 ---
 
@@ -115,3 +116,9 @@ Setting up a pipeline to deploy a new Sandbox environment requires some manual c
 A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant Accelerator.
 
 Check out how to [enable Customer Usage Attribution](enable_customer_usage_attribution.md)
+
+### Sovereign Region Deployment
+
+Check out how to [setup Sovereign Region Deployment](enable_sovereign_deployment.md)
+
+

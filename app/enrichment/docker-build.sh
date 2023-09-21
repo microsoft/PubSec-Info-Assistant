@@ -20,8 +20,13 @@ SCRIPTS_DIR="$(realpath "$APP_DIR/../../scripts")"
 
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-#source "${SCRIPTS_DIR}"/load-env.sh
 source "${SCRIPTS_DIR}/environments/infrastructure.env"
+
+# Determine if this is a gov deployment
+CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
+if $IS_USGOV_DEPLOYMENT; then 
+  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
+fi
 
 # Build the container
 echo "Building container"
@@ -45,5 +50,5 @@ echo "Containers deployed successfully"
 
 # Configure the webapp to use the ACR image
 echo "Pushing container to the WebApp"
-az webapp config container set --name $CONTAINER_APP_SERVICE --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_REGISTRY_NAME.azurecr.io/$image_name:${tag}
+az webapp config container set --name $CONTAINER_APP_SERVICE --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/$image_name:${tag}
 az webapp restart --name $CONTAINER_APP_SERVICE --resource-group $RESOURCE_GROUP_NAME

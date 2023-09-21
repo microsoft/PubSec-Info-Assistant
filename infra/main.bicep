@@ -701,3 +701,4 @@ output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
 output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel
 output EMBEDDING_VECTOR_SIZE string = embeddingVectorSize
+output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment

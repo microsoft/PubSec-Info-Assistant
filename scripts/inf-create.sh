@@ -9,7 +9,8 @@ printInfo() {
 }
 
 figlet Infrastructure
- 
+
+
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
@@ -22,6 +23,7 @@ function finish {
 trap finish EXIT
 
 echo -e "\n" 
+
 echo "Setting up random.txt file for your environment"
 
 #set up variables for the bicep deployment
@@ -34,13 +36,13 @@ else
   echo $randomString >> .state/${WORKSPACE}/random.txt
 fi
 
-if [ -n "${IS_USGOV_DEPLOYMENT}" ]; then
-  WEB_APP_ENDPOINT_SUFFIX="azurewebsites.net"
-else 
+WEB_APP_ENDPOINT_SUFFIX="azurewebsites.net"
+
+if $IS_USGOV_DEPLOYMENT; then
   WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
 fi
 
-if [ -n "${IS_USGOV_DEPLOYMENT}" ] && [ "${USE_EXISTING_AOAI}" == 'false' ] ; then
+if $IS_USGOV_DEPLOYMENT && ! $USE_EXISTING_AOAI; then
   echo "AOAI doesn't exist in US Gov regions.  Please create AOAI seperately and update the USE_EXISTING_AOAI in the env file. "
   exit 1  
 fi

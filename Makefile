@@ -16,7 +16,7 @@ build-deploy: build extract-env deploy-webapp ##Build and Deploy the Webapp
 build: ## Build application code
 	@./scripts/build.sh
 
-build-containers:
+build-containers: extract-env
 	@./app/enrichment/docker-build.sh
 
 infrastructure: check-subscription ## Deploy infrastructure

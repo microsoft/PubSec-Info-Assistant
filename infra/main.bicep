@@ -637,3 +637,4 @@ output AZURE_SUBSCRIPTION_ID string = subscriptionId
 output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
 output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
+output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment

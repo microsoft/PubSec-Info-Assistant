@@ -80,7 +80,11 @@ jq -r  '
         {
             "path": "containeR_APP_SERVICE",
             "env_var": "CONTAINER_APP_SERVICE"
-        }       
+        },       
+        {
+            "path": "iS_USGOV_DEPLOYMENT",
+            "env_var": "IS_USGOV_DEPLOYMENT"
+        }               
     ]
         as $env_vars_to_extract
     |

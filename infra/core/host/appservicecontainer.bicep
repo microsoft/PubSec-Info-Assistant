@@ -90,18 +90,6 @@ identity: {
 }
 properties: {
   enabled: true
-    hostNameSslStates: [
-      {
-        name: '${appServiceName}.azurewebsites.net'
-        sslState: 'Disabled'
-        hostType: 'Standard'
-      }
-      {
-        name: '${appServiceName}.scm.azurewebsites.net'
-        sslState: 'Disabled'
-        hostType: 'Repository'
-      }
-    ]
     serverFarmId: appServicePlan.id
     siteConfig: {
       numberOfWorkers: 1

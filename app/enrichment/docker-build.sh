@@ -6,13 +6,7 @@ set -e
 
 figlet "Build Docker Containers"
 
-
 image_name="enrichment-app"
-CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
-if $IS_USGOV_DEPLOYMENT; then 
-  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
-fi
-echo "IS_USGOV_DEPLOYMENT: "$IS_USGOV_DEPLOYMENT
 
 # Get the required directories of the project
 APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -20,8 +14,13 @@ SCRIPTS_DIR="$(realpath "$APP_DIR/../../scripts")"
 
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-#source "${SCRIPTS_DIR}"/load-env.sh
 source "${SCRIPTS_DIR}/environments/infrastructure.env"
+
+# Determine if this is a gov deployment
+CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
+if $IS_USGOV_DEPLOYMENT; then 
+  CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
+fi
 
 # Build the container
 echo "Building container"

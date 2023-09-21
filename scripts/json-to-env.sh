@@ -76,7 +76,15 @@ jq -r  '
         {
             "path": "containeR_REGISTRY_NAME",
             "env_var": "CONTAINER_REGISTRY_NAME"
-        }
+        },
+        {
+            "path": "containeR_APP_SERVICE",
+            "env_var": "CONTAINER_APP_SERVICE"
+        },       
+        {
+            "path": "iS_USGOV_DEPLOYMENT",
+            "env_var": "IS_USGOV_DEPLOYMENT"
+        }               
     ]
         as $env_vars_to_extract
     |

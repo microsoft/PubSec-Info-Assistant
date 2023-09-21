@@ -49,8 +49,9 @@ param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
-param chatGptModelName string = 'gpt-35-turbo'
-param chatGptDeploymentCapacity int = 30
+param chatGptModelName string = 'gpt-35-turbo-16k'
+param chatGptModelVersion string = '0613'
+param chatGptDeploymentCapacity int = 720
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750' 
@@ -180,7 +181,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         model: {
           format: 'OpenAI'
           name: chatGptModelName
-          version: '0301'
+          version: chatGptModelVersion
         }
         sku: {
           name: 'Standard'

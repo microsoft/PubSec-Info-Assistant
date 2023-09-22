@@ -285,16 +285,6 @@ def index_sections(chunks):
         succeeded = sum([1 for r in results if r.succeeded])
         logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
 
-
-def generate_and_store_embedding(chunk_dict, field_name):
-    """cerates an embedding for a piece of text"""
-    try:
-        text = chunk_dict[f"translated_{field_name}"]
-    except KeyError:
-        text = chunk_dict[field_name]    
-    embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)
-    chunk_dict[f"{field_name}Vector"] = embedding['data']
-
         
 @app.on_event("startup") 
 @repeat_every(seconds=60, logger=log, raise_exceptions=True)
@@ -323,7 +313,7 @@ def poll_queue() -> None:
             chunk_folder_path = file_directory + file_name + file_extension
             blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
-            chunks = []
+            index_chunks = []
             
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
@@ -333,27 +323,40 @@ def poll_queue() -> None:
                 response = requests.get(blob_path_plus_sas)
                 response.raise_for_status()
                 chunk_dict = json.loads(response.text)  
-                                             
-                # Call the function for each field
-                fields_to_process = ["content", "title", "subtitle", "section"]
-                for field in fields_to_process:
-                    generate_and_store_embedding(chunk_dict, field)
+                
+                # create the json to be indexed
+                try:
+                    text = (
+                        chunk_dict["translated_title"] + "\n" +
+                        chunk_dict["translated_subtitle"] + "\n" +
+                        chunk_dict["translated_section"] + "\n" +
+                        chunk_dict["translated_content"]
+                    )
+                except KeyError:
+                    text = (
+                        chunk_dict["title"] + "\n" +
+                        chunk_dict["subtitle"] + "\n" +
+                        chunk_dict["section"] + "\n" +
+                        chunk_dict["content"]
+                    )           
                     
-                # Prepare the chunk for the index
-                chunk_dict['id'] = statusLog.encode_document_id(chunk_dict['file_uri'])
-                chunk_dict['title'] = chunk_dict['translated_title'] 
-                chunk_dict['subtitle'] = chunk_dict['translated_subtitle']
-                chunk_dict['section'] = chunk_dict['translated_section']
-                chunk_dict['content'] = chunk_dict['translated_content']   
-                chunk_dict['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"   
-                del chunk_dict['translated_title']
-                del chunk_dict['translated_subtitle']
-                del chunk_dict['translated_section']
-                del chunk_dict['translated_content']                
-                chunks.append(chunk_dict)
+                # create embedding
+                embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)   
+                embedding_data = embedding['data']                   
+                
+                index_chunk = {}
+                index_chunk['id'] = statusLog.encode_document_id(chunk_dict['file_uri'])
+                index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
+                index_chunk['file_name'] = chunk_dict["file_name"]
+                index_chunk['file_uri'] = chunk_dict["file_uri"]
+                index_chunk['title'] = chunk_dict["title"]
+                index_chunk['translated_title'] = chunk_dict["translated_title"]         
+                index_chunk['content'] = text
+                index_chunk['contentVector'] = embedding_data    
+                index_chunks.append(index_chunk)
                 
             # push chunk content to index
-            index_sections(chunks)
+            index_sections(index_chunks)
 
             # delete message once complete, in case of failure
             queue_client.delete_message(message)      

@@ -76,61 +76,10 @@
       "synonymMaps": []
     },
     {
-      "name": "subtitle",
+      "name": "translated_title",
       "type": "Edm.String",
       "searchable": true,
       "filterable": false,
-      "retrievable": true,
-      "sortable": false,
-      "facetable": false,
-      "key": false,
-      "indexAnalyzer": null,
-      "searchAnalyzer": null,
-      "analyzer": null,
-      "normalizer": null,
-      "dimensions": null,
-      "vectorSearchConfiguration": null,
-      "synonymMaps": []
-    },
-    {
-      "name": "section",
-      "type": "Edm.String",
-      "searchable": true,
-      "filterable": false,
-      "retrievable": true,
-      "sortable": false,
-      "facetable": false,
-      "key": false,
-      "indexAnalyzer": null,
-      "searchAnalyzer": null,
-      "analyzer": null,
-      "normalizer": null,
-      "dimensions": null,
-      "vectorSearchConfiguration": null,
-      "synonymMaps": []
-    },
-    {
-      "name": "pages",
-      "type": "Collection(Edm.Int64)",
-      "searchable": false,
-      "filterable": true,
-      "retrievable": true,
-      "sortable": false,
-      "facetable": false,
-      "key": false,
-      "indexAnalyzer": null,
-      "searchAnalyzer": null,
-      "analyzer": null,
-      "normalizer": null,
-      "dimensions": null,
-      "vectorSearchConfiguration": null,
-      "synonymMaps": []
-    },
-    {
-      "name": "token_count",
-      "type": "Edm.Int64",
-      "searchable": false,
-      "filterable": true,
       "retrievable": true,
       "sortable": false,
       "facetable": false,
@@ -159,30 +108,6 @@
       "dimensions": null,
       "vectorSearchConfiguration": null,
       "synonymMaps": []
-    },
-    {
-      "name": "titleVector",
-      "type": "Collection(Edm.Single)",
-      "searchable": true,
-      "retrievable": true,
-      "dimensions": $EMBEDDING_VECTOR_SIZE,
-      "vectorSearchConfiguration": "my-vector-config"
-    },
-    {
-      "name": "subtitleVector",
-      "type": "Collection(Edm.Single)",
-      "searchable": true,
-      "retrievable": true,
-      "dimensions": $EMBEDDING_VECTOR_SIZE,
-      "vectorSearchConfiguration": "my-vector-config"
-    },
-    {
-      "name": "sectionVector",
-      "type": "Collection(Edm.Single)",
-      "searchable": true,
-      "retrievable": true,
-      "dimensions": $EMBEDDING_VECTOR_SIZE,
-      "vectorSearchConfiguration": "my-vector-config"
     },
     {
       "name": "contentVector",

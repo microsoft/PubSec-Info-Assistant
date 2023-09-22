@@ -26,6 +26,7 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
+IS_USGOV_DEPLOYMENT = os.getenv("IS_USGOV_DEPLOYMENT", False)
 
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -40,18 +41,23 @@ cognitive_services_account_location = os.environ["ENRICHMENT_LOCATION"]
 
 # Translation params for OCR'd text
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
-MAX_CHARS_FOR_DETECTION = 1000
-API_DETECT_ENDPOINT = (
-    "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
-)
-API_TRANSLATE_ENDPOINT = (
-    "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
-)
-translator_api_headers = {
-    "Ocp-Apim-Subscription-Key": cognitive_services_key,
-    "Content-type": "application/json",
-    "Ocp-Apim-Subscription-Region": cognitive_services_account_location,
-}
+
+# If running in the US Gov cloud, use the US Gov translation endpoint, Default to global
+if not IS_USGOV_DEPLOYMENT:
+    MAX_CHARS_FOR_DETECTION = 1000
+    API_DETECT_ENDPOINT = (
+        "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
+    )
+    API_TRANSLATE_ENDPOINT = (
+        "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
+    )
+    translator_api_headers = {
+        "Ocp-Apim-Subscription-Key": cognitive_services_key,
+        "Content-type": "application/json",
+        "Ocp-Apim-Subscription-Region": cognitive_services_account_location,
+    }
+else:
+    raise NotImplementedError("US Gov cloud not yet supported for Image OCR Translation")
 
 # Vision SDK
 vision_service_options = visionsdk.VisionServiceOptions(

@@ -100,9 +100,9 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
 
 1. Wait until all files uploaded have a status of Completed, Error, or Skipped.
 
-## Indexing the uploaded files
+## Manually initiating the indexing process
 
-The search indexer runs every 60 minutes. But you can start indexing immediately by following these steps:
+The search indexer runs every 60 minutes, but you can initiate it now by following these steps.
 
 1. In the Microsoft Azure Government subscription, click All Resources and select the resource named infoasst-search-XXXXXX where XXXXXX is the value in the file infra/.state/usafcio/random.txt.
 
@@ -110,7 +110,7 @@ The search indexer runs every 60 minutes. But you can start indexing immediately
 
 1. Click all-files-indexer.
 
-1. Click Run and wait for indexing to complete. If you uploaded a lot of files, it may take multiple runs to completely index all files. Keep running the indexer until Status is Success and Docs succeeded is 0/0.
+1. Click Run and wait for indexing to complete. You can monitor the indexing process from this screen. If you uploaded a lot of files, it may take multiple runs to completely index all files. Keep running the indexer until Status is Success and Docs succeeded is 0/0.
 
 ## Demo of chat/search
 

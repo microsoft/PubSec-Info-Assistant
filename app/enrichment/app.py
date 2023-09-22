@@ -306,7 +306,7 @@ def poll_queue() -> None:
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
         blob_path = message_json["blob_name"]
-        statusLog.upsert_document(blob_path, 'Embeddings process started', StatusClassification.INFO, State.PROCESSING)
+        statusLog.upsert_document(blob_path, f'Embeddings process started with model ${ENV["TARGET_EMBEDDINGS_MODEL"]}', StatusClassification.INFO, State.PROCESSING)
         
         try:          
             file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_path)

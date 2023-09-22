@@ -82,7 +82,7 @@ If you have never accepted the terms of the "Responsible AI Notice", follow thes
      - The console will display a special url <https://microsoft.com/deviceloginus> for AzureUSGovernment and a code. Use them to log into your Microsoft Azure Government subscription.
    - az account set --subscription "ID of your Microsoft Azure Government subscription"
 
-1. In the root of the project, run make project.
+1. In the root of the project, run make deploy.
 
 1. Review the console for the changes the bicep files will deploy. Press y to apply or n to cancel.
 

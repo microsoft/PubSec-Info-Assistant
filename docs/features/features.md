@@ -100,7 +100,12 @@ Check out how to [Debug the Azure functions locally in VSCode](../function_debug
 
 ### Debugging the web app
 
-Check out how to [Debug the Information Assistant Web App](../webapp_debug.md)
+Check out how to [Debug the Information Assistant Web App](../container_debug.md)
+
+### Debugging the container web app
+
+Check out how to [Debug the Information Assistant Web App](../container_webapp_debug.md)
+
 
 ### Build pipeline for Sandbox
 

@@ -6,7 +6,8 @@ param applicationInsightsName string = ''
 param logAnalyticsWorkspaceName string = ''
 param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
 param storageAccountUri string
-
+param keyVaultName string = ''
+param managedIdentity bool = !empty(keyVaultName)
 param appSettings object = {}
 
 
@@ -84,10 +85,9 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
 name: appServiceName
 location: location
 tags: tags
-kind: 'app,linux,container'
-identity: {
-  type: 'SystemAssigned'
-}
+// kind: 'app,linux,container'
+kind: 'DOCKER'
+identity: { type: managedIdentity ? 'SystemAssigned' : 'None' }
 properties: {
   enabled: true
     serverFarmId: appServicePlan.id
@@ -100,14 +100,12 @@ properties: {
     }
     httpsOnly: true
   }
-
   resource configAppSettings 'config' = {
     name: 'appsettings'
     properties: union(appSettings,
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {}
     )
-  }
- 
+  } 
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {
@@ -151,3 +149,4 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
 }
 
 output name string = appService.name
+output identityPrincipalId string = managedIdentity ? appService.identity.principalId : ''

@@ -327,16 +327,16 @@ def poll_queue() -> None:
                 # create the json to be indexed
                 try:
                     text = (
-                        chunk_dict["translated_title"] + "\n" +
-                        chunk_dict["translated_subtitle"] + "\n" +
-                        chunk_dict["translated_section"] + "\n" +
+                        chunk_dict["translated_title"] + " \n " +
+                        chunk_dict["translated_subtitle"] + " \n " +
+                        chunk_dict["translated_section"] + " \n " +
                         chunk_dict["translated_content"]
                     )
                 except KeyError:
                     text = (
-                        chunk_dict["title"] + "\n" +
-                        chunk_dict["subtitle"] + "\n" +
-                        chunk_dict["section"] + "\n" +
+                        chunk_dict["title"] + " \n " +
+                        chunk_dict["subtitle"] + " \n " +
+                        chunk_dict["section"] + " \n " +
                         chunk_dict["content"]
                     )           
                     

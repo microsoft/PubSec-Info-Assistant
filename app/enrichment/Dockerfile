@@ -12,7 +12,14 @@ COPY download_model.py /download_model.py
 RUN mkdir models
 RUN python download_model.py
 
+
 COPY *.py /
+COPY shared_code/status_log.py /shared_code/status_log.py
+COPY shared_code/utilities.py /shared_code/utilities.py
+
+
+# COPY *.py /
+# COPY shared_code/*.py /shared_code/*.py
 
 EXPOSE 5000
 

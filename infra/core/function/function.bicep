@@ -333,6 +333,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'ENABLE_DEV_CODE'
           value: string(enableDevCode)
         }        
+        {
+          name: 'EMBEDDINGS_QUEUE'
+          value: EMBEDDINGS_QUEUE
+        }                
       ]
     }
   }

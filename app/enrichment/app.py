@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import List
 import base64
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient
 from azure.search.documents import SearchClient
@@ -22,8 +22,14 @@ from model_handling import load_models
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
-from shared_code.status_log import State, StatusClassification, StatusLog
+
+
+
+
+
+
 from shared_code.utilities import Utilities
+from shared_code.status_log import State, StatusClassification, StatusLog
 
 # === ENV Setup ===
 
@@ -257,13 +263,6 @@ def embed_texts(model: str, texts: List[str]):
 
 
 
-
-
-
-
-
-
-
 def index_sections(chunks):
     """ Pushes a batch of content to the search index
     """    
@@ -357,12 +356,13 @@ def poll_queue() -> None:
             index_sections(chunks)
 
             # delete message once complete, in case of failure
-            queue_client.delete_message(message)             
+            queue_client.delete_message(message)      
+            statusLog.upsert_document(blob_path, 'Embeddings process complete', StatusClassification.INFO, State.COMPLETE)
         
         except Exception as error:
             statusLog.upsert_document(
                 blob_path,
-                "An error occurred - {str(error)}",
+                f"An error occurred - {str(error)}",
                 StatusClassification.ERROR,
                 State.ERROR,
             )

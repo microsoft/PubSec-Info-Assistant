@@ -287,7 +287,7 @@ def index_sections(chunks):
 
         
 @app.on_event("startup") 
-@repeat_every(seconds=60, logger=log, raise_exceptions=True)
+@repeat_every(seconds=5, logger=log, raise_exceptions=True)
 def poll_queue() -> None:
     """Polls the queue for messages and embeds them"""
     

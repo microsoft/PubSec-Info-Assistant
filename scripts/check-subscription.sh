@@ -15,6 +15,11 @@ figlet Check Subscription
 # with a Service Principal.
 if [ -n "${IN_AUTOMATION}" ]
 then
+
+    if $IS_USGOV_DEPLOYMENT; then
+        az cloud set --name AzureUSGovernment 
+    fi
+
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi

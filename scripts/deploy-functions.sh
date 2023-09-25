@@ -16,6 +16,11 @@ cd $BINARIES_OUTPUT_PATH
 
 if [ -n "${IN_AUTOMATION}" ]
 then
+
+    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+        az cloud set --name AzureUSGovernment 
+    fi
+
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi

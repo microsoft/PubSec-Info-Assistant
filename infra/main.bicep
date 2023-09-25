@@ -63,14 +63,13 @@ param chatWarningBannerText string = ''
 param chunkTargetSize string = '750' 
 param targetPages string = 'ALL'
 param formRecognizerApiVersion string = '2022-08-31'
-param pdfSubmitQueue string = 'pdf-submit-queue'
-param pdfPollingQueue string = 'pdf-polling-queue'
-param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
-param mediaSubmitQueue string = 'media-submit-queue'
-param textEnrichmentQueue string = 'text-enrichment-queue'
-param embeddingsQueue string = 'embeddings-queue'
 param queryTermLanguage string = 'English'
 param isGovCloudDeployment bool = contains(location, 'usgov')
+
+// This block of variables are used by the enrichment pipeline
+// Azure Functions or Container. These values are also populated
+// in the debug env files at 'functions/local.settings.json'. You
+// may want to update the local debug values separate from what is deployed to Azure.
 param maxSecondsHideOnUpload string = '300'
 param maxSubmitRequeueCount string = '10'
 param pollQueueSubmitBackoff string = '60'
@@ -79,11 +78,19 @@ param maxPollingRequeueCount string = '10'
 param submitRequeueHideSeconds  string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
-param cuaEnabled bool = false
-param cuaId string = ''
 param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
 param targetTranslationLanguage string = 'en'
+param pdfSubmitQueue string = 'pdf-submit-queue'
+param pdfPollingQueue string = 'pdf-polling-queue'
+param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
+param mediaSubmitQueue string = 'media-submit-queue'
+param textEnrichmentQueue string = 'text-enrichment-queue'
+param embeddingsQueue string = 'embeddings-queue'
+// End of valued replicated in debug env files
+
+param cuaEnabled bool = false
+param cuaId string = ''
 param enableDevCode bool = false
 param tenantId string = ''
 param subscriptionId string = ''
@@ -134,17 +141,6 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
-module containerRegistry 'core/host/conteinerregistry.bicep' = {
-  name: 'containerregistry'
-  scope: rg
-  params: {
-    name: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
-    location: location
-    tags: tags
-  }
-}
-
-
 // Create an App Service Plan and supporting services for the enrichment app service
 module appServiceContainer 'core/host/appservicecontainer.bicep' = {
   name: 'appservicecontainer'
@@ -152,6 +148,8 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
   params: {
     appServiceName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
     appServicePlanName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+    containerRegistryName: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
+    containerRegistrySuffix: containerRegistrySuffix
     location: location
     tags: tags
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
@@ -178,9 +176,6 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.${containerRegistrySuffix}'
-      DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
-      DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
       EMBEDDING_VECTOR_SIZE: embeddingVectorSize
@@ -672,34 +667,19 @@ output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
 output BLOB_CONNECTION_STRING string = storage.outputs.connectionString
 output AzureWebJobsStorage string = storage.outputs.connectionString
-output PDFSUBMITQUEUE string = pdfSubmitQueue
-output PDFPOLLINGQUEUE string = pdfPollingQueue
-output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
-output MEDIASUBMITQUEUE string = mediaSubmitQueue
-output TEXTENRICHMENTQUEUE string = textEnrichmentQueue
-output EMBEDDINGSQUEUE string = embeddingsQueue
-output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
-output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff
-output PDF_SUBMIT_QUEUE_BACKOFF string = pdfSubmitQueueBackoff
-output MAX_POLLING_REQUEUE_COUNT string = maxPollingRequeueCount 
-output SUBMIT_REQUEUE_HIDE_SECONDS string = submitRequeueHideSeconds
-output POLLING_BACKOFF string = pollingBackoff
-output MAX_READ_ATTEMPTS string = maxReadAttempts 
 output ENRICHMENT_KEY string = enrichment.outputs.cognitiveServiceAccountKey
 output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
 output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
 output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage
-output MAX_ENRICHMENT_REQUEUE_COUNT string = maxEnrichmentRequeueCount
-output ENRICHMENT_BACKOFF string = enrichmentBackoff
 output ENABLE_DEV_CODE bool = enableDevCode
 output AZURE_CLIENT_ID string = aadMgmtClientId
 output AZURE_TENANT_ID string = tenantId
 #disable-next-line outputs-should-not-contain-secrets
 output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
-output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
-output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
-output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
+output CONTAINER_REGISTRY_ID string = appServiceContainer.outputs.containerRegistryid
+output CONTAINER_REGISTRY_NAME string = appServiceContainer.outputs.containerRegistryName
+output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.appServiceName
 output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel
 output EMBEDDING_VECTOR_SIZE string = embeddingVectorSize
 output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment

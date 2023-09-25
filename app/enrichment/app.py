@@ -104,6 +104,16 @@ class Paraphrase_Multilingual_MiniLM_L12_v2(object):
         model = SentenceTransformer(self.deployment_name)
         response = model.encode(texts)
         return response
+    
+class BAAI_bge_small_en_v1_5(object):
+    def __init__(self, deployment_name) -> None:
+        self.deployment_name = deployment_name
+        
+    @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
+    def encode(self, texts) -> None:
+        model = SentenceTransformer(self.deployment_name)
+        response = model.encode(texts)
+        return response
 
 # === Get Logger ===
 
@@ -139,6 +149,8 @@ models, model_info = load_models()
 models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = AzOAIEmbedding(ENV["AZURE_OPENAI_EMBEDDING_MODEL"])
 models["all-mpnet-base-v2"] = All_MPNET_Base_v2("sentence-transformers/all-mpnet-base-v2")
 models["paraphrase-multilingual-MiniLM-L12-v2"] = Paraphrase_Multilingual_MiniLM_L12_v2("sentence-transformers/all-mpnet-base-v2")
+models["BAAI-all-mpnet-base-v2"] = BAAI_bge_small_en_v1_5("BAAI/bge-small-en-v1.5")
+
 
 model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
     "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"],
@@ -154,7 +166,7 @@ model_info["paraphrase-multilingual-MiniLM-L12-v2"] = {
     "model": "paraphrase-multilingual-MiniLM-L12-v2",
     "vector_size": 384,
 }
-model_info["BAAI/bge-small-en-v1.5"] = {
+model_info["BAAI-all-mpnet-base-v2"] = {
     "model": "BAAI/bge-small-en-v1.5",
     "vector_size": 384,
 }
@@ -253,15 +265,16 @@ def embed_texts(model: str, texts: List[str]):
 
     if model.startswith("azure-openai_"):
         embeddings = model_obj.encode(texts)
-        output = embeddings['data'][0]['embedding']
+        embeddings = embeddings['data'][0]['embedding']
     else:
         embeddings = model_obj.encode(texts)
-        output = embeddings.tolist()
+        embeddings = embeddings[0]
+        embeddings = embeddings.tolist()
         
     output = {
         "model": model,
         "model_info": model_info[model],
-        "data": output
+        "data": embeddings
     }
 
     return output

@@ -20,7 +20,7 @@ class Embedding(pydantic.BaseModel):
 
 
 class EmbeddingResponse(pydantic.BaseModel):
-    data: List[Embedding]
+    data: List[float]
     model: str
     model_info: ModelInfo
 

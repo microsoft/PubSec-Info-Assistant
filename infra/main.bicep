@@ -71,7 +71,7 @@ param textEnrichmentQueue string = 'text-enrichment-queue'
 param embeddingsQueue string = 'embeddings-queue'
 param queryTermLanguage string = 'English'
 param isGovCloudDeployment bool = contains(location, 'usgov')
-param maxSecondsHideOnUpload string = '300'
+// param maxSecondsHideOnUpload string = '300'
 param maxSubmitRequeueCount string = '10'
 param pollQueueSubmitBackoff string = '60'
 param pdfSubmitQueueBackoff string = '60'
@@ -134,17 +134,6 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
-module containerRegistry 'core/host/conteinerregistry.bicep' = {
-  name: 'containerregistry'
-  scope: rg
-  params: {
-    name: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
-    location: location
-    tags: tags
-  }
-}
-
-
 // Create an App Service Plan and supporting services for the enrichment app service
 module appServiceContainer 'core/host/appservicecontainer.bicep' = {
   name: 'appservicecontainer'
@@ -152,6 +141,8 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
   params: {
     appServiceName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
     appServicePlanName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
+    containerRegistryName: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
+    containerRegistrySuffix: containerRegistrySuffix
     location: location
     tags: tags
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
@@ -178,9 +169,6 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.${containerRegistrySuffix}'
-      DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
-      DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
       EMBEDDING_VECTOR_SIZE: embeddingVectorSize
@@ -452,7 +440,7 @@ module functions 'core/function/function.bicep' = {
     pdfPollingQueue: pdfPollingQueue
     nonPdfSubmitQueue: nonPdfSubmitQueue
     mediaSubmitQueue: mediaSubmitQueue
-    maxSecondsHideOnUpload: maxSecondsHideOnUpload
+    // maxSecondsHideOnUpload: maxSecondsHideOnUpload
     maxSubmitRequeueCount: maxSubmitRequeueCount
     pollQueueSubmitBackoff: pollQueueSubmitBackoff
     pdfSubmitQueueBackoff: pdfSubmitQueueBackoff
@@ -697,9 +685,9 @@ output AZURE_TENANT_ID string = tenantId
 #disable-next-line outputs-should-not-contain-secrets
 output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
-output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
-output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
-output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
+output CONTAINER_REGISTRY_ID string = appServiceContainer.outputs.containerRegistryid
+output CONTAINER_REGISTRY_NAME string = appServiceContainer.outputs.containerRegistryName
+output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.appServiceName
 output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel
 output EMBEDDING_VECTOR_SIZE string = embeddingVectorSize
 output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment

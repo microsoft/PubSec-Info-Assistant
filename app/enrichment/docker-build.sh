@@ -22,6 +22,9 @@ if $IS_USGOV_DEPLOYMENT; then
   CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
 fi
 
+# Copy over shared_code to the app directory
+echo "Copying shared code"
+cp -r "${APP_DIR}/../../functions/shared_code" "${APP_DIR}/shared_code"
 # Build the container
 echo "Building container"
 sudo docker build -t ${image_name} ${DIR} --build-arg BUILDKIT_INLINE_CACHE=1

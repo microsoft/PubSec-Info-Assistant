@@ -383,3 +383,5 @@ app/backend/lib64
 app/backend/shared_code
 
 packages-microsoft*
+
+# docker container build artifacts

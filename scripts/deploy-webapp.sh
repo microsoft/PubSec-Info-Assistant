@@ -38,7 +38,7 @@ fi
 if [ -n "${IN_AUTOMATION}" ]
 then
 
-    if $IS_USGOV_DEPLOYMENT; then
+    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
         az cloud set --name AzureUSGovernment 
     fi
 

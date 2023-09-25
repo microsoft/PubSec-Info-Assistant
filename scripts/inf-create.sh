@@ -42,7 +42,7 @@ if $IS_USGOV_DEPLOYMENT; then
   WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
 fi
 
-if $IS_USGOV_DEPLOYMENT && ! $USE_EXISTING_AOAI; then
+if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT && ! $USE_EXISTING_AOAI; then
   echo "AOAI doesn't exist in US Gov regions.  Please create AOAI seperately and update the USE_EXISTING_AOAI in the env file. "
   exit 1  
 fi

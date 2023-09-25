@@ -88,8 +88,8 @@ param mediaSubmitQueue string
 @description('The queue which is used to trigger processing of media files')
 param textEnrichmentQueue string
 
-// @description('The maximum number of seconds  between uploading a file and submitting it to FR')
-// param maxSecondsHideOnUpload string
+@description('The maximum number of seconds  between uploading a file and submitting it to FR')
+param maxSecondsHideOnUpload string
 
 @description('The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capacity limitations')
 param maxSubmitRequeueCount string
@@ -276,6 +276,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {        
           name: 'TEXT_ENRICHMENT_QUEUE'
           value: textEnrichmentQueue
+        }
+        {
+          name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
+          value: maxSecondsHideOnUpload
         }
         {
           name: 'MAX_SUBMIT_REQUEUE_COUNT'

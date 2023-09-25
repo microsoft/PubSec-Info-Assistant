@@ -20,7 +20,7 @@ non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 media_submit_queue = os.environ["MEDIA_SUBMIT_QUEUE"]
-max_seconds_hide_on_upload = 300
+max_seconds_hide_on_upload = os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"]
 function_name = "FileUploadedFunc"
 
 

@@ -134,7 +134,15 @@ jq -r  '
         {
             "path": "azurE_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
-        }
+        },
+        {
+            "path": "targeT_EMBEDDINGS_MODEL",
+            "env_var": "TARGET_EMBEDDINGS_MODEL"
+        },
+        {
+            "path": "embeddinG_VECTOR_SIZE",
+            "env_var": "EMBEDDING_VECTOR_SIZE"
+        }     
     ]
         as $env_vars_to_extract
     |

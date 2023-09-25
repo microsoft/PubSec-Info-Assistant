@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/devcontainers/python:3.11
 
-ARG MODEL_NAMES=all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2
+ARG MODEL_NAMES=all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2|BAAI/bge-small-en-v1.5
 
 # Install requirements
 
@@ -12,7 +12,14 @@ COPY download_model.py /download_model.py
 RUN mkdir models
 RUN python download_model.py
 
+
 COPY *.py /
+COPY shared_code/status_log.py /shared_code/status_log.py
+COPY shared_code/utilities.py /shared_code/utilities.py
+
+
+# COPY *.py /
+# COPY shared_code/*.py /shared_code/*.py
 
 EXPOSE 5000
 

@@ -10,7 +10,6 @@ import pydantic
 
 class ModelInfo(pydantic.BaseModel):
     model: str
-    max_seq_length: int
     vector_size: int
 
 
@@ -21,9 +20,7 @@ class Embedding(pydantic.BaseModel):
 
 
 class EmbeddingResponse(pydantic.BaseModel):
-    object: str = "list"
-    data: List[Embedding]
-    embedding_id: str
+    data: List[float]
     model: str
     model_info: ModelInfo
 

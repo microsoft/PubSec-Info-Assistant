@@ -5,6 +5,10 @@ uvicorn
 python-multipart
 azure-storage-queue == 12.6.0
 azure-storage-blob==12.16.0
+azure.search.documents==11.3.0
+azure-cosmos == 4.3.1
 azure-core == 1.26.4
 tenacity
 openai
+tiktoken==0.3.3
+beautifulsoup4 == 4.12.2

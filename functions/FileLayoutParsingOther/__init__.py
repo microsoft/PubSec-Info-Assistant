@@ -79,7 +79,7 @@ def main(msg: func.QueueMessage) -> None:
         message_json["enrichment_queued_count"] = 1
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string)
-        statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)      
+        statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)    
              
     except Exception as e:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)

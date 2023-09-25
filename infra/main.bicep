@@ -49,10 +49,11 @@ param storageAccountName string = ''
 param containerName string = 'content'
 param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
-param searchIndexName string = 'all-files-index'
+param searchIndexName string = 'vector-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
 param embeddingsModelName string = 'text-embedding-ada-002'
+param targetEmbeddingsModel string = 'azure-openai_text-embedding-ada-002'
 param chatGptDeploymentCapacity int = 30
 param embeddingsDeploymentCapacity int = 240
 param chatGptModelVersion string = ''
@@ -91,8 +92,11 @@ param subscriptionId string = ''
 param principalId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
+var modelVectorSizeMap = loadJsonContent('embedding_model_vector_size.json')
+var embeddingVectorSize = modelVectorSizeMap[targetEmbeddingsModel]
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
+var containerRegistrySuffix = isGovCloudDeployment ? 'azurecr.us' : 'azurecr.io'
 
 
 // Organize resources in a resource group
@@ -174,10 +178,13 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.azurecr.io'
+      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.${containerRegistrySuffix}'
       DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
       DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
+      TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
+      EMBEDDING_VECTOR_SIZE: embeddingVectorSize
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
     }
   }
   dependsOn: [
@@ -461,6 +468,7 @@ module functions 'core/function/function.bicep' = {
     maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
     enrichmentBackoff: enrichmentBackoff
     enableDevCode: enableDevCode
+    EMBEDDINGS_QUEUE: embeddingsQueue
   }
   dependsOn: [
     appServicePlan
@@ -670,7 +678,6 @@ output NONPDFSUBMITQUEUE string = nonPdfSubmitQueue
 output MEDIASUBMITQUEUE string = mediaSubmitQueue
 output TEXTENRICHMENTQUEUE string = textEnrichmentQueue
 output EMBEDDINGSQUEUE string = embeddingsQueue
-output MAX_SECONDS_HIDE_ON_UPLOAD string = maxSecondsHideOnUpload
 output MAX_SUBMIT_REQUEUE_COUNT string = maxSubmitRequeueCount
 output POLL_QUEUE_SUBMIT_BACKOFF string = pollQueueSubmitBackoff
 output PDF_SUBMIT_QUEUE_BACKOFF string = pdfSubmitQueueBackoff
@@ -693,4 +700,8 @@ output AZURE_SUBSCRIPTION_ID string = subscriptionId
 output CONTAINER_REGISTRY_ID string = containerRegistry.outputs.id
 output CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.name
+output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel
+output EMBEDDING_VECTOR_SIZE string = embeddingVectorSize
 output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment
+output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
+output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key

@@ -29,7 +29,6 @@ tag=$(date -u +"%Y%m%d-%H%M%S")
 sudo docker tag ${image_name} ${image_name}:${tag}
 sudo docker tag ${image_name} $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/${image_name}:${tag}
 
-
 # Deploying image to ACR
 echo "Deploying containers to ACR"
 if [ -n "${IN_AUTOMATION}" ]

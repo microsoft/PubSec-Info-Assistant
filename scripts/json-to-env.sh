@@ -95,13 +95,49 @@ jq -r  '
             "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
         },
         {
+            "path": "azurE_STORAGE_CONTAINER",
+            "env_var": "AZURE_STORAGE_CONTAINER"
+        },
+        {
             "path": "bloB_CONNECTION_STRING",
             "env_var": "BLOB_CONNECTION_STRING"
         },       
         {
+            "path": "targeT_EMBEDDINGS_MODEL",
+            "env_var": "TARGET_EMBEDDINGS_MODEL"
+        },
+        {
+            "path": "azurE_COSMOSDB_URL",
+            "env_var": "COSMOSDB_URL"
+        },
+        {
+            "path": "azurE_COSMOSDB_KEY",
+            "env_var": "COSMOSDB_KEY"
+        },
+        {
+            "path": "azurE_COSMOSDB_DATABASE_NAME",
+            "env_var": "COSMOSDB_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_CONTAINER_NAME",
+            "env_var": "COSMOSDB_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_OPENAI_RESOURCE_GROUP",
+            "env_var": "AZURE_OPENAI_RESOURCE_GROUP"
+        },
+        {
+            "path": "embeddinG_VECTOR_SIZE",
+            "env_var": "EMBEDDING_VECTOR_SIZE"
+        },       
+        {
             "path": "iS_USGOV_DEPLOYMENT",
             "env_var": "IS_USGOV_DEPLOYMENT"
-        } 
+        },
+        {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
+        }
     ]
         as $env_vars_to_extract
     |

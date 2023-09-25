@@ -44,20 +44,27 @@ targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
 # If running in the US Gov cloud, use the US Gov translation endpoint, Default to global
 if not IS_USGOV_DEPLOYMENT:
-    MAX_CHARS_FOR_DETECTION = 1000
     API_DETECT_ENDPOINT = (
         "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
     )
     API_TRANSLATE_ENDPOINT = (
         "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
     )
-    translator_api_headers = {
-        "Ocp-Apim-Subscription-Key": cognitive_services_key,
-        "Content-type": "application/json",
-        "Ocp-Apim-Subscription-Region": cognitive_services_account_location,
-    }
 else:
-    raise NotImplementedError("US Gov cloud not yet supported for Image OCR Translation")
+    API_DETECT_ENDPOINT = (
+        "https://api.cognitive.microsofttranslator.us/detect?api-version=3.0"
+    )
+    API_TRANSLATE_ENDPOINT = (
+        "https://api.cognitive.microsofttranslator.us/translate?api-version=3.0"
+    )
+
+
+MAX_CHARS_FOR_DETECTION = 1000
+translator_api_headers = {
+    "Ocp-Apim-Subscription-Key": cognitive_services_key,
+    "Content-type": "application/json",
+    "Ocp-Apim-Subscription-Region": cognitive_services_account_location,
+}
 
 # Vision SDK
 vision_service_options = visionsdk.VisionServiceOptions(

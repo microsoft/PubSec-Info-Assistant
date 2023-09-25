@@ -96,6 +96,7 @@ var modelVectorSizeMap = loadJsonContent('embedding_model_vector_size.json')
 var embeddingVectorSize = modelVectorSizeMap[targetEmbeddingsModel]
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
+var containerRegistrySuffix = isGovCloudDeployment ? 'azurecr.us' : 'azurecr.io'
 
 
 // Organize resources in a resource group
@@ -177,13 +178,13 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.azurecr.io'
+      DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.outputs.name}.${containerRegistrySuffix}'
       DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.outputs.username
       DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.outputs.password
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
       EMBEDDING_VECTOR_SIZE: embeddingVectorSize
-      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
     }
   }
   dependsOn: [

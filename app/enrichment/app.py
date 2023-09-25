@@ -154,6 +154,11 @@ model_info["paraphrase-multilingual-MiniLM-L12-v2"] = {
     "model": "paraphrase-multilingual-MiniLM-L12-v2",
     "vector_size": 384,
 }
+model_info["BAAI/bge-small-en-v1.5"] = {
+    "model": "BAAI/bge-small-en-v1.5",
+    "vector_size": 384,
+}
+
 
 log.debug("Models loaded")
 IS_READY = True

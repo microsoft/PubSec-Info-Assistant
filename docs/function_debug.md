@@ -34,6 +34,7 @@ Next you will need to create local configuration values that are used by the fun
     "FR_API_VERSION": "2022-08-31",
     "MAX_POLLING_REQUEUE_COUNT": "10",
     "MAX_READ_ATTEMPTS": "5",
+    "MAX_SECONDS_HIDE_ON_UPLOAD": "300",
     "MAX_SUBMIT_REQUEUE_COUNT": "10",
     "NON_PDF_SUBMIT_QUEUE": "non-pdf-submit-queue",
     "PDF_SUBMIT_QUEUE_BACKOFF": "60",

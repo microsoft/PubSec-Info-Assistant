@@ -21,7 +21,7 @@ from model_handling import load_models
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
-from utilities_helper import UtilitiesHelper
+from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
 
 # === ENV Setup ===

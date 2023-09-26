@@ -179,6 +179,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
+      AZURE_BLOB_STORAGE_CONTAINER: containerName
     }
   }
   dependsOn: [

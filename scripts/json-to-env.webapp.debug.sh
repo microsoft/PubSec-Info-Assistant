@@ -76,18 +76,6 @@ jq -r  '
             "env_var": "AZURE_SEARCH_SERVICE_KEY"
         },
         {
-            "path": "nonpdfsubmitqueue",
-            "env_var": "NON_PDF_SUBMIT_QUEUE"
-        },
-        {
-            "path": "pdfpollingqueue",
-            "env_var": "PDF_POLLING_QUEUE"
-        },
-        {
-            "path": "pdfsubmitqueue",
-            "env_var": "PDF_SUBMIT_QUEUE"
-        },
-        {
             "path": "bloB_CONNECTION_STRING",
             "env_var": "BLOB_CONNECTION_STRING"
         },
@@ -124,16 +112,28 @@ jq -r  '
             "env_var": "AZURE_SUBSCRIPTION_ID"
         },
         {
-            "path": "embeddingsqueue",
-            "env_var": "EMBEDDINGS_QUEUE"
-        },
-        {
-            "path": "azurE_BLOB_DROP_STORAGE_CONTAINER",
-            "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
-        },
-        {
             "path": "azurE_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
+        },
+        {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "AZURE_BLOB_STORAGE_ENDPOINT"
+        },
+        {
+            "path": "targeT_EMBEDDINGS_MODEL",
+            "env_var": "TARGET_EMBEDDINGS_MODEL"
+        },
+        {
+            "path": "embeddinG_VECTOR_SIZE",
+            "env_var": "EMBEDDING_VECTOR_SIZE"
+        },
+        {
+            "path": "iS_USGOV_DEPLOYMENT",
+            "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
+        },
+        {
+            "path": "azurE_OPENAI_EMBEDDING_MODEL",
+            "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
         }
     ]
         as $env_vars_to_extract
@@ -154,3 +154,8 @@ jq -r  '
     |
     .[]
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
+
+    echo "EMBEDDINGS_QUEUE='embeddings-queue'"
+    echo "DEQUEUE_MESSAGE_BATCH_SIZE=5"
+    echo "MAX_EMBEDDING_REQUEUE_COUNT=5"
+    echo "CHAT_WARNING_BANNER_TEXT='$CHAT_WARNING_BANNER_TEXT'"

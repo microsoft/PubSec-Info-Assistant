@@ -88,6 +88,7 @@
               "--port", 
               "3003"
             ],
+            "preLaunchTask": "pip_install_container"
         }
     ]
 }

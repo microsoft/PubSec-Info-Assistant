@@ -35,8 +35,17 @@
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
     },
-    "embeddingsModelName": {
+    "azureOpenAIEmbeddingsModelName": {
       "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
+    },
+    "useAzureOpenAIEmbeddings": {
+      "value": ${USE_AZURE_OPENAI_EMBEDDINGS}
+    },
+    "sentenceTransformersModelName": {
+      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL}"
+    },
+    "sentenceTransformerEmbeddingVectorSize": {
+      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL_VECTOR_SIZE}"
     },
     "chatGptModelName": {
       "value": "${CHATGPT_MODEL_MODEL_NAME}"

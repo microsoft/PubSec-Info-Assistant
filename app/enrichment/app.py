@@ -21,7 +21,7 @@ from model_handling import load_models
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
-from utilities_helper import UtilitiesHelper
+from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
 
 # === ENV Setup ===
@@ -32,7 +32,6 @@ ENV = {
     "LOG_LEVEL": "DEBUG", # Will be overwritten by LOG_LEVEL in Environment
     "DEQUEUE_MESSAGE_BATCH_SIZE": 5,
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
-    "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
     "COSMOSDB_URL": None,
     "COSMOSDB_KEY": None,
@@ -46,10 +45,10 @@ ENV = {
     "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_SERVICE": None,
     "BLOB_CONNECTION_STRING": None,
-    "AZURE_BLOB_STORAGE_CONTAINER": None,
     "TARGET_EMBEDDINGS_MODEL": None,
     "EMBEDDING_VECTOR_SIZE": None,
-    "AZURE_SEARCH_SERVICE_ENDPOINT": None
+    "AZURE_SEARCH_SERVICE_ENDPOINT": None,
+    "AZURE_BLOB_STORAGE_ENDPOINT": None
 }
 
 for key, value in ENV.items():
@@ -235,7 +234,7 @@ def embed_texts(model: str, texts: List[str]):
         embeddings = embeddings['data'][0]['embedding']
     else:
         embeddings = model_obj.encode(texts)
-        embeddings = embeddings[0]
+        # embeddings = embeddings[0]
         embeddings = embeddings.tolist()
         
     output = {
@@ -294,7 +293,7 @@ def poll_queue() -> None:
         statusLog.upsert_document(blob_path, f'Embeddings process started with model ${ENV["TARGET_EMBEDDINGS_MODEL"]}', StatusClassification.INFO, State.PROCESSING)
         
         try:          
-            file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_path)
+            file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
             chunk_folder_path = file_directory + file_name + file_extension
             blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
@@ -304,7 +303,7 @@ def poll_queue() -> None:
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             for i, chunk in enumerate(chunk_list):
                 # open the file and extract the content
-                blob_path_plus_sas = utilities.get_blob_and_sas(ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
+                blob_path_plus_sas = utilities_helper.get_blob_and_sas(ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
                 response = requests.get(blob_path_plus_sas)
                 response.raise_for_status()
                 chunk_dict = json.loads(response.text)  

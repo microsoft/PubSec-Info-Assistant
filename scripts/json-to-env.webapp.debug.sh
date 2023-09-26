@@ -112,10 +112,6 @@ jq -r  '
             "env_var": "AZURE_SUBSCRIPTION_ID"
         },
         {
-            "path": "azurE_BLOB_DROP_STORAGE_CONTAINER",
-            "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
-        },
-        {
             "path": "azurE_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
         },
@@ -134,7 +130,11 @@ jq -r  '
         {
             "path": "iS_USGOV_DEPLOYMENT",
             "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
-        }     
+        },
+        {
+            "path": "azurE_OPENAI_EMBEDDING_MODEL",
+            "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
+        }
     ]
         as $env_vars_to_extract
     |
@@ -154,3 +154,7 @@ jq -r  '
     |
     .[]
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
+
+    echo "EMBEDDINGS_QUEUE='embeddings-queue'"
+    echo "DEQUEUE_MESSAGE_BATCH_SIZE=5"
+    echo "MAX_EMBEDDING_REQUEUE_COUNT=5"

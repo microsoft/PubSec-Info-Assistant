@@ -162,6 +162,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       LOG_LEVEL: 'DEBUG'
       DEQUEUE_MESSAGE_BATCH_SIZE: 5
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
+      AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
       COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
@@ -179,7 +180,6 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
-      AZURE_BLOB_STORAGE_CONTAINER: containerName
     }
   }
   dependsOn: [
@@ -684,3 +684,4 @@ output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.b
 output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
+output AZURE_OPENAI_EMBEDDING_MODEL string = azureOpenAIEmbeddingsModelName

@@ -91,10 +91,6 @@ jq -r  '
             "env_var": "EMBEDDINGS_QUEUE"
         },
         {
-            "path": "azurE_BLOB_DROP_STORAGE_CONTAINER",
-            "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
-        },
-        {
             "path": "azurE_STORAGE_CONTAINER",
             "env_var": "AZURE_STORAGE_CONTAINER"
         },

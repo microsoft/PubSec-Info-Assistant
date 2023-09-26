@@ -2,13 +2,12 @@
 # Licensed under the MIT license.
 
 import logging
-import os
 import json
 import html
 from datetime import datetime
 from enum import Enum
 from azure.storage.blob import BlobServiceClient
-from utilities_helper import UtilitiesHelper
+from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
 from bs4 import BeautifulSoup

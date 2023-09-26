@@ -52,8 +52,10 @@ param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'vector-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo'
-param embeddingsModelName string = 'text-embedding-ada-002'
-param targetEmbeddingsModel string = 'azure-openai_text-embedding-ada-002'
+param azureOpenAIEmbeddingsModelName string = 'text-embedding-ada-002'
+param useAzureOpenAIEmbeddings bool = true
+param sentenceTransformersModelName string = 'BAAI/bge-small-en-v1.5'
+param sentenceTransformerEmbeddingVectorSize string = '384'
 param chatGptDeploymentCapacity int = 30
 param embeddingsDeploymentCapacity int = 240
 param chatGptModelVersion string = ''
@@ -99,8 +101,6 @@ param subscriptionId string = ''
 param principalId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
-var modelVectorSizeMap = loadJsonContent('embedding_model_vector_size.json')
-var embeddingVectorSize = modelVectorSizeMap[targetEmbeddingsModel]
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 var containerRegistrySuffix = isGovCloudDeployment ? 'azurecr.us' : 'azurecr.io'
@@ -162,8 +162,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       LOG_LEVEL: 'DEBUG'
       DEQUEUE_MESSAGE_BATCH_SIZE: 5
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
-      BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME: uploadContainerName
-      AZURE_BLOB_STORAGE_CONTAINER: containerName
+      AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
       COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName
@@ -171,14 +170,14 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       MAX_EMBEDDING_REQUEUE_COUNT: 5
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
-      AZURE_OPENAI_EMBEDDING_MODEL: embeddingsModelName
+      AZURE_OPENAI_EMBEDDING_MODEL: azureOpenAIEmbeddingsModelName
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
-      TARGET_EMBEDDINGS_MODEL: targetEmbeddingsModel
-      EMBEDDING_VECTOR_SIZE: embeddingVectorSize
+      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
+      EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
     }
   }
@@ -260,10 +259,10 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         }        
       }
       {
-        name: !empty(embeddingsModelName) ? embeddingsModelName : embeddingsModelName
+        name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : azureOpenAIEmbeddingsModelName
         model: {
           format: 'OpenAI'
-          name: embeddingsModelName
+          name: azureOpenAIEmbeddingsModelName
           version: '2'
         }
         sku: {
@@ -648,7 +647,6 @@ output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
-output AZURE_OPENAI_EMBEDDING_MODEL string = !empty(embeddingsModelName) ? embeddingsModelName : embeddingsModelName
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
@@ -680,8 +678,8 @@ output AZURE_SUBSCRIPTION_ID string = subscriptionId
 output CONTAINER_REGISTRY_ID string = appServiceContainer.outputs.containerRegistryid
 output CONTAINER_REGISTRY_NAME string = appServiceContainer.outputs.containerRegistryName
 output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.appServiceName
-output TARGET_EMBEDDINGS_MODEL string = targetEmbeddingsModel
-output EMBEDDING_VECTOR_SIZE string = embeddingVectorSize
 output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment
 output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
 output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
+output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
+output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName

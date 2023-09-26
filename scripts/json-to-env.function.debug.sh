@@ -137,5 +137,6 @@ jq -r  '
             "PDF_POLLING_QUEUE": "pdf-polling-queue",
             "PDF_SUBMIT_QUEUE": "pdf-submit-queue",
             "EMBEDDINGS_QUEUE": "embeddings-queue",
+            "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue"
             })}
     '

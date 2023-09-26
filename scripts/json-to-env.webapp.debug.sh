@@ -120,12 +120,20 @@ jq -r  '
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
         },
         {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "AZURE_BLOB_STORAGE_ENDPOINT"
+        },
+        {
             "path": "targeT_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
         },
         {
             "path": "embeddinG_VECTOR_SIZE",
             "env_var": "EMBEDDING_VECTOR_SIZE"
+        },
+        {
+            "path": "iS_USGOV_DEPLOYMENT",
+            "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
         }     
     ]
         as $env_vars_to_extract

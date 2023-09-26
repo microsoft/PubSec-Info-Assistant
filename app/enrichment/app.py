@@ -8,7 +8,6 @@ from datetime import datetime
 from typing import List
 import base64
 import requests
-from datetime import datetime
 from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient
 from azure.search.documents import SearchClient
@@ -22,13 +21,7 @@ from model_handling import load_models
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
-
-
-
-
-
-
-from shared_code.utilities import Utilities
+from utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
 
 # === ENV Setup ===
@@ -74,47 +67,31 @@ openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
 openai.api_version = "2023-06-01-preview"
 
 class AzOAIEmbedding(object):
+    """A wrapper for a Azure OpenAI Embedding model"""
     def __init__(self, deployment_name) -> None:
         self.deployment_name = deployment_name
     
     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
     def encode(self, texts):
+        """Embeds a list of texts using a given model"""
         response = openai.Embedding.create(
             engine=self.deployment_name,
             input=texts
         )
         return response
 
-class All_MPNET_Base_v2(object):
+class STModel(object):
+    """A wrapper for a sentence-transformers model"""
     def __init__(self, deployment_name) -> None:
         self.deployment_name = deployment_name
         
     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
     def encode(self, texts) -> None:
+        """Embeds a list of texts using a given model"""
         model = SentenceTransformer(self.deployment_name)
         response = model.encode(texts)
         return response
     
-class Paraphrase_Multilingual_MiniLM_L12_v2(object):
-    def __init__(self, deployment_name) -> None:
-        self.deployment_name = deployment_name
-        
-    @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
-    def encode(self, texts) -> None:
-        model = SentenceTransformer(self.deployment_name)
-        response = model.encode(texts)
-        return response
-    
-class BAAI_bge_small_en_v1_5(object):
-    def __init__(self, deployment_name) -> None:
-        self.deployment_name = deployment_name
-        
-    @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
-    def encode(self, texts) -> None:
-        model = SentenceTransformer(self.deployment_name)
-        response = model.encode(texts)
-        return response
-
 # === Get Logger ===
 
 log = logging.getLogger("uvicorn")
@@ -123,10 +100,9 @@ log.info("Starting up")
 
 # === Azure Setup ===
 
-utilities = Utilities(
+utilities_helper = UtilitiesHelper(
     azure_blob_storage_account=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
-    azure_blob_drop_storage_container=ENV["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"],
-    azure_blob_content_storage_container=ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+    azure_blob_storage_endpoint=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
     azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 
@@ -146,29 +122,20 @@ log.debug("Loading embedding models...")
 models, model_info = load_models()
 
 # Add Azure OpenAI Embedding & additional Model
-models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = AzOAIEmbedding(ENV["AZURE_OPENAI_EMBEDDING_MODEL"])
-models["all-mpnet-base-v2"] = All_MPNET_Base_v2("sentence-transformers/all-mpnet-base-v2")
-models["paraphrase-multilingual-MiniLM-L12-v2"] = Paraphrase_Multilingual_MiniLM_L12_v2("sentence-transformers/all-mpnet-base-v2")
-models["BAAI-all-mpnet-base-v2"] = BAAI_bge_small_en_v1_5("BAAI/bge-small-en-v1.5")
-
+models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = AzOAIEmbedding(
+    ENV["AZURE_OPENAI_EMBEDDING_MODEL"])
+models[ENV["TARGET_EMBEDDINGS_MODEL"]] = STModel(
+    ENV["TARGET_EMBEDDINGS_MODEL"])
 
 model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
     "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"],
     "vector_size": 1536,
     # Source: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
 }
-model_info["all-mpnet-base-v2"] = {
-    "model": "all-mpnet-base-v2",
-    "vector_size": 768, 
+model_info[ENV["TARGET_EMBEDDINGS_MODEL"]] = {
+    "model": ENV["TARGET_EMBEDDINGS_MODEL"],
+    "vector_size": ENV["EMBEDDING_VECTOR_SIZE"],
     # https://huggingface.co/sentence-transformers/all-mpnet-base-v2
-}
-model_info["paraphrase-multilingual-MiniLM-L12-v2"] = {
-    "model": "paraphrase-multilingual-MiniLM-L12-v2",
-    "vector_size": 384,
-}
-model_info["BAAI-all-mpnet-base-v2"] = {
-    "model": "BAAI/bge-small-en-v1.5",
-    "vector_size": 384,
 }
 
 

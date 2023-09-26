@@ -32,7 +32,6 @@ ENV = {
     "LOG_LEVEL": "DEBUG", # Will be overwritten by LOG_LEVEL in Environment
     "DEQUEUE_MESSAGE_BATCH_SIZE": 5,
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
-    "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
     "COSMOSDB_URL": None,
     "COSMOSDB_KEY": None,

@@ -28,7 +28,7 @@ from sentence_transformers import SentenceTransformer
 
 
 
-from shared_code.utilities import Utilities
+from utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
 
 # === ENV Setup ===
@@ -123,10 +123,9 @@ log.info("Starting up")
 
 # === Azure Setup ===
 
-utilities = Utilities(
+utilities_helper = UtilitiesHelper(
     azure_blob_storage_account=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
-    azure_blob_drop_storage_container=ENV["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"],
-    azure_blob_content_storage_container=ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+    azure_blob_storage_endpoint=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
     azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 

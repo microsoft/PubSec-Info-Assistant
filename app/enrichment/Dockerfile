@@ -5,16 +5,16 @@ ARG MODEL_NAMES=all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2|BAAI/bge
 # Install requirements
 
 COPY requirements.txt /tmp/pip-tmp/
-#RUN pip install --requirement /tmp/pip-tmp/requirements.txt \
-#    && rm -rf /tmp/pip-
+RUN pip install --requirement /tmp/pip-tmp/requirements.txt \
+    && rm -rf /tmp/pip-
 
 COPY download_model.py /download_model.py
 RUN mkdir models
-#RUN python download_model.py
+RUN python download_model.py
 
 COPY *.py /
 COPY shared_code/status_log.py /shared_code/status_log.py
-COPY shared_code/utilities.py /shared_code/utilities.py
+COPY shared_code/utilities_helper.py /shared_code/utilities_helper.py
 
 EXPOSE 5000
 

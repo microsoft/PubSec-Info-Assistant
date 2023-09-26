@@ -162,8 +162,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       LOG_LEVEL: 'DEBUG'
       DEQUEUE_MESSAGE_BATCH_SIZE: 5
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
-      BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME: uploadContainerName
-      AZURE_BLOB_STORAGE_CONTAINER: containerName
+      AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
       COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName

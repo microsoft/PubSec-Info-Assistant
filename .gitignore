@@ -385,3 +385,4 @@ app/backend/shared_code
 packages-microsoft*
 
 # docker container build artifacts
+app/enrichment/shared_code

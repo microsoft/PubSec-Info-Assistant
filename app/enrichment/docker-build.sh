@@ -24,7 +24,11 @@ fi
 
 # Copy over shared_code to the app directory
 echo "Copying shared code"
-cp -r "${APP_DIR}/../../functions/shared_code" "${APP_DIR}/shared_code"
+mkdir -p ${APP_DIR}/shared_code
+cp ${APP_DIR}/../../functions/shared_code/status_log.py ${APP_DIR}/shared_code
+cp ${APP_DIR}/../../functions/shared_code/utilities_helper.py ${APP_DIR}/shared_code
+
+
 # Build the container
 echo "Building container"
 sudo docker build -t ${image_name} ${DIR} --build-arg BUILDKIT_INLINE_CACHE=1

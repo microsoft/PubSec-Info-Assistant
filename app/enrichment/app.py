@@ -295,7 +295,7 @@ def poll_queue() -> None:
         statusLog.upsert_document(blob_path, f'Embeddings process started with model ${ENV["TARGET_EMBEDDINGS_MODEL"]}', StatusClassification.INFO, State.PROCESSING)
         
         try:          
-            file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_path)
+            file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
             chunk_folder_path = file_directory + file_name + file_extension
             blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
@@ -305,7 +305,7 @@ def poll_queue() -> None:
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             for i, chunk in enumerate(chunk_list):
                 # open the file and extract the content
-                blob_path_plus_sas = utilities.get_blob_and_sas(ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
+                blob_path_plus_sas = utilities_helper.get_blob_and_sas(ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
                 response = requests.get(blob_path_plus_sas)
                 response.raise_for_status()
                 chunk_dict = json.loads(response.text)  

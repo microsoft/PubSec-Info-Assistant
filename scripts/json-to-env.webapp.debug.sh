@@ -130,6 +130,10 @@ jq -r  '
         {
             "path": "embeddinG_VECTOR_SIZE",
             "env_var": "EMBEDDING_VECTOR_SIZE"
+        },
+        {
+            "path": "iS_USGOV_DEPLOYMENT",
+            "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
         }     
     ]
         as $env_vars_to_extract

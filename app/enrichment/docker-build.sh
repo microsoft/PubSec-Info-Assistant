@@ -47,7 +47,7 @@ fi
 
 sudo docker tag ${image_name} $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/${image_name}:${tag}
 az acr login --name $CONTAINER_REGISTRY_NAME
-#docker push $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/${image_name}:${tag}
+docker push $CONTAINER_REGISTRY_NAME.$CONTAINER_REGISTRY_NAME_SUFFIX/${image_name}:${tag}
 echo "Containers deployed successfully"
 
 # Configure the webapp to use the ACR image

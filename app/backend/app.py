@@ -111,7 +111,7 @@ else:
         account_name=AZURE_OPENAI_SERVICE,
         deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
 
-    model_name = deployment.properties.model.name,
+    model_name = deployment.properties.model.name
     model_version = deployment.properties.model.version
 
 chat_approaches = {

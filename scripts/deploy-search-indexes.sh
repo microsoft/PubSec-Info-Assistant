@@ -1,9 +1,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-
 #!/bin/bash
 set -e
+
+figlet Search Index
 
 if [ -n "${IN_AUTOMATION}" ]
 then

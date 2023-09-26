@@ -120,6 +120,10 @@ jq -r  '
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
         },
         {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "AZURE_BLOB_STORAGE_ENDPOINT"
+        },
+        {
             "path": "targeT_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
         },

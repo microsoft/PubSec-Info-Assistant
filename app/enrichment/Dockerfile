@@ -8,6 +8,7 @@ COPY requirements.txt /tmp/pip-tmp/
 RUN pip install --requirement /tmp/pip-tmp/requirements.txt \
     && rm -rf /tmp/pip-
 
+RUN echo "Downloading model: $MODEL_NAMES"
 COPY download_model.py /download_model.py
 RUN mkdir models
 RUN python download_model.py

@@ -236,7 +236,7 @@ def embed_texts(model: str, texts: List[str]):
         embeddings = embeddings['data'][0]['embedding']
     else:
         embeddings = model_obj.encode(texts)
-        embeddings = embeddings[0]
+        # embeddings = embeddings[0]
         embeddings = embeddings.tolist()
         
     output = {

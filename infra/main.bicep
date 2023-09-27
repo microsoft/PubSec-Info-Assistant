@@ -91,12 +91,6 @@ param maxReadAttempts string = '5'
 param maxEnrichmentRequeueCount string = '10'
 param enrichmentBackoff string = '60'
 param targetTranslationLanguage string = 'en'
-param pdfSubmitQueue string = 'pdf-submit-queue'
-param pdfPollingQueue string = 'pdf-polling-queue'
-param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
-param mediaSubmitQueue string = 'media-submit-queue'
-param textEnrichmentQueue string = 'text-enrichment-queue'
-param embeddingsQueue string = 'embeddings-queue'
 // End of valued replicated in debug env files
 
 param cuaEnabled bool = false
@@ -148,18 +142,6 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
-
-module containerRegistry 'core/host/conteinerregistry.bicep' = {
-  name: 'containerregistry'
-  scope: rg
-  params: {
-    name: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
-    location: location
-    tags: tags
-  }
-}
-
-
 // Create an App Service Plan and supporting services for the enrichment app service
 module appServiceContainer 'core/host/appservicecontainer.bicep' = {
   name: 'appservicecontainer'
@@ -198,7 +180,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
-      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
     }
   }
   dependsOn: [
@@ -275,7 +257,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         sku: {
           name: 'Standard'
           capacity: chatGptDeploymentCapacity
-        }        
+        }
       }
       {
         name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : azureOpenAIEmbeddingsModelName
@@ -287,7 +269,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         sku: {
           name: 'Standard'
           capacity: embeddingsDeploymentCapacity
-        }        
+        }
       }
     ]
   }

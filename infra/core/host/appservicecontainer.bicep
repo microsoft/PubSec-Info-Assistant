@@ -1,5 +1,6 @@
 param appServiceName string
 param appServicePlanName string
+param containerRegistryName string
 param location string = resourceGroup().location
 param tags object = {}
 param applicationInsightsName string = ''
@@ -9,7 +10,25 @@ param storageAccountUri string
 param keyVaultName string = ''
 param managedIdentity bool = !empty(keyVaultName)
 param appSettings object = {}
+param containerRegistrySuffix string = ''
 
+
+// For simplicity, this uses the admin user for authenticating
+// For production, consider other authentication options: https://docs.microsoft.com/en-us/azure/container-registry/container-registry-authentication
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2022-12-01' = {
+  name: containerRegistryName
+  location: location
+  tags: tags
+  identity: {
+    type: 'SystemAssigned'
+  } 
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    adminUserEnabled: true
+  }
+}
 
 // Create an App Service Plan to group applications under the same payment plan and SKU, specifically for containers
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
@@ -17,10 +36,10 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   location: location
   tags: tags
   sku: {
-    name: 'S1'
-    tier: 'Standard'
-    size: 'S1'
-    family: 'S'
+    name: 'P1v3'
+    tier: 'PremiumV3'
+    size: 'P1v3'
+    family: 'Pv3'
     capacity: 3
   }
   kind: 'linux'
@@ -103,7 +122,10 @@ properties: {
   resource configAppSettings 'config' = {
     name: 'appsettings'
     properties: union(appSettings,
-      !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {}
+      !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
+      { DOCKER_REGISTRY_SERVER_URL: 'https://${containerRegistry.name}.${containerRegistrySuffix}' }, 
+      { DOCKER_REGISTRY_SERVER_USERNAME: containerRegistry.listCredentials().username },
+      { DOCKER_REGISTRY_SERVER_PASSWORD: containerRegistry.listCredentials().passwords[0].value }
     )
   } 
 }
@@ -148,5 +170,7 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
   }
 }
 
-output name string = appService.name
+output appServiceName string = appService.name
 output identityPrincipalId string = managedIdentity ? appService.identity.principalId : ''
+output containerRegistryid string = containerRegistry.id
+output containerRegistryName string = containerRegistry.name

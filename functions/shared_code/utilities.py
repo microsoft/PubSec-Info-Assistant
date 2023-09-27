@@ -2,12 +2,12 @@
 # Licensed under the MIT license.
 
 import logging
-import os
 import json
 import html
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
+from azure.storage.blob import BlobServiceClient
+from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
 from bs4 import BeautifulSoup
@@ -54,6 +54,9 @@ class Utilities:
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
         self.azure_blob_storage_key = azure_blob_storage_key
+        self.utilities_helper = UtilitiesHelper(azure_blob_storage_account,
+                                                azure_blob_storage_endpoint,
+                                                azure_blob_storage_key)
 
     def write_blob(self, output_container, content, output_filename, folder_set=""):
         """ Function to write a generic blob """
@@ -75,14 +78,11 @@ class Utilities:
 
     def get_filename_and_extension(self, path):
         """ Function to return the file name & type"""
-        # Split the path into base and extension
-        base_name = os.path.basename(path)
-        segments = path.split("/")
-        directory = "/".join(segments[1:-1]) + "/"
-        if directory == "/":
-            directory = ""
-        file_name, file_extension = os.path.splitext(base_name)
-        return file_name, file_extension, directory
+        return self.utilities_helper.get_filename_and_extension(path)
+    
+    def  get_blob_and_sas(self, blob_path):
+        """ Function to retrieve the uri and sas token for a given blob in azure storage"""
+        return self.utilities_helper.get_blob_and_sas(blob_path)
 
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
@@ -107,31 +107,6 @@ class Utilities:
             table_html +="</tr>"
         table_html += "</table>"
         return table_html
-
-    def  get_blob_and_sas(self, blob_path):
-        """ Function to retrieve the uri and sas token for a given blob in azure storage"""
-
-        # Get path and file name minus the root container
-        separator = "/"
-        file_path_w_name_no_cont = separator.join(
-            blob_path.split(separator)[1:])
-        
-        container_name = separator.join(
-            blob_path.split(separator)[0:1])
-
-        # Gen SAS token
-        sas_token = generate_blob_sas(
-            account_name=self.azure_blob_storage_account,
-            container_name=container_name,
-            blob_name=file_path_w_name_no_cont,
-            account_key=self.azure_blob_storage_key,
-            permission=BlobSasPermissions(read=True),
-            expiry=datetime.utcnow() + timedelta(hours=1)
-        )
-        source_blob_path = f'{self.azure_blob_storage_endpoint}{blob_path}?{sas_token}'
-        source_blob_path = source_blob_path.replace(" ", "%20")
-        logging.info("Path and SAS token for file in azure storage are now generated \n")
-        return source_blob_path
 
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
         """ Function to build a json structure representing the paragraphs in a document, 
@@ -335,7 +310,7 @@ class Utilities:
             'file_uri': myblob_uri,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
-            'subtitle_name': subtitle_name,
+            'subtitle': subtitle_name,
             'section': section_name,
             'pages': page_list,
             'token_count': chunk_size,

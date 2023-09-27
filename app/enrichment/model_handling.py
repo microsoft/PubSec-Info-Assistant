@@ -30,7 +30,6 @@ def load_models():
     for model, model_obj in models.items():
         model_info_entry = {
             "model": model,
-            "max_seq_length": model_obj.get_max_seq_length(),
             "vector_size": model_obj.get_sentence_embedding_dimension(),
         }
 

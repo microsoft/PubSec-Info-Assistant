@@ -19,7 +19,7 @@ AOAI_2_OAI = {
 
 def get_token_limit(model_id: str) -> int:
     if model_id not in MODELS_2_TOKEN_LIMITS:
-        raise ValueError("Expected model gpt-35-turbo and above")
+        raise ValueError("Expected model gpt-35-turbo and above. Got: " + model_id)
     return MODELS_2_TOKEN_LIMITS.get(model_id)
 
 

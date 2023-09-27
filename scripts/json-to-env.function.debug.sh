@@ -72,58 +72,6 @@ jq -r  '
             "env_var": "AzureWebJobsStorage"
         },
         {
-            "path": "nonpdfsubmitqueue",
-            "env_var": "NON_PDF_SUBMIT_QUEUE"
-        },
-        {
-            "path": "mediasubmitqueue",
-            "env_var": "MEDIA_SUBMIT_QUEUE"
-        },
-        {
-            "path": "pdfpollingqueue",
-            "env_var": "PDF_POLLING_QUEUE"
-        },
-        {
-            "path": "pdfsubmitqueue",
-            "env_var": "PDF_SUBMIT_QUEUE"
-        },
-        {
-            "path": "textenrichmentqueue",
-            "env_var": "TEXT_ENRICHMENT_QUEUE"
-        },
-        {
-            "path": "maX_SECONDS_HIDE_ON_UPLOAD",
-            "env_var": "MAX_SECONDS_HIDE_ON_UPLOAD"
-        },
-        {
-            "path": "maX_SUBMIT_REQUEUE_COUNT",
-            "env_var": "MAX_SUBMIT_REQUEUE_COUNT"
-        },
-        {
-            "path": "polL_QUEUE_SUBMIT_BACKOFF",
-            "env_var": "POLL_QUEUE_SUBMIT_BACKOFF"
-        },
-        {
-            "path": "pdF_SUBMIT_QUEUE_BACKOFF",
-            "env_var": "PDF_SUBMIT_QUEUE_BACKOFF"
-        },
-        {
-            "path": "maX_POLLING_REQUEUE_COUNT",
-            "env_var": "MAX_POLLING_REQUEUE_COUNT"
-        },
-        {
-            "path": "submiT_REQUEUE_HIDE_SECONDS",
-            "env_var": "SUBMIT_REQUEUE_HIDE_SECONDS"
-        },
-        {
-            "path": "pollinG_BACKOFF",
-            "env_var": "POLLING_BACKOFF"
-        },
-        {
-            "path": "maX_READ_ATTEMPTS",
-            "env_var": "MAX_READ_ATTEMPTS"
-        },
-        {
             "path": "enrichmenT_KEY",
             "env_var": "ENRICHMENT_KEY"
         },
@@ -140,17 +88,18 @@ jq -r  '
             "env_var": "TARGET_TRANSLATION_LANGUAGE"
         },
         {
-            "path": "maX_ENRICHMENT_REQUEUE_COUNT",
-            "env_var": "MAX_ENRICHMENT_REQUEUE_COUNT"
-        },
-        {
-            "path": "enrichmenT_BACKOFF",
-            "env_var": "ENRICHMENT_BACKOFF"
-        },
-        {
             "path": "enablE_DEV_CODE",
             "env_var": "ENABLE_DEV_CODE"
+        },
+        {
+            "path": "azurE_STORAGE_KEY",
+            "env_var": "AZURE_BLOB_STORAGE_KEY"
+        },
+        {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
         }
+
     ]
         as $env_vars_to_extract
     |
@@ -170,5 +119,24 @@ jq -r  '
     |
     reduce .[] as $item ({}; .[$item.key] = $item.value)
     |
-    {"IsEncrypted": false, "Values": (. + {"FUNCTIONS_WORKER_RUNTIME": "python", "AzureWebJobs.parse_html_w_form_rec.Disabled": "true"})}
+    {"IsEncrypted": false, "Values": (. + {"FUNCTIONS_WORKER_RUNTIME": "python", 
+            "AzureWebJobs.parse_html_w_form_rec.Disabled": "true", 
+            "MAX_SECONDS_HIDE_ON_UPLOAD": "30", 
+            "MAX_SUBMIT_REQUEUE_COUNT": "10",
+            "POLL_QUEUE_SUBMIT_BACKOFF": "60",
+            "PDF_SUBMIT_QUEUE_BACKOFF": "60",
+            "MAX_POLLING_REQUEUE_COUNT": "10",
+            "SUBMIT_REQUEUE_HIDE_SECONDS": "1200",
+            "POLLING_BACKOFF": "30",
+            "MAX_READ_ATTEMPTS": "5",
+            "MAX_ENRICHMENT_REQUEUE_COUNT": "10",
+            "ENRICHMENT_BACKOFF": "60",
+            "EMBEDDINGS_QUEUE": "embeddings-queue",
+            "MEDIA_SUBMIT_QUEUE": "media-submit-queue",
+            "NON_PDF_SUBMIT_QUEUE": "non-pdf-submit-queue",
+            "PDF_POLLING_QUEUE": "pdf-polling-queue",
+            "PDF_SUBMIT_QUEUE": "pdf-submit-queue",
+            "EMBEDDINGS_QUEUE": "embeddings-queue",
+            "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue"
+            })}
     '

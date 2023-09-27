@@ -139,6 +139,9 @@ param enrichmentBackoff string
 @description('A boolean value that flags if a user wishes to enable or disable code under development')
 param enableDevCode bool
 
+@description('A boolean value that flags if a user wishes to enable or disable code under development')
+param EMBEDDINGS_QUEUE string
+
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: name
@@ -346,7 +349,12 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'ENABLE_DEV_CODE'
           value: string(enableDevCode)
-        }
+        }        
+        {
+          name: 'EMBEDDINGS_QUEUE'
+          value: EMBEDDINGS_QUEUE
+        }                
+
       ]
     }
   }

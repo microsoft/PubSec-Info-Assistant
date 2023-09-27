@@ -65,7 +65,10 @@ def main(msg: func.QueueMessage) -> None:
             statusLog.upsert_document(blob_name, f'{function_name} - HTML generated from DocX by mammoth', StatusClassification.DEBUG)
             html = result.value # The generated HTML
         else:
-            html = response.text 
+            # Extract the content and detect the charset to decode
+            html_content = response.content
+            detected_charset = utilities.extract_charset(html_content)
+            html = html_content.decode(detected_charset)
                             
         # build the document map from HTML for all non-pdf file types
         statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)

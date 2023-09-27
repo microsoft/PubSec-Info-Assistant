@@ -6,6 +6,11 @@ set -e
 
 figlet Search Index
 
+# Get the directory that this script is in
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source "${DIR}/load-env.sh"
+source "${DIR}/environments/infrastructure.env"
+
 if [ -n "${IN_AUTOMATION}" ]
 then
 
@@ -16,11 +21,6 @@ then
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
-
-# Get the directory that this script is in
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source "${DIR}/load-env.sh"
-source "${DIR}/environments/infrastructure.env"
 
 search_url="${AZURE_SEARCH_SERVICE_ENDPOINT}"
 

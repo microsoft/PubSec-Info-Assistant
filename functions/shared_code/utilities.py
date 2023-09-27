@@ -432,3 +432,21 @@ class Utilities:
         logging.info("Chunking is complete \n")
         return chunk_count
     
+    # Function to detect and extract the charset from the HTML content
+    def extract_charset(self, html_content):
+        soup = BeautifulSoup(html_content, 'html.parser')
+        meta_tags = soup.find_all('meta', charset=True)
+    
+        if meta_tags:
+            return meta_tags[0]['charset'].strip().lower()
+    
+        # If no charset is specified in meta tags, try to detect from the Content-Type header
+        content_type = soup.find('meta', {'http-equiv': 'Content-Type'})
+        if content_type and 'content' in content_type.attrs:
+            content_type_value = content_type['content']
+            if 'charset' in content_type_value:
+                return content_type_value.split('charset=')[-1].strip().lower()
+    
+        # Default to utf-8 if charset is not specified
+        return 'utf-8'
+    

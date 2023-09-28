@@ -8,8 +8,9 @@ from datetime import datetime
 from typing import List
 import base64
 import requests
+import random
 from azure.storage.blob import BlobServiceClient
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
@@ -30,7 +31,7 @@ ENV = {
     "AZURE_BLOB_STORAGE_KEY": None,
     "EMBEDDINGS_QUEUE": None,
     "LOG_LEVEL": "DEBUG", # Will be overwritten by LOG_LEVEL in Environment
-    "DEQUEUE_MESSAGE_BATCH_SIZE": 5,
+    "DEQUEUE_MESSAGE_BATCH_SIZE": 1,
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
@@ -39,6 +40,7 @@ ENV = {
     "COSMOSDB_DATABASE_NAME": None,
     "COSMOSDB_CONTAINER_NAME": None,
     "MAX_EMBEDDING_REQUEUE_COUNT": 5,
+    "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
     "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_OPENAI_EMBEDDING_MODEL": None,
@@ -106,11 +108,6 @@ utilities_helper = UtilitiesHelper(
     azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 
-log.debug("Setting up Azure Storage Queue Client...")
-queue_client = QueueClient.from_connection_string(
-    conn_str=ENV["BLOB_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
-)
-log.debug("Azure Storage Queue Client setup")
 statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_DATABASE_NAME"], ENV["COSMOSDB_CONTAINER_NAME"])
 
 # === API Setup ===
@@ -279,12 +276,17 @@ def poll_queue() -> None:
     if IS_READY == False:
         logging.debug("Skipping poll_queue call, models not yet loaded")
         return
+    
+    log.debug("Setting up Azure Storage Queue Client...")
+    queue_client = QueueClient.from_connection_string(
+        conn_str=ENV["BLOB_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
+    )
+    log.debug("Azure Storage Queue Client setup")
 
     log.debug("Polling queue for messages...")
-    response = queue_client.receive_messages(max_messages=1)
+    response = queue_client.receive_messages(max_messages=int(ENV["DEQUEUE_MESSAGE_BATCH_SIZE"]))
     messages = [x for x in response]
     log.debug(f"Received {len(messages)} messages")
-
     
     for message in messages:        
         logging.debug(f"Received message {message.id}")
@@ -346,13 +348,33 @@ def poll_queue() -> None:
             # delete message once complete, in case of failure
             queue_client.delete_message(message)      
             statusLog.upsert_document(blob_path, 'Embeddings process complete', StatusClassification.INFO, State.COMPLETE)
-        
-        except Exception as error:
-            statusLog.upsert_document(
-                blob_path,
-                f"An error occurred - {str(error)}",
-                StatusClassification.ERROR,
-                State.ERROR,
-            )
+                        
+        except Exception as error:            
+            # Dequeue message and update the embeddings queued count to limit the max retires            
+            try:
+                requeue_count = message_json['embeddings_queued_count']
+            except KeyError:
+                requeue_count = 0
+            requeue_count += 1
+                            
+            if requeue_count <= int(ENV["MAX_EMBEDDING_REQUEUE_COUNT"]):                
+                message_json['embeddings_queued_count'] = requeue_count  
+                # Delete & requeue with a random backoff within limits 
+                queue_client.delete_message(message) 
+                queue_client = QueueClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"], ENV["EMBEDDINGS_QUEUE"], message_encode_policy=TextBase64EncodePolicy())
+                message_string = json.dumps(message_json)                
+                max_seconds = int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * (requeue_count**2)
+                backoff = random.randint(int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * requeue_count, max_seconds)                
+                queue_client.send_message(message_string, visibility_timeout=backoff)
+                statusLog.upsert_document(blob_path, f'Message requed to embeddings queue, attempt {str(requeue_count)}. Visible in {str(backoff)} seconds', StatusClassification.INFO, State.QUEUED)
+            else:
+                # dequeue as max retries has been reached
+                queue_client.delete_message(message)  
+                statusLog.upsert_document(
+                    blob_path,
+                    f"An error occurred, max requeue limit was reache. Error description: {str(error)}",
+                    StatusClassification.ERROR,
+                    State.ERROR,
+                )
         
         statusLog.save_document()

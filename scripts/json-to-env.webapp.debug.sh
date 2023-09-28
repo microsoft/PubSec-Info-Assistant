@@ -156,6 +156,7 @@ jq -r  '
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
 
     echo "EMBEDDINGS_QUEUE='embeddings-queue'"
-    echo "DEQUEUE_MESSAGE_BATCH_SIZE=5"
+    echo "DEQUEUE_MESSAGE_BATCH_SIZE=1"
     echo "MAX_EMBEDDING_REQUEUE_COUNT=5"
+    echo "EMBEDDING_REQUEUE_BACKOFF=60"
     echo "CHAT_WARNING_BANNER_TEXT='$CHAT_WARNING_BANNER_TEXT'"

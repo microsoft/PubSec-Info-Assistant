@@ -62,7 +62,7 @@ param chatGptModelVersion string = ''
 param chatWarningBannerText string = ''
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
-param chunkTargetSize string = '750' 
+param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
 param formRecognizerApiVersion string = '2022-08-31'
 param queryTermLanguage string = 'English'
@@ -77,7 +77,7 @@ param maxSubmitRequeueCount string = '10'
 param pollQueueSubmitBackoff string = '60'
 param pdfSubmitQueueBackoff string = '60'
 param maxPollingRequeueCount string = '10'
-param submitRequeueHideSeconds  string = '1200'
+param submitRequeueHideSeconds string = '1200'
 param pollingBackoff string = '30'
 param maxReadAttempts string = '5'
 param maxEnrichmentRequeueCount string = '10'
@@ -88,6 +88,7 @@ param pdfPollingQueue string = 'pdf-polling-queue'
 param nonPdfSubmitQueue string = 'non-pdf-submit-queue'
 param mediaSubmitQueue string = 'media-submit-queue'
 param textEnrichmentQueue string = 'text-enrichment-queue'
+param imageEnrichmentQueue string = 'image-enrichment-queue'
 param embeddingsQueue string = 'embeddings-queue'
 // End of valued replicated in debug env files
 
@@ -104,7 +105,6 @@ var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 var containerRegistrySuffix = isGovCloudDeployment ? 'azurecr.us' : 'azurecr.io'
-
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -180,14 +180,13 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
-      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint      
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
     }
   }
   dependsOn: [
     logging
   ]
 }
-
 
 // The application frontend
 module backend 'core/host/appservice.bicep' = {
@@ -258,7 +257,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         sku: {
           name: 'Standard'
           capacity: chatGptDeploymentCapacity
-        }        
+        }
       }
       {
         name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : azureOpenAIEmbeddingsModelName
@@ -270,7 +269,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         sku: {
           name: 'Standard'
           capacity: embeddingsDeploymentCapacity
-        }        
+        }
       }
     ]
   }
@@ -372,12 +371,15 @@ module storage 'core/storage/storage-account.bicep' = {
       }
       {
         name: nonPdfSubmitQueue
-      }  
+      }
       {
         name: mediaSubmitQueue
-      }          
+      }
       {
         name: textEnrichmentQueue
+      }
+      {
+        name: imageEnrichmentQueue
       }
       {
         name: embeddingsQueue
@@ -453,6 +455,7 @@ module functions 'core/function/function.bicep' = {
     pollQueueSubmitBackoff: pollQueueSubmitBackoff
     pdfSubmitQueueBackoff: pdfSubmitQueueBackoff
     textEnrichmentQueue: textEnrichmentQueue
+    imageEnrichmentQueue: imageEnrichmentQueue
     maxPollingRequeueCount: maxPollingRequeueCount
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
@@ -460,6 +463,7 @@ module functions 'core/function/function.bicep' = {
     enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     enrichmentEndpoint: enrichment.outputs.cognitiveServiceEndpoint
     enrichmentName: enrichment.outputs.cognitiveServicerAccountName
+    enrichmentLocation: location
     targetTranslationLanguage: targetTranslationLanguage
     maxEnrichmentRequeueCount: maxEnrichmentRequeueCount
     enrichmentBackoff: enrichmentBackoff
@@ -496,7 +500,6 @@ module avam 'core/video_indexer/video_indexer.bicep' = {
     mediaServiceAccountResourceId: media_service.outputs.id
   }
 }
-
 
 // USER ROLES
 module openAiRoleUser 'core/security/role.bicep' = {
@@ -611,8 +614,8 @@ module containerRegistryPush 'core/security/role.bicep' = {
 }
 
 // MANAGEMENT SERVICE PRINCIPAL
-module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
-  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment? azureOpenAIResourceGroup : rg.name)
+module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
+  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment ? azureOpenAIResourceGroup : rg.name)
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId
@@ -623,7 +626,7 @@ module openAiRoleMgmt 'core/security/role.bicep' =  if (!isInAutomation) {
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (cuaEnabled) {
-  name: 'pid-${cuaId}' 
+  name: 'pid-${cuaId}'
   location: location
   properties: {
     mode: 'Incremental'

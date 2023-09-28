@@ -44,9 +44,9 @@ Additional information on this process can be found [here](/docs/functions_flow.
 
 Search is used to index the chunks that were created during pre-processing.  When a question is asked and an optimal search term is generated, this is passed to Search to identify and return the optimal set of chunks to be used in generation of the response. Some further details are listed below
 
-- **Data Enrichments:** Uses many Out-of-the-box Skillsets to extract enrichments from files such as utilizing Optical Character Recognition (OCR) to process images or converting tables within text into searchable text.
+* **Data Enrichments:** Uses many Out-of-the-box Skillsets to extract enrichments from files such as utilizing Optical Character Recognition (OCR) to process images or converting tables within text into searchable text.
 
-- **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
+* **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
 *\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
 
@@ -63,6 +63,8 @@ Search is used to index the chunks that were created during pre-processing.  Whe
 **Visualizing Thought Process:** Gain insights into the AI's decision-making process by visualizing how it arrives at answers, providing transparency and control.
 
 **Proper Citations and References:** The platform generates referenceable source content, designed to enhance trustworthiness and accountability in AI-generated responses.
+
+**Image Captioning**: The platform can generate captions for images, providing additional context for the user. **NOTE**:"CAPTION" and "DENSE_CAPTIONS" are only supported in Azure GPU regions (East US, France Central, Korea Central, North Europe, Southeast Asia, West Europe, West US)
 
 ## Works in Progress (Future releases)
 
@@ -81,7 +83,7 @@ For a detailed review see our [Features](/docs/features/features.md) page.
 
 ## Data Collection Notice
 
-The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at https://go.microsoft.com/fwlink/?LinkID=824704. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
 
 ### About Data Collection
 
@@ -97,7 +99,7 @@ To disable data collection, follow the instructions in the [Configure ENV files]
 
 ## Responsible AI
 
-The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first. 
+The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
 
 **Read our [Transparency Note](./docs/transparency.md)**
 
@@ -121,7 +123,7 @@ You can request access [here](https://aka.ms/oaiapply) *
 >* [Visual studio code](https://code.visualstudio.com/)
 >
 >
-You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/). 
+You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/).
 
 Once you have your prerequisite items, please move on to the Deployment Configuration step.
 
@@ -204,13 +206,12 @@ docs/adoption_workshop/ | PPT files that match what is covered in the Adoption W
 docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
 docs/ | Deployment and other supporting documentation that is primarily linked to from the README.md
 functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
-infra/ | The BICEP scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.bicep` file but most of the resource deployments are modularized under the **core** folder. 
+infra/ | The BICEP scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.bicep` file but most of the resource deployments are modularized under the **core** folder.
 pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the accelerator.
 scripts/environments/ | Deployment configuration files. This is where all external configuration values will be set.
 scripts/ | Supporting scripts that perform the various deployment tasks such as infrastructure deployment, Azure WebApp and Function deployments, building of the webapp and functions source code, etc. These scripts align to the available commands in the `Makefile`.
 Makefile | Deployment command definitions and configurations. You can use `make help` to get more details on available commands.
 README.md | Starting point for this repo. It covers overviews of the Accelerator, Responsible AI, Environment, Deployment, and Usage of the Accelerator.
-
 
 ---
 

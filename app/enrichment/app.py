@@ -325,7 +325,7 @@ def poll_queue() -> None:
                         chunk_dict["subtitle"] + " \n " +
                         chunk_dict["section"] + " \n " +
                         chunk_dict["content"]
-                    )           
+                    )
                     
                 # create embedding
                 embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)   
@@ -337,6 +337,7 @@ def poll_queue() -> None:
                 index_chunk['file_name'] = chunk_dict["file_name"]
                 index_chunk['file_uri'] = chunk_dict["file_uri"]
                 index_chunk['title'] = chunk_dict["title"]
+                index_chunk['pages'] = chunk_dict["pages"]               
                 index_chunk['translated_title'] = chunk_dict["translated_title"]         
                 index_chunk['content'] = text
                 index_chunk['contentVector'] = embedding_data    

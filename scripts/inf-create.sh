@@ -38,7 +38,7 @@ fi
 
 WEB_APP_ENDPOINT_SUFFIX="azurewebsites.net"
 
-if $IS_USGOV_DEPLOYMENT; then
+if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
   WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
 fi
 

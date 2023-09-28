@@ -12,6 +12,7 @@ from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
 ]
@@ -21,6 +22,7 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
@@ -32,32 +34,60 @@ targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+queueName = os.environ["EMBEDDINGS_QUEUE"]
+
+API_DETECT_ENDPOINT = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0".format(suffix = "com")
+API_TRANSLATE_ENDPOINT = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0".format(suffix = "com")
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
-API_DETECT_ENDPOINT = "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
-API_TRANSLATE_ENDPOINT = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
+
 
 utilities = Utilities(
     azure_blob_storage_account,
+    azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
     azure_blob_storage_key,
 )
 
+statusLog = StatusLog(
+    cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
+)     
+
+def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage):
+    '''Translate text if it is not in target language'''
+    if detected_language != targetTranslationLanguage:
+        data = [{"text": chunk_dict[field_name]}]
+        response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
+        
+        if response.status_code == 200:
+            translated_content = response.json()[0]['translations'][0]['text']
+            chunk_dict[f"translated_{field_name}"] = translated_content
+        else:
+            # error so requeue
+            requeue(response, message_json)
+            return   
+    else:
+        chunk_dict[f"translated_{field_name}"] = chunk_dict[f"{field_name}"]
+        return
+
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from
     the target language, it will translate the chunks to the target language.'''
+
+    isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
+    if isGovCloud:
+        API_DETECT_ENDPOINT = API_DETECT_ENDPOINT.format(suffix = "us")
+        API_TRANSLATE_ENDPOINT = API_TRANSLATE_ENDPOINT.format(suffix = "us")
     
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)
     blob_path = message_json["blob_name"]
     try:
         
-        statusLog = StatusLog(
-            cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
-        )        
+   
         logging.info(
             "Python queue trigger function processed a queue item: %s",
             msg.get_body().decode("utf-8"),
@@ -122,36 +152,33 @@ def main(msg: func.QueueMessage) -> None:
                 f"{FUNCTION_NAME} - Non-target language detected",
                 StatusClassification.DEBUG,
                 State.ERROR,
-            )         
-            # regenerate the iterator to reset it to the first chunk
-            chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
-            for i, chunk in enumerate(chunk_list):
-                # open the file and extract the content
-                blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
-                response = requests.get(blob_path_plus_sas)
-                response.raise_for_status()
-                chunk_dict = json.loads(response.text)  
-                data = [{"text": chunk_dict["content"]}]
-                params = {
-                    'to': targetTranslationLanguage
-                }    
-                response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
-                if response.status_code == 200:
-                    translated_content = response.json()[0]['translations'][0]['text']
+            )      
+               
+        # regenerate the iterator to reset it to the first chunk
+        chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
+        for i, chunk in enumerate(chunk_list):
+            # open the file and extract the content
+            blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
+            response = requests.get(blob_path_plus_sas)
+            response.raise_for_status()
+            chunk_dict = json.loads(response.text)
+            params = {'to': targetTranslationLanguage}              
 
-                else:
-                    # error or requeue
-                    requeue(response, message_json)
-                    return
-                                
-                # add translated content to the chunk json
-                chunk_dict["translated_content"] = translated_content
-                                
-                # Get path and file name minus the root container
-                json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
-                block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
-                block_blob_client.upload_blob(json_str, overwrite=True)
-  
+            # Translate content, title, subtitle, and section if required
+            fields_to_translate = ["content", "title", "subtitle", "section"]
+            for field in fields_to_translate:
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage)                
+                                            
+            # Get path and file name minus the root container
+            json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
+            block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
+            block_blob_client.upload_blob(json_str, overwrite=True)
+                
+        # Queue message to embeddings queue for downstream processing
+        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queueName, message_encode_policy=TextBase64EncodePolicy())
+        embeddings_queue_backoff =  random.randint(1, 60)
+        message_string = json.dumps(message_json)
+        queue_client.send_message(message_string, visibility_timeout = embeddings_queue_backoff)
    
         statusLog.upsert_document(
             blob_path,

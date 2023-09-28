@@ -1,12 +1,14 @@
 import tiktoken
 
+#Values from https://platform.openai.com/docs/models/gpt-3-5
+
 MODELS_2_TOKEN_LIMITS = {
-    "gpt-35-turbo": 4000,
-    "gpt-3.5-turbo": 4000,
-    "gpt-35-turbo-16k": 16000,
-    "gpt-3.5-turbo-16k": 16000,
-    "gpt-4": 8100,
-    "gpt-4-32k": 32000
+    "gpt-35-turbo": 4097,
+    "gpt-3.5-turbo": 4097,
+    "gpt-35-turbo-16k": 16385,
+    "gpt-3.5-turbo-16k": 16385,
+    "gpt-4": 8192,
+    "gpt-4-32k": 32768
 }
 
 AOAI_2_OAI = {
@@ -17,7 +19,7 @@ AOAI_2_OAI = {
 
 def get_token_limit(model_id: str) -> int:
     if model_id not in MODELS_2_TOKEN_LIMITS:
-        raise ValueError("Expected model gpt-35-turbo and above")
+        raise ValueError("Expected model gpt-35-turbo and above. Got: " + model_id)
     return MODELS_2_TOKEN_LIMITS.get(model_id)
 
 

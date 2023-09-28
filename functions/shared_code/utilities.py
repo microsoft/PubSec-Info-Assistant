@@ -2,12 +2,12 @@
 # Licensed under the MIT license.
 
 import logging
-import os
 import json
 import html
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
+from azure.storage.blob import BlobServiceClient
+from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
 from bs4 import BeautifulSoup
@@ -44,21 +44,26 @@ class Utilities:
     """ Class to hold utility functions """
     def __init__(self,
                  azure_blob_storage_account,
+                 azure_blob_storage_endpoint,
                  azure_blob_drop_storage_container,
                  azure_blob_content_storage_container,
                  azure_blob_storage_key
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
+        self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
         self.azure_blob_storage_key = azure_blob_storage_key
+        self.utilities_helper = UtilitiesHelper(azure_blob_storage_account,
+                                                azure_blob_storage_endpoint,
+                                                azure_blob_storage_key)
 
     def write_blob(self, output_container, content, output_filename, folder_set=""):
         """ Function to write a generic blob """
         # folder_set should be in the format of "<my_folder_name>/"
         # Get path and file name minus the root container
         blob_service_client = BlobServiceClient(
-            f'https://{self.azure_blob_storage_account}.blob.core.windows.net/',
+            self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         block_blob_client = blob_service_client.get_blob_client(
             container=output_container, blob=f'{folder_set}{output_filename}')
@@ -73,14 +78,11 @@ class Utilities:
 
     def get_filename_and_extension(self, path):
         """ Function to return the file name & type"""
-        # Split the path into base and extension
-        base_name = os.path.basename(path)
-        segments = path.split("/")
-        directory = "/".join(segments[1:-1]) + "/"
-        if directory == "/":
-            directory = ""
-        file_name, file_extension = os.path.splitext(base_name)
-        return file_name, file_extension, directory
+        return self.utilities_helper.get_filename_and_extension(path)
+    
+    def  get_blob_and_sas(self, blob_path):
+        """ Function to retrieve the uri and sas token for a given blob in azure storage"""
+        return self.utilities_helper.get_blob_and_sas(blob_path)
 
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
@@ -105,31 +107,6 @@ class Utilities:
             table_html +="</tr>"
         table_html += "</table>"
         return table_html
-
-    def  get_blob_and_sas(self, blob_path):
-        """ Function to retrieve the uri and sas token for a given blob in azure storage"""
-
-        # Get path and file name minus the root container
-        separator = "/"
-        file_path_w_name_no_cont = separator.join(
-            blob_path.split(separator)[1:])
-        
-        container_name = separator.join(
-            blob_path.split(separator)[0:1])
-
-        # Gen SAS token
-        sas_token = generate_blob_sas(
-            account_name=self.azure_blob_storage_account,
-            container_name=container_name,
-            blob_name=file_path_w_name_no_cont,
-            account_key=self.azure_blob_storage_key,
-            permission=BlobSasPermissions(read=True),
-            expiry=datetime.utcnow() + timedelta(hours=1)
-        )
-        source_blob_path = f'https://{self.azure_blob_storage_account}.blob.core.windows.net/{blob_path}?{sas_token}'
-        source_blob_path = source_blob_path.replace(" ", "%20")
-        logging.info("Path and SAS token for file in azure storage are now generated \n")
-        return source_blob_path
 
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
         """ Function to build a json structure representing the paragraphs in a document, 
@@ -188,27 +165,24 @@ class Utilities:
                         document_map['content_type'][i] = ContentType.SECTIONHEADING_CHAR
                     document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
 
+        # store page number metadata by paragraph object
+        page_number_by_paragraph = {}
+        for _, paragraph in enumerate(result["paragraphs"]):
+            start_char = paragraph["spans"][0]["offset"]
+            page_number_by_paragraph[start_char] = paragraph["boundingRegions"][0]["pageNumber"]
+
         # iterate through the content_type and build the document paragraph catalog of content
         # tagging paragraphs with title and section
         main_title = ''
         current_title = ''
         current_section = ''
-        current_paragraph_index = 0
         start_position = 0
         page_number = 0
         for index, item in enumerate(document_map['content_type']):
 
-            # identify the current paragraph being referenced for use in
-            # enriching the document_map metadata
-            if current_paragraph_index <= len(result["paragraphs"])-1:
-                # Check if we have crossed into the next paragraph
-                # note that sometimes FR returns paragraphs out of sequence (based on the offset position), hence we
-                # also indicate a new paragraph of we see this behaviour
-                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"] or (result["paragraphs"][current_paragraph_index-1]["spans"][0]["offset"] > result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]):
-                    # we have reached a new paragraph, so collect its metadata
-                    page_number = result["paragraphs"][current_paragraph_index]["boundingRegions"][0]["pageNumber"]
-                    current_paragraph_index += 1
-            
+            # collect page number metadata
+            page_number = page_number_by_paragraph.get(index, page_number)
+
             match item:
                 case ContentType.TITLE_START | ContentType.SECTIONHEADING_START | ContentType.TEXT_START | ContentType.TABLE_START:
                     start_position = index
@@ -289,6 +263,7 @@ class Utilities:
                     "type": "text", 
                     "text": tag.get_text(strip=True),
                     "title": title,
+                    'subtitle': '',
                     "section": section,
                     "page_number": 1                
                     })
@@ -297,6 +272,7 @@ class Utilities:
                     "type": "table", 
                     "text": str(tag),
                     "title": title,
+                    'subtitle': '',
                     "section": section,
                     "page_number": 1                
                     })
@@ -331,7 +307,7 @@ class Utilities:
             'file_uri': myblob_uri,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
-            'subtitle_name': subtitle_name,
+            'subtitle': subtitle_name,
             'section': section_name,
             'pages': page_list,
             'token_count': chunk_size,
@@ -342,7 +318,7 @@ class Utilities:
         # Get the folders to use when creating the new files
         folder_set = file_directory + file_name + file_extension + "/"
         blob_service_client = BlobServiceClient(
-            f'https://{self.azure_blob_storage_account}.blob.core.windows.net/',
+            self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
         output_filename = file_name + f'-{file_number}' + '.json'
@@ -452,4 +428,22 @@ class Utilities:
 
         logging.info("Chunking is complete \n")
         return chunk_count
+    
+    # Function to detect and extract the charset from the HTML content
+    def extract_charset(self, html_content):
+        soup = BeautifulSoup(html_content, 'html.parser')
+        meta_tags = soup.find_all('meta', charset=True)
+    
+        if meta_tags:
+            return meta_tags[0]['charset'].strip().lower()
+    
+        # If no charset is specified in meta tags, try to detect from the Content-Type header
+        content_type = soup.find('meta', {'http-equiv': 'Content-Type'})
+        if content_type and 'content' in content_type.attrs:
+            content_type_value = content_type['content']
+            if 'charset' in content_type_value:
+                return content_type_value.split('charset=')[-1].strip().lower()
+    
+        # Default to utf-8 if charset is not specified
+        return 'utf-8'
     

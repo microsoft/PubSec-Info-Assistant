@@ -55,8 +55,12 @@ AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "tru
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
+AZURE_OPENAI_EMBEDDING_MODEL | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
 DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file located in the `scripts/environments/languages` folder. You can then use this file to customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. See [Configuring your own language ENV file](./features/configuring_language_env_files.md) more information.
 ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By default, **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** is set to `true`. The CUA GUID which is pre-configured will tell Microsoft about the usage of this software. Please see [Data Collection Notice](../README.md#data-collection-notice) for more information. <br/><br/>You may provide your own CUA GUID by changing the value in **CUSTOMER_USAGE_ATTRIBUTION_ID**. Ensure you understand how to properly notify your customers by reading <https://learn.microsoft.com/en-us/partner-center/marketplace/azure-partner-customer-usage-attribution#notify-your-customers>.<br/><br/>To disable data collection, set **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** to `false`.
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
-
+IS_USGOV_DEPLOYMENT | No | Defaults to `false``. Set to `true` to enable deploying to UsGov regions.
+AZURE_OPENAI_CHATGPT_MODEL_NAME | No | If you have set **IS_USGOV_DEPLOYMENT** to "true" and Open AI is in Azure Commercial then you must set this to the model name in your Open AI GPT Deployment. 
+AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | If you have set **IS_USGOV_DEPLOYMENT** to "true" and Open AI is in Azure Commercial then you must set this to the model version in your Open AI GPT Deployment. 
+CHAT_WARNING_BANNER_TEXT | No | Setting this value will place a banner and a footer with Warning Text. 
 ---

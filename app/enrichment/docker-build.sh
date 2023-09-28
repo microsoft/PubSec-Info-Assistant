@@ -19,7 +19,7 @@ source "${SCRIPTS_DIR}/environments/infrastructure.env"
 
 # Determine if this is a gov deployment
 CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.io"
-if $IS_USGOV_DEPLOYMENT; then 
+if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
   CONTAINER_REGISTRY_NAME_SUFFIX="azurecr.us"
 fi
 

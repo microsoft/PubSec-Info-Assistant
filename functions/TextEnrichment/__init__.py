@@ -12,6 +12,7 @@ from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
 ]
@@ -35,10 +36,12 @@ backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
 
+API_DETECT_ENDPOINT = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0".format(suffix = "com")
+API_TRANSLATE_ENDPOINT = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0".format(suffix = "com")
+
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
-API_DETECT_ENDPOINT = "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
-API_TRANSLATE_ENDPOINT = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
+
 
 utilities = Utilities(
     azure_blob_storage_account,
@@ -73,6 +76,11 @@ def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from
     the target language, it will translate the chunks to the target language.'''
+
+    isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
+    if isGovCloud:
+        API_DETECT_ENDPOINT = API_DETECT_ENDPOINT.format(suffix = "us")
+        API_TRANSLATE_ENDPOINT = API_TRANSLATE_ENDPOINT.format(suffix = "us")
     
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)

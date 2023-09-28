@@ -160,7 +160,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
       LOG_LEVEL: 'DEBUG'
-      DEQUEUE_MESSAGE_BATCH_SIZE: 5
+      DEQUEUE_MESSAGE_BATCH_SIZE: 1
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
@@ -169,6 +169,7 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       COSMOSDB_DATABASE_NAME: cosmosdb.outputs.CosmosDBDatabaseName
       COSMOSDB_CONTAINER_NAME: cosmosdb.outputs.CosmosDBContainerName
       MAX_EMBEDDING_REQUEUE_COUNT: 5
+      EMBEDDING_REQUEUE_BACKOFF: 60
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       AZURE_OPENAI_EMBEDDING_MODEL: azureOpenAIEmbeddingsModelName

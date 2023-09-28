@@ -165,27 +165,24 @@ class Utilities:
                         document_map['content_type'][i] = ContentType.SECTIONHEADING_CHAR
                     document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
 
+        # store page number metadata by paragraph object
+        page_number_by_paragraph = {}
+        for _, paragraph in enumerate(result["paragraphs"]):
+            start_char = paragraph["spans"][0]["offset"]
+            page_number_by_paragraph[start_char] = paragraph["boundingRegions"][0]["pageNumber"]
+
         # iterate through the content_type and build the document paragraph catalog of content
         # tagging paragraphs with title and section
         main_title = ''
         current_title = ''
         current_section = ''
-        current_paragraph_index = 0
         start_position = 0
         page_number = 0
         for index, item in enumerate(document_map['content_type']):
 
-            # identify the current paragraph being referenced for use in
-            # enriching the document_map metadata
-            if current_paragraph_index <= len(result["paragraphs"])-1:
-                # Check if we have crossed into the next paragraph
-                # note that sometimes FR returns paragraphs out of sequence (based on the offset position), hence we
-                # also indicate a new paragraph of we see this behaviour
-                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"] or (result["paragraphs"][current_paragraph_index-1]["spans"][0]["offset"] > result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]):
-                    # we have reached a new paragraph, so collect its metadata
-                    page_number = result["paragraphs"][current_paragraph_index]["boundingRegions"][0]["pageNumber"]
-                    current_paragraph_index += 1
-            
+            # collect page number metadata
+            page_number = page_number_by_paragraph.get(index, page_number)
+
             match item:
                 case ContentType.TITLE_START | ContentType.SECTIONHEADING_START | ContentType.TEXT_START | ContentType.TABLE_START:
                     start_position = index

@@ -332,7 +332,7 @@ def poll_queue() -> None:
                 embedding_data = embedding['data']                   
                 
                 index_chunk = {}
-                index_chunk['id'] = statusLog.encode_document_id(chunk_dict['file_uri'])
+                index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
                 index_chunk['file_name'] = chunk_dict["file_name"]
                 index_chunk['file_uri'] = chunk_dict["file_uri"]

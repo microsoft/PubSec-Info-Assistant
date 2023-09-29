@@ -23,6 +23,9 @@
     "azureOpenAIServiceName": {
       "value": "${AZURE_OPENAI_SERVICE_NAME}"
     },
+    "azureOpenAIResourceGroup": {
+      "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
+    },
     "azureOpenAIServiceKey": {
       "value": "${AZURE_OPENAI_SERVICE_KEY}"
     },
@@ -31,6 +34,27 @@
     },
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
+    },
+    "azureOpenAIEmbeddingsModelName": {
+      "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
+    },
+    "useAzureOpenAIEmbeddings": {
+      "value": ${USE_AZURE_OPENAI_EMBEDDINGS}
+    },
+    "sentenceTransformersModelName": {
+      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL}"
+    },
+    "sentenceTransformerEmbeddingVectorSize": {
+      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL_VECTOR_SIZE}"
+    },
+    "chatGptModelName": {
+      "value": "${CHATGPT_MODEL_MODEL_NAME}"
+    },
+    "chatGptModelVersion": {
+      "value": "${CHATGPT_MODEL_VERSION}"
+    },
+     "chatWarningBannerText": {
+       "value": "${CHAT_WARNING_BANNER_TEXT}"
     },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
@@ -41,8 +65,17 @@
     "buildNumber": {
       "value": "${BUILD_NUMBER}"
     },
-    "aadClientId": {
-      "value": "${AZURE_AD_APP_CLIENT_ID}"
+    "aadWebClientId": {
+      "value": "${AZURE_AD_WEB_APP_CLIENT_ID}"
+    },
+    "aadMgmtClientId": {
+      "value": "${AZURE_AD_MGMT_APP_CLIENT_ID}"
+    },
+    "aadMgmtServicePrincipalId": {
+      "value": "${AZURE_AD_MGMT_SP_ID}"
+    },
+    "aadMgmtClientSecret": {
+      "value": "${AZURE_AD_MGMT_APP_SECRET}"
     },
     "isInAutomation": {
       "value": ${IS_IN_AUTOMATION}
@@ -55,6 +88,12 @@
     },
     "enableDevCode": {
       "value": ${ENABLE_DEV_CODE}
+    },
+    "tenantId": {
+      "value": "${TENANT_ID}"
+    },
+    "subscriptionId": {
+      "value": "${SUBSCRIPTION_ID}"
     }
   }
 }

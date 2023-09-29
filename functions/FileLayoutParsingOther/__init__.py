@@ -16,6 +16,7 @@ import requests
 
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
@@ -32,7 +33,7 @@ text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 
 
-utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
+utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 function_name = "FileLayoutParsingOther"
 
 def main(msg: func.QueueMessage) -> None:
@@ -64,7 +65,10 @@ def main(msg: func.QueueMessage) -> None:
             statusLog.upsert_document(blob_name, f'{function_name} - HTML generated from DocX by mammoth', StatusClassification.DEBUG)
             html = result.value # The generated HTML
         else:
-            html = response.text 
+            # Extract the content and detect the charset to decode
+            html_content = response.content
+            detected_charset = utilities.extract_charset(html_content)
+            html = html_content.decode(detected_charset)
                             
         # build the document map from HTML for all non-pdf file types
         statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)
@@ -78,7 +82,7 @@ def main(msg: func.QueueMessage) -> None:
         message_json["enrichment_queued_count"] = 1
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string)
-        statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)      
+        statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)    
              
     except Exception as e:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)

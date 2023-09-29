@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse } from "./models";
+import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -73,7 +73,7 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
 }
 
 export function getCitationFilePath(citation: string): string {
-    return `/content/${encodeURIComponent(citation)}`;
+    return `${encodeURIComponent(citation)}`;
 }
 
 export async function getBlobClientUrl(): Promise<string> {
@@ -125,5 +125,39 @@ export async function getInfoData(): Promise<GetInfoResponse> {
         throw Error(parsedResponse.error || "Unknown error");
     }
     console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getWarningBanner(): Promise<GetWarningBanner> {
+    const response = await fetch("/getWarningBanner", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: GetWarningBanner = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getCitationObj(citation: string): Promise<ActiveCitation> {
+    const response = await fetch(`/getcitation`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            citation: citation
+        })
+    });
+    const parsedResponse: ActiveCitation = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
     return parsedResponse;
 }

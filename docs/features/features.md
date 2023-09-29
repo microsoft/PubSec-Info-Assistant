@@ -13,6 +13,7 @@
   * [Debugging Functions](#debugging-functions)
   * [Build pipeline for sandbox environment](#build-pipeline-for-sandbox)
   * [Customer Usage Attribution](#customer-usage-attribution)
+  * [Sovereign Region Deployment](#sovereign-region-deployment)
 
 ---
 
@@ -20,13 +21,15 @@
 
 The Information Assistant Accelerator pre-processes certain document types to allow better understanding of large complex documents. Currently we apply special processing on:
 
-* PDF
-* HTML
-* DOCX
+* [PDF](document_pre_processing.md#pdf-pre-processing)
+* [HTML](document_pre_processing.md#html-pre-processing)
+* [DOCX](document_pre_processing.md#docx-pre-processing)
 
 For more details on how we process each document type click on on the document type in the list above.
 
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](../../functions/shared_code/status_log.md) page for more details.
+
+Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](../functions_flow.md)
 
 ## User Experience
 
@@ -97,7 +100,12 @@ Check out how to [Debug the Azure functions locally in VSCode](../function_debug
 
 ### Debugging the web app
 
-Check out how to [Debug the Information Assistant Web App](../webapp_debug.md)
+Check out how to [Debug the Information Assistant Web App](../container_debug.md)
+
+### Debugging the container web app
+
+Check out how to [Debug the Information Assistant Web App](../container_webapp_debug.md)
+
 
 ### Build pipeline for Sandbox
 
@@ -108,3 +116,9 @@ Setting up a pipeline to deploy a new Sandbox environment requires some manual c
 A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant Accelerator.
 
 Check out how to [enable Customer Usage Attribution](enable_customer_usage_attribution.md)
+
+### Sovereign Region Deployment
+
+Check out how to [setup Sovereign Region Deployment](enable_sovereign_deployment.md)
+
+

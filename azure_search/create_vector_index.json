@@ -59,6 +59,23 @@
       "synonymMaps": []
     },
     {
+      "name": "pages",
+      "type": "Collection(Edm.Int32)",
+      "searchable": false,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },   
+    {
       "name": "title",
       "type": "Edm.String",
       "searchable": true,

@@ -36,8 +36,8 @@ backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
 
-API_DETECT_ENDPOINT = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0".format(suffix = "com")
-API_TRANSLATE_ENDPOINT = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0".format(suffix = "com")
+lang_detection_endpoint = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0".format(suffix = "com")
+translation_endpoint = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0".format(suffix = "com")
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
@@ -55,11 +55,11 @@ statusLog = StatusLog(
     cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
 )     
 
-def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage):
+def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, translation_endpoint):
     '''Translate text if it is not in target language'''
     if detected_language != targetTranslationLanguage:
         data = [{"text": chunk_dict[field_name]}]
-        response = requests.post(API_TRANSLATE_ENDPOINT, headers=headers, json=data, params=params)
+        response = requests.post(translation_endpoint, headers=headers, json=data, params=params)
         
         if response.status_code == 200:
             translated_content = response.json()[0]['translations'][0]['text']
@@ -79,8 +79,8 @@ def main(msg: func.QueueMessage) -> None:
 
     isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
     if isGovCloud:
-        API_DETECT_ENDPOINT = API_DETECT_ENDPOINT.format(suffix = "us")
-        API_TRANSLATE_ENDPOINT = API_TRANSLATE_ENDPOINT.format(suffix = "us")
+        lang_detection_endpoint = lang_detection_endpoint.format(suffix = "us")
+        translation_endpoint = translation_endpoint.format(suffix = "us")
     
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)
@@ -131,7 +131,7 @@ def main(msg: func.QueueMessage) -> None:
             'Ocp-Apim-Subscription-Region': endpoint_region
         }            
         data = [{"text": chunk_content}]
-        response = requests.post(API_DETECT_ENDPOINT, headers=headers, json=data)
+        response = requests.post(lang_detection_endpoint, headers=headers, json=data)
         if response.status_code == 200:
             detected_language = response.json()[0]['language']
             statusLog.upsert_document(
@@ -167,7 +167,7 @@ def main(msg: func.QueueMessage) -> None:
             # Translate content, title, subtitle, and section if required
             fields_to_translate = ["content", "title", "subtitle", "section"]
             for field in fields_to_translate:
-                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage)                
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, translation_endpoint)                
                                             
             # Get path and file name minus the root container
             json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)

@@ -67,6 +67,7 @@ def main(msg: func.QueueMessage) -> None:
     else:
         apiDetectEndpoint = apiDetectEndpoint.format(suffix = "com")
         apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "com")
+
     
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)

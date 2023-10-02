@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 #!/bin/bash
-set -e 
+set -e
 
 echo "# Generated environment variables from bicep output"
 

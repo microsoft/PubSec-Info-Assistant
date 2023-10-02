@@ -36,9 +36,6 @@ backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
 
-lang_detection_endpoint = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0".format(suffix = "com")
-translation_endpoint = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0".format(suffix = "com")
-
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
 
@@ -55,32 +52,22 @@ statusLog = StatusLog(
     cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
 )     
 
-def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, translation_endpoint):
-    '''Translate text if it is not in target language'''
-    if detected_language != targetTranslationLanguage:
-        data = [{"text": chunk_dict[field_name]}]
-        response = requests.post(translation_endpoint, headers=headers, json=data, params=params)
-        
-        if response.status_code == 200:
-            translated_content = response.json()[0]['translations'][0]['text']
-            chunk_dict[f"translated_{field_name}"] = translated_content
-        else:
-            # error so requeue
-            requeue(response, message_json)
-            return   
-    else:
-        chunk_dict[f"translated_{field_name}"] = chunk_dict[f"{field_name}"]
-        return
-
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from
     the target language, it will translate the chunks to the target language.'''
 
+    apiDetectEndpoint = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
+    apiTranslateEndpoint = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
+
     isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
     if isGovCloud:
-        lang_detection_endpoint = lang_detection_endpoint.format(suffix = "us")
-        translation_endpoint = translation_endpoint.format(suffix = "us")
+        apiDetectEndpoint = apiDetectEndpoint.format(suffix = "us")
+        apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "us")
+    else:
+        apiDetectEndpoint = apiDetectEndpoint.format(suffix = "com")
+        apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "com")
+
     
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)
@@ -131,7 +118,8 @@ def main(msg: func.QueueMessage) -> None:
             'Ocp-Apim-Subscription-Region': endpoint_region
         }            
         data = [{"text": chunk_content}]
-        response = requests.post(lang_detection_endpoint, headers=headers, json=data)
+
+        response = requests.post(apiDetectEndpoint, headers=headers, json=data)      
         if response.status_code == 200:
             detected_language = response.json()[0]['language']
             statusLog.upsert_document(
@@ -167,7 +155,7 @@ def main(msg: func.QueueMessage) -> None:
             # Translate content, title, subtitle, and section if required
             fields_to_translate = ["content", "title", "subtitle", "section"]
             for field in fields_to_translate:
-                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, translation_endpoint)                
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                
                                             
             # Get path and file name minus the root container
             json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
@@ -196,7 +184,24 @@ def main(msg: func.QueueMessage) -> None:
         )
         
     statusLog.save_document()
-    
+
+def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint):
+    '''Translate text if it is not in target language'''
+    if detected_language != targetTranslationLanguage:
+        data = [{"text": chunk_dict[field_name]}]
+        response = requests.post(apiTranslateEndpoint, headers=headers, json=data, params=params)
+        
+        if response.status_code == 200:
+            translated_content = response.json()[0]['translations'][0]['text']
+            chunk_dict[f"translated_{field_name}"] = translated_content
+        else:
+            # error so requeue
+            requeue(response, message_json)
+            return   
+    else:
+        chunk_dict[f"translated_{field_name}"] = chunk_dict[f"{field_name}"]
+        return
+
     
 def trim_content(sentence, n):
     '''This function trims a sentence to w max char count and a word boundary'''

@@ -81,13 +81,4 @@ steps:
     parameters:
       displayName: 'Deploy Azure Functions'
       makeCommand: 'deploy-functions'
-
-  - with: MicrosoftSecurityDevOps
-    name: Run Microsoft Security DevOps
-    id: msdo
-    uses: microsoft/security-devops-action@v1
-
-  - name: Upload results to Security tab
-    uses: github/codeql-action/upload-sarif@v2
-    with:
-      sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+      

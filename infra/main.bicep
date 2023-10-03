@@ -232,7 +232,11 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
       CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
+      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
+      ENRICHMENT_APPSERVICE_NAME: appServiceContainer.outputs.appServiceName
     }
+
+
     aadClientId: aadWebClientId
   }
 }
@@ -690,3 +694,4 @@ output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
 output AZURE_OPENAI_EMBEDDING_MODEL string = azureOpenAIEmbeddingsModelName
+output ENRICHMENT_APPSERVICE_NAME string = appServiceContainer.outputs.appServiceName

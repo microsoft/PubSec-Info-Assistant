@@ -19,6 +19,8 @@ import tiktoken
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 from core.modelhelper import num_tokens_from_messages
+import requests
+from urllib.parse import quote
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
@@ -77,20 +79,26 @@ class ChatReadRetrieveReadApproach(Approach):
     {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
     {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[info1.json]'}
     ]
-
+    
+    # # Define a class variable for the base URL
+    # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
+    
     def __init__(
         self,
         search_client: SearchClient,
         oai_service_name: str,
         oai_service_key: str,
         chatgpt_deployment: str,
+        # embedding_model : str,
         source_page_field: str,
         content_field: str,
         blob_client: BlobServiceClient,
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str
+        is_gov_cloud_deployment: str,
+        TARGET_EMBEDDING_MODEL: str,
+        ENRICHMENT_APPSERVICE_NAME: str
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -99,6 +107,20 @@ class ChatReadRetrieveReadApproach(Approach):
         self.blob_client = blob_client
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
+        #escape target embeddiong model name
+        self.target_embedding_model = TARGET_EMBEDDING_MODEL 
+        self.escaped_target_model = urllib.parse.quote(self.target_embedding_model, safe='')
+        
+        
+        self.ENRICHMENT_APPSERVICE_NAME = ENRICHMENT_APPSERVICE_NAME
+        self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
+        
+        # self.embedding_service_url = f'https://infoasst-cr-{embedding_service_suffix}.azurewebsites.net'
+        # embedding_service_url = 'https://' + ENRICHMENT_APPSERVICE_NAME + '.azurewebsites.net'
+        
+        # print("Embedding Service URL: ", embedding_service_url)
+       
+        
 
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
@@ -146,71 +168,128 @@ class ChatReadRetrieveReadApproach(Approach):
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
+            
+        # Generate embedding using REST API
+        print("Target Embedding Model: ", self.target_embedding_model)
+        
+        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
+        
+                
+        print("URL: ", url)
+        
+        data = {
+        'text': generated_query
+        }
 
-        # STEP 2: Retrieve relevant documents from the search index with the optimized query term
-        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
-            raw_search_results = self.search_client.search(
-                generated_query,
-                filter=category_filter,
-                query_type=QueryType.SEMANTIC,
-                query_language="en-us",
-                query_speller="lexicon",
-                semantic_configuration_name="default",
-                top=top,
-                query_caption="extractive|highlight-false"
-                if use_semantic_captions
-                else None,
-            )
+        response = requests.post(url, json=data)
+        
+        vector = None 
+
+        if response.status_code == 200:
+            vector = response.json()
+               
+        
         else:
-            raw_search_results = self.search_client.search(
-                generated_query, filter=category_filter, top=top
-            )
+            print('Error generating embedding:', response.status_code)
+            
+        # Hybrid Search
+        r = self.search_client.search(generated_query, vectors=[vector], top=top)
 
+        # # STEP 2: Retrieve relevant documents from the search index with the optimized query term
+        # if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
+        #     raw_search_results = self.search_client.search(
+        #         generated_query,
+        #         filter=category_filter,
+        #         query_type=QueryType.SEMANTIC,
+        #         query_language="en-us",
+        #         query_speller="lexicon",
+        #         semantic_configuration_name="default",
+        #         top=top,
+        #         query_caption="extractive|highlight-false"
+        #         if use_semantic_captions
+        #         else None,
+        #     )
+        # else:
+        #     raw_search_results = self.search_client.search(
+        #         generated_query, filter=category_filter, top=top
+        #     )
+
+        # citation_lookup = {}  # dict of "FileX" moniker to the actual file name
+        # results = []  # list of results to be used in the prompt
+        # data_points = []  # list of data points to be used in the response
+
+        # for idx, doc in enumerate(
+        #     raw_search_results
+        # ):  # for each document in the search results
+        #     if use_semantic_captions:
+        #         # if using semantic captions, use the captions instead of the content
+        #         # include the "FileX" moniker in the prompt, and the actual file name in the response
+        #         results.append(
+        #             f"File{idx} "
+        #             + "| "
+        #             + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
+        #         )
+        #         data_points.append(
+        #             "/".join(doc[self.source_page_field].split("/")[4:])
+        #             + "| "
+        #             + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
+        #         )
+        #     else:
+        #         # if not using semantic captions, use the content instead of the captions
+        #         # include the "FileX" moniker in the prompt, and the actual file name in the response
+        #         results.append(
+        #             f"File{idx} " + "| " + nonewlines(doc[self.content_field])
+        #         )
+        #         data_points.append(
+        #             "/".join(
+        #                 urllib.parse.unquote(doc[self.source_page_field]).split("/")[4:]
+        #             )
+        #             + "| "
+        #             + nonewlines(doc[self.content_field])
+        #         )
+        #         # uncomment to debug size of each search result content_field
+        #         print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
+        #     # add the "FileX" moniker and full file name to the citation lookup
+
+        #     citation_lookup[f"File{idx}"] = {
+        #         "citation": urllib.parse.unquote(doc[self.source_page_field]),
+        #         "source_path": self.get_source_file_name(doc[self.content_field]),
+        #         "page_number": self.get_first_page_num_for_chunk(
+        #             doc[self.content_field]
+        #         ),
+        #     }
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
+        
+        for idx, doc in enumerate(r):
 
-        for idx, doc in enumerate(
-            raw_search_results
-        ):  # for each document in the search results
             if use_semantic_captions:
-                # if using semantic captions, use the captions instead of the content
-                # include the "FileX" moniker in the prompt, and the actual file name in the response
-                results.append(
-                    f"File{idx} "
-                    + "| "
-                    + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
-                )
-                data_points.append(
-                    "/".join(doc[self.source_page_field].split("/")[4:])
-                    + "| "
-                    + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
-                )
-            else:
-                # if not using semantic captions, use the content instead of the captions
-                # include the "FileX" moniker in the prompt, and the actual file name in the response
-                results.append(
-                    f"File{idx} " + "| " + nonewlines(doc[self.content_field])
-                )
-                data_points.append(
-                    "/".join(
-                        urllib.parse.unquote(doc[self.source_page_field]).split("/")[4:]
-                    )
-                    + "| "
-                    + nonewlines(doc[self.content_field])
-                )
-                # uncomment to debug size of each search result content_field
-                print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
-            # add the "FileX" moniker and full file name to the citation lookup
 
+                # Use content field directly since no merged field
+                results.append(f"File{idx} | {doc['content']}") 
+
+                data_points.append(f"{doc['file_name']} | {doc['content']}")
+
+            else:
+
+                results.append(f"File{idx} | {doc['content']}")
+
+                data_points.append(f"{doc['file_name']} | {doc['content']}")
+
+            # Get page numbers from new pages field
+            page_numbers = doc['pages']
+            
+            print("Page Numbers: ", page_numbers)
+
+            # Populate citation lookup dict
             citation_lookup[f"File{idx}"] = {
-                "citation": urllib.parse.unquote(doc[self.source_page_field]),
-                "source_path": self.get_source_file_name(doc[self.content_field]),
-                "page_number": self.get_first_page_num_for_chunk(
-                    doc[self.content_field]
-                ),
+                "citation": doc['file_uri'],
+                "source_path": doc['file_name'],
+                "page_number": page_numbers[0] if page_numbers else None
             }
             
+            print("Citation Lookup: ", citation_lookup)   
          
                 
            
@@ -221,7 +300,7 @@ class ChatReadRetrieveReadApproach(Approach):
             content = "\n NONE"
         else:
             content = "\n " + results_text
-
+        print("Content: ", content)
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             self.follow_up_questions_prompt_content

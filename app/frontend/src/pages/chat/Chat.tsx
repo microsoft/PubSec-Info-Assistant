@@ -34,10 +34,10 @@ const Chat = () => {
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
-    // Setting responseLength to 1024 by default, this will effect the default display of the ResponseLengthButtonGroup below.
+    // Setting responseLength to 2048 by default, this will effect the default display of the ResponseLengthButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
-    const [responseLength, setResponseLength] = useState<number>(1024);
+    const [responseLength, setResponseLength] = useState<number>(2048);
     // Setting responseTemp to 0.6 by default, this will effect the default display of the ResponseTempButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseTempButtonGroup.tsx file.
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
@@ -139,7 +139,7 @@ const Chat = () => {
             }
         }
         // the or value here needs to match the default value assigned to responseLength above.
-        setResponseLength(_ev.target.value as number || 1024)
+        setResponseLength(_ev.target.value as number || 2048)
     };
 
     const onResponseTempChange = (_ev: any) => {

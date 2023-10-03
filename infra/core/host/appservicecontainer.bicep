@@ -174,3 +174,4 @@ output appServiceName string = appService.name
 output identityPrincipalId string = managedIdentity ? appService.identity.principalId : ''
 output containerRegistryid string = containerRegistry.id
 output containerRegistryName string = containerRegistry.name
+output defaultDomain string = appService.properties.defaultHostName

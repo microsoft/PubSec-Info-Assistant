@@ -694,4 +694,4 @@ output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
 output AZURE_OPENAI_EMBEDDING_MODEL string = azureOpenAIEmbeddingsModelName
-output ENRICHMENT_APPSERVICE_NAME string = appServiceContainer.outputs.appServiceName
+output ENRICHMENT_APPSERVICE_NAME string = appServiceContainer.outputs.defaultDomain

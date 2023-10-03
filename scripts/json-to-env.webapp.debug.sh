@@ -134,7 +134,7 @@ jq -r  '
         {
             "path": "azurE_OPENAI_EMBEDDING_MODEL",
             "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
-        }
+        },
         {
             "path": "enrichmenT_APPSERVICE_NAME",
             "env_var": "ENRICHMENT_APPSERVICE_NAME"

@@ -7,9 +7,6 @@ parameters:
   type: boolean
   default: true
 
-permissions:
-  security-events: write
-
 steps:
 - bash: |
     sudo chown -R $(whoami) .
@@ -42,10 +39,7 @@ steps:
     docker image push $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
   displayName: Push latest dev container image to container registry
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/vNext-Dev')))
-
-- name: security-devops-action
-  uses: microsoft/security-devops-action@v1.7.2
-            
+     
 - template: make-command.yml
   parameters:
     displayName: 'Dev container take ownership of Directory'
@@ -87,7 +81,12 @@ steps:
     parameters:
       displayName: 'Deploy Azure Functions'
       makeCommand: 'deploy-functions'
-  
+
+  - with: MicrosoftSecurityDevOps
+    name: Run Microsoft Security DevOps
+    id: msdo
+    uses: microsoft/security-devops-action@v1
+
   - name: Upload results to Security tab
     uses: github/codeql-action/upload-sarif@v2
     with:

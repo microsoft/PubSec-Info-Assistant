@@ -106,7 +106,6 @@ const Chat = () => {
     const onResponseLengthChange = (_ev: any) => {
         for (let node of _ev.target.parentNode.childNodes) {
             if (node.value == _ev.target.value) {
-                console.log('Val:' + node.vale)
                 switch (node.value) {
                     case "1024":
                         node.className = `${rlbgstyles.buttonleftactive}`;
@@ -123,7 +122,6 @@ const Chat = () => {
                 }                
             }
             else {
-                console.log('Val2:' + node.vale)
                 switch (node.value) {
                     case "1024":
                         node.className = `${rlbgstyles.buttonleft}`;

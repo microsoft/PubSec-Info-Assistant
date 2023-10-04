@@ -58,21 +58,30 @@ def main(msg: func.QueueMessage) -> None:
 
         response = requests.get(blob_path_plus_sas)
         response.raise_for_status()
-        if file_extension in ['.docx']:   
-            docx_file = BytesIO(response.content)
-            # Convert the downloaded Word document to HTML
-            result = mammoth.convert_to_html(docx_file)
-            statusLog.upsert_document(blob_name, f'{function_name} - HTML generated from DocX by mammoth', StatusClassification.DEBUG)
-            html = result.value # The generated HTML
-        else:
-            # Extract the content and detect the charset to decode
-            html_content = response.content
-            detected_charset = utilities.extract_charset(html_content)
-            html = html_content.decode(detected_charset)
+        
+        
+        
+        # if file_extension in ['.docx']:   
+        #     docx_file = BytesIO(response.content)
+        #     # Convert the downloaded Word document to HTML
+        #     result = mammoth.convert_to_html(docx_file)
+        #     statusLog.upsert_document(blob_name, f'{function_name} - HTML generated from DocX by mammoth', StatusClassification.DEBUG)
+        #     html = result.value # The generated HTML
+        # else:
+        #     # Extract the content and detect the charset to decode
+        #     html_content = response.content
+        #     detected_charset = utilities.extract_charset(html_content)
+        #     html = html_content.decode(detected_charset)
                             
-        # build the document map from HTML for all non-pdf file types
-        statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)
-        document_map = utilities.build_document_map_html(blob_name, blob_uri, html, azure_blob_log_storage_container)
+        # # build the document map from HTML for all non-pdf file types
+        # statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)
+        # document_map = utilities.build_document_map_html(blob_name, blob_uri, html, azure_blob_log_storage_container)
+        
+        
+        
+        
+        
+        
         statusLog.upsert_document(blob_name, f'{function_name} - Document map build complete, starting chunking', StatusClassification.DEBUG)
         chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
         statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete. {chunk_count} chunks created', StatusClassification.DEBUG)       

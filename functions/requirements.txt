@@ -16,3 +16,6 @@ nltk == 3.8.1
 tenacity == 8.2.2
 azure-ai-vision
 unstructured == 0.10.18
+python-libmagic == 0.4.0
+pyoo == 1.4
+pandoc == 2.3

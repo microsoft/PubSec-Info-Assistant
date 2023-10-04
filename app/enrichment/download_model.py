@@ -6,8 +6,10 @@ import os
 from sentence_transformers import SentenceTransformer
 
 MODEL_NAMES = os.getenv(
-    "MODEL_NAMES", "all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2|BAAI/bge-small-en-v1.5"
+    "MODEL_NAMES_TO_LOAD", "all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2|BAAI/bge-small-en-v1.5"
 )
+
+print("Downloading models: ", MODEL_NAMES)
 
 models_to_download = MODEL_NAMES.split("|")
 

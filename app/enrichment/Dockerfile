@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/python:3.11
 
-ENV MODEL_NAMES=all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2|BAAI/bge-small-en-v1.5
+ARG MODEL_NAMES=all-mpnet-base-v2|paraphrase-multilingual-MiniLM-L12-v2|BAAI/bge-small-en-v1.5
+ENV MODEL_NAMES_TO_LOAD=$MODEL_NAMES
 
 # Copy requirements for install
 COPY requirements.txt /tmp/pip-tmp/

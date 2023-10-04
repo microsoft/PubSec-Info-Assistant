@@ -121,18 +121,11 @@ models, model_info = load_models()
 # Add Azure OpenAI Embedding & additional Model
 models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = AzOAIEmbedding(
     ENV["AZURE_OPENAI_EMBEDDING_MODEL"])
-models[ENV["TARGET_EMBEDDINGS_MODEL"]] = STModel(
-    ENV["TARGET_EMBEDDINGS_MODEL"])
 
 model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
     "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"],
     "vector_size": 1536,
     # Source: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
-}
-model_info[ENV["TARGET_EMBEDDINGS_MODEL"]] = {
-    "model": ENV["TARGET_EMBEDDINGS_MODEL"],
-    "vector_size": ENV["EMBEDDING_VECTOR_SIZE"],
-    # https://huggingface.co/sentence-transformers/all-mpnet-base-v2
 }
 
 
@@ -238,7 +231,7 @@ def embed_texts(model: str, texts: List[str]):
     output = {
         "model": model,
         "model_info": model_info[model],
-        "data": embeddings
+        "data": embeddings[0]
     }
 
     return output

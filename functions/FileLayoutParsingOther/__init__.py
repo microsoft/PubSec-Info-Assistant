@@ -36,6 +36,18 @@ CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 function_name = "FileLayoutParsingOther"
 
+
+def PartitionFile(file_extension: str, file_url: str):        
+    # from unstructured.partition.docx import partition_docx    
+    # if file_extension == "docx":
+    #     from unstructured.partition.docx import partition_docx
+    
+    from unstructured.partition.auto import partition
+    elements = partition(url=file_url)
+    print(elements)
+    
+    
+
 def main(msg: func.QueueMessage) -> None:
     try:
         statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
@@ -76,6 +88,13 @@ def main(msg: func.QueueMessage) -> None:
         # # build the document map from HTML for all non-pdf file types
         # statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)
         # document_map = utilities.build_document_map_html(blob_name, blob_uri, html, azure_blob_log_storage_container)
+        
+        
+        # Determine file type and load library for this type
+        # Partition the file
+        PartitionFile(file_extension, blob_path_plus_sas)
+        
+        
         
         
         

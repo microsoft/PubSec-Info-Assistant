@@ -1,0 +1,78 @@
+[
+    {
+        "type": "NarrativeText",
+        "element_id": "f49fbd614ddf5b72e06f59e554e6ae2b",
+        "metadata": {
+            "filename": "fake-email.msg",
+            "file_directory": "email",
+            "last_modified": "2022-12-16T17:04:16-05:00",
+            "filetype": "application/vnd.ms-outlook",
+            "parent_id": "9c218520320f238595f1fde74bdd137d",
+            "sent_from": [
+                "Matthew Robinson <mrobinson@unstructured.io>"
+            ],
+            "sent_to": [
+                "Matthew Robinson (None)"
+            ],
+            "subject": "Test Email"
+        },
+        "text": "This is a test email to use for unit tests."
+    },
+    {
+        "type": "Title",
+        "element_id": "9c218520320f238595f1fde74bdd137d",
+        "metadata": {
+            "filename": "fake-email.msg",
+            "file_directory": "email",
+            "last_modified": "2022-12-16T17:04:16-05:00",
+            "filetype": "application/vnd.ms-outlook",
+            "parent_id": "9c218520320f238595f1fde74bdd137d",
+            "sent_from": [
+                "Matthew Robinson <mrobinson@unstructured.io>"
+            ],
+            "sent_to": [
+                "Matthew Robinson (None)"
+            ],
+            "subject": "Test Email"
+        },
+        "text": "Important points:"
+    },
+    {
+        "type": "ListItem",
+        "element_id": "8522061b991b1db70453502d328fe07e",
+        "metadata": {
+            "filename": "fake-email.msg",
+            "file_directory": "email",
+            "last_modified": "2022-12-16T17:04:16-05:00",
+            "filetype": "application/vnd.ms-outlook",
+            "parent_id": "9c218520320f238595f1fde74bdd137d",
+            "sent_from": [
+                "Matthew Robinson <mrobinson@unstructured.io>"
+            ],
+            "sent_to": [
+                "Matthew Robinson (None)"
+            ],
+            "subject": "Test Email"
+        },
+        "text": "Roses are red"
+    },
+    {
+        "type": "ListItem",
+        "element_id": "c3c4527761d4e4b8d0a4c4a0d46954c8",
+        "metadata": {
+            "filename": "fake-email.msg",
+            "file_directory": "email",
+            "last_modified": "2022-12-16T17:04:16-05:00",
+            "filetype": "application/vnd.ms-outlook",
+            "parent_id": "9c218520320f238595f1fde74bdd137d",
+            "sent_from": [
+                "Matthew Robinson <mrobinson@unstructured.io>"
+            ],
+            "sent_to": [
+                "Matthew Robinson (None)"
+            ],
+            "subject": "Test Email"
+        },
+        "text": "Violets are blue"
+    }
+]

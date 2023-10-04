@@ -1,4 +1,5 @@
 import json
+import re
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
@@ -108,20 +109,13 @@ class ChatReadRetrieveReadApproach(Approach):
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         #escape target embeddiong model name
-        self.target_embedding_model = TARGET_EMBEDDING_MODEL 
-        self.escaped_target_model = urllib.parse.quote(self.target_embedding_model, safe='')
+        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
         
+        if is_gov_cloud_deployment:
+            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
+        else:
+            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
         
-        self.ENRICHMENT_APPSERVICE_NAME = ENRICHMENT_APPSERVICE_NAME
-        self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
-        
-        # self.embedding_service_url = f'https://infoasst-cr-{embedding_service_suffix}.azurewebsites.net'
-        # embedding_service_url = 'https://' + ENRICHMENT_APPSERVICE_NAME + '.azurewebsites.net'
-        
-        # print("Embedding Service URL: ", embedding_service_url)
-       
-        
-
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
@@ -134,8 +128,6 @@ class ChatReadRetrieveReadApproach(Approach):
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         top = overrides.get("top") or 3
-        exclude_category = overrides.get("exclude_category") or None
-        category_filter = "category ne '{}'".format(exclude_category.replace("'", "''")) if exclude_category else None
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
@@ -170,7 +162,7 @@ class ChatReadRetrieveReadApproach(Approach):
             generated_query = history[-1]["user"]
             
         # Generate embedding using REST API
-        print("Target Embedding Model: ", self.target_embedding_model)
+        print("Target Embedding Model: ", self.escaped_target_model)
         
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
         

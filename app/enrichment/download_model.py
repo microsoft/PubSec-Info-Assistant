@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 import os
+import re
 
 from sentence_transformers import SentenceTransformer
 
@@ -15,5 +16,7 @@ models_to_download = MODEL_NAMES.split("|")
 
 models_path = "models/"
 
-for model in models_to_download:
-    model = SentenceTransformer(model, cache_folder=models_path)
+for model_name in models_to_download:
+    model = SentenceTransformer(model_name)
+    sanitized_model_name = re.sub(r'[^a-zA-Z0-9_\-.]', '_', model_name)
+    model.save(os.path.join(models_path,sanitized_model_name))

@@ -201,10 +201,16 @@ class ChatReadRetrieveReadApproach(Approach):
         # Hybrid Search
         r = self.search_client.search(generated_query, vectors=[vector], top=top)
         
+        # Pure Vector Search
+        # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
+        
+        # vector search with filter
+        # r=self.search_client.search(search_text=None, vectors=[vector], filter="processed_datetime le 2023-09-18T04:06:29.675Z" , top=top)
+        # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
-        # # STEP 2: Retrieve relevant documents from the search index with the optimized query term
+        # #  hybrid semantic search
         # if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
-        #     raw_search_results = self.search_client.search(
+        #     r = self.search_client.search(
         #         generated_query,
         #         filter=category_filter,
         #         query_type=QueryType.SEMANTIC,
@@ -213,12 +219,12 @@ class ChatReadRetrieveReadApproach(Approach):
         #         semantic_configuration_name="default",
         #         top=top,
         #         query_caption="extractive|highlight-false"
-        #         if use_semantic_captions
-        #         else None,
+        #         if use_semantic_captions else None,
+                #   vectors=[vector]
         #     )
         # else:
-        #     raw_search_results = self.search_client.search(
-        #         generated_query, filter=category_filter, top=top
+        #     r = self.search_client.search(
+        #         generated_query, filter=category_filter, top=top,vectors=[vector]
         #     )
         
         #old citation logic below

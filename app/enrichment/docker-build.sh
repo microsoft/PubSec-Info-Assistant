@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 #!/bin/bash
-set -x
+set -e
 
 figlet "Build/Deploy Containers"
 

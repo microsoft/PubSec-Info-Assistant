@@ -11,7 +11,7 @@ help: ## Show this help
 
 deploy: build infrastructure extract-env build-containers deploy-search-indexes deploy-webapp deploy-functions ## Deploy infrastructure and application code
  
-build-deploy: build extract-env deploy-webapp ##Build and Deploy the Webapp
+build-deploy: build build-containers extract-env deploy-webapp ##Build and Deploy the Webapp
 
 build: ## Build application code
 	@./scripts/build.sh

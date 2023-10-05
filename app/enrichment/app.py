@@ -367,7 +367,7 @@ def poll_queue() -> None:
                 max_seconds = int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * (requeue_count**2)
                 backoff = random.randint(int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * requeue_count, max_seconds)                
                 queue_client.send_message(message_string, visibility_timeout=backoff)
-                statusLog.upsert_document(blob_path, f'Message requed to embeddings queue, attempt {str(requeue_count)}. Visible in {str(backoff)} seconds', StatusClassification.INFO, State.QUEUED)
+                statusLog.upsert_document(blob_path, f'Message requed to embeddings queue, attempt {str(requeue_count)}. Visible in {str(backoff)} seconds. Error: {str(error)}.', StatusClassification.ERROR, State.QUEUED)
             else:
                 # dequeue as max retries has been reached
                 queue_client.delete_message(message)  

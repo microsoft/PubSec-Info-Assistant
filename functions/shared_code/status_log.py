@@ -72,9 +72,8 @@ class StatusLog:
             file_id - if you wish to return a single document by its path     
         """
 
-        encoded_file_id = self.encode_document_id(file_id)
         query = "SELECT * FROM c WHERE c.id = @file_id"
-        query_params = [{"name": "@file_id", "value": encoded_file_id}]
+        query_params = [{"name": "@file_id", "value": self.encode_document_id(file_id)}]
 
         items = list(self.container.query_items(
             query=query,

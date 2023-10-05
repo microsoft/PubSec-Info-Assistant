@@ -64,8 +64,8 @@ steps:
 
   - template: make-command.yml
     parameters:
-      displayName: 'Build containers'
-      makeCommand: 'build-containers'
+      displayName: 'Deploy Enrichments'
+      makeCommand: 'deploy-enrichments'
 
   - template: make-command.yml
     parameters:

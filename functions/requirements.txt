@@ -7,15 +7,11 @@ tiktoken==0.3.3
 azure.ai.formrecognizer==3.2.1
 azure-storage-blob==12.16.0
 azure-core == 1.26.4
-beautifulsoup4 == 4.12.2
 lxml == 4.9.2
-mammoth == 1.5.1
 azure-cosmos == 4.3.1
 azure-storage-queue == 12.6.0
 nltk == 3.8.1
 tenacity == 8.2.2
 azure-ai-vision
-unstructured == 0.10.18
-python-libmagic == 0.4.0
+unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.10.18
 pyoo == 1.4
-pandoc == 2.3

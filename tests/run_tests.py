@@ -23,10 +23,12 @@ OUTPUT_CONTAINER_NAME = "content"
 FILE_PATH = "./"  # Folder containing the files to upload
 DOCX_FILE_NAME = "example.docx"
 PDF_FILE_NAME = "example.pdf"
+HTML_FILE_NAME = "example.html"
 WAIT_TIME_SECONDS = 600  # 10 minutes
 search_queries = [
-    "The maternity service uniforms authorized for wear are classified as", # From example.pdf
-    "The Reading Rule is important to understand how to apply the map"      # From example.docx
+    "The maternity service uniforms authorized for wear are classified as",                                   # From example.pdf
+    "The Reading Rule is important to understand how to apply the map",                                       # From example.docx
+    "Regeringen investerer i infrastrukturudvikling for at opretholde moderne og effektive transportsystemer" # From example.html
 ]
 
 def parse_arguments():
@@ -68,6 +70,9 @@ def main(storage_account_connection_str):
         with open(os.path.join(FILE_PATH, PDF_FILE_NAME), "rb") as pdf_file:
             upload_container_client.upload_blob(PDF_FILE_NAME, pdf_file.read())
 
+        with open(os.path.join(FILE_PATH, HTML_FILE_NAME), "rb") as html_file:
+            upload_container_client.upload_blob(HTML_FILE_NAME, html_file.read())    
+
         console.print("Test Files uploaded successfully.")
 
         # Wait 10 minutes for pipeline processing
@@ -77,7 +82,7 @@ def main(storage_account_connection_str):
         # Check for output files in the "output" container
         output_container_client = blob_service_client.get_container_client(OUTPUT_CONTAINER_NAME)
 
-        for directory_name in [DOCX_FILE_NAME, PDF_FILE_NAME]:
+        for directory_name in [DOCX_FILE_NAME, PDF_FILE_NAME, HTML_FILE_NAME]:
         # Construct the prefix to represent the directory path and check if empty
             prefix = f"{directory_name}/"
             blobs = list(output_container_client.list_blobs(name_starts_with=prefix))

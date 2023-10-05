@@ -50,3 +50,6 @@ take-dir-ownership:
 
 destroy-inf: check-subscription
 	@./scripts/inf-destroy.sh
+
+functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
+	@./scripts/functional-tests.sh	

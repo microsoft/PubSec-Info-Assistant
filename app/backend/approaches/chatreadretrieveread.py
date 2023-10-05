@@ -169,20 +169,16 @@ class ChatReadRetrieveReadApproach(Approach):
                 
         print("URL: ", url)
         
-        data = {
-        'text': generated_query
-        }
+        data = [f"{generated_query}"]
 
         response = requests.post(url, json=data)
         
-        vector = None 
-
+        vector = None
         if response.status_code == 200:
-            vector = response.json()
-               
-        
+            vector = response.json()['data']
         else:
-            print('Error generating embedding:', response.status_code)
+            #raise an execption that the web requets failed with status code and reason
+            response.raise_for_status()
             
         # Hybrid Search
         r = self.search_client.search(generated_query, vectors=[vector], top=top)

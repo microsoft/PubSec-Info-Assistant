@@ -12,6 +12,7 @@ source "${DIR}"/../scripts/load-env.sh
 BINARIES_OUTPUT_PATH="${DIR}/../artifacts/build/"
 WEBAPP_ROOT_PATH="${DIR}/..//app/frontend"
 FUNCTIONS_ROOT_PATH="${DIR}/../functions"
+ENRICHMENT_ROOT_PATH="${DIR}/..//app/enrichment"
 
 # reset the current directory on exit using a trap so that the directory is reset even on error
 #function finish {
@@ -34,9 +35,21 @@ cp  ../../functions/shared_code/status_log.py ./shared_code
 cp  ../../functions/shared_code/__init__.py ./shared_code
 
 # zip the webapp content from app/backend to the ./artifacts folders
-zip -r ${BINARIES_OUTPUT_PATH}/webapp.zip .
+zip -q -r ${BINARIES_OUTPUT_PATH}/webapp.zip .
 cd $DIR
+echo "Successfully zipped webapp"
+echo -e "\n"
 
 # Build the Azure Functions
 cd ${FUNCTIONS_ROOT_PATH}
-zip -r ${BINARIES_OUTPUT_PATH}/functions.zip .
+zip -q -r ${BINARIES_OUTPUT_PATH}/functions.zip .
+echo "Successfully zipped functions"
+echo -e "\n"
+
+# zip the enrichment app content from app/enrichments to the .artifacts folders
+cd ${ENRICHMENT_ROOT_PATH}
+cp  ../../functions/shared_code/status_log.py ./shared_code
+cp  ../../functions/shared_code/utilities_helper.py ./shared_code
+zip -q -r ${BINARIES_OUTPUT_PATH}/enrichment.zip . -x "models/*" @
+echo "Successfully zipped enrichment app"
+echo -e "\n"

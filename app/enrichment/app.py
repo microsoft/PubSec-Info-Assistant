@@ -4,6 +4,7 @@
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from typing import List
 import base64
@@ -115,6 +116,8 @@ statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_DA
 start_time = datetime.now()
 
 IS_READY = False
+
+#download models
 log.debug("Loading embedding models...")
 models, model_info = load_models()
 
@@ -128,13 +131,10 @@ model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
     # Source: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
 }
 
-
 log.debug("Models loaded")
 IS_READY = True
 
-
 # Create API
-
 app = FastAPI(
     title="Text Embedding Service",
     description="A simple API and Queue Polling service that uses sentence-transformers to embed text",
@@ -149,11 +149,9 @@ app = FastAPI(
 )
 
 # === API Routes ===
-
 @app.get("/", include_in_schema=False, response_class=RedirectResponse)
 def root():
     return RedirectResponse(url="/docs")
-
 
 @app.get("/health", response_model=StatusResponse, tags=["health"])
 def health():
@@ -177,7 +175,6 @@ def health():
 
 
 # Models and Embeddings
-
 @app.get("/models", response_model=ModelListResponse, tags=["models"])
 def get_models():
     """Returns a list of available models
@@ -225,13 +222,12 @@ def embed_texts(model: str, texts: List[str]):
         embeddings = embeddings['data'][0]['embedding']
     else:
         embeddings = model_obj.encode(texts)
-        # embeddings = embeddings[0]
-        embeddings = embeddings.tolist()
+        embeddings = embeddings.tolist()[0]
         
     output = {
         "model": model,
         "model_info": model_info[model],
-        "data": embeddings[0]
+        "data": embeddings
     }
 
     return output
@@ -280,13 +276,15 @@ def poll_queue() -> None:
     response = queue_client.receive_messages(max_messages=int(ENV["DEQUEUE_MESSAGE_BATCH_SIZE"]))
     messages = [x for x in response]
     log.debug(f"Received {len(messages)} messages")
+
+    target_embeddings_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"])
     
     for message in messages:        
         logging.debug(f"Received message {message.id}")
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
         blob_path = message_json["blob_name"]
-        statusLog.upsert_document(blob_path, f'Embeddings process started with model ${ENV["TARGET_EMBEDDINGS_MODEL"]}', StatusClassification.INFO, State.PROCESSING)
+        statusLog.upsert_document(blob_path, f'Embeddings process started with model ${target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
         
         try:          
             file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
@@ -294,16 +292,17 @@ def poll_queue() -> None:
             blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
             index_chunks = []
-            
+
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             for i, chunk in enumerate(chunk_list):
                 # open the file and extract the content
-                blob_path_plus_sas = utilities_helper.get_blob_and_sas(ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
+                blob_path_plus_sas = utilities_helper.get_blob_and_sas(
+                    ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
                 response = requests.get(blob_path_plus_sas)
                 response.raise_for_status()
-                chunk_dict = json.loads(response.text)  
-                
+                chunk_dict = json.loads(response.text)
+
                 # create the json to be indexed
                 try:
                     text = (
@@ -319,56 +318,64 @@ def poll_queue() -> None:
                         chunk_dict["section"] + " \n " +
                         chunk_dict["content"]
                     )
-                    
+
                 # create embedding
-                embedding = embed_texts(ENV["TARGET_EMBEDDINGS_MODEL"], text)   
-                embedding_data = embedding['data']                   
-                
+                embedding = embed_texts(target_embeddings_model, text)
+                embedding_data = embedding['data']
+
                 index_chunk = {}
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
                 index_chunk['file_name'] = chunk_dict["file_name"]
                 index_chunk['file_uri'] = chunk_dict["file_uri"]
                 index_chunk['title'] = chunk_dict["title"]
-                index_chunk['pages'] = chunk_dict["pages"]               
-                index_chunk['translated_title'] = chunk_dict["translated_title"]         
+                index_chunk['pages'] = chunk_dict["pages"]
+                index_chunk['translated_title'] = chunk_dict["translated_title"]
                 index_chunk['content'] = text
-                index_chunk['contentVector'] = embedding_data    
+                index_chunk['contentVector'] = embedding_data
                 index_chunks.append(index_chunk)
-                
+
             # push chunk content to index
             index_sections(index_chunks)
 
             # delete message once complete, in case of failure
-            queue_client.delete_message(message)      
-            statusLog.upsert_document(blob_path, 'Embeddings process complete', StatusClassification.INFO, State.COMPLETE)
-                        
-        except Exception as error:            
-            # Dequeue message and update the embeddings queued count to limit the max retires            
+            queue_client.delete_message(message)
+            statusLog.upsert_document(blob_path,
+                                      'Embeddings process complete',
+                                      StatusClassification.INFO, State.COMPLETE)
+
+        except Exception as error:
+            # Dequeue message and update the embeddings queued count to limit the max retires
             try:
                 requeue_count = message_json['embeddings_queued_count']
             except KeyError:
                 requeue_count = 0
             requeue_count += 1
-                            
-            if requeue_count <= int(ENV["MAX_EMBEDDING_REQUEUE_COUNT"]):                
-                message_json['embeddings_queued_count'] = requeue_count  
-                # Delete & requeue with a random backoff within limits 
-                queue_client.delete_message(message) 
-                queue_client = QueueClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"], ENV["EMBEDDINGS_QUEUE"], message_encode_policy=TextBase64EncodePolicy())
-                message_string = json.dumps(message_json)                
+
+            if requeue_count <= int(ENV["MAX_EMBEDDING_REQUEUE_COUNT"]):
+                message_json['embeddings_queued_count'] = requeue_count
+                # Delete & requeue with a random backoff within limits
+                queue_client.delete_message(message)
+                queue_client = QueueClient.from_connection_string(
+                    ENV["BLOB_CONNECTION_STRING"], 
+                    ENV["EMBEDDINGS_QUEUE"], 
+                    message_encode_policy=TextBase64EncodePolicy())
+                message_string = json.dumps(message_json)
                 max_seconds = int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * (requeue_count**2)
-                backoff = random.randint(int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * requeue_count, max_seconds)                
+                backoff = random.randint(
+                    int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * requeue_count, max_seconds)                
                 queue_client.send_message(message_string, visibility_timeout=backoff)
-                statusLog.upsert_document(blob_path, f'Message requed to embeddings queue, attempt {str(requeue_count)}. Visible in {str(backoff)} seconds', StatusClassification.INFO, State.QUEUED)
+                statusLog.upsert_document(blob_path,
+                                          f'Message requed to embeddings queue, attempt {str(requeue_count)}. Visible in {str(backoff)} seconds',
+                                          StatusClassification.INFO, State.QUEUED)
             else:
                 # dequeue as max retries has been reached
-                queue_client.delete_message(message)  
+                queue_client.delete_message(message)
                 statusLog.upsert_document(
                     blob_path,
                     f"An error occurred, max requeue limit was reache. Error description: {str(error)}",
                     StatusClassification.ERROR,
                     State.ERROR,
                 )
-        
+
         statusLog.save_document()

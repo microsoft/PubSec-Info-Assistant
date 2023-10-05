@@ -1,4 +1,5 @@
 import json
+import re
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
@@ -6,8 +7,14 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from azure.search.documents import SearchClient
+from azure.core.credentials import AzureKeyCredential 
+from azure.search.documents import SearchClient  
+from azure.search.documents.indexes import SearchIndexClient  
+from azure.search.documents.models import Vector
 from azure.search.documents.models import QueryType
+
+from text import nonewlines
+from datetime import datetime, timedelta
 from azure.storage.blob import (
     AccountSasPermissions,
     BlobServiceClient,
@@ -19,6 +26,8 @@ import tiktoken
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 from core.modelhelper import num_tokens_from_messages
+import requests
+from urllib.parse import quote
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
@@ -77,20 +86,26 @@ class ChatReadRetrieveReadApproach(Approach):
     {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
     {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[info1.json]'}
     ]
-
+    
+    # # Define a class variable for the base URL
+    # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
+    
     def __init__(
         self,
         search_client: SearchClient,
         oai_service_name: str,
         oai_service_key: str,
         chatgpt_deployment: str,
+        # embedding_model : str,
         source_page_field: str,
         content_field: str,
         blob_client: BlobServiceClient,
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str
+        is_gov_cloud_deployment: str,
+        TARGET_EMBEDDING_MODEL: str,
+        ENRICHMENT_APPSERVICE_NAME: str
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -99,7 +114,14 @@ class ChatReadRetrieveReadApproach(Approach):
         self.blob_client = blob_client
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
-
+        #escape target embeddiong model name
+        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
+        
+        if is_gov_cloud_deployment:
+            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
+        else:
+            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
+        
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
@@ -112,8 +134,6 @@ class ChatReadRetrieveReadApproach(Approach):
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         top = overrides.get("top") or 3
-        exclude_category = overrides.get("exclude_category") or None
-        category_filter = "category ne '{}'".format(exclude_category.replace("'", "''")) if exclude_category else None
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
@@ -146,71 +166,149 @@ class ChatReadRetrieveReadApproach(Approach):
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
+            
+        # Generate embedding using REST API
+        
+        
+        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'      
+             
+        
+        vector_query= f'"{generated_query}"'
+        
+               
+        data = [vector_query]
+        
+        
+        headers = {
+                'Accept': 'application/json',  
+                'Content-Type': 'application/json',
+            }
+        
+        response = requests.post(url, json=data,headers=headers)   
+            
 
-        # STEP 2: Retrieve relevant documents from the search index with the optimized query term
-        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
-            raw_search_results = self.search_client.search(
-                generated_query,
-                filter=category_filter,
-                query_type=QueryType.SEMANTIC,
-                query_language="en-us",
-                query_speller="lexicon",
-                semantic_configuration_name="default",
-                top=top,
-                query_caption="extractive|highlight-false"
-                if use_semantic_captions
-                else None,
-            )
+        if response.status_code == 200:
+            response_data = response.json()
+            embedded_query_vector =response_data.get('data')          
+            
+                    
         else:
-            raw_search_results = self.search_client.search(
-                generated_query, filter=category_filter, top=top
-            )
+            print('Error generating embedding:', response.status_code)
+        
+         #vector set up for pure vector search & hybrid search
+        vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
+            
+        # Hybrid Search
+        r = self.search_client.search(generated_query, vectors=[vector], top=top)
+        
+        # Pure Vector Search
+        # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
+        
+        # vector search with filter
+        # r=self.search_client.search(search_text=None, vectors=[vector], filter="processed_datetime le 2023-09-18T04:06:29.675Z" , top=top)
+        # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
+        # #  hybrid semantic search
+        # if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
+        #     r = self.search_client.search(
+        #         generated_query,
+        #         filter=category_filter,
+        #         query_type=QueryType.SEMANTIC,
+        #         query_language="en-us",
+        #         query_speller="lexicon",
+        #         semantic_configuration_name="default",
+        #         top=top,
+        #         query_caption="extractive|highlight-false"
+        #         if use_semantic_captions else None,
+                #   vectors=[vector]
+        #     )
+        # else:
+        #     r = self.search_client.search(
+        #         generated_query, filter=category_filter, top=top,vectors=[vector]
+        #     )
+        
+        #old citation logic below
+
+        # citation_lookup = {}  # dict of "FileX" moniker to the actual file name
+        # results = []  # list of results to be used in the prompt
+        # data_points = []  # list of data points to be used in the response
+
+        # for idx, doc in enumerate(
+        #     raw_search_results
+        # ):  # for each document in the search results
+        #     if use_semantic_captions:
+        #         # if using semantic captions, use the captions instead of the content
+        #         # include the "FileX" moniker in the prompt, and the actual file name in the response
+        #         results.append(
+        #             f"File{idx} "
+        #             + "| "
+        #             + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
+        #         )
+        #         data_points.append(
+        #             "/".join(doc[self.source_page_field].split("/")[4:])
+        #             + "| "
+        #             + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
+        #         )
+        #     else:
+        #         # if not using semantic captions, use the content instead of the captions
+        #         # include the "FileX" moniker in the prompt, and the actual file name in the response
+        #         results.append(
+        #             f"File{idx} " + "| " + nonewlines(doc[self.content_field])
+        #         )
+        #         data_points.append(
+        #             "/".join(
+        #                 urllib.parse.unquote(doc[self.source_page_field]).split("/")[4:]
+        #             )
+        #             + "| "
+        #             + nonewlines(doc[self.content_field])
+        #         )
+        #         # uncomment to debug size of each search result content_field
+        #         print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
+        #     # add the "FileX" moniker and full file name to the citation lookup
+
+        #     citation_lookup[f"File{idx}"] = {
+        #         "citation": urllib.parse.unquote(doc[self.source_page_field]),
+        #         "source_path": self.get_source_file_name(doc[self.content_field]),
+        #         "page_number": self.get_first_page_num_for_chunk(
+        #             doc[self.content_field]
+        #         ),
+        #     }
+        
+        #new citation logic
+        
+        
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
+        
+        for idx, doc in enumerate(r):
 
-        for idx, doc in enumerate(
-            raw_search_results
-        ):  # for each document in the search results
             if use_semantic_captions:
-                # if using semantic captions, use the captions instead of the content
-                # include the "FileX" moniker in the prompt, and the actual file name in the response
-                results.append(
-                    f"File{idx} "
-                    + "| "
-                    + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
-                )
-                data_points.append(
-                    "/".join(doc[self.source_page_field].split("/")[4:])
-                    + "| "
-                    + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
-                )
-            else:
-                # if not using semantic captions, use the content instead of the captions
-                # include the "FileX" moniker in the prompt, and the actual file name in the response
-                results.append(
-                    f"File{idx} " + "| " + nonewlines(doc[self.content_field])
-                )
-                data_points.append(
-                    "/".join(
-                        urllib.parse.unquote(doc[self.source_page_field]).split("/")[4:]
-                    )
-                    + "| "
-                    + nonewlines(doc[self.content_field])
-                )
-                # uncomment to debug size of each search result content_field
-                print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
-            # add the "FileX" moniker and full file name to the citation lookup
 
+                # Use content field directly since no merged field
+                results.append(f"File{idx} | {doc['content']}") 
+
+                data_points.append(f"{doc['file_name']} | {doc['content']}")
+
+            else:
+
+                results.append(f"File{idx} | {doc['content']}")
+
+                data_points.append(f"{doc['file_name']} | {doc['content']}")
+
+            # Get page numbers from new pages field
+            page_numbers = doc['pages']
+            
+            print("Page Numbers: ", page_numbers)
+
+            # Populate citation lookup dict
             citation_lookup[f"File{idx}"] = {
-                "citation": urllib.parse.unquote(doc[self.source_page_field]),
-                "source_path": self.get_source_file_name(doc[self.content_field]),
-                "page_number": self.get_first_page_num_for_chunk(
-                    doc[self.content_field]
-                ),
+                "citation": doc['file_uri'],
+                "source_path": doc['file_name'],
+                "page_number": page_numbers[0] if page_numbers else None
             }
             
+            print("Citation Lookup: ", citation_lookup)   
          
                 
            
@@ -221,7 +319,7 @@ class ChatReadRetrieveReadApproach(Approach):
             content = "\n NONE"
         else:
             content = "\n " + results_text
-
+        print("Content: ", content)
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             self.follow_up_questions_prompt_content
@@ -326,21 +424,8 @@ class ChatReadRetrieveReadApproach(Approach):
 
         )
 
-        # chat_completion = openai.ChatCompletion.create(
-        #     deployment_id=self.chatgpt_deployment,
-        #     model=self.model_name,
-        #     messages=messages,
-        #     temperature=float(overrides.get("response_temp")) or 0.6,
-        #     max_tokens=1024,
-        #     n=1
+        # STEP 4: Format the response
 
-        # )
-
-        #Aparmar.Token Debugging Code. Uncomment to debug token usage.
-        # generated_response_message = chat_completion.choices[0].message
-        # # Count the tokens in the generated response message
-        # token_count = num_tokens_from_messages(generated_response_message, 'gpt-4')
-        # print("Generated Response Tokens:", token_count)
 
         msg_to_display = '\n\n'.join([str(message) for message in messages])
 
@@ -393,58 +478,60 @@ class ChatReadRetrieveReadApproach(Approach):
         }
         level = levels[response_length]
         return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
+    
+    #these two last function we don't need with the new citation logic
 
-    def get_source_file_name(self, content: str) -> str:
-        """
-        Parse the search document content for "file_name" attribute and generate a SAS token for it.
+    # def get_source_file_name(self, content: str) -> str:
+    #     """
+    #     Parse the search document content for "file_name" attribute and generate a SAS token for it.
 
-        Args:
-            content: The search document content (JSON string)
+    #     Args:
+    #         content: The search document content (JSON string)
 
-        Returns:
-            The source file name with SAS token.
-        """
-        try:
-            source_path = urllib.parse.unquote(json.loads(content)["file_name"])
-            sas_token = generate_account_sas(
-                self.blob_client.account_name,
-                self.blob_client.credential.account_key,
-                resource_types=ResourceTypes(object=True, service=True, container=True),
-                permission=AccountSasPermissions(
-                    read=True,
-                    write=True,
-                    list=True,
-                    delete=False,
-                    add=True,
-                    create=True,
-                    update=True,
-                    process=False,
-                ),
-                expiry=datetime.utcnow() + timedelta(hours=1),
-            )
-            return self.blob_client.url + source_path + "?" + sas_token
-        except Exception as error:
-            logging.exception("Unable to parse source file name: " + str(error) + "")
-            return ""
+    #     Returns:
+    #         The source file name with SAS token.
+    #     """
+    #     try:
+    #         source_path = urllib.parse.unquote(json.loads(content)["file_name"])
+    #         sas_token = generate_account_sas(
+    #             self.blob_client.account_name,
+    #             self.blob_client.credential.account_key,
+    #             resource_types=ResourceTypes(object=True, service=True, container=True),
+    #             permission=AccountSasPermissions(
+    #                 read=True,
+    #                 write=True,
+    #                 list=True,
+    #                 delete=False,
+    #                 add=True,
+    #                 create=True,
+    #                 update=True,
+    #                 process=False,
+    #             ),
+    #             expiry=datetime.utcnow() + timedelta(hours=1),
+    #         )
+    #         return self.blob_client.url + source_path + "?" + sas_token
+    #     except Exception as error:
+    #         logging.exception("Unable to parse source file name: " + str(error) + "")
+    #         return ""
 
-    def get_first_page_num_for_chunk(self, content: str) -> str:
-        """
-        Parse the search document content for the first page from the "pages" attribute
+    # def get_first_page_num_for_chunk(self, content: str) -> str:
+    #     """
+    #     Parse the search document content for the first page from the "pages" attribute
 
-        Args:
-            content: The search document content (JSON string)
+    #     Args:
+    #         content: The search document content (JSON string)
 
-        Returns:
-            The first page number.
-        """
-        try:
-            page_num = str(json.loads(content)["pages"][0])
-            if page_num is None:
-                return "0"
-            return page_num
-        except Exception as error:
-            logging.exception("Unable to parse first page num: " + str(error) + "")
-            return "0"
+    #     Returns:
+    #         The first page number.
+    #     """
+    #     try:
+    #         page_num = str(json.loads(content)["pages"][0])
+    #         if page_num is None:
+    #             return "0"
+    #         return page_num
+    #     except Exception as error:
+    #         logging.exception("Unable to parse first page num: " + str(error) + "")
+    #         return "0"
 
     def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
         """ Function to return the number of tokens in a text string"""

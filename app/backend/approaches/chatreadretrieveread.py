@@ -224,6 +224,8 @@ class ChatReadRetrieveReadApproach(Approach):
         #     raw_search_results = self.search_client.search(
         #         generated_query, filter=category_filter, top=top
         #     )
+        
+        #old citation logic below
 
         # citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         # results = []  # list of results to be used in the prompt
@@ -269,6 +271,10 @@ class ChatReadRetrieveReadApproach(Approach):
         #             doc[self.content_field]
         #         ),
         #     }
+        
+        #new citation logic
+        
+        
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
@@ -416,15 +422,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         )
 
-        # chat_completion = openai.ChatCompletion.create(
-        #     deployment_id=self.chatgpt_deployment,
-        #     model=self.model_name,
-        #     messages=messages,
-        #     temperature=float(overrides.get("response_temp")) or 0.6,
-        #     max_tokens=1024,
-        #     n=1
-
-        # )
+        # STEP 4: Format the response
 
         #Aparmar.Token Debugging Code. Uncomment to debug token usage.
         # generated_response_message = chat_completion.choices[0].message
@@ -483,58 +481,60 @@ class ChatReadRetrieveReadApproach(Approach):
         }
         level = levels[response_length]
         return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
+    
+    #these two last function we don't need with the new citation logic
 
-    def get_source_file_name(self, content: str) -> str:
-        """
-        Parse the search document content for "file_name" attribute and generate a SAS token for it.
+    # def get_source_file_name(self, content: str) -> str:
+    #     """
+    #     Parse the search document content for "file_name" attribute and generate a SAS token for it.
 
-        Args:
-            content: The search document content (JSON string)
+    #     Args:
+    #         content: The search document content (JSON string)
 
-        Returns:
-            The source file name with SAS token.
-        """
-        try:
-            source_path = urllib.parse.unquote(json.loads(content)["file_name"])
-            sas_token = generate_account_sas(
-                self.blob_client.account_name,
-                self.blob_client.credential.account_key,
-                resource_types=ResourceTypes(object=True, service=True, container=True),
-                permission=AccountSasPermissions(
-                    read=True,
-                    write=True,
-                    list=True,
-                    delete=False,
-                    add=True,
-                    create=True,
-                    update=True,
-                    process=False,
-                ),
-                expiry=datetime.utcnow() + timedelta(hours=1),
-            )
-            return self.blob_client.url + source_path + "?" + sas_token
-        except Exception as error:
-            logging.exception("Unable to parse source file name: " + str(error) + "")
-            return ""
+    #     Returns:
+    #         The source file name with SAS token.
+    #     """
+    #     try:
+    #         source_path = urllib.parse.unquote(json.loads(content)["file_name"])
+    #         sas_token = generate_account_sas(
+    #             self.blob_client.account_name,
+    #             self.blob_client.credential.account_key,
+    #             resource_types=ResourceTypes(object=True, service=True, container=True),
+    #             permission=AccountSasPermissions(
+    #                 read=True,
+    #                 write=True,
+    #                 list=True,
+    #                 delete=False,
+    #                 add=True,
+    #                 create=True,
+    #                 update=True,
+    #                 process=False,
+    #             ),
+    #             expiry=datetime.utcnow() + timedelta(hours=1),
+    #         )
+    #         return self.blob_client.url + source_path + "?" + sas_token
+    #     except Exception as error:
+    #         logging.exception("Unable to parse source file name: " + str(error) + "")
+    #         return ""
 
-    def get_first_page_num_for_chunk(self, content: str) -> str:
-        """
-        Parse the search document content for the first page from the "pages" attribute
+    # def get_first_page_num_for_chunk(self, content: str) -> str:
+    #     """
+    #     Parse the search document content for the first page from the "pages" attribute
 
-        Args:
-            content: The search document content (JSON string)
+    #     Args:
+    #         content: The search document content (JSON string)
 
-        Returns:
-            The first page number.
-        """
-        try:
-            page_num = str(json.loads(content)["pages"][0])
-            if page_num is None:
-                return "0"
-            return page_num
-        except Exception as error:
-            logging.exception("Unable to parse first page num: " + str(error) + "")
-            return "0"
+    #     Returns:
+    #         The first page number.
+    #     """
+    #     try:
+    #         page_num = str(json.loads(content)["pages"][0])
+    #         if page_num is None:
+    #             return "0"
+    #         return page_num
+    #     except Exception as error:
+    #         logging.exception("Unable to parse first page num: " + str(error) + "")
+    #         return "0"
 
     def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
         """ Function to return the number of tokens in a text string"""

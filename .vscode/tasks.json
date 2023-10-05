@@ -20,7 +20,7 @@
       }
     },
     {
-      "label": "pip_install_container",
+      "label": "pip_install_enrichment",
       "type": "shell",
       "command": "pip",
       "args": [

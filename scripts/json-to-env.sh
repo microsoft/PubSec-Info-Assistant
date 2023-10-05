@@ -133,6 +133,10 @@ jq -r  '
         {
             "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
             "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
+        },
+        {
+            "path": "enrichmenT_APPSERVICE_NAME",
+            "env_var": "ENRICHMENT_APPSERVICE_NAME"
         }
     ]
         as $env_vars_to_extract

@@ -71,13 +71,10 @@ class StatusLog:
             or verbose status updates to be included
             file_id - if you wish to return a single document by its path     
         """
-
-        query = "SELECT * FROM c WHERE c.id = @file_id"
-        query_params = [{"name": "@file_id", "value": self.encode_document_id(file_id)}]
+        query_string = f"SELECT * FROM c WHERE c.id = '{self.encode_document_id(file_id)}'"
 
         items = list(self.container.query_items(
-            query=query,
-            parameters=query_params,
+            query=query_string,
             enable_cross_partition_query=True
         ))
 

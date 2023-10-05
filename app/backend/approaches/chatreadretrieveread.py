@@ -168,17 +168,14 @@ class ChatReadRetrieveReadApproach(Approach):
             generated_query = history[-1]["user"]
             
         # Generate embedding using REST API
-        print("Target Embedding Model: ", self.target_embedding_model)
         
-        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
         
-                
-        print("URL: ", url)
-        print ("Generated Query: ", generated_query)
+        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'      
+             
         
         vector_query= f'"{generated_query}"'
-        print("vector_Query: ", vector_query)
         
+               
         data = [vector_query]
         
         
@@ -186,16 +183,15 @@ class ChatReadRetrieveReadApproach(Approach):
                 'Accept': 'application/json',  
                 'Content-Type': 'application/json',
             }
+        
         response = requests.post(url, json=data,headers=headers)   
             
 
         if response.status_code == 200:
             response_data = response.json()
-            embedded_query_vector =response_data.get('data')
-            print('Embedding generated successfully')
-            print('Vector: ', embedded_query_vector)
-               
-        
+            embedded_query_vector =response_data.get('data')          
+            
+                    
         else:
             print('Error generating embedding:', response.status_code)
         
@@ -424,11 +420,6 @@ class ChatReadRetrieveReadApproach(Approach):
 
         # STEP 4: Format the response
 
-        #Aparmar.Token Debugging Code. Uncomment to debug token usage.
-        # generated_response_message = chat_completion.choices[0].message
-        # # Count the tokens in the generated response message
-        # token_count = num_tokens_from_messages(generated_response_message, 'gpt-4')
-        # print("Generated Response Tokens:", token_count)
 
         msg_to_display = '\n\n'.join([str(message) for message in messages])
 

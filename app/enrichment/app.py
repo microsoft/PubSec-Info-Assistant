@@ -320,7 +320,9 @@ def poll_queue() -> None:
                     )
 
                 # create embedding
-                embedding = embed_texts(target_embeddings_model, text)
+                #Daylan's logic
+                embedding = embed_texts(re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"]), text)
+                # embedding = embed_texts(target_embeddings_model, text)
                 embedding_data = embedding['data']
 
                 index_chunk = {}

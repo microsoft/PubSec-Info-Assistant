@@ -7,8 +7,14 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from azure.search.documents import SearchClient
+from azure.core.credentials import AzureKeyCredential 
+from azure.search.documents import SearchClient  
+from azure.search.documents.indexes import SearchIndexClient  
+from azure.search.documents.models import Vector
 from azure.search.documents.models import QueryType
+
+from text import nonewlines
+from datetime import datetime, timedelta
 from azure.storage.blob import (
     AccountSasPermissions,
     BlobServiceClient,
@@ -162,30 +168,43 @@ class ChatReadRetrieveReadApproach(Approach):
             generated_query = history[-1]["user"]
             
         # Generate embedding using REST API
-        print("Target Embedding Model: ", self.escaped_target_model)
+        print("Target Embedding Model: ", self.target_embedding_model)
         
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
         
                 
         print("URL: ", url)
+        print ("Generated Query: ", generated_query)
         
-        data = {
-        'text': generated_query
-        }
-
-        response = requests.post(url, json=data)
+        vector_query= f'"{generated_query}"'
+        print("vector_Query: ", vector_query)
         
-        vector = None 
+        data = [vector_query]
+        
+        
+        headers = {
+                'Accept': 'application/json',  
+                'Content-Type': 'application/json',
+            }
+        response = requests.post(url, json=data,headers=headers)   
+            
 
         if response.status_code == 200:
-            vector = response.json()
+            response_data = response.json()
+            embedded_query_vector =response_data.get('data')
+            print('Embedding generated successfully')
+            print('Vector: ', embedded_query_vector)
                
         
         else:
             print('Error generating embedding:', response.status_code)
+        
+         #vector set up for pure vector search & hybrid search
+        vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
             
         # Hybrid Search
         r = self.search_client.search(generated_query, vectors=[vector], top=top)
+        
 
         # # STEP 2: Retrieve relevant documents from the search index with the optimized query term
         # if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):

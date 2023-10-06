@@ -8,7 +8,7 @@ import requests
 from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.utilities import Utilities
+from shared_code.utilities import Utilities, MediaType
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ[
@@ -265,7 +265,8 @@ def main(msg: func.QueueMessage) -> None:
             page_list=[0],
             section_name="",
             title_name=file_name,
-            subtitle_name=""
+            subtitle_name="",
+            file_class=MediaType.IMAGE
         )
 
         statusLog.upsert_document(

@@ -39,6 +39,12 @@ class ContentType(Enum):
     TABLE_CHAR              = 11
     TABLE_END               = 12
 
+class MediaType:
+    """ Helper class for standard media values"""
+    TEXT = "text"
+    IMAGE = "image"
+    MEDIA = "media"    
+
 class Utilities:
     """ Class to hold utility functions """
     def __init__(self,
@@ -247,11 +253,13 @@ class Utilities:
         token_count = self.num_tokens_from_string(input_text, encoding)
         return token_count
 
-    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name, subtitle_name):
+    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, 
+                    section_name, title_name, subtitle_name, file_class):
         """ Function to write a json chunk to blob"""
         chunk_output = {
             'file_name': myblob_name,
             'file_uri': myblob_uri,
+            'file_class': file_class,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
             'subtitle': subtitle_name,
@@ -330,7 +338,8 @@ class Utilities:
                                              f"{file_number}.{i}",
                                              self.token_count(chunk_text_p),
                                              chunk_text_p, page_list,
-                                             previous_section_name, previous_title_name, previous_subtitle_name)
+                                             previous_section_name, previous_title_name, previous_subtitle_name, 
+                                             MediaType.TEXT)
                             chunk_count += 1
                         else:
                             # Reset the paragraph token count to just the tokens left in the last
@@ -344,7 +353,8 @@ class Utilities:
                     # or it is a new section, then write out the chunk text we have to this point
                     self.write_chunk(myblob_name, myblob_uri, file_number,
                                      chunk_size, chunk_text, page_list,
-                                     previous_section_name, previous_title_name, previous_subtitle_name)
+                                     previous_section_name, previous_title_name, previous_subtitle_name,
+                                     MediaType.TEXT)
                     chunk_count += 1
 
                     # reset chunk specific variables
@@ -366,7 +376,8 @@ class Utilities:
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:
                 self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
-                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name)
+                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name,
+                                 MediaType.TEXT)
                 chunk_count += 1
 
             previous_section_name = section_name

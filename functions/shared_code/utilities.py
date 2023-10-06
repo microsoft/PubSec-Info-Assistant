@@ -10,7 +10,6 @@ from azure.storage.blob import BlobServiceClient
 from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
-from bs4 import BeautifulSoup
 import nltk
 nltk.download('punkt')
 
@@ -234,58 +233,6 @@ class Utilities:
 
         return document_map
 
-    def build_document_map_html(self, myblob_name, myblob_uri, html_data, azure_blob_log_storage_container):
-        """ Function to build a json structure representing the paragraphs in a document,
-            including metadata such as section heading, title, page number, 
-            real word percentage etc."""
-
-        logging.info("Constructing the JSON structure of the document\n")
-
-        soup = BeautifulSoup(html_data, 'lxml')
-        document_map = {
-            'file_name': myblob_name,
-            'file_uri': myblob_uri,
-            'content': soup.text,
-            "structure": []
-        }
-
-        title = ''
-        section = ''
-        title = soup.title.string if soup.title else "No title"
-
-        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'table']):
-            if tag.name in ['h2', 'h3', 'h4', 'h5', 'h6']:
-                section = tag.get_text(strip=True)
-            elif tag.name == 'h1':
-                title = tag.get_text(strip=True)
-            elif tag.name == 'p' and tag.get_text(strip=True):
-                document_map["structure"].append({
-                    "type": "text", 
-                    "text": tag.get_text(strip=True),
-                    "title": title,
-                    'subtitle': '',
-                    "section": section,
-                    "page_number": 1                
-                    })
-            elif tag.name == 'table' and tag.get_text(strip=True):
-                document_map["structure"].append({
-                    "type": "table", 
-                    "text": str(tag),
-                    "title": title,
-                    'subtitle': '',
-                    "section": section,
-                    "page_number": 1                
-                    })
-
-        # Output document map to log container
-        json_str = json.dumps(document_map, indent=2)
-        file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
-        output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
-
-        logging.info("Constructing the JSON structure of the document complete\n")
-        return document_map
-
     def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
         """ Function to return the number of tokens in a text string"""
         encoding = tiktoken.get_encoding(encoding_name)
@@ -428,22 +375,3 @@ class Utilities:
 
         logging.info("Chunking is complete \n")
         return chunk_count
-    
-    # Function to detect and extract the charset from the HTML content
-    def extract_charset(self, html_content):
-        soup = BeautifulSoup(html_content, 'html.parser')
-        meta_tags = soup.find_all('meta', charset=True)
-    
-        if meta_tags:
-            return meta_tags[0]['charset'].strip().lower()
-    
-        # If no charset is specified in meta tags, try to detect from the Content-Type header
-        content_type = soup.find('meta', {'http-equiv': 'Content-Type'})
-        if content_type and 'content' in content_type.attrs:
-            content_type_value = content_type['content']
-            if 'charset' in content_type_value:
-                return content_type_value.split('charset=')[-1].strip().lower()
-    
-        # Default to utf-8 if charset is not specified
-        return 'utf-8'
-    

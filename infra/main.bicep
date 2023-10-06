@@ -31,15 +31,15 @@ param cosmosdbName string = ''
 param formRecognizerName string = ''
 param enrichmentName string = ''
 param formRecognizerSkuName string = 'S0'
-param encichmentSkuName string = 'S0'
+param enrichmentSkuName string = 'S0'
 param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
-param appServicePlanContainerName string = ''
-param containerRegistryName string = ''
+param enrichmentAppServicePlanName string = ''
 param resourceGroupName string = ''
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
+param enrichmentServiceName string = ''
 param functionsAppName string = ''
 param mediaServiceName string = ''
 param videoIndexerName string = ''
@@ -104,7 +104,6 @@ param principalId string = ''
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
-var containerRegistrySuffix = isGovCloudDeployment ? 'azurecr.us' : 'azurecr.io'
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -134,28 +133,51 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B2'
+      name: 'S1'
       capacity: 3
     }
     kind: 'linux'
   }
 }
 
-// Create an App Service Plan and supporting services for the enrichment app service
-module appServiceContainer 'core/host/appservicecontainer.bicep' = {
-  name: 'appservicecontainer'
+// Create an App Service Plan to group applications under the same payment plan and SKU
+module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
+  name: 'enrichmentAppserviceplan'
   scope: rg
   params: {
-    appServiceName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
-    appServicePlanName: !empty(appServicePlanContainerName) ? appServicePlanContainerName : '${prefix}-${abbrs.containerRegistryRegistries}-${randomString}'
-    containerRegistryName: !empty(containerRegistryName) ? containerRegistryName : '${prefix}${abbrs.containerRegistryRegistries}${randomString}'
-    containerRegistrySuffix: containerRegistrySuffix
+    name: !empty(enrichmentAppServicePlanName) ? enrichmentAppServicePlanName : '${prefix}-enrichment${abbrs.webServerFarms}${randomString}'
     location: location
     tags: tags
+    sku: {
+      name: 'P1v3'
+      tier: 'PremiumV3'
+      size: 'P1v3'
+      family: 'Pv3'
+      capacity: 3
+    }
+    kind: 'linux'
+    reserved: true
+    storageAccountId: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
+  }
+}
+
+// Create an App Service Plan and supporting services for the enrichment app service
+module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
+  name: 'enrichmentApp'
+  scope: rg
+  params: {
+    name: !empty(enrichmentServiceName) ? enrichmentServiceName : '${prefix}-enrichment${abbrs.webSitesAppService}${randomString}'
+    appServicePlanId: enrichmentAppServicePlan.outputs.id
+    location: location
+    tags: tags
+    runtimeName: 'python'
+    runtimeVersion: '3.10'
+    scmDoBuildDuringDeployment: true
+    managedIdentity: true
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     applicationInsightsName: logging.outputs.applicationInsightsName
-    storageAccountUri: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
-    managedIdentity: true
+    healthCheckPath: '/health'
+    appCommandLine: 'gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app'
     appSettings: {
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
@@ -184,9 +206,6 @@ module appServiceContainer 'core/host/appservicecontainer.bicep' = {
       WEBSITES_CONTAINER_START_TIME_LIMIT: 600
     }
   }
-  dependsOn: [
-    logging
-  ]
 }
 
 // The application frontend
@@ -232,7 +251,11 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
       CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
+      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
+      ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
     }
+
+
     aadClientId: aadWebClientId
   }
 }
@@ -297,7 +320,7 @@ module enrichment 'core/ai/enrichment.bicep' = {
     name: !empty(enrichmentName) ? enrichmentName : '${prefix}-enrichment-${abbrs.cognitiveServicesAccounts}${randomString}'
     location: location
     tags: tags
-    sku: encichmentSkuName
+    sku: enrichmentSkuName
     isGovCloudDeployment: isGovCloudDeployment
   }
 }
@@ -568,7 +591,7 @@ module ACRRoleContainerAppService 'core/security/role.bicep' = {
   scope: rg
   name: 'container-webapp-acrpull-role'
   params: {
-    principalId: appServiceContainer.outputs.identityPrincipalId
+    principalId: enrichmentApp.outputs.identityPrincipalId
     roleDefinitionId: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
     principalType: 'ServicePrincipal'
   }
@@ -681,12 +704,10 @@ output AZURE_TENANT_ID string = tenantId
 #disable-next-line outputs-should-not-contain-secrets
 output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
-output CONTAINER_REGISTRY_ID string = appServiceContainer.outputs.containerRegistryid
-output CONTAINER_REGISTRY_NAME string = appServiceContainer.outputs.containerRegistryName
-output CONTAINER_APP_SERVICE string = appServiceContainer.outputs.appServiceName
 output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment
 output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
 output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingsModelName : sentenceTransformersModelName
 output AZURE_OPENAI_EMBEDDING_MODEL string = azureOpenAIEmbeddingsModelName
+output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name

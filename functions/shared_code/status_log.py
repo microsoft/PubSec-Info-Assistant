@@ -8,6 +8,7 @@ import base64
 from enum import Enum
 import logging
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
+import traceback, sys
 
 class State(Enum):
     """ Enum for state of a process """
@@ -156,6 +157,10 @@ class StatusLog:
                 "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "status_classification": str(status_classification.value)
             }
+
+            if status_classification == StatusClassification.ERROR:
+                new_item["stack_trace"] = self.get_stack_trace()
+
             status_updates.append(new_item)
 
         except Exception:
@@ -172,7 +177,8 @@ class StatusLog:
                     {
                         "status": status,
                         "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                        "status_classification": str(status_classification.value)
+                        "status_classification": str(status_classification.value),
+                        "stack_trace": self.get_stack_trace()
                     }
                 ]
             }
@@ -186,3 +192,15 @@ class StatusLog:
 
     def save_document(self):
         self.container.upsert_item(body=self._log_document)
+
+    def get_stack_trace(self):
+        exc = sys.exc_info()[0]
+        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
+        if exc is not None:  # i.e. an exception is present
+            del stack[-1]       # remove call of full_stack, the printed exception
+                                # will contain the caught exception caller instead
+        trc = 'Traceback (most recent call last):\n'
+        stackstr = trc + ''.join(traceback.format_list(stack))
+        if exc is not None:
+            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+        return stackstr

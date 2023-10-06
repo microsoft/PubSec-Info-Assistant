@@ -139,6 +139,9 @@ def main(msg: func.QueueMessage) -> None:
         
         # Partition the file dependent on file extension
         elements, metadata = PartitionFile(file_extension, blob_path_plus_sas)
+        metdata_text = ''
+        for metadata_value in metadata:
+            metdata_text += metadata_value + '\n'    
         statusLog.upsert_document(blob_name, f'{function_name} - partitioning complete', StatusClassification.DEBUG)
         
         title = ''
@@ -170,11 +173,7 @@ def main(msg: func.QueueMessage) -> None:
             else:
                 chunk_text = chunk.text
             # add filetype specific metadata as chunk text header
-            metdata_text = ''
-            for metadata_value in metadata:
-                metdata_text += metadata_value + '\n'    
-            chunk_text = metdata_text + chunk_text
-                    
+            chunk_text = metdata_text + chunk_text                    
             utilities.write_chunk(blob_name, blob_uri,
                                 f"{i}",
                                 utilities.token_count(chunk.text),

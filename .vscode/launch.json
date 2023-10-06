@@ -5,14 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Flask",
+            "name": "Python: WebApp backend",
             "type": "python",
             "request": "launch",
             "module": "flask",
@@ -32,6 +25,34 @@
             "justMyCode": true,
             "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
             "preLaunchTask": "pip_install"
+        },
+        {
+            "name": "Python: Enrichment Webapp",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload",
+                "--port",
+                "5001"
+            ],
+            "cwd": "${workspaceFolder}/app/enrichment",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
+            "preLaunchTask": "pip_install_enrichment"
+        },
+        {
+            "name": "Vite: Debug",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:5000",
+            "webRoot": "${workspaceFolder}/app/backend/static",
+            "sourceMapPathOverrides": {
+              "webpack:///src/*": "${webRoot}/*"
+            },
+            "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
         },
         {
             "name": "Frontend: watch",
@@ -65,30 +86,11 @@
             "preLaunchTask": "func host start"
         },
         {
-            "name": "Vite: Debug",
-            "type": "msedge",
-            "request": "launch",
-            "url": "http://localhost:5000",
-            "webRoot": "${workspaceFolder}/app/backend/static",
-            "sourceMapPathOverrides": {
-              "webpack:///src/*": "${webRoot}/*"
-            },
-            "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
-        },
-        {
-            "name": "Python: FastAPI - enrichment app",
+            "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "module": "uvicorn",
-            "cwd": "${workspaceFolder}/app/enrichment",
-            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
-            "args": [
-              "app:app",
-              "--reload",
-              "--port", 
-              "3003"
-            ],
-            "preLaunchTask": "pip_install_container"
+            "program": "${file}",
+            "console": "integratedTerminal"
         }
     ]
 }

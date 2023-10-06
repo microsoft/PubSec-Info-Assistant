@@ -26,9 +26,9 @@ PDF_FILE_NAME = "example.pdf"
 HTML_FILE_NAME = "example.html"
 WAIT_TIME_SECONDS = 600  # 10 minutes
 search_queries = [
-    "The maternity service uniforms authorized for wear are classified as",                                   # From example.pdf
-    "The Reading Rule is important to understand how to apply the map",                                       # From example.docx
-    "Regeringen investerer i infrastrukturudvikling for at opretholde moderne og effektive transportsystemer" # From example.html
+    "Each brushstroke and note played adds to the vibrant tapestry of human culture,",                         # From example.pdf
+    "Sed non urna nec elit auctor elementum. Sed auctor eget urna at faucibus.",                               # From example.docx
+    "Regeringen investerer i infrastrukturudvikling for at opretholde moderne og effektive transportsystemer"  # From example.html
 ]
 
 def parse_arguments():

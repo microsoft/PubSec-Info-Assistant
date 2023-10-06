@@ -338,7 +338,8 @@ class Utilities:
                                              f"{file_number}.{i}",
                                              self.token_count(chunk_text_p),
                                              chunk_text_p, page_list,
-                                             previous_section_name, previous_title_name, previous_subtitle_name)
+                                             previous_section_name, previous_title_name, previous_subtitle_name, 
+                                             MediaType.TEXT)
                             chunk_count += 1
                         else:
                             # Reset the paragraph token count to just the tokens left in the last
@@ -352,7 +353,8 @@ class Utilities:
                     # or it is a new section, then write out the chunk text we have to this point
                     self.write_chunk(myblob_name, myblob_uri, file_number,
                                      chunk_size, chunk_text, page_list,
-                                     previous_section_name, previous_title_name, previous_subtitle_name)
+                                     previous_section_name, previous_title_name, previous_subtitle_name,
+                                     MediaType.TEXT)
                     chunk_count += 1
 
                     # reset chunk specific variables
@@ -374,7 +376,8 @@ class Utilities:
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:
                 self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
-                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name)
+                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name,
+                                 MediaType.TEXT)
                 chunk_count += 1
 
             previous_section_name = section_name

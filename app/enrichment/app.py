@@ -222,7 +222,7 @@ def embed_texts(model: str, texts: List[str]):
         embeddings = embeddings['data'][0]['embedding']
     else:
         embeddings = model_obj.encode(texts)
-        embeddings = embeddings.tolist()[0]
+        embeddings = embeddings.tolist()
         
     output = {
         "model": model,
@@ -330,7 +330,7 @@ def poll_queue() -> None:
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
                 index_chunk['file_name'] = chunk_dict["file_name"]
                 index_chunk['file_uri'] = chunk_dict["file_uri"] 
-                index_chunk['chunk_file'] = chunk_dict[chunk.name]
+                index_chunk['chunk_file'] = chunk.name
                 index_chunk['file_class'] = chunk_dict["file_class"]
                 index_chunk['title'] = chunk_dict["title"]
                 index_chunk['pages'] = chunk_dict["pages"]
@@ -349,7 +349,7 @@ def poll_queue() -> None:
                                       StatusClassification.INFO, State.COMPLETE)
 
         except Exception as error:
-            # Dequeue message and update the embeddings queued count to limit the max retires
+            # Dequeue message and update the embeddings queued count to limit the max retries
             try:
                 requeue_count = message_json['embeddings_queued_count']
             except KeyError:

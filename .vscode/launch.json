@@ -91,6 +91,21 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: FastAPI - enrichment app",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "cwd": "${workspaceFolder}/app/enrichment",
+            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
+            "args": [
+              "app:app",
+              "--reload",
+              "--port", 
+              "3003"
+            ],
+            "preLaunchTask": "pip_install_container"
         }
     ]
 }

@@ -166,8 +166,11 @@ def main(msg: func.QueueMessage) -> None:
         subtitle_name = ''
         section_name = ''
         # Complete and write chunks
-        for i, chunk in enumerate(chunks):       
-            page_list = [chunk.metadata.page_number]     
+        for i, chunk in enumerate(chunks):      
+            if chunk.metadata.page_number == None:
+                page_list = [1]
+            else:
+                page_list = [chunk.metadata.page_number] 
             # substitute html if text is a table            
             if chunk.category == 'Table':
                 chunk_text = chunk.metadata.text_as_html

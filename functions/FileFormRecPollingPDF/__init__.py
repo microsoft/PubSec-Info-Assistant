@@ -9,7 +9,7 @@ import json
 import requests
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import StatusLog, State, StatusClassification
-from shared_code.utilities import Utilities
+from shared_code.utilities import Utilities, MediaType
 import random
 from collections import namedtuple
 import time

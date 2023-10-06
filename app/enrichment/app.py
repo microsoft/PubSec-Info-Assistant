@@ -329,7 +329,9 @@ def poll_queue() -> None:
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
                 index_chunk['file_name'] = chunk_dict["file_name"]
-                index_chunk['file_uri'] = chunk_dict["file_uri"]
+                index_chunk['file_uri'] = chunk_dict["file_uri"] 
+                index_chunk['chunk_file'] = chunk_dict[chunk.name]
+                index_chunk['file_class'] = chunk_dict["file_class"]
                 index_chunk['title'] = chunk_dict["title"]
                 index_chunk['pages'] = chunk_dict["pages"]
                 index_chunk['translated_title'] = chunk_dict["translated_title"]

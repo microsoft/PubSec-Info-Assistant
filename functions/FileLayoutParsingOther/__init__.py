@@ -10,7 +10,8 @@ import azure.functions as func
 from azure.storage.blob import generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import StatusLog, State, StatusClassification
-from shared_code.utilities import Utilities
+from shared_code.utilities import Utilities, MediaType
+
 import requests
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
@@ -178,7 +179,9 @@ def main(msg: func.QueueMessage) -> None:
                                 f"{i}",
                                 utilities.token_count(chunk.text),
                                 chunk_text, page_list,
-                                section_name, title, subtitle_name)
+                                section_name, title, subtitle_name,
+                                MediaType.TEXT
+                                )
         
         statusLog.upsert_document(blob_name, f'{function_name} - chunking stored.', StatusClassification.DEBUG)   
         

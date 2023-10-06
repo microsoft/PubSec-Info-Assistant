@@ -39,6 +39,12 @@ class ContentType(Enum):
     TABLE_CHAR              = 11
     TABLE_END               = 12
 
+class MediaType:
+    """ Helper class for standard media values"""
+    TEXT = "text"
+    IMAGE = "image"
+    MEDIA = "media"    
+
 class Utilities:
     """ Class to hold utility functions """
     def __init__(self,
@@ -247,11 +253,13 @@ class Utilities:
         token_count = self.num_tokens_from_string(input_text, encoding)
         return token_count
 
-    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name, subtitle_name):
+    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, 
+                    section_name, title_name, subtitle_name, file_class):
         """ Function to write a json chunk to blob"""
         chunk_output = {
             'file_name': myblob_name,
             'file_uri': myblob_uri,
+            'file_class': file_class,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
             'subtitle': subtitle_name,

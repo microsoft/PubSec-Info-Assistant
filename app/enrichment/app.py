@@ -222,7 +222,7 @@ def embed_texts(model: str, texts: List[str]):
         embeddings = embeddings['data'][0]['embedding']
     else:
         embeddings = model_obj.encode(texts)
-        embeddings = embeddings.tolist()
+        embeddings = embeddings.tolist()[0]
         
     output = {
         "model": model,
@@ -320,9 +320,7 @@ def poll_queue() -> None:
                     )
 
                 # create embedding
-                #Daylan's logic
-                embedding = embed_texts(re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"]), text)
-                # embedding = embed_texts(target_embeddings_model, text)
+                embedding = embed_texts(target_embeddings_model, [text])
                 embedding_data = embedding['data']
 
                 index_chunk = {}

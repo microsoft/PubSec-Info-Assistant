@@ -93,16 +93,22 @@
             "program": "debug_tests.py",
             "args": [
                 "--storage_account_connection_str",
-                "${env:BLOB_CONNECTION_STRING}",
+                "${env:STORAGE_ACCOUNT_CONNECTION_STR},",
                 "--search_service_endpoint",
-                "${env:AZURE_SEARCH_SERVICE_ENDPOINT}",
+                "${env:SEARCH_SERVICE_ENDPOINT}",
                 "--search_index",
-                "${env:AZURE_SEARCH_INDEX}",
+                "${env:SEARCH_INDEX}",
                 "--search_key",
-                "${env:AZURE_SEARCH_SERVICE_KEY}",
+                "${env:SEARCH_KEY}",
                 "--wait_time_seconds",
-                "120"
+                "60"
             ],
+            "env": {
+                "STORAGE_ACCOUNT_CONNECTION_STR": "${env:BLOB_CONNECTION_STRING}",
+                "SEARCH_SERVICE_ENDPOINT": "${env:AZURE_SEARCH_SERVICE_ENDPOINT}",
+                "SEARCH_INDEX": "${env:AZURE_SEARCH_INDEX}",
+                "SEARCH_KEY": "${env:AZURE_SEARCH_SERVICE_KEY}"
+            },
             "cwd": "${workspaceFolder}/tests",
             "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
             "preLaunchTask": "pip_install_func_tests",

@@ -11,7 +11,7 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "What impact does China have on climate change?", value: "What impact does China have on climate change?" },
+    { text: "How many documents do you know about?", value: "How many documents do you know about?" },
     { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
     { text: "Provide a report comparing the Arleigh Burke destroyers with the Chinese Type 055.", value: "Provide a report comparing the Arleigh Burke destroyers with the Chinese Type 055." }
 ];

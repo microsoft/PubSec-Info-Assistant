@@ -6,11 +6,10 @@ Command line functional test runner
 '''
 import argparse
 import base64
+import os
+import time
 from rich.console import Console
 import rich.traceback
-import os
-import sys
-import time
 from azure.storage.blob import BlobServiceClient
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
@@ -19,7 +18,7 @@ rich.traceback.install()
 console = Console()
 
 class TestFailedError(Exception):
-    pass
+    """Exception raised when a test fails"""
 
 # Define top-level variables
 UPLOAD_CONTAINER_NAME = "upload"
@@ -67,32 +66,37 @@ def parse_arguments():
     return parser.parse_args()
 
 def main(blob_service_client, wait_time_seconds):
+    """Main function to run functional tests"""
     try:
         current_duration = 0
         # Upload the files to the container
         upload_container_client = blob_service_client.get_container_client(UPLOAD_CONTAINER_NAME)
 
         with open(os.path.join(FILE_PATH, DOCX_FILE_NAME), "rb") as docx_file:
-            upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{DOCX_FILE_NAME}', docx_file.read())
+            upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{DOCX_FILE_NAME}',
+                                                docx_file.read())
 
         with open(os.path.join(FILE_PATH, PDF_FILE_NAME), "rb") as pdf_file:
-            upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{PDF_FILE_NAME}', pdf_file.read())
+            upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{PDF_FILE_NAME}',
+                                                pdf_file.read())
 
         with open(os.path.join(FILE_PATH, HTML_FILE_NAME), "rb") as html_file:
-            upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{HTML_FILE_NAME}', html_file.read())    
+            upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{HTML_FILE_NAME}',
+                                                html_file.read())
 
         console.print("Test Files uploaded successfully.")
 
         # Check for output files in the "output" container
         output_container_client = blob_service_client.get_container_client(OUTPUT_CONTAINER_NAME)
-        
+
         test_files = [DOCX_FILE_NAME, PDF_FILE_NAME, HTML_FILE_NAME]
         # Dictionary to track the status of each file
         status = {file: False for file in test_files}
-        
+
         while current_duration < MAX_DURATION:
             # Wait 10 minutes for pipeline processing
-            console.print(f"Waiting for {int(wait_time_seconds) // 60} minutes for pipeline processing...")
+            console.print(f"Waiting for {int(wait_time_seconds) // 60} \
+                          minutes for pipeline processing...")
             time.sleep(int(wait_time_seconds))
 
             for test_file in test_files:
@@ -102,14 +106,17 @@ def main(blob_service_client, wait_time_seconds):
                     blobs = list(output_container_client.list_blobs(name_starts_with=file_path))
 
                     if blobs:
-                        console.print(f"Directory '{file_path}' in the 'content' container is populated.")
+                        console.print(f"Directory '{file_path}' in the 'content' \
+                                      container is populated.")
                         status[test_file] = True
                     else:
                         if current_duration + int(wait_time_seconds) >= MAX_DURATION:
-                            raise TestFailedError(f"Directory '{file_path}' is empty in the 'content' container.")
+                            raise TestFailedError(f"Directory '{file_path}' is empty in \
+                                                  the 'content' container.")
                         else:
-                            console.print(f"Directory '{file_path}' in the 'content' container is empty. Checking again... ")
-                    
+                            console.print(f"Directory '{file_path}' in the 'content' \
+                                          container is empty. Checking again... ")
+
             if all(status.values()):
                 console.print("All test files have been successfully processed.")
                 break
@@ -143,14 +150,14 @@ def check_index(search_service_endpoint, search_index, search_key ):
             else:
                 console.print(f"Content for query '{query}' does not exist in the index.")
                 raise TestFailedError(f"Content for query '{query}' does not exist in the index.")
-        
+
     except (Exception, TestFailedError) as ex:
-        exit_status = 1
         console.log(f'[red]❌ {ex}[/red]')
         raise ex
 
 def cleanup_after_test(blob_service_client, search_service_endpoint, search_index, search_key):
-    console.print(f"Cleaning up after tests...")
+    """Function to cleanup after tests"""
+    console.print("Cleaning up after tests...")
 
     upload_container_client = blob_service_client.get_container_client(UPLOAD_CONTAINER_NAME)
     output_container_client = blob_service_client.get_container_client(OUTPUT_CONTAINER_NAME)
@@ -165,17 +172,26 @@ def cleanup_after_test(blob_service_client, search_service_endpoint, search_inde
     upload_container_client.delete_blob(f'{UPLOAD_FOLDER_NAME}/{DOCX_FILE_NAME}')
     upload_container_client.delete_blob(f'{UPLOAD_FOLDER_NAME}/{PDF_FILE_NAME}')
     upload_container_client.delete_blob(f'{UPLOAD_FOLDER_NAME}/{HTML_FILE_NAME}')
-    
+
     # Cleanup output container
     blobs = output_container_client.list_blobs(name_starts_with=UPLOAD_FOLDER_NAME)
     for blob in blobs:
-        print(f"Deleting blob: {blob.name}")
-        output_container_client.delete_blob(blob.name)
-        # Cleanup search index
-        print(f"Removing document from index: {blob.name} : id : {encode_document_id(blob.name)}")
-        search_client.delete_documents(documents=[{"id": f"{encode_document_id(blob.name)}"}])
+        try:
+            console.print(f"Deleting blob: {blob.name}")
+            output_container_client.delete_blob(blob.name)
+        except Exception as ex:
+            console.print(f"Failed to delete blob: {blob.name}. Error: {ex}")
 
-    console.print(f"Finished cleaning up after tests.")
+        try:
+            # Cleanup search index
+            console.print(f"Removing document from index: {blob.name} \
+                          : id : {encode_document_id(blob.name)}")
+            search_client.delete_documents(documents=[{"id": f"{encode_document_id(blob.name)}"}])
+        except Exception as ex:
+            console.print(f"Failed to remove document from index: {blob.name} \
+                          : id : {encode_document_id(blob.name)}. Error: {ex}")
+
+    console.print("Finished cleaning up after tests.")
 
 def encode_document_id(document_id):
     """ encode a path/file name to remove unsafe chars for a cosmos db id """
@@ -185,8 +201,12 @@ def encode_document_id(document_id):
 if __name__ == '__main__':
     args = parse_arguments()
     try:
-        storage_blob_service_client = BlobServiceClient.from_connection_string(args.storage_account_connection_str)
+        storage_blob_service_client = BlobServiceClient.from_connection_string(
+            args.storage_account_connection_str)
         main(storage_blob_service_client, args.wait_time_seconds)
         check_index(args.search_service_endpoint, args.search_index, args.search_key)
     finally:
-        cleanup_after_test(storage_blob_service_client, args.search_service_endpoint, args.search_index, args.search_key)
+        cleanup_after_test(storage_blob_service_client,
+                           args.search_service_endpoint,
+                           args.search_index,
+                           args.search_key)

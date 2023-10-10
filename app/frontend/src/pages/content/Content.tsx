@@ -7,6 +7,7 @@ import { FilePicker } from "../../components/filepicker/file-picker";
 import { FileStatus } from "../../components/FileStatus/FileStatus";
 
 import styles from "./Content.module.css";
+import { Branding } from "../../components/Branding/Branding";
 
 const Content = () => {
     return (
@@ -19,6 +20,9 @@ const Content = () => {
                 </PivotItem>
                 <PivotItem headerText="Upload Status" aria-label="Upload Status Tab">
                     <FileStatus className=""/>
+                </PivotItem>
+                <PivotItem headerText="Branding" aria-label="Branding Tab">
+                    <Branding className=""/>
                 </PivotItem>
             </Pivot>
         </div>

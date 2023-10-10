@@ -227,13 +227,20 @@ def get_warning_banner():
         })
     return response
 
+
+
 @app.route("/getcitation", methods=["POST"])
 def get_citation():
-    citation = urllib.parse.unquote(request.json["citation"])
+    citation = urllib.parse.unquote(request.json["source_path"])
+    
+    
+    
+    
     try:
         blob = blob_container.get_blob_client(citation).download_blob()
         decoded_text = blob.readall().decode()
         results = jsonify(json.loads(decoded_text))
+        
     except Exception as e:
         logging.exception("Exception in /getalluploadstatus")
         return jsonify({"error": str(e)}), 500

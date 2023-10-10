@@ -174,7 +174,7 @@ class ChatReadRetrieveReadApproach(Approach):
         
         
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'      
-             
+           
         
         vector_query= f'"{generated_query}"'
         
@@ -188,7 +188,7 @@ class ChatReadRetrieveReadApproach(Approach):
             }
         
         response = requests.post(url, json=data,headers=headers)   
-            
+        
 
         if response.status_code == 200:
             response_data = response.json()
@@ -302,12 +302,13 @@ class ChatReadRetrieveReadApproach(Approach):
             # Get page numbers from new pages field
             page_numbers = doc['pages']
             
-            print("Page Numbers: ", page_numbers)
+            
 
             # Populate citation lookup dict
             citation_lookup[f"File{idx}"] = {
                 "citation": doc['file_uri'],
-                "source_path": doc['file_name'],
+                # "source_path": doc['file_name'],
+                "source_path": self.get_source_file_name(doc['file_uri'], doc['chunk_file']),
                 "page_number": page_numbers[0] if page_numbers else None
             }
             
@@ -322,7 +323,7 @@ class ChatReadRetrieveReadApproach(Approach):
             content = "\n NONE"
         else:
             content = "\n " + results_text
-        print("Content: ", content)
+        
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             self.follow_up_questions_prompt_content
@@ -484,38 +485,56 @@ class ChatReadRetrieveReadApproach(Approach):
     
     #these two last function we don't need with the new citation logic
 
-    # def get_source_file_name(self, content: str) -> str:
-    #     """
-    #     Parse the search document content for "file_name" attribute and generate a SAS token for it.
+    def get_source_file_name(self, file_uri: str, chunk_file: str) -> str:
+        """
+        Parse the search document content for "file_name" attribute and generate a SAS token for it.
 
-    #     Args:
-    #         content: The search document content (JSON string)
+        Args:
+            content: The search document content (JSON string)
 
-    #     Returns:
-    #         The source file name with SAS token.
-    #     """
-    #     try:
-    #         source_path = urllib.parse.unquote(json.loads(content)["file_name"])
-    #         sas_token = generate_account_sas(
-    #             self.blob_client.account_name,
-    #             self.blob_client.credential.account_key,
-    #             resource_types=ResourceTypes(object=True, service=True, container=True),
-    #             permission=AccountSasPermissions(
-    #                 read=True,
-    #                 write=True,
-    #                 list=True,
-    #                 delete=False,
-    #                 add=True,
-    #                 create=True,
-    #                 update=True,
-    #                 process=False,
-    #             ),
-    #             expiry=datetime.utcnow() + timedelta(hours=1),
-    #         )
-    #         return self.blob_client.url + source_path + "?" + sas_token
-    #     except Exception as error:
-    #         logging.exception("Unable to parse source file name: " + str(error) + "")
-    #         return ""
+        Returns:
+            The source file name with SAS token.
+        """
+        try:
+            # # Parse file URI
+            # uri_parts = urllib.parse.urlsplit(file_uri)
+            # # server_domain = uri_parts.netloc
+            # path_parts = uri_parts.path.split('/')
+            # file_name = path_parts[-1]
+            
+            # # Extract base file name from chunk_file
+            # chunk_file_parts = chunk_file.split('/')
+            # base_file_name = urllib.parse.unquote(chunk_file_parts[0])
+            
+            # print("Base File Name: ", base_file_name)
+            # print("File Name: ", file_name)
+            # print("Chunk File: ", chunk_file)
+            
+            # Construct file storage path
+            file_storage_path = f"content/{chunk_file}"
+           
+            
+            # source_path = urllib.parse.unquote(json.loads(content)["file_name"])
+            sas_token = generate_account_sas(
+                self.blob_client.account_name,
+                self.blob_client.credential.account_key,
+                resource_types=ResourceTypes(object=True, service=True, container=True),
+                permission=AccountSasPermissions(
+                    read=True,
+                    write=True,
+                    list=True,
+                    delete=False,
+                    add=True,
+                    create=True,
+                    update=True,
+                    process=False,
+                ),
+                expiry=datetime.utcnow() + timedelta(hours=1),
+            )
+            return self.blob_client.url + file_storage_path + "?" + sas_token
+        except Exception as error:
+            logging.exception("Unable to parse source file name: " + str(error) + "")
+            return ""
 
     # def get_first_page_num_for_chunk(self, content: str) -> str:
     #     """

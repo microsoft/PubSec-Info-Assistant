@@ -142,6 +142,15 @@ param enableDevCode bool
 @description('A boolean value that flags if a user wishes to enable or disable code under development')
 param EMBEDDINGS_QUEUE string
 
+@description('Name of the Azure Search Service index to post data to for ingestion')
+param azureSearchIndex string
+
+@description('Endpoint of the Azure Search Service to post data to for ingestion')
+param azureSearchServiceEndpoint string
+
+@description('Used to connect and authenticate to Azure Search Service')
+param azureSearchServiceKey string
+
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: name
@@ -353,7 +362,19 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'EMBEDDINGS_QUEUE'
           value: EMBEDDINGS_QUEUE
-        }                
+        }
+        {
+          name: 'AZURE_SEARCH_SERVICE_KEY'
+          value: azureSearchServiceKey 
+        }  
+        {
+          name: 'AZURE_SEARCH_SERVICE_ENDPOINT'
+          value: azureSearchServiceEndpoint
+        }  
+        {
+          name: 'AZURE_SEARCH_INDEX'
+          value: azureSearchIndex
+        }                  
 
       ]
     }

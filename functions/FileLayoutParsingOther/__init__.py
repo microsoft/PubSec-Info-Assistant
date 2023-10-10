@@ -14,6 +14,8 @@ from shared_code.utilities import Utilities
 import mammoth
 import requests
 
+def string_to_bool(s):
+    return s.lower() == 'true'
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
@@ -30,7 +32,7 @@ pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
-
+enableDevCode = string_to_bool(os.environ["ENABLE_DEV_CODE"])
 
 utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 function_name = "FileLayoutParsingOther"
@@ -73,13 +75,17 @@ def main(msg: func.QueueMessage) -> None:
         chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
         statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete. {chunk_count} chunks created', StatusClassification.DEBUG)       
         
-        # submit message to the enrichment queue to continue processing                
-        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
-        message_json["enrichment_queued_count"] = 1
-        message_string = json.dumps(message_json)
-        queue_client.send_message(message_string)
-        statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)      
-             
+        if enableDevCode:
+            # Dev code
+            # submit message to the enrichment queue to continue processing                
+            queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+            message_json["enrichment_queued_count"] = 1
+            message_string = json.dumps(message_json)
+            queue_client.send_message(message_string)
+            statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)      
+        else:
+            statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete.', StatusClassification.INFO, State.COMPLETE)
+            
     except Exception as e:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 

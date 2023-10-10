@@ -157,7 +157,7 @@ def main(msg: func.QueueMessage) -> None:
             blob_path,
             f"{FUNCTION_NAME} - Text enrichment is complete",
             StatusClassification.DEBUG,
-            State.QUEUED,
+            State.COMPLETE,
         )
    
     except Exception as error:

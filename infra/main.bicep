@@ -49,9 +49,9 @@ param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
-param chatGptModelName string = 'gpt-35-turbo-16k'
+param chatGptModelName string = 'gpt-4'
 param chatGptModelVersion string = '0613'
-param chatGptDeploymentCapacity int = 720
+param chatGptDeploymentCapacity int = 200
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750' 
@@ -165,7 +165,7 @@ module backend 'core/host/appservice.bicep' = {
   }
 }
 
-module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
+module cognitiveServices 'core/ai/cognitive_services.bicep' = if (!useExistingAOAIService) {
   name: 'openai'
   scope: rg
   params: {
@@ -192,7 +192,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
   }
 }
 
-module formrecognizer 'core/ai/formrecognizer.bicep' = {
+module formrecognizer 'core/ai/document_intelligence.bicep' = {
   scope: rg
   name: 'formrecognizer'
   params: {
@@ -216,7 +216,7 @@ module enrichment 'core/ai/enrichment.bicep' = {
   }
 }
 
-module searchServices 'core/search/search-services.bicep' = {
+module searchServices 'core/search/search_services.bicep' = {
   scope: rg
   name: 'search-services'
   params: {
@@ -239,7 +239,7 @@ module searchServices 'core/search/search-services.bicep' = {
   }
 }
 
-module storage 'core/storage/storage-account.bicep' = {
+module storage 'core/storage/storage_account.bicep' = {
   name: 'storage'
   scope: rg
   params: {
@@ -296,7 +296,7 @@ module storage 'core/storage/storage-account.bicep' = {
   }
 }
 
-module storageMedia 'core/storage/storage-account.bicep' = {
+module storageMedia 'core/storage/storage_account.bicep' = {
   name: 'storage-media'
   scope: rg
   params: {
@@ -314,7 +314,7 @@ module storageMedia 'core/storage/storage-account.bicep' = {
   }
 }
 
-module cosmosdb 'core/db/cosmosdb.bicep' = {
+module cosmosdb 'core/db/cosmos_db.bicep' = {
   name: 'cosmosdb'
   scope: rg
   params: {

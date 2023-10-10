@@ -198,10 +198,11 @@ def main(msg: func.QueueMessage) -> None:
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
                         result.caption.content, result.caption.confidence
                     )
-                    index_content += "{}\n ".format(result.caption.content)
+                    index_content += "Caption: {}\n ".format(result.caption.content)
 
                 if result.dense_captions is not None:
                     text_image_summary += "Dense Captions:\n"
+                    index_content += "DeepCaptions: "
                     for caption in result.dense_captions:
                         text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
                             caption.content, caption.confidence
@@ -210,6 +211,7 @@ def main(msg: func.QueueMessage) -> None:
 
             if result.objects is not None:
                 text_image_summary += "Objects:\n"
+                index_content += "Descriptions: "
                 for object_detection in result.objects:
                     text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
                         object_detection.name, object_detection.confidence
@@ -255,12 +257,12 @@ def main(msg: func.QueueMessage) -> None:
                 )
                 text_image_summary += f"Translated OCR Text - Target language: {targetTranslationLanguage}\n"
                 text_image_summary += output_text
-                index_content += "{}\n ".format(output_text)
+                index_content += "OCR Text: {}\n ".format(output_text)
 
             else:
                 # No translation required
                 output_text = complete_ocr_text
-                index_content += "{}\n ".format(complete_ocr_text)
+                index_content += "OCR Text: {}\n ".format(complete_ocr_text)
 
         else:
             statusLog.upsert_document(

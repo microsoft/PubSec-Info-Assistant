@@ -153,6 +153,6 @@ jq -r  '
             "PDF_SUBMIT_QUEUE": "pdf-submit-queue",
             "EMBEDDINGS_QUEUE": "embeddings-queue",
             "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
-		    "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue"
+            "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue"
             })}
     '

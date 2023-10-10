@@ -493,6 +493,10 @@ module functions 'core/function/function.bicep' = {
     enrichmentBackoff: enrichmentBackoff
     enableDevCode: enableDevCode
     EMBEDDINGS_QUEUE: embeddingsQueue
+    azureSearchIndex: searchIndexName
+    azureSearchServiceEndpoint: searchServices.outputs.endpoint
+    azureSearchServiceKey: searchServices.outputs.searchServiceKey
+
   }
   dependsOn: [
     appServicePlan

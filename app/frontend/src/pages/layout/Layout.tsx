@@ -13,10 +13,10 @@ const Layout = () => {
             <header className={styles.header} role={"banner"}>
                 <WarningBanner />
                 <div className={styles.headerContainer}>
-                    <Link to="/" className={styles.headerTitleContainer}>
+                    <div className={styles.headerTitleContainer}>
                         <img src={openai} alt="Azure OpenAI" className={styles.headerLogo} />
-                        <h3 className={styles.headerTitle}> Information Assistant powered by Azure OpenAI</h3>
-                    </Link>
+                        <h3 className={styles.headerTitle}> Information Assistant, built with Azure OpenAI</h3>
+                    </div>
                     <nav>
                         <ul className={styles.headerNavList}>
                             <li>

@@ -27,19 +27,20 @@ OUTPUT_CONTAINER_NAME = "content"
 FILE_PATH = "./test_data"  # Folder containing the files to upload
 UPLOAD_FOLDER_NAME = "functional-test"
 MAX_DURATION = 1200  # 20 minutes
-search_queries = [
-    "Each brushstroke and note played adds to the vibrant tapestry of human culture,",                               # From test_example.pdf
-    "Sed non urna nec elit auctor elementum. Sed auctor eget urna at faucibus.",                                     # From test_example.docx
-    "Regeringen investerer i infrastrukturudvikling for at opretholde moderne og effektive transportsystemer",       # From test_example.html
-    "This word, nothiing. blank not space.",                                                                         # From test_example.jpg
-    "kitten animal kitty funny OCR Text: FAILED DOO WIITH DAILY DRIGDETY",                                           # From test_example.png
-    "<td>Hill, Freeman and Johnson</td> <td>xcarter@example.com</td> <td>61</td> </tr> <tr> <td>Johnson Group</td>", # From test_example.csv
-    "Viel Spaß beim Entdecken und Üben dieser Wörter!",                                                              # From test_example.md
-    "Randomly Generated For PPTX This data test Title for PPTX Text paragraph in power point",                       # From test_example.pptx
-    "The deep green that isn't the color of clouds, but came with these.",                                           # From test_example.txt
-    "<td>Turnerhaven</td> <td>9580 Boyd Point Suite 139</td> <td>67199</td>",                                        # From test_example.xlsx
-    "John Doe john.doe@example.com 123-456-7890 42 Alice Smith"                                                      # From test_example.xml
-]
+
+search_queries = {
+    "pdf": "Each brushstroke and note played adds to the vibrant tapestry of human culture,",  
+    "docx": "Sed non urna nec elit auctor elementum. Sed auctor eget urna at faucibus.",  
+    "html": "Regeringen investerer i infrastrukturudvikling for at opretholde moderne og effektive transportsystemer", 
+    "jpg": "This word, nothing. blank not space.",  
+    "png": "kitten animal kitty funny OCR Text: FAILED DOO WIITH DAILY DRIGDETY",  
+    "csv": "<td>Hill, Freeman and Johnson</td> <td>xcarter@example.com</td> <td>61</td> </tr> <tr> <td>Johnson Group</td>", 
+    "md": "Viel Spaß beim Entdecken und Üben dieser Wörter!",  
+    "pptx": "Randomly Generated For PPTX This data test Title for PPTX Text paragraph in power point",  
+    "txt": "The deep green that isn't the color of clouds, but came with these.",  
+    "xlsx": "<td>Turnerhaven</td> <td>9580 Boyd Point Suite 139</td> <td>67199</td>", 
+    "xml": "John Doe john.doe@example.com 123-456-7890 42 Alice Smith"  
+}
 
 def parse_arguments():
     """
@@ -143,23 +144,21 @@ def check_index(search_service_endpoint, search_index, search_key ):
             credential=azure_search_key_credential,
         )
 
-        for query in search_queries:
+        for extension, query in search_queries.items():
             search_results = search_client.search(query)
 
             if search_results:
-                
                 # Iterate through search results
                 for result in search_results:
                     file_name = result.get("file_name")
-                    
-                    if file_name and 'test_example' in file_name.lower():
 
-                        console.print(f"Specified content for query '{query}' exists in the index.")
+                    if file_name and f'test_example.{extension}' in file_name.lower():
+                        console.print(f"Specified content for query '{query}' with extension '{extension}' exists in the index.")
                         console.print(f"Result: {file_name}")
                         break
             else:
-                console.print("Content for query does not exist in the index.")
-                raise TestFailedError("Content for query does not exist in the index.")
+                console.print(f"Content for query with extension '{extension}' does not exist in the index.")
+                raise TestFailedError(f"Content for query with extension '{extension}' does not exist in the index.")
 
     except (Exception, TestFailedError) as ex:
         console.log(f'[red]❌ {ex}[/red]')

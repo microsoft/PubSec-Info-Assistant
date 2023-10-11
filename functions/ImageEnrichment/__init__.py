@@ -272,10 +272,9 @@ def main(msg: func.QueueMessage) -> None:
                 State.PROCESSING,
             )
 
-
         # Upload the output as a chunk to match document model
         utilities.write_chunk(
-            myblob_name=file_name,
+            myblob_name=blob_path,
             myblob_uri=blob_path,
             file_number=0,
             chunk_size=utilities.token_count(text_image_summary),
@@ -325,18 +324,15 @@ def index_section(index_content, file_name, chunk_id, blob_path):
     index_chunk['id'] = chunk_id
     azure_datetime = datetime.now().astimezone().isoformat()
     index_chunk['processed_datetime'] = azure_datetime
-    index_chunk['file_name'] = file_name
+    index_chunk['file_name'] = blob_path
     index_chunk['file_uri'] = blob_path
     index_chunk['title'] = file_name
     index_chunk['content'] = index_content
     index_chunk['file_class'] = MediaType.IMAGE
     batch.append(index_chunk)
 
-
     search_client = SearchClient(endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
                                     index_name=AZURE_SEARCH_INDEX,
                                     credential=SEARCH_CREDS)
 
     search_client.upload_documents(documents=batch)
-
- 

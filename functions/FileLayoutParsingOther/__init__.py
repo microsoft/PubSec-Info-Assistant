@@ -89,13 +89,13 @@ def PartitionFile(file_extension: str, file_url: str):
                        
         elif file_extension == '.ppt':
             from unstructured.partition.ppt import partition_ppt
-            elements = partition_ppt(file=bytes_io)   
+            elements = partition_ppt(file=bytes_io)
             
         elif file_extension == '.pptx':    
             from unstructured.partition.pptx import partition_pptx
-            elements = partition_pptx(file=bytes_io) 
+            elements = partition_pptx(file=bytes_io)
             
-        elif file_extension == '.text':
+        elif file_extension == '.txt':
             from unstructured.partition.text import partition_text
             elements = partition_text(file=bytes_io)
             

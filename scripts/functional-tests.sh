@@ -30,4 +30,5 @@ python run_tests.py \
     --search_service_endpoint "${AZURE_SEARCH_SERVICE_ENDPOINT}" \
     --search_index "${AZURE_SEARCH_INDEX}" \
     --search_key "${AZURE_SEARCH_SERVICE_KEY}" \
-    --wait_time_seconds 60 # 1 minutes
+    --wait_time_seconds 60 \
+    --file_extensions "docx" "pdf" "html" "jpg" "png" "csv" "md" "pptx" "txt" "xlsx" "xml"

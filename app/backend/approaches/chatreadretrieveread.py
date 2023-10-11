@@ -306,8 +306,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
             # Populate citation lookup dict
             citation_lookup[f"File{idx}"] = {
-                "citation": doc['file_uri'],
-                # "source_path": doc['file_name'],
+                "citation": doc['file_uri'],                              
                 "source_path": self.get_source_file_name(doc['file_uri'], doc['chunk_file']),
                 "page_number": page_numbers[0] if page_numbers else None
             }

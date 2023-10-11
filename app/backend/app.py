@@ -231,10 +231,11 @@ def get_warning_banner():
 
 @app.route("/getcitation", methods=["POST"])
 def get_citation():
-    citation = urllib.parse.unquote(request.json["source_path"])
     
+    print(request.json)
+    citation = urllib.parse.unquote(request.json["citation"])
     
-    
+       
     
     try:
         blob = blob_container.get_blob_client(citation).download_blob()

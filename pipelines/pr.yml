@@ -28,4 +28,4 @@ stages:
           deploy:
             steps:
             - template: templates/deploy-template.yml
-            - template: templates/destroy-template.yml
+            # - template: templates/destroy-template.yml

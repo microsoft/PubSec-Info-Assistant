@@ -144,10 +144,10 @@ def check_index(search_service_endpoint, search_index, search_key ):
             index_name=search_index,
             credential=azure_search_key_credential,
         )
-
+        console.print("Begining index search")
         for extension, query in search_queries.items():
             search_results = search_client.search(query)
-
+            console.print(f"Search for query '{query}'")
             if search_results:
                 # Iterate through search results
                 for result in search_results:
@@ -228,8 +228,8 @@ if __name__ == '__main__':
         main(storage_blob_service_client, args.wait_time_seconds, test_file_names)
         check_index(args.search_service_endpoint, args.search_index, args.search_key)
     finally:
-        cleanup_after_test(storage_blob_service_client,
-                           args.search_service_endpoint,
-                           args.search_index,
-                           args.search_key,
-                           test_file_names)
+        # cleanup_after_test(storage_blob_service_client,
+        #                    args.search_service_endpoint,
+        #                    args.search_index,
+        #                    args.search_key,
+        #                    test_file_names)

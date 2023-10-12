@@ -134,9 +134,9 @@ The Information Assistant Accelerator requires access to one of the following Az
 Model Name | Supported Versions
 ---|---
 gpt-35-turbo | 0301, 0613
-**gpt-35-turbo-16k** | N/A
-**gpt-4** | N/A
-gpt-4-32k | N/A
+**gpt-35-turbo-16k** | current version
+**gpt-4** | current version
+gpt-4-32k | current version
 
 **Important:** It is recommended to use gpt-4 models to achieve the best results from the IA Accelerator. Access to gpt-4 requires approval which can be requested [here](https://aka.ms/oai/get-gpt4). If gpt-4 access is not available gpt-35-turbo-16k (0613) is recommended.
 

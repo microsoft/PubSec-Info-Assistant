@@ -99,9 +99,11 @@ class ChatReadRetrieveReadApproach(Approach):
         oai_service_name: str,
         oai_service_key: str,
         chatgpt_deployment: str,
-        # embedding_model : str,
-        source_page_field: str,
+        source_file_field: str,
         content_field: str,
+        page_number_field: str,
+        chunk_file_field: str,
+        content_storage_container: str,
         blob_client: BlobServiceClient,
         query_term_language: str,
         model_name: str,
@@ -112,8 +114,11 @@ class ChatReadRetrieveReadApproach(Approach):
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
-        self.source_page_field = source_page_field
+        self.source_file_field = source_file_field
         self.content_field = content_field
+        self.page_number_field = page_number_field
+        self.chunk_file_field = chunk_file_field
+        self.content_storage_container = content_storage_container
         self.blob_client = blob_client
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
@@ -156,7 +161,6 @@ class ChatReadRetrieveReadApproach(Approach):
             )
 
         chat_completion = openai.ChatCompletion.create(
-
             deployment_id=self.chatgpt_deployment,
             model=self.model_name,
             messages=messages,
@@ -165,38 +169,25 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
-
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
-            
+
         # Generate embedding using REST API
-        
-        
-        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'      
-           
-        
-        vector_query= f'"{generated_query}"'
-        
-               
-        data = [vector_query]
-        
-        
+        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
+        data = [f'"{generated_query}"']
         headers = {
                 'Accept': 'application/json',  
                 'Content-Type': 'application/json',
             }
-        
-        response = requests.post(url, json=data,headers=headers)   
-        
 
+        response = requests.post(url, json=data,headers=headers,timeout=300)
         if response.status_code == 200:
             response_data = response.json()
             embedded_query_vector =response_data.get('data')          
-            
-                    
         else:
             print('Error generating embedding:', response.status_code)
+            raise Exception('Error generating embedding:', response.status_code)
         
          #vector set up for pure vector search & hybrid search
         vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
@@ -229,92 +220,30 @@ class ChatReadRetrieveReadApproach(Approach):
         #     r = self.search_client.search(
         #         generated_query, filter=category_filter, top=top,vectors=[vector]
         #     )
-        
-        #old citation logic below
 
-        # citation_lookup = {}  # dict of "FileX" moniker to the actual file name
-        # results = []  # list of results to be used in the prompt
-        # data_points = []  # list of data points to be used in the response
-
-        # for idx, doc in enumerate(
-        #     raw_search_results
-        # ):  # for each document in the search results
-        #     if use_semantic_captions:
-        #         # if using semantic captions, use the captions instead of the content
-        #         # include the "FileX" moniker in the prompt, and the actual file name in the response
-        #         results.append(
-        #             f"File{idx} "
-        #             + "| "
-        #             + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
-        #         )
-        #         data_points.append(
-        #             "/".join(doc[self.source_page_field].split("/")[4:])
-        #             + "| "
-        #             + nonewlines(" . ".join([c.text for c in doc["@search.captions"]]))
-        #         )
-        #     else:
-        #         # if not using semantic captions, use the content instead of the captions
-        #         # include the "FileX" moniker in the prompt, and the actual file name in the response
-        #         results.append(
-        #             f"File{idx} " + "| " + nonewlines(doc[self.content_field])
-        #         )
-        #         data_points.append(
-        #             "/".join(
-        #                 urllib.parse.unquote(doc[self.source_page_field]).split("/")[4:]
-        #             )
-        #             + "| "
-        #             + nonewlines(doc[self.content_field])
-        #         )
-        #         # uncomment to debug size of each search result content_field
-        #         print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
-        #     # add the "FileX" moniker and full file name to the citation lookup
-
-        #     citation_lookup[f"File{idx}"] = {
-        #         "citation": urllib.parse.unquote(doc[self.source_page_field]),
-        #         "source_path": self.get_source_file_name(doc[self.content_field]),
-        #         "page_number": self.get_first_page_num_for_chunk(
-        #             doc[self.content_field]
-        #         ),
-        #     }
-        
-        #new citation logic
-        
-        
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
-        
-        for idx, doc in enumerate(r):
 
-            if use_semantic_captions:
+        for idx, doc in enumerate(r):  # for each document in the search results
+            # include the "FileX" moniker in the prompt, and the actual file name in the response
+            results.append(
+                f"File{idx} " + "| " + nonewlines(doc[self.content_field])
+            )
+            data_points.append(
+               "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[4:]
+                ) + "| " + nonewlines(doc[self.content_field])
+                )
+            # uncomment to debug size of each search result content_field
+            # print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + /
+            #  "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
 
-                # Use content field directly since no merged field
-                results.append(f"File{idx} | {doc['content']}") 
-
-                data_points.append(f"{doc['file_name']} | {doc['content']}")
-
-            else:
-
-                results.append(f"File{idx} | {doc['content']}")
-
-                data_points.append(f"{doc['file_name']} | {doc['content']}")
-
-            # Get page numbers from new pages field
-            page_numbers = doc['pages']
-            
-            
-
-            # Populate citation lookup dict
+            # add the "FileX" moniker and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = {
-                "citation": doc['file_uri'],                              
-                "source_path": self.get_source_file_name(doc['file_uri'], doc['chunk_file']),
-                "page_number": page_numbers[0] if page_numbers else None
-            }
-            
-            print("Citation Lookup: ", citation_lookup)   
-         
-                
-           
+                "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
+                "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
+                "page_number": str(doc[self.page_number_field][0]) or "0",
+             }
 
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
@@ -322,7 +251,7 @@ class ChatReadRetrieveReadApproach(Approach):
             content = "\n NONE"
         else:
             content = "\n " + results_text
-        
+
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             self.follow_up_questions_prompt_content
@@ -385,7 +314,6 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-            
 
             chat_completion = openai.ChatCompletion.create(
             deployment_id=self.chatgpt_deployment,
@@ -394,7 +322,7 @@ class ChatReadRetrieveReadApproach(Approach):
             temperature=float(overrides.get("response_temp")) or 0.6,
             n=1
         )
-            
+
         elif self.model_name.startswith("gpt-4"):
             messages = self.get_messages_from_history(
                 "Sources:\n" + content + "\n\n" + system_message,
@@ -424,12 +352,9 @@ class ChatReadRetrieveReadApproach(Approach):
             temperature=float(overrides.get("response_temp")) or 0.6,
             max_tokens=1024,
             n=1
-
         )
 
         # STEP 4: Format the response
-
-
         msg_to_display = '\n\n'.join([str(message) for message in messages])
 
         return {
@@ -474,6 +399,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
     #Get the prompt text for the response length
     def get_response_length_prompt_text(self, response_length: int):
+        """ Function to return the response length prompt text"""
         levels = {
             1024: "succinct",
             2048: "standard",
@@ -481,39 +407,16 @@ class ChatReadRetrieveReadApproach(Approach):
         }
         level = levels[response_length]
         return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
-    
-    #these two last function we don't need with the new citation logic
 
-    def get_source_file_name(self, file_uri: str, chunk_file: str) -> str:
-        """
-        Parse the search document content for "file_name" attribute and generate a SAS token for it.
+    def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
+        """ Function to return the number of tokens in a text string"""
+        encoding = tiktoken.get_encoding(encoding_name)
+        num_tokens = len(encoding.encode(string))
+        return num_tokens
 
-        Args:
-            content: The search document content (JSON string)
-
-        Returns:
-            The source file name with SAS token.
-        """
+    def get_source_file_with_sas(self, source_file: str) -> str:
+        """ Function to return the source file with a SAS token"""
         try:
-            # # Parse file URI
-            # uri_parts = urllib.parse.urlsplit(file_uri)
-            # # server_domain = uri_parts.netloc
-            # path_parts = uri_parts.path.split('/')
-            # file_name = path_parts[-1]
-            
-            # # Extract base file name from chunk_file
-            # chunk_file_parts = chunk_file.split('/')
-            # base_file_name = urllib.parse.unquote(chunk_file_parts[0])
-            
-            # print("Base File Name: ", base_file_name)
-            # print("File Name: ", file_name)
-            # print("Chunk File: ", chunk_file)
-            
-            # Construct file storage path
-            file_storage_path = f"content/{chunk_file}"
-           
-            
-            # source_path = urllib.parse.unquote(json.loads(content)["file_name"])
             sas_token = generate_account_sas(
                 self.blob_client.account_name,
                 self.blob_client.credential.account_key,
@@ -530,32 +433,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 ),
                 expiry=datetime.utcnow() + timedelta(hours=1),
             )
-            return self.blob_client.url + file_storage_path + "?" + sas_token
+            return source_file + "?" + sas_token
         except Exception as error:
             logging.exception("Unable to parse source file name: " + str(error) + "")
             return ""
-
-    # def get_first_page_num_for_chunk(self, content: str) -> str:
-    #     """
-    #     Parse the search document content for the first page from the "pages" attribute
-
-    #     Args:
-    #         content: The search document content (JSON string)
-
-    #     Returns:
-    #         The first page number.
-    #     """
-    #     try:
-    #         page_num = str(json.loads(content)["pages"][0])
-    #         if page_num is None:
-    #             return "0"
-    #         return page_num
-    #     except Exception as error:
-    #         logging.exception("Unable to parse first page num: " + str(error) + "")
-    #         return "0"
-
-    def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
-        """ Function to return the number of tokens in a text string"""
-        encoding = tiktoken.get_encoding(encoding_name)
-        num_tokens = len(encoding.encode(string))
-        return num_tokens

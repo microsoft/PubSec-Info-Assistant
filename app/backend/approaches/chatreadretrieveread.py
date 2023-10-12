@@ -235,23 +235,23 @@ class ChatReadRetrieveReadApproach(Approach):
                 ) + "| " + nonewlines(doc[self.content_field])
                 )
             # uncomment to debug size of each search result content_field
-            #print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
-            
+            # print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + /
+            #  "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
+
             # add the "FileX" moniker and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = {
                 "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
                 "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
-        
-        
+
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
         if results_text == "":
             content = "\n NONE"
         else:
             content = "\n " + results_text
-        
+
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             self.follow_up_questions_prompt_content
@@ -314,7 +314,6 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-            
 
             chat_completion = openai.ChatCompletion.create(
             deployment_id=self.chatgpt_deployment,
@@ -323,7 +322,7 @@ class ChatReadRetrieveReadApproach(Approach):
             temperature=float(overrides.get("response_temp")) or 0.6,
             n=1
         )
-            
+
         elif self.model_name.startswith("gpt-4"):
             messages = self.get_messages_from_history(
                 "Sources:\n" + content + "\n\n" + system_message,
@@ -353,12 +352,9 @@ class ChatReadRetrieveReadApproach(Approach):
             temperature=float(overrides.get("response_temp")) or 0.6,
             max_tokens=1024,
             n=1
-
         )
 
         # STEP 4: Format the response
-
-
         msg_to_display = '\n\n'.join([str(message) for message in messages])
 
         return {
@@ -403,6 +399,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
     #Get the prompt text for the response length
     def get_response_length_prompt_text(self, response_length: int):
+        """ Function to return the response length prompt text"""
         levels = {
             1024: "succinct",
             2048: "standard",
@@ -410,95 +407,15 @@ class ChatReadRetrieveReadApproach(Approach):
         }
         level = levels[response_length]
         return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
-    
-    #these two last function we don't need with the new citation logic
-
-    def get_source_file_name(self, file_uri: str, chunk_file: str) -> str:
-        """
-        Parse the search document content for "file_name" attribute and generate a SAS token for it.
-
-        Args:
-            content: The search document content (JSON string)
-
-        Returns:
-            The source file name with SAS token.
-        """
-        try:
-            # # Parse file URI
-            # uri_parts = urllib.parse.urlsplit(file_uri)
-            # # server_domain = uri_parts.netloc
-            # path_parts = uri_parts.path.split('/')
-            # file_name = path_parts[-1]
-            
-            # # Extract base file name from chunk_file
-            # chunk_file_parts = chunk_file.split('/')
-            # base_file_name = urllib.parse.unquote(chunk_file_parts[0])
-            
-            # print("Base File Name: ", base_file_name)
-            # print("File Name: ", file_name)
-            # print("Chunk File: ", chunk_file)
-            
-            # Construct file storage path
-            file_storage_path = f"content/{chunk_file}"
-           
-            
-            # source_path = urllib.parse.unquote(json.loads(content)["file_name"])
-            sas_token = generate_account_sas(
-                self.blob_client.account_name,
-                self.blob_client.credential.account_key,
-                resource_types=ResourceTypes(object=True, service=True, container=True),
-                permission=AccountSasPermissions(
-                    read=True,
-                    write=True,
-                    list=True,
-                    delete=False,
-                    add=True,
-                    create=True,
-                    update=True,
-                    process=False,
-                ),
-                expiry=datetime.utcnow() + timedelta(hours=1),
-            )
-            return self.blob_client.url + file_storage_path + "?" + sas_token
-        except Exception as error:
-            logging.exception("Unable to parse source file name: " + str(error) + "")
-            return ""
-
-    # def get_first_page_num_for_chunk(self, content: str) -> str:
-    #     """
-    #     Parse the search document content for the first page from the "pages" attribute
-
-    #     Args:
-    #         content: The search document content (JSON string)
-
-    #     Returns:
-    #         The first page number.
-    #     """
-    #     try:
-    #         page_num = str(json.loads(content)["pages"][0])
-    #         if page_num is None:
-    #             return "0"
-    #         return page_num
-    #     except Exception as error:
-    #         logging.exception("Unable to parse first page num: " + str(error) + "")
-    #         return "0"
 
     def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
         """ Function to return the number of tokens in a text string"""
         encoding = tiktoken.get_encoding(encoding_name)
         num_tokens = len(encoding.encode(string))
         return num_tokens
-    
+
     def get_source_file_with_sas(self, source_file: str) -> str:
-        """
-        Parse the search document content for "file_name" attribute and generate a SAS token for it.
-
-        Args:
-            source_file: The search document source file attribute
-
-        Returns:
-            The source file name with SAS token.
-        """
+        """ Function to return the source file with a SAS token"""
         try:
             sas_token = generate_account_sas(
                 self.blob_client.account_name,

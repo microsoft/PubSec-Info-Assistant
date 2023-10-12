@@ -8,7 +8,11 @@ import requests
 from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.utilities import Utilities
+from shared_code.utilities import Utilities, MediaType
+from azure.search.documents import SearchClient
+from azure.core.credentials import AzureKeyCredential
+from datetime import datetime
+
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ[
@@ -38,6 +42,11 @@ cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
 cognitive_services_key = os.environ["ENRICHMENT_KEY"]
 cognitive_services_endpoint = os.environ["ENRICHMENT_ENDPOINT"]
 cognitive_services_account_location = os.environ["ENRICHMENT_LOCATION"]
+
+# Search Service
+AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
+AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
+SEARCH_CREDS = AzureKeyCredential(os.environ.get("AZURE_SEARCH_SERVICE_KEY"))
 
 # Translation params for OCR'd text
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
@@ -179,6 +188,7 @@ def main(msg: func.QueueMessage) -> None:
         result = image_analyzer.analyze()
 
         text_image_summary = ""
+        index_content = ""
         complete_ocr_text = None
 
         if result.reason == visionsdk.ImageAnalysisResultReason.ANALYZED:
@@ -188,20 +198,25 @@ def main(msg: func.QueueMessage) -> None:
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
                         result.caption.content, result.caption.confidence
                     )
+                    index_content += "Caption: {}\n ".format(result.caption.content)
 
                 if result.dense_captions is not None:
                     text_image_summary += "Dense Captions:\n"
+                    index_content += "DeepCaptions: "
                     for caption in result.dense_captions:
                         text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
                             caption.content, caption.confidence
                         )
+                        index_content += "{}\n ".format(caption.content)
 
             if result.objects is not None:
                 text_image_summary += "Objects:\n"
+                index_content += "Descriptions: "
                 for object_detection in result.objects:
                     text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
                         object_detection.name, object_detection.confidence
                     )
+                    index_content += "{}\n ".format(object_detection.name)
 
             if result.tags is not None:
                 text_image_summary += "Tags:\n"
@@ -209,6 +224,7 @@ def main(msg: func.QueueMessage) -> None:
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
                         tag.name, tag.confidence
                     )
+                    index_content += "{}\n ".format(tag.name)
 
             if result.text is not None:
                 text_image_summary += "Raw OCR Text:\n"
@@ -241,10 +257,12 @@ def main(msg: func.QueueMessage) -> None:
                 )
                 text_image_summary += f"Translated OCR Text - Target language: {targetTranslationLanguage}\n"
                 text_image_summary += output_text
+                index_content += "OCR Text: {}\n ".format(output_text)
 
             else:
                 # No translation required
                 output_text = complete_ocr_text
+                index_content += "OCR Text: {}\n ".format(complete_ocr_text)
 
         else:
             statusLog.upsert_document(
@@ -254,10 +272,9 @@ def main(msg: func.QueueMessage) -> None:
                 State.PROCESSING,
             )
 
-
         # Upload the output as a chunk to match document model
         utilities.write_chunk(
-            myblob_name=file_name,
+            myblob_name=blob_path,
             myblob_uri=blob_path,
             file_number=0,
             chunk_size=utilities.token_count(text_image_summary),
@@ -265,7 +282,8 @@ def main(msg: func.QueueMessage) -> None:
             page_list=[0],
             section_name="",
             title_name=file_name,
-            subtitle_name=""
+            subtitle_name="",
+            file_class=MediaType.IMAGE
         )
 
         statusLog.upsert_document(
@@ -284,3 +302,37 @@ def main(msg: func.QueueMessage) -> None:
         )
 
     statusLog.save_document()
+
+    try:
+        index_section(index_content, file_name, statusLog.encode_document_id(file_name), blob_path)
+    except Exception as err:
+        statusLog.upsert_document(
+            blob_path,
+            f"{FUNCTION_NAME} - An error occurred while indexing - {str(err)}",
+            StatusClassification.ERROR,
+            State.ERROR,
+        )
+    statusLog.save_document()
+
+
+def index_section(index_content, file_name, chunk_id, blob_path):
+    """ Pushes a batch of content to the search index
+    """
+
+    index_chunk = {}
+    batch = []
+    index_chunk['id'] = chunk_id
+    azure_datetime = datetime.now().astimezone().isoformat()
+    index_chunk['processed_datetime'] = azure_datetime
+    index_chunk['file_name'] = blob_path
+    index_chunk['file_uri'] = blob_path
+    index_chunk['title'] = file_name
+    index_chunk['content'] = index_content
+    index_chunk['file_class'] = MediaType.IMAGE
+    batch.append(index_chunk)
+
+    search_client = SearchClient(endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
+                                    index_name=AZURE_SEARCH_INDEX,
+                                    credential=SEARCH_CREDS)
+
+    search_client.upload_documents(documents=batch)

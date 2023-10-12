@@ -64,6 +64,11 @@ steps:
 
   - template: make-command.yml
     parameters:
+      displayName: 'Deploy Enrichments'
+      makeCommand: 'deploy-enrichments'
+
+  - template: make-command.yml
+    parameters:
       displayName: 'Deploy search indexes'
       makeCommand: 'deploy-search-indexes'
       

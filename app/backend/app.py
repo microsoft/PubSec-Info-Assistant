@@ -21,7 +21,7 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from flask import Flask, jsonify, request
-from shared_code.status_log import State, StatusLog
+from shared_code.status_log import State, StatusClassification, StatusLog
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = (
@@ -50,9 +50,12 @@ str_to_bool = {'true': True, 'false': False}
 IS_GOV_CLOUD_DEPLOYMENT = str_to_bool.get(os.environ.get("IS_GOV_CLOUD_DEPLOYMENT").lower()) or False
 CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT") or ""
 
+
+
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "content"
-KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
-KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "file_uri"
+KB_FIELDS_PAGENUMBER = os.environ.get("KB_FIELDS_PAGENUMBER") or "pages"
+KB_FIELDS_SOURCEFILE = os.environ.get("KB_FIELDS_SOURCEFILE") or "file_uri"
+KB_FIELDS_CHUNKFILE = os.environ.get("KB_FIELDS_CHUNKFILE") or "chunk_file"
 
 COSMOSDB_URL = os.environ.get("COSMOSDB_URL")
 COSMODB_KEY = os.environ.get("COSMOSDB_KEY")
@@ -60,6 +63,11 @@ COSMOSDB_DATABASE_NAME = os.environ.get("COSMOSDB_DATABASE_NAME") or "statusdb"
 COSMOSDB_CONTAINER_NAME = os.environ.get("COSMOSDB_CONTAINER_NAME") or "statuscontainer"
 
 QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
+
+TARGET_EMBEDDING_MODEL = os.environ.get("TARGET_EMBEDDING_MODEL") or "BAAI/bge-small-en-v1.5"
+ENRICHMENT_APPSERVICE_NAME = os.environ.get("ENRICHMENT_APPSERVICE_NAME") or "enrichment"
+
+# embedding_service_suffix = "xyoek"
 
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
@@ -121,13 +129,18 @@ chat_approaches = {
         AZURE_OPENAI_SERVICE,
         AZURE_OPENAI_SERVICE_KEY,
         AZURE_OPENAI_CHATGPT_DEPLOYMENT,
-        KB_FIELDS_SOURCEPAGE,
+        KB_FIELDS_SOURCEFILE,
         KB_FIELDS_CONTENT,
+        KB_FIELDS_PAGENUMBER,
+        KB_FIELDS_CHUNKFILE,
+        AZURE_BLOB_STORAGE_CONTAINER,
         blob_client,
         QUERY_TERM_LANGUAGE,
         model_name,
         model_version,
-        IS_GOV_CLOUD_DEPLOYMENT
+        IS_GOV_CLOUD_DEPLOYMENT,
+        TARGET_EMBEDDING_MODEL,
+        ENRICHMENT_APPSERVICE_NAME
     )
 }
 
@@ -137,10 +150,12 @@ app = Flask(__name__)
 @app.route("/", defaults={"path": "index.html"})
 @app.route("/<path:path>")
 def static_file(path):
+    """Serve static files from the 'static' directory"""
     return app.send_static_file(path)
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    """Chat with the bot using a given approach"""
     approach = request.json["approach"]
     try:
         impl = chat_approaches.get(approach)
@@ -159,12 +174,13 @@ def chat():
             }
         )
 
-    except Exception as e:
+    except Exception as ex:
         logging.exception("Exception in /chat")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(ex)}), 500
 
 @app.route("/getblobclienturl")
 def get_blob_client_url():
+    """Get a URL for a file in Blob Storage with SAS token"""
     sas_token = generate_account_sas(
         AZURE_BLOB_STORAGE_ACCOUNT,
         AZURE_BLOB_STORAGE_KEY,
@@ -185,18 +201,41 @@ def get_blob_client_url():
 
 @app.route("/getalluploadstatus", methods=["POST"])
 def get_all_upload_status():
+    """Get the status of all file uploads in the last N hours"""
     timeframe = request.json["timeframe"]
     state = request.json["state"]
     try:
         results = statusLog.read_files_status_by_timeframe(timeframe, State[state])
-    except Exception as e:
+    except Exception as ex:
         logging.exception("Exception in /getalluploadstatus")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(ex)}), 500
     return jsonify(results)
+
+@app.route("/logstatus", methods=["POST"])
+def logstatus():
+    """Log the status of a file upload to CosmosDB"""
+    try:
+        path = request.json["path"]
+        status = request.json["status"]
+        status_classification = StatusClassification[request.json["status_classification"].upper()]
+        state = State[request.json["state"].upper()]
+
+        statusLog.upsert_document(document_path=path,
+                                  status=status,
+                                  status_classification=status_classification,
+                                  state=state,
+                                  fresh_start=True)
+        statusLog.save_document(document_path=path)
+        
+    except Exception as ex:
+        logging.exception("Exception in /logstatus")
+        return jsonify({"error": str(ex)}), 500
+    return jsonify({"status": 200})
 
 # Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.route("/getInfoData")
 def get_info_data():
+    """Get the info data for the app"""
     response = jsonify(
         {
             "AZURE_OPENAI_CHATGPT_DEPLOYMENT": f"{AZURE_OPENAI_CHATGPT_DEPLOYMENT}",
@@ -212,6 +251,7 @@ def get_info_data():
 # Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.route("/getWarningBanner")
 def get_warning_banner():
+    """Get the warning banner text"""
     response = jsonify(
         {
             "WARNING_BANNER_TEXT": f"{CHAT_WARNING_BANNER_TEXT}"
@@ -220,14 +260,15 @@ def get_warning_banner():
 
 @app.route("/getcitation", methods=["POST"])
 def get_citation():
+    """Get the citation for a given file"""
     citation = urllib.parse.unquote(request.json["citation"])
     try:
         blob = blob_container.get_blob_client(citation).download_blob()
         decoded_text = blob.readall().decode()
         results = jsonify(json.loads(decoded_text))
-    except Exception as e:
+    except Exception as ex:
         logging.exception("Exception in /getalluploadstatus")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(ex)}), 500
     return jsonify(results.json)
 
 if __name__ == "__main__":

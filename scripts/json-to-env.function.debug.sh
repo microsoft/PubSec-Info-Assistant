@@ -98,8 +98,23 @@ jq -r  '
         {
             "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
             "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
+        },
+        {
+            "path": "azurE_LOCATION",
+            "env_var": "ENRICHMENT_LOCATION"
+        },
+        {
+            "path": "azurE_SEARCH_INDEX",
+            "env_var": "AZURE_SEARCH_INDEX"
+        },
+        {
+            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
+        },
+        {
+            "path": "azurE_SEARCH_KEY",
+            "env_var": "AZURE_SEARCH_SERVICE_KEY"
         }
-
     ]
         as $env_vars_to_extract
     |
@@ -137,6 +152,7 @@ jq -r  '
             "PDF_POLLING_QUEUE": "pdf-polling-queue",
             "PDF_SUBMIT_QUEUE": "pdf-submit-queue",
             "EMBEDDINGS_QUEUE": "embeddings-queue",
-            "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue"
+            "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
+            "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue"
             })}
     '

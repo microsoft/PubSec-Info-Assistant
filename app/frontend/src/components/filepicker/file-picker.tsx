@@ -8,8 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
-import { getBlobClientUrl } from "../../api"
-
+import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
 
 const FilePicker = () => {
   const [files, setFiles] = useState<any>([]);
@@ -51,15 +50,24 @@ const FilePicker = () => {
 
       const containerClient = blobServiceClient.getContainerClient("upload");
       var counter = 1;
-      files.forEach((indexedFile: any) => {
+      files.forEach(async (indexedFile: any) => {
         // add each file into Azure Blob Storage
-        const file = indexedFile.file as File;
+        var file = indexedFile.file as File;
         const blobClient = containerClient.getBlockBlobClient(file.name);
         // set mimetype as determined from browser with file upload control
         const options = { blobHTTPHeaders: { blobContentType: file.type } };
 
         // upload file
         blobClient.uploadData(file, options);
+        //write status to log
+        var logEntry: StatusLogEntry = {
+          path: "upload/"+file.name,
+          status: "File uploaded from browser to Azure Blob Storage",
+          status_classification: StatusLogClassification.Info,
+          state: StatusLogState.Uploaded
+        }
+        await logStatus(logEntry);
+
         setProgress((counter/files.length) * 100);
         counter++;
       });

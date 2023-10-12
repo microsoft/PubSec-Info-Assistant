@@ -107,6 +107,7 @@
   "notificationHubsNamespacesNotificationHubs": "ntf-",
   "operationalInsightsWorkspaces": "log-",
   "openAIServices": "aoai-",
+  "openAIEmbeddingModel": "azure-openai_",
   "portalDashboards": "dash-",
   "powerBIDedicatedCapacities": "pbi-",
   "purviewAccounts": "pview-",

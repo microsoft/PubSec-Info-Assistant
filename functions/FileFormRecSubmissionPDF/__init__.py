@@ -177,4 +177,4 @@ def main(msg: func.QueueMessage) -> None:
             State.ERROR,
         )
         
-    statusLog.save_document()
+    statusLog.save_document(blob_path)

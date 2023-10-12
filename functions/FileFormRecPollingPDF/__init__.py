@@ -144,7 +144,7 @@ def main(msg: func.QueueMessage) -> None:
         # a general error 
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - code: {response.status_code} - {str(e)}", StatusClassification.ERROR, State.ERROR)
         
-    statusLog.save_document()
+    statusLog.save_document(blob_name)
 
 
 @retry(stop=stop_after_attempt(max_read_attempts), wait=wait_fixed(5))

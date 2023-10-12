@@ -18,6 +18,7 @@ class State(Enum):
     COMPLETE = "Complete"
     ERROR = "Error"
     THROTTLED = "Throttled"
+    UPLOADED = "Uploaded"
     ALL = "All"
 
 class StatusClassification(Enum):
@@ -42,7 +43,7 @@ class StatusLog:
         self._database_name = database_name
         self._container_name = container_name
         self.cosmos_client = CosmosClient(url=self._url, credential=self._key)
-        self._log_document = ""
+        self._log_document = {}
 
         # Select a database (will create it if it doesn't exist)
         self.database = self.cosmos_client.get_database_client(self._database_name)
@@ -138,12 +139,12 @@ class StatusLog:
 
         json_document = ""
         try:
-            # if the document exists and if this is the first call to the function from the parent, 
+            # if the document exists and if this is the first call to the function from the parent,
             # then retrieve the stored document from cosmos, otherwise, use the log stored in self
-            if self._log_document == "":
+            if self._log_document.get(document_id, "") == "":
                 json_document = self.container.read_item(item=document_id, partition_key=base_name)
             else:
-                json_document = self._log_document       
+                json_document = self._log_document[document_id]
 
             # Check if there has been a state change, and therefore to update state
             if json_document['state'] != state.value:
@@ -184,14 +185,16 @@ class StatusLog:
             }
 
         #self.container.upsert_item(body=json_document)
-        self._log_document = json_document         
+        self._log_document[document_id] = json_document
         
         # add status to standard logger
         logging.info(status)
 
 
-    def save_document(self):
-        self.container.upsert_item(body=self._log_document)
+    def save_document(self, document_path):
+        document_id = self.encode_document_id(document_path)
+        self.container.upsert_item(body=self._log_document[document_id])
+        self._log_document[document_id] = ""
 
     def get_stack_trace(self):
         exc = sys.exc_info()[0]

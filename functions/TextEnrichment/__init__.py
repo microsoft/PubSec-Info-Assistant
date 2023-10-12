@@ -183,7 +183,7 @@ def main(msg: func.QueueMessage) -> None:
             State.ERROR,
         )
         
-    statusLog.save_document()
+    statusLog.save_document(blob_path)
 
 def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint):
     '''Translate text if it is not in target language'''

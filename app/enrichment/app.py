@@ -284,7 +284,7 @@ def poll_queue() -> None:
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
         blob_path = message_json["blob_name"]
-        statusLog.upsert_document(blob_path, f'Embeddings process started with model ${target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
+        statusLog.upsert_document(blob_path, f'Embeddings process started with model {target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
         
         try:          
             file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
@@ -380,4 +380,4 @@ def poll_queue() -> None:
                     State.ERROR,
                 )
 
-        statusLog.save_document()
+        statusLog.save_document(blob_path)

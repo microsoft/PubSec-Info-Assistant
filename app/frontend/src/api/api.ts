@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner } from "./models";
+import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner, StatusLogEntry, StatusLogResponse } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -109,6 +109,29 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
         throw Error(parsedResponse.error || "Unknown error");
     }
     const results: AllFilesUploadStatus = {statuses: parsedResponse};
+    return results;
+}
+
+export async function logStatus(status_log_entry: StatusLogEntry): Promise<StatusLogResponse> {
+    var response = await fetch("/logstatus", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "path": status_log_entry.path,
+            "status": status_log_entry.status,
+            "status_classification": status_log_entry.status_classification,
+            "state": status_log_entry.state
+            })
+    });
+
+    var parsedResponse: StatusLogResponse = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+
+    var results: StatusLogResponse = {status: parsedResponse.status};
     return results;
 }
 

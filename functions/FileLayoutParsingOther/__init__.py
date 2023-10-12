@@ -198,4 +198,4 @@ def main(msg: func.QueueMessage) -> None:
     except Exception as e:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
-    statusLog.save_document()
+    statusLog.save_document(blob_name)

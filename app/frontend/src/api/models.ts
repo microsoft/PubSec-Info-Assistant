@@ -117,3 +117,37 @@ export type GetWarningBanner = {
     WARNING_BANNER_TEXT: string;
     error?: string;
 };
+
+// These keys need to match case with the defined Enum in the 
+// shared code (functions/shared_code/status_log.py)
+export const enum StatusLogClassification {
+    Debug = "Debug",
+    Info = "Info",
+    Error = "Error"
+}
+
+// These keys need to match case with the defined Enum in the 
+// shared code (functions/shared_code/status_log.py)
+export const enum StatusLogState {
+    Processing = "Processing",
+    Skipped = "Skipped",
+    Queued = "Queued",
+    Complete = "Complete",
+    Error = "Error",
+    Throttled = "Throttled",
+    Uploaded = "Uploaded",
+    All = "All"
+}
+
+export type StatusLogEntry = {
+    path: string;
+    status: string;
+    status_classification: StatusLogClassification;
+    state: StatusLogState;
+}
+
+export type StatusLogResponse = {
+    status: number;
+    error?: string;
+}
+

@@ -106,6 +106,7 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
             console.print(f"Waiting for {int(wait_time_seconds) // 60} \
                           minutes for pipeline processing...")
             time.sleep(int(wait_time_seconds))
+            current_duration += int(wait_time_seconds)
 
             for test_file in test_files:
                 if not status[test_file]:
@@ -179,14 +180,15 @@ def cleanup_after_test(blob_service_client, search_service_endpoint, search_inde
 
     # Cleanup upload container
     for file_name in test_file_names:
+        console.print(f"Deleting blob: {UPLOAD_FOLDER_NAME}/{file_name}")
         upload_container_client.delete_blob(f'{UPLOAD_FOLDER_NAME}/{file_name}')
 
     # Cleanup output container
     blobs = output_container_client.list_blobs(name_starts_with=UPLOAD_FOLDER_NAME)
     for blob in blobs:
         try:
-            console.print(f"Deleting blob: {blob.name}")
             output_container_client.delete_blob(blob.name)
+            console.print(f"Deleted blob: {blob.name}")
         except Exception as ex:
             console.print(f"Failed to delete blob: {blob.name}. Error: {ex}")
 

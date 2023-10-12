@@ -102,6 +102,18 @@ jq -r  '
         {
             "path": "azurE_LOCATION",
             "env_var": "ENRICHMENT_LOCATION"
+        },
+        {
+            "path": "azurE_SEARCH_INDEX",
+            "env_var": "AZURE_SEARCH_INDEX"
+        },
+        {
+            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
+        },
+        {
+            "path": "azurE_SEARCH_KEY",
+            "env_var": "AZURE_SEARCH_SERVICE_KEY"
         }
     ]
         as $env_vars_to_extract

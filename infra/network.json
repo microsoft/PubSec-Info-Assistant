@@ -1,0 +1,39 @@
+{
+    "virtualNetwork": {
+        "CIDR": "10.0.0.0/24",
+        "subnets": [
+            {
+                "name": "apiManagement",
+                "CIDR": "10.0.0.0/27"
+            },
+            {
+                "name": "appServiceEnvironment",
+                "CIDR": "10.0.0.33/27"
+            },
+            {
+                "name": "storageAccount",
+                "CIDR": "10.0.0.65/27"
+            },
+            {
+                "name": "appGateway",
+                "CIDR": "10.0.0.97/27"
+            },
+            {
+                "name": "cosmosDb",
+                "CIDR": "10.0.0.129/27"
+            },
+            {
+                "name": "azureAi",
+                "CIDR": "10.0.0.161/27"
+            },
+            {
+                "name": "keyVault",
+                "CIDR": "10.0.0.193/27"
+            },
+            {
+                "name": "function",
+                "CIDR": "10.0.0.225/27"
+            }
+        ]
+    }
+}

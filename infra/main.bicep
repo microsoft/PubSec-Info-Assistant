@@ -79,14 +79,76 @@ param targetTranslationLanguage string = 'en'
 param enableDevCode bool = false
 param tenantId string = ''
 param subscriptionId string = ''
+param vnetName string = ''
+param apiManagementServiceName string = ''
+param keyVaultName string = ''
+param privateDnsZoneName string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
+
+@description('The IP address prefix (CIDR range) to use when deploying the virtual network.')
+param vnetIPPrefix string = '10.0.0.0/24'
+
+@description('The IP address prefix (CIDR range) to use when deploying the API Management subnet within the virtual network.')
+param apiManagementSubnetIPPrefix string = '10.0.0.0/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the App Service Environment subnet within the virtual network.')
+param appServiceEnvironmentSubnetIPPrefix string = '10.0.0.33/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the Storage Account subnet within the virtual network.')
+param storageAccountSubnetIPPrefix string = '10.0.0.65/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the App Gateway subnet within the virtual network.')
+param appGatewaySubnetIPPrefix string = '10.0.0.97/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the Cosmos Database subnet within the virtual network.')
+param cosmosDbSubnetIPPrefix string = '10.0.0.129/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the App Service Environment subnet within the virtual network.')
+param azureAiSubnetIPPrefix string = '10.0.0.161/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the Key Vault subnet within the virtual network.')
+param keyVaultSubnetIPPrefix string = '10.0.0.193/27'
+
+@description('The IP address prefix (CIDR range) to use when deploying the Azure Function subnet within the virtual network.')
+param functionSubnetIPPrefix string = '10.0.0.225/27'
+
+@description('The SKU of the API Management instance.')
+@allowed([
+  'Premium'
+  'Developer'
+])
+param apiManagementSku string = 'Premium'
+
+@description('The name of the API publisher. This information is used by API Management.')
+param apiManagementPublisherName string = 'Contoso'
+
+@description('The email address of the API publisher. This information is used by API Management.')
+param apiManagementPublisherEmail string = 'admin@contoso.com'
+
+var openApiJson = 'https://raw.githubusercontent.com/microsoft/AzureOpenAI-with-APIM/main/AzureOpenAI_OpenAPI.json'
+var openApiXml = 'https://raw.githubusercontent.com/microsoft/AzureOpenAI-with-APIM/main/AzureOpenAI_Policy.xml'
 
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 
+var apiNetwork = 'Internal'
+var keyVaultskuName = 'standard'
+var secretName = 'aoai-api-key'
+var keysPermissions = ['list']
+var secretsPermissions = ['list']
+var enabledForDeployment = false
+var enabledForDiskEncryption = false
+var enabledForTemplateDeployment = false
+
+var apiManagementSkuCount = 1
+var apiManagementNamedValueName = 'aoai-api-key'
+
+var apiName = 'azure-openai-service-api'
+var apiPath = ''
+var apiSubscriptionName = 'AzureOpenAI-Consumer-Example'
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -105,6 +167,78 @@ module logging 'core/logging/logging.bicep' = {
     tags: tags
     skuName: 'PerGB2018'
   }
+}
+
+module network 'core/network/network.bicep' = {
+  scope: rg
+  name: 'network'
+  params: {
+    vnetName: vnetName
+    location: location
+    vnetIPPrefix: vnetIPPrefix
+    apiManagementSubnetIPPrefix: apiManagementSubnetIPPrefix
+  }
+  dependsOn: [
+    logging
+  ]
+}
+
+module apiManagement 'core/apim/apim.bicep' = {
+  scope: rg
+  name: 'api-management'
+  params: {
+    location: location
+    serviceName: apiManagementServiceName
+    publisherName: apiManagementPublisherName
+    publisherEmail: apiManagementPublisherEmail
+    skuName: apiManagementSku
+    skuCount: apiManagementSkuCount
+    subnetResourceId: network.outputs.apiManagementSubnetResourceId
+    virtualNetworkType: apiNetwork
+  }
+  dependsOn: [
+    network
+  ]
+}
+
+module keyVault 'core/security/key_vault.bicep' = {
+  scope: rg
+  name: 'key-vault'
+  params: {
+    location: location
+    keyVaultName: keyVaultName
+    enabledForDeployment: enabledForDeployment
+    enabledForDiskEncryption: enabledForDiskEncryption
+    enabledForTemplateDeployment: enabledForTemplateDeployment
+    tenantId: tenantId
+    objectId: apiManagement.outputs.apiManagementIdentityPrincipalId
+    keysPermissions: keysPermissions
+    secretsPermissions: secretsPermissions
+    skuName: keyVaultskuName
+    secretName: secretName
+    secretValue: azureOpenAiKey
+  }
+  dependsOn: [
+    apiManagement
+  ]
+}
+
+module api 'core/apim/api.bicep' = {\
+  scope: rg
+  name: 'api'
+  params: {
+    apimName: apiManagementServiceName
+    apiName: apiName
+    apiPath: apiPath
+    openApiJson : openApiJson
+    openApiXml : openApiXml
+    serviceUrl: apiServiceUrl
+    apiSubscriptionName: apiSubscriptionName
+  }
+  dependsOn: [
+    keyVault
+    apiManagement
+  ]
 }
 
 // Create an App Service Plan to group applications under the same payment plan and SKU
@@ -192,7 +326,7 @@ module cognitiveServices 'core/ai/cognitive_services.bicep' = if (!useExistingAO
   }
 }
 
-module formrecognizer 'core/ai/document_intelligence.bicep' = {
+module formrecognizer 'core/ai/forms_recognizer.bicep' = {
   scope: rg
   name: 'formrecognizer'
   params: {

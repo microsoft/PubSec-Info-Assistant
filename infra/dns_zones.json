@@ -1,0 +1,108 @@
+{
+  "azureCommercial": {
+    "azureOpenAi": {
+      "zone": "openai.azure.com",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "apiManagementService": {
+      "zone": "azure-api.net",
+      "records": {
+        "parentName": "parentName",
+        "portal": "parentName.portal",
+        "developer": "parentName.developer",
+        "management": "parentName.management",
+        "scm": "parentName.scm"
+      }
+    },
+    "appServiceEnvionment": {
+      "zone": "appserviceenvironment.net",
+      "records": {
+        "*": "*.parentName",
+        "ftp": "parentAPIM.ftp",
+        "scm": "*.scm.parentName"
+      }
+    },
+    "azureAi": {
+      "zone": "cognitiveservices.azure.com",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "azureFunction": {
+      "zone": "azurewebsites.net",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "keyVault": {
+      "zone": "vault.azure.net",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "storageAccount": {
+      "zone": "core.windows.net",
+      "records": {
+        "parentName": "parentName",
+        "blob": "parentName.blob",
+        "dfs": "parentName.dfs",
+        "file": "parentName.file",
+        "queue": "parentName.queue",
+        "table": "parentName.table",
+        "web": "parentName.web"
+      }
+    }
+  },
+  "azureGovernment": {
+    "apiManagementService": {
+      "zone": "usgovcloudapi.net",
+      "records": {
+        "parentName": "parentName",
+        "portal": "parentName.portal",
+        "developer": "parentName.developer",
+        "management": "parentName.management",
+        "scm": "parentName.scm"
+      }
+    },
+    "appServiceEnvionment": {
+      "zone": "appserviceenvironment.us",
+      "records": {
+        "*": "*.parentName",
+        "ftp": "parentAPIM.ftp",
+        "scm": "*.scm.parentName"
+      }
+    },
+    "azureAi": {
+      "zone": "ccognitiveservices.azure.us",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "azureFunction": {
+      "zone": "azurewebsites.us",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "keyVault": {
+      "zone": "vault.usgovcloudapi.net",
+      "records": {
+        "parentName": "parentName"
+      }
+    },
+    "storageAccount": {
+      "zone": "blob.core.usgovcloudapi.net",
+      "records": {
+        "parentName": "parentName",
+        "blob": "parentName.blob",
+        "dfs": "parentName.dfs",
+        "file": "parentName.file",
+        "queue": "parentName.queue",
+        "table": "parentName.table",
+        "web": "parentName.web"
+      }
+    }
+  }
+}

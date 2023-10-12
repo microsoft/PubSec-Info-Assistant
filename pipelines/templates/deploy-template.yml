@@ -81,4 +81,9 @@ steps:
     parameters:
       displayName: 'Deploy Azure Functions'
       makeCommand: 'deploy-functions'
+
+  - template: make-command.yml
+    parameters:
+      displayName: 'Run Ingestion and Indexing Tests'
+      makeCommand: 'functional-tests'    
   

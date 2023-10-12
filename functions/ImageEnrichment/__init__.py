@@ -301,7 +301,7 @@ def main(msg: func.QueueMessage) -> None:
             State.ERROR,
         )
 
-    statusLog.save_document()
+    statusLog.save_document(blob_path)
 
     try:
         index_section(index_content, file_name, statusLog.encode_document_id(file_name), blob_path)
@@ -312,7 +312,7 @@ def main(msg: func.QueueMessage) -> None:
             StatusClassification.ERROR,
             State.ERROR,
         )
-    statusLog.save_document()
+    statusLog.save_document(blob_path)
 
 
 def index_section(index_content, file_name, chunk_id, blob_path):

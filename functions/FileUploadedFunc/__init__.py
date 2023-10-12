@@ -31,7 +31,7 @@ def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
     try:
         statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
-        statusLog.upsert_document(myblob.name, 'File Uploaded', StatusClassification.INFO, State.PROCESSING, True)            
+        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
         # Create message structure to send to queue
@@ -77,4 +77,4 @@ def main(myblob: func.InputStream):
     except Exception as e:
         statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
-    statusLog.save_document()
+    statusLog.save_document(myblob.name)

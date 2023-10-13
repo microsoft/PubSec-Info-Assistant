@@ -81,7 +81,7 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
     """Main function to run functional tests"""
     try:
         current_duration = 0
-        
+
         #Wait for deployment to settle
         time.sleep(int(wait_time_seconds))
         
@@ -151,7 +151,7 @@ def check_index(search_service_endpoint, search_index, search_key ):
         console.print("Begining index search")
         for extension, query in search_queries.items():
             search_results = search_client.search(query)
-            console.print(f"Search for query '{query}'")
+            
             if search_results:
                 # Iterate through search results
                 for result in search_results:

@@ -84,6 +84,6 @@ steps:
 
   - template: make-command.yml
     parameters:
-      displayName: 'Run Ingestion and Indexing Tests'
+      displayName: 'Functional Tests'
       makeCommand: 'functional-tests'    
   

@@ -161,6 +161,7 @@ def main(msg: func.QueueMessage) -> None:
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)
     blob_path = message_json["blob_name"]
+    blob_uri = message_json["blob_uri"]
     try:
         statusLog = StatusLog(
             cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
@@ -275,7 +276,7 @@ def main(msg: func.QueueMessage) -> None:
         # Upload the output as a chunk to match document model
         utilities.write_chunk(
             myblob_name=blob_path,
-            myblob_uri=blob_path,
+            myblob_uri=blob_uri,
             file_number=0,
             chunk_size=utilities.token_count(text_image_summary),
             chunk_text=text_image_summary,
@@ -302,7 +303,7 @@ def main(msg: func.QueueMessage) -> None:
         )
 
     try:
-        index_section(index_content, file_name, statusLog.encode_document_id(file_name), blob_path)
+        index_section(index_content, file_name, statusLog.encode_document_id(file_name), blob_path, blob_uri)
     except Exception as err:
         statusLog.upsert_document(
             blob_path,
@@ -313,7 +314,7 @@ def main(msg: func.QueueMessage) -> None:
     statusLog.save_document(blob_path)
 
 
-def index_section(index_content, file_name, chunk_id, blob_path):
+def index_section(index_content, file_name, chunk_id, blob_path, blob_uri):
     """ Pushes a batch of content to the search index
     """
 
@@ -323,9 +324,11 @@ def index_section(index_content, file_name, chunk_id, blob_path):
     azure_datetime = datetime.now().astimezone().isoformat()
     index_chunk['processed_datetime'] = azure_datetime
     index_chunk['file_name'] = blob_path
-    index_chunk['file_uri'] = blob_path
+    index_chunk['file_uri'] = blob_uri
     index_chunk['title'] = file_name
     index_chunk['content'] = index_content
+    index_chunk['pages'] = [0]
+    index_chunk['chunk_file'] = file_name
     index_chunk['file_class'] = MediaType.IMAGE
     batch.append(index_chunk)
 

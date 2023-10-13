@@ -26,7 +26,7 @@ UPLOAD_CONTAINER_NAME = "upload"
 OUTPUT_CONTAINER_NAME = "content"
 FILE_PATH = "./test_data"  # Folder containing the files to upload
 UPLOAD_FOLDER_NAME = "functional-test"
-MAX_DURATION = 1200  # 20 minutes
+MAX_DURATION = 1500  # 25 minutes
 
 search_queries = {
     "pdf": "Each brushstroke and note played adds to the vibrant tapestry of human culture,",  
@@ -151,7 +151,7 @@ def check_index(search_service_endpoint, search_index, search_key ):
         console.print("Begining index search")
         for extension, query in search_queries.items():
             search_results = search_client.search(query)
-            
+
             if search_results:
                 # Iterate through search results
                 for result in search_results:

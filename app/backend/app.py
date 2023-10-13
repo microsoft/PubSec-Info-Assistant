@@ -53,8 +53,9 @@ CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT") or ""
 
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "content"
-KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
-KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "file_uri"
+KB_FIELDS_PAGENUMBER = os.environ.get("KB_FIELDS_PAGENUMBER") or "pages"
+KB_FIELDS_SOURCEFILE = os.environ.get("KB_FIELDS_SOURCEFILE") or "file_uri"
+KB_FIELDS_CHUNKFILE = os.environ.get("KB_FIELDS_CHUNKFILE") or "chunk_file"
 
 COSMOSDB_URL = os.environ.get("COSMOSDB_URL")
 COSMODB_KEY = os.environ.get("COSMOSDB_KEY")
@@ -128,8 +129,11 @@ chat_approaches = {
         AZURE_OPENAI_SERVICE,
         AZURE_OPENAI_SERVICE_KEY,
         AZURE_OPENAI_CHATGPT_DEPLOYMENT,
-        KB_FIELDS_SOURCEPAGE,
+        KB_FIELDS_SOURCEFILE,
         KB_FIELDS_CONTENT,
+        KB_FIELDS_PAGENUMBER,
+        KB_FIELDS_CHUNKFILE,
+        AZURE_BLOB_STORAGE_CONTAINER,
         blob_client,
         QUERY_TERM_LANGUAGE,
         model_name,

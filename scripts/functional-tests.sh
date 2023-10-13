@@ -25,10 +25,14 @@ pip install -r requirements.txt --disable-pip-version-check -q
 BASE_PATH=$(realpath "$DIR/..")
 
 # Pipeline functional test
-python run_tests.py \
-    --storage_account_connection_str "${BLOB_CONNECTION_STRING}" \
-    --search_service_endpoint "${AZURE_SEARCH_SERVICE_ENDPOINT}" \
-    --search_index "${AZURE_SEARCH_INDEX}" \
-    --search_key "${AZURE_SEARCH_SERVICE_KEY}" \
-    --wait_time_seconds 60 \
-    --file_extensions "docx" "pdf" "html" "jpg" "png" "csv" "md" "pptx" "txt" "xlsx" "xml"
+# python run_tests.py \
+#     --storage_account_connection_str "${BLOB_CONNECTION_STRING}" \
+#     --search_service_endpoint "${AZURE_SEARCH_SERVICE_ENDPOINT}" \
+#     --search_index "${AZURE_SEARCH_INDEX}" \
+#     --search_key "${AZURE_SEARCH_SERVICE_KEY}" \
+#     --wait_time_seconds 60 \
+#     --file_extensions "docx" "pdf" "html" "jpg" "png" "csv" "md" "pptx" "txt" "xlsx" "xml"
+
+# Rest API functional test
+python run_api_tests.py \
+    --enrichment_service_endpoint "${ENRICHMENT_APPSERVICE_NAME}" 

@@ -232,9 +232,8 @@ if __name__ == '__main__':
         main(storage_blob_service_client, args.wait_time_seconds, test_file_names)
         check_index(args.search_service_endpoint, args.search_index, args.search_key)
     finally:
-        console.print("Cleaning up after tests.")
-        # cleanup_after_test(storage_blob_service_client,
-        #                    args.search_service_endpoint,
-        #                    args.search_index,
-        #                    args.search_key,
-        #                    test_file_names)
+        cleanup_after_test(storage_blob_service_client,
+                           args.search_service_endpoint,
+                           args.search_index,
+                           args.search_key,
+                           test_file_names)

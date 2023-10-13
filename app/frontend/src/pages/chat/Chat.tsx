@@ -246,7 +246,7 @@ const Chat = () => {
                             <span className={styles.chatEmptyObjectivesList}>
                                 <span className={styles.chatEmptyObjectivesListItem}>
                                     <ClockFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Clock icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Current: Based on the latest “up to date” information in your private data</span>
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Current: Based on the latest "up to date" information in your private data</span>
                                 </span>
                                 <span className={styles.chatEmptyObjectivesListItem}>
                                     <TargetArrowFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Target icon" />

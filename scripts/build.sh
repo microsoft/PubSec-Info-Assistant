@@ -48,6 +48,7 @@ echo -e "\n"
 
 # zip the enrichment app content from app/enrichments to the .artifacts folders
 cd ${ENRICHMENT_ROOT_PATH}
+mkdir -p ./shared_code
 cp  ../../functions/shared_code/status_log.py ./shared_code
 cp  ../../functions/shared_code/utilities_helper.py ./shared_code
 zip -q -r ${BINARIES_OUTPUT_PATH}/enrichment.zip . -x "models/*" @

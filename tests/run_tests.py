@@ -81,6 +81,10 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
     """Main function to run functional tests"""
     try:
         current_duration = 0
+        
+        #Wait for deployment to settle
+        time.sleep(int(wait_time_seconds))
+        
         # Upload the files to the container
         upload_container_client = blob_service_client.get_container_client(UPLOAD_CONTAINER_NAME)
 

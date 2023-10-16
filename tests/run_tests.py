@@ -150,7 +150,7 @@ def check_index(search_service_endpoint, search_index, search_key ):
         )
         console.print("Begining index search")
         for extension, query in search_queries.items():
-            search_results = search_client.search(query)
+            search_results = search_client.search(query, top=20)
 
             if search_results:
                 # Iterate through search results

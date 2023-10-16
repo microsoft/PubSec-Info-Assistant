@@ -35,4 +35,5 @@ python run_tests.py \
 
 # Rest API functional test
 python run_api_tests.py \
-    --enrichment_service_endpoint "${ENRICHMENT_APPSERVICE_NAME}" 
+    --enrichment_service_endpoint "${ENRICHMENT_APPSERVICE_NAME}" \
+    --is_gov_deployment "${IS_USGOV_DEPLOYMENT}"

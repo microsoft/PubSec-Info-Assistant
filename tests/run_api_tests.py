@@ -16,7 +16,7 @@ rich.traceback.install()
 console = Console()
 
 class TestFailedError(Exception):
-    """Exception raised when a test fails"""
+    """Exception raised when a test fails."""
 
 # Define top-level variables
 TIMEOUT_VALUE = 60

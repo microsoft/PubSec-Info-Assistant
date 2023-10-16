@@ -189,11 +189,11 @@ class ChatReadRetrieveReadApproach(Approach):
             print('Error generating embedding:', response.status_code)
             raise Exception('Error generating embedding:', response.status_code)
         
-         #vector set up for pure vector search & hybrid search
+        #vector set up for pure vector search & Hybrid search & Hybrid semantic
         vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
             
         # Hybrid Search
-        r = self.search_client.search(generated_query, vectors=[vector], top=top)
+        # r = self.search_client.search(generated_query, vectors=[vector], top=top)
         
         # Pure Vector Search
         # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
@@ -202,24 +202,23 @@ class ChatReadRetrieveReadApproach(Approach):
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="processed_datetime le 2023-09-18T04:06:29.675Z" , top=top)
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
-        # #  hybrid semantic search
-        # if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
-        #     r = self.search_client.search(
-        #         generated_query,
-        #         filter=category_filter,
-        #         query_type=QueryType.SEMANTIC,
-        #         query_language="en-us",
-        #         query_speller="lexicon",
-        #         semantic_configuration_name="default",
-        #         top=top,
-        #         query_caption="extractive|highlight-false"
-        #         if use_semantic_captions else None,
-                #   vectors=[vector]
-        #     )
-        # else:
-        #     r = self.search_client.search(
-        #         generated_query, filter=category_filter, top=top,vectors=[vector]
-        #     )
+        #  hybrid semantic search using semantic reranker
+        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
+            r = self.search_client.search(
+                generated_query,
+                query_type=QueryType.SEMANTIC,
+                query_language="en-us",
+                query_speller="lexicon",
+                semantic_configuration_name="default",
+                top=top,
+                query_caption="extractive|highlight-false"
+                if use_semantic_captions else None,
+                vectors=[vector]
+            )
+        else:
+            r = self.search_client.search(
+                generated_query, top=top,vectors=[vector]
+            )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt

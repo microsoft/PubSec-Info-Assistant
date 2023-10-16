@@ -33,7 +33,7 @@ def parse_arguments():
         help="Azure Search Endpoint")
     parser.add_argument(
         "--is_gov_deployment",
-        default=False,
+        default="False",
         help="Is Gov Deployment")
 
     return parser.parse_args()
@@ -46,7 +46,7 @@ def main(enrichment_service_endpoint, is_gov_cloud):
         # Define the base URL for the API
         base_url = ""
 
-        if is_gov_cloud:
+        if is_gov_cloud == "true":
             base_url = f"https://{enrichment_service_endpoint}.azurewebsites.us/models"
         else:
             base_url = f"https://{enrichment_service_endpoint}.azurewebsites.net/models"

@@ -26,7 +26,7 @@ UPLOAD_CONTAINER_NAME = "upload"
 OUTPUT_CONTAINER_NAME = "content"
 FILE_PATH = "./test_data"  # Folder containing the files to upload
 UPLOAD_FOLDER_NAME = "functional-test"
-MAX_DURATION = 1200  # 20 minutes
+MAX_DURATION = 1500  # 25 minutes
 
 search_queries = {
     "pdf": "Each brushstroke and note played adds to the vibrant tapestry of human culture,",  
@@ -81,6 +81,10 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
     """Main function to run functional tests"""
     try:
         current_duration = 0
+
+        #Wait for deployment to settle
+        time.sleep(int(wait_time_seconds))
+        
         # Upload the files to the container
         upload_container_client = blob_service_client.get_container_client(UPLOAD_CONTAINER_NAME)
 
@@ -144,7 +148,7 @@ def check_index(search_service_endpoint, search_index, search_key ):
             index_name=search_index,
             credential=azure_search_key_credential,
         )
-
+        console.print("Begining index search")
         for extension, query in search_queries.items():
             search_results = search_client.search(query)
 

@@ -104,7 +104,7 @@ def post_embeddings_check(base_url, response_data):
 
         for model_info in response_data["models"]:
             model_name = model_info.get("model")
-            if model_name == 'azure-openai_':
+            if model_name.startswith('azure-openai_'):
                 continue
 
             # Generate some random text data

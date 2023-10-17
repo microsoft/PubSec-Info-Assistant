@@ -9,11 +9,12 @@ parameters:
   default: true
 
 steps:
-- ${{ if eq(parameters.fullBuild, true) }}:
-  - template: make-command.yml
-    parameters:
-      displayName: 'Functional Tests'
-      makeCommand: 'functional-tests' 
+- ${{ if and(ne(variables['IS_USGOV_DEPLOYMENT'], 'True'), ne(variables['IS_USGOV_DEPLOYMENT'], 'true')) }}:
+  - ${{ if eq(parameters.fullBuild, true) }}:
+    - template: make-command.yml
+      parameters:
+        displayName: 'Functional Tests'
+        makeCommand: 'functional-tests' 
 
  
   

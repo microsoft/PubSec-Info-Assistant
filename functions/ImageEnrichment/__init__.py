@@ -302,7 +302,8 @@ def main(msg: func.QueueMessage) -> None:
             State.ERROR,
         )
 
-    try:
+    try: 
+        # Only one chunk per image currently
         chunk_file = f"{blob_path.replace('upload/', '')}/{file_name}-0.json"
         index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), blob_path, blob_uri)
     except Exception as err:

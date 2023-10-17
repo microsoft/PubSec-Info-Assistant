@@ -12,7 +12,7 @@ parameters:
   default: 'false'
 
 steps:
-- ${{ if and(ne(variables['IS_USGOV_DEPLOYMENT'], 'True'), ne(variables['IS_USGOV_DEPLOYMENT'], 'true')) }}:
+- ${{ if and(ne(parameters.isUsGovDeployment, 'True'), ne(parameters.isUsGovDeployment, 'true')) }}:
   - ${{ if eq(parameters.fullBuild, true) }}:
     - template: make-command.yml
       parameters:

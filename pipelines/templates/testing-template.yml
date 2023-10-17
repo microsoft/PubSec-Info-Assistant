@@ -7,6 +7,9 @@ parameters:
 - name: fullBuild  
   type: boolean
   default: true
+- name: isUsGovDeployment
+  type: string
+  default: 'false'
 
 steps:
 - ${{ if and(ne(variables['IS_USGOV_DEPLOYMENT'], 'True'), ne(variables['IS_USGOV_DEPLOYMENT'], 'true')) }}:

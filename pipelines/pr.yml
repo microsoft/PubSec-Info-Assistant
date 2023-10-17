@@ -29,4 +29,6 @@ stages:
             steps:
             - template: templates/deploy-template.yml
             - template: templates/testing-template.yml
+              parameters:
+                isUsGovDeployment: $(IS_USGOV_DEPLOYMENT)
             - template: templates/destroy-template.yml

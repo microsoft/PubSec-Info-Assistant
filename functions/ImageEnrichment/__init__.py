@@ -310,7 +310,7 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.upsert_document(
             blob_path,
             f"{FUNCTION_NAME} - An error occurred while indexing - {str(err)}",
-            StatusClassification.INFO,
+            StatusClassification.ERROR,
             State.ERROR,
         )
 

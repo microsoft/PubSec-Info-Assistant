@@ -28,6 +28,5 @@ stages:
           deploy:
             steps:
             - template: templates/deploy-template.yml
-              parameters:
-                executeFunctionTests: true
+            - template: templates/testing-template.yml
             - template: templates/destroy-template.yml

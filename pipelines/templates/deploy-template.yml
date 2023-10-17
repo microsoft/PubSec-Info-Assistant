@@ -6,6 +6,9 @@ parameters:
 - name: fullBuild  
   type: boolean
   default: true
+- name: executeFunctionTests  
+  type: boolean
+  default: false  
 
 steps:
 - bash: |
@@ -82,8 +85,9 @@ steps:
       displayName: 'Deploy Azure Functions'
       makeCommand: 'deploy-functions'
 
-  - template: make-command.yml
-    parameters:
-      displayName: 'Functional Tests'
-      makeCommand: 'functional-tests'    
+  - ${{ if parameters.executeFunctionTests }}:
+    - template: make-command.yml
+      parameters:
+        displayName: 'Functional Tests'
+        makeCommand: 'functional-tests'    
   

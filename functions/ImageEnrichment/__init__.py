@@ -303,8 +303,14 @@ def main(msg: func.QueueMessage) -> None:
         )
 
     try: 
-        # Only one chunk per image currently
-        chunk_file = f"{blob_path.replace('upload/', '')}/{file_name}-0.json"
+        # Only one chunk per image currently, this code matches the write_chunk utility method in functions/shared_code/utilities.py
+        # Please update in both locations
+        file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
+        folder_set = file_directory + file_name + file_extension + "/"
+        output_filename = file_name + '-0.json'
+        chunk_file=f'{folder_set}{output_filename}'
+
+        # chunk_file = f"{blob_path.replace('upload/', '')}/{file_name}-0.json" #functional-test/test_example.jpg/test_example-0.json
         index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), blob_path, blob_uri)
 
         statusLog.upsert_document(

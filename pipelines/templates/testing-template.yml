@@ -7,17 +7,16 @@ parameters:
 - name: fullBuild  
   type: boolean
   default: true
-- name: isUsGovDeployment
+- name: environment
   type: string
-  default: 'false'
-
+  default: ''
+#startswith instead of ne
 steps:
-- ${{ if and(ne(parameters.isUsGovDeployment, 'True'), ne(parameters.isUsGovDeployment, 'true')) }}:
-  - ${{ if eq(parameters.fullBuild, true) }}:
-    - template: make-command.yml
-      parameters:
-        displayName: 'Functional Tests'
-        makeCommand: 'functional-tests' 
+- ${{ if and(startsWith(parameters.environment, 'tmp'), eq(parameters.fullBuild, true)) }}:
+  - template: make-command.yml
+    parameters:
+      displayName: 'Functional Tests'
+      makeCommand: 'functional-tests' 
 
  
   

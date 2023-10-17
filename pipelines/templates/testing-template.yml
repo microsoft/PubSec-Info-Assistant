@@ -1,0 +1,22 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+# Template for Functional Tests. Modify and add steps here.
+
+parameters:
+- name: fullBuild  
+  type: boolean
+  default: true
+- name: environment
+  type: string
+  default: ''
+#startswith instead of ne
+steps:
+- ${{ if and(startsWith(parameters.environment, 'tmp'), eq(parameters.fullBuild, true)) }}:
+  - template: make-command.yml
+    parameters:
+      displayName: 'Functional Tests'
+      makeCommand: 'functional-tests' 
+
+ 
+  

@@ -30,6 +30,5 @@ stages:
             - template: templates/deploy-template.yml
             - template: templates/testing-template.yml
               parameters:
-                fullBuild: true
                 environment: $(environment)
             - template: templates/destroy-template.yml

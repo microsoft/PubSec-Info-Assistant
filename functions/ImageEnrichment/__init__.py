@@ -319,8 +319,8 @@ def main(msg: func.QueueMessage) -> None:
             f"{FUNCTION_NAME} - Image added to index.",
             StatusClassification.INFO,
             State.COMPLETE,
-        ) 
-          
+        )
+
     statusLog.save_document(blob_path)
 
 

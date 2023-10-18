@@ -146,7 +146,7 @@ The deployment process for the IA Accelerator, uses a concept of **Developing in
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 
-Begin by setting up your own Codespace using our  [Developing in a Codespaces](docs/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own Codespace using our  [Developing in a Codespaces](./docs/developing_in_a_codespaces.md) documentation.
 
 *If you want to configure your local desktop for development container, follow our [Configuring your System for Development Containers](./docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 

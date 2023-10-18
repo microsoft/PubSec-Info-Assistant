@@ -48,7 +48,7 @@ Search is used to index the chunks that were created during pre-processing.  Whe
 
 - **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
-*\*See [Configuring your own language ENV file](./docs/features/configuring_language_env_files.md) for supported languages*
+*\*See [Configuring your own language ENV file](../docs/features/configuring_language_env_files.md) for supported languages*
 
 ## Customization and Personalization
 
@@ -75,7 +75,7 @@ The unstructured library is open source and designed to help pre-process unstruc
 
 ![Chat screen](docs/images/info_assistant_chatscreen.png)
 
-For a detailed review see our [Features](./docs/features/features.md) page.
+For a detailed review see our [Features](../docs/features/features.md) page.
 
 ---
 
@@ -91,7 +91,7 @@ Data collection is implemented by the presence of a tracking GUID in the environ
 
 ### How to Disable Data Collection
 
-To disable data collection, follow the instructions in the [Configure ENV files](./docs/development_environment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
+To disable data collection, follow the instructions in the [Configure ENV files](../docs/development_environment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
 
 ---
 
@@ -99,7 +99,7 @@ To disable data collection, follow the instructions in the [Configure ENV files]
 
 The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first. 
 
-**Read our [Transparency Note](./docs/transparency.md)**
+**Read our [Transparency Note](../docs/transparency.md)**
 
 Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
 
@@ -148,7 +148,7 @@ The deployment process for the IA Accelerator, uses a concept of **Developing in
 
 Begin by setting up your own Codespace using our  [Developing in a Codespaces](docs/developing_in_a_codespaces.md) documentation.
 
-*If you want to configure your local desktop for development container, follow our [Configuring your System for Development Containers](./docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*If you want to configure your local desktop for development container, follow our [Configuring your System for Development Containers](../docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
 Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
 
@@ -156,7 +156,7 @@ Once you have the completed the setting up Codespaces, please move on to the Siz
 
 ## Sizing Estimator
 
- The IA Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](./docs/costestimator.md) to help find the configuration that fits your needs.
+ The IA Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](../docs/costestimator.md) to help find the configuration that fits your needs.
 
 Once you have completed the Sizing Estimator, please move on to the Deployment steps.
 

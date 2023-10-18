@@ -1,0 +1,10 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+# Template for Functional Tests. Modify and add steps here.
+
+steps:
+- template: make-command.yml
+  parameters:
+    displayName: 'Functional Tests'
+    makeCommand: 'functional-tests' 

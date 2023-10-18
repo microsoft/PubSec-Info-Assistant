@@ -32,3 +32,8 @@ python run_tests.py \
     --search_key "${AZURE_SEARCH_SERVICE_KEY}" \
     --wait_time_seconds 60 \
     --file_extensions "docx" "pdf" "html" "jpg" "png" "csv" "md" "pptx" "txt" "xlsx" "xml"
+
+# Rest API functional test
+python run_api_tests.py \
+    --enrichment_service_endpoint "${ENRICHMENT_APPSERVICE_NAME}" \
+    --is_gov_deployment "${IS_USGOV_DEPLOYMENT}"

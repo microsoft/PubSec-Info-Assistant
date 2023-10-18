@@ -271,6 +271,8 @@ class Utilities:
         # Get path and file name minus the root container
         file_name, file_extension, file_directory = self.get_filename_and_extension(myblob_name)
         # Get the folders to use when creating the new files
+        # This code matches the index logic in image pipeline in functions/ImageEnrichment/__init__.py
+        # Please update in both locations
         folder_set = file_directory + file_name + file_extension + "/"
         blob_service_client = BlobServiceClient(
             self.azure_blob_storage_endpoint,

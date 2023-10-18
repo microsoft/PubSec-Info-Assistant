@@ -80,10 +80,5 @@ steps:
   - template: make-command.yml
     parameters:
       displayName: 'Deploy Azure Functions'
-      makeCommand: 'deploy-functions'
-
-  - template: make-command.yml
-    parameters:
-      displayName: 'Functional Tests'
-      makeCommand: 'functional-tests'    
+      makeCommand: 'deploy-functions'   
   

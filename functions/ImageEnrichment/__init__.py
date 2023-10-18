@@ -302,8 +302,22 @@ def main(msg: func.QueueMessage) -> None:
             State.ERROR,
         )
 
-    try:
-        index_section(index_content, file_name, statusLog.encode_document_id(file_name), blob_path, blob_uri)
+    try: 
+        # Only one chunk per image currently, this code matches the write_chunk utility method in functions/shared_code/utilities.py
+        # Please update in both locations
+        file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
+        folder_set = file_directory + file_name + file_extension + "/"
+        output_filename = file_name + '-0.json'
+        chunk_file=f'{folder_set}{output_filename}'
+
+        index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri)
+
+        statusLog.upsert_document(
+            blob_path,
+            f"{FUNCTION_NAME} - Image added to index.",
+            StatusClassification.INFO,
+            State.COMPLETE,
+        )
     except Exception as err:
         statusLog.upsert_document(
             blob_path,
@@ -311,10 +325,12 @@ def main(msg: func.QueueMessage) -> None:
             StatusClassification.ERROR,
             State.ERROR,
         )
+
+
     statusLog.save_document(blob_path)
 
 
-def index_section(index_content, file_name, chunk_id, blob_path, blob_uri):
+def index_section(index_content, file_name, chunk_id, chunk_file, blob_path, blob_uri):
     """ Pushes a batch of content to the search index
     """
 
@@ -328,7 +344,7 @@ def index_section(index_content, file_name, chunk_id, blob_path, blob_uri):
     index_chunk['title'] = file_name
     index_chunk['content'] = index_content
     index_chunk['pages'] = [0]
-    index_chunk['chunk_file'] = file_name
+    index_chunk['chunk_file'] = chunk_file
     index_chunk['file_class'] = MediaType.IMAGE
     batch.append(index_chunk)
 

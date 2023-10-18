@@ -4,7 +4,7 @@
 trigger:
   batch: true
   branches:
-    include: [ main ]
+    include: [ vNext-Dev ]
 
 pr: none
 

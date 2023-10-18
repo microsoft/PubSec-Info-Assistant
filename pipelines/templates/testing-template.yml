@@ -4,7 +4,7 @@
 # Template for Functional Tests. Modify and add steps here.
 
 steps:
-  - template: make-command.yml
-    parameters:
-      displayName: 'Functional Tests'
-      makeCommand: 'functional-tests' 
+- template: make-command.yml
+  parameters:
+    displayName: 'Functional Tests'
+    makeCommand: 'functional-tests' 

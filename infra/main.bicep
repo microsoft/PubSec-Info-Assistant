@@ -51,7 +51,7 @@ param searchIndexName string = 'all-files-index'
 param chatGptDeploymentName string = 'chat'
 param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
-param chatGptDeploymentCapacity int = 720
+param chatGptDeploymentCapacity int = 100
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750' 
@@ -79,6 +79,7 @@ param targetTranslationLanguage string = 'en'
 param enableDevCode bool = false
 param tenantId string = ''
 param subscriptionId string = ''
+param applicationtitle string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -159,7 +160,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
-
+      APPLICATION_TITLE: applicationtitle
     }
     aadClientId: aadWebClientId
   }

@@ -66,7 +66,7 @@ Use the Visual Studio Code Marketplace to install the [GitHub Codespaces](https:
 
 1. In VS Code, in the Activity Bar, click the Remote Explorer icon.
 
-    ![Alt text](/docs/images/developing_in_a_codespaces_open_in_vscode_3.png)
+    ![Alt text](../docs/images/developing_in_a_codespaces_open_in_vscode_3.png)
 
 2. Under "GitHub Codespaces", hover over the codespace you want to develop in.
 

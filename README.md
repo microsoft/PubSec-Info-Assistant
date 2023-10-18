@@ -167,7 +167,7 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 The following checklist will guide you through configuring the IA Accelerator in your azure subscription. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
 >1. Configure your deployment settings
->       * [Configuring your Development Environment](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/development_environment.md)
+>       * [Configuring your Development Environment](../docs/development_environment.md)
 >1. Configure Azure resources
 >       * [Configure Azure resources](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/infra/README.md)
 
@@ -181,12 +181,12 @@ To use the IA Accelerator, you need to follow these steps:
 
 > 1. Prepare your data and upload it to Azure.
 >
->       * Your data must be in a specified format to be valid for processing. See our [supported document types in the Feature documentation](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/features/features.md#document-pre-processing).
->       * Upload your data [via the data upload user interface](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/features/features.md#uploading-documents).
+>       * Your data must be in a specified format to be valid for processing. See our [supported document types in the Feature documentation](../docs/features/features.md#document-pre-processing).
+>       * Upload your data [via the data upload user interface](../docs/features/features.md#uploading-documents).
 > 2. Once uploaded the system will automatically process and make the document(s) available to you and other users of the deployment.
-> 3. Begin [having conversations with your data](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/features/features.md#having-a-conversation-with-your-data) by selecting the appropriate interaction method.
+> 3. Begin [having conversations with your data](../docs/features/features.md#having-a-conversation-with-your-data) by selecting the appropriate interaction method.
 
-For more detailed information review the [Features](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/features/features.md) section of the documentation.
+For more detailed information review the [Features](../docs/features/features.md) section of the documentation.
 
 ---
 

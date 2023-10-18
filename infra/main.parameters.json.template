@@ -53,7 +53,10 @@
     "chatGptModelVersion": {
       "value": "${CHATGPT_MODEL_VERSION}"
     },
-     "chatWarningBannerText": {
+    "chatGptDeploymentCapacity": {
+      "value": ${CHATGPT_MODEL_CAPACITY}
+    },
+    "chatWarningBannerText": {
        "value": "${CHAT_WARNING_BANNER_TEXT}"
     },
     "useExistingAOAIService": {

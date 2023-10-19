@@ -295,8 +295,8 @@ def poll_queue() -> None:
 
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
-            pathlist = list(chunk_list)
-            for i, chunk in enumerate(pathlist):
+            chunks = list(chunk_list)
+            for i, chunk in enumerate(chunks):
 
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(pathlist)}")
                 # open the file and extract the content

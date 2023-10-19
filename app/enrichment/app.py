@@ -234,27 +234,17 @@ def embed_texts(model: str, texts: List[str]):
 
 
 
-def index_sections(chunks, blob_path):
+def index_sections(chunks):
     """ Pushes a batch of content to the search index
     """    
     search_client = SearchClient(endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
                                     index_name=ENV["AZURE_SEARCH_INDEX"],
                                     credential=search_creds)    
-    i = 0
-    batch = []
-    for c in chunks:
-        batch.append(c)
-        i += 1
-        if i % 1000 == 0:
-            results = search_client.upload_documents(documents=batch)
-            succeeded = sum([1 for r in results if r.succeeded])
-            logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
-            batch = []
 
-    if len(batch) > 0:
-        results = search_client.upload_documents(documents=batch)
-        succeeded = sum([1 for r in results if r.succeeded])
-        logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
+    results = search_client.upload_documents(documents=chunks)
+    succeeded = sum([1 for r in results if r.succeeded])
+    logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
+
 
         
 @app.on_event("startup") 
@@ -296,7 +286,8 @@ def poll_queue() -> None:
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             chunks = list(chunk_list)
-            for i, chunk in enumerate(chunks):
+            i = 0
+            for chunk in chunks:
 
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}")
                 # open the file and extract the content
@@ -339,9 +330,16 @@ def poll_queue() -> None:
                 index_chunk['content'] = text
                 index_chunk['contentVector'] = embedding_data
                 index_chunks.append(index_chunk)
+                i += 1
+                
+                # push batch of content to index
+                if i % 200 == 0:
+                    index_sections(index_chunks)
+                    index_chunks = []
 
-            # push chunk content to index
-            index_sections(index_chunks, blob_path)
+            # push remainder chunks content to index
+            if len(index_chunks) > 0:
+                index_sections(index_chunks)
 
             # delete message once complete, in case of failure
             queue_client.delete_message(message)

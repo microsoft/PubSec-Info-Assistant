@@ -234,7 +234,7 @@ def embed_texts(model: str, texts: List[str]):
 
 
 
-def index_sections(chunks):
+def index_sections(chunks, blob_path):
     """ Pushes a batch of content to the search index
     """    
     search_client = SearchClient(endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
@@ -295,7 +295,10 @@ def poll_queue() -> None:
 
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
-            for i, chunk in enumerate(chunk_list):
+            pathlist = list(chunk_list)
+            for i, chunk in enumerate(pathlist):
+
+                statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(pathlist)}")
                 # open the file and extract the content
                 blob_path_plus_sas = utilities_helper.get_blob_and_sas(
                     ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
@@ -336,9 +339,10 @@ def poll_queue() -> None:
                 index_chunk['content'] = text
                 index_chunk['contentVector'] = embedding_data
                 index_chunks.append(index_chunk)
+                # i += 1
 
             # push chunk content to index
-            index_sections(index_chunks)
+            index_sections(index_chunks, blob_path)
 
             # delete message once complete, in case of failure
             queue_client.delete_message(message)

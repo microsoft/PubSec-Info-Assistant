@@ -282,6 +282,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
           name: 'Standard'
           capacity: chatGptDeploymentCapacity
         }
+        raiPolicyName: 'Microsoft.Default'
       }
       {
         name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : azureOpenAIEmbeddingsModelName
@@ -294,6 +295,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
           name: 'Standard'
           capacity: embeddingsDeploymentCapacity
         }
+        raiPolicyName: 'Microsoft.Default'
       }
     ]
   }

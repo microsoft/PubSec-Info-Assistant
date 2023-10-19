@@ -8,7 +8,8 @@
     justify-content: center;
     width: 600px;
     padding: 1rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #d3d3d3;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
   }
   

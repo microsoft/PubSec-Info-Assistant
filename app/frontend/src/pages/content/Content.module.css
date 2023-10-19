@@ -4,9 +4,10 @@
 .App {
     text-align: center;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 900px;
+    min-height: 600px;
   }
   
   .App-logo {
@@ -51,6 +52,8 @@
   .contentArea {
     width: 100%;
     margin-top: 10px;
+    display: flex;
+    align-content: center;
   }
 
   .topPivot {
@@ -58,5 +61,42 @@
     flex-direction: column;
     justify-content: center;
     width: 100%;
+  }
+
+  .folderArea {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    width: 600px;
+    padding-bottom: 20px;
+  }
+
+  .folderSelection {
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 5px;
+    justify-content: left;
+    text-align: left;
+  }
+
+  .tagArea {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    width: 600px;
+    padding-bottom: 20px;
+  }
+
+  .tagSelection {
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 5px;
+    justify-content: left;
+    text-align: left;
+    height: 90px;
+  }
+
+  .actionButton {
+    width: 180px;
   }
   

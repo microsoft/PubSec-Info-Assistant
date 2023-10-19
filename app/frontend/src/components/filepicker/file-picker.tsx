@@ -10,10 +10,15 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
 
-const FilePicker = () => {
+interface Props {
+  folderPath: string;
+}
+
+const FilePicker = ({folderPath}: Props) => {
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
+  const folderName = folderPath;
 
   // handler called when files are selected via the Dropzone component
   const handleOnChange = useCallback((files: any) => {
@@ -53,7 +58,8 @@ const FilePicker = () => {
       files.forEach(async (indexedFile: any) => {
         // add each file into Azure Blob Storage
         var file = indexedFile.file as File;
-        const blobClient = containerClient.getBlockBlobClient(file.name);
+        var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
+        const blobClient = containerClient.getBlockBlobClient(filePath);
         // set mimetype as determined from browser with file upload control
         const options = { blobHTTPHeaders: { blobContentType: file.type } };
 
@@ -61,7 +67,7 @@ const FilePicker = () => {
         blobClient.uploadData(file, options);
         //write status to log
         var logEntry: StatusLogEntry = {
-          path: "upload/"+file.name,
+          path: filePath,
           status: "File uploaded from browser to Azure Blob Storage",
           status_classification: StatusLogClassification.Info,
           state: StatusLogState.Uploaded

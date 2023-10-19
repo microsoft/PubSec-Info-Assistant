@@ -17,7 +17,7 @@ export const Title = () => {
 
             const v = await getApplicationTitle();
             if (!v.APPLICATION_TITLE) {
-                return "sss";
+                return null;
             }
 
             setTitle(v);

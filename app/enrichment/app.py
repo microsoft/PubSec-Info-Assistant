@@ -339,7 +339,6 @@ def poll_queue() -> None:
                 index_chunk['content'] = text
                 index_chunk['contentVector'] = embedding_data
                 index_chunks.append(index_chunk)
-                # i += 1
 
             # push chunk content to index
             index_sections(index_chunks, blob_path)

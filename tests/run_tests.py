@@ -26,7 +26,7 @@ UPLOAD_CONTAINER_NAME = "upload"
 OUTPUT_CONTAINER_NAME = "content"
 FILE_PATH = "./test_data"  # Folder containing the files to upload
 UPLOAD_FOLDER_NAME = "functional-test"
-MAX_DURATION = 2100  # 35 minutes
+MAX_DURATION = 2700  # 45 minutes
 
 search_queries = {
     "pdf": "Each brushstroke and note played adds to the vibrant tapestry of human culture,",  

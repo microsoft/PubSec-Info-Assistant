@@ -267,6 +267,10 @@ def poll_queue() -> None:
     log.debug(f"Received {len(messages)} messages")
 
     target_embeddings_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"])
+
+    # Remove from queue to prevent duplicate processing from any additional instances
+    for message in messages:
+        queue_client.delete_message(message)
     
     for message in messages:        
         logging.debug(f"Received message {message.id}")
@@ -340,8 +344,6 @@ def poll_queue() -> None:
             if len(index_chunks) > 0:
                 index_sections(index_chunks)
 
-            # delete message once complete, in case of failure
-            queue_client.delete_message(message)
             statusLog.upsert_document(blob_path,
                                       'Embeddings process complete',
                                       StatusClassification.INFO, State.COMPLETE)
@@ -356,8 +358,7 @@ def poll_queue() -> None:
 
             if requeue_count <= int(ENV["MAX_EMBEDDING_REQUEUE_COUNT"]):
                 message_json['embeddings_queued_count'] = requeue_count
-                # Delete & requeue with a random backoff within limits
-                queue_client.delete_message(message)
+                # Requeue with a random backoff within limits
                 queue_client = QueueClient.from_connection_string(
                     ENV["BLOB_CONNECTION_STRING"], 
                     ENV["EMBEDDINGS_QUEUE"], 
@@ -371,8 +372,7 @@ def poll_queue() -> None:
                                           StatusClassification.ERROR,
                                           State.QUEUED)
             else:
-                # dequeue as max retries has been reached
-                queue_client.delete_message(message)
+                # max retries has been reached
                 statusLog.upsert_document(
                     blob_path,
                     f"An error occurred, max requeue limit was reache. Error description: {str(error)}",

@@ -245,7 +245,6 @@ def index_sections(chunks):
     succeeded = sum([1 for r in results if r.succeeded])
     logging.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
 
-
         
 @app.on_event("startup") 
 @repeat_every(seconds=5, logger=log, raise_exceptions=True)

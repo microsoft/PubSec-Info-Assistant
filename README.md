@@ -38,7 +38,7 @@ Go here for more information on [Prompt engineering techniques](https://learn.mi
 * creating a standard JSON representation of all a documents text-based content
 * chunking and saving metadata into manageable sized to be used in the RAG pattern
 
-Additional information on this process can be found [here](/docs/functions_flow.md)
+Additional information on this process can be found [here](./docs/functions_flow.md)
 
 ### Azure Cognitive Search Integration
 
@@ -48,7 +48,7 @@ Search is used to index the chunks that were created during pre-processing.  Whe
 
 - **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
-*\*See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) for supported languages*
+*\*See [Configuring your own language ENV file](./docs/features/configuring_language_env_files.md) for supported languages*
 
 ## Customization and Personalization
 
@@ -75,7 +75,7 @@ The unstructured library is open source and designed to help pre-process unstruc
 
 ![Chat screen](docs/images/info_assistant_chatscreen.png)
 
-For a detailed review see our [Features](/docs/features/features.md) page.
+For a detailed review see our [Features](./docs/features/features.md) page.
 
 ---
 
@@ -91,7 +91,7 @@ Data collection is implemented by the presence of a tracking GUID in the environ
 
 ### How to Disable Data Collection
 
-To disable data collection, follow the instructions in the [Configure ENV files](/docs/development_environment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
+To disable data collection, follow the instructions in the [Configure ENV files](./docs/development_environment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
 
 ---
 
@@ -146,9 +146,9 @@ The deployment process for the IA Accelerator, uses a concept of **Developing in
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 
-Begin by setting up your own Codespace using our  [Developing in a Codespaces](docs/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own Codespace using our  [Developing in a Codespaces](./docs/developing_in_a_codespaces.md) documentation.
 
-*If you want to configure your local desktop for development container, follow our [Configuring your System for Development Containers](/docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*If you want to configure your local desktop for development container, follow our [Configuring your System for Development Containers](./docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
 Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
 
@@ -167,9 +167,9 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 The following checklist will guide you through configuring the IA Accelerator in your azure subscription. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
 >1. Configure your deployment settings
->       * [Configuring your Development Environment](/docs/development_environment.md)
+>       * [Configuring your Development Environment](./docs/development_environment.md)
 >1. Configure Azure resources
->       * [Configure Azure resources](/infra/README.md)
+>       * [Configure Azure resources](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/infra/README.md)
 
 ---
 
@@ -181,12 +181,12 @@ To use the IA Accelerator, you need to follow these steps:
 
 > 1. Prepare your data and upload it to Azure.
 >
->       * Your data must be in a specified format to be valid for processing. See our [supported document types in the Feature documentation](/docs/features/features.md#document-pre-processing).
->       * Upload your data [via the data upload user interface](/docs/features/features.md#uploading-documents).
+>       * Your data must be in a specified format to be valid for processing. See our [supported document types in the Feature documentation](./docs/features/features.md#document-pre-processing).
+>       * Upload your data [via the data upload user interface](./docs/features/features.md#uploading-documents).
 > 2. Once uploaded the system will automatically process and make the document(s) available to you and other users of the deployment.
-> 3. Begin [having conversations with your data](/docs/features/features.md#having-a-conversation-with-your-data) by selecting the appropriate interaction method.
+> 3. Begin [having conversations with your data](./docs/features/features.md#having-a-conversation-with-your-data) by selecting the appropriate interaction method.
 
-For more detailed information review the [Features](/docs/features/features.md) section of the documentation.
+For more detailed information review the [Features](./docs/features/features.md) section of the documentation.
 
 ---
 

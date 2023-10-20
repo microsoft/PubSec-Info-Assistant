@@ -29,7 +29,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
    3. Under **Configure your pipeline:** select **Existing Azure Pipelines YAML file**
 
-      ![pipeline_configuration](/docs/images/sandbox_environment_build_pipeline_configuration.png)
+      ![pipeline_configuration](./docs/images/sandbox_environment_build_pipeline_configuration.png)
 
    4. In the popup window, Select the branch you wish to pull the pipeline definition from. Then select the path at `/pipelines/demo.yml`
 

@@ -190,6 +190,21 @@ class StatusLog:
         # add status to standard logger
         logging.info(status)
 
+    def update_document_state(self, document_path, state_str):
+        """Updates the state of the document in the storage"""
+        try:
+            # base_name = os.path.basename(document_path)
+            document_id = self.encode_document_id(document_path)
+            if self._log_document.get(document_id, "") != "":
+                json_document = self._log_document[document_id]
+                json_document['state'] = state_str
+                json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                self.save_document(document_path)
+                self._log_document[document_id] = json_document
+            else:
+                logging.warning(f"Document with ID {document_id} not found.")
+        except Exception as err:
+            logging.error(f"An error occurred while updating the document state: {str(err)}")      
 
     def save_document(self, document_path):
         document_id = self.encode_document_id(document_path)

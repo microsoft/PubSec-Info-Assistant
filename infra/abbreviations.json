@@ -136,6 +136,7 @@
   "timeSeriesInsightsEnvironments": "tsi-",
   "videoIndexer": "vi-",
   "webServerFarms": "asp-",
+  "funcServerFarms": "func-asp-",
   "webSitesAppService": "web-",
   "webSitesAppServiceEnvironment": "ase-",
   "webSitesFunctions": "func-",

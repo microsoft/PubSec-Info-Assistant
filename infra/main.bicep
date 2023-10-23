@@ -140,6 +140,22 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
+// Create an App Service Plan for functions
+module funcServicePlan 'core/host/funcserviceplan.bicep' = {
+  name: 'funcserviceplan'
+  scope: rg
+  params: {
+    name: !empty(appServicePlanName) ? appServicePlanName : '${prefix}-${abbrs.funcServerFarms}${randomString}'
+    location: location
+    tags: tags
+    sku: {
+      name: 'S3'
+      capacity: 5
+    }
+    kind: 'linux'
+  }
+}
+
 // Create an App Service Plan to group applications under the same payment plan and SKU
 module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
   name: 'enrichmentAppserviceplan'
@@ -450,7 +466,7 @@ module functions 'core/function/function.bicep' = {
     name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
     location: location
     tags: tags
-    appServicePlanId: appServicePlan.outputs.id
+    appServicePlanId: funcServicePlan.outputs.id
     runtime: 'python'
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
@@ -665,6 +681,7 @@ resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (
     }
   }
 }
+
 
 output AZURE_LOCATION string = location
 output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName //cognitiveServices.outputs.name

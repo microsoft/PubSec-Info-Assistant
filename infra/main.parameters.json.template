@@ -38,6 +38,9 @@
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
     },
+    "applicationtitle": {
+      "value": "${APPLICATION_TITLE}"
+    },
     "searchServicesSkuName": {
       "value": "standard"
     },

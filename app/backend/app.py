@@ -52,6 +52,7 @@ COSMOSDB_DATABASE_NAME = os.environ.get("COSMOSDB_DATABASE_NAME") or "statusdb"
 COSMOSDB_CONTAINER_NAME = os.environ.get("COSMOSDB_CONTAINER_NAME") or "statuscontainer"
 
 QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
+APPLICATION_TITLE = os.environ.get("APPLICATION_TITLE") or "Information Assistant, built with Azure OpenAI"
 
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
@@ -201,6 +202,16 @@ def get_citation():
         logging.exception("Exception in /getalluploadstatus")
         return jsonify({"error": str(e)}), 500
     return jsonify(results.json)
+
+# Return APPLICATION_TITLE
+@app.route("/getApplicationTitle")
+def get_application_title():
+    """Get the application title text"""
+    response = jsonify(
+        {
+            "APPLICATION_TITLE": f"{APPLICATION_TITLE}"
+        })
+    return response
 
 if __name__ == "__main__":
     app.run()

@@ -79,6 +79,7 @@ param targetTranslationLanguage string = 'en'
 param enableDevCode bool = false
 param tenantId string = ''
 param subscriptionId string = ''
+param applicationtitle string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -159,6 +160,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
+      APPLICATION_TITLE: applicationtitle
 
     }
     aadClientId: aadWebClientId

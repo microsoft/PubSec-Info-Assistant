@@ -33,6 +33,15 @@ else
   echo $randomString >> ../infra/.state/${WORKSPACE}/random.txt
 fi
 
+export RANDOM_STRING="${randomString,,}"
+
+if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+  az cloud set --name AzureUSGovernment 
+  auth_callback_url="https://infoasst-web-$RANDOM_STRING.azurewebsites.us/.auth/login/aad/callback"
+else
+  auth_callback_url="https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback"
+fi
+
 # add the random.txt to the state container
 #echo "az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists"
 exists=$(az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists)
@@ -47,8 +56,6 @@ else
   upload=$(az storage blob upload --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --file ../infra/.state/${WORKSPACE}/random.txt)
 fi
 
-randomString="${randomString,,}"
-export RANDOM_STRING=$randomString
 
 signedInUserId=$(az ad signed-in-user show --query id --output tsv)
 #if not in automation, create the app registration and service principal values
@@ -56,7 +63,7 @@ signedInUserId=$(az ad signed-in-user show --query id --output tsv)
 aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
 if [ -z $aadWebAppId ]; then
     echo "Creating new AD App Registration: infoasst_web_access_$RANDOM_STRING"   
-    aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+    aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris $auth_callback_url --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
     aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
 fi
 

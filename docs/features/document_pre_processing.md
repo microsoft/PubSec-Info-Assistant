@@ -5,7 +5,7 @@ The pre-processing of documents is a crucial step as it involves several steps, 
 ```mermaid
 graph LR
   A[[File]]-->B
-  AA[Form Recognizer]
+  AA[Document Intelligence]
 
   subgraph "State (Azure Blob Storage)"
   B[Upload Container]
@@ -24,7 +24,7 @@ subgraph "Chunking"
   C-->D{Is Text Based}
   D-->|Yes|E{File Type}
   E-->F[PDF]
-  E-->G[HTM, HTML, DOCX]
+  E-->G[OTHER]
   D-->|No|H{FileType}
   H-->I[Image]
   H-->J[Media]
@@ -46,9 +46,12 @@ subgraph "Chunking"
 ```
 ## PDF Pre-Processing
 PDF documents often contain a mix of text, images, and other media, which requires a series of steps to extract and process the relevant information.
-For PDF's we use a service, known as Azure Form Recognizer. Azure Form Recognizer 'cracks' a PDF file and process each page using the Layout API. It provides a JSON representation of the file including titles, sub-headings, headers, footers, tables and content paragraphs. We take this content and build a standardized JSON 'document map' of the content.
+For PDF's we use a service, known as Azure Document Intelligence. Azure Document Intelligence 'cracks' a PDF file and process each page using the Layout API. It provides a JSON representation of the file including titles, sub-headings, headers, footers, tables and content paragraphs. We take this content and build a standardized JSON 'document map' of the content.
 
 
 ## HTML/DOCX Pre-Processing
-For HTML and docx documents, we firstly use a library called [Mammoth](https://pypi.org/project/mammoth/) to convert these to html format. Now that we have these all as HTML, we use another library, [Beautiful Soup](https://pypi.org/project/beautifulsoup4/), to extract titles, sub-headings, headers, footers, tables and content paragraphs, similarly to using Azure Form Recognizer for PDF's. Again we create a 'document map' of the content, a json based representation.
+For HTML and docx documents, we leverage the capabilities of [Unstructured.io](https://unstructured.io/) for conversion to HTML format and subsequent content extraction. Unstructured.io supports various additional document types, including 'htm', 'csv', 'md', 'pptx', 'txt', 'xlsx', 'xml', 'eml', and 'msg'. Like Azure Document Intelligence for PDFs, we create a 'document map' of the content, which serves as a JSON-based representation.
+
+## Image Pre-Processing
+We've extended our capabilities to include image processing for 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif', and 'tiff' formats. Leveraging the power of Azure's GPU optionally in regions where available (East US, France Central, Korea Central, North Europe, Southeast Asia, West Europe, West US) to generate Captions and Deep Captions. We utilize the Cognitive Services Computer Vision API to generate descriptions and perform OCR on any text present within these image files.
 

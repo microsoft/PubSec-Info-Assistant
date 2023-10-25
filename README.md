@@ -45,7 +45,7 @@ Additional information on this process can be found [here](/docs/functions_flow.
 
 #### How It Works
 
-When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure Cognitive Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a streaight forward process. Additional information on this can be found [here](/docs/images/)
+When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure Cognitive Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a streaight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
 
 #### What's Coming
 

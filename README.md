@@ -40,6 +40,18 @@ Go here for more information on [Prompt engineering techniques](https://learn.mi
 
 Additional information on this process can be found [here](/docs/functions_flow.md)
 
+## Image Search
+**Text-Based Image Retrieval** , With this addition, you can easily search for images in the Retrieval Augmented Generation (RAG) application.
+
+#### How It Works
+
+When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure Cognitive Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a streaight forward process. Additional information on this can be found [here](/docs/images/)
+
+#### What's Coming
+
+We're starting with text-based image retrieval, but in the future, we have plans to extend this functionality to include image-to-image search, offering even more robust options for our users.
+
+
 ### Azure Cognitive Search Integration
 
 **Vector Hybrid Search**

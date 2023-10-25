@@ -64,7 +64,7 @@ COSMOSDB_CONTAINER_NAME = os.environ.get("COSMOSDB_CONTAINER_NAME") or "statusco
 
 QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
 
-TARGET_EMBEDDING_MODEL = os.environ.get("TARGET_EMBEDDING_MODEL") or "BAAI/bge-small-en-v1.5"
+TARGET_EMBEDDING_MODEL = os.environ.get("TARGET_EMBEDDINGS_MODEL") or "BAAI/bge-small-en-v1.5"
 ENRICHMENT_APPSERVICE_NAME = os.environ.get("ENRICHMENT_APPSERVICE_NAME") or "enrichment"
 
 # embedding_service_suffix = "xyoek"

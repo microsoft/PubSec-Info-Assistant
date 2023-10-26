@@ -113,7 +113,7 @@ class Utilities:
         table_html += "</table>"
         return table_html
 
-    def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
+    def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container, enable_dev_code):
         """ Function to build a json structure representing the paragraphs in a document, 
         including metadata such as section heading, title, page number, etc.
         We construct this map from the Content key/value output of FR, because the paragraphs 
@@ -226,16 +226,17 @@ class Utilities:
         del document_map['content_type']
         del document_map['table_index']
 
-        # Output document map to log container
-        json_str = json.dumps(document_map, indent=2)
-        file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
-        output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
+        if enable_dev_code:
+            # Output document map to log container
+            json_str = json.dumps(document_map, indent=2)
+            file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
+            output_filename =  file_name + "_Document_Map" + file_extension + ".json"
+            self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
 
-        # Output FR result to log container
-        json_str = json.dumps(result, indent=2)
-        output_filename =  file_name + '_FR_Result' + file_extension + ".json"
-        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
+            # Output FR result to log container
+            json_str = json.dumps(result, indent=2)
+            output_filename =  file_name + '_FR_Result' + file_extension + ".json"
+            self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
 
         return document_map
 

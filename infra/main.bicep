@@ -59,7 +59,7 @@ param embeddingsDeploymentCapacity int = 240
 param chatWarningBannerText string = ''
 param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
-param chatGptDeploymentCapacity int = 720
+param chatGptDeploymentCapacity int = 240
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750'
@@ -135,6 +135,22 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
     sku: {
       name: 'S1'
       capacity: 3
+    }
+    kind: 'linux'
+  }
+}
+
+// Create an App Service Plan for functions
+module funcServicePlan 'core/host/funcserviceplan.bicep' = {
+  name: 'funcserviceplan'
+  scope: rg
+  params: {
+    name: !empty(appServicePlanName) ? appServicePlanName : '${prefix}-${abbrs.funcServerFarms}${randomString}'
+    location: location
+    tags: tags
+    sku: {
+      name: 'S3'
+      capacity: 5
     }
     kind: 'linux'
   }
@@ -272,11 +288,11 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
     }
     deployments: [
       {
-        name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+        name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
         model: {
           format: 'OpenAI'
-          name: chatGptModelName
-          version: chatGptModelVersion
+          name: !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
+          version: !empty(chatGptModelVersion) ? chatGptModelVersion : '0613'
         }
         sku: {
           name: 'Standard'
@@ -288,7 +304,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : azureOpenAIEmbeddingsModelName
         model: {
           format: 'OpenAI'
-          name: azureOpenAIEmbeddingsModelName
+          name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : 'text-embedding-ada-002'
           version: '2'
         }
         sku: {
@@ -452,7 +468,7 @@ module functions 'core/function/function.bicep' = {
     name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
     location: location
     tags: tags
-    appServicePlanId: appServicePlan.outputs.id
+    appServicePlanId: funcServicePlan.outputs.id
     runtime: 'python'
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
@@ -667,6 +683,7 @@ resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (
     }
   }
 }
+
 
 output AZURE_LOCATION string = location
 output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName //cognitiveServices.outputs.name

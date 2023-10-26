@@ -310,8 +310,7 @@ def main(msg: func.QueueMessage) -> None:
         output_filename = file_name + '-0.json'
         chunk_file=f'{folder_set}{output_filename}'
 
-        # chunk_file = f"{blob_path.replace('upload/', '')}/{file_name}-0.json" #functional-test/test_example.jpg/test_example-0.json
-        index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), blob_path, blob_uri)
+        index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri)
 
         statusLog.upsert_document(
             blob_path,
@@ -331,7 +330,7 @@ def main(msg: func.QueueMessage) -> None:
     statusLog.save_document(blob_path)
 
 
-def index_section(index_content, file_name, chunk_id, blob_path, blob_uri):
+def index_section(index_content, file_name, chunk_id, chunk_file, blob_path, blob_uri):
     """ Pushes a batch of content to the search index
     """
 
@@ -345,7 +344,7 @@ def index_section(index_content, file_name, chunk_id, blob_path, blob_uri):
     index_chunk['title'] = file_name
     index_chunk['content'] = index_content
     index_chunk['pages'] = [0]
-    index_chunk['chunk_file'] = file_name
+    index_chunk['chunk_file'] = chunk_file
     index_chunk['file_class'] = MediaType.IMAGE
     batch.append(index_chunk)
 

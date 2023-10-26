@@ -97,6 +97,9 @@
     },
     "subscriptionId": {
       "value": "${SUBSCRIPTION_ID}"
+    },
+    "applicationtitle": {
+      "value": "${APPLICATION_TITLE}"
     }
   }
 }

@@ -18,7 +18,7 @@ Now that the message is in the **pdf-polling-queue**, the next function picks th
 
 We use this two function polling and queue pattern, rather than the SDK which uses polling also, because the processing of the PDF file can take multiple minutes. This prevents us than having an Azure Function running and just waiting, or failing if the time is too much.
 
-The other main path through the flow is for non-PDF files. The **FileLayoutParsingOther** function listens to the **non-pdf-submit-queue** and starts processing new messages when they are received. this will convert DocX to html, if the file type is html or htm, and then it will build the same document map structure as was created for PDF files. Likewise, this function will call the same shared code functions to generate the chunks.
+The other main path through the flow is for non-PDF files. The **FileLayoutParsingOther** function listens to the **non-pdf-submit-queue** and starts processing new messages when they are received. This function uses the [unstructured.io](https://unstructured-io.github.io/unstructured/index.html) library to read variosu document types adn convert them to chunks.
 
 ## Function Configuration
 

@@ -63,22 +63,6 @@
     width: 100%;
   }
 
-  .folderArea {
-    display: flex;
-    flex-direction: column;
-    justify-content: right;
-    width: 600px;
-    padding-bottom: 20px;
-  }
-
-  .folderSelection {
-    display: flex;
-    flex-direction: row;
-    padding-bottom: 5px;
-    justify-content: left;
-    text-align: left;
-  }
-
   .tagArea {
     display: flex;
     flex-direction: column;

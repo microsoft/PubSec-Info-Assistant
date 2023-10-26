@@ -30,6 +30,7 @@ from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 from core.modelhelper import num_tokens_from_messages
 import requests
+from approaches.prompttemplate import PromptTemplate
 from urllib.parse import quote
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
@@ -44,36 +45,6 @@ class ChatReadRetrieveReadApproach(Approach):
     USER = "user"
     ASSISTANT = "assistant"
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above.
-    Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
-    
-    Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
-    the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
-    
-    Here is how you should answer every question:
-    
-    -Look for relevant information in the above source documents to answer the question.
-    -If the source document does not include the exact answer, please respond with relevant information from the data in the response along with citation.You must include a citation to each document referenced.      
-    -If you cannot find any relevant information in the above sources, respond with I am not sure.Do not provide personal opinions or assumptions.
-    
-    {follow_up_questions_prompt}
-    {injected_prompt}
-    
-    """
-    follow_up_questions_prompt_content = """
-    Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-    Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
-    """
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
-    Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
-    Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
-    Do not include any text inside [] or <<<>>> in the search query terms.
-    Do not include any special characters like '+'.
-    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
-    If you cannot generate a search query, return just the number 0.
-    """
-
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
     {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
@@ -148,7 +119,9 @@ class ChatReadRetrieveReadApproach(Approach):
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
 
-        query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
+        prompt_templates = PromptTemplate(overrides.get("byPassGrounding"))
+
+        query_prompt=prompt_templates.Query_Prompt_Template.format(query_term_language=self.query_term_language)
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
@@ -188,35 +161,37 @@ class ChatReadRetrieveReadApproach(Approach):
         else:
             print('Error generating embedding:', response.status_code)
             raise Exception('Error generating embedding:', response.status_code)
-        
-        #vector set up for pure vector search & Hybrid search & Hybrid semantic
-        vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
-            
-        # Hybrid Search
-        # r = self.search_client.search(generated_query, vectors=[vector], top=top)
-        
-        # Pure Vector Search
-        # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
-        
-        # vector search with filter
-        # r=self.search_client.search(search_text=None, vectors=[vector], filter="processed_datetime le 2023-09-18T04:06:29.675Z" , top=top)
-        # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
-        #  hybrid semantic search using semantic reranker
-        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
-            r = self.search_client.search(
-                generated_query,
-                query_type=QueryType.SEMANTIC,
-                query_language="en-us",
-                query_speller="lexicon",
-                semantic_configuration_name="default",
-                top=top,
-                query_caption="extractive|highlight-false"
-                if use_semantic_captions else None,
-                vectors=[vector]
-            )
-        else:
-            r = self.search_client.search(
+        # If we don't bypass ground then proceed with Vector + Search
+        if not overrides.get("byPassGrounding"):
+            #vector set up for pure vector search & Hybrid search & Hybrid semantic
+            vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
+                
+            # Hybrid Search
+            # r = self.search_client.search(generated_query, vectors=[vector], top=top)
+            
+            # Pure Vector Search
+            # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
+            
+            # vector search with filter
+            # r=self.search_client.search(search_text=None, vectors=[vector], filter="processed_datetime le 2023-09-18T04:06:29.675Z" , top=top)
+            # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
+
+            #  hybrid semantic search using semantic reranker
+            if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
+                r = self.search_client.search(
+                    generated_query,
+                    query_type=QueryType.SEMANTIC,
+                    query_language="en-us",
+                    query_speller="lexicon",
+                    semantic_configuration_name="default",
+                    top=top,
+                    query_caption="extractive|highlight-false"
+                    if use_semantic_captions else None,
+                    vectors=[vector]
+                )
+            else:
+                r = self.search_client.search(
                 generated_query, top=top,vectors=[vector]
             )
 
@@ -224,25 +199,28 @@ class ChatReadRetrieveReadApproach(Approach):
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
 
-        for idx, doc in enumerate(r):  # for each document in the search results
-            # include the "FileX" moniker in the prompt, and the actual file name in the response
-            results.append(
-                f"File{idx} " + "| " + nonewlines(doc[self.content_field])
-            )
-            data_points.append(
-               "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[4:]
-                ) + "| " + nonewlines(doc[self.content_field])
+        # If we don't bypass ground then proceed with Vector + Search
+        if not overrides.get("byPassGrounding"):
+            for idx, doc in enumerate(r):  # for each document in the search results
+                # include the "FileX" moniker in the prompt, and the actual file name in the response
+                results.append(
+                    f"File{idx} " + "| " + nonewlines(doc[self.content_field])
                 )
-            # uncomment to debug size of each search result content_field
-            # print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + /
-            #  "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
+                data_points.append(
+                "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[4:]
+                    ) + "| " + nonewlines(doc[self.content_field])
+                    )
+                # uncomment to debug size of each search result content_field
+                # print(f"File{idx}: ", self.num_tokens_from_string(f"File{idx} " + /
+                #  "| " + nonewlines(doc[self.content_field]), "cl100k_base"))
 
-            # add the "FileX" moniker and full file name to the citation lookup
-            citation_lookup[f"File{idx}"] = {
-                "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
-                "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
-                "page_number": str(doc[self.page_number_field][0]) or "0",
-             }
+                # add the "FileX" moniker and full file name to the citation lookup
+                citation_lookup[f"File{idx}"] = {
+                    "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
+                    "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
+                    "page_number": str(doc[self.page_number_field][0]) or "0",
+                }
+
 
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
@@ -253,7 +231,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
-            self.follow_up_questions_prompt_content
+            prompt_templates.Follow_Up_Questions_Prompt_Content
             if overrides.get("suggest_followup_questions")
             else ""
         )
@@ -262,7 +240,7 @@ class ChatReadRetrieveReadApproach(Approach):
         prompt_override = overrides.get("prompt_template")
 
         if prompt_override is None:
-            system_message = self.system_message_chat_conversation.format(
+            system_message = prompt_templates.System_Message_Chat_Conversation.format(
                 injected_prompt="",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -272,7 +250,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 systemPersona=system_persona,
             )
         elif prompt_override.startswith(">>>"):
-            system_message = self.system_message_chat_conversation.format(
+            system_message = prompt_templates.System_Message_Chat_Conversation.format(
                 injected_prompt=prompt_override[3:] + "\n ",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -282,7 +260,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 systemPersona=system_persona,
             )
         else:
-            system_message = self.system_message_chat_conversation.format(
+            system_message = prompt_templates.System_Message_Chat_Conversation.format(
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
                     response_length

@@ -31,6 +31,7 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
+    const [useBypassGrounding, setUseByPassGrounding] = useState<boolean>(false);
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
@@ -79,6 +80,7 @@ const Chat = () => {
                     semanticRanker: useSemanticRanker,
                     semanticCaptions: useSemanticCaptions,
                     suggestFollowupQuestions: useSuggestFollowupQuestions,
+                    byPassGrounding: useBypassGrounding,
                     userPersona: userPersona,
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
@@ -197,6 +199,10 @@ const Chat = () => {
 
     const onUseSuggestFollowupQuestionsChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
         setUseSuggestFollowupQuestions(!!checked);
+    };
+
+    const onUseByPassGroundingChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
+        setUseByPassGrounding(!!checked);
     };
 
     const onExampleClicked = (example: string) => {
@@ -368,6 +374,12 @@ const Chat = () => {
                                 checked={useSuggestFollowupQuestions}
                                 label="Suggest follow-up questions"
                                 onChange={onUseSuggestFollowupQuestionsChange}
+                            />
+                             <Checkbox
+                                className={styles.chatSettingsSeparator}
+                                checked={useBypassGrounding}
+                                label="Ask GPT Directly (bypass grounding)"
+                                onChange={onUseByPassGroundingChange}
                             />
                             <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />

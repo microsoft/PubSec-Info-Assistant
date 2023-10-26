@@ -179,7 +179,7 @@ class StatusLog:
                         "status": status,
                         "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                         "status_classification": str(status_classification.value),
-                        "stack_trace": self.get_stack_trace()
+                        "stack_trace": self.get_stack_trace() if not fresh_start else None
                     }
                 ]
             }

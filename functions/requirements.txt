@@ -13,7 +13,7 @@ azure-storage-queue == 12.6.0
 nltk == 3.8.1
 tenacity == 8.2.2
 azure-ai-vision
-unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.10.27
+unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.10.18
 pyoo == 1.4
 azure-search-documents == 11.4.0b3
 

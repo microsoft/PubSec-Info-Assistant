@@ -3,7 +3,7 @@ param logWorkbookName string = ''
 param componentResource string = ''
 
 resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
-  name: 'App Log Workbook'
+  name: logWorkbookName
   location: location
   properties: {
     galleries: [
@@ -22,7 +22,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
     {
       type: 1
       content: {
-        json: '\r\n\r\nApplication Logs'
+        json: '\r\n\r\nApplication Logs (Last 6 Hours)'
       }
       name: 'text - 3'
     }
@@ -30,7 +30,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
       type: 3
       content: {
         version: 'KqlItem/1.0'
-        query: 'AppServiceConsoleLogs'
+        query: 'AppServiceConsoleLogs | where TimeGenerated > ago(6h)'
         size: 0
         timeContext: {
           durationMs: 86400000
@@ -46,7 +46,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
     {
       type: 1
       content: {
-        json: 'Function Logs'
+        json: 'Function Logs (Last 6 Hours)'
       }
       name: 'text - 4'
     }
@@ -54,7 +54,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
       type: 3
       content: {
         version: 'KqlItem/1.0'
-        query: 'AppTraces'
+        query: 'AppTraces | where TimeGenerated > ago(6h)'
         size: 0
         timeContext: {
           durationMs: 86400000
@@ -70,7 +70,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
     {
       type: 1
       content: {
-        json: 'App Service Deployment Logs'
+        json: 'App Service Deployment Logs (Last 6 Hours)'
       }
       name: 'text - 5'
     }
@@ -78,7 +78,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
       type: 3
       content: {
         version: 'KqlItem/1.0'
-        query: 'AppServicePlatformLogs'
+        query: 'AppServicePlatformLogs | where TimeGenerated > ago(6h)'
         size: 0
         timeContext: {
           durationMs: 86400000

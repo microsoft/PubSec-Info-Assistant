@@ -79,6 +79,7 @@ def main(myblob: func.InputStream):
         
     except Exception as err:
         logging.error(f"{function_name} - An error occurred - {str(err)}")
-        statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(err)}", StatusClassification.ERROR, State.ERROR)
+        if statusLog is not None:
+            statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(err)}", StatusClassification.ERROR, State.ERROR)
 
     statusLog.save_document(myblob.name)

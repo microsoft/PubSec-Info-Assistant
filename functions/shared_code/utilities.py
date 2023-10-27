@@ -12,6 +12,7 @@ from nltk.tokenize import sent_tokenize
 import tiktoken
 import nltk
 nltk.download('punkt')
+nltk.data.load('tokenizers/punkt/english.pickle')
 
 class ParagraphRoles(Enum):
     """ Enum to define the priority of paragraph roles """

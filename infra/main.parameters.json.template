@@ -59,6 +59,9 @@
     "chatWarningBannerText": {
        "value": "${CHAT_WARNING_BANNER_TEXT}"
     },
+    "enableRagBypass": {
+       "value": "${ENABLE_RAG_BYPASS}"
+    },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
     },

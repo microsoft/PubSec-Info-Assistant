@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner, StatusLogEntry, StatusLogResponse, ApplicationTitle } from "./models";
+import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner, StatusLogEntry, StatusLogResponse, ApplicationTitle, GetConfigurationsResponse } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -144,6 +144,22 @@ export async function getInfoData(): Promise<GetInfoResponse> {
         }
     });
     const parsedResponse: GetInfoResponse = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getConfigurations(): Promise<GetConfigurationsResponse> {
+    const response = await fetch("/getConfigurations", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: GetConfigurationsResponse = await response.json();
     if (response.status > 299 || !response.ok) {
         console.log(response);
         throw Error(parsedResponse.error || "Unknown error");

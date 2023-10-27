@@ -102,6 +102,11 @@ export type GetInfoResponse = {
     error?: string;
 };
 
+export type GetConfigurationsResponse = {
+    ENABLE_RAG_BYPASS: boolean;
+    error?: string;
+};
+
 export type ActiveCitation = {
     file_name: string;
     file_uri: string;

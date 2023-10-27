@@ -57,7 +57,6 @@ param sentenceTransformersModelName string = 'BAAI/bge-small-en-v1.5'
 param sentenceTransformerEmbeddingVectorSize string = '384'
 param embeddingsDeploymentCapacity int = 240
 param chatWarningBannerText string = ''
-param enableRagBypass string = ''
 param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
 param chatGptDeploymentCapacity int = 240
@@ -271,8 +270,6 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
-      CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
-      ENABLE_RAG_BYPASS: enableRagBypass
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       APPLICATION_TITLE: applicationtitle

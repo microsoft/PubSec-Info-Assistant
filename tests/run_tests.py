@@ -96,6 +96,7 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
                 # Upload the file to the container
                 file_name = os.path.basename(test_file)
                 upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{file_name}', file.read())
+                time.sleep(15)
 
         console.print("Test Files uploaded successfully.")
 

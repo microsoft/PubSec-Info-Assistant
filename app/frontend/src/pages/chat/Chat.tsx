@@ -9,7 +9,7 @@ import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
-import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, GetConfigurationsResponse, getConfigurations } from "../../api";
+import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { ExampleList } from "../../components/Example";
@@ -59,24 +59,6 @@ const Chat = () => {
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
-
-    const [config, setConfigurations] = useState<GetConfigurationsResponse>();
-
-    async function fetchConfigurations() {
-        console.log("Fetch Configurations");
-        try {
-            const configurations = await getConfigurations();    
-
-            setConfigurations(configurations);
-        } catch (error) {
-            // Handle the error here
-            console.log(error);
-        }
-    }
-
-    useEffect(() => {
-        fetchConfigurations();
-    });
 
     const makeApiRequest = async (question: string) => {
         lastQuestionRef.current = question;

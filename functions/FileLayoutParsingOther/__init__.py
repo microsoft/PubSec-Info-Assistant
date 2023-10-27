@@ -11,9 +11,6 @@ from azure.storage.blob import generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities, MediaType
-import nltk
-nltk.download('punkt')
-nltk.data.load('tokenizers/punkt/english.pickle')
 
 import requests
 

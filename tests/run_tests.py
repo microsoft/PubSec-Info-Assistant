@@ -83,7 +83,7 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
         current_duration = 0
 
         #Wait for deployment to settle
-        time.sleep(int(wait_time_seconds))
+        time.sleep(15)
         
         # Upload the files to the container
         upload_container_client = blob_service_client.get_container_client(UPLOAD_CONTAINER_NAME)
@@ -95,6 +95,7 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
             with open(os.path.join(FILE_PATH, test_file), "rb") as file:
                 # Upload the file to the container
                 file_name = os.path.basename(test_file)
+                console.print(f"Uploading '{file_name}'")
                 upload_container_client.upload_blob(f'{UPLOAD_FOLDER_NAME}/{file_name}', file.read())
                 time.sleep(15)
 

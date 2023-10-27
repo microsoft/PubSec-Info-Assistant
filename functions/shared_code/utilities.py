@@ -8,11 +8,10 @@ from datetime import datetime
 from enum import Enum
 from azure.storage.blob import BlobServiceClient
 from shared_code.utilities_helper import UtilitiesHelper
-#from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize
 import tiktoken
 import nltk
 nltk.download('punkt')
-sent_tokenize = nltk.data.load('tokenizers/punkt/english.pickle')
 
 class ParagraphRoles(Enum):
     """ Enum to define the priority of paragraph roles """

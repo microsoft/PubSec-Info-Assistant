@@ -152,3 +152,7 @@ export type StatusLogResponse = {
     error?: string;
 }
 
+export type ApplicationTitle = {
+    APPLICATION_TITLE: string;
+    error?: string;
+};

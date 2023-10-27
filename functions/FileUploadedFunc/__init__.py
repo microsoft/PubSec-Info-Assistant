@@ -2,14 +2,14 @@
 # Licensed under the MIT license.
 
 import logging
+import os
+import json
+import random
+import time
+from shared_code.status_log import StatusLog, State, StatusClassification
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-import logging
-import os
-import json
-from shared_code.status_log import StatusLog, State, StatusClassification
-import random
 
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -30,16 +30,17 @@ function_name = "FileUploadedFunc"
 def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
 
-    
-
     try:
+        base_retry_delay = 3
+        delay = base_retry_delay + random.randint(1, 10)
+        time.sleep(delay)  # add a random delay
         statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
-        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
-        statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
+        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)
+        statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)
         
         # Create message structure to send to queue
       
-        file_extension = os.path.splitext(myblob.name)[1][1:].lower()     
+        file_extension = os.path.splitext(myblob.name)[1][1:].lower()
         if file_extension == 'pdf':
              # If the file is a PDF a message is sent to the PDF processing queue.
             queue_name = pdf_submit_queue
@@ -79,7 +80,6 @@ def main(myblob: func.InputStream):
         
     except Exception as err:
         logging.error(f"{function_name} - An error occurred - {str(err)}")
-        if statusLog is not None:
-            statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(err)}", StatusClassification.ERROR, State.ERROR)
+        statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(err)}", StatusClassification.ERROR, State.ERROR)
 
     statusLog.save_document(myblob.name)

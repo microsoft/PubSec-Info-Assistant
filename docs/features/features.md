@@ -19,13 +19,7 @@
 
 ## Document Pre-processing
 
-The Information Assistant Accelerator pre-processes certain document types to allow better understanding of large complex documents. Currently we apply special processing on:
-
-* [PDF](document_pre_processing.md#pdf-pre-processing)
-* [HTML](document_pre_processing.md#html-pre-processing)
-* [DOCX](document_pre_processing.md#docx-pre-processing)
-
-For more details on how we process each document type click on on the document type in the list above.
+The Information Assistant Accelerator [pre-processes](document_pre_processing.md#pdf-pre-processing) certain document types to allow better understanding of large complex documents. 
 
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](../../functions/shared_code/status_log.md) page for more details.
 
@@ -120,5 +114,3 @@ Check out how to [enable Customer Usage Attribution](enable_customer_usage_attri
 ### Sovereign Region Deployment
 
 Check out how to [setup Sovereign Region Deployment](enable_sovereign_deployment.md)
-
-

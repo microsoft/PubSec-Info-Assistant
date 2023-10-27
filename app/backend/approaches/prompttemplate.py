@@ -8,7 +8,7 @@ class PromptTemplate:
 
     def __init__(self, bypassGounding):
         if bypassGounding:
-            self.init_bypass_grounding()
+            self.init_bypass_rag()
         else:
             self.init_rag()
 
@@ -46,7 +46,7 @@ class PromptTemplate:
         If you cannot generate a search query, return just the number 0.
         """
 
-    def init_bypass_grounding(self):
+    def init_bypass_rag(self):
 
         self.System_Message_Chat_Conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
         User persona is {userPersona} 

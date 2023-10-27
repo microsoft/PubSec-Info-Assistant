@@ -17,7 +17,7 @@ export type AskRequestOverrides = {
     promptTemplatePrefix?: string;
     promptTemplateSuffix?: string;
     suggestFollowupQuestions?: boolean;
-    byPassGrounding?: boolean;
+    byPassRAG?: boolean;
     userPersona?: string;
     systemPersona?: string;
     aiPersona?: string;

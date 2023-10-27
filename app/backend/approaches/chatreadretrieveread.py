@@ -119,7 +119,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
 
-        prompt_templates = PromptTemplate(overrides.get("byPassGrounding"))
+        prompt_templates = PromptTemplate(overrides.get("byPassRAG"))
 
         query_prompt=prompt_templates.Query_Prompt_Template.format(query_term_language=self.query_term_language)
 
@@ -163,7 +163,7 @@ class ChatReadRetrieveReadApproach(Approach):
             raise Exception('Error generating embedding:', response.status_code)
 
         # If we don't bypass ground then proceed with Vector + Search
-        if not overrides.get("byPassGrounding"):
+        if not overrides.get("byPassRAG"):
             #vector set up for pure vector search & Hybrid search & Hybrid semantic
             vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
                 
@@ -200,7 +200,7 @@ class ChatReadRetrieveReadApproach(Approach):
         data_points = []  # list of data points to be used in the response
 
         # If we don't bypass ground then proceed with Vector + Search
-        if not overrides.get("byPassGrounding"):
+        if not overrides.get("byPassRAG"):
             for idx, doc in enumerate(r):  # for each document in the search results
                 # include the "FileX" moniker in the prompt, and the actual file name in the response
                 results.append(

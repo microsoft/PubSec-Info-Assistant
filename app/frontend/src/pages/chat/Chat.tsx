@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton} from "@fluentui/react";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator} from "@fluentui/react";
 import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
 
 import styles from "./Chat.module.css";
@@ -31,7 +31,7 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
-    const [useBypassGrounding, setUseByPassGrounding] = useState<boolean>(false);
+    const [useBypassRAG, setUseByPassRAG] = useState<boolean>(false);
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
@@ -80,7 +80,7 @@ const Chat = () => {
                     semanticRanker: useSemanticRanker,
                     semanticCaptions: useSemanticCaptions,
                     suggestFollowupQuestions: useSuggestFollowupQuestions,
-                    byPassGrounding: useBypassGrounding,
+                    byPassRAG: useBypassRAG,
                     userPersona: userPersona,
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
@@ -201,8 +201,8 @@ const Chat = () => {
         setUseSuggestFollowupQuestions(!!checked);
     };
 
-    const onUseByPassGroundingChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-        setUseByPassGrounding(!!checked);
+    const onUseByPassRAGChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
+        setUseByPassRAG(!!checked);
     };
 
     const onExampleClicked = (example: string) => {
@@ -375,16 +375,19 @@ const Chat = () => {
                                 label="Suggest follow-up questions"
                                 onChange={onUseSuggestFollowupQuestionsChange}
                             />
-                             <Checkbox
-                                className={styles.chatSettingsSeparator}
-                                checked={useBypassGrounding}
-                                label="Ask GPT Directly (bypass grounding)"
-                                onChange={onUseByPassGroundingChange}
-                            />
                             <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
+
+                            <Separator className={styles.chatSettingsSeparator}>Data Source Grounding</Separator>
+
+                            <Checkbox
+                                className={styles.chatSettingsSeparator}
+                                checked={useBypassRAG}
+                                label="Ask GPT Directly (bypass RAG)"
+                                onChange={onUseByPassRAGChange}
+                            />
                 </Panel>
 
                 <Panel

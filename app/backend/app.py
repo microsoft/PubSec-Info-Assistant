@@ -49,6 +49,7 @@ AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 str_to_bool = {'true': True, 'false': False}
 IS_GOV_CLOUD_DEPLOYMENT = str_to_bool.get(os.environ.get("IS_GOV_CLOUD_DEPLOYMENT").lower()) or False
 CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT") or ""
+ENABLE_RAG_BYPASS = str_to_bool.get(os.environ.get("ENABLE_RAG_BYPASS").lower()) or False
 APPLICATION_TITLE = os.environ.get("APPLICATION_TITLE") or "Information Assistant, built with Azure OpenAI"
 
 
@@ -255,6 +256,15 @@ def get_warning_banner():
     response = jsonify(
         {
             "WARNING_BANNER_TEXT": f"{CHAT_WARNING_BANNER_TEXT}"
+        })
+    return response
+
+# Return a set of configurations.
+@app.route("/getConfigurations")
+def get_configurations():
+    response = jsonify(
+        {
+            "ENABLE_RAG_BYPASS": f"{ENABLE_RAG_BYPASS}"
         })
     return response
 

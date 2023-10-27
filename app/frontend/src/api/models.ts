@@ -17,7 +17,7 @@ export type AskRequestOverrides = {
     promptTemplatePrefix?: string;
     promptTemplateSuffix?: string;
     suggestFollowupQuestions?: boolean;
-    byPassGrounding?: boolean;
+    byPassRAG?: boolean;
     userPersona?: string;
     systemPersona?: string;
     aiPersona?: string;
@@ -99,6 +99,11 @@ export type GetInfoResponse = {
     AZURE_SEARCH_SERVICE: string;
     AZURE_SEARCH_INDEX: string;
     TARGET_LANGUAGE: string;
+    error?: string;
+};
+
+export type GetConfigurationsResponse = {
+    ENABLE_RAG_BYPASS: boolean;
     error?: string;
 };
 

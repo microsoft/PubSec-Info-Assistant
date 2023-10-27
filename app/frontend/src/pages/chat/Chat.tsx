@@ -9,7 +9,7 @@ import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
-import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn } from "../../api";
+import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, GetConfigurationsResponse, getConfigurations } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { ExampleList } from "../../components/Example";
@@ -31,7 +31,7 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
-    const [useBypassGrounding, setUseByPassGrounding] = useState<boolean>(false);
+    const [useBypassRAG, setUseByPassRAG] = useState<boolean>(false);
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
@@ -60,6 +60,24 @@ const Chat = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
 
+    const [config, setConfigurations] = useState<GetConfigurationsResponse>();
+
+    async function fetchConfigurations() {
+        console.log("Fetch Configurations");
+        try {
+            const configurations = await getConfigurations();    
+
+            setConfigurations(configurations);
+        } catch (error) {
+            // Handle the error here
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        fetchConfigurations();
+    });
+
     const makeApiRequest = async (question: string) => {
         lastQuestionRef.current = question;
 
@@ -80,7 +98,7 @@ const Chat = () => {
                     semanticRanker: useSemanticRanker,
                     semanticCaptions: useSemanticCaptions,
                     suggestFollowupQuestions: useSuggestFollowupQuestions,
-                    byPassGrounding: useBypassGrounding,
+                    byPassRAG: useBypassRAG,
                     userPersona: userPersona,
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
@@ -201,8 +219,8 @@ const Chat = () => {
         setUseSuggestFollowupQuestions(!!checked);
     };
 
-    const onUseByPassGroundingChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-        setUseByPassGrounding(!!checked);
+    const onUseByPassRAGChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
+        setUseByPassRAG(!!checked);
     };
 
     const onExampleClicked = (example: string) => {
@@ -375,12 +393,14 @@ const Chat = () => {
                                 label="Suggest follow-up questions"
                                 onChange={onUseSuggestFollowupQuestionsChange}
                             />
-                             <Checkbox
-                                className={styles.chatSettingsSeparator}
-                                checked={useBypassGrounding}
-                                label="Ask GPT Directly (bypass grounding)"
-                                onChange={onUseByPassGroundingChange}
-                            />
+                            {config?.ENABLE_RAG_BYPASS && 
+                                <Checkbox
+                                    className={styles.chatSettingsSeparator}
+                                    checked={useBypassRAG}
+                                    label="Ask GPT Directly (bypass RAG)"
+                                    onChange={onUseByPassRAGChange}
+                                />
+                            }
                             <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>

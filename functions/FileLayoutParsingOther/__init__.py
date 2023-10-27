@@ -95,7 +95,7 @@ def PartitionFile(file_extension: str, file_url: str):
             from unstructured.partition.pptx import partition_pptx
             elements = partition_pptx(file=bytes_io)
             
-        elif file_extension == '.txt':
+        elif any(file_extension in x for x in ['.txt', '.json']):
             from unstructured.partition.text import partition_text
             elements = partition_text(file=bytes_io)
             

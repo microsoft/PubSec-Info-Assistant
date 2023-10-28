@@ -31,9 +31,7 @@ def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
 
     try:
-        base_retry_delay = 3
-        delay = base_retry_delay + random.randint(1, 10)
-        time.sleep(delay)  # add a random delay
+        time.sleep(random.randint(1, 2))  # add a random delay
         statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
         statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)

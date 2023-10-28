@@ -145,6 +145,8 @@ class ChatReadRetrieveReadApproach(Approach):
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
+        folder_filter = overrides.get("selected_folders", "")
+        tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
 
@@ -188,13 +190,24 @@ class ChatReadRetrieveReadApproach(Approach):
         else:
             print('Error generating embedding:', response.status_code)
             raise Exception('Error generating embedding:', response.status_code)
-        
+
         #vector set up for pure vector search & Hybrid search & Hybrid semantic
         vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
-            
+
+        #Create a filter for the search query
+        if (folder_filter != "") & (folder_filter != "All"):
+            search_filter = f"search.in(folder, '{folder_filter}')"
+        else:
+            search_filter = None
+        if tags_filter != "" :
+            if search_filter is not None:
+                search_filter = search_filter + f" and tags/any(t: search.in(t, '{tags_filter}')')"
+            else:
+                search_filter = f"tags/any(t: search.in(t, '{tags_filter}'))'"
+
         # Hybrid Search
         # r = self.search_client.search(generated_query, vectors=[vector], top=top)
-        
+
         # Pure Vector Search
         # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
         
@@ -213,11 +226,12 @@ class ChatReadRetrieveReadApproach(Approach):
                 top=top,
                 query_caption="extractive|highlight-false"
                 if use_semantic_captions else None,
-                vectors=[vector]
+                vectors=[vector],
+                filter=search_filter if search_filter is not None else None
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vectors=[vector]
+                generated_query, top=top,vectors=[vector], filter=search_filter if search_filter is not None else None
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name

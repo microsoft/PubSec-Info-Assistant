@@ -3,17 +3,13 @@
 
 import { useState } from 'react';
 import { Pivot,
-    PivotItem,
-    TooltipHost,
-    ITooltipHostStyles} from "@fluentui/react";
-import { useId } from '@fluentui/react-hooks';
-import { Info16Regular } from '@fluentui/react-icons';
+    PivotItem } from "@fluentui/react";
 import { FilePicker } from "../../components/filepicker/file-picker";
 import { FileStatus } from "../../components/FileStatus/FileStatus";
 import { TagPickerInline } from "../../components/TagPicker/TagPicker"
+import { FolderPicker } from '../../components/FolderPicker/FolderPicker';
 
 import styles from "./Content.module.css";
-import { FolderPicker } from '../../components/FolderPicker/FolderPicker';
 
 export interface IButtonExampleProps {
     // These are set based on the toggles shown above the examples (not needed in real code)
@@ -22,27 +18,19 @@ export interface IButtonExampleProps {
   }
 
 const Content = () => {
-    const tooltipId = useId('tooltip');
-    const hostStyles: Partial<ITooltipHostStyles> = { root: { display: 'inline-block' } };
     const [selectedKey, setSelectedKey] = useState<string | undefined>(undefined);
-    
+
+    const onSelectedKeyChanged = (selectedFolder: string[]) => {
+        setSelectedKey(selectedFolder[0]);
+    };
+
     return (
         <div className={styles.contentArea} >
             <Pivot aria-label="Upload Files Section" className={styles.topPivot}>
                 <PivotItem headerText="Upload Files" aria-label="Upload Files Tab">
                     <div className={styles.App} >
-                        <FolderPicker allowFolderCreation={true} />
-                        <div className={styles.tagArea}>
-                            <div className={styles.tagSelection}>
-                                <TagPickerInline allowNewTags={true} />
-                                <TooltipHost content="Tags to append to each document uploaded below."
-                                        styles={hostStyles}
-                                        id={tooltipId}>
-                                    <Info16Regular></Info16Regular>
-                                </TooltipHost>
-                            </div>
-
-                        </div>
+                        <FolderPicker allowFolderCreation={true} onSelectedKeyChange={onSelectedKeyChanged}/>
+                        <TagPickerInline allowNewTags={true} />
                         <FilePicker folderPath={selectedKey || ""}/>
                     </div>
                 </PivotItem>

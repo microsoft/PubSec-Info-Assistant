@@ -62,25 +62,4 @@
     justify-content: center;
     width: 100%;
   }
-
-  .tagArea {
-    display: flex;
-    flex-direction: column;
-    justify-content: right;
-    width: 600px;
-    padding-bottom: 20px;
-  }
-
-  .tagSelection {
-    display: flex;
-    flex-direction: row;
-    padding-bottom: 5px;
-    justify-content: left;
-    text-align: left;
-    height: 90px;
-  }
-
-  .actionButton {
-    width: 180px;
-  }
   

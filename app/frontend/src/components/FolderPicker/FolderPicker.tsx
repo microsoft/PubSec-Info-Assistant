@@ -4,8 +4,10 @@
 import { useState, useEffect } from 'react';
 import { useId, useBoolean } from '@fluentui/react-hooks';
 import { ComboBox,
+    IComboBox,
     IComboBoxOption,
     IComboBoxStyles,
+    SelectableOptionMenuItemType,
     TooltipHost,
     ITooltipHostStyles,
     ActionButton, 
@@ -25,17 +27,22 @@ var allowNewFolders = false;
 
 interface Props {
     allowFolderCreation?: boolean;
+    onSelectedKeyChange: (selectedFolders: string[]) => void;
 }
 
-export const FolderPicker = ({allowFolderCreation}: Props) => {
+export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange}: Props) => {
 
     const buttonId = useId('targetButton');
     const tooltipId = useId('folderpicker-tooltip');
     const textFieldId = useId('textField');
 
     const [teachingBubbleVisible, { toggle: toggleTeachingBubbleVisible }] = useBoolean(false);
-    const [selectedKey, setSelectedKey] = useState<string | undefined>(undefined);
+    const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
     const [options, setOptions] = useState<IComboBoxOption[]>([]);
+    const selectableOptions = options.filter(
+        option =>
+          (option.itemType === SelectableOptionMenuItemType.Normal || option.itemType === undefined) && !option.disabled,
+      );
     const comboBoxStyles: Partial<IComboBoxStyles> = { root: { maxWidth: 300 } };
     const hostStyles: Partial<ITooltipHostStyles> = { root: { display: 'inline-block' } };
     const addFolderIcon: IIconProps = { iconName: 'Add' };
@@ -62,7 +69,8 @@ export const FolderPicker = ({allowFolderCreation}: Props) => {
             var currentOptions = options;
             currentOptions.push({key: textField.defaultValue, text: textField.defaultValue});
             setOptions(currentOptions)
-            setSelectedKey(textField.defaultValue);
+            setSelectedKeys([textField.defaultValue]);
+            onSelectedKeyChange([textField.defaultValue]);
             toggleTeachingBubbleVisible();
         }
     });
@@ -79,6 +87,9 @@ export const FolderPicker = ({allowFolderCreation}: Props) => {
             var containerClient = blobServiceClient.getContainerClient("upload");
             const delimiter = "/";
             const prefix = "";
+            var newOptions: IComboBoxOption[] = allowNewFolders ? [] : [(
+                { key: 'selectAll', text: 'Select All', itemType: SelectableOptionMenuItemType.SelectAll }
+                )];
             for await (const item of containerClient.listBlobsByHierarchy(delimiter, {
                 prefix,
               })) {
@@ -86,11 +97,19 @@ export const FolderPicker = ({allowFolderCreation}: Props) => {
                 if (item.kind === "prefix") {
                   // Get the folder name and add to the dropdown list
                   var folderName = item.name.slice(0,-1);
-                  var newOptions = options;
+                  
                   newOptions.push({key: folderName, text: folderName});
                   setOptions(newOptions);
                 }
               }
+              if (!allowNewFolders) {
+                var filteredOptions = newOptions.filter(
+                    option =>
+                      (option.itemType === SelectableOptionMenuItemType.Normal || option.itemType === undefined) && !option.disabled,
+                  );
+                setSelectedKeys(['selectAll', ...filteredOptions.map(o => o.key as string)]);
+                onSelectedKeyChange(['selectAll', ...filteredOptions.map(o => o.key as string)]);
+              } 
         } catch (error) {
             // Handle the error here
             console.log(error);
@@ -125,22 +144,62 @@ export const FolderPicker = ({allowFolderCreation}: Props) => {
         };
     }
 
+    const onChange = (
+        event: React.FormEvent<IComboBox>,
+        option?: IComboBoxOption,
+        index?: number,
+        value?: string,
+      ): void => {
+        const selected = option?.selected;
+        const currentSelectedOptionKeys = selectedKeys.filter(key => key !== 'selectAll');
+        const selectAllState = currentSelectedOptionKeys.length === selectableOptions.length;
+        if (!allowNewFolders) {
+            if (option) {
+            if (option?.itemType === SelectableOptionMenuItemType.SelectAll) {
+                if (selectAllState) {
+                    setSelectedKeys([])
+                    onSelectedKeyChange([]);
+                }
+                else {
+                    setSelectedKeys(['selectAll', ...selectableOptions.map(o => o.key as string)]);
+                    onSelectedKeyChange(['selectAll', ...selectableOptions.map(o => o.key as string)]);
+                }
+            } else {
+                const updatedKeys = selected
+                ? [...currentSelectedOptionKeys, option!.key as string]
+                : currentSelectedOptionKeys.filter(k => k !== option.key);
+                if (updatedKeys.length === selectableOptions.length) {
+                updatedKeys.push('selectAll');
+                }
+                setSelectedKeys(updatedKeys);
+                onSelectedKeyChange(updatedKeys);
+            }
+            }
+        }
+        else { 
+            setSelectedKeys([option!.key as string]);
+            onSelectedKeyChange([option!.key as string]);
+        }
+      };
+
     return (
         <div className={styles.folderArea}>
             <div className={styles.folderSelection}>
                 <ComboBox
-                    selectedKey={selectedKey}
-                    label="Folder Selection"
+                    multiSelect={allowNewFolders? false : true}
+                    selectedKey={selectedKeys}
+                    label={allowNewFolders? "Folder Selection" : "Folder Selection (Select multiple folders)"}
                     options={options}
+                    onChange={onChange}
                     styles={comboBoxStyles}
                 />
-                <TooltipHost content="A folder to upload documents into."
+                <TooltipHost content={allowNewFolders ? "Select a folder to upload documents into" : "Select a folder to filter the search by"}
                         styles={hostStyles}
                         id={tooltipId}>
                     <Info16Regular></Info16Regular>
                 </TooltipHost>
             </div>
-            {allowFolderCreation ? (
+            {allowNewFolders ? (
                 <div className={styles.actionButton}>
                     <ActionButton
                         iconProps={addFolderIcon} 

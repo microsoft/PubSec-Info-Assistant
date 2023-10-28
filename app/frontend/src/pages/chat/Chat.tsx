@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton} from "@fluentui/react";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator} from "@fluentui/react";
 import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
 
 import styles from "./Chat.module.css";
@@ -21,6 +21,8 @@ import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
+import { FolderPicker } from "../../components/FolderPicker";
+import { TagPickerInline } from "../../components/TagPicker";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -44,8 +46,6 @@ const Chat = () => {
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
     const lastQuestionRef = useRef<string>("");
-    const testQuestion = "This is a test question.";
-    const thisquestion = "";
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,6 +55,7 @@ const Chat = () => {
     const [activeCitationSourceFile, setActiveCitationSourceFile] = useState<string>();
     const [activeCitationSourceFilePageNumber, setActiveCitationSourceFilePageNumber] = useState<string>();
     const [activeAnalysisPanelTab, setActiveAnalysisPanelTab] = useState<AnalysisPanelTabs | undefined>(undefined);
+    const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
@@ -83,7 +84,9 @@ const Chat = () => {
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
                     responseLength: responseLength,
-                    responseTemp: responseTemp
+                    responseTemp: responseTemp,
+                    selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
+                    selectedTags: ""
                 }
             };
             const result = await chatApi(request);
@@ -224,6 +227,10 @@ const Chat = () => {
         }
 
         setSelectedAnswer(index);
+    };
+
+    const onSelectedKeyChanged = (selectedFolders: string[]) => {
+        setSelectedFolders(selectedFolders)
     };
 
     return (
@@ -373,6 +380,9 @@ const Chat = () => {
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
+                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged}/>
+                            <TagPickerInline allowNewTags={false} />
                 </Panel>
 
                 <Panel

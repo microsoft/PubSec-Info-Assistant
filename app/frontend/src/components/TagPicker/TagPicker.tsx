@@ -1,16 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { TagPicker, ITag, IBasePickerSuggestionsProps, IBasePicker } from '@fluentui/react/lib/Pickers';
+import { TagPicker, ITag, IBasePickerSuggestionsProps} from '@fluentui/react/lib/Pickers';
+import { TooltipHost,
+  ITooltipHostStyles} from "@fluentui/react";
+import { Info16Regular } from '@fluentui/react-icons';
 import { mergeStyles } from '@fluentui/react/lib/Styling';
 import { useId } from '@fluentui/react-hooks';
 
 import styles from "./TagPicker.module.css";
-
-const pickerSuggestionsProps: IBasePickerSuggestionsProps = {
-  suggestionsHeaderText: 'Existing Tags',
-  noResultsFoundText: 'Press Enter to add as a new tag',
-};
 
 var allowAddNew = false;
 
@@ -91,12 +89,21 @@ interface Props {
 
 export const TagPickerInline = ({allowNewTags}: Props) => {
 
-    const pickerId = useId('inline-picker');
+    const pickerId = useId('tag-inline-picker');
+    const tooltipId = useId('tagpicker-tooltip');
+    const hostStyles: Partial<ITooltipHostStyles> = { root: { display: 'inline-block' } };
 
     allowAddNew = allowNewTags as boolean;
 
+    const pickerSuggestionsProps: IBasePickerSuggestionsProps = {
+      suggestionsHeaderText: 'Existing Tags',
+      noResultsFoundText: allowAddNew ? 'Press Enter to add as a new tag' : 'No matching tag found',
+    };
+    
     return (
-        <div className={styles.rootClass}>
+      <div className={styles.tagArea}>
+        <div className={styles.tagSelection}>
+          <div className={allowAddNew ? styles.rootClass : styles.rootClassFilter}>
             <label htmlFor={pickerId}>Tags</label>
             <TagPicker
                 className={styles.tagPicker}
@@ -108,13 +115,19 @@ export const TagPickerInline = ({allowNewTags}: Props) => {
                 pickerSuggestionsProps={pickerSuggestionsProps}
                 itemLimit={10}
                 // this option tells the picker's callout to render inline instead of in a new layer
-                pickerCalloutProps={{ doNotLayer: true }}
+                pickerCalloutProps={{ doNotLayer: false }}
                 inputProps={{
                     id: pickerId
                 }}
                 onItemSelected={onItemSelected}
             />
-        <div style={{ height: '10em' }}/>
-    </div>
+          </div>
+          <TooltipHost content={allowAddNew ? "Tags to append to each document uploaded below." : "Tags to filter documents by."}
+                    styles={hostStyles}
+                    id={tooltipId}>
+            <Info16Regular></Info16Regular>
+          </TooltipHost>
+        </div>
+      </div>
   );
 };

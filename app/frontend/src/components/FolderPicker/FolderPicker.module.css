@@ -13,3 +13,7 @@
     justify-content: left;
     text-align: left;
   }
+
+  .actionButton {
+    width: 180px;
+  }

@@ -22,6 +22,8 @@ export type AskRequestOverrides = {
     aiPersona?: string;
     responseLength?: number;
     responseTemp?: number;
+    selectedFolders?: string;
+    selectedTags?: string;
 };
 
 export type AskRequest = {

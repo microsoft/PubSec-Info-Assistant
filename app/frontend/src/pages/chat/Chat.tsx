@@ -381,7 +381,7 @@ const Chat = () => {
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
                             <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
-                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged}/>
+                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders}/>
                             <TagPickerInline allowNewTags={false} />
                 </Panel>
 

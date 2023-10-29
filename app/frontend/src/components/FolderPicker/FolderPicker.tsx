@@ -28,9 +28,10 @@ var allowNewFolders = false;
 interface Props {
     allowFolderCreation?: boolean;
     onSelectedKeyChange: (selectedFolders: string[]) => void;
+    preSelectedKeys?: string[];
 }
 
-export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange}: Props) => {
+export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelectedKeys}: Props) => {
 
     const buttonId = useId('targetButton');
     const tooltipId = useId('folderpicker-tooltip');
@@ -107,8 +108,14 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange}: Props) 
                     option =>
                       (option.itemType === SelectableOptionMenuItemType.Normal || option.itemType === undefined) && !option.disabled,
                   );
-                setSelectedKeys(['selectAll', ...filteredOptions.map(o => o.key as string)]);
-                onSelectedKeyChange(['selectAll', ...filteredOptions.map(o => o.key as string)]);
+                if (preSelectedKeys !== undefined && preSelectedKeys.length > 0) {
+                    setSelectedKeys(preSelectedKeys);
+                    onSelectedKeyChange(preSelectedKeys);
+                }
+                else {
+                    setSelectedKeys(['selectAll', ...filteredOptions.map(o => o.key as string)]);
+                    onSelectedKeyChange(['selectAll', ...filteredOptions.map(o => o.key as string)]);
+                }
               } 
         } catch (error) {
             // Handle the error here

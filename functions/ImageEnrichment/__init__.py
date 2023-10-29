@@ -310,7 +310,7 @@ def main(msg: func.QueueMessage) -> None:
         output_filename = file_name + '-0.json'
         chunk_file=f'{folder_set}{output_filename}'
 
-        index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri)
+        index_section(index_content, file_name, file_directory[:-1], statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri)
 
         statusLog.upsert_document(
             blob_path,
@@ -330,7 +330,7 @@ def main(msg: func.QueueMessage) -> None:
     statusLog.save_document(blob_path)
 
 
-def index_section(index_content, file_name, chunk_id, chunk_file, blob_path, blob_uri):
+def index_section(index_content, file_name, file_directory, chunk_id, chunk_file, blob_path, blob_uri):
     """ Pushes a batch of content to the search index
     """
 
@@ -341,6 +341,7 @@ def index_section(index_content, file_name, chunk_id, chunk_file, blob_path, blo
     index_chunk['processed_datetime'] = azure_datetime
     index_chunk['file_name'] = blob_path
     index_chunk['file_uri'] = blob_uri
+    index_chunk['folder'] = file_directory
     index_chunk['title'] = file_name
     index_chunk['content'] = index_content
     index_chunk['pages'] = [0]

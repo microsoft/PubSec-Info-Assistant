@@ -117,6 +117,8 @@ class StatusLog:
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)
 
+        query_string += " ORDER BY c.state_timestamp DESC"
+
         items = list(self.container.query_items(
             query=query_string,
             enable_cross_partition_query=True

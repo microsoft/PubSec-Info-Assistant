@@ -88,9 +88,9 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
             var containerClient = blobServiceClient.getContainerClient("upload");
             const delimiter = "/";
             const prefix = "";
-            var newOptions: IComboBoxOption[] = allowNewFolders ? [] : [(
-                { key: 'selectAll', text: 'Select All', itemType: SelectableOptionMenuItemType.SelectAll }
-                )];
+            var newOptions: IComboBoxOption[] = allowNewFolders ? [] : [
+                { key: 'selectAll', text: 'Select All', itemType: SelectableOptionMenuItemType.SelectAll },
+                { key: 'FolderHeader', text: 'Folders', itemType: SelectableOptionMenuItemType.Header }];
             for await (const item of containerClient.listBlobsByHierarchy(delimiter, {
                 prefix,
               })) {

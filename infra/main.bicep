@@ -92,6 +92,10 @@ param imageEnrichmentQueue string = 'image-enrichment-queue'
 param embeddingsQueue string = 'embeddings-queue'
 // End of valued replicated in debug env files
 
+// This block of variables are used for Branding
+param applicationtitle string = ''
+// End branding
+
 param cuaEnabled bool = false
 param cuaId string = ''
 param enableDevCode bool = false
@@ -269,6 +273,7 @@ module backend 'core/host/appservice.bicep' = {
       CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
+      APPLICATION_TITLE: applicationtitle
     }
 
 

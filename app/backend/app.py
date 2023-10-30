@@ -49,7 +49,7 @@ AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
 str_to_bool = {'true': True, 'false': False}
 IS_GOV_CLOUD_DEPLOYMENT = str_to_bool.get(os.environ.get("IS_GOV_CLOUD_DEPLOYMENT").lower()) or False
 CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT") or ""
-
+APPLICATION_TITLE = os.environ.get("APPLICATION_TITLE") or "Information Assistant, built with Azure OpenAI"
 
 
 KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "content"
@@ -270,6 +270,16 @@ def get_citation():
         logging.exception("Exception in /getalluploadstatus")
         return jsonify({"error": str(ex)}), 500
     return jsonify(results.json)
+
+# Return APPLICATION_TITLE
+@app.route("/getApplicationTitle")
+def get_application_title():
+    """Get the application title text"""
+    response = jsonify(
+        {
+            "APPLICATION_TITLE": f"{APPLICATION_TITLE}"
+        })
+    return response
 
 if __name__ == "__main__":
     app.run()

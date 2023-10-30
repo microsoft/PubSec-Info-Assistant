@@ -8,5 +8,10 @@
       "path": "upload",
       "connection": "BLOB_CONNECTION_STRING"
     }
-  ]
+  ],
+  "retry": {
+    "strategy": "fixedDelay",
+    "maxRetryCount": 6,
+    "delayInterval": "00:00:05"
+  }
 }

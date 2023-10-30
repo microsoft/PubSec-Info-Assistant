@@ -63,5 +63,4 @@ IS_USGOV_DEPLOYMENT | No | Defaults to `false``. Set to `true` to enable deployi
 AZURE_OPENAI_CHATGPT_MODEL_NAME | No | If you have set **IS_USGOV_DEPLOYMENT** to "true" and Open AI is in Azure Commercial then you must set this to the model name in your Open AI GPT Deployment. 
 AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | If you have set **IS_USGOV_DEPLOYMENT** to "true" and Open AI is in Azure Commercial then you must set this to the model version in your Open AI GPT Deployment. 
 CHAT_WARNING_BANNER_TEXT | No | Setting this value will place a banner and a footer with Warning Text. 
-ENABLE | No | Setting this value will enable users to directly chat with GPT and Bypass the RAG pattern. 
 ---

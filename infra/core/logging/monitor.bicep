@@ -30,7 +30,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
       type: 3
       content: {
         version: 'KqlItem/1.0'
-        query: 'AppServiceConsoleLogs | where TimeGenerated > ago(6h)'
+        query: 'AppServiceConsoleLogs | project TimeGenerated, Level, ResultDescription, _ResourceId | where TimeGenerated > ago(6h) | order by TimeGenerated desc'
         size: 0
         timeContext: {
           durationMs: 86400000
@@ -54,7 +54,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
       type: 3
       content: {
         version: 'KqlItem/1.0'
-        query: 'AppTraces | where TimeGenerated > ago(6h)'
+        query: 'AppTraces | project TimeGenerated, Message, Properties | where TimeGenerated > ago(6h) | order by TimeGenerated desc'
         size: 0
         timeContext: {
           durationMs: 86400000
@@ -78,7 +78,7 @@ resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
       type: 3
       content: {
         version: 'KqlItem/1.0'
-        query: 'AppServicePlatformLogs | where TimeGenerated > ago(6h)'
+        query: 'AppServicePlatformLogs | project TimeGenerated, Level, Message, _ResourceId | where TimeGenerated > ago(6h) | order by TimeGenerated desc'
         size: 0
         timeContext: {
           durationMs: 86400000

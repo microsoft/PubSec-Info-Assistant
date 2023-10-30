@@ -6,9 +6,9 @@ import azure.ai.vision as visionsdk
 import azure.functions as func
 import requests
 from azure.storage.blob import BlobServiceClient
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
+from shared_code.tags_helper import TagsHelper
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from datetime import datetime
@@ -35,8 +35,10 @@ IS_USGOV_DEPLOYMENT = os.getenv("IS_USGOV_DEPLOYMENT", False)
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
-cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
+cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
+cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
 
 # Cognitive Services
 cognitive_services_key = os.environ["ENRICHMENT_KEY"]
@@ -164,7 +166,7 @@ def main(msg: func.QueueMessage) -> None:
     blob_uri = message_json["blob_uri"]
     try:
         statusLog = StatusLog(
-            cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
+            cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
         )
         logging.info(
             "Python queue trigger function processed a queue item: %s",
@@ -302,15 +304,34 @@ def main(msg: func.QueueMessage) -> None:
             State.ERROR,
         )
 
-    try: 
+    try:
+        file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
+        path = file_directory + file_name + file_extension
+        # Get the tags from metadata on the blob
+        blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
+        blob_client = blob_service_client.get_blob_client(container=azure_blob_drop_storage_container, blob=path)
+        blob_properties = blob_client.get_blob_properties()
+        tags = blob_properties.metadata.get("tags")
+        if tags is not None:
+            if isinstance(tags, str):
+                tags_list = [tags]
+            else:
+                tags_list = tags.split(",")
+        else:
+            tags_list = []
+        # Write the tags to cosmos db
+        tags_helper = TagsHelper(
+            cosmosdb_url, cosmosdb_key, cosmosdb_tags_database_name, cosmosdb_tags_container_name
+        )
+        tags_helper.upsert_document(blob_path, tags_list)
+
         # Only one chunk per image currently, this code matches the write_chunk utility method in functions/shared_code/utilities.py
         # Please update in both locations
-        file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
         folder_set = file_directory + file_name + file_extension + "/"
         output_filename = file_name + '-0.json'
         chunk_file=f'{folder_set}{output_filename}'
 
-        index_section(index_content, file_name, file_directory[:-1], statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri)
+        index_section(index_content, file_name, file_directory[:-1], statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri, tags_list)
 
         statusLog.upsert_document(
             blob_path,
@@ -330,7 +351,7 @@ def main(msg: func.QueueMessage) -> None:
     statusLog.save_document(blob_path)
 
 
-def index_section(index_content, file_name, file_directory, chunk_id, chunk_file, blob_path, blob_uri):
+def index_section(index_content, file_name, file_directory, chunk_id, chunk_file, blob_path, blob_uri, tags):
     """ Pushes a batch of content to the search index
     """
 
@@ -347,6 +368,7 @@ def index_section(index_content, file_name, file_directory, chunk_id, chunk_file
     index_chunk['pages'] = [0]
     index_chunk['chunk_file'] = chunk_file
     index_chunk['file_class'] = MediaType.IMAGE
+    index_chunk['tags'] = tags
     batch.append(index_chunk)
 
     search_client = SearchClient(endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,

@@ -12,13 +12,15 @@ import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, S
 
 interface Props {
   folderPath: string;
+  tags: string[];
 }
 
-const FilePicker = ({folderPath}: Props) => {
+const FilePicker = ({folderPath, tags}: Props) => {
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
   const folderName = folderPath;
+  const tagList = tags;
 
   // handler called when files are selected via the Dropzone component
   const handleOnChange = useCallback((files: any) => {
@@ -61,7 +63,10 @@ const FilePicker = ({folderPath}: Props) => {
         var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
         const blobClient = containerClient.getBlockBlobClient(filePath);
         // set mimetype as determined from browser with file upload control
-        const options = { blobHTTPHeaders: { blobContentType: file.type } };
+        const options = {
+          blobHTTPHeaders: { blobContentType: file.type },
+          metadata: { tags: tagList.join(",") }
+        };
 
         // upload file
         blobClient.uploadData(file, options);

@@ -4,6 +4,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator} from "@fluentui/react";
 import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
+import { ITag } from '@fluentui/react/lib/Pickers';
 
 import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
@@ -56,6 +57,7 @@ const Chat = () => {
     const [activeCitationSourceFilePageNumber, setActiveCitationSourceFilePageNumber] = useState<string>();
     const [activeAnalysisPanelTab, setActiveAnalysisPanelTab] = useState<AnalysisPanelTabs | undefined>(undefined);
     const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
+    const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
@@ -86,7 +88,7 @@ const Chat = () => {
                     responseLength: responseLength,
                     responseTemp: responseTemp,
                     selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
-                    selectedTags: ""
+                    selectedTags: selectedTags.map(tag => tag.name).join(",")
                 }
             };
             const result = await chatApi(request);
@@ -232,6 +234,10 @@ const Chat = () => {
     const onSelectedKeyChanged = (selectedFolders: string[]) => {
         setSelectedFolders(selectedFolders)
     };
+
+    const onSelectedTagsChange = (selectedTags: ITag[]) => {
+        setSelectedTags(selectedTags)
+    }
 
     return (
         <div className={styles.container}>
@@ -382,7 +388,7 @@ const Chat = () => {
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
                             <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
                             <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders}/>
-                            <TagPickerInline allowNewTags={false} />
+                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags}/>
                 </Panel>
 
                 <Panel

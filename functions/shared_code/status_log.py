@@ -209,11 +209,13 @@ class StatusLog:
             logging.error(f"An error occurred while updating the document state: {str(err)}")      
 
     def save_document(self, document_path):
+        """Saves the document in the storage"""
         document_id = self.encode_document_id(document_path)
         self.container.upsert_item(body=self._log_document[document_id])
         self._log_document[document_id] = ""
 
     def get_stack_trace(self):
+        """ Returns the stack trace of the current exception"""
         exc = sys.exc_info()[0]
         stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
         if exc is not None:  # i.e. an exception is present

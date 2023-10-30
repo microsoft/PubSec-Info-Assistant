@@ -157,3 +157,8 @@ export type ApplicationTitle = {
     APPLICATION_TITLE: string;
     error?: string;
 };
+
+export type GetTagsResponse = {
+    tags: string;
+    error?: string;
+}

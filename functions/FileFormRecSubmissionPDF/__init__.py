@@ -23,8 +23,8 @@ azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
-cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
@@ -56,7 +56,7 @@ def main(msg: func.QueueMessage) -> None:
     blob_path = message_json["blob_name"]
     try:
         statusLog = StatusLog(
-            cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
+            cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
         )
 
         # Receive message from the queue

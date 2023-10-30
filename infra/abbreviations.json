@@ -61,6 +61,7 @@
   "logicIntegrationAccounts": "ia-",
   "logicWorkflows": "logic-",
   "logAnalytics": "la-",
+  "logWorkbook": "lw-",
   "machineLearningServicesWorkspaces": "mlw-",
   "managedIdentityUserAssignedIdentities": "id-",
   "managementManagementGroups": "mg-",

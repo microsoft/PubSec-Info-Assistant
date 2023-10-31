@@ -13,7 +13,7 @@ from approaches.approach import Approach
 from azure.core.credentials import AzureKeyCredential 
 from azure.search.documents import SearchClient  
 from azure.search.documents.indexes import SearchIndexClient  
-from azure.search.documents.models import Vector
+from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
 
 from text import nonewlines
@@ -192,7 +192,7 @@ class ChatReadRetrieveReadApproach(Approach):
             raise Exception('Error generating embedding:', response.status_code)
 
         #vector set up for pure vector search & Hybrid search & Hybrid semantic
-        vector = Vector(value=embedded_query_vector, k=top, fields="contentVector")
+        vector = RawVectorQuery(vector=embedded_query_vector, k=top, fields="contentVector")
 
         #Create a filter for the search query
         if (folder_filter != "") & (folder_filter != "All"):
@@ -227,7 +227,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 top=top,
                 query_caption="extractive|highlight-false"
                 if use_semantic_captions else None,
-                vectors=[vector],
+                vector_queries =[vector],
                 filter=search_filter if search_filter is not None else None
             )
         else:

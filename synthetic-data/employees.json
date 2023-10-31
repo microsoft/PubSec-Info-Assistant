@@ -1,0 +1,104 @@
+{
+  "employees": [
+    {
+      "name": "John Smith",
+      "current_job_title": "Data Analyst",
+      "grade": "HEO",
+      "previous_roles": ["Research Assistant"],
+      "technical_skills": ["Excel", "SQL", "Data Analysis"],
+      "hard_skills": ["Data Reporting", "Teamwork"],
+      "project_experience": ["Data Analysis Fundamentals"],
+      "training_courses_completed": ["Data Analysis Basics", "Excel for Data Analysis"]
+    },
+    {
+      "name": "Sarah Johnson",
+      "current_job_title": "Data Engineer",
+      "grade": "HEO",
+      "previous_roles": ["Software Developer", "Data Analyst"],
+      "technical_skills": ["SQL", "Python", "ETL"],
+      "hard_skills": ["Data Engineering", "Database Management"],
+      "project_experience": ["ETL Fundamentals"],
+      "training_courses_completed": ["ETL for Data Warehousing", "Python for Data Engineering"]
+    },
+    {
+      "name": "Emily Davis",
+      "current_job_title": "Data Ethicist",
+      "grade": "HEO",
+      "previous_roles": ["Researcher", "Policy Analyst"],
+      "technical_skills": ["Data Ethics", "Privacy Regulations", "Ethical Decision-Making"],
+      "hard_skills": ["Policy Development", "Ethical Frameworks"],
+      "project_experience": ["Applied Ethics"],
+      "training_courses_completed": ["Data Privacy Regulations", "Ethical Decision-Making"]
+    },
+    {
+      "name": "Michael Brown",
+      "current_job_title": "Data Governance Manager",
+      "grade": "SEO",
+      "previous_roles": ["Data Steward", "Policy Advisor"],
+      "technical_skills": ["Data Governance", "Policy Compliance", "Data Strategy"],
+      "hard_skills": ["Data Governance Frameworks", "Regulatory Compliance"],
+      "project_experience": ["Data Governance Best Practices"],
+      "training_courses_completed": ["Policy Development", "Data Governance Frameworks"]
+    },
+    {
+      "name": "Sophia Clark",
+      "current_job_title": "Data Scientist",
+      "grade": "SEO",
+      "previous_roles": ["Machine Learning Engineer", "Data Analyst"],
+      "technical_skills": ["Python", "R", "Data Science"],
+      "hard_skills": ["Statistical Analysis", "Model Development", "Algorithm Design"],
+      "project_experience": ["Machine Learning in Python"],
+      "training_courses_completed": ["Data Analysis for Data Science"]
+    },
+    {
+      "name": "Oliver White",
+      "current_job_title": "Performance Analyst",
+      "grade": "SEO",
+      "previous_roles": ["Performance Manager", "Data Analyst"],
+      "technical_skills": ["Data Analysis", "KPI Monitoring", "Performance Metrics"],
+      "hard_skills": ["Performance Analytics", "KPI Measurement", "Data Visualization"],
+      "project_experience": ["Advanced Analytics"],
+      "training_courses_completed": ["Data Performance Metrics"]
+    },
+    {
+      "name": "Alice Turner",
+      "current_job_title": "Data Analyst",
+      "grade": "Grade 7",
+      "previous_roles": ["Research Assistant"],
+      "technical_skills": ["Excel", "SQL", "Data Analysis"],
+      "hard_skills": ["Data Reporting", "Teamwork"],
+      "project_experience": ["Data Analysis Fundamentals"],
+      "training_courses_completed": ["Data Analysis Basics", "Excel for Data Analysis"]
+    },
+    {
+      "name": "James Wilson",
+      "current_job_title": "Data Engineer",
+      "grade": "Grade 7",
+      "previous_roles": ["Software Developer", "Data Analyst"],
+      "technical_skills": ["SQL", "Python", "ETL"],
+      "hard_skills": ["Data Engineering", "Database Management"],
+      "project_experience": ["ETL Fundamentals"],
+      "training_courses_completed": ["ETL for Data Warehousing", "Python for Data Engineering"]
+    },
+    {
+      "name": "Linda Miller",
+      "current_job_title": "Data Ethicist",
+      "grade": "Grade 7",
+      "previous_roles": ["Researcher", "Policy Analyst"],
+      "technical_skills": ["Data Ethics", "Privacy Regulations", "Ethical Decision-Making"],
+      "hard_skills": ["Policy Development", "Ethical Frameworks"],
+      "project_experience": ["Applied Ethics"],
+      "training_courses_completed": ["Data Privacy Regulations", "Ethical Decision-Making"]
+    },
+    {
+      "name": "Daniel Harris",
+      "current_job_title": "Data Governance Manager",
+      "grade": "Grade 7",
+      "previous_roles": ["Data Steward", "Policy Advisor"],
+      "technical_skills": ["Data Governance", "Policy Compliance", "Data Strategy"],
+      "hard_skills": ["Data Governance Frameworks", "Regulatory Compliance"],
+      "project_experience": ["Data Governance Best Practices"],
+      "training_courses_completed": ["Policy Development", "Data Governance Frameworks"]
+    }
+  ]
+}

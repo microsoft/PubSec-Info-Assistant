@@ -1,0 +1,19 @@
+Curriculum Vitae 
+Name: Sarah Johnson 
+Contact Information:
+• Address: 456 Data Street, Data Town, DT 12345
+• Phone: (555) 123-4567
+• Email: sarah.johnson@email.com
+Summary: Experienced Data Engineer with a strong background in SQL, Python, and ETL. Skilled in data management and database administration. Committed to optimizing data workflows and supporting data-driven decision-making at the Government Office for Science's Technology and Science Insights (TSI) team.
+Education:
+• Bachelor of Science in Computer Science Tech College Graduated: 2019
+Professional Experience: Data Engineer - DataTech Solutions January 2020 - Present
+• Design and implement ETL processes to extract, transform, and load data.
+• Utilize SQL, Python, and database management to ensure data accuracy and availability.
+• Collaborate with cross-functional teams to optimize data pipelines.
+• Previous Roles: Software Developer, Data Analyst
+Skills:
+• Technical Skills: SQL, Python, ETL
+• Hard Skills: Data Engineering, Database Management
+• Project Experience: ETL Fundamentals
+• Training Courses Completed: ETL for Data Warehousing, Python for Data Engineering

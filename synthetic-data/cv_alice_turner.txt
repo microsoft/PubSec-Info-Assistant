@@ -1,0 +1,19 @@
+Curriculum Vitae 
+Name: Alice Turner 
+Contact Information:
+• Address: 789 Data Lane, Data City, DC 56789
+• Phone: (555) 987-6543
+• Email: alice.turner@email.com
+Summary: Dedicated Data Analyst with expertise in Excel, SQL, and data analysis. Committed to delivering data-driven insights and supporting teamwork. Eager to contribute to evidence-based decision-making and policy development at the Government Office for Science's Technology and Science Insights (TSI) team.
+Education:
+• Bachelor of Science in Data Analysis Data University Graduated: 2021
+Professional Experience: Data Analyst - Data Insights Ltd January 2022 - Present
+• Conduct data analysis to provide valuable insights for decision-makers.
+• Utilize SQL and Excel for data manipulation and reporting.
+• Collaborate with cross-functional teams to achieve project goals.
+• Previous Role: Research Assistant
+Skills:
+• Technical Skills: Excel, SQL, Data Analysis
+• Hard Skills: Data Reporting, Teamwork
+• Project Experience: Data Analysis Fundamentals
+• Training Courses Completed: Data Analysis Basics, Excel for Data Analysis

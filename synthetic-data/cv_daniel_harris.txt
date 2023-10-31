@@ -1,0 +1,20 @@
+Curriculum Vitae 
+Name: Daniel Harris 
+Contact Information:
+• Address: 123 Governance Street, Dataville, GV 23456
+• Phone: (777) 888-9999
+• Email: daniel.harris@email.com
+Summary: Experienced Data Governance Manager with expertise in data governance, policy compliance, and data strategy. Skilled in data governance frameworks and regulatory compliance. Committed to establishing effective data governance practices at the Government Office for Science's Technology and Science Insights (TSI) team.
+Education:
+• Master of Business Administration Business University Graduated: 2018
+Professional Experience: Data Governance Manager - Governance Solutions Ltd January 2019 - Present
+• Establish and maintain data governance best practices and policies.
+• Ensure policy compliance and regulatory adherence.
+• Collaborate with cross-functional teams to develop data strategies.
+• Previous Roles: Data Steward, Policy Advisor
+Skills:
+• Technical Skills: Data Governance, Policy Compliance, Data Strategy
+• Hard Skills: Data Governance Frameworks, Regulatory Compliance
+• Project Experience: Data Governance Best Practices
+• Training Courses Completed: Policy Development, Data Governance Frameworks
+These CVs provide a summary of the individuals' qualifications, professional experience, and skills in the style and structure you provided.

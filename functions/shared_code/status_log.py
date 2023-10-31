@@ -193,7 +193,7 @@ class StatusLog:
     def update_document_state(self, document_path, state_str):
         """Updates the state of the document in the storage"""
         try:
-            # base_name = os.path.basename(document_path)
+            logging.info(f"{state_str} DocumentID - {document_id}")
             document_id = self.encode_document_id(document_path)
             if self._log_document.get(document_id, "") != "":
                 json_document = self._log_document[document_id]

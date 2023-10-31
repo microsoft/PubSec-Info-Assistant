@@ -77,7 +77,6 @@ def main(myblob: func.InputStream):
         statusLog.upsert_document(myblob.name, f'{function_name} - {file_extension} file sent to submit queue. Visible in {backoff} seconds', StatusClassification.DEBUG, State.QUEUED)          
         
     except Exception as err:
-        logging.error(f"{function_name} - An error occurred - {str(err)}")
         statusLog.upsert_document(myblob.name, f"{function_name} - An error occurred - {str(err)}", StatusClassification.ERROR, State.ERROR)
 
     statusLog.save_document(myblob.name)

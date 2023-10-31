@@ -5,8 +5,6 @@ import os
 import azure.ai.vision as visionsdk
 import azure.functions as func
 import requests
-from azure.storage.blob import BlobServiceClient
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
 from azure.search.documents import SearchClient

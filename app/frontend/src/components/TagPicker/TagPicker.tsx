@@ -94,7 +94,7 @@ export const TagPickerInline = ({allowNewTags, onSelectedTagsChange, preSelected
         response.tags.split(",").forEach((tag: string) => {
           const trimmedTag = tag.trim();
           if (trimmedTag !== "" && !newTags.some(t => t.key === trimmedTag)) {
-            const newTag: any = { key: trimmedTag, name: trimmedTag.toUpperCase(), isNewItem: false };
+            const newTag: any = { key: trimmedTag, name: trimmedTag, isNewItem: false };
             newTags.push(newTag);
           }
         });

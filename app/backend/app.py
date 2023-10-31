@@ -282,4 +282,5 @@ def get_application_title():
     return response
 
 if __name__ == "__main__":
+    logging.info("IA WebApp Starting...")
     app.run()

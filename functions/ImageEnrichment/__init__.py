@@ -306,8 +306,9 @@ def main(msg: func.QueueMessage) -> None:
 
     try:
         file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
-        path = file_directory + file_name + file_extension
+        
         # Get the tags from metadata on the blob
+        path = file_directory + file_name + file_extension
         blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
         blob_client = blob_service_client.get_blob_client(container=azure_blob_drop_storage_container, blob=path)
         blob_properties = blob_client.get_blob_properties()
@@ -325,11 +326,8 @@ def main(msg: func.QueueMessage) -> None:
         )
         tags_helper.upsert_document(blob_path, tags_list)
 
-        # Only one chunk per image currently, this code matches the write_chunk utility method in functions/shared_code/utilities.py
-        # Please update in both locations
-        folder_set = file_directory + file_name + file_extension + "/"
-        output_filename = file_name + '-0.json'
-        chunk_file=f'{folder_set}{output_filename}'
+        # Only one chunk per image currently.
+        chunk_file=utilities.build_chunk_filepath(file_directory, file_name, file_extension, '0')
 
         index_section(index_content, file_name, file_directory[:-1], statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri, tags_list)
 

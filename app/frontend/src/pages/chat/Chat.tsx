@@ -20,6 +20,7 @@ import { InfoButton } from "../../components/InfoButton";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
+import { ApproachesButtonGroup } from "../../components/ApproachesButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
 
 const Chat = () => {
@@ -39,10 +40,16 @@ const Chat = () => {
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
     const [responseLength, setResponseLength] = useState<number>(2048);
+
     // Setting responseTemp to 0.6 by default, this will effect the default display of the ResponseTempButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseTempButtonGroup.tsx file.
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
+
+    // Setting Approaches to 2 by default, this will effect the default display of the ApproachesButtonGroup below.
+    // It must match a valid value of one of the buttons in the ApproachesButtonGroup.tsx file.
+    // If you update the default value here, you must also update the default value in the onApproachChange method.
+    const [approach, setApproach] = useState<number>(Approaches.ReadRetrieveRead);
 
     const lastQuestionRef = useRef<string>("");
     const testQuestion = "This is a test question.";
@@ -72,7 +79,7 @@ const Chat = () => {
             const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
             const request: ChatRequest = {
                 history: [...history, { user: question, bot: undefined }],
-                approach: Approaches.ReadRetrieveRead,
+                approach: approach,
                 overrides: {
                     promptTemplate: promptTemplate.length === 0 ? undefined : promptTemplate,
                     excludeCategory: excludeCategory.length === 0 ? undefined : excludeCategory,
@@ -80,7 +87,6 @@ const Chat = () => {
                     semanticRanker: useSemanticRanker,
                     semanticCaptions: useSemanticCaptions,
                     suggestFollowupQuestions: useSuggestFollowupQuestions,
-                    byPassRAG: useBypassRAG,
                     userPersona: userPersona,
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
@@ -183,6 +189,40 @@ const Chat = () => {
         setResponseTemp(_ev.target.value as number || 0.6)
     };
 
+    const onApproachChange = (_ev: any) => {
+        for (let node of _ev.target.parentNode.childNodes) {
+            if (node.value == _ev.target.value) {
+                switch (node.value) {
+                    case Approaches.ReadRetrieveRead:
+                        node.className = `${rlbgstyles.buttonleftactive}`;
+                        break;
+                    case Approaches.GPTDirect:
+                        node.className = `${rlbgstyles.buttonrightactive}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }                
+            }
+            else {
+                switch (node.value) {
+                    case Approaches.ReadRetrieveRead:
+                        node.className = `${rlbgstyles.buttonleft}`;
+                        break;
+                    case Approaches.GPTDirect:
+                        node.className = `${rlbgstyles.buttonright}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }
+            }
+        }
+        // the or value here needs to match the default value assigned to responseLength above.
+        setApproach(_ev.target.value as number || Approaches.ReadRetrieveRead)
+    };
+
+
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 
     const onRetrieveCountChange = (_ev?: React.SyntheticEvent<HTMLElement, Event>, newValue?: string) => {
@@ -199,10 +239,6 @@ const Chat = () => {
 
     const onUseSuggestFollowupQuestionsChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
         setUseSuggestFollowupQuestions(!!checked);
-    };
-
-    const onUseByPassRAGChange = (_ev?: React.FormEvent<HTMLElement | HTMLInputElement>, checked?: boolean) => {
-        setUseByPassRAG(!!checked);
     };
 
     const onExampleClicked = (example: string) => {
@@ -368,6 +404,7 @@ const Chat = () => {
                                 max={50}
                                 defaultValue={retrieveCount.toString()}
                                 onChange={onRetrieveCountChange}
+                                disabled={approach.toString() == Approaches.GPTDirect.toString()}
                             />
                             <Checkbox
                                 className={styles.chatSettingsSeparator}
@@ -380,15 +417,7 @@ const Chat = () => {
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
-
-                            <Separator className={styles.chatSettingsSeparator}>Data Source Grounding</Separator>
-
-                            <Checkbox
-                                className={styles.chatSettingsSeparator}
-                                checked={useBypassRAG}
-                                label="Ask GPT Directly (bypass RAG)"
-                                onChange={onUseByPassRAGChange}
-                            />
+                            <ApproachesButtonGroup className={styles.chatSettingsSeparator} onClick={onApproachChange} defaultValue={approach}/>
                 </Panel>
 
                 <Panel

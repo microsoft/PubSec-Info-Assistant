@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 
 import openai
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.gpt_direct_approach import GPTDirectApproach
+from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
@@ -124,24 +126,35 @@ else:
     model_version = deployment.properties.model.version
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(
-        search_client,
-        AZURE_OPENAI_SERVICE,
-        AZURE_OPENAI_SERVICE_KEY,
-        AZURE_OPENAI_CHATGPT_DEPLOYMENT,
-        KB_FIELDS_SOURCEFILE,
-        KB_FIELDS_CONTENT,
-        KB_FIELDS_PAGENUMBER,
-        KB_FIELDS_CHUNKFILE,
-        AZURE_BLOB_STORAGE_CONTAINER,
-        blob_client,
-        QUERY_TERM_LANGUAGE,
-        model_name,
-        model_version,
-        IS_GOV_CLOUD_DEPLOYMENT,
-        TARGET_EMBEDDING_MODEL,
-        ENRICHMENT_APPSERVICE_NAME
-    )
+    Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
+                                    search_client,
+                                    AZURE_OPENAI_SERVICE,
+                                    AZURE_OPENAI_SERVICE_KEY,
+                                    AZURE_OPENAI_CHATGPT_DEPLOYMENT,
+                                    KB_FIELDS_SOURCEFILE,
+                                    KB_FIELDS_CONTENT,
+                                    KB_FIELDS_PAGENUMBER,
+                                    KB_FIELDS_CHUNKFILE,
+                                    AZURE_BLOB_STORAGE_CONTAINER,
+                                    blob_client,
+                                    QUERY_TERM_LANGUAGE,
+                                    model_name,
+                                    model_version,
+                                    IS_GOV_CLOUD_DEPLOYMENT,
+                                    TARGET_EMBEDDING_MODEL,
+                                    ENRICHMENT_APPSERVICE_NAME
+                                ),
+    Approaches.GPTDirect: GPTDirectApproach(
+                                    AZURE_OPENAI_SERVICE,
+                                    AZURE_OPENAI_SERVICE_KEY,
+                                    AZURE_OPENAI_CHATGPT_DEPLOYMENT,
+                                    QUERY_TERM_LANGUAGE,
+                                    model_name,
+                                    model_version,
+                                    IS_GOV_CLOUD_DEPLOYMENT,
+                                    TARGET_EMBEDDING_MODEL,
+                                    ENRICHMENT_APPSERVICE_NAME
+                                )
 }
 
 app = Flask(__name__)
@@ -158,7 +171,7 @@ def chat():
     """Chat with the bot using a given approach"""
     approach = request.json["approach"]
     try:
-        impl = chat_approaches.get(approach)
+        impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return jsonify({"error": "unknown approach"}), 400
         r = impl.run(request.json["history"], request.json.get("overrides") or {})

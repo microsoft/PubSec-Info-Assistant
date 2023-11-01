@@ -2,9 +2,10 @@
 // Licensed under the MIT license.
 
 export const enum Approaches {
-    RetrieveThenRead = "rtr",
-    ReadRetrieveRead = "rrr",
-    ReadDecomposeAsk = "rda"
+    RetrieveThenRead = 0,
+    ReadRetrieveRead = 1,
+    ReadDecomposeAsk = 2,
+    GPTDirect = 3
 }
 
 export type AskRequestOverrides = {

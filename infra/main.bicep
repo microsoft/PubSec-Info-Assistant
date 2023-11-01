@@ -673,6 +673,17 @@ module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
   }
 }
 
+
+module azMonitor 'core/logging/monitor.bicep' = {
+  scope: rg
+  name: 'azure-monitor'
+  params: {
+    location: location
+    logWorkbookName: '${prefix}-${abbrs.logWorkbook}${randomString}'
+    componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
+  }
+}
+
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource customerAttribution 'Microsoft.Resources/deployments@2021-04-01' = if (cuaEnabled) {
   name: 'pid-${cuaId}'

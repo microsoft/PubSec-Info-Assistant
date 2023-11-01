@@ -95,7 +95,7 @@ def PartitionFile(file_extension: str, file_url: str):
             from unstructured.partition.pptx import partition_pptx
             elements = partition_pptx(file=bytes_io)
             
-        elif file_extension == '.txt':
+        elif any(file_extension in x for x in ['.txt', '.json']):
             from unstructured.partition.text import partition_text
             elements = partition_text(file=bytes_io)
             
@@ -159,8 +159,9 @@ def main(msg: func.QueueMessage) -> None:
         
         # Chunk the file     
         from unstructured.chunking.title import chunk_by_title
-        chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS)
-        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS, max_characters=MAX_CHARACTERS)        
+        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS)
+        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS, max_characters=MAX_CHARACTERS)   
+        chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_text_under_n_chars=COMBINE_UNDER_N_CHARS)
         statusLog.upsert_document(blob_name, f'{function_name} - chunking complete. {str(chunks.count)} chunks created', StatusClassification.DEBUG)
                 
         subtitle_name = ''

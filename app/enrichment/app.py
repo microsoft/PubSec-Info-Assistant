@@ -16,7 +16,7 @@ from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
@@ -212,23 +212,28 @@ def embed_texts(model: str, texts: List[str]):
         EmbeddingResponse: The embeddings of the texts
     """
 
+    output = {}
     if model not in models:
         return {"message": f"Model {model} not found"}
 
     model_obj = models[model]
+    try:
+        if model.startswith("azure-openai_"):
+            embeddings = model_obj.encode(texts)
+            embeddings = embeddings['data'][0]['embedding']
+        else:
+            embeddings = model_obj.encode(texts)
+            embeddings = embeddings.tolist()[0]
 
-    if model.startswith("azure-openai_"):
-        embeddings = model_obj.encode(texts)
-        embeddings = embeddings['data'][0]['embedding']
-    else:
-        embeddings = model_obj.encode(texts)
-        embeddings = embeddings.tolist()[0]
-        
-    output = {
-        "model": model,
-        "model_info": model_info[model],
-        "data": embeddings
-    }
+        output = {
+            "model": model,
+            "model_info": model_info[model],
+            "data": embeddings
+        }
+    
+    except Exception as error:
+        logging.error(f"Failed to embed: {str(error)}")
+        raise HTTPException(status_code=500, detail=f"Failed to embed: {str(error)}") from error
 
     return output
 

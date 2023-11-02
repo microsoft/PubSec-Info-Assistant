@@ -18,6 +18,7 @@ Please see below sections for coverage of IA Accelerator features.
 	* [Build pipeline for Sandbox](/docs/features/features.md#build-pipeline-for-sandbox)
 	* [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
 * [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
+* [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
 
 ## Retrieval Augmented Generation (RAG)
 

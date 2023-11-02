@@ -283,4 +283,4 @@ def get_application_title():
 
 if __name__ == "__main__":
     logging.info("IA WebApp Starting Up...")
-    app.run()
+    app.run(threaded=True)

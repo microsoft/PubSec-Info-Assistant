@@ -88,7 +88,7 @@ Check out how to [Debug the Azure functions locally in VSCode](/docs/function_de
 
 ### Debugging the web app
 
-Check out how to [Debug the Information Assistant Web App](/docs/container_debug.md)
+Check out how to [Debug the Information Assistant Web App](/docs/webapp_debug.md)
 
 ### Debugging the container web app
 

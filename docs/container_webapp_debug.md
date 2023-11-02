@@ -6,4 +6,4 @@ To start debugging firstly add breakpoints to the code and then simply select th
 
 One tip is to save a copy of a message in the embeddings queue which triggers your logic. Then you will be able to just resubmit this message again and again to initiate and trace your code.
 
-![Attach to function](images/fastapi_debug.png)
+![Attach to function](/docs/images/fastapi_debug.png)

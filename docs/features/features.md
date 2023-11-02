@@ -2,6 +2,23 @@
 
 Please see below sections for coverage of IA Accelerator features. 
 
+* [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
+* [Prompt Engineering](/docs/features/features.md#prompt-engineering)
+* [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
+* [Image Search](/docs/features/features.md#image-search)
+* [Azure Cognitive Search Integration](/docs/features/features.md#azure-cognitive-search-integration)
+* [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
+* [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
+* [User Experience](/docs/features/features.md#user-experience)
+* [Developer Settings](/docs/features/features.md#developer-settings)
+	* [Configuring your own language ENV file](/docs/features/features.md#configuring-your-own-language-env-file)
+	* [Debugging functions](/docs/features/features.md#debugging-functions)
+	* [Debugging the web app](/docs/features/features.md#debugging-the-web-app)
+	* [Debugging the container web app](/docs/features/features.md#debugging-the-container-web-app)
+	* [Build pipeline for Sandbox](/docs/features/features.md#build-pipeline-for-sandbox)
+	* [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
+* [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
+
 ## Retrieval Augmented Generation (RAG)
 
 **Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's indexing capabilities to retrieve documents that are contextually relevant for precise answers.

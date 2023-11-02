@@ -72,7 +72,7 @@ const FilePicker = ({folderPath, tags}: Props) => {
         blobClient.uploadData(file, options);
         //write status to log
         var logEntry: StatusLogEntry = {
-          path: filePath,
+          path: "upload/"+filePath,
           status: "File uploaded from browser to Azure Blob Storage",
           status_classification: StatusLogClassification.Info,
           state: StatusLogState.Uploaded

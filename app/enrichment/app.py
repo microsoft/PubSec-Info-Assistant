@@ -252,9 +252,11 @@ def index_sections(chunks):
 
 def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     """ Gets the tags from the blob metadata and uploads them to cosmos db"""
+    file_name, file_extension, file_directory = utilities_helper.get_filename_and_extension(blob_path)
+    path = file_directory + file_name + file_extension
     blob_client = blob_service_client.get_blob_client(
         container=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
-        blob=blob_path)
+        blob=path)
     blob_properties = blob_client.get_blob_properties()
     tags = blob_properties.metadata.get("tags")
     if tags is not None:
@@ -342,7 +344,7 @@ def poll_queue() -> None:
                 embedding = embed_texts(target_embeddings_model, [text])
                 embedding_data = embedding['data']
 
-                get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
+                tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
 
                 index_chunk = {}
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
@@ -350,6 +352,7 @@ def poll_queue() -> None:
                 index_chunk['file_name'] = chunk_dict["file_name"]
                 index_chunk['file_uri'] = chunk_dict["file_uri"]
                 index_chunk['folder'] = file_directory[:-1]
+                index_chunk['tags'] = tag_list
                 index_chunk['chunk_file'] = chunk.name
                 index_chunk['file_class'] = chunk_dict["file_class"]
                 index_chunk['title'] = chunk_dict["title"]

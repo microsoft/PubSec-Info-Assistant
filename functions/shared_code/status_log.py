@@ -165,9 +165,26 @@ class StatusLog:
                 new_item["stack_trace"] = self.get_stack_trace()
 
             status_updates.append(new_item)
-
+        except exceptions.CosmosResourceNotFoundError:
+            # this is a new document
+            json_document = {
+                "id": document_id,
+                "file_path": document_path,
+                "file_name": base_name,
+                "state": str(state.value),
+                "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "state_description": "",
+                "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "status_updates": [
+                    {
+                        "status": status,
+                        "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        "status_classification": str(status_classification.value)
+                    }
+                ]
+            }
         except Exception:
-            # if this is a new document
+            # log the exception with stack trace to the status log
             json_document = {
                 "id": document_id,
                 "file_path": document_path,

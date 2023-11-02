@@ -5,8 +5,6 @@ import os
 import azure.ai.vision as visionsdk
 import azure.functions as func
 import requests
-from azure.storage.blob import BlobServiceClient
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
 from azure.search.documents import SearchClient
@@ -303,12 +301,9 @@ def main(msg: func.QueueMessage) -> None:
         )
 
     try: 
-        # Only one chunk per image currently, this code matches the write_chunk utility method in functions/shared_code/utilities.py
-        # Please update in both locations
+        # Only one chunk per image currently.
         file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
-        folder_set = file_directory + file_name + file_extension + "/"
-        output_filename = file_name + '-0.json'
-        chunk_file=f'{folder_set}{output_filename}'
+        chunk_file=utilities.build_chunk_filepath(file_directory, file_name, file_extension, '0')
 
         index_section(index_content, file_name, statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri)
 

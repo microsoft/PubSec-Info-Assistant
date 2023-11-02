@@ -130,6 +130,9 @@ class StatusLog:
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
 
+        # add status to standard logger
+        logging.info(f"{status} DocumentID - {document_id}")
+
         # If this event is the start of an upload, remove any existing status files for this path
         if fresh_start:
             try:
@@ -179,21 +182,18 @@ class StatusLog:
                         "status": status,
                         "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                         "status_classification": str(status_classification.value),
-                        "stack_trace": self.get_stack_trace()
+                        "stack_trace": self.get_stack_trace() if not fresh_start else None
                     }
                 ]
             }
 
         #self.container.upsert_item(body=json_document)
         self._log_document[document_id] = json_document
-        
-        # add status to standard logger
-        logging.info(status)
 
     def update_document_state(self, document_path, state_str):
         """Updates the state of the document in the storage"""
         try:
-            # base_name = os.path.basename(document_path)
+            logging.info(f"{state_str} DocumentID - {document_id}")
             document_id = self.encode_document_id(document_path)
             if self._log_document.get(document_id, "") != "":
                 json_document = self._log_document[document_id]

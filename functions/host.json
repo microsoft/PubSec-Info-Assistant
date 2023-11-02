@@ -16,5 +16,5 @@
     "dynamicConcurrencyEnabled": true,
     "snapshotPersistenceEnabled": true
   },
-  "functionTimeout": "00:29:59"
+  "functionTimeout": "01:00:00"
 }

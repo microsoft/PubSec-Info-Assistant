@@ -92,6 +92,10 @@ param imageEnrichmentQueue string = 'image-enrichment-queue'
 param embeddingsQueue string = 'embeddings-queue'
 // End of valued replicated in debug env files
 
+// This block of variables are used for Branding
+param applicationtitle string = ''
+// End branding
+
 param cuaEnabled bool = false
 param cuaId string = ''
 param enableDevCode bool = false
@@ -269,6 +273,7 @@ module backend 'core/host/appservice.bicep' = {
       CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
+      APPLICATION_TITLE: applicationtitle
     }
 
 
@@ -665,6 +670,17 @@ module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
     principalId: aadMgmtServicePrincipalId
     roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
     principalType: 'ServicePrincipal'
+  }
+}
+
+
+module azMonitor 'core/logging/monitor.bicep' = {
+  scope: rg
+  name: 'azure-monitor'
+  params: {
+    location: location
+    logWorkbookName: '${prefix}-${abbrs.logWorkbook}${randomString}'
+    componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
   }
 }
 

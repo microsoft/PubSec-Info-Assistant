@@ -228,7 +228,7 @@ class GPTDirectApproach(Approach):
         Emphasize the use of facts.
         
         Here is how you should answer every question:
-        -Please respond with relevant information from the data in the response along with citation if able.    
+        -Please respond with relevant information from the data in the response.    
         
         {follow_up_questions_prompt}
         {injected_prompt}

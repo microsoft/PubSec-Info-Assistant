@@ -183,12 +183,12 @@ class ChatReadRetrieveReadApproach(Approach):
                 'Content-Type': 'application/json',
             }
 
-        response = requests.post(url, json=data,headers=headers,timeout=300)
+        response = requests.post(url, json=data,headers=headers,timeout=60)
         if response.status_code == 200:
             response_data = response.json()
             embedded_query_vector =response_data.get('data')          
         else:
-            print('Error generating embedding:', response.status_code)
+            logging.error(f"Error generating embedding:: {response.status_code}")
             raise Exception('Error generating embedding:', response.status_code)
 
         #vector set up for pure vector search & Hybrid search & Hybrid semantic
@@ -449,5 +449,5 @@ class ChatReadRetrieveReadApproach(Approach):
             )
             return source_file + "?" + sas_token
         except Exception as error:
-            logging.exception("Unable to parse source file name: " + str(error) + "")
+            logging.error(f"Unable to parse source file name: {str(error)}")
             return ""

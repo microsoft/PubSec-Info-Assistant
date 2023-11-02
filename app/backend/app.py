@@ -298,4 +298,5 @@ def get_all_tags():
     return jsonify(results)
 
 if __name__ == "__main__":
-    app.run()
+    logging.info("IA WebApp Starting Up...")
+    app.run(threaded=True)

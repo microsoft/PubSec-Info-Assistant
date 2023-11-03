@@ -151,9 +151,7 @@ chat_approaches = {
                                     QUERY_TERM_LANGUAGE,
                                     model_name,
                                     model_version,
-                                    IS_GOV_CLOUD_DEPLOYMENT,
-                                    TARGET_EMBEDDING_MODEL,
-                                    ENRICHMENT_APPSERVICE_NAME
+                                    IS_GOV_CLOUD_DEPLOYMENT
                                 )
 }
 

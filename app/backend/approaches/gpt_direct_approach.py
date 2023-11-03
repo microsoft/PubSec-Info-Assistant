@@ -42,20 +42,11 @@ class GPTDirectApproach(Approach):
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str,
-        TARGET_EMBEDDING_MODEL: str,
-        ENRICHMENT_APPSERVICE_NAME: str
+        is_gov_cloud_deployment: str
     ):
         self.chatgpt_deployment = chatgpt_deployment
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
-        #escape target embeddiong model name
-        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
-        
-        if is_gov_cloud_deployment:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
-        else:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
         
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
@@ -67,8 +58,6 @@ class GPTDirectApproach(Approach):
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
-        use_semantic_captions = True if overrides.get("semantic_captions") else False
-        top = overrides.get("top") or 3
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
@@ -103,32 +92,8 @@ class GPTDirectApproach(Approach):
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
 
-        # Generate embedding using REST API
-        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
-        data = [f'"{generated_query}"']
-        headers = {
-                'Accept': 'application/json',  
-                'Content-Type': 'application/json',
-            }
 
-        response = requests.post(url, json=data,headers=headers,timeout=300)
-        if response.status_code == 200:
-            response_data = response.json()
-            embedded_query_vector =response_data.get('data')          
-        else:
-            print('Error generating embedding:', response.status_code)
-            raise Exception('Error generating embedding:', response.status_code)
-
-        results = []  # list of results to be used in the prompt
-
-        # create a single string of all the results to be used in the prompt
-        results_text = "".join(results)
-        if results_text == "":
-            content = "\n NONE"
-        else:
-            content = "\n " + results_text
-
-        # STEP 3: Generate the prompt to be sent to the GPT model
+        #Generate the follow up prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             prompt_template.Follow_Up_Questions_Prompt_Content
             if overrides.get("suggest_followup_questions")
@@ -168,47 +133,27 @@ class GPTDirectApproach(Approach):
                 systemPersona=system_persona,
             )
 
-        # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
+        #Generate a contextual and content-specific answer using the search results and chat history.
         #Added conditional block to use different system messages for different models.
-        if self.model_name.startswith("gpt-35-turbo"):
-            messages = self.get_messages_from_history(
-                prompt_template,
-                system_message,
-                self.model_name,
-                history,
-                history[-1]["user"] + "Sources:\n" + content + "\n\n",
-                prompt_template.Response_Prompt_Few_Shots,
-                max_tokens=self.chatgpt_token_limit - 500
-            )
+        messages = self.get_messages_from_history(
+            prompt_template,
+            system_message,
+            self.model_name,
+            history,
+            history[-1]["user"] + "\n\n",
+            prompt_template.Response_Prompt_Few_Shots,
+            max_tokens=self.chatgpt_token_limit - 500
+        )
 
-            chat_completion = openai.ChatCompletion.create(
-                deployment_id=self.chatgpt_deployment,
-                model=self.model_name,
-                messages=messages,
-                temperature=float(overrides.get("response_temp")) or 0.6,
-                n=1
-            )
-        elif self.model_name.startswith("gpt-4"):
-            messages = self.get_messages_from_history(
-                prompt_template,
-                "Sources:\n" + content + "\n\n" + system_message,
-                self.model_name,
-                history,
-                history[-1]["user"],
-                prompt_template.Response_Prompt_Few_Shots,
-                max_tokens=self.chatgpt_token_limit
-            )
+        chat_completion = openai.ChatCompletion.create(
+            deployment_id=self.chatgpt_deployment,
+            model=self.model_name,
+            messages=messages,
+            temperature=float(overrides.get("response_temp")) or 0.6,
+            n=1
+        )  
 
-            chat_completion = openai.ChatCompletion.create(
-                deployment_id=self.chatgpt_deployment,
-                model=self.model_name,
-                messages=messages,
-                temperature=float(overrides.get("response_temp")) or 0.6,
-                max_tokens=1024,
-                n=1
-            )
-
-        # STEP 4: Format the response
+        #Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
 
         return {

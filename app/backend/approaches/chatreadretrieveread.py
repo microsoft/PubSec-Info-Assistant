@@ -228,11 +228,11 @@ class ChatReadRetrieveReadApproach(Approach):
                 query_caption="extractive|highlight-false"
                 if use_semantic_captions else None,
                 vector_queries =[vector],
-                filter=search_filter if search_filter is not None else None
+                filter=search_filter
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vectors=[vector], filter=search_filter if search_filter is not None else None
+                generated_query, top=top,vectors=[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name

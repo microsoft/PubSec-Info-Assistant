@@ -7,14 +7,7 @@ The end user leverages the web interface as the primary method to engage with th
 When you engage with IA Accelerator in the "Chat" method, the system maintains a history for your conversation and will be able to understand the context of your questions from one question to the next.
 
 > You may activate the Chat engagement pattern by choosing the "Chat" link at the top of the page
-> ![Chat Link](/docs/images/chat-interface.jpg)
-
-## Ask your data
-
-When you engage with IA Accelerator in the "Ask a question" method, the system does not maintain a history for your conversation. Each question will be treated with on its own as a new and unique query.
-
-> You may activate the **Ask a question** engagement pattern by choosing the "Chat" link at the top of the page
-> ![Chat Link](/docs/images/ask-a-question-interface.jpg)
+> ![Chat Link](/docs/images/chat-interface.png)
 
 ## Analysis Panel
 
@@ -41,7 +34,7 @@ You can upload documents in the [supported formats listed above](#document-pre-p
 > ![Manage Content](/docs/images/manage-content-interface.png)
 > 1. Then click on the "Upload files" tab.
 > ![Upload Link](/docs/images/upload-files-link.png)
-> 1. Drag files to the user interface, or click to open a browse window
+> 1. Select a folder, add some tags, and drag files to the user interface, or click the box to open a browse window
 > ![Upload Link Drag and Drop](/docs/images/upload-files-drag-drop.jpg)
 
 ### View upload status

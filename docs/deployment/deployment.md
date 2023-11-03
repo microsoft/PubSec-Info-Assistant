@@ -1,10 +1,8 @@
-
-
 # Deploying IA Accelerator to Azure
 
 Follow these steps to get the accelerator up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
 
-## Prerequisites 
+## Prerequisites
 
 The IA Accelerator relies on multiple Azure services and has certain prerequisites that need to be met before deployment. It's essential to procure these prerequisites prior to proceeding with the deployment instructions in this guide.
 
@@ -13,14 +11,12 @@ To get started with the IA Accelerator you will need the following:
 >* A funded Azure subscription
 >   * You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/).
 >   * NOTE: "Free" tier subscriptions will not work due to the number of services required.
->* Access enabled for the Azure OpenAI service in your subscription. 
+>* Access enabled for the Azure OpenAI service in your subscription.
 >   * You can request access [here](https://aka.ms/oaiapply).
 >* Administrative rights on the Azure Subscription
->   * Contributor is necessary to install, but Administrator may be required to enable external webapp access
+>   * Contributor and User Access Administrator roles are necessary to install, but Administrator may be required to enable external webapp access
 >* (Optional) [Visual studio code](https://code.visualstudio.com/)
 >
->
-
 
 Once you have your prerequisite items, please move on to the Deployment Configuration step.
 
@@ -35,21 +31,19 @@ gpt-35-turbo | 0301, 0613
 **gpt-4** | current version
 gpt-4-32k | current version
 
-**Important:** GPT 4 models may achieve better results from the IA Accelerator. Access to gpt-4 may require approval which can be requested [here](https://aka.ms/oai/get-gpt4). If gpt-4 access is not available gpt-35-turbo-16k (0613) is recommended.
-
+**Important:** Gpt-35-turbo-16k (0613) is recommended. GPT 4 models may achieve better results from the IA Accelerator. Access to gpt-4 may require approval which can be requested [here](https://aka.ms/oai/get-gpt4).
 
 ## Development Environment Configuration
 
-The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub Codespaces.
+The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub CodeSpaces.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
+[![Open in GitHub CodeSpaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
 
-Begin by setting up your own Codespace using our  [Developing in a Codespaces](/docs/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own CodeSpace using our  [Developing in CodeSpaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
 
-*If you want to configure your local desktop for development container, follow our [Configuring your System for Development Containers](/docs/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*If you want to configure your local desktop for development container or you do not have access to CodeSpaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
 Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
-
 
 ## Sizing Estimator
 
@@ -66,7 +60,6 @@ You now need to set up your local environment variables file in preparation for 
 Inside your Development environment (Codespace or Container), do the following:
 
 >1. Open `scripts/environments` and copy `local.env.example` to `local.env`.
->   1. Note: choose the best example ENV file for your deployment, specifically if you have non-English language settings.
 >1. Then open `local.env` and update values as needed:
 
 Variable | Required | Description
@@ -75,24 +68,28 @@ LOCATION | Yes | The location (West Europe is the default). The BICEP templates 
 WORKSPACE | Yes  | The workspace name (use something simple and unique to you). This will appended to infoasst-????? in your subscription.
 SUBSCRIPTION_ID | Yes | The GUID that represents the Azure Subscription you want the Accelerator to be deployed into.
 TENANT_ID | Yes | The GUID that represents the Azure Active Directory Tenant for the Subscription you want the accelerator to be deployed into.
+IS_USGOV_DEPLOYMENT | Yes | Defaults to false. This value should be set to true only if you are deploying to one of the US Sovereign regions. Find more information on [Sovereign Deployemnt](./enable_sovereign_deployment.md)
 REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
 SKIP_PLAN_CHECK | No | If this value is set to 1, then the BICEP deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
-USE_EXISTING_AOAI | Yes | Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. Set the value to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
+USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
 AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the resource group that hosts the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
+USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to true. When set to true this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to false, Information Assistant will use the open source language model that is provided in the values below.
 AZURE_OPENAI_EMBEDDING_MODEL | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
+OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer.
+OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure Cognitive Search hybrid index's vector columns can be set to the matching size.
+AZURE_OPENAI_CHATGPT_MODEL_NAME | No | This can be used to select a different GPT model to be deployed to Azure OpenAI when the default (gpt-35-turbo-16k) isn't available to you.
+AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | This can be used to select a specific version of the GPT model above when the default (0613) isn't available to you.
+AZURE_OPENAI_CHATGPT_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the GPT model deployed to Azure OpenAI when you have reduced capacity.
+CHAT_WARNING_BANNER_TEXT | No | Defaults to "". Provide a value in this parameter to display a header and footer to the UX of Information Assistant with the included warning banner text.
 DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file located in the `scripts/environments/languages` folder. You can then use this file to customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. See [Configuring your own language ENV file](/features/configuring_language_env_files.md) more information.
 ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By default, **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** is set to `true`. The CUA GUID which is pre-configured will tell Microsoft about the usage of this software. Please see [Data Collection Notice](/README.md#data-collection-notice) for more information. <br/><br/>You may provide your own CUA GUID by changing the value in **CUSTOMER_USAGE_ATTRIBUTION_ID**. Ensure you understand how to properly notify your customers by reading <https://learn.microsoft.com/en-us/partner-center/marketplace/azure-partner-customer-usage-attribution#notify-your-customers>.<br/><br/>To disable data collection, set **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** to `false`.
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
-IS_USGOV_DEPLOYMENT | No | Defaults to `false``. Set to `true` to enable deploying to UsGov regions.
-AZURE_OPENAI_CHATGPT_MODEL_NAME | No | If you have set **IS_USGOV_DEPLOYMENT** to "true" and Open AI is in Azure Commercial then you must set this to the model name in your Open AI GPT Deployment. 
-AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | If you have set **IS_USGOV_DEPLOYMENT** to "true" and Open AI is in Azure Commercial then you must set this to the model version in your Open AI GPT Deployment. 
-CHAT_WARNING_BANNER_TEXT | No | Setting this value will place a banner and a footer with Warning Text. 
+APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 
 ## Log into Azure using the Azure CLI
-
 
 You can use the bash prompt in your Codespace to issue the following commands:
 
@@ -124,10 +121,9 @@ From this output, grab the Subscription ID of the subscription you intend to dep
 
 ## Deploy and Configure Azure resources
 
+Now that your CodeSpace/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
 
-Now that your Codespace/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
-
-To deploy everything run the following command from the Codespace/Dev Container prompt:
+To deploy everything run the following command from the CodeSpace/Dev Container prompt:
 
 ```bash
     make deploy
@@ -159,7 +155,7 @@ functional-tests             Run functional tests to check the processing pipeli
 
 ## Configure authentication and authorization
 
-If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](/docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure. 
+If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](/docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure.
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
@@ -167,12 +163,11 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 Once deployed, you can find the URL of your installation by:
 
-1) Browse to your new Resource Group at https://portal.azure.com and locate the "App Service"
+1) Browse to your new Resource Group at https://portal.azure.com and locate the "App Service" with the name that starts with "infoasst-web"
 ![Location of App Service in Portal](/docs/images/deployment_app_service_location.jpg)
 
 2) After clicking on the App Service, you will see the "Default domain" listed. This is the link to your installation.
 ![Default Domain of App Service in Portal](/docs/images/deployment_default_domain.jpg)
-
 
 ## Next steps
 
@@ -180,4 +175,4 @@ At this point deployment is complete. Please go to the [Using the IA Accelerator
 
 ## Need Help?
 
-If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager. 
+If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

@@ -1,6 +1,6 @@
 # IA Accelerator Features
 
-Please see below sections for coverage of IA Accelerator features. 
+Please see below sections for coverage of IA Accelerator features.
 
 * [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
 * [Prompt Engineering](/docs/features/features.md#prompt-engineering)
@@ -11,18 +11,18 @@ Please see below sections for coverage of IA Accelerator features.
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)
 * [Developer Settings](/docs/features/features.md#developer-settings)
-	* [Configuring your own language ENV file](/docs/features/features.md#configuring-your-own-language-env-file)
-	* [Debugging functions](/docs/features/features.md#debugging-functions)
-	* [Debugging the web app](/docs/features/features.md#debugging-the-web-app)
-	* [Debugging the container web app](/docs/features/features.md#debugging-the-container-web-app)
-	* [Build pipeline for Sandbox](/docs/features/features.md#build-pipeline-for-sandbox)
-	* [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
+  * [Configuring your own language ENV file](/docs/features/features.md#configuring-your-own-language-env-file)
+  * [Debugging functions](/docs/features/features.md#debugging-functions)
+  * [Debugging the web app](/docs/features/features.md#debugging-the-web-app)
+  * [Debugging the container web app](/docs/features/features.md#debugging-the-container-web-app)
+  * [Build pipeline for Sandbox](/docs/features/features.md#build-pipeline-for-sandbox)
+  * [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
 * [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
 * [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
 
 ## Retrieval Augmented Generation (RAG)
 
-**Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's indexing capabilities to retrieve documents that are contextually relevant for precise answers.
+**Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's Vector Hybrid Search capabilities to retrieve documents that are contextually relevant for precise answers. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
 
 **Dynamic Model Selection:** Use GPT models (GPT-3.5 or GPT-4) tailored to your needs.
 
@@ -42,29 +42,38 @@ Go here for more information on [Prompt engineering techniques](https://learn.mi
 
 ## Document Pre-Processing
 
+### Supported Document Types
+
+Information Assistant supports the following document types:
+
+Pipeline | File Types
+--- | ---
+Text-based | pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg
+Images | jpg, jpeg, png, gif, bmp, tif, tiff
+
 **Custom Document Chunking:** The Azure OpenAI GPT models have a maximum token limit, which includes both input and output tokens. Tokens are units of text which can represent a single word, a part of a word, or even a character, depending on the specific language and text encoding being used. Consequently the model will not be able to process a 500 page text based document. Likewise, the models will not be able to process complex file types, such as PDF. This is why we pre-process these documents, before passing these to our search capability to then be exposed by the RAG pattern. Our process focused on
 
 * content extraction from text-based documents
+  * [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) for PDFs
+  * [Unstructure.io](https://unstructured.io/) for all other text-based types
 * creating a standard JSON representation of all a documents text-based content
 * chunking and saving metadata into manageable sized to be used in the RAG pattern
 
-The Information Assistant Accelerator [pre-processes](/docs/features/document_pre_processing.md) certain document types to allow better understanding of large complex documents. 
+The Information Assistant Accelerator [pre-processes](/docs/features/document_pre_processing.md) certain document types to allow better understanding of large complex documents.
 
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](/functions/shared_code/status_log.md) page for more details.
 
 Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](/docs/functions_flow.md)
 
 ## Image Search
-**Text-Based Image Retrieval** , With this addition, you can easily search for images in the Retrieval Augmented Generation (RAG) application.
+
+### Text-Based Image Retrieval
+
+With this addition, you can easily search for images in the Retrieval Augmented Generation (RAG) application.
 
 #### How It Works
 
-When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure Cognitive Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a streaight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
-
-#### What's Coming
-
-We're starting with text-based image retrieval, but in the future, we have plans to extend this functionality to include image-to-image search, offering even more robust options for our users.
-
+When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure Cognitive Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a straight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
 
 ## Azure Cognitive Search Integration
 
@@ -92,7 +101,7 @@ To learn more, please visit the [Cognitive Search](/docs/features/cognitive_sear
 
 ![Chat screen](/docs/images/info_assistant_chatscreen.png)
 
-The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page. 
+The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page.
 
 ## Developer Settings
 
@@ -112,7 +121,6 @@ Check out how to [Debug the Information Assistant Web App](/docs/webapp_debug.md
 
 Check out how to [Debug the Information Assistant Web App](/docs/container_webapp_debug.md)
 
-
 ### Build pipeline for Sandbox
 
 Setting up a pipeline to deploy a new Sandbox environment requires some manual configuration. Review the details of the [Procedure to setup sandbox environment](/docs/deployment/setting_up_sandbox_environment.md) here.
@@ -129,4 +137,10 @@ Check out how to [setup Sovereign Region Deployment](/docs/deployment/enable_sov
 
 ## Works in Progress (Future releases)
 
-**Adding Evaluation Guidance and Metrics:** To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
+### Image Similarity Search
+
+We've starting with text-based image retrieval, but in the future, we have plans to extend this functionality to include image-to-image search, offering even more robust options for our users.
+
+### Adding Evaluation Guidance and Metrics
+
+To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.

@@ -21,4 +21,4 @@ To get started with setting up your deployment pipelines please take the followi
     - AD_MGMTAPP_CLIENT_SECRET: Azure AD Client Secret for your environment Service Principal
     - CONTAINER_REGISTRY_ADDRESS: ACR host of the Info Assistant development container used by CICD
     - WEBAPP_CLIENT_ID: WebApp Application Registration Identifier
-    - environment: Environment variable file. Located in [./scripts/environments](./scripts/environments)
+    - environment: Environment variable file. Located in `./scripts/environments`

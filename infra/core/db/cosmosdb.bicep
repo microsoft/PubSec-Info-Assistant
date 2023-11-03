@@ -28,11 +28,17 @@ param maxIntervalInSeconds int = 300
 param systemManagedFailover bool = true
 
 
-@description('The name for the database')
-param databaseName string
+@description('The name for the log database')
+param logDatabaseName string
 
-@description('The name for the container')
-param containerName string
+@description('The name for the log container')
+param logContainerName string
+
+@description('The name for the tag database')
+param tagDatabaseName string
+
+@description('The name for the tag container')
+param tagContainerName string
 
 @description('Maximum autoscale throughput for the container')
 @minValue(1000)
@@ -80,22 +86,22 @@ resource cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
   }
 }
 
-resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
+resource logDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
   parent: cosmosDBAccount
-  name: databaseName
+  name: logDatabaseName
   properties: {
     resource: {
-      id: databaseName
+      id: logDatabaseName
     }
   }
 }
 
-resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
-  parent: database
-  name: containerName
+resource logContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: logDatabase
+  name: logContainerName
   properties: {
     resource: {
-      id: containerName
+      id: logContainerName
       partitionKey: {
         paths: [
           '/file_name'
@@ -119,9 +125,49 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
+resource tagDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
+  parent: cosmosDBAccount
+  name: tagDatabaseName
+  properties: {
+    resource: {
+      id: tagDatabaseName
+    }
+  }
+}
+
+resource tagContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
+  parent: tagDatabase
+  name: tagContainerName
+  properties: {
+    resource: {
+      id: tagContainerName
+      partitionKey: {
+        paths: [
+          '/file_path'
+        ]
+        kind: 'Hash'
+      }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: autoscaleMaxThroughput
+      }
+    }
+  }
+}
 
 output CosmosDBEndpointURL string = cosmosDBAccount.properties.documentEndpoint
 #disable-next-line outputs-should-not-contain-secrets
 output CosmosDBKey string = cosmosDBAccount.listKeys().primaryMasterKey
-output CosmosDBDatabaseName string = database.name
-output CosmosDBContainerName string = container.name
+output CosmosDBLogDatabaseName string = logDatabase.name
+output CosmosDBLogContainerName string = logContainer.name
+output CosmosDBTagsDatabaseName string = tagDatabase.name
+output CosmosDBTagsContainerName string = tagContainer.name

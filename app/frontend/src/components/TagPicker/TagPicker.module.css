@@ -1,0 +1,29 @@
+
+.rootClass {
+    max-width: 800px;
+}
+
+.rootClassFilter {
+    max-width: 250px;
+}
+
+.tagPicker {
+    background-color: white;
+}
+
+.tagArea {
+    display: flex;
+    flex-direction: column;
+    justify-content: right;
+    width: 600px;
+    padding-bottom: 20px;
+  }
+
+.tagSelection {
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 5px;
+    justify-content: left;
+    text-align: left;
+    height: 90px;
+ }  

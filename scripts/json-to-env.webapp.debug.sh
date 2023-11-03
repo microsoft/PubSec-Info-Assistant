@@ -32,6 +32,10 @@ jq -r  '
             "env_var": "AZURE_BLOB_STORAGE_CONTAINER"
         },
         {
+            "path": "azurE_STORAGE_UPLOAD_CONTAINER",
+            "env_var": "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"
+        },
+        {
             "path": "azurE_OPENAI_SERVICE",
             "env_var": "AZURE_OPENAI_SERVICE"
         },
@@ -88,12 +92,20 @@ jq -r  '
             "env_var": "COSMOSDB_KEY"
         },
         {
-            "path": "azurE_COSMOSDB_DATABASE_NAME",
-            "env_var": "COSMOSDB_DATABASE_NAME"
+            "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
+            "env_var": "COSMOSDB_LOG_DATABASE_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_CONTAINER_NAME",
-            "env_var": "COSMOSDB_CONTAINER_NAME"
+            "path": "azurE_COSMOSDB_LOG_CONTAINER_NAME",
+            "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
+            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
+            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
         },
         {
             "path": "azurE_CLIENT_ID",

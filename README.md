@@ -74,7 +74,6 @@ azure_search/ | The configuration of the Azure Search hybrid index that is appli
 docs/adoption_workshop/ | PPT files that match what is covered in the Adoption Workshop videos in Discussions.
 docs/deployment/ | Detailed documentation on how to deploy and start using Information Assistant.
 docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
-docs/debugging/ | Detailed documentation on how to debug different parts of Information Assistant
 docs/ | Other supporting documentation that is primarily linked to from the other markdown files.
 functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
 infra/ | The BICEP scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.bicep` file but most of the resource deployments are modularized under the **core** folder.

@@ -135,7 +135,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 'Content-Type': 'application/json',
             }
 
-        response = requests.post(url, json=data,headers=headers,timeout=30)
+        response = requests.post(url, json=data,headers=headers,timeout=60)
         if response.status_code == 200:
             response_data = response.json()
             embedded_query_vector =response_data.get('data')          

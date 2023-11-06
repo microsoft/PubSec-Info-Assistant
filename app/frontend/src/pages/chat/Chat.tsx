@@ -4,6 +4,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator} from "@fluentui/react";
 import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
+import { ITag } from '@fluentui/react/lib/Pickers';
 
 import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
@@ -22,6 +23,8 @@ import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButton
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
 import { ApproachesButtonGroup } from "../../components/ApproachesButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
+import { FolderPicker } from "../../components/FolderPicker";
+import { TagPickerInline } from "../../components/TagPicker";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -52,8 +55,6 @@ const Chat = () => {
     const [approach, setApproach] = useState<number>(Approaches.ReadRetrieveRead);
 
     const lastQuestionRef = useRef<string>("");
-    const testQuestion = "This is a test question.";
-    const thisquestion = "";
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -63,6 +64,8 @@ const Chat = () => {
     const [activeCitationSourceFile, setActiveCitationSourceFile] = useState<string>();
     const [activeCitationSourceFilePageNumber, setActiveCitationSourceFilePageNumber] = useState<string>();
     const [activeAnalysisPanelTab, setActiveAnalysisPanelTab] = useState<AnalysisPanelTabs | undefined>(undefined);
+    const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
+    const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
@@ -91,7 +94,9 @@ const Chat = () => {
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
                     responseLength: responseLength,
-                    responseTemp: responseTemp
+                    responseTemp: responseTemp,
+                    selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
+                    selectedTags: selectedTags.map(tag => tag.name).join(",")
                 }
             };
             const result = await chatApi(request);
@@ -268,6 +273,14 @@ const Chat = () => {
         setSelectedAnswer(index);
     };
 
+    const onSelectedKeyChanged = (selectedFolders: string[]) => {
+        setSelectedFolders(selectedFolders)
+    };
+
+    const onSelectedTagsChange = (selectedTags: ITag[]) => {
+        setSelectedTags(selectedTags)
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.commandsContainer}>
@@ -418,6 +431,10 @@ const Chat = () => {
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
                             <ApproachesButtonGroup className={styles.chatSettingsSeparator} onClick={onApproachChange} defaultValue={approach}/>
+
+                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders}/>
+                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags}/>
                 </Panel>
 
                 <Panel

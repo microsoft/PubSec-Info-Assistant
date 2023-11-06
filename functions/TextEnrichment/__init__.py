@@ -25,8 +25,8 @@ azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_C
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
-cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 enrichmentKey =  os.environ["ENRICHMENT_KEY"]
 enrichmentEndpoint = os.environ["ENRICHMENT_ENDPOINT"] 
@@ -49,7 +49,7 @@ utilities = Utilities(
 )
 
 statusLog = StatusLog(
-    cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name
+    cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
 )     
 
 def main(msg: func.QueueMessage) -> None:

@@ -24,6 +24,8 @@ export type AskRequestOverrides = {
     aiPersona?: string;
     responseLength?: number;
     responseTemp?: number;
+    selectedFolders?: string;
+    selectedTags?: string;
 };
 
 export type AskRequest = {
@@ -157,3 +159,8 @@ export type ApplicationTitle = {
     APPLICATION_TITLE: string;
     error?: string;
 };
+
+export type GetTagsResponse = {
+    tags: string;
+    error?: string;
+}

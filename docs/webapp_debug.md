@@ -6,15 +6,15 @@ The app consists of two layers, namely the frontend user interface components an
 
 To debug the webapp, both frontend and backend firstly select breakpoints to your code under the frontend and/or backend. Next select the 'Run & Debug' tab from the sidebar in VS Code. Next select Python: Flask from the dropdown and hit run. This will initiate local debugging of the backend code.
 
-![backend debugging](images/webapp_debug_1.png)
+![backend debugging](/docs/images/webapp_debug_1.png)
 
 Next, you will need to initiate debugging of the frontend code. To do this select 'Vite: Debug' from the drop down and hit run.
 
-![frontend debugging](images/webapp_debug_2.png)
+![frontend debugging](/docs/images/webapp_debug_2.png)
 
 This will initiate frontend running and debugging. a browser will open and show the web app running under localhost:5000. Next proceed to interact with the web app, by asking a question. In the VS Code interface, you code will hit the breakpoints, frontend or backend, and you will be able to view variable, trace logic etc. You can switch between the two running debuggers by selecting frontend or backend  (flask or vite) from the debug dropdown.
 
-![frontend debugging](images/webapp_debug_3.png)
+![frontend debugging](/docs/images/webapp_debug_3.png)
 
 ## Known Issues
 

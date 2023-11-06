@@ -36,7 +36,7 @@ Go here for more information on [Prompt engineering techniques](https://learn.mi
 
 * content extraction from text-based documents
 * creating a standard JSON representation of all a documents text-based content
-* chunking and saving metadata into manageable sized to be used in the RAG pattern
+* chunking and saving metadata into a manageable size to be used in the RAG pattern
 
 Additional information on this process can be found [here](./docs/functions_flow.md)
 

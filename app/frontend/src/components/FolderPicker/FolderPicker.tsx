@@ -47,7 +47,6 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
     const comboBoxStyles: Partial<IComboBoxStyles> = { root: { maxWidth: 300 } };
     const hostStyles: Partial<ITooltipHostStyles> = { root: { display: 'inline-block' } };
     const addFolderIcon: IIconProps = { iconName: 'Add' };
-    const SelectableOptionMenuItemTypeNone = 'None';
 
     allowNewFolders = allowFolderCreation as boolean;
 
@@ -60,7 +59,7 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
             color: "#696969"
         },
     }
-
+    
     const teachingBubblePrimaryButtonClick = () => {
         const textField = document.getElementById(textFieldId) as HTMLInputElement;
         if (!textField.defaultValue || textField.defaultValue.trim() === '') {
@@ -93,7 +92,6 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
             const delimiter = "/";
             const prefix = "";
             var newOptions: IComboBoxOption[] = allowNewFolders ? [] : [
-                { key: 'none', text: 'None' },
                 { key: 'selectAll', text: 'Select All', itemType: SelectableOptionMenuItemType.SelectAll },
                 { key: 'FolderHeader', text: 'Folders', itemType: SelectableOptionMenuItemType.Header }];
             for await (const item of containerClient.listBlobsByHierarchy(delimiter, {
@@ -161,80 +159,38 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
         option?: IComboBoxOption,
         index?: number,
         value?: string,
-    ): void => {
+      ): void => {
         const selected = option?.selected;
-        const currentSelectedOptionKeys = selectedKeys.filter(key => key !== 'selectAll' && key !== 'none');
+        const currentSelectedOptionKeys = selectedKeys.filter(key => key !== 'selectAll');
         const selectAllState = currentSelectedOptionKeys.length === selectableOptions.length;
-    
         if (!allowNewFolders) {
             if (option) {
-                if (option?.itemType === SelectableOptionMenuItemType.SelectAll) {
-                    if (selectAllState) {
-                        setSelectedKeys([])
-                        onSelectedKeyChange([]);
-                    }
-                    else {
-                        setSelectedKeys(['selectAll', ...selectableOptions.map(o => o.key as string)]);
-                        onSelectedKeyChange(['selectAll', ...selectableOptions.map(o => o.key as string)]);
-                    }
-                } else if (option?.key === 'none') {
-                    setSelectedKeys(['none']);
-                    onSelectedKeyChange(['none']);
-                } else {
-                    const updatedKeys = selected
-                    ? [...currentSelectedOptionKeys, option!.key as string]
-                    : currentSelectedOptionKeys.filter(k => k !== option.key);
-                    if (updatedKeys.length === selectableOptions.length) {
-                        updatedKeys.push('selectAll');
-                    }
-                    setSelectedKeys(updatedKeys);
-                    onSelectedKeyChange(updatedKeys);
+            if (option?.itemType === SelectableOptionMenuItemType.SelectAll) {
+                if (selectAllState) {
+                    setSelectedKeys([])
+                    onSelectedKeyChange([]);
                 }
+                else {
+                    setSelectedKeys(['selectAll', ...selectableOptions.map(o => o.key as string)]);
+                    onSelectedKeyChange(['selectAll', ...selectableOptions.map(o => o.key as string)]);
+                }
+            } else {
+                const updatedKeys = selected
+                ? [...currentSelectedOptionKeys, option!.key as string]
+                : currentSelectedOptionKeys.filter(k => k !== option.key);
+                if (updatedKeys.length === selectableOptions.length) {
+                updatedKeys.push('selectAll');
+                }
+                setSelectedKeys(updatedKeys);
+                onSelectedKeyChange(updatedKeys);
+            }
             }
         }
         else { 
             setSelectedKeys([option!.key as string]);
             onSelectedKeyChange([option!.key as string]);
         }
-    };
-
-    // const onChange = (
-    //     event: React.FormEvent<IComboBox>,
-    //     option?: IComboBoxOption,
-    //     index?: number,
-    //     value?: string,
-    //   ): void => {
-    //     const selected = option?.selected;
-    //     const currentSelectedOptionKeys = selectedKeys.filter(key => key !== 'selectAll');
-    //     const selectAllState = currentSelectedOptionKeys.length === selectableOptions.length;
-    //     if (!allowNewFolders) {
-    //         if (option) {
-    //         if (option?.itemType === SelectableOptionMenuItemType.SelectAll) {
-    //             if (selectAllState) {
-    //                 setSelectedKeys([])
-    //                 onSelectedKeyChange([]);
-    //             }
-    //             else {
-    //                 setSelectedKeys(['selectAll', ...selectableOptions.map(o => o.key as string)]);
-    //                 onSelectedKeyChange(['selectAll', ...selectableOptions.map(o => o.key as string)]);
-    //             }
-    //         } else {
-    //             const updatedKeys = selected
-    //             ? [...currentSelectedOptionKeys, option!.key as string]
-    //             : currentSelectedOptionKeys.filter(k => k !== option.key);
-    //             if (updatedKeys.length === selectableOptions.length) {
-    //             updatedKeys.push('selectAll');
-    //             }
-    //             setSelectedKeys(updatedKeys);
-    //             onSelectedKeyChange(updatedKeys);
-    //         }
-    //         }
-    //     }
-    //     else { 
-    //         setSelectedKeys([option!.key as string]);
-    //         onSelectedKeyChange([option!.key as string]);
-    //     }
-    //   };
+      };
 
     return (
         <div className={styles.folderArea}>

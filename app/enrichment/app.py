@@ -16,7 +16,7 @@ from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
@@ -25,6 +25,7 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
 from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.tags_helper import TagsHelper
 
 # === ENV Setup ===
 
@@ -36,10 +37,13 @@ ENV = {
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
+    "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": None,
     "COSMOSDB_URL": None,
     "COSMOSDB_KEY": None,
-    "COSMOSDB_DATABASE_NAME": None,
-    "COSMOSDB_CONTAINER_NAME": None,
+    "COSMOSDB_LOG_DATABASE_NAME": None,
+    "COSMOSDB_LOG_CONTAINER_NAME": None,
+    "COSMOSDB_TAGS_DATABASE_NAME": None,
+    "COSMOSDB_TAGS_CONTAINER_NAME": None,
     "MAX_EMBEDDING_REQUEUE_COUNT": 5,
     "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
@@ -109,8 +113,9 @@ utilities_helper = UtilitiesHelper(
     azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 
-statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_DATABASE_NAME"], ENV["COSMOSDB_CONTAINER_NAME"])
+statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
 
+tagsHelper = TagsHelper(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_TAGS_DATABASE_NAME"], ENV["COSMOSDB_TAGS_CONTAINER_NAME"])
 # === API Setup ===
 
 start_time = datetime.now()
@@ -212,23 +217,28 @@ def embed_texts(model: str, texts: List[str]):
         EmbeddingResponse: The embeddings of the texts
     """
 
+    output = {}
     if model not in models:
         return {"message": f"Model {model} not found"}
 
     model_obj = models[model]
+    try:
+        if model.startswith("azure-openai_"):
+            embeddings = model_obj.encode(texts)
+            embeddings = embeddings['data'][0]['embedding']
+        else:
+            embeddings = model_obj.encode(texts)
+            embeddings = embeddings.tolist()[0]
 
-    if model.startswith("azure-openai_"):
-        embeddings = model_obj.encode(texts)
-        embeddings = embeddings['data'][0]['embedding']
-    else:
-        embeddings = model_obj.encode(texts)
-        embeddings = embeddings.tolist()[0]
-        
-    output = {
-        "model": model,
-        "model_info": model_info[model],
-        "data": embeddings
-    }
+        output = {
+            "model": model,
+            "model_info": model_info[model],
+            "data": embeddings
+        }
+    
+    except Exception as error:
+        logging.error(f"Failed to embed: {str(error)}")
+        raise HTTPException(status_code=500, detail=f"Failed to embed: {str(error)}") from error
 
     return output
 
@@ -245,6 +255,25 @@ def index_sections(chunks):
     succeeded = sum([1 for r in results if r.succeeded])
     log.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
 
+def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
+    """ Gets the tags from the blob metadata and uploads them to cosmos db"""
+    file_name, file_extension, file_directory = utilities_helper.get_filename_and_extension(blob_path)
+    path = file_directory + file_name + file_extension
+    blob_client = blob_service_client.get_blob_client(
+        container=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
+        blob=path)
+    blob_properties = blob_client.get_blob_properties()
+    tags = blob_properties.metadata.get("tags")
+    if tags is not None:
+        if isinstance(tags, str):
+            tags_list = [tags]
+        else:
+            tags_list = tags.split(",")
+    else:
+        tags_list = []
+    # Write the tags to cosmos db
+    tagsHelper.upsert_document(blob_path, tags_list)
+    return tags_list
         
 @app.on_event("startup") 
 @repeat_every(seconds=5, logger=log, raise_exceptions=True)
@@ -317,11 +346,15 @@ def poll_queue() -> None:
                 embedding = embed_texts(target_embeddings_model, [text])
                 embedding_data = embedding['data']
 
+                tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
+
                 index_chunk = {}
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
                 index_chunk['file_name'] = chunk_dict["file_name"]
-                index_chunk['file_uri'] = chunk_dict["file_uri"] 
+                index_chunk['file_uri'] = chunk_dict["file_uri"]
+                index_chunk['folder'] = file_directory[:-1]
+                index_chunk['tags'] = tag_list
                 index_chunk['chunk_file'] = chunk.name
                 index_chunk['file_class'] = chunk_dict["file_class"]
                 index_chunk['title'] = chunk_dict["title"]
@@ -378,3 +411,5 @@ def poll_queue() -> None:
                 )
 
         statusLog.save_document(blob_path)
+
+

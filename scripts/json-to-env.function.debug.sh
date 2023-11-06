@@ -56,12 +56,20 @@ jq -r  '
             "env_var": "COSMOSDB_KEY"
         },
         {
-            "path": "azurE_COSMOSDB_DATABASE_NAME",
-            "env_var": "COSMOSDB_DATABASE_NAME"
+            "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
+            "env_var": "COSMOSDB_LOG_DATABASE_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_CONTAINER_NAME",
-            "env_var": "COSMOSDB_CONTAINER_NAME"
+            "path": "azurE_COSMOSDB_LOG_CONTAINER_NAME",
+            "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
+            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
+            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
         },
         {
             "path": "bloB_CONNECTION_STRING",

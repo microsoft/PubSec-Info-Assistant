@@ -42,10 +42,10 @@
       "value": ${USE_AZURE_OPENAI_EMBEDDINGS}
     },
     "sentenceTransformersModelName": {
-      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL}"
+      "value": "${OPEN_SOURCE_EMBEDDING_MODEL}"
     },
     "sentenceTransformerEmbeddingVectorSize": {
-      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL_VECTOR_SIZE}"
+      "value": "${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}"
     },
     "chatGptModelName": {
       "value": "${CHATGPT_MODEL_MODEL_NAME}"

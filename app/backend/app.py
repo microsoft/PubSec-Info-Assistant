@@ -22,6 +22,7 @@ from azure.storage.blob import (
 )
 from flask import Flask, jsonify, request
 from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.tags_helper import TagsHelper
 
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = (
@@ -59,8 +60,10 @@ KB_FIELDS_CHUNKFILE = os.environ.get("KB_FIELDS_CHUNKFILE") or "chunk_file"
 
 COSMOSDB_URL = os.environ.get("COSMOSDB_URL")
 COSMODB_KEY = os.environ.get("COSMOSDB_KEY")
-COSMOSDB_DATABASE_NAME = os.environ.get("COSMOSDB_DATABASE_NAME") or "statusdb"
-COSMOSDB_CONTAINER_NAME = os.environ.get("COSMOSDB_CONTAINER_NAME") or "statuscontainer"
+COSMOSDB_LOG_DATABASE_NAME = os.environ.get("COSMOSDB_LOG_DATABASE_NAME") or "statusdb"
+COSMOSDB_LOG_CONTAINER_NAME = os.environ.get("COSMOSDB_LOG_CONTAINER_NAME") or "statuscontainer"
+COSMOSDB_TAGS_DATABASE_NAME = os.environ.get("COSMOSDB_TAGS_DATABASE_NAME") or "tagsdb"
+COSMOSDB_TAGS_CONTAINER_NAME = os.environ.get("COSMOSDB_TAGS_CONTAINER_NAME") or "tagscontainer"
 
 QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
 
@@ -83,7 +86,10 @@ openai.api_version = "2023-06-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
-    COSMOSDB_URL, COSMODB_KEY, COSMOSDB_DATABASE_NAME, COSMOSDB_CONTAINER_NAME
+    COSMOSDB_URL, COSMODB_KEY, COSMOSDB_LOG_DATABASE_NAME, COSMOSDB_LOG_CONTAINER_NAME
+)
+tagsHelper = TagsHelper(
+    COSMOSDB_URL, COSMODB_KEY, COSMOSDB_TAGS_DATABASE_NAME, COSMOSDB_TAGS_CONTAINER_NAME
 )
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
@@ -281,6 +287,16 @@ def get_application_title():
         })
     return response
 
+@app.route("/getalltags", methods=["GET"])
+def get_all_tags():
+    """Get the status of all tags in the system"""
+    try:
+        results = tagsHelper.get_all_tags()
+    except Exception as ex:
+        logging.exception("Exception in /getalltags")
+        return jsonify({"error": str(ex)}), 500
+    return jsonify(results)
+
 if __name__ == "__main__":
     logging.info("IA WebApp Starting Up...")
-    app.run()
+    app.run(threaded=True)

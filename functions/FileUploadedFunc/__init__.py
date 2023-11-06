@@ -14,8 +14,8 @@ from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
-cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
@@ -32,9 +32,9 @@ def main(myblob: func.InputStream):
 
     try:
         time.sleep(random.randint(1, 2))  # add a random delay
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
-        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)
-        statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
+        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
+        statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
         # Create message structure to send to queue
       

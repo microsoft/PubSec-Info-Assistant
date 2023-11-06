@@ -11,7 +11,7 @@
   
   .banner_text {
     font-size: 1.5rem;
-    color: #ccc;
+    color: #929090;
     display: block;
     margin: 0.5rem 0;
   }
@@ -19,7 +19,7 @@
   .banner {
     background-color: #fafafa;
     width: 100%;
-    border: 4px dashed #ccc;
+    border: 4px dashed #969595;
     height: 200px;
     display: flex;
     flex-direction: column;

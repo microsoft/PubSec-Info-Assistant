@@ -117,6 +117,8 @@ class StatusLog:
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)
 
+        query_string += " ORDER BY c.state_timestamp DESC"
+
         items = list(self.container.query_items(
             query=query_string,
             enable_cross_partition_query=True
@@ -166,9 +168,26 @@ class StatusLog:
                 new_item["stack_trace"] = self.get_stack_trace()
 
             status_updates.append(new_item)
-
+        except exceptions.CosmosResourceNotFoundError:
+            # this is a new document
+            json_document = {
+                "id": document_id,
+                "file_path": document_path,
+                "file_name": base_name,
+                "state": str(state.value),
+                "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "state_description": "",
+                "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "status_updates": [
+                    {
+                        "status": status,
+                        "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        "status_classification": str(status_classification.value)
+                    }
+                ]
+            }
         except Exception:
-            # if this is a new document
+            # log the exception with stack trace to the status log
             json_document = {
                 "id": document_id,
                 "file_path": document_path,
@@ -207,11 +226,13 @@ class StatusLog:
             logging.error(f"An error occurred while updating the document state: {str(err)}")      
 
     def save_document(self, document_path):
+        """Saves the document in the storage"""
         document_id = self.encode_document_id(document_path)
         self.container.upsert_item(body=self._log_document[document_id])
         self._log_document[document_id] = ""
 
     def get_stack_trace(self):
+        """ Returns the stack trace of the current exception"""
         exc = sys.exc_info()[0]
         stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
         if exc is not None:  # i.e. an exception is present

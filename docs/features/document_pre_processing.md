@@ -44,14 +44,17 @@ subgraph "Chunking"
   end
 
 ```
-## PDF Document Pre-Processing
-PDF documents often contain a mix of text, images, and other media, which requires a series of steps to extract and process the relevant information.
-For PDF's we use a service, known as Azure Document Intelligence. Azure Document Intelligence 'cracks' a PDF file and process each page using the Layout API. It provides a JSON representation of the file including titles, sub-headings, headers, footers, tables and content paragraphs. We take this content and build a standardized JSON 'document map' of the content.
 
+## PDF Document Pre-Processing
+
+PDF documents often contain a mix of text, images, and other media, which requires a series of steps to extract and process the relevant information.
+For PDF's we use a service, known as [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0). Azure AI Document Intelligence 'cracks' a PDF file and process each page using the Layout API. It provides a JSON representation of the file including titles, sub-headings, headers, footers, tables and content paragraphs. We take this content and build a standardized JSON 'document map' of the content.
 
 ## Document Pre-Processing
-[Unstructured.io](https://unstructured.io/) supports various document types, including 'docx', 'html', 'htm', 'csv', 'md', 'pptx', 'txt', 'json', 'xlsx', 'xml', 'eml', and 'msg'. Like Azure Document Intelligence for PDFs, we create a 'document map' of the content, which serves as a JSON-based representation.
+
+[Unstructured.io](https://unstructured.io/) supports various document types, including 'docx', 'html', 'htm', 'csv', 'md', 'pptx', 'txt', 'json', 'xlsx', 'xml', 'eml', and 'msg'. Like Azure AI Document Intelligence for PDFs, we create a 'document map' of the content, which serves as a JSON-based representation.
 
 ## Image Pre-Processing
-Image processing for 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif', and 'tiff' formats. Leveraging Azure's GPU optionally in regions where [available](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-region-availability) to generate Captions and Deep Captions. We utilize the Cognitive Services [Computer Vision API](https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-computer-vision/?ef_id=_k_f4f6deceb1b41be24ecebbf7bfa0a48b_k_&OCID=AIDcmme9zx2qiz_SEM__k_f4f6deceb1b41be24ecebbf7bfa0a48b_k_&msclkid=f4f6deceb1b41be24ecebbf7bfa0a48b#object-classification) to generate descriptions and perform OCR on any text present within these image files. A json model of this data is then generated the same as with other document types.
+
+Image processing for 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif', and 'tiff' formats. Leveraging Azure's GPU optionally in regions where [available](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-region-availability) to generate Captions and Deep Captions. We utilize the Cognitive Services [Computer Vision API](https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-computer-vision/?ef_id=_k_f4f6deceb1b41be24ecebbf7bfa0a48b_k_&OCID=AIDcmme9zx2qiz_SEM__k_f4f6deceb1b41be24ecebbf7bfa0a48b_k_&msclkid=f4f6deceb1b41be24ecebbf7bfa0a48b#object-classification) to generate descriptions and perform OCR on any text present within these image files. A JSON model of this data is then generated the same as with other document types.
 

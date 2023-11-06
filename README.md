@@ -24,7 +24,7 @@ Technical overview of RAG: [Retrieval Augmented Generation using Azure Machine L
 
 **Dynamic Prompts:** Dynamic prompt context based on the selected GPT model and users settings.
 
-**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address fabrications that may arise with large language models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
+**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address fabrications that may arise with Large Language Models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
 
 **Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate fabrications and improve response accuracy.
 

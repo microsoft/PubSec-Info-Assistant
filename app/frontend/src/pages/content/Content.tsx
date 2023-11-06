@@ -34,7 +34,6 @@ const Content = () => {
         setSelectedKey(undefined);
     };    
 
-    console.log("selectedKey: ", selectedKey);
     return (
         <div className={styles.contentArea} >
             <Pivot aria-label="Upload Files Section" className={styles.topPivot} onLinkClick={handleLinkClick}>

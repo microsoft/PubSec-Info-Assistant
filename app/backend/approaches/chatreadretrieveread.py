@@ -217,6 +217,7 @@ class ChatReadRetrieveReadApproach(Approach):
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
         #  hybrid semantic search using semantic reranker
+       
         if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
             r = self.search_client.search(
                 generated_query,
@@ -232,7 +233,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vectors=[vector], filter=search_filter
+                generated_query, top=top,vector_queries =[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name

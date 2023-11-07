@@ -32,7 +32,7 @@ Additionally, there are many configuration values that can be altered to affect 
 
 ## User Experience
 
-The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
+The end user leverages the web interface as the primary method to engage with the Information Assistant (IA) Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
 
 ### Having a conversation with your data
 

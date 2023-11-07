@@ -4,7 +4,7 @@
 
 #### Any version change made here should also be made and tested for the web apps in /app/backend and /app/enrichment
 
-azure-functions
+azure-functions == 1.17.0
 tiktoken==0.4.0
 azure.ai.formrecognizer==3.2.1
 azure-storage-blob==12.16.0

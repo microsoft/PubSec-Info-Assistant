@@ -164,7 +164,7 @@ Once you have completed the Sizing Estimator, please move on to the Deployment s
 
 ## Deployment
 
-The following checklist will guide you through configuring the IA Accelerator in your azure subscription. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
+The following checklist will guide you through configuring the IA Accelerator in your Azure subscription. Please follow the steps in the order they are provided as values from one step may be used in subsequent steps.
 
 >1. Configure your deployment settings
 >       * [Configuring your Development Environment](./docs/development_environment.md)

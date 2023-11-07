@@ -58,8 +58,8 @@ jq -r  '
             "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
         },
         {
-            "path": "azurE_OPENAI_EMBEDDING_MODEL",
-            "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
+            "path": "azurE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+            "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
         },       
         {
             "path": "azurE_OPENAI_SERVICE_KEY",

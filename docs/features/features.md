@@ -78,7 +78,7 @@ You can upload documents in the [supported formats listed above](#document-pre-p
 
 #### View upload status
 
-You can view the status up files that have been uploaded to the system through the user interface. To do so:
+You can view the status of files that have been uploaded to the system through the user interface. To do so:
 
 > 1. Click on the Manage Content link in the top of the interface
 > ![Manage Content](../images/manage-content-interface.png)

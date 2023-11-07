@@ -34,7 +34,7 @@ Technical overview of RAG: [Retrieval Augmented Generation using Azure Machine L
 
 **Dynamic Prompts:** Dynamic prompt context based on the selected GPT model and users settings.
 
-**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address fabrications that may arise with large language models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
+**Built-in Chain of Thought (COT):** COT is integrated into our prompts to address fabrications that may arise with Large Language Models (LLM). COT encourages the LLM to follow a set of instructions, explain its reasoning, and enhances the reliability of responses.
 
 **Few-Shot Prompting:** We employ few-shot prompting in conjunction with COT to further mitigate fabrications and improve response accuracy.
 
@@ -57,7 +57,7 @@ Images | jpg, jpeg, png, gif, bmp, tif, tiff
   * [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) for PDFs
   * [Unstructure.io](https://unstructured.io/) for all other text-based types
 * creating a standard JSON representation of all a documents text-based content
-* chunking and saving metadata into manageable sized to be used in the RAG pattern
+* chunking and saving metadata into manageable sizes to be used in the RAG pattern
 
 The Information Assistant Accelerator [pre-processes](/docs/features/document_pre_processing.md) certain document types to allow better understanding of large complex documents.
 

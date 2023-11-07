@@ -28,7 +28,7 @@ For more details on how we process each document type click on on the document t
 
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](../../functions/shared_code/status_log.md) page for more details.
 
-Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](../functions_flow.md)
+Additionally, there are many configuration values that can be altered to affect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](../functions_flow.md)
 
 ## User Experience
 

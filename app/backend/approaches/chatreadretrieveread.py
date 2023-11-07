@@ -186,7 +186,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vectors=[vector], filter=search_filter
+                generated_query, top=top,vector_queries=[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name

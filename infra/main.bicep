@@ -217,7 +217,7 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       EMBEDDING_REQUEUE_BACKOFF: 60
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
-      AZURE_OPENAI_EMBEDDING_MODEL: azureOpenAIEmbeddingsModelName
+      AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingsModelName
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
@@ -761,5 +761,5 @@ output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.b
 output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
-output AZURE_OPENAI_EMBEDDING_MODEL string = azureOpenAIEmbeddingsModelName
+output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = azureOpenAIEmbeddingsModelName
 output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name

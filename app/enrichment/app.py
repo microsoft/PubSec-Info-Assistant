@@ -48,7 +48,7 @@ ENV = {
     "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
     "AZURE_OPENAI_SERVICE_KEY": None,
-    "AZURE_OPENAI_EMBEDDING_MODEL": None,
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": None,
     "AZURE_SEARCH_INDEX": None,
     "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_SERVICE": None,
@@ -127,11 +127,11 @@ log.debug("Loading embedding models...")
 models, model_info = load_models()
 
 # Add Azure OpenAI Embedding & additional Model
-models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = AzOAIEmbedding(
-    ENV["AZURE_OPENAI_EMBEDDING_MODEL"])
+models["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"]] = AzOAIEmbedding(
+    ENV["AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"])
 
-model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"]] = {
-    "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_MODEL"],
+model_info["azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"]] = {
+    "model": "azure-openai_" + ENV["AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"],
     "vector_size": 1536,
     # Source: https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
 }

@@ -195,8 +195,8 @@
       "synonymMaps": []
     },
     {
-      "name": "ner",
-      "type": "Edm.String",
+      "name": "entities",
+      "type": "Collection(Edm.String)",
       "searchable": true,
       "filterable": false,
       "retrievable": true,
@@ -205,15 +205,15 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "standard.lucene",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
       "synonymMaps": []
     },
     {
-      "name": "keyPhrases",
-      "type": "Edm.String",
+      "name": "key_phrases",
+      "type": "Collection(Edm.String)",
       "searchable": true,
       "filterable": false,
       "retrievable": true,
@@ -222,7 +222,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "standard.lucene",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,

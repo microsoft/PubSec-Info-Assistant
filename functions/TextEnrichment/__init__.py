@@ -57,23 +57,21 @@ def main(msg: func.QueueMessage) -> None:
     It will first determine the language, and if this differs from
     the target language, it will translate the chunks to the target language.'''
 
-    apiDetectEndpoint = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
-    apiTranslateEndpoint = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
-
-    isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
-    if isGovCloud:
-        apiDetectEndpoint = apiDetectEndpoint.format(suffix = "us")
-        apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "us")
-    else:
-        apiDetectEndpoint = apiDetectEndpoint.format(suffix = "com")
-        apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "com")
-
-    
-    message_body = msg.get_body().decode("utf-8")
-    message_json = json.loads(message_body)
-    blob_path = message_json["blob_name"]
     try:
+        endpoint_region = enrichmentEndpoint.split("https://")[1].split(".api")[0]        
+        isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
+        if isGovCloud:
+            suffix = "us"
+        else:
+            suffix = "com"    
+
+        apiDetectEndpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
+        apiTranslateEndpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
+        enrich_endpoint = f"https://{endpoint_region}.api.cognitive.microsoft.{suffix}/language/:analyze-text?api-version=2022-05-01"
         
+        message_body = msg.get_body().decode("utf-8")
+        message_json = json.loads(message_body)
+        blob_path = message_json["blob_name"]       
    
         logging.info(
             "Python queue trigger function processed a queue item: %s",
@@ -111,7 +109,6 @@ def main(msg: func.QueueMessage) -> None:
                 break
 
         # detect language           
-        endpoint_region = enrichmentEndpoint.split("https://")[1].split(".api")[0]
         headers = {
             'Ocp-Apim-Subscription-Key': enrichmentKey,
             'Content-type': 'application/json',
@@ -158,7 +155,6 @@ def main(msg: func.QueueMessage) -> None:
                 translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
                                 
             # Extract entities for index    
-            enrich_endpoint = "https://westeurope.api.cognitive.microsoft.com/language/:analyze-text?api-version=2022-05-01"  
             enrich_headers = {
                 'Ocp-Apim-Subscription-Key': enrichmentKey,
                 'Content-type': 'application/json'
@@ -190,7 +186,6 @@ def main(msg: func.QueueMessage) -> None:
             chunk_dict[f"entities"] = entities_collection
                         
             # Extract key phrases for index    
-            enrich_endpoint = "https://westeurope.api.cognitive.microsoft.com/language/:analyze-text?api-version=2022-05-01"  
             enrich_headers = {
                 'Ocp-Apim-Subscription-Key': enrichmentKey,
                 'Content-type': 'application/json'

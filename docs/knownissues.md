@@ -100,3 +100,11 @@ InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in 
 ```
 ### Solution:
 Deploy Azure OpenAI Service only in the supported regions. Review the local.env file and update the location as per supported models and [region availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability)
+
+
+## Error: jq parse error: Expected value before ','
+
+If you see a jq parse error while doing deployments, it means one of the makefile scripts to extract environment variables is failing to find a value it expects to be there. The files related would be the main.parameters.json file which is the variables from bicep output from the infrastructure create. The other would be the env file used during build and deploy time
+
+### Solution:
+To resolve carefully check your deployment .env file for any missing but required values. There are rare times when ARM has issues and output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` and/or ```make extract-env``` command so that the bicep outputs can be written again

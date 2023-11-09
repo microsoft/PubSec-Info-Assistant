@@ -1,11 +1,13 @@
-sentence-transformers
-fastapi
-fastapi-utils
-uvicorn
+#### Any version change made here should also be made and tested for the webapp backend and function apps in /functions and /app/backend
+
+sentence-transformers == 2.2.2
+fastapi == 0.103.2
+fastapi-utils == 0.2.1
+uvicorn == 0.23.2
 azure-storage-queue == 12.6.0
 azure-storage-blob==12.16.0
-azure.search.documents==11.3.0
+azure.search.documents==11.4.0b11
 azure-cosmos == 4.3.1
 azure-core == 1.26.4
-tenacity
-openai
+tenacity == 8.2.3
+openai == 0.27.0

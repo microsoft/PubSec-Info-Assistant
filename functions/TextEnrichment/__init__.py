@@ -153,9 +153,44 @@ def main(msg: func.QueueMessage) -> None:
             params = {'to': targetTranslationLanguage}              
 
             # Translate content, title, subtitle, and section if required
-            fields_to_translate = ["content", "title", "subtitle", "section"]
-            for field in fields_to_translate:
-                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                
+            fields_to_enrich = ["content", "title", "subtitle", "section"]
+            for field in fields_to_enrich:
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
+                
+                
+                
+                
+                # Extract entities for index    
+                enrich_endpoint = "https://westeurope.api.cognitive.microsoft.com/language/:analyze-text?api-version=2022-05-01"  
+                enrich_headers = {
+                    'Ocp-Apim-Subscription-Key': enrichmentKey,
+                    'Content-type': 'application/json'
+                }                   
+                enrich_data = {
+                    "kind": "EntityRecognition",
+                    "parameters": {
+                        "modelVersion": "latest"
+                    },
+                    "analysisInput":{
+                        "documents":[
+                            {
+                                "id":"1",
+                                "language": "en",
+                                "text": chunk_dict[field]
+                            }
+                        ]
+                    }
+                }                
+                response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+                chunk_dict[f"enrich_{field}"] = response.json()['results']['documents'][0]['entities']
+                
+                
+                
+                
+                
+                
+                
+                
                                             
             # Get path and file name minus the root container
             json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)

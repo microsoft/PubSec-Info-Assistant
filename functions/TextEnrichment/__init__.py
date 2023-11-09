@@ -156,41 +156,67 @@ def main(msg: func.QueueMessage) -> None:
             fields_to_enrich = ["content", "title", "subtitle", "section"]
             for field in fields_to_enrich:
                 translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
-                
-                
-                
-                
-                # Extract entities for index    
-                enrich_endpoint = "https://westeurope.api.cognitive.microsoft.com/language/:analyze-text?api-version=2022-05-01"  
-                enrich_headers = {
-                    'Ocp-Apim-Subscription-Key': enrichmentKey,
-                    'Content-type': 'application/json'
-                }                   
-                enrich_data = {
-                    "kind": "EntityRecognition",
-                    "parameters": {
-                        "modelVersion": "latest"
-                    },
-                    "analysisInput":{
-                        "documents":[
-                            {
-                                "id":"1",
-                                "language": "en",
-                                "text": chunk_dict[field]
-                            }
-                        ]
-                    }
-                }                
-                response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
-                chunk_dict[f"enrich_{field}"] = response.json()['results']['documents'][0]['entities']
-                
-                
-                
-                
-                
-                
-                
-                
+                                
+            # Extract entities for index    
+            enrich_endpoint = "https://westeurope.api.cognitive.microsoft.com/language/:analyze-text?api-version=2022-05-01"  
+            enrich_headers = {
+                'Ocp-Apim-Subscription-Key': enrichmentKey,
+                'Content-type': 'application/json'
+            }        
+            target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
+            enrich_data = {
+                "kind": "EntityRecognition",
+                "parameters": {
+                    "modelVersion": "latest"
+                },
+                "analysisInput":{
+                    "documents":[
+                        {
+                            "id":"1",
+                            "language": targetTranslationLanguage,
+                            "text": target_content
+                        }
+                    ]
+                }
+            }                
+            response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+            try:
+                entities = response.json()['results']['documents'][0]['entities']
+            except:
+                entities = []
+            entities_collection = []
+            for entity in entities:
+                entities_collection.append(entity['text'])            
+            chunk_dict[f"entities"] = entities_collection
+                        
+            # Extract key phrases for index    
+            enrich_endpoint = "https://westeurope.api.cognitive.microsoft.com/language/:analyze-text?api-version=2022-05-01"  
+            enrich_headers = {
+                'Ocp-Apim-Subscription-Key': enrichmentKey,
+                'Content-type': 'application/json'
+            }        
+            target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
+            enrich_data = {
+                "kind": "KeyPhraseExtraction",
+                "parameters": {
+                    "modelVersion": "latest"
+                },
+                "analysisInput":{
+                    "documents":[
+                        {
+                            "id":"1",
+                            "language": targetTranslationLanguage,
+                            "text": target_content
+                        }
+                    ]
+                }
+            }                
+            response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+            try:
+                key_phrases = response.json()['results']['documents'][0]['keyPhrases']
+            except:
+                key_phrases = []
+            chunk_dict[f"key_phrases"] = key_phrases           
                                             
             # Get path and file name minus the root container
             json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)

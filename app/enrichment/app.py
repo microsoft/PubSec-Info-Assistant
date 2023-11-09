@@ -362,6 +362,8 @@ def poll_queue() -> None:
                 index_chunk['translated_title'] = chunk_dict["translated_title"]
                 index_chunk['content'] = text
                 index_chunk['contentVector'] = embedding_data
+                index_chunk['ner'] = chunk_dict["entities"]
+                index_chunk['keyPhrases'] = chunk_dict["key_phrases"]
                 index_chunks.append(index_chunk)
                 i += 1
                 

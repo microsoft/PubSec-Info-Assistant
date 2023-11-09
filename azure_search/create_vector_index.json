@@ -278,7 +278,32 @@
             }
           ]
         }
+      },
+      {
+        "name": "semantic_config",
+        "prioritizedFields": {
+          "titleField": {
+            "fieldName": "title"
+          },
+          "prioritizedContentFields": [
+            {
+              "fieldName": "title"
+            },
+            {
+              "fieldName": "content"
+            }
+          ],
+          "prioritizedKeywordsFields": [
+            {
+              "fieldName": "key_phrases"
+            },
+            {
+              "fieldName": "entities"
+            }
+          ]
+        }
       }
+
     ]
   }
 }

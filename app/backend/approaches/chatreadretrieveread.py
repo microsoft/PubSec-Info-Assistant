@@ -207,16 +207,17 @@ class ChatReadRetrieveReadApproach(Approach):
                 search_filter = f"tags/any(t: search.in(t, '{quoted_tags_filter}'))"
 
         # Hybrid Search
-        # r = self.search_client.search(generated_query, vectors=[vector], top=top)
+        # r = self.search_client.search(generated_query, vector_queries =[vector], top=top)
 
         # Pure Vector Search
-        # r=self.search_client.search(search_text=None, vectors=[vector], top=top)
+        # r=self.search_client.search(search_text=None, vector_queries =[vector], top=top)
         
         # vector search with filter
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="processed_datetime le 2023-09-18T04:06:29.675Z" , top=top)
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
         #  hybrid semantic search using semantic reranker
+       
         if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
             r = self.search_client.search(
                 generated_query,
@@ -232,7 +233,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vectors=[vector], filter=search_filter
+                generated_query, top=top,vector_queries =[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name

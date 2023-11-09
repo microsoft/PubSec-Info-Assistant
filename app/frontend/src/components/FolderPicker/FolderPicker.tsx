@@ -60,21 +60,24 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
         },
     }
     
-    const teachingBubblePrimaryButtonClick = (() => {
-        var textField = document.getElementById(textFieldId) as HTMLInputElement;
-        if (textField.defaultValue == null || textField.defaultValue == "") {
+    const teachingBubblePrimaryButtonClick = () => {
+        const textField = document.getElementById(textFieldId) as HTMLInputElement;
+        if (!textField.defaultValue || textField.defaultValue.trim() === '') {
             alert('Please enter a folder name.');
+        } else if (textField.defaultValue.trim().includes(' ')) {
+            alert('Folder name cannot contain spaces.');
         } else {
             // add the folder to the dropdown list and select it
             // This will be passed to the file-picker component to determine the folder to upload to
-            var currentOptions = options;
-            currentOptions.push({key: textField.defaultValue, text: textField.defaultValue});
-            setOptions(currentOptions)
-            setSelectedKeys([textField.defaultValue]);
-            onSelectedKeyChange([textField.defaultValue]);
+            const trimVal = textField.defaultValue.trim()
+            const currentOptions = options;
+            currentOptions.push({ key: trimVal, text: trimVal });
+            setOptions(currentOptions);
+            setSelectedKeys([trimVal]);
+            onSelectedKeyChange([trimVal]);
             toggleTeachingBubbleVisible();
         }
-    });
+    };
 
     const examplePrimaryButtonProps: IButtonProps = {
         children: 'Create folder',

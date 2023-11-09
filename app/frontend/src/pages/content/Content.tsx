@@ -30,9 +30,13 @@ const Content = () => {
         setSelectedTags(selectedTags.map((tag) => tag.name));
     }
 
+    const handleLinkClick = (item?: PivotItem) => {
+        setSelectedKey(undefined);
+    };    
+
     return (
         <div className={styles.contentArea} >
-            <Pivot aria-label="Upload Files Section" className={styles.topPivot}>
+            <Pivot aria-label="Upload Files Section" className={styles.topPivot} onLinkClick={handleLinkClick}>
                 <PivotItem headerText="Upload Files" aria-label="Upload Files Tab">
                     <div className={styles.App} >
                         <FolderPicker allowFolderCreation={true} onSelectedKeyChange={onSelectedKeyChanged}/>

@@ -13,6 +13,7 @@ import traceback, sys
 class State(Enum):
     """ Enum for state of a process """
     PROCESSING = "Processing"
+    INDEXING = "Indexing"
     SKIPPED = "Skipped"
     QUEUED = "Queued"
     COMPLETE = "Complete"
@@ -155,6 +156,9 @@ class StatusLog:
             if json_document['state'] != state.value:
                 json_document['state'] = state.value
                 json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                
+            # Update state description with latest status
+            json_document['state_description'] = status
 
             # Append a new item to the array
             status_updates = json_document["status_updates"]
@@ -176,7 +180,7 @@ class StatusLog:
                 "file_name": base_name,
                 "state": str(state.value),
                 "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                "state_description": "",
+                "state_description": status,
                 "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "status_updates": [
                     {
@@ -194,7 +198,7 @@ class StatusLog:
                 "file_name": base_name,
                 "state": str(state.value),
                 "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                "state_description": "",
+                "state_description": status,
                 "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "status_updates": [
                     {
@@ -208,28 +212,33 @@ class StatusLog:
 
         #self.container.upsert_item(body=json_document)
         self._log_document[document_id] = json_document
-
-    def update_document_state(self, document_path, state_str):
+                        
+        
+    def update_document_state(self, document_path, status, state=State.PROCESSING):
         """Updates the state of the document in the storage"""
         try:
-            logging.info(f"{state_str} DocumentID - {document_id}")
             document_id = self.encode_document_id(document_path)
+            logging.info(f"{status} DocumentID - {document_id}")
             if self._log_document.get(document_id, "") != "":
                 json_document = self._log_document[document_id]
-                json_document['state'] = state_str
+                
+                json_document['state'] = state.value
+                json_document['state_description'] = status
                 json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 self.save_document(document_path)
                 self._log_document[document_id] = json_document
             else:
                 logging.warning(f"Document with ID {document_id} not found.")
         except Exception as err:
-            logging.error(f"An error occurred while updating the document state: {str(err)}")      
+            logging.error(f"An error occurred while updating the document state: {str(err)}") 
+                 
 
     def save_document(self, document_path):
         """Saves the document in the storage"""
         document_id = self.encode_document_id(document_path)
         self.container.upsert_item(body=self._log_document[document_id])
         self._log_document[document_id] = ""
+        
 
     def get_stack_trace(self):
         """ Returns the stack trace of the current exception"""

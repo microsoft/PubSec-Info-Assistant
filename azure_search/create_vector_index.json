@@ -287,9 +287,6 @@
           },
           "prioritizedContentFields": [
             {
-              "fieldName": "title"
-            },
-            {
               "fieldName": "content"
             }
           ],

@@ -432,9 +432,9 @@ const Chat = () => {
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
                             <ApproachesButtonGroup className={styles.chatSettingsSeparator} onClick={onApproachChange} defaultValue={approach}/>
 
-                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
-                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders}/>
-                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags}/>
+                            <Separator className={approach.toString() == Approaches.GPTDirect.toString()? styles.hide : styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders} hide={approach.toString() == Approaches.GPTDirect.toString()} />
+                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags} hide={approach.toString() == Approaches.GPTDirect.toString()}/>
                 </Panel>
 
                 <Panel

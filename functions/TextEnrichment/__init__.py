@@ -10,6 +10,7 @@ import random
 import re
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
@@ -144,8 +145,8 @@ def main(msg: func.QueueMessage) -> None:
         for i, chunk in enumerate(chunk_list):
             # open the file and extract the content
             blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
-            response = requests.get(blob_path_plus_sas)
-            response.raise_for_status()
+            # exported to a def to allow retry if error encountered in getting response
+            response = get_chunk_blob(blob_path_plus_sas)            
             chunk_dict = json.loads(response.text)
             params = {'to': targetTranslationLanguage}              
 
@@ -309,3 +310,12 @@ def requeue(response, message_json):
             f"{FUNCTION_NAME} - Error on language detection - {response.status_code} - {response.reason}",
             StatusClassification.ERROR
         )     
+        
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
+def get_chunk_blob(blob_path_plus_sas):
+    '''This function wraps retrieving a blob from storage to allow 
+    retries if throttled or error occurs'''
+    response = requests.get(blob_path_plus_sas)
+    response.raise_for_status()
+    return response

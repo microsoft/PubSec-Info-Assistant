@@ -276,19 +276,6 @@
             {
               "fieldName": "content"
             }
-          ]
-        }
-      },
-      {
-        "name": "semantic_config",
-        "prioritizedFields": {
-          "titleField": {
-            "fieldName": "title"
-          },
-          "prioritizedContentFields": [
-            {
-              "fieldName": "content"
-            }
           ],
           "prioritizedKeywordsFields": [
             {

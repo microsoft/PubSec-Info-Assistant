@@ -10,6 +10,7 @@ import random
 import re
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
@@ -57,23 +58,21 @@ def main(msg: func.QueueMessage) -> None:
     It will first determine the language, and if this differs from
     the target language, it will translate the chunks to the target language.'''
 
-    apiDetectEndpoint = "https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
-    apiTranslateEndpoint = "https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
-
-    isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
-    if isGovCloud:
-        apiDetectEndpoint = apiDetectEndpoint.format(suffix = "us")
-        apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "us")
-    else:
-        apiDetectEndpoint = apiDetectEndpoint.format(suffix = "com")
-        apiTranslateEndpoint = apiTranslateEndpoint.format(suffix = "com")
-
-    
-    message_body = msg.get_body().decode("utf-8")
-    message_json = json.loads(message_body)
-    blob_path = message_json["blob_name"]
     try:
+        endpoint_region = enrichmentEndpoint.split("https://")[1].split(".api")[0]        
+        isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
+        if isGovCloud:
+            suffix = "us"
+        else:
+            suffix = "com"    
+
+        apiDetectEndpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
+        apiTranslateEndpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
+        enrich_endpoint = f"https://{endpoint_region}.api.cognitive.microsoft.{suffix}/language/:analyze-text?api-version=2022-05-01"
         
+        message_body = msg.get_body().decode("utf-8")
+        message_json = json.loads(message_body)
+        blob_path = message_json["blob_name"]       
    
         logging.info(
             "Python queue trigger function processed a queue item: %s",
@@ -111,7 +110,6 @@ def main(msg: func.QueueMessage) -> None:
                 break
 
         # detect language           
-        endpoint_region = enrichmentEndpoint.split("https://")[1].split(".api")[0]
         headers = {
             'Ocp-Apim-Subscription-Key': enrichmentKey,
             'Content-type': 'application/json',
@@ -147,15 +145,74 @@ def main(msg: func.QueueMessage) -> None:
         for i, chunk in enumerate(chunk_list):
             # open the file and extract the content
             blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
-            response = requests.get(blob_path_plus_sas)
-            response.raise_for_status()
+            # exported to a def to allow retry if error encountered in getting response
+            response = get_chunk_blob(blob_path_plus_sas)            
             chunk_dict = json.loads(response.text)
             params = {'to': targetTranslationLanguage}              
 
             # Translate content, title, subtitle, and section if required
-            fields_to_translate = ["content", "title", "subtitle", "section"]
-            for field in fields_to_translate:
-                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                
+            fields_to_enrich = ["content", "title", "subtitle", "section"]
+            for field in fields_to_enrich:
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
+                                
+            # Extract entities for index    
+            enrich_headers = {
+                'Ocp-Apim-Subscription-Key': enrichmentKey,
+                'Content-type': 'application/json'
+            }        
+            target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
+            enrich_data = {
+                "kind": "EntityRecognition",
+                "parameters": {
+                    "modelVersion": "latest"
+                },
+                "analysisInput":{
+                    "documents":[
+                        {
+                            "id":"1",
+                            "language": targetTranslationLanguage,
+                            "text": target_content
+                        }
+                    ]
+                }
+            }                
+            response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+            try:
+                entities = response.json()['results']['documents'][0]['entities']
+            except:
+                entities = []
+            entities_collection = []
+            for entity in entities:
+                entities_collection.append(entity['text'])            
+            chunk_dict[f"entities"] = entities_collection
+                        
+            # Extract key phrases for index    
+            enrich_headers = {
+                'Ocp-Apim-Subscription-Key': enrichmentKey,
+                'Content-type': 'application/json'
+            }        
+            target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
+            enrich_data = {
+                "kind": "KeyPhraseExtraction",
+                "parameters": {
+                    "modelVersion": "latest"
+                },
+                "analysisInput":{
+                    "documents":[
+                        {
+                            "id":"1",
+                            "language": targetTranslationLanguage,
+                            "text": target_content
+                        }
+                    ]
+                }
+            }                
+            response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+            try:
+                key_phrases = response.json()['results']['documents'][0]['keyPhrases']
+            except:
+                key_phrases = []
+            chunk_dict[f"key_phrases"] = key_phrases           
                                             
             # Get path and file name minus the root container
             json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
@@ -253,3 +310,12 @@ def requeue(response, message_json):
             f"{FUNCTION_NAME} - Error on language detection - {response.status_code} - {response.reason}",
             StatusClassification.ERROR
         )     
+        
+
+@retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
+def get_chunk_blob(blob_path_plus_sas):
+    '''This function wraps retrieving a blob from storage to allow 
+    retries if throttled or error occurs'''
+    response = requests.get(blob_path_plus_sas)
+    response.raise_for_status()
+    return response

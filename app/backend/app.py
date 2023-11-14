@@ -24,6 +24,7 @@ from flask import Flask, jsonify, request
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.tags_helper import TagsHelper
 
+str_to_bool = {'true': True, 'false': False}
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = (
     os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
@@ -43,11 +44,14 @@ AZURE_OPENAI_CHATGPT_DEPLOYMENT = (
     os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
 )
 AZURE_OPENAI_CHATGPT_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME") or "")
-AZURE_OPENAI_CHATGPT_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_VERSION") or "")
+AZURE_OPENAI_CHATGPT_MODEL_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION") or "")
+USE_AZURE_OPENAI_EMBEDDINGS = str_to_bool.get(os.environ.get("USE_AZURE_OPENAI_EMBEDDINGS").lower()) or False
+EMBEDDING_DEPLOYMENT_NAME = ( os.environ.get("EMBEDDING_DEPLOYMENT_NAME") or "")
+AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_MODEL_NAME") or "")
+AZURE_OPENAI_EMBEDDINGS_VERSION = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_VERSION") or "")
 
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
-str_to_bool = {'true': True, 'false': False}
 IS_GOV_CLOUD_DEPLOYMENT = str_to_bool.get(os.environ.get("IS_GOV_CLOUD_DEPLOYMENT").lower()) or False
 CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT") or ""
 APPLICATION_TITLE = os.environ.get("APPLICATION_TITLE") or "Information Assistant, built with Azure OpenAI"
@@ -113,8 +117,10 @@ model_name = ''
 model_version = ''
 
 if (IS_GOV_CLOUD_DEPLOYMENT):
-    model_name = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME")
-    model_version = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION")
+    model_name = AZURE_OPENAI_CHATGPT_MODEL_NAME
+    model_version = AZURE_OPENAI_CHATGPT_MODEL_VERSION
+    embedding_model_name = AZURE_OPENAI_EMBEDDINGS_MODEL_NAME
+    embedding_model_version = AZURE_OPENAI_EMBEDDINGS_VERSION
 else:
     # Set up OpenAI management client
     openai_mgmt_client = CognitiveServicesManagementClient(
@@ -128,6 +134,18 @@ else:
 
     model_name = deployment.properties.model.name
     model_version = deployment.properties.model.version
+
+    if USE_AZURE_OPENAI_EMBEDDINGS:
+        embedding_deployment = openai_mgmt_client.deployments.get(
+            resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+            account_name=AZURE_OPENAI_SERVICE,
+            deployment_name=EMBEDDING_DEPLOYMENT_NAME)
+
+        embedding_model_name = embedding_deployment.properties.model.name
+        embedding_model_version = embedding_deployment.properties.model.version
+    else:
+        embedding_model_name = ""
+        embedding_model_version = ""
 
 chat_approaches = {
     "rrr": ChatReadRetrieveReadApproach(
@@ -250,7 +268,11 @@ def get_info_data():
             "AZURE_OPENAI_SERVICE": f"{AZURE_OPENAI_SERVICE}",
             "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
             "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",
-            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
+            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}",
+            "USE_AZURE_OPENAI_EMBEDDINGS": USE_AZURE_OPENAI_EMBEDDINGS,
+            "EMBEDDINGS_DEPLOYMENT": f"{EMBEDDING_DEPLOYMENT_NAME}",
+            "EMBEDDINGS_MODEL_NAME": f"{embedding_model_name}",
+            "EMBEDDINGS_MODEL_VERSION": f"{embedding_model_version}",
         })
     return response
 

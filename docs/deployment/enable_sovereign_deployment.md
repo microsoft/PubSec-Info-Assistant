@@ -24,6 +24,8 @@ To enable a Sovereign region deployment, you need to update the local.env file w
    ```bash
    export AZURE_OPENAI_CHATGPT_MODEL_NAME="gpt-35-turbo-16k"
    export AZURE_OPENAI_CHATGPT_MODEL_VERSION="0613"
+   export AZURE_OPENAI_EMBEDDINGS_MODEL_NAME="text-embedding-ada-002"
+   export AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION="2"
    ```
 
 5. Consider setting **CHAT_WARNING_BANNER_TEXT**  with `DEV / UNCLASSIFIED / NO CUI` or something similar if deployment is IL2.

@@ -43,7 +43,10 @@ AZURE_OPENAI_CHATGPT_DEPLOYMENT = (
     os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
 )
 AZURE_OPENAI_CHATGPT_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME") or "")
-AZURE_OPENAI_CHATGPT_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_VERSION") or "")
+AZURE_OPENAI_CHATGPT_MODEL_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION") or "")
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = ( os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME") or "")
+AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_MODEL_NAME") or "")
+AZURE_OPENAI_EMBEDDINGS_VERSION = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_VERSION") or "")
 
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
@@ -113,8 +116,10 @@ model_name = ''
 model_version = ''
 
 if (IS_GOV_CLOUD_DEPLOYMENT):
-    model_name = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME")
-    model_version = os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION")
+    model_name = AZURE_OPENAI_CHATGPT_MODEL_NAME
+    model_version = AZURE_OPENAI_CHATGPT_MODEL_VERSION
+    embedding_model_name = AZURE_OPENAI_EMBEDDINGS_MODEL_NAME
+    embedding_model_version = AZURE_OPENAI_EMBEDDINGS_VERSION
 else:
     # Set up OpenAI management client
     openai_mgmt_client = CognitiveServicesManagementClient(
@@ -128,6 +133,14 @@ else:
 
     model_name = deployment.properties.model.name
     model_version = deployment.properties.model.version
+
+    embedding_deployment = openai_mgmt_client.deployments.get(
+        resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+        account_name=AZURE_OPENAI_SERVICE,
+        deployment_name=AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME)
+
+    embedding_model_name = embedding_deployment.properties.model.name
+    embedding_model_version = embedding_deployment.properties.model.version
 
 chat_approaches = {
     "rrr": ChatReadRetrieveReadApproach(
@@ -250,7 +263,10 @@ def get_info_data():
             "AZURE_OPENAI_SERVICE": f"{AZURE_OPENAI_SERVICE}",
             "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
             "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",
-            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
+            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}",
+            "EMBEDDINGS_DEPLOYMENT": f"{AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}",
+            "EMBEDDINGS_MODEL_NAME": f"{embedding_model_name}",
+            "EMBEDDINGS_MODEL_VERSION": f"{embedding_model_version}",
         })
     return response
 

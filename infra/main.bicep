@@ -51,7 +51,9 @@ param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'vector-index'
 param chatGptDeploymentName string = 'chat'
+param azureOpenAIEmbeddingDeploymentName string = 'text-embedding-ada-002'
 param azureOpenAIEmbeddingsModelName string = 'text-embedding-ada-002'
+param azureOpenAIEmbeddingsModelVersion string = '2'
 param useAzureOpenAIEmbeddings bool = true
 param sentenceTransformersModelName string = 'BAAI/bge-small-en-v1.5'
 param sentenceTransformerEmbeddingVectorSize string = '384'
@@ -217,13 +219,13 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       EMBEDDING_REQUEUE_BACKOFF: 60
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
-      AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingsModelName
+      AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingDeploymentName
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       BLOB_CONNECTION_STRING: storage.outputs.connectionString
       AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
-      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
+      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       WEBSITES_CONTAINER_START_TIME_LIMIT: 600
@@ -262,6 +264,9 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
+      AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingDeploymentName
+      AZURE_OPENAI_EMBEDDINGS_MODEL_NAME: azureOpenAIEmbeddingsModelName
+      AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION: azureOpenAIEmbeddingsModelVersion
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
@@ -277,7 +282,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
       CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
-      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
+      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       APPLICATION_TITLE: applicationtitle
     }
@@ -312,10 +317,10 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
         raiPolicyName: 'Microsoft.Default'
       }
       {
-        name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : azureOpenAIEmbeddingsModelName
+        name: !empty(azureOpenAIEmbeddingDeploymentName) ? azureOpenAIEmbeddingDeploymentName : azureOpenAIEmbeddingDeploymentName
         model: {
           format: 'OpenAI'
-          name: !empty(azureOpenAIEmbeddingsModelName) ? azureOpenAIEmbeddingsModelName : 'text-embedding-ada-002'
+          name: !empty(azureOpenAIEmbeddingDeploymentName) ? azureOpenAIEmbeddingDeploymentName : 'text-embedding-ada-002'
           version: '2'
         }
         sku: {
@@ -760,6 +765,6 @@ output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment
 output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
 output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
-output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingsModelName}' : sentenceTransformersModelName
-output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = azureOpenAIEmbeddingsModelName
+output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
+output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = azureOpenAIEmbeddingDeploymentName
 output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name

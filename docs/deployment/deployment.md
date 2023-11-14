@@ -33,6 +33,12 @@ gpt-4-32k | current version
 
 **Important:** Gpt-35-turbo-16k (0613) is recommended. GPT 4 models may achieve better results from the IA Accelerator. Access to gpt-4 may require approval which can be requested [here](https://aka.ms/oai/get-gpt4).
 
+We also recommend you have access to the following Azure OpenAI model for embeddings. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using Azure OpenAI embedding model.
+
+Model Name | Supported Versions
+---|---
+**text-embedding-ada-002** | current version
+
 ## Development Environment Configuration
 
 The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub CodeSpaces.
@@ -76,14 +82,14 @@ AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "tru
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
-USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to true. When set to true this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to false, Information Assistant will use the open source language model that is provided in the values below.
-AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
-OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer.
-OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure Cognitive Search hybrid index's vector columns can be set to the matching size.
+USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to "true". When set to "true" this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to "false", Information Assistant will use the open source language model that is provided in the values below.
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_AZURE_OPENAI_EMBEDDINGS** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
+OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
+OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure Cognitive Search hybrid index's vector columns can be set to the matching size. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
 AZURE_OPENAI_CHATGPT_MODEL_NAME | No | This can be used to select a different GPT model to be deployed to Azure OpenAI when the default (gpt-35-turbo-16k) isn't available to you.
 AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | This can be used to select a specific version of the GPT model above when the default (0613) isn't available to you.
-AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed
-AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed
+AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
+AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
 AZURE_OPENAI_CHATGPT_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the GPT model deployed to Azure OpenAI when you have reduced capacity.
 CHAT_WARNING_BANNER_TEXT | No | Defaults to "". Provide a value in this parameter to display a header and footer to the UX of Information Assistant with the included warning banner text.
 DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file located in the `scripts/environments/languages` folder. You can then use this file to customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. See [Configuring your own language ENV file](/features/configuring_language_env_files.md) more information.

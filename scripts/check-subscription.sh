@@ -15,6 +15,11 @@ figlet Check Subscription
 # with a Service Principal.
 if [ -n "${IN_AUTOMATION}" ]
 then
+
+    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+        az cloud set --name AzureUSGovernment 
+    fi
+
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
@@ -29,4 +34,3 @@ then
     echo -e "Either use subscription id $ARM_SUBSCRIPTION_ID, or unset the ARM_SUBSCRIPTION_ID environment variable in your .env"
     exit 1
 fi
-

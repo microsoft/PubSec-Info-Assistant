@@ -13,6 +13,14 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Models
+
+models
+
+# Image tags
+
+image_tag.txt
+
 # Mono auto generated files
 mono_crash.*
 
@@ -375,3 +383,6 @@ app/backend/lib64
 app/backend/shared_code
 
 packages-microsoft*
+
+# docker container build artifacts
+app/enrichment/shared_code

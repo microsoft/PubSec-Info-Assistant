@@ -21,17 +21,21 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from flask import Flask, jsonify, request
-from shared_code.status_log import State, StatusLog
+from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.tags_helper import TagsHelper
 
+str_to_bool = {'true': True, 'false': False}
 # Replace these with your own values, either in environment variables or directly here
 AZURE_BLOB_STORAGE_ACCOUNT = (
     os.environ.get("AZURE_BLOB_STORAGE_ACCOUNT") or "mystorageaccount"
 )
+AZURE_BLOB_STORAGE_ENDPOINT = os.environ.get("AZURE_BLOB_STORAGE_ENDPOINT") 
 AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = (
     os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
 )
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
+AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
 AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
 AZURE_OPENAI_SERVICE = os.environ.get("AZURE_OPENAI_SERVICE") or "myopenai"
@@ -39,19 +43,38 @@ AZURE_OPENAI_RESOURCE_GROUP = os.environ.get("AZURE_OPENAI_RESOURCE_GROUP") or "
 AZURE_OPENAI_CHATGPT_DEPLOYMENT = (
     os.environ.get("AZURE_OPENAI_CHATGPT_DEPLOYMENT") or "chat"
 )
+AZURE_OPENAI_CHATGPT_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_NAME") or "")
+AZURE_OPENAI_CHATGPT_MODEL_VERSION = ( os.environ.get("AZURE_OPENAI_CHATGPT_MODEL_VERSION") or "")
+USE_AZURE_OPENAI_EMBEDDINGS = str_to_bool.get(os.environ.get("USE_AZURE_OPENAI_EMBEDDINGS").lower()) or False
+EMBEDDING_DEPLOYMENT_NAME = ( os.environ.get("EMBEDDING_DEPLOYMENT_NAME") or "")
+AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_MODEL_NAME") or "")
+AZURE_OPENAI_EMBEDDINGS_VERSION = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_VERSION") or "")
+
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
+IS_GOV_CLOUD_DEPLOYMENT = str_to_bool.get(os.environ.get("IS_GOV_CLOUD_DEPLOYMENT").lower()) or False
+CHAT_WARNING_BANNER_TEXT = os.environ.get("CHAT_WARNING_BANNER_TEXT") or ""
+APPLICATION_TITLE = os.environ.get("APPLICATION_TITLE") or "Information Assistant, built with Azure OpenAI"
 
-KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "merged_content"
-KB_FIELDS_CATEGORY = os.environ.get("KB_FIELDS_CATEGORY") or "category"
-KB_FIELDS_SOURCEPAGE = os.environ.get("KB_FIELDS_SOURCEPAGE") or "file_storage_path"
+
+KB_FIELDS_CONTENT = os.environ.get("KB_FIELDS_CONTENT") or "content"
+KB_FIELDS_PAGENUMBER = os.environ.get("KB_FIELDS_PAGENUMBER") or "pages"
+KB_FIELDS_SOURCEFILE = os.environ.get("KB_FIELDS_SOURCEFILE") or "file_uri"
+KB_FIELDS_CHUNKFILE = os.environ.get("KB_FIELDS_CHUNKFILE") or "chunk_file"
 
 COSMOSDB_URL = os.environ.get("COSMOSDB_URL")
 COSMODB_KEY = os.environ.get("COSMOSDB_KEY")
-COSMOSDB_DATABASE_NAME = os.environ.get("COSMOSDB_DATABASE_NAME") or "statusdb"
-COSMOSDB_CONTAINER_NAME = os.environ.get("COSMOSDB_CONTAINER_NAME") or "statuscontainer"
+COSMOSDB_LOG_DATABASE_NAME = os.environ.get("COSMOSDB_LOG_DATABASE_NAME") or "statusdb"
+COSMOSDB_LOG_CONTAINER_NAME = os.environ.get("COSMOSDB_LOG_CONTAINER_NAME") or "statuscontainer"
+COSMOSDB_TAGS_DATABASE_NAME = os.environ.get("COSMOSDB_TAGS_DATABASE_NAME") or "tagsdb"
+COSMOSDB_TAGS_CONTAINER_NAME = os.environ.get("COSMOSDB_TAGS_CONTAINER_NAME") or "tagscontainer"
 
 QUERY_TERM_LANGUAGE = os.environ.get("QUERY_TERM_LANGUAGE") or "English"
+
+TARGET_EMBEDDING_MODEL = os.environ.get("TARGET_EMBEDDINGS_MODEL") or "BAAI/bge-small-en-v1.5"
+ENRICHMENT_APPSERVICE_NAME = os.environ.get("ENRICHMENT_APPSERVICE_NAME") or "enrichment"
+
+# embedding_service_suffix = "xyoek"
 
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
@@ -67,7 +90,10 @@ openai.api_version = "2023-06-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
-    COSMOSDB_URL, COSMODB_KEY, COSMOSDB_DATABASE_NAME, COSMOSDB_CONTAINER_NAME
+    COSMOSDB_URL, COSMODB_KEY, COSMOSDB_LOG_DATABASE_NAME, COSMOSDB_LOG_CONTAINER_NAME
+)
+tagsHelper = TagsHelper(
+    COSMOSDB_URL, COSMODB_KEY, COSMOSDB_TAGS_DATABASE_NAME, COSMOSDB_TAGS_CONTAINER_NAME
 )
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
@@ -77,25 +103,49 @@ openai.api_key = AZURE_OPENAI_SERVICE_KEY
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
-    endpoint=f"https://{AZURE_SEARCH_SERVICE}.search.windows.net",
+    endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
     index_name=AZURE_SEARCH_INDEX,
     credential=azure_search_key_credential,
 )
 blob_client = BlobServiceClient(
-    account_url=f"https://{AZURE_BLOB_STORAGE_ACCOUNT}.blob.core.windows.net",
+    account_url=AZURE_BLOB_STORAGE_ENDPOINT,
     credential=AZURE_BLOB_STORAGE_KEY,
 )
 blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 
-# Set up OpenAI management client
-openai_mgmt_client = CognitiveServicesManagementClient(
-    credential=azure_credential,
-    subscription_id=AZURE_SUBSCRIPTION_ID)
+model_name = ''
+model_version = ''
 
-deployment = openai_mgmt_client.deployments.get(
-    resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
-    account_name=AZURE_OPENAI_SERVICE,
-    deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+if (IS_GOV_CLOUD_DEPLOYMENT):
+    model_name = AZURE_OPENAI_CHATGPT_MODEL_NAME
+    model_version = AZURE_OPENAI_CHATGPT_MODEL_VERSION
+    embedding_model_name = AZURE_OPENAI_EMBEDDINGS_MODEL_NAME
+    embedding_model_version = AZURE_OPENAI_EMBEDDINGS_VERSION
+else:
+    # Set up OpenAI management client
+    openai_mgmt_client = CognitiveServicesManagementClient(
+        credential=azure_credential,
+        subscription_id=AZURE_SUBSCRIPTION_ID)
+
+    deployment = openai_mgmt_client.deployments.get(
+        resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+        account_name=AZURE_OPENAI_SERVICE,
+        deployment_name=AZURE_OPENAI_CHATGPT_DEPLOYMENT)
+
+    model_name = deployment.properties.model.name
+    model_version = deployment.properties.model.version
+
+    if USE_AZURE_OPENAI_EMBEDDINGS:
+        embedding_deployment = openai_mgmt_client.deployments.get(
+            resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,
+            account_name=AZURE_OPENAI_SERVICE,
+            deployment_name=EMBEDDING_DEPLOYMENT_NAME)
+
+        embedding_model_name = embedding_deployment.properties.model.name
+        embedding_model_version = embedding_deployment.properties.model.version
+    else:
+        embedding_model_name = ""
+        embedding_model_version = ""
 
 chat_approaches = {
     "rrr": ChatReadRetrieveReadApproach(
@@ -103,12 +153,18 @@ chat_approaches = {
         AZURE_OPENAI_SERVICE,
         AZURE_OPENAI_SERVICE_KEY,
         AZURE_OPENAI_CHATGPT_DEPLOYMENT,
-        KB_FIELDS_SOURCEPAGE,
+        KB_FIELDS_SOURCEFILE,
         KB_FIELDS_CONTENT,
+        KB_FIELDS_PAGENUMBER,
+        KB_FIELDS_CHUNKFILE,
+        AZURE_BLOB_STORAGE_CONTAINER,
         blob_client,
         QUERY_TERM_LANGUAGE,
-        deployment.properties.model.name,
-        deployment.properties.model.version
+        model_name,
+        model_version,
+        IS_GOV_CLOUD_DEPLOYMENT,
+        TARGET_EMBEDDING_MODEL,
+        ENRICHMENT_APPSERVICE_NAME
     )
 }
 
@@ -118,10 +174,12 @@ app = Flask(__name__)
 @app.route("/", defaults={"path": "index.html"})
 @app.route("/<path:path>")
 def static_file(path):
+    """Serve static files from the 'static' directory"""
     return app.send_static_file(path)
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    """Chat with the bot using a given approach"""
     approach = request.json["approach"]
     try:
         impl = chat_approaches.get(approach)
@@ -140,12 +198,13 @@ def chat():
             }
         )
 
-    except Exception as e:
+    except Exception as ex:
         logging.exception("Exception in /chat")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(ex)}), 500
 
 @app.route("/getblobclienturl")
 def get_blob_client_url():
+    """Get a URL for a file in Blob Storage with SAS token"""
     sas_token = generate_account_sas(
         AZURE_BLOB_STORAGE_ACCOUNT,
         AZURE_BLOB_STORAGE_KEY,
@@ -166,41 +225,100 @@ def get_blob_client_url():
 
 @app.route("/getalluploadstatus", methods=["POST"])
 def get_all_upload_status():
+    """Get the status of all file uploads in the last N hours"""
     timeframe = request.json["timeframe"]
     state = request.json["state"]
     try:
         results = statusLog.read_files_status_by_timeframe(timeframe, State[state])
-    except Exception as e:
+    except Exception as ex:
         logging.exception("Exception in /getalluploadstatus")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(ex)}), 500
     return jsonify(results)
+
+@app.route("/logstatus", methods=["POST"])
+def logstatus():
+    """Log the status of a file upload to CosmosDB"""
+    try:
+        path = request.json["path"]
+        status = request.json["status"]
+        status_classification = StatusClassification[request.json["status_classification"].upper()]
+        state = State[request.json["state"].upper()]
+
+        statusLog.upsert_document(document_path=path,
+                                  status=status,
+                                  status_classification=status_classification,
+                                  state=state,
+                                  fresh_start=True)
+        statusLog.save_document(document_path=path)
+        
+    except Exception as ex:
+        logging.exception("Exception in /logstatus")
+        return jsonify({"error": str(ex)}), 500
+    return jsonify({"status": 200})
 
 # Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.route("/getInfoData")
 def get_info_data():
+    """Get the info data for the app"""
     response = jsonify(
         {
             "AZURE_OPENAI_CHATGPT_DEPLOYMENT": f"{AZURE_OPENAI_CHATGPT_DEPLOYMENT}",
-            "AZURE_OPENAI_MODEL_NAME": f"{deployment.properties.model.name}",
-            "AZURE_OPENAI_MODEL_VERSION": f"{deployment.properties.model.version}",
+            "AZURE_OPENAI_MODEL_NAME": f"{model_name}",
+            "AZURE_OPENAI_MODEL_VERSION": f"{model_version}",
             "AZURE_OPENAI_SERVICE": f"{AZURE_OPENAI_SERVICE}",
             "AZURE_SEARCH_SERVICE": f"{AZURE_SEARCH_SERVICE}",
             "AZURE_SEARCH_INDEX": f"{AZURE_SEARCH_INDEX}",
-            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}"
+            "TARGET_LANGUAGE": f"{QUERY_TERM_LANGUAGE}",
+            "USE_AZURE_OPENAI_EMBEDDINGS": USE_AZURE_OPENAI_EMBEDDINGS,
+            "EMBEDDINGS_DEPLOYMENT": f"{EMBEDDING_DEPLOYMENT_NAME}",
+            "EMBEDDINGS_MODEL_NAME": f"{embedding_model_name}",
+            "EMBEDDINGS_MODEL_VERSION": f"{embedding_model_version}",
+        })
+    return response
+
+# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
+@app.route("/getWarningBanner")
+def get_warning_banner():
+    """Get the warning banner text"""
+    response = jsonify(
+        {
+            "WARNING_BANNER_TEXT": f"{CHAT_WARNING_BANNER_TEXT}"
         })
     return response
 
 @app.route("/getcitation", methods=["POST"])
 def get_citation():
+    """Get the citation for a given file"""
     citation = urllib.parse.unquote(request.json["citation"])
     try:
         blob = blob_container.get_blob_client(citation).download_blob()
         decoded_text = blob.readall().decode()
         results = jsonify(json.loads(decoded_text))
-    except Exception as e:
+    except Exception as ex:
         logging.exception("Exception in /getalluploadstatus")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(ex)}), 500
     return jsonify(results.json)
 
+# Return APPLICATION_TITLE
+@app.route("/getApplicationTitle")
+def get_application_title():
+    """Get the application title text"""
+    response = jsonify(
+        {
+            "APPLICATION_TITLE": f"{APPLICATION_TITLE}"
+        })
+    return response
+
+@app.route("/getalltags", methods=["GET"])
+def get_all_tags():
+    """Get the status of all tags in the system"""
+    try:
+        results = tagsHelper.get_all_tags()
+    except Exception as ex:
+        logging.exception("Exception in /getalltags")
+        return jsonify({"error": str(ex)}), 500
+    return jsonify(results)
+
 if __name__ == "__main__":
-    app.run()
+    logging.info("IA WebApp Starting Up...")
+    app.run(threaded=True)

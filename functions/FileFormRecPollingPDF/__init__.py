@@ -9,7 +9,7 @@ import json
 import requests
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from shared_code.status_log import StatusLog, State, StatusClassification
-from shared_code.utilities import Utilities
+from shared_code.utilities import Utilities, MediaType
 import random
 from collections import namedtuple
 import time
@@ -20,6 +20,7 @@ def string_to_bool(s):
     return s.lower() == 'true'
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
@@ -33,8 +34,8 @@ FR_API_VERSION = os.environ["FR_API_VERSION"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
-cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
@@ -50,7 +51,7 @@ max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
 enableDevCode = string_to_bool(os.environ["ENABLE_DEV_CODE"])
 
 function_name = "FileFormRecPollingPDF"
-utilities = Utilities(azure_blob_storage_account, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
+utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 
 
@@ -59,7 +60,7 @@ FR_MODEL = "prebuilt-layout"
 def main(msg: func.QueueMessage) -> None:
     
     try:
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
         # Receive message from the queue
         message_body = msg.get_body().decode('utf-8')
         message_json = json.loads(message_body)
@@ -96,25 +97,19 @@ def main(msg: func.QueueMessage) -> None:
                 statusLog.upsert_document(blob_name, f'{function_name} - Form Recognizer has completed processing and the analyze results have been received', StatusClassification.DEBUG)  
                 # build the document map     
                 statusLog.upsert_document(blob_name, f'{function_name} - Starting document map build', StatusClassification.DEBUG)  
-                document_map = utilities.build_document_map_pdf(blob_name, blob_uri, response_json["analyzeResult"], azure_blob_log_storage_container)  
+                document_map = utilities.build_document_map_pdf(blob_name, blob_uri, response_json["analyzeResult"], azure_blob_log_storage_container, enableDevCode)  
                 statusLog.upsert_document(blob_name, f'{function_name} - Document map build complete', StatusClassification.DEBUG)     
                 # create chunks
                 statusLog.upsert_document(blob_name, f'{function_name} - Starting chunking', StatusClassification.DEBUG)  
                 chunk_count = utilities.build_chunks(document_map, blob_name, blob_uri, CHUNK_TARGET_SIZE)
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete, {chunk_count} chunks created.', StatusClassification.DEBUG)  
                 
-                # create chunks
-                if enableDevCode:
-                    # Dev code
-                    # submit message to the enrichment queue to continue processing                
-                    queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
-                    message_json["text_enrichment_queued_count"] = 1
-                    message_string = json.dumps(message_json)
-                    queue_client.send_message(message_string)
-                    statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED) 
-                else:                    
-                    # Released code
-                    statusLog.upsert_document(blob_name, f'{function_name} - Processing of file is now complete.', StatusClassification.INFO, State.COMPLETE)
+                # submit message to the enrichment queue to continue processing                
+                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+                message_json["text_enrichment_queued_count"] = 1
+                message_string = json.dumps(message_json)
+                queue_client.send_message(message_string)
+                statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED) 
 
             elif response_status == "running":
                 # still running so requeue with a backoff
@@ -149,7 +144,7 @@ def main(msg: func.QueueMessage) -> None:
         # a general error 
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - code: {response.status_code} - {str(e)}", StatusClassification.ERROR, State.ERROR)
         
-    statusLog.save_document()
+    statusLog.save_document(blob_name)
 
 
 @retry(stop=stop_after_attempt(max_read_attempts), wait=wait_fixed(5))

@@ -2,15 +2,14 @@
 # Licensed under the MIT license.
 
 import logging
-import os
 import json
 import html
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
+from azure.storage.blob import BlobServiceClient
+from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
-from bs4 import BeautifulSoup
 import nltk
 nltk.download('punkt')
 
@@ -40,25 +39,36 @@ class ContentType(Enum):
     TABLE_CHAR              = 11
     TABLE_END               = 12
 
+class MediaType:
+    """ Helper class for standard media values"""
+    TEXT = "text"
+    IMAGE = "image"
+    MEDIA = "media"    
+
 class Utilities:
     """ Class to hold utility functions """
     def __init__(self,
                  azure_blob_storage_account,
+                 azure_blob_storage_endpoint,
                  azure_blob_drop_storage_container,
                  azure_blob_content_storage_container,
                  azure_blob_storage_key
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
+        self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
         self.azure_blob_storage_key = azure_blob_storage_key
+        self.utilities_helper = UtilitiesHelper(azure_blob_storage_account,
+                                                azure_blob_storage_endpoint,
+                                                azure_blob_storage_key)
 
     def write_blob(self, output_container, content, output_filename, folder_set=""):
         """ Function to write a generic blob """
         # folder_set should be in the format of "<my_folder_name>/"
         # Get path and file name minus the root container
         blob_service_client = BlobServiceClient(
-            f'https://{self.azure_blob_storage_account}.blob.core.windows.net/',
+            self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         block_blob_client = blob_service_client.get_blob_client(
             container=output_container, blob=f'{folder_set}{output_filename}')
@@ -73,14 +83,11 @@ class Utilities:
 
     def get_filename_and_extension(self, path):
         """ Function to return the file name & type"""
-        # Split the path into base and extension
-        base_name = os.path.basename(path)
-        segments = path.split("/")
-        directory = "/".join(segments[1:-1]) + "/"
-        if directory == "/":
-            directory = ""
-        file_name, file_extension = os.path.splitext(base_name)
-        return file_name, file_extension, directory
+        return self.utilities_helper.get_filename_and_extension(path)
+    
+    def  get_blob_and_sas(self, blob_path):
+        """ Function to retrieve the uri and sas token for a given blob in azure storage"""
+        return self.utilities_helper.get_blob_and_sas(blob_path)
 
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
@@ -106,32 +113,7 @@ class Utilities:
         table_html += "</table>"
         return table_html
 
-    def  get_blob_and_sas(self, blob_path):
-        """ Function to retrieve the uri and sas token for a given blob in azure storage"""
-
-        # Get path and file name minus the root container
-        separator = "/"
-        file_path_w_name_no_cont = separator.join(
-            blob_path.split(separator)[1:])
-        
-        container_name = separator.join(
-            blob_path.split(separator)[0:1])
-
-        # Gen SAS token
-        sas_token = generate_blob_sas(
-            account_name=self.azure_blob_storage_account,
-            container_name=container_name,
-            blob_name=file_path_w_name_no_cont,
-            account_key=self.azure_blob_storage_key,
-            permission=BlobSasPermissions(read=True),
-            expiry=datetime.utcnow() + timedelta(hours=1)
-        )
-        source_blob_path = f'https://{self.azure_blob_storage_account}.blob.core.windows.net/{blob_path}?{sas_token}'
-        source_blob_path = source_blob_path.replace(" ", "%20")
-        logging.info("Path and SAS token for file in azure storage are now generated \n")
-        return source_blob_path
-
-    def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container):
+    def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container, enable_dev_code):
         """ Function to build a json structure representing the paragraphs in a document, 
         including metadata such as section heading, title, page number, etc.
         We construct this map from the Content key/value output of FR, because the paragraphs 
@@ -188,27 +170,24 @@ class Utilities:
                         document_map['content_type'][i] = ContentType.SECTIONHEADING_CHAR
                     document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
 
+        # store page number metadata by paragraph object
+        page_number_by_paragraph = {}
+        for _, paragraph in enumerate(result["paragraphs"]):
+            start_char = paragraph["spans"][0]["offset"]
+            page_number_by_paragraph[start_char] = paragraph["boundingRegions"][0]["pageNumber"]
+
         # iterate through the content_type and build the document paragraph catalog of content
         # tagging paragraphs with title and section
         main_title = ''
         current_title = ''
         current_section = ''
-        current_paragraph_index = 0
         start_position = 0
         page_number = 0
         for index, item in enumerate(document_map['content_type']):
 
-            # identify the current paragraph being referenced for use in
-            # enriching the document_map metadata
-            if current_paragraph_index <= len(result["paragraphs"])-1:
-                # Check if we have crossed into the next paragraph
-                # note that sometimes FR returns paragraphs out of sequence (based on the offset position), hence we
-                # also indicate a new paragraph of we see this behaviour
-                if index == result["paragraphs"][current_paragraph_index]["spans"][0]["offset"] or (result["paragraphs"][current_paragraph_index-1]["spans"][0]["offset"] > result["paragraphs"][current_paragraph_index]["spans"][0]["offset"]):
-                    # we have reached a new paragraph, so collect its metadata
-                    page_number = result["paragraphs"][current_paragraph_index]["boundingRegions"][0]["pageNumber"]
-                    current_paragraph_index += 1
-            
+            # collect page number metadata
+            page_number = page_number_by_paragraph.get(index, page_number)
+
             match item:
                 case ContentType.TITLE_START | ContentType.SECTIONHEADING_START | ContentType.TEXT_START | ContentType.TABLE_START:
                     start_position = index
@@ -247,69 +226,18 @@ class Utilities:
         del document_map['content_type']
         del document_map['table_index']
 
-        # Output document map to log container
-        json_str = json.dumps(document_map, indent=2)
-        file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
-        output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
+        if enable_dev_code:
+            # Output document map to log container
+            json_str = json.dumps(document_map, indent=2)
+            file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
+            output_filename =  file_name + "_Document_Map" + file_extension + ".json"
+            self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
 
-        # Output FR result to log container
-        json_str = json.dumps(result, indent=2)
-        output_filename =  file_name + '_FR_Result' + file_extension + ".json"
-        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
+            # Output FR result to log container
+            json_str = json.dumps(result, indent=2)
+            output_filename =  file_name + '_FR_Result' + file_extension + ".json"
+            self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
 
-        return document_map
-
-    def build_document_map_html(self, myblob_name, myblob_uri, html_data, azure_blob_log_storage_container):
-        """ Function to build a json structure representing the paragraphs in a document,
-            including metadata such as section heading, title, page number, 
-            real word percentage etc."""
-
-        logging.info("Constructing the JSON structure of the document\n")
-
-        soup = BeautifulSoup(html_data, 'lxml')
-        document_map = {
-            'file_name': myblob_name,
-            'file_uri': myblob_uri,
-            'content': soup.text,
-            "structure": []
-        }
-
-        title = ''
-        section = ''
-        title = soup.title.string if soup.title else "No title"
-
-        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'table']):
-            if tag.name in ['h2', 'h3', 'h4', 'h5', 'h6']:
-                section = tag.get_text(strip=True)
-            elif tag.name == 'h1':
-                title = tag.get_text(strip=True)
-            elif tag.name == 'p' and tag.get_text(strip=True):
-                document_map["structure"].append({
-                    "type": "text", 
-                    "text": tag.get_text(strip=True),
-                    "title": title,
-                    'subtitle': '',
-                    "section": section,
-                    "page_number": 1                
-                    })
-            elif tag.name == 'table' and tag.get_text(strip=True):
-                document_map["structure"].append({
-                    "type": "table", 
-                    "text": str(tag),
-                    "title": title,
-                    'subtitle': '',
-                    "section": section,
-                    "page_number": 1                
-                    })
-
-        # Output document map to log container
-        json_str = json.dumps(document_map, indent=2)
-        file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
-        output_filename =  file_name + "_Document_Map" + file_extension + ".json"
-        self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
-
-        logging.info("Constructing the JSON structure of the document complete\n")
         return document_map
 
     def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
@@ -326,14 +254,16 @@ class Utilities:
         token_count = self.num_tokens_from_string(input_text, encoding)
         return token_count
 
-    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, section_name, title_name, subtitle_name):
+    def write_chunk(self, myblob_name, myblob_uri, file_number, chunk_size, chunk_text, page_list, 
+                    section_name, title_name, subtitle_name, file_class):
         """ Function to write a json chunk to blob"""
         chunk_output = {
             'file_name': myblob_name,
             'file_uri': myblob_uri,
+            'file_class': file_class,
             'processed_datetime': datetime.now().isoformat(),
             'title': title_name,
-            'subtitle_name': subtitle_name,
+            'subtitle': subtitle_name,
             'section': section_name,
             'pages': page_list,
             'token_count': chunk_size,
@@ -341,17 +271,20 @@ class Utilities:
         }
         # Get path and file name minus the root container
         file_name, file_extension, file_directory = self.get_filename_and_extension(myblob_name)
-        # Get the folders to use when creating the new files
-        folder_set = file_directory + file_name + file_extension + "/"
         blob_service_client = BlobServiceClient(
-            f'https://{self.azure_blob_storage_account}.blob.core.windows.net/',
+            self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
-        output_filename = file_name + f'-{file_number}' + '.json'
         block_blob_client = blob_service_client.get_blob_client(
             container=self.azure_blob_content_storage_container,
-            blob=f'{folder_set}{output_filename}')
+            blob=self.build_chunk_filepath(file_directory, file_name, file_extension, file_number))
         block_blob_client.upload_blob(json_str, overwrite=True)
+
+    def build_chunk_filepath (self, file_directory, file_name, file_extension, file_number):
+        """ Get the folders and filename to use when creating the new file chunks """
+        folder_set = file_directory + file_name + file_extension + "/"
+        output_filename = file_name + f'-{file_number}' + '.json'
+        return f'{folder_set}{output_filename}'
 
     def build_chunks(self, document_map, myblob_name, myblob_uri, chunk_target_size):
         """ Function to build chunk outputs based on the document map """
@@ -409,7 +342,8 @@ class Utilities:
                                              f"{file_number}.{i}",
                                              self.token_count(chunk_text_p),
                                              chunk_text_p, page_list,
-                                             previous_section_name, previous_title_name, previous_subtitle_name)
+                                             previous_section_name, previous_title_name, previous_subtitle_name, 
+                                             MediaType.TEXT)
                             chunk_count += 1
                         else:
                             # Reset the paragraph token count to just the tokens left in the last
@@ -423,7 +357,8 @@ class Utilities:
                     # or it is a new section, then write out the chunk text we have to this point
                     self.write_chunk(myblob_name, myblob_uri, file_number,
                                      chunk_size, chunk_text, page_list,
-                                     previous_section_name, previous_title_name, previous_subtitle_name)
+                                     previous_section_name, previous_title_name, previous_subtitle_name,
+                                     MediaType.TEXT)
                     chunk_count += 1
 
                     # reset chunk specific variables
@@ -445,7 +380,8 @@ class Utilities:
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:
                 self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
-                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name)
+                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name,
+                                 MediaType.TEXT)
                 chunk_count += 1
 
             previous_section_name = section_name
@@ -454,4 +390,3 @@ class Utilities:
 
         logging.info("Chunking is complete \n")
         return chunk_count
-    

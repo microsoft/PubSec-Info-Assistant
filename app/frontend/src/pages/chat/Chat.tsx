@@ -2,8 +2,9 @@
 // Licensed under the MIT license.
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton} from "@fluentui/react";
-import { SparkleFilled } from "@fluentui/react-icons";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator} from "@fluentui/react";
+import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
+import { ITag } from '@fluentui/react/lib/Pickers';
 
 import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
@@ -21,6 +22,8 @@ import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
+import { FolderPicker } from "../../components/FolderPicker";
+import { TagPickerInline } from "../../components/TagPicker";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -34,18 +37,16 @@ const Chat = () => {
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
-    // Setting responseLength to 1024 by default, this will effect the default display of the ResponseLengthButtonGroup below.
+    // Setting responseLength to 2048 by default, this will effect the default display of the ResponseLengthButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
-    const [responseLength, setResponseLength] = useState<number>(1024);
+    const [responseLength, setResponseLength] = useState<number>(2048);
     // Setting responseTemp to 0.6 by default, this will effect the default display of the ResponseTempButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseTempButtonGroup.tsx file.
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
     const lastQuestionRef = useRef<string>("");
-    const testQuestion = "This is a test question.";
-    const thisquestion = "";
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -55,6 +56,8 @@ const Chat = () => {
     const [activeCitationSourceFile, setActiveCitationSourceFile] = useState<string>();
     const [activeCitationSourceFilePageNumber, setActiveCitationSourceFilePageNumber] = useState<string>();
     const [activeAnalysisPanelTab, setActiveAnalysisPanelTab] = useState<AnalysisPanelTabs | undefined>(undefined);
+    const [selectedFolders, setSelectedFolders] = useState<string[]>([]);
+    const [selectedTags, setSelectedTags] = useState<ITag[]>([]);
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
@@ -83,7 +86,9 @@ const Chat = () => {
                     systemPersona: systemPersona,
                     aiPersona: aiPersona,
                     responseLength: responseLength,
-                    responseTemp: responseTemp
+                    responseTemp: responseTemp,
+                    selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
+                    selectedTags: selectedTags.map(tag => tag.name).join(",")
                 }
             };
             const result = await chatApi(request);
@@ -139,14 +144,14 @@ const Chat = () => {
             }
         }
         // the or value here needs to match the default value assigned to responseLength above.
-        setResponseLength(_ev.target.value as number || 1024)
+        setResponseLength(_ev.target.value as number || 2048)
     };
 
     const onResponseTempChange = (_ev: any) => {
         for (let node of _ev.target.parentNode.childNodes) {
             if (node.value == _ev.target.value) {
                 switch (node.value) {
-                    case "1.3":
+                    case "1.0":
                         node.className = `${rtbgstyles.buttonleftactive}`;
                         break;
                     case "0.6":
@@ -162,7 +167,7 @@ const Chat = () => {
             }
             else {
                 switch (node.value) {
-                    case "1.3":
+                    case "1.0":
                         node.className = `${rtbgstyles.buttonleft}`;
                         break;
                     case "0.6":
@@ -226,6 +231,14 @@ const Chat = () => {
         setSelectedAnswer(index);
     };
 
+    const onSelectedKeyChanged = (selectedFolders: string[]) => {
+        setSelectedFolders(selectedFolders)
+    };
+
+    const onSelectedTagsChange = (selectedTags: ITag[]) => {
+        setSelectedTags(selectedTags)
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.commandsContainer}>
@@ -240,17 +253,35 @@ const Chat = () => {
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
                             <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your private data</h1>
                             <span className={styles.chatEmptyObjectives}>
-                                The objective of the Information Assistant powered by Azure OpenAI is to leverage a combination of AI components 
-                                to enable you to <b>Chat</b> (Have a conversation) with or <b>Ask a question</b> of your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
+                                The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components 
+                                to enable you to <b>Chat</b> (Have a conversation) with your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
                             </span>
-                            <ul className={styles.chatEmptyObjectivesList}>
-                                <li>Current: Based on the latest “up to date” information in your private data</li>
-                                <li>Relevant: Responses should leverage your private data</li>
-                                <li>Controlled: You can use the <b>Adjust</b> feature to control the response parameters</li>
-                                <li>Referenced: Responses should include specific citations</li>
-                                <li>Personalized: Responses should be tailored to your personal settings you <b>Adjust</b> to</li>
-                                <li>Explainable: Each response should include details on the <b>Thought Process</b> that was used</li>
-                            </ul>
+                            <span className={styles.chatEmptyObjectivesList}>
+                                <span className={styles.chatEmptyObjectivesListItem}>
+                                    <ClockFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Clock icon" />
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Current: Based on the latest "up to date" information in your private data</span>
+                                </span>
+                                <span className={styles.chatEmptyObjectivesListItem}>
+                                    <TargetArrowFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Target icon" />
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Relevant: Responses should leverage your private data</span>
+                                </span>
+                                <span className={styles.chatEmptyObjectivesListItem}>
+                                    <OptionsFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Options icon" />
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Controlled: You can use the <b>Adjust</b> feature to control the response parameters</span>
+                                </span>
+                                <span className={styles.chatEmptyObjectivesListItem}>
+                                    <SearchInfoFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Search Info icon" />
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Referenced: Responses should include specific citations</span>
+                                </span>
+                                <span className={styles.chatEmptyObjectivesListItem}>
+                                    <PersonStarFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Person Star icon" />
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Personalized: Responses should be tailored to your personal settings you <b>Adjust</b> to</span>
+                                </span>
+                                <span className={styles.chatEmptyObjectivesListItem}> 
+                                    <TextBulletListSquareSparkleFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Text Bullet List Square Sparkle icon" />
+                                    <span className={styles.chatEmptyObjectivesListItemText}>Explainable: Each response should include details on the <b>Thought Process</b> that was used</span>
+                                </span>
+                            </span>
                             <span className={styles.chatEmptyObjectives}>
                                 <i>Though the Accelerator is focused on the key areas above, human oversight to confirm accuracy is crucial. 
                                 All responses from the system must be verified with the citations provided. 
@@ -355,6 +386,9 @@ const Chat = () => {
                             <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                             <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
                             <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
+                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders}/>
+                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags}/>
                 </Panel>
 
                 <Panel

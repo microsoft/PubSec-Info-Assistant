@@ -8,6 +8,7 @@ import base64
 from enum import Enum
 import logging
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
+import traceback, sys
 
 class State(Enum):
     """ Enum for state of a process """
@@ -17,6 +18,7 @@ class State(Enum):
     COMPLETE = "Complete"
     ERROR = "Error"
     THROTTLED = "Throttled"
+    UPLOADED = "Uploaded"
     ALL = "All"
 
 class StatusClassification(Enum):
@@ -41,7 +43,7 @@ class StatusLog:
         self._database_name = database_name
         self._container_name = container_name
         self.cosmos_client = CosmosClient(url=self._url, credential=self._key)
-        self._log_document = ""
+        self._log_document = {}
 
         # Select a database (will create it if it doesn't exist)
         self.database = self.cosmos_client.get_database_client(self._database_name)
@@ -115,6 +117,8 @@ class StatusLog:
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)
 
+        query_string += " ORDER BY c.state_timestamp DESC"
+
         items = list(self.container.query_items(
             query=query_string,
             enable_cross_partition_query=True
@@ -128,6 +132,9 @@ class StatusLog:
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
 
+        # add status to standard logger
+        logging.info(f"{status} DocumentID - {document_id}")
+
         # If this event is the start of an upload, remove any existing status files for this path
         if fresh_start:
             try:
@@ -137,12 +144,12 @@ class StatusLog:
 
         json_document = ""
         try:
-            # if the document exists and if this is the first call to the function from the parent, 
+            # if the document exists and if this is the first call to the function from the parent,
             # then retrieve the stored document from cosmos, otherwise, use the log stored in self
-            if self._log_document == "":
+            if self._log_document.get(document_id, "") == "":
                 json_document = self.container.read_item(item=document_id, partition_key=base_name)
             else:
-                json_document = self._log_document       
+                json_document = self._log_document[document_id]
 
             # Check if there has been a state change, and therefore to update state
             if json_document['state'] != state.value:
@@ -156,10 +163,13 @@ class StatusLog:
                 "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
                 "status_classification": str(status_classification.value)
             }
-            status_updates.append(new_item)
 
-        except Exception:
-            # if this is a new document
+            if status_classification == StatusClassification.ERROR:
+                new_item["stack_trace"] = self.get_stack_trace()
+
+            status_updates.append(new_item)
+        except exceptions.CosmosResourceNotFoundError:
+            # this is a new document
             json_document = {
                 "id": document_id,
                 "file_path": document_path,
@@ -176,13 +186,61 @@ class StatusLog:
                     }
                 ]
             }
+        except Exception:
+            # log the exception with stack trace to the status log
+            json_document = {
+                "id": document_id,
+                "file_path": document_path,
+                "file_name": base_name,
+                "state": str(state.value),
+                "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "state_description": "",
+                "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "status_updates": [
+                    {
+                        "status": status,
+                        "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        "status_classification": str(status_classification.value),
+                        "stack_trace": self.get_stack_trace() if not fresh_start else None
+                    }
+                ]
+            }
 
         #self.container.upsert_item(body=json_document)
-        self._log_document = json_document         
-        
-        # add status to standard logger
-        logging.info(status)
+        self._log_document[document_id] = json_document
 
+    def update_document_state(self, document_path, state_str):
+        """Updates the state of the document in the storage"""
+        try:
+            document_id = self.encode_document_id(document_path)
+            logging.info(f"{state_str} DocumentID - {document_id}")
+            document_id = self.encode_document_id(document_path)
+            if self._log_document.get(document_id, "") != "":
+                json_document = self._log_document[document_id]
+                json_document['state'] = state_str
+                json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                self.save_document(document_path)
+                self._log_document[document_id] = json_document
+            else:
+                logging.warning(f"Document with ID {document_id} not found.")
+        except Exception as err:
+            logging.error(f"An error occurred while updating the document state: {str(err)}")      
 
-    def save_document(self):
-        self.container.upsert_item(body=self._log_document)
+    def save_document(self, document_path):
+        """Saves the document in the storage"""
+        document_id = self.encode_document_id(document_path)
+        self.container.upsert_item(body=self._log_document[document_id])
+        self._log_document[document_id] = ""
+
+    def get_stack_trace(self):
+        """ Returns the stack trace of the current exception"""
+        exc = sys.exc_info()[0]
+        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
+        if exc is not None:  # i.e. an exception is present
+            del stack[-1]       # remove call of full_stack, the printed exception
+                                # will contain the caught exception caller instead
+        trc = 'Traceback (most recent call last):\n'
+        stackstr = trc + ''.join(traceback.format_list(stack))
+        if exc is not None:
+            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+        return stackstr

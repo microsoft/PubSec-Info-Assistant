@@ -22,6 +22,10 @@ jq -r  '
             "env_var": "AZURE_SEARCH_SERVICE"
         },
         {
+            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
+        },
+        {
             "path": "azurE_STORAGE_ACCOUNT",
             "env_var": "AZURE_BLOB_STORAGE_ACCOUNT"
         },
@@ -54,6 +58,10 @@ jq -r  '
             "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
         },
         {
+            "path": "azurE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+            "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
+        },       
+        {
             "path": "azurE_OPENAI_SERVICE_KEY",
             "env_var": "AZURE_OPENAI_SERVICE_KEY"
         },
@@ -68,8 +76,68 @@ jq -r  '
         {
             "path": "azurE_FUNCTION_APP_NAME",
             "env_var": "AZURE_FUNCTION_APP_NAME"
+        },
+        {
+            "path": "containeR_REGISTRY_NAME",
+            "env_var": "CONTAINER_REGISTRY_NAME"
+        },
+        {
+            "path": "containeR_APP_SERVICE",
+            "env_var": "CONTAINER_APP_SERVICE"
+
+        },
+        {
+            "path": "embeddingsqueue",
+            "env_var": "EMBEDDINGS_QUEUE"
+        },
+        {
+            "path": "azurE_STORAGE_CONTAINER",
+            "env_var": "AZURE_STORAGE_CONTAINER"
+        },
+        {
+            "path": "bloB_CONNECTION_STRING",
+            "env_var": "BLOB_CONNECTION_STRING"
+        },       
+        {
+            "path": "targeT_EMBEDDINGS_MODEL",
+            "env_var": "TARGET_EMBEDDINGS_MODEL"
+        },
+        {
+            "path": "azurE_COSMOSDB_URL",
+            "env_var": "COSMOSDB_URL"
+        },
+        {
+            "path": "azurE_COSMOSDB_KEY",
+            "env_var": "COSMOSDB_KEY"
+        },
+        {
+            "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
+            "env_var": "COSMOSDB_LOG_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_LOG_CONTAINER_NAME",
+            "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
+        },
+        {
+            "path": "azurE_OPENAI_RESOURCE_GROUP",
+            "env_var": "AZURE_OPENAI_RESOURCE_GROUP"
+        },
+        {
+            "path": "embeddinG_VECTOR_SIZE",
+            "env_var": "EMBEDDING_VECTOR_SIZE"
+        },       
+        {
+            "path": "iS_USGOV_DEPLOYMENT",
+            "env_var": "IS_USGOV_DEPLOYMENT"
+        },
+        {
+            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
+        },
+        {
+            "path": "enrichmenT_APPSERVICE_NAME",
+            "env_var": "ENRICHMENT_APPSERVICE_NAME"
         }
-        
     ]
         as $env_vars_to_extract
     |
@@ -89,3 +157,4 @@ jq -r  '
     |
     .[]
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
+    

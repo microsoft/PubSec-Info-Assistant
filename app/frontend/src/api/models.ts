@@ -22,6 +22,8 @@ export type AskRequestOverrides = {
     aiPersona?: string;
     responseLength?: number;
     responseTemp?: number;
+    selectedFolders?: string;
+    selectedTags?: string;
 };
 
 export type AskRequest = {
@@ -97,6 +99,10 @@ export type GetInfoResponse = {
     AZURE_SEARCH_SERVICE: string;
     AZURE_SEARCH_INDEX: string;
     TARGET_LANGUAGE: string;
+    USE_AZURE_OPENAI_EMBEDDINGS: boolean;
+    EMBEDDINGS_DEPLOYMENT: string;
+    EMBEDDINGS_MODEL_NAME: string;
+    EMBEDDINGS_MODEL_VERSION: string;
     error?: string;
 };
 
@@ -109,5 +115,53 @@ export type ActiveCitation = {
     pages: number[];
     token_count: number;
     content: string;
+    error?: string;
+}
+
+export type GetWarningBanner = {
+    WARNING_BANNER_TEXT: string;
+    error?: string;
+};
+
+// These keys need to match case with the defined Enum in the 
+// shared code (functions/shared_code/status_log.py)
+export const enum StatusLogClassification {
+    Debug = "Debug",
+    Info = "Info",
+    Error = "Error"
+}
+
+// These keys need to match case with the defined Enum in the 
+// shared code (functions/shared_code/status_log.py)
+export const enum StatusLogState {
+    Processing = "Processing",
+    Skipped = "Skipped",
+    Queued = "Queued",
+    Complete = "Complete",
+    Error = "Error",
+    Throttled = "Throttled",
+    Uploaded = "Uploaded",
+    All = "All"
+}
+
+export type StatusLogEntry = {
+    path: string;
+    status: string;
+    status_classification: StatusLogClassification;
+    state: StatusLogState;
+}
+
+export type StatusLogResponse = {
+    status: number;
+    error?: string;
+}
+
+export type ApplicationTitle = {
+    APPLICATION_TITLE: string;
+    error?: string;
+};
+
+export type GetTagsResponse = {
+    tags: string;
     error?: string;
 }

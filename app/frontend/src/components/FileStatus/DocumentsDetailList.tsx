@@ -110,7 +110,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         {
             key: 'column4',
             name: 'Submitted On',
-            fieldName: 'submittedOn',
+            fieldName: 'upload_timestamp',
             minWidth: 70,
             maxWidth: 90,
             isResizable: true,
@@ -126,12 +126,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         {
             key: 'column5',
             name: 'Last Updated',
-            fieldName: 'lastUpdated',
+            fieldName: 'modified_timestamp',
             minWidth: 70,
             maxWidth: 90,
             isResizable: true,
             isSorted: true,
-            isSortedDescending: true,
+            isSortedDescending: false,
             sortAscendingAriaLabel: 'Sorted Oldest to Newest',
             sortDescendingAriaLabel: 'Sorted Newest to Oldest',
             isCollapsible: true,
@@ -146,6 +146,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     return (
         <div>
+            <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <DetailsList
                 items={items}
                 compact={true}

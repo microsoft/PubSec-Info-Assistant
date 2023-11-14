@@ -8,13 +8,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
-import { getBlobClientUrl } from "../../api"
+import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
 
+interface Props {
+  folderPath: string;
+  tags: string[];
+}
 
-const FilePicker = () => {
+const FilePicker = ({folderPath, tags}: Props) => {
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
+  const folderName = folderPath;
+  const tagList = tags;
 
   // handler called when files are selected via the Dropzone component
   const handleOnChange = useCallback((files: any) => {
@@ -51,15 +57,28 @@ const FilePicker = () => {
 
       const containerClient = blobServiceClient.getContainerClient("upload");
       var counter = 1;
-      files.forEach((indexedFile: any) => {
+      files.forEach(async (indexedFile: any) => {
         // add each file into Azure Blob Storage
-        const file = indexedFile.file as File;
-        const blobClient = containerClient.getBlockBlobClient(file.name);
+        var file = indexedFile.file as File;
+        var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
+        const blobClient = containerClient.getBlockBlobClient(filePath);
         // set mimetype as determined from browser with file upload control
-        const options = { blobHTTPHeaders: { blobContentType: file.type } };
+        const options = {
+          blobHTTPHeaders: { blobContentType: file.type },
+          metadata: { tags: tagList.join(",") }
+        };
 
         // upload file
         blobClient.uploadData(file, options);
+        //write status to log
+        var logEntry: StatusLogEntry = {
+          path: "upload/"+filePath,
+          status: "File uploaded from browser to Azure Blob Storage",
+          status_classification: StatusLogClassification.Info,
+          state: StatusLogState.Uploaded
+        }
+        await logStatus(logEntry);
+
         setProgress((counter/files.length) * 100);
         counter++;
       });

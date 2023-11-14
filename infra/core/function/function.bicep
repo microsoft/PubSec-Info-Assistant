@@ -24,6 +24,9 @@ param appInsightsConnectionString string
 @description('Azure Blob Storage Account Name')
 param blobStorageAccountName string
 
+@description('Azure Blob Storage Account Endpoint')
+param blobStorageAccountEndpoint string
+
 @description('Azure Blob Storage Account Upload Container Name')
 param blobStorageAccountUploadContainerName string
 
@@ -64,11 +67,17 @@ param CosmosDBEndpointURL string
 @secure()
 param CosmosDBKey string
 
-@description('CosmosDB Database Name')
-param CosmosDBDatabaseName string
+@description('CosmosDB Log Database Name')
+param CosmosDBLogDatabaseName string
 
-@description('CosmosDB Container Name')
-param CosmosDBContainerName string
+@description('CosmosDB Log Container Name')
+param CosmosDBLogContainerName string
+
+@description('CosmosDB Tags Database Name')
+param CosmosDBTagsDatabaseName string
+
+@description('CosmosDB Tags Container Name')
+param CosmosDBTagsContainerName string
 
 @description('Name of the submit queue for PDF files')
 param pdfSubmitQueue string
@@ -82,8 +91,11 @@ param nonPdfSubmitQueue string
 @description('The queue which is used to trigger processing of media files')
 param mediaSubmitQueue string
 
-@description('The queue which is used to trigger processing of media files')
+@description('The queue which is used to trigger processing of text files')
 param textEnrichmentQueue string
+
+@description('The queue which is used to trigger processing of image files')
+param imageEnrichmentQueue string
 
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
 param maxSecondsHideOnUpload string
@@ -118,6 +130,9 @@ param enrichmentEndpoint string
 @description('Name of the enrichment service')
 param enrichmentName string
 
+@description('Location of the enrichment service')
+param enrichmentLocation string
+
 @description('Target language to translate content to')
 param targetTranslationLanguage string
 
@@ -130,6 +145,17 @@ param enrichmentBackoff string
 @description('A boolean value that flags if a user wishes to enable or disable code under development')
 param enableDevCode bool
 
+@description('A boolean value that flags if a user wishes to enable or disable code under development')
+param EMBEDDINGS_QUEUE string
+
+@description('Name of the Azure Search Service index to post data to for ingestion')
+param azureSearchIndex string
+
+@description('Endpoint of the Azure Search Service to post data to for ingestion')
+param azureSearchServiceEndpoint string
+
+@description('Used to connect and authenticate to Azure Search Service')
+param azureSearchServiceKey string
 
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
@@ -139,7 +165,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   kind: 'functionapp'
   identity: {
     type: 'SystemAssigned'
-  } 
+  }
   properties: {
     reserved: true
     serverFarmId: appServicePlanId
@@ -147,8 +173,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       http20Enabled: true
       linuxFxVersion: 'python|3.10'
       alwaysOn: true
-      minTlsVersion: '1.2'    
-      connectionStrings:[
+      minTlsVersion: '1.2'
+      connectionStrings: [
         {
           name: 'BLOB_CONNECTION_STRING'
           connectionString: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
@@ -190,6 +216,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'BLOB_STORAGE_ACCOUNT'
           value: blobStorageAccountName
+        }
+        {
+          name: 'BLOB_STORAGE_ACCOUNT_ENDPOINT'
+          value: blobStorageAccountEndpoint
         }
         {
           name: 'BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME'
@@ -240,12 +270,20 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: CosmosDBKey
         }
         {
-          name: 'COSMOSDB_DATABASE_NAME'
-          value: CosmosDBDatabaseName
+          name: 'COSMOSDB_LOG_DATABASE_NAME'
+          value: CosmosDBLogDatabaseName
         }
         {
-          name: 'COSMOSDB_CONTAINER_NAME'
-          value: CosmosDBContainerName
+          name: 'COSMOSDB_LOG_CONTAINER_NAME'
+          value: CosmosDBLogContainerName
+        }
+        {
+          name: 'COSMOSDB_TAGS_DATABASE_NAME'
+          value: CosmosDBTagsDatabaseName
+        }
+        {
+          name: 'COSMOSDB_TAGS_CONTAINER_NAME'
+          value: CosmosDBTagsContainerName
         }
         {
           name: 'PDF_SUBMIT_QUEUE'
@@ -263,9 +301,13 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'MEDIA_SUBMIT_QUEUE'
           value: mediaSubmitQueue
         }
-        {        
+        {
           name: 'TEXT_ENRICHMENT_QUEUE'
           value: textEnrichmentQueue
+        }
+        {
+          name: 'IMAGE_ENRICHMENT_QUEUE'
+          value: imageEnrichmentQueue
         }
         {
           name: 'MAX_SECONDS_HIDE_ON_UPLOAD'
@@ -294,7 +336,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'POLLING_BACKOFF'
           value: pollingBackoff
-        }        
+        }
         {
           name: 'MAX_READ_ATTEMPTS'
           value: maxReadAttempts
@@ -312,6 +354,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: enrichmentName
         }
         {
+          name: 'ENRICHMENT_LOCATION'
+          value: enrichmentLocation
+        }
+        {
           name: 'TARGET_TRANSLATION_LANGUAGE'
           value: targetTranslationLanguage
         }
@@ -322,11 +368,28 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'ENRICHMENT_BACKOFF'
           value: enrichmentBackoff
-        }        
+        }
         {
           name: 'ENABLE_DEV_CODE'
           value: string(enableDevCode)
         }        
+        {
+          name: 'EMBEDDINGS_QUEUE'
+          value: EMBEDDINGS_QUEUE
+        }
+        {
+          name: 'AZURE_SEARCH_SERVICE_KEY'
+          value: azureSearchServiceKey 
+        }  
+        {
+          name: 'AZURE_SEARCH_SERVICE_ENDPOINT'
+          value: azureSearchServiceEndpoint
+        }  
+        {
+          name: 'AZURE_SEARCH_INDEX'
+          value: azureSearchIndex
+        }                  
+
       ]
     }
   }

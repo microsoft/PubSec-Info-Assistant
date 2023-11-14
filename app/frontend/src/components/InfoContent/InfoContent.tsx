@@ -36,9 +36,18 @@ export const InfoContent = ({ className }: Props) => {
             <Label>GPT Deployment Name</Label><Text>{infoData?.AZURE_OPENAI_CHATGPT_DEPLOYMENT}</Text>
             <Label>GPT Model Name</Label><Text>{infoData?.AZURE_OPENAI_MODEL_NAME}</Text>
             <Label>GPT Model Version</Label><Text>{infoData?.AZURE_OPENAI_MODEL_VERSION}</Text>
+            {infoData?.USE_AZURE_OPENAI_EMBEDDINGS ? (
+            <div>
             <Label>Embeddings Deployment Name</Label><Text>{infoData?.EMBEDDINGS_DEPLOYMENT}</Text>
             <Label>Embeddings Model Name</Label><Text>{infoData?.EMBEDDINGS_MODEL_NAME}</Text>
             <Label>Embeddings Model Version</Label><Text>{infoData?.EMBEDDINGS_MODEL_VERSION}</Text>
+            </div>
+            ) : (
+            <div>
+            <Separator>Open Source Embeddings</Separator>
+            <Label>Embeddings Model</Label><Text>{infoData?.EMBEDDINGS_DEPLOYMENT}</Text>
+            </div>
+            )}
             <Separator>Azure Cognitive Search</Separator>
             <Label>Service Name</Label><Text>{infoData?.AZURE_SEARCH_SERVICE}</Text>
             <Label>Index Name</Label><Text>{infoData?.AZURE_SEARCH_INDEX}</Text>

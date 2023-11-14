@@ -264,7 +264,8 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
-      AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingDeploymentName
+      USE_AZURE_OPENAI_EMBEDDINGS: useAzureOpenAIEmbeddings
+      EMBEDDING_DEPLOYMENT_NAME: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
       AZURE_OPENAI_EMBEDDINGS_MODEL_NAME: azureOpenAIEmbeddingsModelName
       AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION: azureOpenAIEmbeddingsModelVersion
       AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
@@ -767,4 +768,6 @@ output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = azureOpenAIEmbeddingDeploymentName
+output USE_AZURE_OPENAI_EMBEDDINGS bool = useAzureOpenAIEmbeddings
+output EMBEDDING_DEPLOYMENT_NAME string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
 output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name

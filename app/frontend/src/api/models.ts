@@ -99,6 +99,7 @@ export type GetInfoResponse = {
     AZURE_SEARCH_SERVICE: string;
     AZURE_SEARCH_INDEX: string;
     TARGET_LANGUAGE: string;
+    USE_AZURE_OPENAI_EMBEDDINGS: boolean;
     EMBEDDINGS_DEPLOYMENT: string;
     EMBEDDINGS_MODEL_NAME: string;
     EMBEDDINGS_MODEL_VERSION: string;

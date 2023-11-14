@@ -148,6 +148,14 @@ jq -r  '
             "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
         },
         {
+            "path": "embeddinG_DEPLOYMENT_NAME",
+            "env_var": "EMBEDDING_DEPLOYMENT_NAME"
+        },
+        {
+            "path": "usE_AZURE_OPENAI_EMBEDDINGS",
+            "env_var": "USE_AZURE_OPENAI_EMBEDDINGS"
+        },
+        {
             "path": "enrichmenT_APPSERVICE_NAME",
             "env_var": "ENRICHMENT_APPSERVICE_NAME"
         }

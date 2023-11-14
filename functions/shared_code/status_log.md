@@ -8,7 +8,7 @@ Currently the status logger provides a class, StatusLog, with the following func
 - **encode_document_id** - this function is used to generate the id from the file name by the upsert_document function initially. It can also be called to retrieve the encoded id of a file if you pass in the file name. The id is used as the partition key.
 - **read_documents** - This function returns status documents from Cosmos DB for you to use. You can specify optional query parameters, such as document id (the document path) or an integer representing how many minutes from now the processing should have started, or if you wish to receive verbose or concise details.
 
-Finally you will need to supply 4 properties to the class before you can call the above functions. These are COSMOSDB_URL, COSMOSDB_KEY, COSMOSDB_DATABASE_NAME and COSMOSDB_CONTAINER_NAME. The resulting json includes verbos status updates but also a snapshot status for the end user UI, specifically the state, state_description and state_timestamp. These values are just select high level state snapshots, including 'Processing', 'Error' and 'Complete'.
+Finally you will need to supply 4 properties to the class before you can call the above functions. These are COSMOSDB_URL, COSMOSDB_KEY, COSMOSDB_LOG_DATABASE_NAME and COSMOSDB_LOG_CONTAINER_NAME. The resulting json includes verbos status updates but also a snapshot status for the end user UI, specifically the state, state_description and state_timestamp. These values are just select high level state snapshots, including 'Processing', 'Error' and 'Complete'.
 
 ````json
 {

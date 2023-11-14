@@ -28,14 +28,42 @@
     justify-content: center;
     align-items: center;
     max-height: 1024px;
-    padding-top: 60px;
+    padding-top: 10px;
 }
 
 .chatEmptyStateTitle {
     font-size: 4rem;
     font-weight: 600;
     margin-top: 0;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+}
+
+.chatEmptyObjectives {
+    padding-left: 160px;
+    padding-right: 160px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.chatEmptyObjectivesList {
+    text-align: center;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 50px;
+    padding-top: 30px;
+}
+
+.chatEmptyObjectivesListItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+}
+
+.chatEmptyObjectivesListItemText {
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 .chatEmptyStateSubtitle {

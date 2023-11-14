@@ -40,6 +40,10 @@ param tenantId string = subscription().tenantId
 
 param logAnalyticsWorkspaceResourceId string = !empty(logAnalyticsWorkspaceName) ? resourceId('Microsoft.OperationalInsights/workspaces', logAnalyticsWorkspaceName) : ''
 
+param isGovCloudDeployment bool  
+
+param portalURL string = (isGovCloudDeployment) ? 'https://portal.azure.us' : 'https://portal.azure.com'
+
 resource appService 'Microsoft.Web/sites@2022-03-01' = {
   name: name
   location: location
@@ -58,7 +62,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
       functionAppScaleLimit: functionAppScaleLimit != -1 ? functionAppScaleLimit : null
       healthCheckPath: healthCheckPath
       cors: {
-        allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
+        allowedOrigins: union([ portalURL, 'https://ms.portal.azure.com' ], allowedOrigins)
       }
     }
     clientAffinityEnabled: clientAffinityEnabled
@@ -110,6 +114,9 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
             allowedAudiences: [
               'api://${name}'
             ]
+            defaultAuthorizationPolicy: {
+              allowedApplications: []
+            }
           }
         }
       }
@@ -135,25 +142,33 @@ resource diagnosticLogs 'Microsoft.Insights/diagnosticSettings@2021-05-01-previe
         category: 'AppServiceAppLogs'
         enabled: true
         retentionPolicy: {
-          days: 30
+          days: 0 
           enabled: true 
         }
       }
       {
         category: 'AppServicePlatformLogs'
         enabled: true
-        retentionPolicy: {
-          days: 30
+        retentionPolicy:  {
+          days: 0
           enabled: true 
         }
       }
+      {
+        category: 'AppServiceConsoleLogs'
+        enabled: true
+        retentionPolicy: {
+          days: 0
+          enabled: true 
+        }
+      }        
     ]
     metrics: [
       {
         category: 'AllMetrics'
         enabled: true
         retentionPolicy: {
-          days: 30
+          days: 0
           enabled: true 
         }
       }

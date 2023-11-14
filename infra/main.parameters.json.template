@@ -8,6 +8,12 @@
     "location": {
       "value": "${LOCATION}"
     },
+    "cuaEnabled": {
+      "value": ${ENABLE_CUSTOMER_USAGE_ATTRIBUTION}
+    },
+    "cuaId": {
+      "value": "${CUSTOMER_USAGE_ATTRIBUTION_ID}"
+    },
     "principalId": {
       "value": "${SINGED_IN_USER_PRINCIPAL}"
     },
@@ -17,20 +23,50 @@
     "azureOpenAIServiceName": {
       "value": "${AZURE_OPENAI_SERVICE_NAME}"
     },
+    "azureOpenAIResourceGroup": {
+      "value": "${AZURE_OPENAI_RESOURCE_GROUP}"
+    },
     "azureOpenAIServiceKey": {
       "value": "${AZURE_OPENAI_SERVICE_KEY}"
     },
-    "gptDeploymentName": {
-      "value": "${GPT_MODEL_DEPLOYMENT_NAME}"
+    "openAiSkuName": {
+      "value": "S0"
     },
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
     },
+    "azureOpenAIEmbeddingDeploymentName": {
+      "value": "${AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}"
+    },
+    "azureOpenAIEmbeddingsModelName": {
+      "value": "${AZURE_OPENAI_EMBEDDINGS_MODEL_NAME}"
+    },
+    "azureOpenAIEmbeddingsModelVersion": {
+      "value": "${AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION}"
+    },
+    "useAzureOpenAIEmbeddings": {
+      "value": ${USE_AZURE_OPENAI_EMBEDDINGS}
+    },
+    "sentenceTransformersModelName": {
+      "value": "${OPEN_SOURCE_EMBEDDING_MODEL}"
+    },
+    "sentenceTransformerEmbeddingVectorSize": {
+      "value": "${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}"
+    },
+    "chatGptModelName": {
+      "value": "${CHATGPT_MODEL_MODEL_NAME}"
+    },
+    "chatGptModelVersion": {
+      "value": "${CHATGPT_MODEL_VERSION}"
+    },
+    "chatGptDeploymentCapacity": {
+      "value": ${CHATGPT_MODEL_CAPACITY}
+    },
+    "chatWarningBannerText": {
+       "value": "${CHAT_WARNING_BANNER_TEXT}"
+    },
     "useExistingAOAIService": {
       "value": ${USE_EXISTING_AOAI}
-    },
-    "cognitiveServicesSkuName": {
-      "value": "S0"
     },
     "searchServicesSkuName": {
       "value": "standard"
@@ -38,11 +74,38 @@
     "buildNumber": {
       "value": "${BUILD_NUMBER}"
     },
-    "aadClientId": {
-      "value": "${AZURE_AD_APP_CLIENT_ID}"
+    "aadWebClientId": {
+      "value": "${AZURE_AD_WEB_APP_CLIENT_ID}"
+    },
+    "aadMgmtClientId": {
+      "value": "${AZURE_AD_MGMT_APP_CLIENT_ID}"
+    },
+    "aadMgmtServicePrincipalId": {
+      "value": "${AZURE_AD_MGMT_SP_ID}"
+    },
+    "aadMgmtClientSecret": {
+      "value": "${AZURE_AD_MGMT_APP_SECRET}"
     },
     "isInAutomation": {
       "value": ${IS_IN_AUTOMATION}
+    },
+    "queryTermLanguage": {
+      "value": "${QUERYTERM_LANGUAGE}"
+    },
+    "targetTranslationLanguage": {
+      "value": "${TARGET_TRANSLATION_LANGUAGE}"
+    },
+    "enableDevCode": {
+      "value": ${ENABLE_DEV_CODE}
+    },
+    "tenantId": {
+      "value": "${TENANT_ID}"
+    },
+    "subscriptionId": {
+      "value": "${SUBSCRIPTION_ID}"
+    },
+    "applicationtitle": {
+      "value": "${APPLICATION_TITLE}"
     }
   }
 }

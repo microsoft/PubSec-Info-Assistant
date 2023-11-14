@@ -10,9 +10,8 @@ import "./index.css";
 
 import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
-import OneShot from "./pages/oneshot/OneShot";
 import Chat from "./pages/chat/Chat";
-import Upload from "./pages/upload/Upload";
+import Content from "./pages/content/Content";
 
 initializeIcons();
 
@@ -22,8 +21,7 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Chat />} />
-                    <Route path="qa" element={<OneShot />} />
-                    <Route path="upload" element={<Upload />} />
+                    <Route path="content" element={<Content />} />
                     <Route path="*" element={<NoPage />} />
                 </Route>
             </Routes>

@@ -20,6 +20,45 @@
       }
     },
     {
+      "label": "pip_install_enrichment",
+      "type": "shell",
+      "command": "pip",
+      "args": [
+        "install",
+        "-r",
+        "${workspaceFolder}/app/enrichment/requirements.txt"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
+      "label": "pip_install_func_tests",
+      "type": "shell",
+      "command": "pip",
+      "args": [
+        "install",
+        "-r",
+        "${workspaceFolder}/tests/requirements.txt"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/tests",
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
       "type": "func",
       "label": "func host start",
       "command": "host start",

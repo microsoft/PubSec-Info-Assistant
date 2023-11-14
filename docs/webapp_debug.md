@@ -8,7 +8,7 @@ To debug the webapp, both frontend and backend, first set breakpoints in your co
 
 Next verify you have a virtual environment created, which should be seen as a folder called .venv under the root of your workspace. If this doesn't exists you can create one by following these steps:
 
-1. opening the command palette (Ctrl+Shift+P)
+1. Opening the command palette (Ctrl+Shift+P)
 1. Select the command Python: Create Environment
 1. Next select Venv
 1. Now select the latest version of Python from the list

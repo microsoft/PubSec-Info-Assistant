@@ -135,6 +135,11 @@ Check out how to [enable Customer Usage Attribution](/docs/features/enable_custo
 
 Check out how to [setup Sovereign Region Deployment](/docs/deployment/enable_sovereign_deployment.md)
 
+## Configure OAuth Client Credentials Flow
+
+If you are wanting to use the API stand-alone or use a custom UI.
+Check out how to [enable OAuth Client Crendentials Flow](/docs/deployment/client_credentials_flow.md)
+
 ## Works in Progress (Future releases)
 
 ### Image Similarity Search

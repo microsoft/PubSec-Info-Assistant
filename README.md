@@ -1,5 +1,10 @@
 # Information Assistant Accelerator
 
+| Version | What's New|
+|---------|------------|
+| Delta   | <span style="color:green"> [Click Here](https://github.com/microsoft/PubSec-Info-Assistant/releases/tag/v0.4-Delta):heavy_check_mark:</span> |
+ 
+
 This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure Cognitive Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure Cognitive Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
@@ -8,6 +13,26 @@ The accelerator adapts prompts based on the model type for enhanced performance.
 
 ![Process Flow](/docs/process_flow.drawio.png)
 
+---
+
+## Getting Started
+
+**STOP: Read this first**
+> Before you begin the deployment process, please review the following:
+
+- [x] [pre-requisites](docs/deployment/deployment.md#prerequisites) 
+- [x] [known issues](https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/knownissues.md) during deployment
+- [x] Firewall/network restrictions to access github codespaces/azure services.
+- [X] An Azure subscription with sufficient quota and permissions to create and manage Azure resources. You can check your subscription details and limits [here](https://learn.microsoft.com/en-us/azure/networking/check-usage-against-limits)
+      
+
+## Deployment
+
+Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the IA Accelerator in your Azure subscription.
+
+Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
+
+---
 ## Features
 
 The IA Accelerator contains several features, many of which have their own documentation.
@@ -32,20 +57,7 @@ The IA Accelerator contains several features, many of which have their own docum
 
 For a detailed review see our [Features](./docs/features/features.md) page.
 
-## Data Collection Notice
-
-The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
-
-### About Data Collection
-
-Data collection by the software in this repository is used by Microsoft solely to help justify the efforts of the teams who build and maintain this accelerator for our customers. It is your choice to leave this enabled, or to disable data collection.
-
-Data collection is implemented by the presence of a tracking GUID in the environment variables at deployment time. The GUID is associated with each Azure resource deployed by the installation scripts. This GUID is used by Microsoft to track the Azure consumption this open source solution generates.
-
-### How to Disable Data Collection
-
-To disable data collection, follow the instructions in the [Configure ENV files](/docs/deployment/deployment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
-
+---
 ## Responsible AI
 
 The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
@@ -54,11 +66,6 @@ The Information Assistant (IA) Accelerator and Microsoft are committed to the ad
 
 Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
 
-## Deployment
-
-Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the IA Accelerator in your Azure subscription.
-
-Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
 
 ## Navigating the Source Code
 
@@ -89,6 +96,20 @@ README.md | Starting point for this repo. It covers overviews of the Accelerator
 * [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
 * [Azure Cognitive Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
 * [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
+
+## Data Collection Notice
+
+The software may collect information about you and your use of the software and send it to Microsoft. Microsoft may use this information to provide services and improve our products and services. You may turn off the telemetry as described in the repository. There are also some features in the software that may enable you and Microsoft to collect data from users of your applications. If you use these features, you must comply with applicable law, including providing appropriate notices to users of your applications together with a copy of Microsoft’s privacy statement. Our privacy statement is located at <https://go.microsoft.com/fwlink/?LinkID=824704>. You can learn more about data collection and use in the help documentation and our privacy statement. Your use of the software operates as your consent to these practices.
+
+### About Data Collection
+
+Data collection by the software in this repository is used by Microsoft solely to help justify the efforts of the teams who build and maintain this accelerator for our customers. It is your choice to leave this enabled, or to disable data collection.
+
+Data collection is implemented by the presence of a tracking GUID in the environment variables at deployment time. The GUID is associated with each Azure resource deployed by the installation scripts. This GUID is used by Microsoft to track the Azure consumption this open source solution generates.
+
+### How to Disable Data Collection
+
+To disable data collection, follow the instructions in the [Configure ENV files](/docs/deployment/deployment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
 
 ## Trademarks
 

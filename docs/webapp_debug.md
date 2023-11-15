@@ -4,7 +4,7 @@ If you wish to debug the user interface, or web app that as part of this acceler
 
 The app consists of two layers, namely the frontend user interface components and the backend logic components. As a user interacts with the user interface, they are engaging with the frontend code, and control is passed to the back end code as needed, for example to make calls to the Azure OpenAI service.
 
-To debug the webapp, both frontend and backend firstly select breakpoints to your code under the frontend and/or backend. Next select the 'Run & Debug' tab from the sidebar in VS Code. Next select Python: Flask from the dropdown and hit run. This will initiate local debugging of the backend code.
+To debug the webapp, both frontend and backend, first set breakpoints in your code under the frontend and/or backend. Select the 'Run & Debug' tab from the sidebar in VS Code. Select Python: Flask from the dropdown and hit run. This will initiate local debugging of the backend code.
 
 ![backend debugging](/docs/images/webapp_debug_1.png)
 
@@ -12,7 +12,7 @@ Next, you will need to initiate debugging of the frontend code. To do this selec
 
 ![frontend debugging](/docs/images/webapp_debug_2.png)
 
-This will initiate frontend running and debugging. a browser will open and show the web app running under localhost:5000. Next proceed to interact with the web app, by asking a question. In the VS Code interface, you code will hit the breakpoints, frontend or backend, and you will be able to view variable, trace logic etc. You can switch between the two running debuggers by selecting frontend or backend  (flask or vite) from the debug dropdown.
+This will initiate frontend running and debugging. A browser will open and show the web app running under localhost:5000. Next proceed to interact with the web app, by asking a question. In the VS Code interface, your code will hit the breakpoints, frontend or backend, and you will be able to view variable, trace logic etc. You can switch between the two running debuggers by selecting frontend or backend  (flask or vite) from the debug dropdown.
 
 ![frontend debugging](/docs/images/webapp_debug_3.png)
 

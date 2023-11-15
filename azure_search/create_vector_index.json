@@ -18,7 +18,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -154,7 +154,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -171,7 +171,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -188,7 +188,41 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "entities",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "key_phrases",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -200,7 +234,7 @@
       "searchable": true,
       "retrievable": true,
       "dimensions": $EMBEDDING_VECTOR_SIZE,
-      "vectorSearchConfiguration": "my-vector-config"
+      "vectorSearchConfiguration": "vector-config"
     }
   ],
   "suggesters": [],
@@ -213,7 +247,7 @@
   "vectorSearch": {
     "algorithmConfigurations": [
       {
-        "name": "my-vector-config",
+        "name": "vector-config",
         "kind": "hnsw",
         "hnswParameters": {
           "m": 4,
@@ -241,6 +275,14 @@
           "prioritizedContentFields": [
             {
               "fieldName": "content"
+            }
+          ],
+          "prioritizedKeywordsFields": [
+            {
+              "fieldName": "key_phrases"
+            },
+            {
+              "fieldName": "entities"
             }
           ]
         }

@@ -30,7 +30,7 @@ The IA Accelerator contains several features, many of which have their own docum
 * [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
 * [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
 
-For a detailed review see our [Features](/docs/features/features.md) page.
+For a detailed review see our [Features](./docs/features/features.md) page.
 
 ## Data Collection Notice
 

@@ -36,7 +36,8 @@ Unauthenticated requests: HTTP 401 Unauthorized: recommended for APIs
 Token store: Checked  
 
 After Saving it will bring you back to the Authentication tab where you will see your newly created Microsoft Identity provider.  
-Click the Edit icon and add the correct token audience. This value will be the same recorded earlier from the App Registration `Application ID URI`.  
+Click the Edit icon and add the correct token audience.  
+This value will be the same recorded earlier from the App Registration `Application ID URI`.  
 
 After this is completed a new secret will be generated in the 'Certificates and Secrets' blade of the App Registration.  
 Save this, it should now also exist in the App Service Configuration map 'Application Settings' with key: `MICROSOFT_PROVIDER_AUTHENTICATION_SECRET`  

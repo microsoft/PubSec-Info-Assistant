@@ -9,7 +9,7 @@ Navigate to the 'App Registrations' on Microsoft Entra ID and search for your `i
 Save the Client ID and Tenant ID for use later.  
 Navigate to the 'Expose an API' blade and take note of the value for `Application ID URI`.  
 
-Go to 'App Roles' bladeAdd an App Role to the App registration. Could be something to the effect of APIUser for example.  
+Go to 'App Roles' blade and add an App Role to the App registration. Could be APIUser for example.  
 
 Go to 'API permissions' blade and Add a permission, selecting `infoasst_web_access_xxxx` with Application permissions type and you should see your newly created role to be selected.  
 Add that permision.  

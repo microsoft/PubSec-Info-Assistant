@@ -8,7 +8,7 @@ The below directions are showing how to accomplish via portal but most of which 
 
 ## Update App Registration
 
-> 1.  Navigate to the 'App Registrations' on Microsoft Entra ID and search for your `infoasst-web-xxx`  
+> 1.  Navigate to the 'App Registrations' on Microsoft Entra ID and search for your `infoasst_web_access_xxx`  
 >     * Save the Client ID and Tenant ID for use later.  
 >     * Navigate to the 'Expose an API' blade and take note of the value for `Application ID URI`.  
 >
@@ -16,7 +16,7 @@ The below directions are showing how to accomplish via portal but most of which 
 >
 > 3. Go to 'API permissions' blade and Add a permission.  
 >       * Selecting `infoasst_web_access_xxxx` with Application permissions type and you should see your newly created role to be selected.  
->       * Add the permision.  
+>       * Add the permission.  
 
 ## Update Enterprise Application  
 
@@ -50,19 +50,58 @@ The below directions are showing how to accomplish via portal but most of which 
 
 ## Test to confirm configuration
 
-You can follow these steps to see the new authentication configured.  
-Make a rest POST call to login.microsoftonline.com/{your_tenant_id}/oauth2/v2.0/token  
-With form data parameters: 
+You can follow these steps to see the new authentication configured.
 
->Form-Data Key |  Value
->---|---
->grant_type | `"client_credentials"`  
->client_id | Your App Registration Client_ID  
->client_secret | Your App Registration Client_Secret  
->scope="api://`Your_Application_ID_URI`/.default"`  
+### Get Authentication Token
 
-This post call should return a token.
+Make a POST call to login.microsoftonline.com/{your_tenant_id}/oauth2/v2.0/token to obtain a token to use for calling the REST APIs.
 
-Construct a restful call to the backend api using the Token as a Bearer token Authorization.  
-An example call could be a GET call to infoasst-web-xxxx.azurewebsites.net/getalluploadstatus  
+#### HTTP
+
+```http
+POST https://login.microsoftonline.com/{your_tenant_id}/oauth2/v2.0/token
+Host: login.microsoftonline.com:443
+Content-Type: application/x-www-form-urlencoded
+
+client_id={your_client_id}
+&scope=api://infoasst-xxxxx/.default
+&client_secret={your_client_secret}
+&grant_type=client_credentials
+```
+
+#### curl
+
+```shell
+curl --request POST \
+  --url https://login.microsoftonline.com/{your_tenant_id}/oauth2/v2.0/token \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --header 'host: login.microsoftonline.com:443' \
+  --data client_id={your_client_id} \
+  --data scope=api://infoasst-xxxxx/.default \
+  --data 'client_secret={your_client_secret}' \
+  --data grant_type=client_credentials
+```
+
+This POST call should return a token.
+
+### Call REST APIs with token
+
+Construct a restful call to the backend APIs using the Token as an Authorization header.
+
+#### HTTP
+
+```http
+GET https://{infoasst-web-xxxxx}.azurewebsites.net/getInfoData
+Authorization: Bearer {your_auth_token}
+
+```
+
+#### curl
+
+```shell
+curl --request GET \
+  --url https://infoasst-web-xxxxx.azurewebsites.net/getInfoData \
+  --header 'authorization: Bearer {your_auth_token}' \
+```
+
 You should see a 200 response with valid configuration.

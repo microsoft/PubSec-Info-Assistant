@@ -8,7 +8,7 @@ The below directions are showing how to accomplish via portal but most of which 
 
 ## Update App Registration
 
-> 1.  Navigate to the 'App Registrations' on Microsoft Entra ID and search for your `infoasst_web_access_xxx`  
+> 1. Navigate to the 'App Registrations' on Microsoft Entra ID and search for your `infoasst_web_access_xxx`  
 >     * Save the Client ID and Tenant ID for use later.  
 >     * Navigate to the 'Expose an API' blade and take note of the value for `Application ID URI`.  
 >
@@ -20,18 +20,21 @@ The below directions are showing how to accomplish via portal but most of which 
 
 ## Update Enterprise Application  
 
+>| :exclamation: Application Administrator role required to grant consent to the application in step #3  
+
 > 1. Navigate to the 'Enterprise applications' on Microsoft Entra ID and search for your `infoasst_web_access_xxxx`  
 > 2. Select the blade option 'Properties' and set 'Assignment Required' to `NO`.  
 > 3. Select the 'Permissions' blade and click button to grant admin consent for the enterprise application.  
 
 ## Reconfigure Web App Authentication  
 
+>| :exclamation: The application in the App Service needs to be restarted for the below changes to take effect.  
+
 > 1. From the Azure portal, navigate to the IA Web app. On the left side select the Authentication blade.  
-> 2. Delete the existing Microsoft Identity Provider and select the popup option to remove authorization.  
-
+> 2. Delete the existing Microsoft Identity Provider and select the popup option to 'Remove Authentication'.  
 > 3. After removal, select the option to add a new provider.  
-> Select the Microsoft Provider option with the following options  
 
+> Select the Microsoft Provider option with the following options  
 >Option |  Value
 >---|---
 >Tenant Type | Workforce  

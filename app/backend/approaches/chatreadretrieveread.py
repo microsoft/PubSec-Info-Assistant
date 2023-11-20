@@ -45,7 +45,7 @@ class ChatReadRetrieveReadApproach(Approach):
     ASSISTANT = "assistant"
      
     system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above.
+    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above in {query_term_language}
     Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
     
     Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
@@ -53,7 +53,7 @@ class ChatReadRetrieveReadApproach(Approach):
     
     Here is how you should answer every question:
     
-    -Look for relevant information in the above source documents to answer the question.
+    -Look for relevant information in the above source documents to answer the question in {query_term_language}.
     -If the source document does not include the exact answer, please respond with relevant information from the data in the response along with citation.You must include a citation to each document referenced.      
     -If you cannot find any relevant information in the above sources, respond with I am not sure.Do not provide personal opinions or assumptions.
     
@@ -137,6 +137,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.model_name = model_name
         self.model_version = model_version
         self.is_gov_cloud_deployment = is_gov_cloud_deployment
+        
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -149,8 +150,9 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
-
+        
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
+        
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
@@ -223,6 +225,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 generated_query,
                 query_type=QueryType.SEMANTIC,
                 query_language="en-us",
+                # query_language=self.query_term_language,
                 query_speller="lexicon",
                 semantic_configuration_name="default",
                 top=top,
@@ -279,6 +282,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         if prompt_override is None:
             system_message = self.system_message_chat_conversation.format(
+                query_term_language=self.query_term_language,
                 injected_prompt="",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -289,6 +293,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         elif prompt_override.startswith(">>>"):
             system_message = self.system_message_chat_conversation.format(
+                query_term_language=self.query_term_language,
                 injected_prompt=prompt_override[3:] + "\n ",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -299,6 +304,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             system_message = self.system_message_chat_conversation.format(
+                query_term_language=self.query_term_language,
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
                     response_length

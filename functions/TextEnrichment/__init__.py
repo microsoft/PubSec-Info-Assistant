@@ -289,7 +289,7 @@ def requeue(response, message_json):
                 backoff * queued_count, max_seconds
             )
             queued_count += 1
-            message_json["enrichment_queued_count"] = queued_count
+            message_json["text_enrichment_queued_count"] = queued_count
             queue_client = QueueClient.from_connection_string(
                 azure_blob_connection_string,
                 queue_name=text_enrichment_queue,
@@ -299,7 +299,7 @@ def requeue(response, message_json):
             queue_client.send_message(message_json_str, visibility_timeout=backoff)
             statusLog.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - message resent to enrichment-queue. Visible in {backoff} seconds.",
+                f"{FUNCTION_NAME} - message resent to text enrichment-queue. Visible in {backoff} seconds.",
                 StatusClassification.DEBUG,
                 State.QUEUED,
             )       

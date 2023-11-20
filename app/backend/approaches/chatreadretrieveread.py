@@ -50,6 +50,7 @@ class ChatReadRetrieveReadApproach(Approach):
     
     Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
     the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    Never cite the source content using the examples provided in this paragraph that start with info.
     
     Here is how you should answer every question:
     
@@ -87,7 +88,7 @@ class ChatReadRetrieveReadApproach(Approach):
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
     {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[info1.json]'}
+    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
     ]
     
     # # Define a class variable for the base URL
@@ -262,6 +263,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
+            
 
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)

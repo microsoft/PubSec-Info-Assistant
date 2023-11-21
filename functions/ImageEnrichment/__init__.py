@@ -158,7 +158,7 @@ def translate_text(text, target_language):
 def main(msg: func.QueueMessage) -> None:
     """This function is triggered by a message in the image-enrichment-queue.
     It will first analyse the image. If the image contains text, it will then
-    detect the language of the text and translate it to Target Language."""
+    detect the language of the text and translate it to Target Language. """
 
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)

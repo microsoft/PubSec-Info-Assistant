@@ -1,55 +1,20 @@
 # Deploying IA Accelerator to Azure
 
+:warning: **IMPORTANT**: Please ensure you have met the [Azure account requirements](../../README.md#azure-account-requirements) before continuing.
+
 Follow these steps to get the accelerator up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
-
-## Prerequisites
-
-The IA Accelerator relies on multiple Azure services and has certain prerequisites that need to be met before deployment. It's essential to procure these prerequisites prior to proceeding with the deployment instructions in this guide.
-
-To get started with the IA Accelerator you will need the following:
->
->* A funded Azure subscription
->   * You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/).
->   * NOTE: "Free" tier subscriptions will not work due to the number of services required.
->* Access enabled for the Azure OpenAI service in your subscription.
->   * You can request access [here](https://aka.ms/oaiapply).
->* Administrative rights on the Azure Subscription
->   * Contributor and User Access Administrator roles are necessary to install, but Administrator may be required to enable external webapp access
->* (Optional) [Visual studio code](https://code.visualstudio.com/)
->
-
-Once you have your prerequisite items, please move on to the Deployment Configuration step.
-
-**NOTICE:** This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service.
-
-The Information Assistant Accelerator requires access to one of the following Azure OpenAI models.
-
-Model Name | Supported Versions
----|---
-gpt-35-turbo | 0301, 0613
-**gpt-35-turbo-16k** | current version
-**gpt-4** | current version
-gpt-4-32k | current version
-
-**Important:** Gpt-35-turbo-16k (0613) is recommended. GPT 4 models may achieve better results from the IA Accelerator. Access to gpt-4 may require approval which can be requested [here](https://aka.ms/oai/get-gpt4).
-
-We also recommend you have access to the following Azure OpenAI model for embeddings. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using Azure OpenAI embedding model.
-
-Model Name | Supported Versions
----|---
-**text-embedding-ada-002** | current version
 
 ## Development Environment Configuration
 
-The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub CodeSpaces.
+The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub Codespaces.
 
-[![Open in GitHub CodeSpaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-Begin by setting up your own CodeSpace using our  [Developing in CodeSpaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own CodeSpace using our  [Developing in Codespaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
 
-*If you want to configure your local desktop for development container or you do not have access to CodeSpaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*If you want to configure your local desktop for development container or you do not have access to Codespaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
+Once you have the completed setting up a CodeSpace and have your CodeSpace open in Visual Studio Code, please move on to the Sizing Estimation step.
 
 ## Sizing Estimator
 

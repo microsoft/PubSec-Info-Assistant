@@ -13,7 +13,7 @@ Please see below sections for coverage of IA Accelerator optional features.
 
 ## Configuring your own language ENV file
 
-At deployment time, you can alter the behavior of the IA Accelerator to use a language of your choosing across it's Azure Cognitive Search and Azure OpenAI prompting. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
+At deployment time, you can alter the behavior of the IA Accelerator to use a language of your choosing across it's Azure AI Search and Azure OpenAI prompting. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
 
 ## Debugging functions
 

@@ -6,7 +6,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Prompt Engineering](/docs/features/features.md#prompt-engineering)
 * [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
 * [Image Search](/docs/features/features.md#image-search)
-* [Azure Cognitive Search Integration](/docs/features/features.md#azure-cognitive-search-integration)
+* [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)
@@ -14,7 +14,7 @@ Please see below sections for coverage of IA Accelerator features.
 
 ## Retrieval Augmented Generation (RAG)
 
-**Retrieve Contextually Relevant Documents:** Utilize Azure Cognitive Search's Vector Hybrid Search capabilities to retrieve documents that are contextually relevant for precise answers. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
+**Retrieve Contextually Relevant Documents:** Utilize Azure AI Search's Vector Hybrid Search capabilities to retrieve documents that are contextually relevant for precise answers. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
 
 **Dynamic Model Selection:** Use GPT models (GPT-3.5 or GPT-4) tailored to your needs.
 
@@ -65,9 +65,9 @@ With this addition, you can easily search for images in the Retrieval Augmented 
 
 #### How It Works
 
-When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure Cognitive Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a straight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
+When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure AI Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a straight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
 
-## Azure Cognitive Search Integration
+## Azure AI Search Integration
 
 This accelerator employs Vector Hybrid Search which combines vector similarity with keyword matching to enhance search accuracy. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
 

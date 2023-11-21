@@ -28,7 +28,7 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure Cognitive Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure Cognitive Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
@@ -112,7 +112,7 @@ File/Folder | Description
 ---|---
 .devcontainer/ | Dockerfile, devcontainer configuration, and supporting script to enable both Codespaces and local DevContainers.
 app/backend/ | The middleware part of the IA website that contains the prompt engineering and provides an API layer for the client code to pass through when communicating with the various Azure services. This code is python based and hosted as a Flask app.
-app/enrichment/ | The text-based file enrichment process that handles language translation, embedding the text chunks, and inserting text chunks into the Azure Cognitive Search hybrid index. This code is python based and is hosted as a Flask app that subscribes to an Azure Storage Queue.
+app/enrichment/ | The text-based file enrichment process that handles language translation, embedding the text chunks, and inserting text chunks into the Azure AI Search hybrid index. This code is python based and is hosted as a Flask app that subscribes to an Azure Storage Queue.
 app/frontend/ | The User Experience layer of the IA website. This code is Typescript based and hosted as a Vite app and compiled using npm.
 azure_search/ | The configuration of the Azure Search hybrid index that is applied in the deployment scripts.
 docs/adoption_workshop/ | PPT files that match what is covered in the Adoption Workshop videos in Discussions.
@@ -131,7 +131,7 @@ README.md | Starting point for this repo. It covers overviews of the Accelerator
 ### References
 
 - [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
-- [Azure Cognitive Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
+- [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
 - [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
 
 ### Trademarks

@@ -19,6 +19,7 @@
   - [Transparency Note](#transparency-note)
   - [Data Collection Notice](#data-collection-notice)
 - [Resources](#resources)
+  - [Known Issues](./docs/knownissues.md)
   - [Navigating the source code](#navigating-the-source-code)
   - [References](#references)
   - [Trademarks](#trademarks)
@@ -68,7 +69,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
   * Your Azure account must have `Microsoft.Authorization/roleAssignments/write` permissions, such as [Role Based Access Control Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#role-based-access-control-administrator-preview), [User Access Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#user-access-administrator), or [Owner](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#owner). If you don't have subscription-level permissions, you must be granted [RBAC](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#role-based-access-control-administrator-preview) for an existing resource group and [deploy to that existing group](#existing-resource-group).
   * Your Azure account also needs `Microsoft.Resources/deployments/write` permissions on the subscription level.
   * Your Azure account also needs `microsoft.directory/applications/create` and `microsoft.directory/servicePrincipals/create`, such as [Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#application-administrator) Entra built-in role.
-* **To have accepted the Azure AI Services Responsible AI Notice** for your subscription. If you have not manually accepted this notice please follow our guide at [Accepting Azure AI Service Responsible AI Notice]().
+* **To have accepted the Azure AI Services Responsible AI Notice** for your subscription. If you have not manually accepted this notice please follow our guide at [Accepting Azure AI Service Responsible AI Notice](./docs/deployment/accepting_responsible_ai_notice.md).
 * **Have [Visual Studio Code](https://code.visualstudio.com/) installed** on your development machine. This will better enable authentication to your Azure Subscription.
 
 ## Deployment

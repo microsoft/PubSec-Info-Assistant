@@ -167,7 +167,7 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
-## Find your deploment URL
+## Find your deployment URL
 
 Once deployed, you can find the URL of your installation by:
 

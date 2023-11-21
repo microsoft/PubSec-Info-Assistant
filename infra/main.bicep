@@ -770,4 +770,4 @@ output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? '${abbrs.open
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = azureOpenAIEmbeddingDeploymentName
 output USE_AZURE_OPENAI_EMBEDDINGS bool = useAzureOpenAIEmbeddings
 output EMBEDDING_DEPLOYMENT_NAME string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
-output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name
+output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name 

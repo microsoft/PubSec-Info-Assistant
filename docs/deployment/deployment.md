@@ -10,11 +10,11 @@ The deployment process for the IA Accelerator, uses a concept of **Developing in
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-Begin by setting up your own CodeSpace using our  [Developing in Codespaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own Codespace using our  [Developing in Codespaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
 
 *If you want to configure your local desktop for development container or you do not have access to Codespaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once you have the completed setting up a CodeSpace and have your CodeSpace open in Visual Studio Code, please move on to the Sizing Estimation step.
+Once you have the completed setting up a Codespace, please move on to the Sizing Estimation step.
 
 ## Sizing Estimator
 
@@ -94,9 +94,9 @@ From this output, grab the Subscription ID of the subscription you intend to dep
 
 ## Deploy and Configure Azure resources
 
-Now that your CodeSpace/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
+Now that your Codespace/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
 
-To deploy everything run the following command from the CodeSpace/Dev Container prompt:
+To deploy everything run the following command from the Codespace/Dev Container prompt:
 
 ```bash
     make deploy
@@ -132,7 +132,7 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
-## Find your deploment URL
+## Find your deployment URL
 
 Once deployed, you can find the URL of your installation by:
 

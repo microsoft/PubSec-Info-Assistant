@@ -1,36 +1,92 @@
 # Information Assistant Accelerator
 
-This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure Cognitive Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure Cognitive Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+> [!IMPORTANT]  
+> As of November 15, 2023, Azure Cognitive Search has been renamed to Azure AI Search. Azure Cognitive Services have also been renamed to Azure AI Services.
+
+## Table of Contents
+
+- [Features](#features)
+- [Azure account requirements](#azure-account-requirements)
+- [Azure Deployment](./docs/deployment/deployment.md)
+  - [Codespaces Setup](./docs/deployment/deployment.md#development-environment-configuration)
+  - [Cost Estimation](./docs/deployment/deployment.md#sizing-estimator)
+  - [Configuring ENV parameters](./docs/deployment/deployment.md#configure-env-files)
+  - [Authenticating to Azure](./docs/deployment/deployment.md#log-into-azure-using-the-azure-cli)
+  - [Deploying to Azure](./docs/deployment/deployment.md#deploy-and-configure-azure-resources)
+- [Enabling optional features](./docs/features/optional_features.md)
+- [Using the app](/docs/deployment/using_ia_first_time.md)
+- [Responsible AI](#responsible-ai)
+  - [Transparency Note](#transparency-note)
+- [Data Collection Notice](#data-collection-notice)
+- [Resources](#resources)
+  - [Known Issues](./docs/knownissues.md)
+  - [Navigating the source code](#navigating-the-source-code)
+  - [References](#references)
+  - [Trademarks](#trademarks)
+  - [Code of Conduct](#code-of-conduct)
+  - [Reporting security issues](#reporting-security-issues)
+
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
+
+This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
-
----
-
-![Process Flow](/docs/process_flow.drawio.png)
 
 ## Features
 
 The IA Accelerator contains several features, many of which have their own documentation.
 
-* [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
-* [Prompt Engineering](/docs/features/features.md#prompt-engineering)
-* [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
-* [Image Search](/docs/features/features.md#image-search)
-* [Azure Cognitive Search Integration](/docs/features/features.md#azure-cognitive-search-integration)
-* [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
-* [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
-* [User Experience](/docs/features/features.md#user-experience)
-* [Developer Settings](/docs/features/features.md#developer-settings)
-  * [Configuring your own language ENV file](/docs/features/features.md#configuring-your-own-language-env-file)
-  * [Debugging functions](/docs/features/features.md#debugging-functions)
-  * [Debugging the web app](/docs/features/features.md#debugging-the-web-app)
-  * [Debugging the container web app](/docs/features/features.md#debugging-the-container-web-app)
-  * [Build pipeline for Sandbox](/docs/features/features.md#build-pipeline-for-sandbox)
-  * [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
-* [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
-* [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
+- Examples of custom Retrieval Augmented Generation (RAG), Prompt Engineering, and Document Pre-Processing
+- Azure AI Search Integration to include text search of both text documents and images
+- Customization and Personalization to enable enhanced AI interaction
 
 For a detailed review see our [Features](./docs/features/features.md) page.
+
+![Process Flow](/docs/process_flow.drawio.png)
+
+## Azure account requirements
+
+**IMPORTANT:** In order to deploy and run this example, you'll need:
+
+* **Azure account**. If you're new to Azure, [get an Azure account for free](https://azure.microsoft.com/free/cognitive-search/) and you'll get some free Azure credits to get started.
+* **Azure subscription with access enabled for the Azure OpenAI service**. You can request access with [this form](https://aka.ms/oaiapply).
+  * **Access to one of the following Azure OpenAI models**:
+
+    Model Name | Supported Versions
+    ---|---
+    gpt-35-turbo | 0301, 0613
+    **gpt-35-turbo-16k** | current version
+    **gpt-4** | current version
+    gpt-4-32k | current version
+
+    **Important:** Gpt-35-turbo-16k (0613) is recommended. GPT 4 models may achieve better results from the IA Accelerator.
+  * (Optional) **Access to the following Azure OpenAI model for embeddings**. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using the following Azure OpenAI embedding model.
+
+    Model Name | Supported Versions
+    ---|---
+    **text-embedding-ada-002** | current version
+* **Azure account permissions**:
+  * Your Azure account must have `Microsoft.Authorization/roleAssignments/write` permissions, such as [Role Based Access Control Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#role-based-access-control-administrator-preview), [User Access Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#user-access-administrator), or [Owner](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#owner) on the subscription.
+  * Your Azure account also needs `Microsoft.Resources/deployments/write` permissions on the subscription level.
+  * Your Azure account also needs `microsoft.directory/applications/create` and `microsoft.directory/servicePrincipals/create`, such as [Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#application-administrator) Entra built-in role.
+* **To have accepted the Azure AI Services Responsible AI Notice** for your subscription. If you have not manually accepted this notice please follow our guide at [Accepting Azure AI Service Responsible AI Notice](./docs/deployment/accepting_responsible_ai_notice.md).
+* (Optional) Have [Visual Studio Code](https://code.visualstudio.com/) installed on your development machine. If your Azure tenant and subscription have conditional access policies or device policies required, you may need to open your Codespace in VS Code to satisfy the required polices.
+
+## Deployment
+
+Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the IA Accelerator in your Azure subscription.
+
+Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
+
+## Responsible AI
+
+The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
+
+### Transparency Note
+
+**Read our [Transparency Note](/docs/transparency.md)**
+
+Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
 
 ## Data Collection Notice
 
@@ -46,29 +102,17 @@ Data collection is implemented by the presence of a tracking GUID in the environ
 
 To disable data collection, follow the instructions in the [Configure ENV files](/docs/deployment/deployment.md#configure-env-files) section for `ENABLE_CUSTOMER_USAGE_ATTRIBUTION` variable before deploying.
 
-## Responsible AI
+## Resources
 
-The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
-
-**Read our [Transparency Note](/docs/transparency.md)**
-
-Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
-
-## Deployment
-
-Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the IA Accelerator in your Azure subscription.
-
-Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
-
-## Navigating the Source Code
+### Navigating the Source Code
 
 This project has the following structure:
 
 File/Folder | Description
 ---|---
-.devcontainer/ | Dockerfile, devcontainer configuration, and supporting script to enable both CodeSpaces and local DevContainers.
+.devcontainer/ | Dockerfile, devcontainer configuration, and supporting script to enable both Codespaces and local DevContainers.
 app/backend/ | The middleware part of the IA website that contains the prompt engineering and provides an API layer for the client code to pass through when communicating with the various Azure services. This code is python based and hosted as a Flask app.
-app/enrichment/ | The text-based file enrichment process that handles language translation, embedding the text chunks, and inserting text chunks into the Azure Cognitive Search hybrid index. This code is python based and is hosted as a Flask app that subscribes to an Azure Storage Queue.
+app/enrichment/ | The text-based file enrichment process that handles language translation, embedding the text chunks, and inserting text chunks into the Azure AI Search hybrid index. This code is python based and is hosted as a Flask app that subscribes to an Azure Storage Queue.
 app/frontend/ | The User Experience layer of the IA website. This code is Typescript based and hosted as a Vite app and compiled using npm.
 azure_search/ | The configuration of the Azure Search hybrid index that is applied in the deployment scripts.
 docs/adoption_workshop/ | PPT files that match what is covered in the Adoption Workshop videos in Discussions.
@@ -84,20 +128,20 @@ tests/ | Functional Test scripts that are used to validate a deployed Informatio
 Makefile | Deployment command definitions and configurations. You can use `make help` to get more details on available commands.
 README.md | Starting point for this repo. It covers overviews of the Accelerator, Responsible AI, Environment, Deployment, and Usage of the Accelerator.
 
-## Resources
+### References
 
-* [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
-* [Azure Cognitive Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
-* [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
+- [Revolutionize your Enterprise Data with ChatGPT: Next-gen Apps w/ Azure OpenAI and Cognitive Search](https://aka.ms/entgptsearchblog)
+- [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
+- [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
 
-## Trademarks
+### Trademarks
 
 This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft’s Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
 
-## Code of Conduct
+### Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-## Reporting Security Issues
+### Reporting Security Issues
 
 For security concerns, please see [Security Guidelines](./SECURITY.md)

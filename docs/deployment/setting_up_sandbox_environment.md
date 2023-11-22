@@ -59,7 +59,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
 The CI/CD pipelines run under a "Service Connection" that leverages an Azure Active Directory Service Principal. This Service Principal will not have rights to create additional Azure Active Directory objects. This requires an Administrative user to manually create the objects before running the pipeline. Follow these steps to configure the Azure AD Objects:
 
-1. In a **Terminal** Window from your DevOps CodeSpace for Information Assistant, log into Azure using the `az login` command.
+1. In a **Terminal** Window from your DevOps Codespace for Information Assistant, log into Azure using the `az login` command.
 
 2. Navigate to the `/scripts` folder and run the `create-ad-objs-for-deployment.sh` script manually.
 

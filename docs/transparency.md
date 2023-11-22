@@ -87,7 +87,7 @@ Terminology | Definition
 ## System behavior
 
 ### Overview
-This system is implemented primarily on top of Azure OpenAI service and Azure Cognitive Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Azure Cognitive Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
+This system is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
 
 By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.** 
 

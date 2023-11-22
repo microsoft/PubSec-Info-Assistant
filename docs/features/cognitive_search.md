@@ -1,4 +1,4 @@
-# Azure Cognitive Search Integration
+# Azure AI Search Integration
 
 **Vector Hybrid Search**
 

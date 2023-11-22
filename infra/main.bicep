@@ -23,6 +23,7 @@ param isInAutomation bool = false
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
 param azureOpenAIResourceGroup string
+@secure()
 param azureOpenAIServiceKey string
 param openAiServiceName string = ''
 param openAiSkuName string = 'S0'
@@ -733,6 +734,7 @@ output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
+#disable-next-line outputs-should-not-contain-secrets
 output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
 #disable-next-line outputs-should-not-contain-secrets
 output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey

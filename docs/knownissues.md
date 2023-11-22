@@ -101,10 +101,33 @@ InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in 
 ### Solution:
 Deploy Azure OpenAI Service only in the supported regions. Review the local.env file and update the location as per supported models and [region availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability)
 
-
 ## Error: jq parse error: Expected value before ','
 
 If you see a jq parse error while doing deployments, it means one of the makefile scripts to extract environment variables is failing to find a value it expects to be there. The files related would be the main.parameters.json file which is the variables from bicep output from the infrastructure create. The other would be the env file used during build and deploy time
 
 ### Solution:
 To resolve carefully check your deployment .env file for any missing but required values. There are rare times when ARM has issues and output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` and/or ```make extract-env``` command so that the bicep outputs can be written again
+
+## Error: Creation of new Media Service accounts are not allowed as the resource has been deprecated
+
+### Solution:
+Media Services is scheduled for 30th June 2024. This is the [guide](https://learn.microsoft.com/en-us/azure/media-services/latest/azure-media-services-retirement). On deeper investigation Video Indexer, which is the service we use that sits on top of Media Services, will switch away from this before the end date....
+
+```
+Is Azure Video Indexer being retired?
+No, Azure Video Indexer isn't part of the Media Services retirement. Although Video Indexer currently relies on a Media Services account as part of its workflow, this dependency will be eliminated before Media Services is retired on June 30, 2024. See the following for more [impact of Media Services retirement for Video Indexer](https://aka.ms/vi-ams-retirement-announcement)
+```
+
+As of today, Video Indexer still requires a Media Services service to be created, and so we can't remove it from bicep deployment. We will need to assess closer to the date if VI is working without the service and we can then remove the dependency.
+
+The error is interesting as it seems to indicate the media service cannot be created. This is not the case, it does work in regions where VI and Media Services are available. I have updated this to an enhancement and we will add a ticket to the board to action this when VI can be deployed without this supporting service.
+
+## Error: Token limit often exceeded with PDF files
+
+### Solution:
+
+The root of this is table processing. If a table is greater than our target token count for a chunk, this is not respected.Essentially tables are not chunked, but treated as units. We have added a task to our board to split tables by chunk size and repeat the table header rows in each chunk..
+
+When we switched to using unstructured.io for non-PDF documents, we were aware of the same issue there. They were planning on adding this feature. So, we need to make the change in our code, and follow up with unstructured to confirm if this has been fixed and update that path also.
+
+This issue has been updated to an enhancement.

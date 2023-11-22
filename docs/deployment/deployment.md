@@ -1,55 +1,20 @@
 # Deploying IA Accelerator to Azure
 
+:warning: **IMPORTANT**: Please ensure you have met the [Azure account requirements](../../README.md#azure-account-requirements) before continuing.
+
 Follow these steps to get the accelerator up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
-
-## Prerequisites
-
-The IA Accelerator relies on multiple Azure services and has certain prerequisites that need to be met before deployment. It's essential to procure these prerequisites prior to proceeding with the deployment instructions in this guide.
-
-To get started with the IA Accelerator you will need the following:
->
->* A funded Azure subscription
->   * You can sign up for an Azure subscription [here](https://azure.microsoft.com/en-us/free/).
->   * NOTE: "Free" tier subscriptions will not work due to the number of services required.
->* Access enabled for the Azure OpenAI service in your subscription.
->   * You can request access [here](https://aka.ms/oaiapply).
->* Administrative rights on the Azure Subscription
->   * Contributor and User Access Administrator roles are necessary to install, but Administrator may be required to enable external webapp access
->* (Optional) [Visual studio code](https://code.visualstudio.com/)
->
-
-Once you have your prerequisite items, please move on to the Deployment Configuration step.
-
-**NOTICE:** This codebase relies on the Azure OpenAI Service which must be procured first separately, subject to any applicable license agreement. Access to this code does not grant you a license or right to use Azure OpenAI Service.
-
-The Information Assistant Accelerator requires access to one of the following Azure OpenAI models.
-
-Model Name | Supported Versions
----|---
-gpt-35-turbo | 0301, 0613
-**gpt-35-turbo-16k** | current version
-**gpt-4** | current version
-gpt-4-32k | current version
-
-**Important:** Gpt-35-turbo-16k (0613) is recommended. GPT 4 models may achieve better results from the IA Accelerator. Access to gpt-4 may require approval which can be requested [here](https://aka.ms/oai/get-gpt4).
-
-We also recommend you have access to the following Azure OpenAI model for embeddings. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using Azure OpenAI embedding model.
-
-Model Name | Supported Versions
----|---
-**text-embedding-ada-002** | current version
 
 ## Development Environment Configuration
 
-The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub CodeSpaces.
+The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub Codespaces.
 
-[![Open in GitHub CodeSpaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-Begin by setting up your own CodeSpace using our  [Developing in CodeSpaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own Codespace using our  [Developing in Codespaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
 
-*If you want to configure your local desktop for development container or you do not have access to CodeSpaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
+*If you want to configure your local desktop for development container or you do not have access to Codespaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once you have the completed the setting up Codespaces, please move on to the Sizing Estimation step.
+Once you have the completed setting up a Codespace, please move on to the Sizing Estimation step.
 
 ## Sizing Estimator
 
@@ -85,7 +50,7 @@ AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to 
 USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to "true". When set to "true" this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to "false", Information Assistant will use the open source language model that is provided in the values below.
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_AZURE_OPENAI_EMBEDDINGS** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
 OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
-OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure Cognitive Search hybrid index's vector columns can be set to the matching size. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
+OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure AI Search hybrid index's vector columns can be set to the matching size. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
 AZURE_OPENAI_CHATGPT_MODEL_NAME | No | This can be used to select a different GPT model to be deployed to Azure OpenAI when the default (gpt-35-turbo-16k) isn't available to you.
 AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | This can be used to select a specific version of the GPT model above when the default (0613) isn't available to you.
 AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
@@ -129,9 +94,9 @@ From this output, grab the Subscription ID of the subscription you intend to dep
 
 ## Deploy and Configure Azure resources
 
-Now that your CodeSpace/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
+Now that your Codespace/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
 
-To deploy everything run the following command from the CodeSpace/Dev Container prompt:
+To deploy everything run the following command from the Codespace/Dev Container prompt:
 
 ```bash
     make deploy
@@ -167,7 +132,7 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
-## Find your deploment URL
+## Find your deployment URL
 
 Once deployed, you can find the URL of your installation by:
 

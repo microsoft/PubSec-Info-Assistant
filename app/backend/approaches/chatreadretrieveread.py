@@ -45,15 +45,16 @@ class ChatReadRetrieveReadApproach(Approach):
     ASSISTANT = "assistant"
      
     system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above.
+    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above in {query_term_language}
     Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
     
     Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
     the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    Never cite the source content using the examples provided in this paragraph that start with info.
     
     Here is how you should answer every question:
     
-    -Look for relevant information in the above source documents to answer the question.
+    -Look for relevant information in the above source documents to answer the question in {query_term_language}.
     -If the source document does not include the exact answer, please respond with relevant information from the data in the response along with citation.You must include a citation to each document referenced.      
     -If you cannot find any relevant information in the above sources, respond with I am not sure.Do not provide personal opinions or assumptions.
     
@@ -87,7 +88,7 @@ class ChatReadRetrieveReadApproach(Approach):
     {"role": USER ,'content': 'I am looking for information in source documents'},
     {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
     {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[info1.json]'}
+    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
     ]
     
     # # Define a class variable for the base URL
@@ -137,6 +138,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.model_name = model_name
         self.model_version = model_version
         self.is_gov_cloud_deployment = is_gov_cloud_deployment
+        
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -149,8 +151,9 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
-
+        
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
+        
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
@@ -196,15 +199,15 @@ class ChatReadRetrieveReadApproach(Approach):
 
         #Create a filter for the search query
         if (folder_filter != "") & (folder_filter != "All"):
-            search_filter = f"search.in(folder, '{folder_filter}')"
+            search_filter = f"search.in(folder, '{folder_filter}', ',')"
         else:
             search_filter = None
         if tags_filter != "" :
             quoted_tags_filter = tags_filter.replace(",","','")
             if search_filter is not None:
-                search_filter = search_filter + f" and tags/any(t: search.in(t, '{quoted_tags_filter}'))"
+                search_filter = search_filter + f" and tags/any(t: search.in(t, '{quoted_tags_filter}', ','))"
             else:
-                search_filter = f"tags/any(t: search.in(t, '{quoted_tags_filter}'))"
+                search_filter = f"tags/any(t: search.in(t, '{quoted_tags_filter}', ','))"
 
         # Hybrid Search
         # r = self.search_client.search(generated_query, vector_queries =[vector], top=top)
@@ -223,6 +226,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 generated_query,
                 query_type=QueryType.SEMANTIC,
                 query_language="en-us",
+                # query_language=self.query_term_language,
                 query_speller="lexicon",
                 semantic_configuration_name="default",
                 top=top,
@@ -259,6 +263,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
+            
 
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
@@ -279,6 +284,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         if prompt_override is None:
             system_message = self.system_message_chat_conversation.format(
+                query_term_language=self.query_term_language,
                 injected_prompt="",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -289,6 +295,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         elif prompt_override.startswith(">>>"):
             system_message = self.system_message_chat_conversation.format(
+                query_term_language=self.query_term_language,
                 injected_prompt=prompt_override[3:] + "\n ",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -299,6 +306,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             system_message = self.system_message_chat_conversation.format(
+                query_term_language=self.query_term_language,
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
                     response_length

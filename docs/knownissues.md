@@ -2,20 +2,20 @@
 
 Here are some commonly encountered issues when deploying the PS Info Assistant Accelerator.
 
-## This subscription cannot create CognitiveServices until you agree to Responsible AI terms for this resource
+## This subscription cannot create AzureIAServices until you agree to Responsible AI terms for this resource
 
 ```bash
 Error: This subscription cannot create CognitiveServices until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal then trying again. For more detail go to https://aka.ms/csrainotice"}]
 
 ```
 
-**Solution** : Manually create a "Cognitive services multi-service account" in your Azure Subscription and Accept "Responsible AI Notice"
+**Solution** : Manually create a "Azure AI services" in your Azure Subscription and Accept "Responsible AI Notice"
 
-1. In the Azure portal, navigate to the “Create a resource” page and search for “Cognitive Services”
-2. Select “Cognitive Services” from the list of results and click “Create” 1.
-3. On the “Create” page, provide the required information such as Subscription, Resource group, Region, Name, and Pricing tier 1.
-4. Review and accept the terms "Responsible AI Notice"
-
+1. In the Azure portal, navigate to the “Create a resource” page and search for “Azure AI Services”
+2. Select “Azure AI services” from the list of results and click “Create”
+3. On the “Create” page, provide the required information such as Subscription, Resource group, Region, Name, and Pricing tier "Standard S0".
+4. Review and accept the terms "Responsible AI Notice".
+5. Create the Azure AI Service.
 
 ---
 

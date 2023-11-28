@@ -234,7 +234,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: blobStorageAccountLogContainerName
         }
         {
-          name: 'BLOB_STORAGE_ACCOUNT_KEY'
+          name: 'AZURE_BLOB_STORAGE_KEY'
           value: blobStorageAccountKey
         }
         {

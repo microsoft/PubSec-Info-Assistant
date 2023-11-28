@@ -22,7 +22,7 @@ azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
-azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
+azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"

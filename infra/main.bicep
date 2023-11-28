@@ -107,6 +107,7 @@ param subscriptionId string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
+param kvAccessObjectId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
@@ -708,7 +709,7 @@ module kvModule 'core/security/keyvault.bicep' = {
   params: {
     name: '${prefix}-${abbrs.keyvault}${randomString}'
     location: location
-    signedInUser: principalId
+    signedInUser: kvAccessObjectId
     searchServiceKey: searchServices.outputs.searchServiceKey 
     openaiServiceKey: azureOpenAIServiceKey
     cogServicesSearchKey: searchServices.outputs.cogServiceKey

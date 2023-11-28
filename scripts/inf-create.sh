@@ -146,10 +146,15 @@ export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
 echo "AZURE_AD_MGMT_APP_SECRET: $AZURE_AD_MGMT_APP_SECRET"
 
 if [ -n "${IN_AUTOMATION}" ]; then 
-  export IS_IN_AUTOMATION=true 
+  export IS_IN_AUTOMATION=true
+  kvAccessObjectId=$(az ad app show --id $signedInUserId --query id  --output tsv)
+  echo "myVar: $myVar"
 else 
   export IS_IN_AUTOMATION=false
+  kvAccessObjectId=$signedInUserId
 fi
+
+export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
 
 #set up parameter file
 declare -A REPLACE_TOKENS=(
@@ -186,6 +191,7 @@ declare -A REPLACE_TOKENS=(
     [\${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}]=${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}
     [\${OPEN_SOURCE_EMBEDDING_MODEL}]=${OPEN_SOURCE_EMBEDDING_MODEL}
     [\${APPLICATION_TITLE}]=${APPLICATION_TITLE}
+    [\${AZURE_KV_ACCESS_OBJ_ID}]=${AZURE_KV_ACCESS_OBJ_ID}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

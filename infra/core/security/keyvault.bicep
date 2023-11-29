@@ -37,7 +37,7 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
     accessPolicies: [
       {
         tenantId: subscription().tenantId
-        objectId: signedInUser
+        objectId: 'ad14665c-441c-403b-ac88-4f5038d742dd'//signedInUser
         permissions: {
           keys: ['all']
           secrets: ['all']

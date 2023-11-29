@@ -147,11 +147,11 @@ echo "AZURE_AD_MGMT_APP_SECRET: $AZURE_AD_MGMT_APP_SECRET"
 
 if [ -n "${IN_AUTOMATION}" ]; then 
   export IS_IN_AUTOMATION=true
-  kvAccessObjectId=$(az ad app show --id $signedInUserId --query id  --output tsv)
-  echo "myVar: $myVar"
+  # kvAccessObjectId=$(az ad app show --id $signedInUserId --query id  --output tsv)
+  # echo "kvAccessObjectId: $kvAccessObjectId"
 else 
   export IS_IN_AUTOMATION=false
-  kvAccessObjectId=$signedInUserId
+  # kvAccessObjectId=$signedInUserId
 fi
 
 export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId

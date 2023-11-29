@@ -78,6 +78,7 @@ if [ -n "${IN_AUTOMATION}" ]; then
     aadWebSPId=$ARM_SERVICE_PRINCIPAL_ID
     aadMgmtAppSecret=$ARM_CLIENT_SECRET
     aadMgmtSPId=$ARM_SERVICE_PRINCIPAL_ID
+    kvAccessObjectId=$aadWebSPId
   else
     # if in automation for non-PR builds, get the app registration and service principal values from the manually created AD objects
     aadWebAppId=$AD_WEBAPP_CLIENT_ID
@@ -89,9 +90,11 @@ if [ -n "${IN_AUTOMATION}" ]; then
     aadMgmtAppId=$AD_MGMTAPP_CLIENT_ID
     aadMgmtAppSecret=$AD_MGMTAPP_CLIENT_SECRET
     aadMgmtSPId=$AD_MGMT_SERVICE_PRINCIPAL_ID
+    kvAccessObjectId=$aadWebSPId
   fi
 else
   signedInUserId=$(az ad signed-in-user show --query id --output tsv)
+  kvAccessObjectId=$signedInUserId
   #if not in automation, create the app registration and service principal values
   #set up azure ad app registration since there is no bicep support for this yet
   aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
@@ -131,31 +134,17 @@ else
 fi
 
 export SINGED_IN_USER_PRINCIPAL=$signedInUserId
-echo "SINGED_IN_USER_PRINCIPAL: $SINGED_IN_USER_PRINCIPAL"
-
 export AZURE_AD_WEB_APP_CLIENT_ID=$aadWebAppId
-echo "AZURE_AD_WEB_APP_CLIENT_ID: $AZURE_AD_WEB_APP_CLIENT_ID"
-
 export AZURE_AD_MGMT_APP_CLIENT_ID=$aadMgmtAppId
-echo "AZURE_AD_MGMT_APP_CLIENT_ID: $AZURE_AD_MGMT_APP_CLIENT_ID"
-
 export AZURE_AD_MGMT_SP_ID=$aadMgmtSPId
-echo "AZURE_AD_MGMT_SP_ID: $AZURE_AD_MGMT_SP_ID"
-
 export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
-echo "AZURE_AD_MGMT_APP_SECRET: $AZURE_AD_MGMT_APP_SECRET"
+export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
 
 if [ -n "${IN_AUTOMATION}" ]; then 
   export IS_IN_AUTOMATION=true
-  # kvAccessObjectId=$(az ad app show --id $signedInUserId --query id  --output tsv)
-  # echo "kvAccessObjectId: $kvAccessObjectId"
-  kvAccessObjectId=$aadWebSPId
 else 
   export IS_IN_AUTOMATION=false
-  kvAccessObjectId=$signedInUserId
 fi
-
-export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
 
 #set up parameter file
 declare -A REPLACE_TOKENS=(

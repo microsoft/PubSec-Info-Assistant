@@ -158,6 +158,6 @@ secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTIO
 for secretName in "${secretNames[@]}"; do
   secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
   envVarName=$(echo $secretName | tr '-' '_')
-  echo export $envVarName=$secretValue
+  echo export $envVarName=\'$secretValue\'
 done
     

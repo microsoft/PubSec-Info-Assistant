@@ -1,6 +1,6 @@
 param name string
 param location string = resourceGroup().location
-param signedInUser string
+param kvAccessObjectId string
 @secure()
 param searchServiceKey string
 @secure()
@@ -37,7 +37,7 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
     accessPolicies: [
       {
         tenantId: subscription().tenantId
-        objectId: 'ad14665c-441c-403b-ac88-4f5038d742dd'//signedInUser
+        objectId: kvAccessObjectId 
         permissions: {
           keys: ['all']
           secrets: ['all']

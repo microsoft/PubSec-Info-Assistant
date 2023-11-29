@@ -481,6 +481,7 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
   }
 }
 
+
 // Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
@@ -709,7 +710,7 @@ module kvModule 'core/security/keyvault.bicep' = {
   params: {
     name: '${prefix}-${abbrs.keyvault}${randomString}'
     location: location
-    signedInUser: kvAccessObjectId
+    kvAccessObjectId: kvAccessObjectId
     searchServiceKey: searchServices.outputs.searchServiceKey 
     openaiServiceKey: azureOpenAIServiceKey
     cogServicesSearchKey: searchServices.outputs.cogServiceKey

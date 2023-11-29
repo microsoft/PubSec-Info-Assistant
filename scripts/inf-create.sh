@@ -149,9 +149,10 @@ if [ -n "${IN_AUTOMATION}" ]; then
   export IS_IN_AUTOMATION=true
   # kvAccessObjectId=$(az ad app show --id $signedInUserId --query id  --output tsv)
   # echo "kvAccessObjectId: $kvAccessObjectId"
+  kvAccessObjectId=$aadWebSPId
 else 
   export IS_IN_AUTOMATION=false
-  # kvAccessObjectId=$signedInUserId
+  kvAccessObjectId=$signedInUserId
 fi
 
 export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId

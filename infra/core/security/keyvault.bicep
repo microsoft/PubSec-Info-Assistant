@@ -1,6 +1,6 @@
 param name string
 param location string = resourceGroup().location
-param kvAccessObjectId string
+param kvAccessObjectId string 
 @secure()
 param searchServiceKey string
 @secure()

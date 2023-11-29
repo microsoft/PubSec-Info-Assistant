@@ -1,6 +1,6 @@
 # Tests
 
-This folder contains a functional test, which are used to validate the pipeline works as designed.
+The `/tests` folder contains a functional test, which are used to validate the pipeline works as designed.
 
 ## Functional tests
 

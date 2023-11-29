@@ -20,6 +20,8 @@
 - [Data Collection Notice](#data-collection-notice)
 - [Resources](#resources)
   - [Known Issues](./docs/knownissues.md)
+  - [Log Analysis](./docs/deployment/worbook_usage.md)
+  - [Functional Tests](./tests/README.md)
   - [Navigating the source code](#navigating-the-source-code)
   - [References](#references)
   - [Trademarks](#trademarks)

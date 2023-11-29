@@ -6,7 +6,7 @@ param searchServiceKey string
 @secure()
 param openaiServiceKey string
 @secure()
-param cogServicesSearchKey string
+param cogServicesSearchKey string 
 @secure()
 param cosmosdbKey string
 @secure()

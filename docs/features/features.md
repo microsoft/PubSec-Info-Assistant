@@ -10,6 +10,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)
+* [Architectural Decisions](/docs/features/architectural_decisions.md)
 * [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
 
 ## Retrieval Augmented Generation (RAG)

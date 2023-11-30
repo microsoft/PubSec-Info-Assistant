@@ -126,10 +126,10 @@ else
 
   if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
     # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
-    az ad sp update --id $aadWebSPId --set "appRoleAssignmentRequired=true"
+    az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=true"
   else
     # otherwise the default is to allow all users in the tenant to access the app
-    az ad sp update --id $aadWebSPId --set "appRoleAssignmentRequired=false"
+    az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=false"
   fi
 fi
 

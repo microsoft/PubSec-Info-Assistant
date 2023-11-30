@@ -124,7 +124,10 @@ else
       aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
   fi
 
-  if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
+  #Default true if undefined
+  REQUIRE_WEBSITE_SECURITY_MEMBERSHIP=${REQUIRE_WEBSITE_SECURITY_MEMBERSHIP:-true}
+
+  if [ "$REQUIRE_WEBSITE_SECURITY_MEMBERSHIP" = "true" ]; then
     # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
     az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=true"
   else

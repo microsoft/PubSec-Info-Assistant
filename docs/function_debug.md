@@ -26,7 +26,7 @@ Next you will need to create local configuration values that are used by the fun
     "AZURE_FORM_RECOGNIZER_KEY": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": "content",
-    "BLOB_STORAGE_ACCOUNT_KEY": "<YOUR AZURE VALUE>",
+    "AZURE_BLOB_STORAGE_KEY": "<YOUR AZURE VALUE>",
     "CHUNK_TARGET_SIZE": "750",
     "FR_API_VERSION": "2023-02-28-preview",
     "BLOB_CONNECTION_STRING": "<YOUR AZURE VALUE>",

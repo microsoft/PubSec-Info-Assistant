@@ -86,6 +86,9 @@
     "aadMgmtClientSecret": {
       "value": "${AZURE_AD_MGMT_APP_SECRET}"
     },
+    "kvAccessObjectId": {
+      "value": "${AZURE_KV_ACCESS_OBJ_ID}"
+    },
     "isInAutomation": {
       "value": ${IS_IN_AUTOMATION}
     },

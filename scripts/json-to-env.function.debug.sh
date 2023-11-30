@@ -4,9 +4,38 @@
 #!/bin/bash
 set -e
 
-jq -r  '
+if [ -n "${IN_AUTOMATION}" ]
+then
+    IS_USGOV_DEPLOYMENT=$(jq -r '.properties.outputs.iS_USGOV_DEPLOYMENT.value' infra_output.json)
+    
+    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+        az cloud set --name AzureUSGovernment > /dev/null 2>&1
+    fi
+
+    az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" > /dev/null 2>&1
+    az account set -s "$ARM_SUBSCRIPTION_ID" > /dev/null 2>&1
+fi
+
+secrets="{"
+# Name of your Key Vault
+keyVaultName=$(cat infra_output.json | jq -r .properties.outputs.deploymenT_KEYVAULT_NAME.value)
+
+# Names of your secrets
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "ENRICHMENT-KEY")
+
+# Retrieve and export each secret
+for secretName in "${secretNames[@]}"; do
+  secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
+  envVarName=$(echo $secretName | tr '-' '_')
+  secrets+="\"$envVarName\": \"$secretValue\","
+done 
+secrets=${secrets%?} # Remove the trailing comma
+secrets+="}"
+secrets="${secrets%,}"
+
+jq -r --arg secrets "$secrets" '
     .properties.outputs |
-    [
+        [
         {
             "path": "azurE_STORAGE_ACCOUNT",
             "env_var": "BLOB_STORAGE_ACCOUNT"
@@ -18,10 +47,6 @@ jq -r  '
         {
             "path": "azurE_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
-        },
-        {
-            "path": "azurE_STORAGE_KEY",
-            "env_var": "BLOB_STORAGE_ACCOUNT_KEY"
         },
         {
             "path": "azurE_BLOB_LOG_STORAGE_CONTAINER",
@@ -44,16 +69,8 @@ jq -r  '
             "env_var": "AZURE_FORM_RECOGNIZER_ENDPOINT"
         },
         {
-            "path": "azurE_FORM_RECOGNIZER_KEY",
-            "env_var": "AZURE_FORM_RECOGNIZER_KEY"
-        },
-        {
             "path": "azurE_COSMOSDB_URL",
             "env_var": "COSMOSDB_URL"
-        },
-        {
-            "path": "azurE_COSMOSDB_KEY",
-            "env_var": "COSMOSDB_KEY"
         },
         {
             "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
@@ -72,16 +89,8 @@ jq -r  '
             "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
         },
         {
-            "path": "bloB_CONNECTION_STRING",
-            "env_var": "BLOB_CONNECTION_STRING"
-        },
-        {
             "path": "azureWebJobsStorage",
             "env_var": "AzureWebJobsStorage"
-        },
-        {
-            "path": "enrichmenT_KEY",
-            "env_var": "ENRICHMENT_KEY"
         },
         {
             "path": "enrichmenT_ENDPOINT",
@@ -100,10 +109,6 @@ jq -r  '
             "env_var": "ENABLE_DEV_CODE"
         },
         {
-            "path": "azurE_STORAGE_KEY",
-            "env_var": "AZURE_BLOB_STORAGE_KEY"
-        },
-        {
             "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
             "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
         },
@@ -120,28 +125,28 @@ jq -r  '
             "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
         },
         {
-            "path": "azurE_SEARCH_KEY",
-            "env_var": "AZURE_SEARCH_SERVICE_KEY"
+            "path": "deploymenT_KEYVAULT_NAME",
+            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
         }
-    ]
+    ] 
         as $env_vars_to_extract
-    |
-    with_entries(
-        select (
-            .key as $a
+        |
+        with_entries(
+            select (
+                .key as $a
+                |
+                any( $env_vars_to_extract[]; .path == $a)
+            )
             |
-            any( $env_vars_to_extract[]; .path == $a)
+            .key |= . as $old_key | ($env_vars_to_extract[] | select (.path == $old_key) | .env_var)
         )
         |
-        .key |= . as $old_key | ($env_vars_to_extract[] | select (.path == $old_key) | .env_var)
-    )
-    |
-    to_entries
-    | 
-    map({key: .key, value: .value.value})
-    |
-    reduce .[] as $item ({}; .[$item.key] = $item.value)
-    |
+        to_entries
+        | 
+        map({key: .key, value: .value.value})
+        |
+        reduce .[] as $item ({}; .[$item.key] = $item.value)
+        |
     {"IsEncrypted": false, "Values": (. + {"FUNCTIONS_WORKER_RUNTIME": "python", 
             "AzureWebJobs.parse_html_w_form_rec.Disabled": "true", 
             "MAX_SECONDS_HIDE_ON_UPLOAD": "30", 
@@ -161,6 +166,8 @@ jq -r  '
             "PDF_SUBMIT_QUEUE": "pdf-submit-queue",
             "EMBEDDINGS_QUEUE": "embeddings-queue",
             "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
-            "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue"
-            })}
+            "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue",
+            } + ($secrets | fromjson)
+             
+    )}
     '

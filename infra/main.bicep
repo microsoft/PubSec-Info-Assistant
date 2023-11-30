@@ -23,6 +23,7 @@ param isInAutomation bool = false
 param useExistingAOAIService bool
 param azureOpenAIServiceName string
 param azureOpenAIResourceGroup string
+@secure()
 param azureOpenAIServiceKey string
 param openAiServiceName string = ''
 param openAiSkuName string = 'S0'
@@ -50,7 +51,7 @@ param containerName string = 'content'
 param uploadContainerName string = 'upload'
 param functionLogsContainerName string = 'logs'
 param searchIndexName string = 'vector-index'
-param chatGptDeploymentName string = 'chat'
+param chatGptDeploymentName string = 'gpt-35-turbo-16k'
 param azureOpenAIEmbeddingDeploymentName string = 'text-embedding-ada-002'
 param azureOpenAIEmbeddingsModelName string = 'text-embedding-ada-002'
 param azureOpenAIEmbeddingsModelVersion string = '2'
@@ -106,6 +107,7 @@ param subscriptionId string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
+param kvAccessObjectId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
@@ -261,7 +263,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
-      AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+      AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
       AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
       USE_AZURE_OPENAI_EMBEDDINGS: useAzureOpenAIEmbeddings
@@ -479,6 +481,7 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
   }
 }
 
+
 // Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
@@ -691,7 +694,6 @@ module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
   }
 }
 
-
 module azMonitor 'core/logging/monitor.bicep' = {
   scope: rg
   name: 'azure-monitor'
@@ -699,6 +701,25 @@ module azMonitor 'core/logging/monitor.bicep' = {
     location: location
     logWorkbookName: '${prefix}-${abbrs.logWorkbook}${randomString}'
     componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
+  }
+}
+
+module kvModule 'core/security/keyvault.bicep' = {
+  scope: rg
+  name: 'keyvault-deployment'
+  params: {
+    name: '${prefix}-${abbrs.keyvault}${randomString}'
+    location: location
+    kvAccessObjectId: kvAccessObjectId
+    searchServiceKey: searchServices.outputs.searchServiceKey 
+    openaiServiceKey: azureOpenAIServiceKey
+    cogServicesSearchKey: searchServices.outputs.cogServiceKey
+    cosmosdbKey: cosmosdb.outputs.CosmosDBKey
+    formRecognizerKey: formrecognizer.outputs.formRecognizerAccountKey
+    blobConnectionString: storage.outputs.connectionString
+    enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
+    spClientSecret: aadMgmtClientSecret
+    blobStorageKey: storage.outputs.key
   }
 }
 
@@ -722,52 +743,41 @@ output AZURE_OPENAI_SERVICE string = azureOpenAIServiceName //cognitiveServices.
 output AZURE_SEARCH_INDEX string = searchIndexName
 output AZURE_SEARCH_SERVICE string = searchServices.outputs.name
 output AZURE_SEARCH_SERVICE_ENDPOINT string = searchServices.outputs.endpoint
-output AZURE_SEARCH_KEY string = searchServices.outputs.searchServiceKey
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output AZURE_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
 output AZURE_STORAGE_CONTAINER string = containerName
 output AZURE_STORAGE_UPLOAD_CONTAINER string = uploadContainerName
-output AZURE_STORAGE_KEY string = storage.outputs.key
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
-output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : chatGptModelName
+output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
-output AZURE_OPENAI_SERVICE_KEY string = azureOpenAIServiceKey
-#disable-next-line outputs-should-not-contain-secrets
-output COG_SERVICES_FOR_SEARCH_KEY string = searchServices.outputs.cogServiceKey
 output AZURE_FUNCTION_APP_NAME string = functions.outputs.name
 output AZURE_COSMOSDB_URL string = cosmosdb.outputs.CosmosDBEndpointURL
-output AZURE_COSMOSDB_KEY string = cosmosdb.outputs.CosmosDBKey
 output AZURE_COSMOSDB_LOG_DATABASE_NAME string = cosmosdb.outputs.CosmosDBLogDatabaseName
 output AZURE_COSMOSDB_LOG_CONTAINER_NAME string = cosmosdb.outputs.CosmosDBLogContainerName
 output AZURE_COSMOSDB_TAGS_DATABASE_NAME string = cosmosdb.outputs.CosmosDBTagsDatabaseName
 output AZURE_COSMOSDB_TAGS_CONTAINER_NAME string = cosmosdb.outputs.CosmosDBTagsContainerName
 output AZURE_FORM_RECOGNIZER_ENDPOINT string = formrecognizer.outputs.formRecognizerAccountEndpoint
-output AZURE_FORM_RECOGNIZER_KEY string = formrecognizer.outputs.formRecognizerAccountKey
 output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
 output CHUNK_TARGET_SIZE string = chunkTargetSize
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
-output BLOB_CONNECTION_STRING string = storage.outputs.connectionString
 output AzureWebJobsStorage string = storage.outputs.connectionString
-output ENRICHMENT_KEY string = enrichment.outputs.cognitiveServiceAccountKey
 output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
 output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
 output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage
 output ENABLE_DEV_CODE bool = enableDevCode
 output AZURE_CLIENT_ID string = aadMgmtClientId
 output AZURE_TENANT_ID string = tenantId
-#disable-next-line outputs-should-not-contain-secrets
-output AZURE_CLIENT_SECRET string = aadMgmtClientSecret
 output AZURE_SUBSCRIPTION_ID string = subscriptionId
 output IS_USGOV_DEPLOYMENT bool = isGovCloudDeployment
 output BLOB_STORAGE_ACCOUNT_ENDPOINT string = storage.outputs.primaryEndpoints.blob
-output AZURE_BLOB_STORAGE_KEY string = storage.outputs.key
 output EMBEDDING_VECTOR_SIZE string = useAzureOpenAIEmbeddings ? '1536' : sentenceTransformerEmbeddingVectorSize
 output TARGET_EMBEDDINGS_MODEL string = useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
 output AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME string = azureOpenAIEmbeddingDeploymentName
 output USE_AZURE_OPENAI_EMBEDDINGS bool = useAzureOpenAIEmbeddings
 output EMBEDDING_DEPLOYMENT_NAME string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
-output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name
+output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name 
+output DEPLOYMENT_KEYVAULT_NAME string = kvModule.outputs.keyVaultName

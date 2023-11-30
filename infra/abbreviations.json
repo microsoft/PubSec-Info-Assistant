@@ -141,5 +141,6 @@
   "webSitesAppService": "web-",
   "webSitesAppServiceEnvironment": "ase-",
   "webSitesFunctions": "func-",
-  "webStaticSites": "stapp-"
+  "webStaticSites": "stapp-",
+  "keyvault": "kv-"
 }

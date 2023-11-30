@@ -22,7 +22,7 @@ azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
-azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
+azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
@@ -158,7 +158,7 @@ def translate_text(text, target_language):
 def main(msg: func.QueueMessage) -> None:
     """This function is triggered by a message in the image-enrichment-queue.
     It will first analyse the image. If the image contains text, it will then
-    detect the language of the text and translate it to Target Language."""
+    detect the language of the text and translate it to Target Language. """
 
     message_body = msg.get_body().decode("utf-8")
     message_json = json.loads(message_body)

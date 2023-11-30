@@ -1,16 +1,16 @@
-# IA Accelerator, version 0.3 gamma - Estimation
+# IA Accelerator, version 0.4 delta - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 0.3 gamma, and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 0.4 delta, and provides cost estimates based on the chosen configurations.
 
 
 | Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA Accelerator, version 0.3 gamma | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/10d4b470c4144c9aa006927ac571300c) | 
+| IA Accelerator, version 0.4 delta | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/06376dd6bb454d088b7af5fdd6e00d48) | 
 
 ---
 ### Azure Services
 
-The following list of Azure Services will be deployed for IA Accelerator, version 0.3 gamma:
+The following list of Azure Services will be deployed for IA Accelerator, version 0.4 gamma:
 
 - App Service [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Azure Function(App Service plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/functions/#pricing)
@@ -19,8 +19,9 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 - Azure AI Document Intelligence [:link:](https://azure.microsoft.com/en-ca/pricing/details/form-recognizer/#pricing)
 - Azure OpenAI [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/openai-service/)
 - Azure AI Services [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/)
-- Cognitive Search [:link:](https://azure.microsoft.com/en-ca/pricing/details/search/)
+- Azure AI Search [:link:](https://azure.microsoft.com/en-ca/pricing/details/search/#pricing)
 - Azure Active Directory [:link:](https://www.microsoft.com/en-sg/security/business/microsoft-entra-pricing?rtc=1)
+- Azure AI Video Indexer [:link:](https://azure.microsoft.com/en-us/pricing/details/video-indexer/)
 - Log Analytics workspace [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)
 - Storage account  [:link:]()
 

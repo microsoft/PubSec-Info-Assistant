@@ -18,7 +18,7 @@ azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
-azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
+azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -189,9 +189,9 @@ def main(msg: func.QueueMessage) -> None:
         
         statusLog.upsert_document(blob_name, f'{function_name} - chunking stored.', StatusClassification.DEBUG)   
         
-        # submit message to the enrichment queue to continue processing                
+        # submit message to the text enrichment queue to continue processing                
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
-        message_json["enrichment_queued_count"] = 1
+        message_json["text_enrichment_queued_count"] = 1
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string)
         statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)    

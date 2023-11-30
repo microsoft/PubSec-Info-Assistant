@@ -4,7 +4,9 @@ We've looked into various technical areas to make informed architectural decisio
 
 ## Document Processing
 
-We looked into Azure cognitive search text splitter skillset but it was not able to extract unstructured data from docs such as tables. Instead, we decided to go with Azure Document Intelligence formally known as Form recognizer and unstructured.io for document processing and document chunking. With powerful OCR capabilities, Document Intelligence extracts text, numbers, dates, and tables making it a robust solution for document processing. With unstructured.io, we extended file type support to total of 20 different file types where data exists in difficult-to-use formats such as HTML, csv, docx etc. Older file types such as doc and ppt won't be supported in this release due to issue of processing them. Unstructured.io is an open source so it gave us customizations, transparency, flexibility benefits that come with open-source software.
+We looked into Azure cognitive search text splitter skillset but it was not able to extract unstructured data from docs such as tables. Instead, we decided to go with Azure AI Document Intelligence formally known as Form recognizer and unstructured.io for document processing and document chunking. With powerful OCR capabilities, Azure AI Document Intelligence extracts text, numbers, dates, and tables making it a robust solution for document processing. With unstructured.io, we extended file type support to total of 20 different file types where data exists in difficult-to-use formats such as HTML, csv, docx etc. Older file types such as doc and ppt won't be supported in this release due to issue of processing them. Unstructured.io is an open source so it gave us customizations, transparency, flexibility benefits that come with open-source software.
+
+We assessed Azure AI Document Intelligence against the various options provided by Unstructure.io for processing PDF files. We determined Azure AI Document Intelligence performed best in our test cases, specifically processing of tables in PDF files.
 
 ## Document Chunking
 

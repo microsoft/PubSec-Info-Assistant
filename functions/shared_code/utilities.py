@@ -6,12 +6,28 @@ import json
 import html
 from datetime import datetime
 from enum import Enum
+import zipfile
+import os
 from azure.storage.blob import BlobServiceClient
 from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
 import nltk
+# Try to download using nltk.download
 nltk.download('punkt')
+
+punkt_dir = os.path.join(nltk.data.path[0], 'tokenizers/punkt')
+
+# Check if the 'punkt' directory exists
+if not os.path.exists(punkt_dir):
+    punkt_zip_path = os.path.join(nltk.data.path[0], 'tokenizers/punkt.zip')
+
+    # If the 'punkt.zip' file exists, unzip it
+    if os.path.exists(punkt_zip_path):
+        with zipfile.ZipFile(punkt_zip_path, 'r') as zip_ref:
+            zip_ref.extractall(os.path.join(nltk.data.path[0], 'tokenizers/'))
+    else:
+        raise Exception("Failed to download 'punkt' package")
 
 class ParagraphRoles(Enum):
     """ Enum to define the priority of paragraph roles """

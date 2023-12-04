@@ -57,11 +57,11 @@ param azureOpenAIEmbeddingsModelVersion string = '2'
 param useAzureOpenAIEmbeddings bool = true
 param sentenceTransformersModelName string = 'BAAI/bge-small-en-v1.5'
 param sentenceTransformerEmbeddingVectorSize string = '384'
-param embeddingsDeploymentCapacity int = 240
+param embeddingsDeploymentCapacity int = 100
 param chatWarningBannerText string = ''
-param chatGptModelName string = 'gpt-35-turbo-16k'
+param chatGptModelName string = 'gpt-4'
 param chatGptModelVersion string = '0613'
-param chatGptDeploymentCapacity int = 240
+param chatGptDeploymentCapacity int = 20
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750'
@@ -305,10 +305,10 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
     }
     deployments: [
       {
-        name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
+        name: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-4'
         model: {
           format: 'OpenAI'
-          name: !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
+          name: !empty(chatGptModelName) ? chatGptModelName : 'gpt-4'
           version: !empty(chatGptModelVersion) ? chatGptModelVersion : '0613'
         }
         sku: {

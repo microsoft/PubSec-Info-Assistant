@@ -23,10 +23,12 @@
   - [Known Issues](./docs/knownissues.md)
   - [Functional Tests](./tests/README.md)
   - [Navigating the source code](#navigating-the-source-code)
+  - [Architectural Decisions](/docs/features/architectural_decisions.md)
   - [References](#references)
   - [Trademarks](#trademarks)
   - [Code of Conduct](#code-of-conduct)
   - [Reporting security issues](#reporting-security-issues)
+
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 

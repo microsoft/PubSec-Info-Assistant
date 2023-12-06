@@ -157,8 +157,8 @@ module funcServicePlan 'core/host/funcserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'S3'
-      capacity: 5
+      name: 'S2'
+      capacity: 2
     }
     kind: 'linux'
   }

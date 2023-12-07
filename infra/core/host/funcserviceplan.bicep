@@ -19,40 +19,40 @@ resource funcServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
 
 resource autoscaleSettings 'Microsoft.Insights/autoscalesettings@2022-10-01' = {
   name: '${funcServicePlan.name}-Autoscale'
-  location: location // Change to your desired region
+  location: location 
   properties: {
     enabled: true
     profiles: [
       {
         name: '${funcServicePlan.name}-Autoscale'
         capacity: {
-          default: '3'
-          minimum: '3'
+          default: '2'
+          minimum: '2'
           maximum: '10'
         }
         rules: [
           {
             metricTrigger: {
               metricName: 'CpuPercentage'
-              metricResourceUri: funcServicePlan.id //'${functionApp.id}/providers/microsoft.insights/metrics'
+              metricResourceUri: funcServicePlan.id 
               timeGrain: 'PT1M'
               statistic: 'Average'
               timeWindow: 'PT5M'
               timeAggregation: 'Average'
               operator: 'GreaterThan'
-              threshold: 50
+              threshold: 60
             }
             scaleAction: {
               direction: 'Increase'
               type: 'ChangeCount'
-              value: '3'
+              value: '2'
               cooldown: 'PT5M'
             }
           }
           {
             metricTrigger: {
               metricName: 'CpuPercentage'
-              metricResourceUri: funcServicePlan.id //'${functionApp.id}/providers/microsoft.insights/metrics'
+              metricResourceUri: funcServicePlan.id 
               timeGrain: 'PT1M'
               statistic: 'Average'
               timeWindow: 'PT5M'
@@ -63,7 +63,7 @@ resource autoscaleSettings 'Microsoft.Insights/autoscalesettings@2022-10-01' = {
             scaleAction: {
               direction: 'Decrease'
               type: 'ChangeCount'
-              value: '1'
+              value: '2'
               cooldown: 'PT2M'
             }
           }

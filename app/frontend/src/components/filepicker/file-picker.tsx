@@ -22,24 +22,9 @@ const FilePicker = ({folderPath, tags}: Props) => {
   const folderName = folderPath;
   const tagList = tags;
 
-  // // handler called when files are selected via the Dropzone component
-  // const handleOnChange = useCallback((files: any) => {
-  //   let filesArray = Array.from(files);
-
-  //   filesArray = filesArray.map((file) => ({
-  //     id: nanoid(),
-  //     file
-  //   }));
-
-  //   setFiles(filesArray as any);
-  //   setProgress(0);
-  //   setUploadStarted(false);
-  // }, []);
-
   // handler called when files are selected via the Dropzone component
   const handleOnChange = useCallback((files: any) => {
     if (files.length > 40) {
-      // Show an error message or handle this situation as you see fit
       alert("You can only upload up to 40 files at a time.");
       return;
     }

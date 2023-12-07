@@ -34,7 +34,6 @@ const FilePicker = ({folderPath, tags}: Props) => {
     filesArray = filesArray.map((file) => ({
       id: nanoid(),
       file
-    // rest of your code...
   }));
     setFiles(filesArray as any);
     setProgress(0);

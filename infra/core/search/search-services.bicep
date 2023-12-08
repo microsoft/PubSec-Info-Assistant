@@ -1,5 +1,4 @@
 param name string
-param cogServicesName string
 param location string = resourceGroup().location
 param tags object = {}
 
@@ -9,12 +8,7 @@ param sku object = {
 
 param authOptions object = {}
 param semanticSearch string = 'disabled'
-param kind string = 'CognitiveServices'
-param publicNetworkAccess string = 'Enabled'
 param isGovCloudDeployment bool  
-param cogServicesSku object = {
-  name: 'S0'
-}
 
 resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   name: name
@@ -43,21 +37,9 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   sku: sku
 }
 
-resource cogService 'Microsoft.CognitiveServices/accounts@2022-10-01' = {
-  name: cogServicesName
-  location: location
-  tags: tags
-  kind: kind
-  properties: {
-    publicNetworkAccess: publicNetworkAccess
-  }
-  sku: cogServicesSku
-}
 
 output id string = search.id
 output endpoint string = (isGovCloudDeployment) ? 'https://${name}.search.azure.us/' : 'https://${name}.search.windows.net/'
 output name string = search.name
 #disable-next-line outputs-should-not-contain-secrets
 output searchServiceKey string = search.listAdminKeys().primaryKey
-#disable-next-line outputs-should-not-contain-secrets 
-output cogServiceKey string = cogService.listKeys().key1

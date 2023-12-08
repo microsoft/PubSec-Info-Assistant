@@ -58,11 +58,29 @@ resource scaleOutRule 'Microsoft.Insights/autoscalesettings@2022-10-01' = {
               metricResourceUri: storageAccountId
               operator: 'GreaterThan'
               statistic: 'Average'
-              threshold: 10
+              threshold: 5
               timeAggregation: 'Average'
               timeGrain: 'PT1M'
               timeWindow: 'PT10M'
-              dividePerInstance: true
+            }
+          }
+          {
+            scaleAction: {
+              direction: 'Decrease'
+              type: 'ChangeCount'
+              value: '1'
+              cooldown: 'PT5M'
+            }
+            metricTrigger: {
+              metricName: 'ApproximateMessageCount'
+              metricNamespace: ''
+              metricResourceUri: storageAccountId
+              operator: 'LessThan'
+              statistic: 'Average'
+              threshold: 2
+              timeAggregation: 'Average'
+              timeGrain: 'PT1M'
+              timeWindow: 'PT10M'
             }
           }
         ]

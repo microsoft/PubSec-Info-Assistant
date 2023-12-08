@@ -177,7 +177,7 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
       tier: 'PremiumV3'
       size: 'P1v3'
       family: 'Pv3'
-      capacity: 3
+      capacity: 1
     }
     kind: 'linux'
     reserved: true

@@ -6,8 +6,6 @@ param kind string = ''
 param reserved bool = true
 param sku object
 
-param storageAccountId string
-
 
 // Create an App Service Plan to group applications under the same payment plan and SKU, specifically for containers
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
@@ -40,47 +38,45 @@ resource scaleOutRule 'Microsoft.Insights/autoscalesettings@2022-10-01' = {
       {
         name: 'Scale out condition'
         capacity: {
-          maximum: '3'
+          maximum: '5'
           default: '1'
           minimum: '1'
         }
         rules: [
           {
+            metricTrigger: {
+              metricName: 'CpuPercentage'
+              metricResourceUri: appServicePlan.id 
+              timeGrain: 'PT1M'
+              statistic: 'Average'
+              timeWindow: 'PT5M'
+              timeAggregation: 'Average'
+              operator: 'GreaterThan'
+              threshold: 60
+            }
             scaleAction: {
               direction: 'Increase'
               type: 'ChangeCount'
               value: '1'
               cooldown: 'PT5M'
             }
-            metricTrigger: {
-              metricName: 'ApproximateMessageCount'
-              metricNamespace: ''
-              metricResourceUri: storageAccountId
-              operator: 'GreaterThan'
-              statistic: 'Average'
-              threshold: 5
-              timeAggregation: 'Average'
-              timeGrain: 'PT1M'
-              timeWindow: 'PT10M'
-            }
           }
           {
+            metricTrigger: {
+              metricName: 'CpuPercentage'
+              metricResourceUri: appServicePlan.id 
+              timeGrain: 'PT1M'
+              statistic: 'Average'
+              timeWindow: 'PT10M'
+              timeAggregation: 'Average'
+              operator: 'LessThan'
+              threshold: 20
+            }
             scaleAction: {
               direction: 'Decrease'
               type: 'ChangeCount'
               value: '1'
-              cooldown: 'PT5M'
-            }
-            metricTrigger: {
-              metricName: 'ApproximateMessageCount'
-              metricNamespace: ''
-              metricResourceUri: storageAccountId
-              operator: 'LessThan'
-              statistic: 'Average'
-              threshold: 2
-              timeAggregation: 'Average'
-              timeGrain: 'PT1M'
-              timeWindow: 'PT10M'
+              cooldown: 'PT15M'
             }
           }
         ]

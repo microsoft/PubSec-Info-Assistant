@@ -181,7 +181,6 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
     }
     kind: 'linux'
     reserved: true
-    storageAccountId: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
   }
 }
 

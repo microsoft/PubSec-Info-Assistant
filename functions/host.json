@@ -12,9 +12,14 @@
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
     "version": "[3.*, 4.0.0)"
   },
+  "extensions": {
+    "queues": {
+        "batchSize": 3
+    }
+  },
   "concurrency": {
-    "dynamicConcurrencyEnabled": true,
-    "snapshotPersistenceEnabled": true
+    "dynamicConcurrencyEnabled": false,
+    "snapshotPersistenceEnabled": false
   },
   "functionTimeout": "01:00:00"
 }

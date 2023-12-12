@@ -27,13 +27,11 @@ param azureOpenAIResourceGroup string
 param azureOpenAIServiceKey string
 param openAiServiceName string = ''
 param openAiSkuName string = 'S0'
-param cognitiveServiesForSearchName string = ''
 param cosmosdbName string = ''
 param formRecognizerName string = ''
 param enrichmentName string = ''
 param formRecognizerSkuName string = 'S0'
 param enrichmentSkuName string = 'S0'
-param cognitiveServiesForSearchSku string = 'S0'
 param appServicePlanName string = ''
 param enrichmentAppServicePlanName string = ''
 param resourceGroupName string = ''
@@ -378,10 +376,6 @@ module searchServices 'core/search/search-services.bicep' = {
       name: searchServicesSkuName
     }
     semanticSearch: 'free'
-    cogServicesName: !empty(cognitiveServiesForSearchName) ? cognitiveServiesForSearchName : '${prefix}-${abbrs.cognitiveServicesAccounts}${randomString}'
-    cogServicesSku: {
-      name: cognitiveServiesForSearchSku
-    }
     isGovCloudDeployment: isGovCloudDeployment
   }
 }
@@ -713,7 +707,6 @@ module kvModule 'core/security/keyvault.bicep' = {
     kvAccessObjectId: kvAccessObjectId
     searchServiceKey: searchServices.outputs.searchServiceKey 
     openaiServiceKey: azureOpenAIServiceKey
-    cogServicesSearchKey: searchServices.outputs.cogServiceKey
     cosmosdbKey: cosmosdb.outputs.CosmosDBKey
     formRecognizerKey: formrecognizer.outputs.formRecognizerAccountKey
     blobConnectionString: storage.outputs.connectionString

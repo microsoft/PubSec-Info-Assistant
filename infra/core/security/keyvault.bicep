@@ -6,8 +6,6 @@ param searchServiceKey string
 @secure()
 param openaiServiceKey string
 @secure()
-param cogServicesSearchKey string 
-@secure()
 param cosmosdbKey string
 @secure()
 param formRecognizerKey string
@@ -63,14 +61,6 @@ resource openaiServiceKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' =
   name: 'AZURE-OPENAI-SERVICE-KEY'
   properties: {
     value: openaiServiceKey 
-  }
-}
-
-resource cogServicesSearchKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
-  parent: kv
-  name: 'COGNITIVE-SERVICES-KEY'
-  properties: {
-    value: cogServicesSearchKey 
   }
 }
 

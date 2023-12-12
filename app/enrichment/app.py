@@ -10,6 +10,7 @@ from typing import List
 import base64
 import requests
 import random
+from urllib.parse import unquote
 from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.search.documents import SearchClient
@@ -266,14 +267,15 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     tags = blob_properties.metadata.get("tags")
     if tags is not None:
         if isinstance(tags, str):
-            tags_list = [tags]
+            tags_list = [unquote(tags)]
         else:
-            tags_list = tags.split(",")
+            tags_list = [unquote(tag) for tag in tags.split(",")]
     else:
         tags_list = []
     # Write the tags to cosmos db
     tagsHelper.upsert_document(blob_path, tags_list)
     return tags_list
+
         
 @app.on_event("startup") 
 @repeat_every(seconds=5, logger=log, raise_exceptions=True)

@@ -148,4 +148,6 @@ At this point deployment is complete. Please go to the [Using the IA Accelerator
 
 ## Need Help?
 
+To review logs try [Using the Workbook Template](/docs/deployment/worbook_usage.md)
+
 If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

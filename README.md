@@ -13,6 +13,7 @@
   - [Configuring ENV parameters](./docs/deployment/deployment.md#configure-env-files)
   - [Authenticating to Azure](./docs/deployment/deployment.md#log-into-azure-using-the-azure-cli)
   - [Deploying to Azure](./docs/deployment/deployment.md#deploy-and-configure-azure-resources)
+  - [Troubleshooting Deployment & Startup Issues](./docs/deployment/worbook_usage.md)
 - [Enabling optional features](./docs/features/optional_features.md)
 - [Using the app](/docs/deployment/using_ia_first_time.md)
 - [Responsible AI](#responsible-ai)
@@ -20,11 +21,14 @@
 - [Data Collection Notice](#data-collection-notice)
 - [Resources](#resources)
   - [Known Issues](./docs/knownissues.md)
+  - [Functional Tests](./tests/README.md)
   - [Navigating the source code](#navigating-the-source-code)
+  - [Architectural Decisions](/docs/features/architectural_decisions.md)
   - [References](#references)
   - [Trademarks](#trademarks)
   - [Code of Conduct](#code-of-conduct)
   - [Reporting security issues](#reporting-security-issues)
+
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 

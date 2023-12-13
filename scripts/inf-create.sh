@@ -78,6 +78,7 @@ if [ -n "${IN_AUTOMATION}" ]; then
     aadWebSPId=$ARM_SERVICE_PRINCIPAL_ID
     aadMgmtAppSecret=$ARM_CLIENT_SECRET
     aadMgmtSPId=$ARM_SERVICE_PRINCIPAL_ID
+    kvAccessObjectId=$aadWebSPId
   else
     # if in automation for non-PR builds, get the app registration and service principal values from the manually created AD objects
     aadWebAppId=$AD_WEBAPP_CLIENT_ID
@@ -89,9 +90,11 @@ if [ -n "${IN_AUTOMATION}" ]; then
     aadMgmtAppId=$AD_MGMTAPP_CLIENT_ID
     aadMgmtAppSecret=$AD_MGMTAPP_CLIENT_SECRET
     aadMgmtSPId=$AD_MGMT_SERVICE_PRINCIPAL_ID
+    kvAccessObjectId=$aadWebSPId
   fi
 else
   signedInUserId=$(az ad signed-in-user show --query id --output tsv)
+  kvAccessObjectId=$signedInUserId
   #if not in automation, create the app registration and service principal values
   #set up azure ad app registration since there is no bicep support for this yet
   aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
@@ -121,12 +124,15 @@ else
       aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
   fi
 
-  if [ $REQUIRE_WEBSITE_SECURITY_MEMBERSHIP ]; then
+  #Default true if undefined
+  REQUIRE_WEBSITE_SECURITY_MEMBERSHIP=${REQUIRE_WEBSITE_SECURITY_MEMBERSHIP:-true}
+
+  if [ "$REQUIRE_WEBSITE_SECURITY_MEMBERSHIP" = "true" ]; then
     # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
-    az ad sp update --id $aadWebSPId --set "appRoleAssignmentRequired=true"
+    az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=true"
   else
     # otherwise the default is to allow all users in the tenant to access the app
-    az ad sp update --id $aadWebSPId --set "appRoleAssignmentRequired=false"
+    az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=false"
   fi
 fi
 
@@ -135,9 +141,10 @@ export AZURE_AD_WEB_APP_CLIENT_ID=$aadWebAppId
 export AZURE_AD_MGMT_APP_CLIENT_ID=$aadMgmtAppId
 export AZURE_AD_MGMT_SP_ID=$aadMgmtSPId
 export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
+export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
 
 if [ -n "${IN_AUTOMATION}" ]; then 
-  export IS_IN_AUTOMATION=true 
+  export IS_IN_AUTOMATION=true
 else 
   export IS_IN_AUTOMATION=false
 fi
@@ -177,6 +184,7 @@ declare -A REPLACE_TOKENS=(
     [\${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}]=${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}
     [\${OPEN_SOURCE_EMBEDDING_MODEL}]=${OPEN_SOURCE_EMBEDDING_MODEL}
     [\${APPLICATION_TITLE}]=${APPLICATION_TITLE}
+    [\${AZURE_KV_ACCESS_OBJ_ID}]=${AZURE_KV_ACCESS_OBJ_ID}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

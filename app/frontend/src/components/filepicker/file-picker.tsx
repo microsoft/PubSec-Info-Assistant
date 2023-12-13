@@ -65,7 +65,7 @@ const FilePicker = ({folderPath, tags}: Props) => {
         // set mimetype as determined from browser with file upload control
         const options = {
           blobHTTPHeaders: { blobContentType: file.type },
-          metadata: { tags: tagList.join(",") }
+          metadata: { tags: tagList.map(encodeURIComponent).join(",") }
         };
 
         // upload file

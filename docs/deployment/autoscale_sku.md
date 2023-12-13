@@ -29,9 +29,6 @@ The Azure Functions Service Plan Autoscale settings are defined in the file loca
    - **Time Window:** `5 minutes`
    - **Scaling Action:** Decrease capacity by `2` with a cooldown of `2 minutes`.
 
-### Customization
-
-To customize the Azure Functions Service Plan Autoscale settings, modify the parameters mentioned above in the specified Bicep file.
 
 ## App Service Plan Autoscale for Enrichment App
 
@@ -106,7 +103,48 @@ More information can be found [here.](https://azure.microsoft.com/en-us/pricing/
 - **Family:** `Pv3`
 - **Capacity:** `1`
 
+### Enrichment Message Dequeue Parameter
+There exist a property that can be set int he local.env file called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.bicep` and `app/enrichment/app.py` to the value of **3**. This means the app will process 3 messages from the queue at a time. This is found to be the most opitmal with the existing configuration but can be increased if you also increase tne enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
+
 ### Customization
 
 To customize the App Service Plans SKU settings, modify the `sku` parameters in the specified Bicep file and run the `make deploy` or `make infrastructure`command.
 
+This can also be adjusted in the Azure Portal.
+
+**Note:** Adjusting the scale or Tier can cause outages until the redeployment occurrs.
+
+
+### Steps to Scale Up:
+
+>1. **Sign in to the Azure Portal:**
+>   - Open a web browser and navigate to the [Azure Portal](https://portal.azure.com/).
+>   - Log in with your Azure account credentials.
+
+>2. **Navigate to the App Service:**
+>   - In the left navigation pane, select "App Services."
+>   - Click on the specific App Service you want to scale.
+
+>3. **Access the Scale Up Blade:**
+>   - In the App Service menu, find and click on "Scale up (App Service plan)" in the left sidebar.
+
+>4. **Choose a New Pricing Tier:**
+>   - On the "Scale Up" blade, you'll see different pricing tiers representing various levels of resources.
+>   - Select the desired pricing tier that corresponds to the scale you need.
+
+>5. **Review and Apply Changes:**
+>   - Review the information about the selected pricing tier, including its features and costs.
+>   - Click the "Apply" or "Save" button to apply the changes.
+
+
+### Considerations:
+- **Cost Implications:**
+  - Be aware of the cost implications associated with higher pricing tiers. Review the Azure Pricing documentation for details on costs.
+
+- **Resource Limits:**
+  - Ensure that the new pricing tier aligns with the resource requirements of your application. Some tiers may have limitations on resources.
+
+- **Performance Impact:**
+  - Scaling up provides additional resources, potentially improving performance. However, it's essential to assess whether your application benefits from the increased resources.
+
+By following these steps, you can successfully scale up your Azure App Service to accommodate increased workloads or resource requirements.

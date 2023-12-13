@@ -205,7 +205,7 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
       LOG_LEVEL: 'DEBUG'
-      DEQUEUE_MESSAGE_BATCH_SIZE: 1
+      DEQUEUE_MESSAGE_BATCH_SIZE: 3
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName

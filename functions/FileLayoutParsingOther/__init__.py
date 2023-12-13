@@ -52,6 +52,7 @@ def PartitionFile(file_extension: str, file_url: str):
     bytes_io = BytesIO(response.content)
     response.close()   
     metadata = [] 
+    elements = None
     try:        
         if file_extension == '.csv':
             from unstructured.partition.csv import partition_csv

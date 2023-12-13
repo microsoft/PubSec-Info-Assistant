@@ -9,7 +9,7 @@ The Azure Workbook template `infoasst-lw-xxxx` is designed for log analysis, pro
    - Default Query:
      ```kql
      AppServiceConsoleLogs 
-     | project TimeGenerated, Level, ResultDescription, _ResourceId 
+     | project TimeGenerated, ResultDescription, _ResourceId 
      | where TimeGenerated > ago(6h) 
      | order by TimeGenerated desc
      ```

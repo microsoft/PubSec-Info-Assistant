@@ -347,7 +347,10 @@ def poll_queue() -> None:
 
                 # create embedding
                 embedding = embed_texts(target_embeddings_model, [text])
-                embedding_data = embedding['data']
+                if 'data' in embedding:
+                    embedding_data = embedding['data']
+                else:
+                    raise ValueError(embedding['message']) 
 
                 tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
 

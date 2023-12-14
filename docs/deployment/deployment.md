@@ -126,8 +126,6 @@ extract-env-debug-functions  Extract local.settings.json to debug functions from
 functional-tests             Run functional tests to check the processing pipeline is working
 ```
 
-Information about out of the box Autoscale and App Service SKU's can be found [here](/docs/deployment/autoscale_sku.md)
-
 ## Configure authentication and authorization
 
 If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](/docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure.

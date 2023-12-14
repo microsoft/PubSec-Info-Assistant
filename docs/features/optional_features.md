@@ -10,6 +10,7 @@ Please see below sections for coverage of IA Accelerator optional features.
 * [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
 * [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
 * [Configure REST API access](#configure-rest-api-access)
+* [Customize Autoscale and App Service SKU's](#customize-autoscale)
 
 ## Configuring your own language ENV file
 
@@ -45,3 +46,8 @@ Check out how to [setup Sovereign Region Deployment](/docs/deployment/enable_sov
 
 If you are wanting to use the API stand-alone or use a custom UI.
 Check out how to [enable OAuth Client Credentials Flow](/docs/deployment/client_credentials_flow.md)
+
+## Customize Autoscale
+
+If you want to learn more about Autoscale Settings and App SErvice SKU's
+Check out how to [customize Autoscale settings](/docs/deployment/autoscale_sku.md)

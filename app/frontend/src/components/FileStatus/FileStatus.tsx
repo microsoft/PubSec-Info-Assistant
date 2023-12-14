@@ -72,10 +72,10 @@ export const FileStatus = ({ className }: Props) => {
                 timeframe = 24;
                 break;
             case "7days":
-                timeframe = 10080;
+                timeframe = 168;
                 break;
             case "30days":
-                timeframe = 43200;
+                timeframe = 720;
                 break;
             default:
                 timeframe = 4;

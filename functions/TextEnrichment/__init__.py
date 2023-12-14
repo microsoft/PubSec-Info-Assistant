@@ -227,7 +227,7 @@ def main(msg: func.QueueMessage) -> None:
    
         statusLog.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - Text enrichment is complete, message sent to embeddings queue",
+            f"{FUNCTION_NAME} - Text enrichment is complete",
             StatusClassification.DEBUG,
             State.QUEUED,
         )

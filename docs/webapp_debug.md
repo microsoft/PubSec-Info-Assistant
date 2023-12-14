@@ -6,23 +6,15 @@ The app consists of two layers, namely the frontend user interface components an
 
 To debug the webapp, both frontend and backend, first set breakpoints in your code under the frontend and/or backend. Select the 'Run & Debug' tab from the sidebar in VS Code. Select Python: Flask from the dropdown and hit run. This will initiate local debugging of the backend code.
 
-Next verify you have a virtual environment created, which should be seen as a folder called .venv under the root of your workspace. If this doesn't exists you can create one by following these steps:
+![backend debugging](/docs/images/webapp_debug_1.png)
 
-1. Opening the command palette (Ctrl+Shift+P)
-1. Select the command Python: Create Environment
-1. Next select Venv
-1. Now select the latest version of Python from the list
-1. Finally enter check marks next to all requirements.txt files listed and hit OK
+Next, you will need to initiate debugging of the frontend code. To do this select 'Vite: Debug' from the drop down and hit run.
+
+![frontend debugging](/docs/images/webapp_debug_2.png)
 
 This will initiate frontend running and debugging. A browser will open and show the web app running under localhost:5000. Next proceed to interact with the web app, by asking a question. In the VS Code interface, your code will hit the breakpoints, frontend or backend, and you will be able to view variable, trace logic etc. You can switch between the two running debuggers by selecting frontend or backend  (flask or vite) from the debug dropdown.
 
-Now initiate debugging of the front end code by selecting 'Frontend: watch' and then hitting run
-![backend debugging](/docs/images/frontend-watch.png)
-
-Finally hit Vite: Debug
-![backend debugging](/docs/images/vite-debug.png)
-
-A browser will open and show the web app running under localhost:5000. Next proceed to interact with the web app, by asking a question. In the VS Code interface, you code will hit the breakpoints, frontend or backend, and you will be able to view variable, trace logic etc. You can switch between the two running debuggers by selecting frontend or backend  (flask or vite) from the debug dropdown.
+![frontend debugging](/docs/images/webapp_debug_3.png)
 
 ## Known Issues
 

@@ -100,19 +100,19 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
-            // onRender: (item: IDocument) => (
-            //     <TooltipHost content={`${item.state_description} `}>
-            //         <span>{item.state}</span>
-            //     </TooltipHost>
-            // ),
+            onRender: (item: IDocument) => (
+                <TooltipHost content={`${item.state_description} `}>
+                    <span>{item.state}</span>
+                </TooltipHost>
+            ),
             isPadded: true,
         },
         {
             key: 'column4',
             name: 'Submitted On',
             fieldName: 'upload_timestamp',
-            minWidth: 90,
-            maxWidth: 120,
+            minWidth: 70,
+            maxWidth: 90,
             isResizable: true,
             isCollapsible: true,
             ariaLabel: 'Column operations for submitted on date, Press to sort by submitted date',
@@ -127,8 +127,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             key: 'column5',
             name: 'Last Updated',
             fieldName: 'modified_timestamp',
-            minWidth: 90,
-            maxWidth: 120,
+            minWidth: 70,
+            maxWidth: 90,
             isResizable: true,
             isSorted: true,
             isSortedDescending: false,
@@ -142,18 +142,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 return <span>{item.modified_timestamp}</span>;
             },
         },
-        {
-            key: 'column6',
-            name: 'Status Detail',
-            fieldName: 'state_description',
-            minWidth: 90,
-            maxWidth: 200,
-            isResizable: true,
-            isCollapsible: true,
-            ariaLabel: 'Column operations for status detail',
-            data: 'string',
-            onColumnClick: onColumnClick
-        }
     ]);
 
     return (

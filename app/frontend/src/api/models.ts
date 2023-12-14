@@ -84,13 +84,10 @@ export type GetUploadStatusRequest = {
 export const enum FileState {
     All = "ALL",
     Processing = "PROCESSING",
-    Indexing = "INDEXING",
     Skipped = "SKIPPED",
     Queued = "QUEUED",
     Complete = "COMPLETE",
-    Error = "ERROR",
-    THROTTLED = "THROTTLED",
-    UPLOADED = "UPLOADED"
+    Error = "ERROR"
 }
 
 
@@ -138,7 +135,6 @@ export const enum StatusLogClassification {
 // shared code (functions/shared_code/status_log.py)
 export const enum StatusLogState {
     Processing = "Processing",
-    Indexing = "Indexing",
     Skipped = "Skipped",
     Queued = "Queued",
     Complete = "Complete",

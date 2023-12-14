@@ -49,5 +49,5 @@ Check out how to [enable OAuth Client Credentials Flow](/docs/deployment/client_
 
 ## Customize Autoscale
 
-If you want to learn more about Autoscale Settings and App SErvice SKU's
+If you want to learn more about Autoscale Settings and App Service SKU's
 Check out how to [customize Autoscale settings](/docs/deployment/autoscale_sku.md)

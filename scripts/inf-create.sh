@@ -87,6 +87,7 @@ if [ -n "${IN_AUTOMATION}" ]; then
       echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh and set the AD_WEBAPP_CLIENT_ID pipeline variable in Azure DevOps."
       exit 1  
     fi
+    aadWebSPId=$ARM_SERVICE_PRINCIPAL_ID
     aadMgmtAppId=$AD_MGMTAPP_CLIENT_ID
     aadMgmtAppSecret=$AD_MGMTAPP_CLIENT_SECRET
     aadMgmtSPId=$AD_MGMT_SERVICE_PRINCIPAL_ID

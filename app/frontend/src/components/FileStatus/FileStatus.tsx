@@ -29,8 +29,11 @@ const dropdownFileStateOptions = [
     { key: FileState.Complete, text: 'Completed' },
     { key: FileState.Error, text: 'Error' },
     { key: FileState.Processing, text: 'Processing' },
+    { key: FileState.Indexing, text: 'Indexing' },
     { key: FileState.Queued, text: 'Queued' },
     { key: FileState.Skipped, text: 'Skipped'},
+    { key: FileState.UPLOADED, text: 'Uploaded'},
+    { key: FileState.THROTTLED, text: 'Throttled'},    
   ];
 
 interface Props {
@@ -69,10 +72,10 @@ export const FileStatus = ({ className }: Props) => {
                 timeframe = 24;
                 break;
             case "7days":
-                timeframe = 10080;
+                timeframe = 168;
                 break;
             case "30days":
-                timeframe = 43200;
+                timeframe = 720;
                 break;
             default:
                 timeframe = 4;

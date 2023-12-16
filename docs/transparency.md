@@ -1,6 +1,6 @@
 # Transparency Note: Information Assistant (IA)
 
-Updated 24 Aug 2023
+Updated 02 Nov 2023
 
 ## Table of Contents
 
@@ -45,7 +45,7 @@ Microsoft’s Transparency Notes are part of a broader effort at Microsoft to pu
 
 ## Introduction
 
-The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services, intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
+The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services. IA Accelerator is an implementation of the [Retreival Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
 
 The system aims to provide the functionality mentioned above while also focusing on the following key areas:
 
@@ -54,13 +54,14 @@ The system aims to provide the functionality mentioned above while also focusing
 - Context
   - Provide the ability to understand the “chunks” of data within the context of a larger document (Title, section, page, date etc.)
 - Confidence
-  - Provide the response with a level of confidence
+  - Provide the response with a level of confidence - **Work in Progress**
 - Control
   - Length of response
   - Data Sources, Date Range, Author etc that are used for the response
   - Role Based Access
 - Format
-  - Tabular/structured data
+  - Multiple common file types
+  - Tabular and structured data within documents
 - Personalization
   - Tailoring the response with a specific persona in mind (Speaker and Receiver)
 
@@ -73,9 +74,11 @@ Terminology | Definition
 [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/#overview) | Collection of large-scale generative AI models available as a service via Azure. 
 [ChatGPT](https://en.wikipedia.org/wiki/ChatGPT) | "ChatGPT is an artificial intelligence chatbot developed by OpenAI based on the company's Generative Pre-trained Transformer (GPT) series of large language models (LLMs)."
 [Chunking](https://learn.microsoft.com/en-us/samples/azure-samples/azure-search-power-skills/azure-open-ai-embeddings-generator/) | Chunking is a strategy of breaking down large documents into smaller pieces which satisfy the token limits of OpenAI models. 
-[Generative AI](https://en.wikipedia.org/wiki/Generative_artificial_intelligence) | "A type of artificial intelligence (AI) system capable of generating text, images, or other media in response to prompts."
 [Fabrications (aka Hallucinations)](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)) | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data". The term "Fabrication" is prefered as the term "hallucination" may be offensive to people with certain disabilities. 
+[Generative AI](https://en.wikipedia.org/wiki/Generative_artificial_intelligence) | "A type of artificial intelligence (AI) system capable of generating text, images, or other media in response to prompts."
+[Grounding](https://www.expert.ai/glossary-of-ai-terms/grounding/) | "The ability of generative applications to map the factual information contained in a generative output or completion. It links generative applications to available factual sources — for example, documents or knowledge bases — as a direct citation, or it searches for new links."
 [Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering) | "A concept in artificial intelligence, particularly natural language processing. In prompt engineering, the description of the task that the AI is supposed to accomplish is embedded in the input, e.g. as a question, instead of it being explicitly given. Prompt engineering typically works by converting one or more tasks to a prompt-based dataset and training a language model with what has been called "prompt-based learning" or just "prompt learning"."
+[RAG](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) | Retreival Augmented Generation; a pattern where data is retreived (such as from a search system) and sent to Generative AI with a prompt to provide specific data to answer a question. 
 [Semantic Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) | "A collection of query-related capabilities that bring semantic relevance and language understanding to textual search results."
 [Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant. 
 
@@ -83,17 +86,18 @@ Terminology | Definition
 **NOTE:** This project is developed with an agile methodology. As such, features and capabilities are subject to change, and may change faster than the documentation. Those deploying this project should review approved pull requests to understand changes which have been committed since the update of the documentation.
 ## System behavior
 
-This system is implemented primarily on top of Azure OpenAI service and Azure Cognitive Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Semantic Search and ChatGPT. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
+### Overview
+This system is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
 
 By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.** 
 
 ### Data Preparation
 
-The system receives and process files from the end user. Data is chunked with strategies to ensure that the data can be used by Azure OpenAI service while maintaining logical relevance based on the input data element (for example, being aware of page breaks in PDF documents to keep related content together). All historically-processed data is available to the end user.
+The system receives and process files from the end user. Data is chunked with various strategies in an attempt to ensure that the data can be used by Azure OpenAI service while maintaining logical relevance based on the input data element (for example, being aware of page breaks in PDF documents to keep related content together). All historically-processed data is available to the end user.
 
 ### Prompt Engineering
 
-This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work goes into prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
+This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
 
 **NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
 
@@ -101,7 +105,7 @@ This system is primarily tuned for accuracy of response based on the data provid
 
 ### Intended uses
 
-This system is intended for the purpose of enabling ChatGPT capabilities with data provided by the end user. This system leverages prompt engineering to limit the creativity of the OpenAI model(s) and citations to help the end user determine when answers are factual. This system uses private search and is not intended as a replacement for a comprehensive internet-based search engine such as OpenAI-enabled Bing search; this system will not provide up-to-date search results from the Internet. 
+This system is intended for the purpose of enabling ChatGPT capabilities with data provided by the end user. This system leverages prompt engineering to limit the creativity of the OpenAI model(s) and citations to help the end user determine when answers are factual. This system uses private search and is not intended as a replacement for a comprehensive internet-based search engine such as OpenAI-enabled Bing search; this system will not provide up-to-date search results from the Internet. This system is not intended to provide creative responses which are not backed in data available to the system (i.e. generation of papers, images or answering questions in an ungrounded manner ).
 
 ### Considerations when choosing a use case
 
@@ -119,7 +123,7 @@ This system does not provide a confidence score for results returned. It is requ
 
 ### Accuracy 
 
-This system provides citations for all answers given. At the time of this writing, this is an early release and the system at times may not give citations. All answers should be validated by a human reviewing the citations. If no citations are given, the answer must not be assumed accurate. 
+This system provides citations for all answers given. All answers should be validated by a human reviewing the citations. If no citations are given, the answer **must not** be assumed accurate. 
 
 ## Technical limitations, operational factors and ranges
 
@@ -139,7 +143,7 @@ The Azure OpenAI API may be subject to throttling. As such this accelerator may 
 
 # System performance
 
-The central part of IA Accelerator (the system) is to produce answers to questions with the data provided by the end user. This relies on the several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
+The central part of IA Accelerator (the system) is to produce answers to questions with the data provided by the end user (grounded). This relies on several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
 - documents with the answers available to the system
 - submitted documents having been successfully processed
 - input questions with sufficient detail to identify the best source documents available
@@ -150,7 +154,7 @@ Outcomes | Examples
 True Positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
 False Positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents do not answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Tennessee". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
 False Negative | The user asks a question and the system does not find any document available to answer yet the document was available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was uploaded, but failed processing. It is not found, summarized or cited.
-True Negative | The user asks a question and the system does not find any document available to answer and there was no document available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited.
+True Negative | The user asks a question and the system does not find any document available to answer and there was no document available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited. The system responds that it is unable to answer the question.
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. False Positive outcomes may be mitigated by human review of citations.
 
@@ -174,7 +178,7 @@ There are **minimal** administrative tools at this early stage which will give i
 
 ### Evaluation of system performance
 
-The system outcomes need to be evaluated by the user to determine the accuracy of the system’s answers provided with the data available to the system. Do not assume that the system is performing well with your data. Use the information about system performance listed above to understand the outcomes, both True and False.
+The system outcomes need to be evaluated by the user to determine the accuracy of the system’s answers provided as compared to the data available to the system. **Do not assume that the system is performing well with your data.** Use the information about system performance listed above to understand the outcomes, both True and False.
 
 ### Use technical documentation
 

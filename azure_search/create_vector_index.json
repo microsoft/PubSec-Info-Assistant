@@ -18,7 +18,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -93,6 +93,40 @@
       "synonymMaps": []
     },
     {
+      "name": "folder",
+      "type": "Edm.String",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": true,
+      "facetable": true,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "tags",
+      "type": "Collection(Edm.String)",
+      "searchable": false,
+      "filterable": true,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": true,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": null,
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
       "name": "pages",
       "type": "Collection(Edm.Int32)",
       "searchable": false,
@@ -120,7 +154,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -137,7 +171,7 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -154,7 +188,41 @@
       "key": false,
       "indexAnalyzer": null,
       "searchAnalyzer": null,
-      "analyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "entities",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
+      "normalizer": null,
+      "dimensions": null,
+      "vectorSearchConfiguration": null,
+      "synonymMaps": []
+    },
+    {
+      "name": "key_phrases",
+      "type": "Collection(Edm.String)",
+      "searchable": true,
+      "filterable": false,
+      "retrievable": true,
+      "sortable": false,
+      "facetable": false,
+      "key": false,
+      "indexAnalyzer": null,
+      "searchAnalyzer": null,
+      "analyzer": "$SEARCH_INDEX_ANALYZER",
       "normalizer": null,
       "dimensions": null,
       "vectorSearchConfiguration": null,
@@ -166,7 +234,7 @@
       "searchable": true,
       "retrievable": true,
       "dimensions": $EMBEDDING_VECTOR_SIZE,
-      "vectorSearchConfiguration": "my-vector-config"
+      "vectorSearchConfiguration": "vector-config"
     }
   ],
   "suggesters": [],
@@ -179,7 +247,7 @@
   "vectorSearch": {
     "algorithmConfigurations": [
       {
-        "name": "my-vector-config",
+        "name": "vector-config",
         "kind": "hnsw",
         "hnswParameters": {
           "m": 4,
@@ -193,8 +261,8 @@
   "tokenizers": [],
   "similarity": {
     "@odata.type": "#Microsoft.Azure.Search.BM25Similarity",
-    "k1": null,
-    "b": null
+    "k1": 1.2,
+    "b": 0.75
   },
   "semantic": {
     "configurations": [
@@ -207,6 +275,14 @@
           "prioritizedContentFields": [
             {
               "fieldName": "content"
+            }
+          ],
+          "prioritizedKeywordsFields": [
+            {
+              "fieldName": "key_phrases"
+            },
+            {
+              "fieldName": "entities"
             }
           ]
         }

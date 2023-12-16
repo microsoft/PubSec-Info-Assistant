@@ -67,11 +67,17 @@ param CosmosDBEndpointURL string
 @secure()
 param CosmosDBKey string
 
-@description('CosmosDB Database Name')
-param CosmosDBDatabaseName string
+@description('CosmosDB Log Database Name')
+param CosmosDBLogDatabaseName string
 
-@description('CosmosDB Container Name')
-param CosmosDBContainerName string
+@description('CosmosDB Log Container Name')
+param CosmosDBLogContainerName string
+
+@description('CosmosDB Tags Database Name')
+param CosmosDBTagsDatabaseName string
+
+@description('CosmosDB Tags Container Name')
+param CosmosDBTagsContainerName string
 
 @description('Name of the submit queue for PDF files')
 param pdfSubmitQueue string
@@ -228,7 +234,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: blobStorageAccountLogContainerName
         }
         {
-          name: 'BLOB_STORAGE_ACCOUNT_KEY'
+          name: 'AZURE_BLOB_STORAGE_KEY'
           value: blobStorageAccountKey
         }
         {
@@ -264,12 +270,20 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: CosmosDBKey
         }
         {
-          name: 'COSMOSDB_DATABASE_NAME'
-          value: CosmosDBDatabaseName
+          name: 'COSMOSDB_LOG_DATABASE_NAME'
+          value: CosmosDBLogDatabaseName
         }
         {
-          name: 'COSMOSDB_CONTAINER_NAME'
-          value: CosmosDBContainerName
+          name: 'COSMOSDB_LOG_CONTAINER_NAME'
+          value: CosmosDBLogContainerName
+        }
+        {
+          name: 'COSMOSDB_TAGS_DATABASE_NAME'
+          value: CosmosDBTagsDatabaseName
+        }
+        {
+          name: 'COSMOSDB_TAGS_CONTAINER_NAME'
+          value: CosmosDBTagsContainerName
         }
         {
           name: 'PDF_SUBMIT_QUEUE'

@@ -32,6 +32,10 @@ jq -r  '
             "env_var": "AZURE_BLOB_STORAGE_CONTAINER"
         },
         {
+            "path": "azurE_STORAGE_UPLOAD_CONTAINER",
+            "env_var": "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"
+        },
+        {
             "path": "azurE_OPENAI_SERVICE",
             "env_var": "AZURE_OPENAI_SERVICE"
         },
@@ -52,56 +56,36 @@ jq -r  '
             "env_var": "RESOURCE_GROUP_NAME"
         },
         {
-            "path": "coG_SERVICES_FOR_SEARCH_KEY",
-            "env_var": "COGNITIVE_SERVICES_KEY"
-        },
-        {
             "path": "azurE_OPENAI_CHAT_GPT_DEPLOYMENT",
             "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
         },
         {
-            "path": "azurE_OPENAI_EMBEDDING_MODEL",
-            "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
+            "path": "azurE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+            "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
         },        
-        {
-            "path": "azurE_OPENAI_SERVICE_KEY",
-            "env_var": "AZURE_OPENAI_SERVICE_KEY"
-        },
-        {
-            "path": "azurE_STORAGE_KEY",
-            "env_var": "AZURE_BLOB_STORAGE_KEY"
-        },
-        {
-            "path": "azurE_SEARCH_KEY",
-            "env_var": "AZURE_SEARCH_SERVICE_KEY"
-        },
-        {
-            "path": "bloB_CONNECTION_STRING",
-            "env_var": "BLOB_CONNECTION_STRING"
-        },
         {
             "path": "azurE_COSMOSDB_URL",
             "env_var": "COSMOSDB_URL"
         },
         {
-            "path": "azurE_COSMOSDB_KEY",
-            "env_var": "COSMOSDB_KEY"
+            "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
+            "env_var": "COSMOSDB_LOG_DATABASE_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_DATABASE_NAME",
-            "env_var": "COSMOSDB_DATABASE_NAME"
+            "path": "azurE_COSMOSDB_LOG_CONTAINER_NAME",
+            "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_CONTAINER_NAME",
-            "env_var": "COSMOSDB_CONTAINER_NAME"
+            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
+            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
+        },
+        {
+            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
+            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
         },
         {
             "path": "azurE_CLIENT_ID",
             "env_var": "AZURE_CLIENT_ID"
-        },
-        {
-            "path": "azurE_CLIENT_SECRET",
-            "env_var": "AZURE_CLIENT_SECRET"
         },
         {
             "path": "azurE_TENANT_ID",
@@ -132,8 +116,16 @@ jq -r  '
             "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
         },
         {
-            "path": "azurE_OPENAI_EMBEDDING_MODEL",
-            "env_var": "AZURE_OPENAI_EMBEDDING_MODEL"
+            "path": "azurE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+            "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
+        },
+        {
+            "path": "embeddinG_DEPLOYMENT_NAME",
+            "env_var": "EMBEDDING_DEPLOYMENT_NAME"
+        },
+        {
+            "path": "usE_AZURE_OPENAI_EMBEDDINGS",
+            "env_var": "USE_AZURE_OPENAI_EMBEDDINGS"
         },
         {
             "path": "enrichmenT_APPSERVICE_NAME",
@@ -172,3 +164,28 @@ jq -r  '
     echo "MAX_EMBEDDING_REQUEUE_COUNT=5"
     echo "EMBEDDING_REQUEUE_BACKOFF=60"
     echo "CHAT_WARNING_BANNER_TEXT='$CHAT_WARNING_BANNER_TEXT'"
+
+if [ -n "${IN_AUTOMATION}" ]
+then
+    IS_USGOV_DEPLOYMENT=$(jq -r '.properties.outputs.iS_USGOV_DEPLOYMENT.value' infra_output.json)
+
+    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+        az cloud set --name AzureUSGovernment > /dev/null 2>&1
+    fi
+
+    az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" > /dev/null 2>&1
+    az account set -s "$ARM_SUBSCRIPTION_ID" > /dev/null 2>&1
+fi    
+
+# Name of your Key Vault
+keyVaultName=$(cat infra_output.json | jq -r .properties.outputs.deploymenT_KEYVAULT_NAME.value)
+
+# Names of your secrets
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET")
+
+# Retrieve and export each secret
+for secretName in "${secretNames[@]}"; do
+  secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
+  envVarName=$(echo $secretName | tr '-' '_')
+  echo $envVarName=\'$secretValue\'
+done        

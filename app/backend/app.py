@@ -32,6 +32,9 @@ AZURE_BLOB_STORAGE_KEY = os.environ.get("AZURE_BLOB_STORAGE_KEY")
 AZURE_BLOB_STORAGE_CONTAINER = (
     os.environ.get("AZURE_BLOB_STORAGE_CONTAINER") or "content"
 )
+AZURE_BLOB_STORAGE_UPLOAD_CONTAINER = (
+    os.environ.get("AZURE_BLOB_STORAGE_UPLOAD_CONTAINER") or "upload"
+)
 AZURE_SEARCH_SERVICE = os.environ.get("AZURE_SEARCH_SERVICE") or "gptkb"
 AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
 AZURE_SEARCH_SERVICE_KEY = os.environ.get("AZURE_SEARCH_SERVICE_KEY")
@@ -210,6 +213,25 @@ def get_all_upload_status():
         logging.exception("Exception in /getalluploadstatus")
         return jsonify({"error": str(ex)}), 500
     return jsonify(results)
+
+@app.route("/retryFile", methods=["POST"])
+def retryFile():
+    filePath = request.json["filePath"]
+    try:
+
+        file_path_parsed = filePath.replace(AZURE_BLOB_STORAGE_UPLOAD_CONTAINER + "/", "")
+        blob = blob_client.get_blob_client(AZURE_BLOB_STORAGE_UPLOAD_CONTAINER, file_path_parsed)  
+  
+        if blob.exists():
+            raw_file = blob.download_blob().readall()
+  
+            # Overwrite the existing blob with new data
+            blob.upload_blob(raw_file, overwrite=True) 
+
+    except Exception as ex:
+        logging.exception("Exception in /retryFile")
+        return jsonify({"error": str(ex)}), 500
+    return jsonify({"status": 200})
 
 @app.route("/logstatus", methods=["POST"])
 def logstatus():

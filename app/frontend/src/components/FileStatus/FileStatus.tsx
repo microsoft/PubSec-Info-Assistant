@@ -100,6 +100,7 @@ export const FileStatus = ({ className }: Props) => {
                     name: fileList[i].file_name,
                     iconName: FILE_ICONS[fileExtension.toLowerCase()],
                     fileType: fileExtension,
+                    filePath: fileList[i].file_path,
                     state: fileList[i].state,
                     state_description: fileList[i].state_description,
                     upload_timestamp: fileList[i].start_timestamp,

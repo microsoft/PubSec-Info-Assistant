@@ -2,8 +2,9 @@
 // Licensed under the MIT license.
 
 import { useState } from "react";
-import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, BaseSelectedItemsList } from "@fluentui/react";
+import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, Text, BaseSelectedItemsList } from "@fluentui/react";
 import { TooltipHost } from '@fluentui/react';
+import { retryFile } from "../../api";
 
 import styles from "./DocumentsDetailList.module.css";
 
@@ -13,6 +14,7 @@ export interface IDocument {
     value: string;
     iconName: string;
     fileType: string;
+    filePath: string;
     state: string;
     state_description: string;
     upload_timestamp: string;
@@ -55,6 +57,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     function onItemInvoked(item: any): void {
         alert(`Item invoked: ${item.name}`);
+    }
+
+    function retryErroredFile(item: any): void {
+        const result = retryFile(item.filePath);
+
+        //item.state = "Queued"; 
     }
 
     const [columns, setColumns] = useState<IColumn[]> ([
@@ -100,11 +108,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => (
-                <TooltipHost content={`${item.state_description} `}>
-                    <span>{item.state}</span>
-                </TooltipHost>
-            ),
+            onRender: (item: IDocument) => (  
+                <TooltipHost content={`${item.state} `}>  
+                    <span>{item.state}</span>  
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                </TooltipHost>  
+            ), 
             isPadded: true,
         },
         {
@@ -142,6 +151,23 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 return <span>{item.modified_timestamp}</span>;
             },
         },
+        {
+            key: 'column6',
+            name: 'Status Detail',
+            fieldName: 'state_description',
+            minWidth: 90,
+            maxWidth: 200,
+            isResizable: true,
+            isCollapsible: true,
+            ariaLabel: 'Column operations for status detail',
+            data: 'string',
+            onColumnClick: onColumnClick,
+            onRender: (item: IDocument) => (
+                <TooltipHost content={`${item.state_description} `}>
+                    <span>{item.state}</span>
+                </TooltipHost>
+            ),
+        }
     ]);
 
     return (

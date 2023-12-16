@@ -112,6 +112,25 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
     return results;
 }
 
+export async function retryFile(filePath: string): Promise<boolean> {
+    const response = await fetch("/retryFile", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            filePath: filePath
+            })
+        });
+    
+    const parsedResponse: String = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return true;
+}
+
 export async function logStatus(status_log_entry: StatusLogEntry): Promise<StatusLogResponse> {
     var response = await fetch("/logstatus", {
         method: "POST",

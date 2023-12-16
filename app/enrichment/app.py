@@ -370,7 +370,7 @@ def poll_queue() -> None:
                 queue_client.send_message(message_string, visibility_timeout=backoff)
                 statusLog.upsert_document(blob_path, f'Message requed to embeddings queue, attempt {str(requeue_count)}. Visible in {str(backoff)} seconds. Error: {str(error)}.',
                                           StatusClassification.ERROR,
-                                          State.QUEUED)
+                                          State.QUEUED, additional_info={"Queue_Item": message_string })
             else:
                 # max retries has been reached
                 statusLog.upsert_document(

@@ -230,7 +230,8 @@ def retryFile():
 
     except Exception as ex:
         logging.exception("Exception in /retryFile")
-        return jsonify({"error": str(ex)}), 500
+        return jsonify({"error": ex.message}), 500
+    
     return jsonify({"status": 200})
 
 @app.route("/logstatus", methods=["POST"])

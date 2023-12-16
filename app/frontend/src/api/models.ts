@@ -22,6 +22,8 @@ export type AskRequestOverrides = {
     aiPersona?: string;
     responseLength?: number;
     responseTemp?: number;
+    selectedFolders?: string;
+    selectedTags?: string;
 };
 
 export type AskRequest = {
@@ -82,10 +84,13 @@ export type GetUploadStatusRequest = {
 export const enum FileState {
     All = "ALL",
     Processing = "PROCESSING",
+    Indexing = "INDEXING",
     Skipped = "SKIPPED",
     Queued = "QUEUED",
     Complete = "COMPLETE",
-    Error = "ERROR"
+    Error = "ERROR",
+    THROTTLED = "THROTTLED",
+    UPLOADED = "UPLOADED"
 }
 
 
@@ -93,11 +98,14 @@ export type GetInfoResponse = {
     AZURE_OPENAI_SERVICE: string;
     AZURE_OPENAI_CHATGPT_DEPLOYMENT: string;
     AZURE_OPENAI_MODEL_NAME: string;
-    AZURE_OPENAI_EMBEDDING_MODEL: string;
     AZURE_OPENAI_MODEL_VERSION: string;
     AZURE_SEARCH_SERVICE: string;
     AZURE_SEARCH_INDEX: string;
     TARGET_LANGUAGE: string;
+    USE_AZURE_OPENAI_EMBEDDINGS: boolean;
+    EMBEDDINGS_DEPLOYMENT: string;
+    EMBEDDINGS_MODEL_NAME: string;
+    EMBEDDINGS_MODEL_VERSION: string;
     error?: string;
 };
 
@@ -130,6 +138,7 @@ export const enum StatusLogClassification {
 // shared code (functions/shared_code/status_log.py)
 export const enum StatusLogState {
     Processing = "Processing",
+    Indexing = "Indexing",
     Skipped = "Skipped",
     Queued = "Queued",
     Complete = "Complete",
@@ -151,3 +160,12 @@ export type StatusLogResponse = {
     error?: string;
 }
 
+export type ApplicationTitle = {
+    APPLICATION_TITLE: string;
+    error?: string;
+};
+
+export type GetTagsResponse = {
+    tags: string;
+    error?: string;
+}

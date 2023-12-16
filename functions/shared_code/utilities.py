@@ -6,12 +6,28 @@ import json
 import html
 from datetime import datetime
 from enum import Enum
+import zipfile
+import os
 from azure.storage.blob import BlobServiceClient
 from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
 import nltk
+# Try to download using nltk.download
 nltk.download('punkt')
+
+punkt_dir = os.path.join(nltk.data.path[0], 'tokenizers/punkt')
+
+# Check if the 'punkt' directory exists
+if not os.path.exists(punkt_dir):
+    punkt_zip_path = os.path.join(nltk.data.path[0], 'tokenizers/punkt.zip')
+
+    # If the 'punkt.zip' file exists, unzip it
+    if os.path.exists(punkt_zip_path):
+        with zipfile.ZipFile(punkt_zip_path, 'r') as zip_ref:
+            zip_ref.extractall(os.path.join(nltk.data.path[0], 'tokenizers/'))
+    else:
+        raise Exception("Failed to download 'punkt' package")
 
 class ParagraphRoles(Enum):
     """ Enum to define the priority of paragraph roles """
@@ -271,19 +287,20 @@ class Utilities:
         }
         # Get path and file name minus the root container
         file_name, file_extension, file_directory = self.get_filename_and_extension(myblob_name)
-        # Get the folders to use when creating the new files
-        # This code matches the index logic in image pipeline in functions/ImageEnrichment/__init__.py
-        # Please update in both locations
-        folder_set = file_directory + file_name + file_extension + "/"
         blob_service_client = BlobServiceClient(
             self.azure_blob_storage_endpoint,
             self.azure_blob_storage_key)
         json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
-        output_filename = file_name + f'-{file_number}' + '.json'
         block_blob_client = blob_service_client.get_blob_client(
             container=self.azure_blob_content_storage_container,
-            blob=f'{folder_set}{output_filename}')
+            blob=self.build_chunk_filepath(file_directory, file_name, file_extension, file_number))
         block_blob_client.upload_blob(json_str, overwrite=True)
+
+    def build_chunk_filepath (self, file_directory, file_name, file_extension, file_number):
+        """ Get the folders and filename to use when creating the new file chunks """
+        folder_set = file_directory + file_name + file_extension + "/"
+        output_filename = file_name + f'-{file_number}' + '.json'
+        return f'{folder_set}{output_filename}'
 
     def build_chunks(self, document_map, myblob_name, myblob_uri, chunk_target_size):
         """ Function to build chunk outputs based on the document map """

@@ -18,13 +18,13 @@ azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
-azure_blob_storage_key = os.environ["BLOB_STORAGE_ACCOUNT_KEY"]
+azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_database_name = os.environ["COSMOSDB_DATABASE_NAME"]
-cosmosdb_container_name = os.environ["COSMOSDB_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
@@ -52,6 +52,7 @@ def PartitionFile(file_extension: str, file_url: str):
     bytes_io = BytesIO(response.content)
     response.close()   
     metadata = [] 
+    elements = None
     try:        
         if file_extension == '.csv':
             from unstructured.partition.csv import partition_csv
@@ -95,7 +96,7 @@ def PartitionFile(file_extension: str, file_url: str):
             from unstructured.partition.pptx import partition_pptx
             elements = partition_pptx(file=bytes_io)
             
-        elif file_extension == '.txt':
+        elif any(file_extension in x for x in ['.txt', '.json']):
             from unstructured.partition.text import partition_text
             elements = partition_text(file=bytes_io)
             
@@ -116,7 +117,7 @@ def PartitionFile(file_extension: str, file_url: str):
 
 def main(msg: func.QueueMessage) -> None:
     try:
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_database_name, cosmosdb_container_name)
+        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
         logging.info('Python queue trigger function processed a queue item: %s',
                     msg.get_body().decode('utf-8'))
 
@@ -159,8 +160,9 @@ def main(msg: func.QueueMessage) -> None:
         
         # Chunk the file     
         from unstructured.chunking.title import chunk_by_title
-        chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS)
-        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS, max_characters=MAX_CHARACTERS)        
+        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS)
+        # chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_under_n_chars=COMBINE_UNDER_N_CHARS, max_characters=MAX_CHARACTERS)   
+        chunks = chunk_by_title(elements, multipage_sections=True, new_after_n_chars=NEW_AFTER_N_CHARS, combine_text_under_n_chars=COMBINE_UNDER_N_CHARS)
         statusLog.upsert_document(blob_name, f'{function_name} - chunking complete. {str(chunks.count)} chunks created', StatusClassification.DEBUG)
                 
         subtitle_name = ''
@@ -188,9 +190,9 @@ def main(msg: func.QueueMessage) -> None:
         
         statusLog.upsert_document(blob_name, f'{function_name} - chunking stored.', StatusClassification.DEBUG)   
         
-        # submit message to the enrichment queue to continue processing                
+        # submit message to the text enrichment queue to continue processing                
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
-        message_json["enrichment_queued_count"] = 1
+        message_json["text_enrichment_queued_count"] = 1
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string)
         statusLog.upsert_document(blob_name, f"{function_name} - message sent to enrichment queue", StatusClassification.DEBUG, State.QUEUED)    

@@ -1,14 +1,12 @@
 # Developing in a GitHub Codespaces
 
-* [Getting started with codespace](#getting-started-with-codespace)
-* [Creating your codespace](#Creating-your-codespace)
-  * From a GitHub template or any template repository to start a new project
-  * From a branch in your repository for new feature work
-  * From an open pull request to explore work-in-progress
-* [Using GitHub Codespaces in Visual Studio Code](#Using-GitHub-Codespaces-in-Visual-Studio-Code)
-  * [Prerequisites](#Prerequisites)
-  * [Opening a codespace in VS Code](#Opening-a-codespace-in-VS-Code)
-  * [Navigating to an existing codespace](#navigating-to-an-existing-codespace)
+- [Developing in a GitHub Codespaces](#developing-in-a-github-codespaces)
+  - [Getting started with codespace](#getting-started-with-codespace)
+  - [Creating your codespace](#creating-your-codespace)
+  - [Using GitHub Codespaces in Visual Studio Code](#using-github-codespaces-in-visual-studio-code)
+  - [Prerequisites](#prerequisites)
+  - [Opening a codespace in VS Code](#opening-a-codespace-in-vs-code)
+  - [Navigating to an existing codespace](#navigating-to-an-existing-codespace)
 ---
 ## Getting started with codespace
 
@@ -23,6 +21,7 @@ A codespace is a development environment that's hosted in the cloud. You can cus
     Also it would provide option to select **Region**,**Machine type**
 4. Then click on  **Create codespace**
 ![Codespaces creation](/docs/images/codespaces_creation.png)
+
 5.	Then it automatically start building container in the github codespaces ( wait for until container successfully created)
 ![Building container](/docs/images/codespaces_building_container.png)
 6. When you create a new codespace from a template, it is always opened in the Visual Studio Code web client. You can reopen an existing codespace in any supported editor
@@ -43,7 +42,7 @@ Use the Visual Studio Code Marketplace to install the [GitHub Codespaces](https:
 
 
 1. In VS Code, in the Activity Bar, click the Remote Explorer icon.
- ![Alt text](/docs/images/developing_in_a_codespaces_image_1.png)
+ ![Remove Explorer Tab in VS Code](/docs/images/developing_in_a_codespaces_image_2.png)
 
     Note: If the Remote Explorer is not displayed in the Activity Bar:
     - Access the Command Palette. For example, by pressing Shift+Command+P (Mac) / Ctrl+Shift+P (Windows/Linux).
@@ -54,7 +53,7 @@ Use the Visual Studio Code Marketplace to install the [GitHub Codespaces](https:
 
 3. Click **Sign in to GitHub.**
 
-    ![Alt text](/docs/images/developing_in_a_codespaces_image_2.png)
+    ![Sign into GitHub button in VS Code](/docs/images/developing_in_a_codespaces_image_1.png)
 
 4. If you are not currently signed in to GitHub you'll be prompted to do so. Go ahead and sign in.
 
@@ -66,20 +65,20 @@ Use the Visual Studio Code Marketplace to install the [GitHub Codespaces](https:
 
 1. In VS Code, in the Activity Bar, click the Remote Explorer icon.
 
-    ![Alt text](/docs/images/developing_in_a_codespaces_open_in_vscode_3.png)
+    ![Remote Explorer Icon in VS Code](/docs/images/developing_in_a_codespaces_open_in_vscode_3.png)
 
 2. Under "GitHub Codespaces", hover over the codespace you want to develop in.
 
 3. Click the connection icon (a plug symbol).
 
-    ![Alt text](/docs/images/developing_in_a_codespaces_open_in_vscode_4.png)
+    ![Conections Icon in VS Code](/docs/images/developing_in_a_codespaces_open_in_vscode_4.png)
 
 
 ## Navigating to an existing codespace
 
 - You can see every available codespace that you have created at github.com/codespaces.
 
-    ![Alt text](/docs/images/developing_in_a_codespaces_open_in_vscode_2.png)
+    ![Available Codespaces in GitHub.com](/docs/images/developing_in_a_codespaces_open_in_vscode_2.png)
 
 - Click the name of the codespace you want to develop in.
 Alternatively, you can see any of your codespaces for a specific repository by navigating to that repository and selecting  Code. The dropdown menu will display all active codespaces for a repository.

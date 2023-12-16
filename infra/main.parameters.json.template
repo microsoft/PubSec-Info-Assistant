@@ -35,17 +35,23 @@
     "chatGptDeploymentName": {
       "value": "${CHATGPT_MODEL_DEPLOYMENT_NAME}"
     },
+    "azureOpenAIEmbeddingDeploymentName": {
+      "value": "${AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME}"
+    },
     "azureOpenAIEmbeddingsModelName": {
-      "value": "${AZURE_OPENAI_EMBEDDING_MODEL}"
+      "value": "${AZURE_OPENAI_EMBEDDINGS_MODEL_NAME}"
+    },
+    "azureOpenAIEmbeddingsModelVersion": {
+      "value": "${AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION}"
     },
     "useAzureOpenAIEmbeddings": {
       "value": ${USE_AZURE_OPENAI_EMBEDDINGS}
     },
     "sentenceTransformersModelName": {
-      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL}"
+      "value": "${OPEN_SOURCE_EMBEDDING_MODEL}"
     },
     "sentenceTransformerEmbeddingVectorSize": {
-      "value": "${SENTENCE_TRANSFORMER_EMBEDDING_MODEL_VECTOR_SIZE}"
+      "value": "${OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE}"
     },
     "chatGptModelName": {
       "value": "${CHATGPT_MODEL_MODEL_NAME}"
@@ -80,6 +86,9 @@
     "aadMgmtClientSecret": {
       "value": "${AZURE_AD_MGMT_APP_SECRET}"
     },
+    "kvAccessObjectId": {
+      "value": "${AZURE_KV_ACCESS_OBJ_ID}"
+    },
     "isInAutomation": {
       "value": ${IS_IN_AUTOMATION}
     },
@@ -97,6 +106,9 @@
     },
     "subscriptionId": {
       "value": "${SUBSCRIPTION_ID}"
+    },
+    "applicationtitle": {
+      "value": "${APPLICATION_TITLE}"
     }
   }
 }

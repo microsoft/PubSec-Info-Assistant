@@ -61,6 +61,7 @@
   "logicIntegrationAccounts": "ia-",
   "logicWorkflows": "logic-",
   "logAnalytics": "la-",
+  "logWorkbook": "lw-",
   "machineLearningServicesWorkspaces": "mlw-",
   "managedIdentityUserAssignedIdentities": "id-",
   "managementManagementGroups": "mg-",
@@ -140,5 +141,6 @@
   "webSitesAppService": "web-",
   "webSitesAppServiceEnvironment": "ase-",
   "webSitesFunctions": "func-",
-  "webStaticSites": "stapp-"
+  "webStaticSites": "stapp-",
+  "keyvault": "kv-"
 }

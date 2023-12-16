@@ -29,7 +29,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
    3. Under **Configure your pipeline:** select **Existing Azure Pipelines YAML file**
 
-      ![pipeline_configuration](/docs/images/sandbox_environment_build_pipeline_configuration.png)
+      ![pipeline_configuration](./docs/images/sandbox_environment_build_pipeline_configuration.png)
 
    4. In the popup window, Select the branch you wish to pull the pipeline definition from. Then select the path at `/pipelines/demo.yml`
 
@@ -43,26 +43,23 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
    6. Next **Configure variables :** To Configure the deployment, please add the following variables to the build pipeline and populate with values for your target Azure subscription. Then save the pipeline variables.
 
-       > AZURE_OPENAI_CHATGPT_DEPLOYMENT = gpt-35-turbo \
-       > AZURE_OPENAI_EMBEDDING_MODEL = text-embedding-ada-002 \
-       > AZURE_OPENAI_SERVICE_KEY = "" \
-       > AZURE_OPENAI_SERVICE_NAME = "" \
-       > AZURE_STORAGE_ACCOUNT = "" \
-       > AZURE_STORAGE_ACCOUNT_KEY = "" \
-       > CLIENT_ID = "" \
-       > CLIENT_SECRET = "" \
-       > CONTAINER_REGISTRY_ADDRESS = "" \
-       > SERVICE_PRINCIPAL_ID = "" \
-       > TENANT_ID = "" \
-       > SUBSCRIPTION_ID = ""
+    VARIABLE | DESCRIPTION
+    ---|---
+    CLIENT_ID<br />CLIENT_SECRET<br />SERVICE_PRINCIPAL_ID | These are used for the deployment scripts to login to Azure. This is typically a service principal and will need Contributor and User Access Administrator roles.
+    SUBSCRIPTION_ID | The ID of the subscription that should be deployed to.
+    TENANT_ID | The ID of the tenant that should be deployed to.
+    AZURE_STORAGE_ACCOUNT<br/>AZURE_STORAGE_ACCOUNT_KEY | Bicep is used to create Infrastructure as Code. This is the storage account that the Bicep State is stored.
+	CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
+    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
+    environment | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env`
 
-2. **Save and pipeline:** After updating the variable, save your pipeline configuration.
+2. **Save your pipeline:** After updating the variable, save your pipeline configuration.
 
 ## Configuring Azure Active Directory Objects
 
 The CI/CD pipelines run under a "Service Connection" that leverages an Azure Active Directory Service Principal. This Service Principal will not have rights to create additional Azure Active Directory objects. This requires an Administrative user to manually create the objects before running the pipeline. Follow these steps to configure the Azure AD Objects:
 
-1. In a **Terminal** Window from your DevOps CodeSpace for Information Assistant, log into Azure using the `az login` command.
+1. In a **Terminal** Window from your DevOps Codespace for Information Assistant, log into Azure using the `az login` command.
 
 2. Navigate to the `/scripts` folder and run the `create-ad-objs-for-deployment.sh` script manually.
 

@@ -390,7 +390,6 @@ def poll_queue() -> None:
             # push remainder chunks content to index
             if len(index_chunks) > 0:
                 index_sections(index_chunks)
-                chunk_indexed_count = i
 
             statusLog.upsert_document(blob_path,
                                       'Embeddings process complete',

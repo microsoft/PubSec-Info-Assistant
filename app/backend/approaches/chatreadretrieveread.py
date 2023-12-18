@@ -46,52 +46,6 @@ class ChatReadRetrieveReadApproach(Approach):
     USER = "user"
     ASSISTANT = "assistant"
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above in {query_term_language}
-    Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
-    
-    Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
-    the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
-    Never cite the source content using the examples provided in this paragraph that start with info.
-    
-    Here is how you should answer every question:
-    
-    -Look for relevant information in the above source documents to answer the question in {query_term_language}.
-    -If the source document does not include the exact answer, please respond with relevant information from the data in the response along with citation.You must include a citation to each document referenced.      
-    -If you cannot find any relevant information in the above sources, respond with I am not sure.Do not provide personal opinions or assumptions.
-    
-    {follow_up_questions_prompt}
-    {injected_prompt}
-    
-    """
-    follow_up_questions_prompt_content = """
-    Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-    Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
-    """
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
-    Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
-    Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
-    Do not include any text inside [] or <<<>>> in the search query terms.
-    Do not include any special characters like '+'.
-    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
-    If you cannot generate a search query, return just the number 0.
-    """
-
-    #Few Shot prompting for Keyword Search Query
-    query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
-    ]
-
-    #Few Shot prompting for Response. This will feed into Chain of thought system message.
-    response_prompt_few_shots = [
-    {"role": USER ,'content': 'I am looking for information in source documents'},
-    {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
-    ]
     
     # # Define a class variable for the base URL
     # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
@@ -154,9 +108,10 @@ class ChatReadRetrieveReadApproach(Approach):
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
         
-        query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
-        
+        prompt_template = self.get_prompt_template()
 
+        query_prompt=prompt_template.Query_Prompt_Template.format(query_term_language=self.query_term_language)
+        
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
             prompt_template,
@@ -286,7 +241,7 @@ class ChatReadRetrieveReadApproach(Approach):
         prompt_override = overrides.get("prompt_template")
 
         if prompt_override is None:
-            system_message = self.system_message_chat_conversation.format(
+            system_message = prompt_template.System_Message_Chat_Conversation.format(
                 query_term_language=self.query_term_language,
                 injected_prompt="",
                 follow_up_questions_prompt=follow_up_questions_prompt,
@@ -297,7 +252,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 systemPersona=system_persona,
             )
         elif prompt_override.startswith(">>>"):
-            system_message = self.system_message_chat_conversation.format(
+            system_message = prompt_template.System_Message_Chat_Conversation.format(
                 query_term_language=self.query_term_language,
                 injected_prompt=prompt_override[3:] + "\n ",
                 follow_up_questions_prompt=follow_up_questions_prompt,
@@ -308,7 +263,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 systemPersona=system_persona,
             )
         else:
-            system_message = self.system_message_chat_conversation.format(
+            system_message = prompt_template.System_Message_Chat_Conversation.format(
                 query_term_language=self.query_term_language,
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, Text, BaseSelectedItemsList } from "@fluentui/react";
 import { TooltipHost } from '@fluentui/react';
 import { retryFile } from "../../api";
+import React, { useRef } from "react";
 
 import styles from "./DocumentsDetailList.module.css";
 
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
+    const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
         const newColumns: IColumn[] = columns.slice();
@@ -59,11 +61,29 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         alert(`Item invoked: ${item.name}`);
     }
 
-    function retryErroredFile(item: any): void {
-        const result = retryFile(item.filePath);
-
-        //item.state = "Queued"; 
+    const [itemList, setItems] = useState<IDocument[]>(items);
+    function retryErroredFile(item: IDocument): void {
+        retryFile(item.filePath)
+            .then(() => {
+                // Create a new array with the updated item
+                const updatedItems = itemList.map((i) => {
+                    if (i.key === item.key) {
+                        return {
+                            ...i,
+                            state: "Queued"
+                        };
+                    }
+                    return i;
+                });
+    
+                setItems(updatedItems); // Update the state with the new array
+                console.log("State updated, triggering re-render");
+            })
+            .catch((error) => {
+                console.error("Error retrying file:", error);
+            });
     }
+
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -174,7 +194,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         <div>
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <DetailsList
-                items={items}
+                // items={items}
+                items={itemList}
                 compact={true}
                 columns={columns}
                 selectionMode={SelectionMode.none}

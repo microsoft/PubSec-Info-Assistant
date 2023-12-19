@@ -24,17 +24,17 @@ const FilePicker = ({folderPath, tags}: Props) => {
 
   // handler called when files are selected via the Dropzone component
   const handleOnChange = useCallback((files: any) => {
+
     let filesArray = Array.from(files);
 
     filesArray = filesArray.map((file) => ({
       id: nanoid(),
       file
-    }));
-
+  }));
     setFiles(filesArray as any);
     setProgress(0);
     setUploadStarted(false);
-  }, []);
+}, []);
 
   // handle for removing files form the files list view
   const handleClearFile = useCallback((id: any) => {

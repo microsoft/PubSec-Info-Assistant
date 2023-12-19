@@ -321,7 +321,7 @@ def poll_queue() -> None:
             
             for chunk in chunks:
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.INDEXING)
-                # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING 
+                # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING
                 # open the file and extract the content
                 blob_path_plus_sas = utilities_helper.get_blob_and_sas(
                     ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)

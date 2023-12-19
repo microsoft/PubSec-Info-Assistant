@@ -4,6 +4,8 @@
 import json
 import logging
 import os
+import threading
+import time
 import re
 from datetime import datetime
 from typing import List
@@ -276,9 +278,17 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     tagsHelper.upsert_document(blob_path, tags_list)
     return tags_list
 
-        
 @app.on_event("startup") 
-@repeat_every(seconds=5, logger=log, raise_exceptions=True)
+def startup_event():
+    poll_thread = threading.Thread(target=poll_queue_thread)
+    poll_thread.daemon = True
+    poll_thread.start()
+
+def poll_queue_thread():
+    while True:
+        poll_queue()
+        time.sleep(5)     
+        
 def poll_queue() -> None:
     """Polls the queue for messages and embeds them"""
     
@@ -293,6 +303,11 @@ def poll_queue() -> None:
     log.debug("Polling embeddings queue for messages...")
     response = queue_client.receive_messages(max_messages=int(ENV["DEQUEUE_MESSAGE_BATCH_SIZE"]))
     messages = [x for x in response]
+
+    if not messages:
+        log.debug("No messages to process. Waiting for a couple of minutes...")
+        time.sleep(120)  # Sleep for 2 minutes
+        return
 
     target_embeddings_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"])
 

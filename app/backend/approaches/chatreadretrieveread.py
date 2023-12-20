@@ -123,7 +123,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.blob_client = blob_client
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
-        #escape target embeddiong model name
+        #escape target embeddiong model name 
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
         
         if is_gov_cloud_deployment:

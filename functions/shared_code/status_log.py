@@ -217,8 +217,12 @@ class StatusLog:
         """Updates the state of the document in the storage"""
         try:
             document_id = self.encode_document_id(document_path)
+<<<<<<< HEAD
             logging.info("%s DocumentID - %s", state_str, document_id)
             document_id = self.encode_document_id(document_path)
+=======
+            logging.info(f"{status} DocumentID - {document_id}")
+>>>>>>> 610eeba306e7fc6f34a80a795d2c70b884757cc8
             if self._log_document.get(document_id, "") != "":
                 json_document = self._log_document[document_id]
                 json_document['state'] = state_str

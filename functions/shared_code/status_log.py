@@ -19,6 +19,7 @@ class State(Enum):
     ERROR = "Error"
     THROTTLED = "Throttled"
     UPLOADED = "Uploaded"
+    DELETED = "Deleted"
     ALL = "All"
 
 class StatusClassification(Enum):
@@ -133,7 +134,7 @@ class StatusLog:
         document_id = self.encode_document_id(document_path)
 
         # add status to standard logger
-        logging.info(f"{status} DocumentID - {document_id}")
+        logging.info("%s DocumentID - %s", status, document_id)
 
         # If this event is the start of an upload, remove any existing status files for this path
         if fresh_start:
@@ -151,23 +152,26 @@ class StatusLog:
             else:
                 json_document = self._log_document[document_id]
 
-            # Check if there has been a state change, and therefore to update state
-            if json_document['state'] != state.value:
-                json_document['state'] = state.value
-                json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            if json_document['state'] != State.DELETED.value:
+                # Check if there has been a state change, and therefore to update state
+                if json_document['state'] != state.value:
+                    json_document['state'] = state.value
+                    json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-            # Append a new item to the array
-            status_updates = json_document["status_updates"]
-            new_item = {
-                "status": status,
-                "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                "status_classification": str(status_classification.value)
-            }
+                # Append a new item to the array
+                status_updates = json_document["status_updates"]
+                new_item = {
+                    "status": status,
+                    "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    "status_classification": str(status_classification.value)
+                }
 
-            if status_classification == StatusClassification.ERROR:
-                new_item["stack_trace"] = self.get_stack_trace()
+                if status_classification == StatusClassification.ERROR:
+                    new_item["stack_trace"] = self.get_stack_trace()
 
-            status_updates.append(new_item)
+                status_updates.append(new_item)
+            else:
+                logging.debug("%s was previously deleted. No changes to make.", document_path)
         except exceptions.CosmosResourceNotFoundError:
             # this is a new document
             json_document = {
@@ -213,7 +217,7 @@ class StatusLog:
         """Updates the state of the document in the storage"""
         try:
             document_id = self.encode_document_id(document_path)
-            logging.info(f"{state_str} DocumentID - {document_id}")
+            logging.info("%s DocumentID - %s", state_str, document_id)
             document_id = self.encode_document_id(document_path)
             if self._log_document.get(document_id, "") != "":
                 json_document = self._log_document[document_id]
@@ -222,9 +226,9 @@ class StatusLog:
                 self.save_document(document_path)
                 self._log_document[document_id] = json_document
             else:
-                logging.warning(f"Document with ID {document_id} not found.")
+                logging.warning("Document with ID %s not found.", document_id)
         except Exception as err:
-            logging.error(f"An error occurred while updating the document state: {str(err)}")      
+            logging.error("An error occurred while updating the document state: %s", str(err))
 
     def save_document(self, document_path):
         """Saves the document in the storage"""

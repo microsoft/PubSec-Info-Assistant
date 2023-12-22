@@ -333,10 +333,10 @@ def poll_queue() -> None:
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             chunks = list(chunk_list)
             i = 0
+            
             for chunk in chunks:
-
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.INDEXING)
-                # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING 
+                # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING
                 # open the file and extract the content
                 blob_path_plus_sas = utilities_helper.get_blob_and_sas(
                     ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
@@ -360,15 +360,18 @@ def poll_queue() -> None:
                         chunk_dict["content"]
                     )
 
-                # create embedding
-                embedding = embed_texts(target_embeddings_model, [text])
-                if 'data' in embedding:
+
+                try:
+                    # try first to read the embedding from the chunk, in case it was already created
+                    embedding_data = chunk_dict['contentVector']
+                except KeyError:      
+                    # create embedding
+                    embedding = embed_texts(target_embeddings_model, [text])
                     embedding_data = embedding['data']
-                else:
-                    raise ValueError(embedding['message']) 
 
                 tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
 
+                # PRepare the index schema based representation of the chunk with the embedding
                 index_chunk = {}
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
@@ -386,9 +389,15 @@ def poll_queue() -> None:
                 index_chunk['entities'] = chunk_dict["entities"]
                 index_chunk['key_phrases'] = chunk_dict["key_phrases"]
                 index_chunks.append(index_chunk)
+
+                # write the updated chunk, with embedding to storage in case of failure
+                chunk_dict['contentVector'] = embedding_data
+                json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
+                block_blob_client = blob_service_client.get_blob_client(container=ENV["AZURE_BLOB_STORAGE_CONTAINER"], blob=chunk.name)
+                block_blob_client.upload_blob(json_str, overwrite=True)
                 i += 1
                 
-                # push batch of content to index
+                # push batch of content to index, rather than each individual chunk
                 if i % 200 == 0:
                     index_sections(index_chunks)
                     index_chunks = []

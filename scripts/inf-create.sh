@@ -197,6 +197,9 @@ echo $parameter_json > $DIR/../infra/main.parameters.json
 #make sure bicep is always the latest version
 az bicep upgrade
 
+#Check and Remove if exists the CUA deployment Object to resolve Bicep limitations
+az deployment sub delete --name "pid-${CUSTOMER_USAGE_ATTRIBUTION_ID}"
+
 #deploy bicep
 az deployment sub what-if --location $LOCATION --template-file main.bicep --parameters main.parameters.json --name $RG_NAME
 if [ -z $SKIP_PLAN_CHECK ]

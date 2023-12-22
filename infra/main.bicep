@@ -246,7 +246,7 @@ module backend 'core/host/appservice.bicep' = {
     runtimeVersion: '3.10'
     scmDoBuildDuringDeployment: true
     managedIdentity: true
-    appCommandLine: 'gunicorn --workers 10 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600'
+    appCommandLine: 'gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600'
     applicationInsightsName: logging.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     isGovCloudDeployment: isGovCloudDeployment

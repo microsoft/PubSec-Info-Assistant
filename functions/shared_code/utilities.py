@@ -116,7 +116,8 @@ class Utilities:
             table_html += "<tr>"
             for cell in row_cells:
                 tag = "td"
-                if hasattr(cell, 'kind'):
+                #if hasattr(cell, 'kind'):
+                if 'kind' in cell:                      
                     if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
                         tag = "th"
                 cell_spans = ""
@@ -311,7 +312,7 @@ class Utilities:
         soup = BeautifulSoup(table_html, 'html.parser')
 
         # Check for and extract the thead and tbody, or default to entire table
-        thead = soup.find('thead','h1', 'h2', 'h3', 'h4', 'h5', 'h6')
+        thead = soup.find('th')
         tbody = soup.find('tbody') or soup.find('table')
         rows = soup.find_all('tr') if not tbody else tbody.find_all('tr')
         header_html = f"<table>{str(thead)}" if thead else "<table>"

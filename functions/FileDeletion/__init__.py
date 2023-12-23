@@ -1,31 +1,81 @@
-from azure.cosmos import CosmosClient, exceptions
-from azure.storage.blob import BlobServiceClient
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+import logging
+import os
+from datetime import datetime, timezone
+from itertools import islice
+import azure.functions as func
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
-from datetime import datetime, timezone
-from enum import Enum
-from itertools import islice
+from azure.storage.blob import BlobServiceClient
+from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.tags_helper import TagsHelper
 
-import logging, os
-from DeleteTimerTrigger.status_log import State, StatusClassification, StatusLog
-import azure.functions as func
+blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
+blob_storage_account_upload_container_name = os.environ[
+    "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
+blob_storage_account_output_container_name = os.environ[
+    "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
+azure_search_index = os.environ["AZURE_SEARCH_INDEX"]
+azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
+cosmosdb_url = os.environ["COSMOSDB_URL"]
+cosmosdb_key = os.environ["COSMOSDB_KEY"]
+cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
+cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
+cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
+cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
-BLOB_CONN_STRING = os.environ["BLOB_CONN_STRING"]
-UPLOAD_CONT_NAME = os.environ["UPLOAD_CONT_NAME"]
-CONTENT_CONT_NAME = os.environ["CONTENT_CONT_NAME"]
-SEARCH_ENDPOINT = os.environ["SEARCH_ENDPOINT"]
-SEARCH_INDEX = os.environ["SEARCH_INDEX"]
-SEARCH_KEY = os.environ["SEARCH_KEY"]
-COSMOS_URL = os.environ["COSMOS_URL"]
-COSMOS_KEY = os.environ["COSMOS_KEY"]
-COSMOS_TAG_DB = os.environ["COSMOS_TAG_DB"]
-COSMOS_TAG_CONTAINER = os.environ["COSMOS_TAG_CONTAINER"]
-COSMOS_STATUS_DB = os.environ["COSMOS_STATUS_DB"]
-COSMOS_STATUS_CONTAINER = os.environ["COSMOS_STATUS_CONTAINER"]
+status_log = StatusLog(cosmosdb_url,
+                       cosmosdb_key,
+                       cosmosdb_log_database_name,
+                       cosmosdb_log_container_name)
 
-# max to delete with one request is 256, so need to break down dictionary
-# define a function that chunks a dictionary
+tags_helper = TagsHelper(cosmosdb_url,
+                         cosmosdb_key,
+                         cosmosdb_tags_database_name,
+                         cosmosdb_tags_container_name)
+
+def get_deleted_blobs(blob_service_client: BlobServiceClient) -> list:
+    '''Creates and returns a list of file paths that are soft-deleted.'''
+    # Create Uploaded Container Client and list all blobs, including deleted blobs
+    upload_container_client = blob_service_client.get_container_client(
+        blob_storage_account_upload_container_name)
+    temp_list = upload_container_client.list_blobs(include="deleted")
+
+    deleted_blobs = []
+    # Pull out the soft-deleted blob names
+    for blob in temp_list:
+        if blob.deleted:
+            logging.debug("\t Deleted Blob name: %s", blob.name)
+            deleted_blobs.append(blob.name)
+    return deleted_blobs
+
+def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blobs: list) -> dict:
+    '''Deletes blobs in the content container that correspond to a given
+    soft-deleted blob from the upload container. Returns a list of deleted
+    content blobs for use in other methods.'''
+    # Create Content Container Client
+    content_container_client = blob_service_client.get_container_client(
+        blob_storage_account_output_container_name)
+    # Get a dict with all chunked blobs that came from a deleted blob in the upload container
+    chunked_blobs_to_delete = {}
+    for blob in deleted_blobs:
+        content_list = content_container_client.list_blobs(name_starts_with=blob)
+        for blob in content_list:
+            chunked_blobs_to_delete[blob.name] = None
+    logging.debug("Total number of chunked blobs to delete - %s", str(len(chunked_blobs_to_delete)))
+    # Split the chunked blob dict into chunks of less than 256
+    chunked_content_blob_dict = list(chunks(chunked_blobs_to_delete, 255))
+    # Delete all of the content blobs that came from a deleted blob in the upload container
+    for item in chunked_content_blob_dict:
+        content_container_client.delete_blobs(*item)
+    return chunked_blobs_to_delete
+
 def chunks(data, size):
+    '''max number of blobs to delete in one request is 256, so this breaks
+    chunks the dictionary'''
     # create an iterator over the keys
     it = iter(data)
     # loop over the range of the length of the data
@@ -33,7 +83,34 @@ def chunks(data, size):
         # yield a dictionary with a slice of keys and their values
         yield {k: data [k] for k in islice(it, size)}
 
+def delete_search_entries(deleted_content_blobs: dict) -> None:
+    '''Takes a list of content blobs that were deleted in a previous
+    step and deletes the corresponding entries in the Azure AI 
+    Search index.'''
+    search_client = SearchClient(azure_search_service_endpoint,
+                                 azure_search_index,
+                                 AzureKeyCredential(azure_search_service_key))
+
+    search_id_list_to_delete = []
+    for file_path in deleted_content_blobs.keys():
+        search_id_list_to_delete.append({"id": status_log.encode_document_id(file_path)})
+
+    logging.debug("Total Search IDs to delete: %s", str(len(search_id_list_to_delete)))
+
+    if len(search_id_list_to_delete) > 0:
+        search_client.delete_documents(documents=search_id_list_to_delete)
+        logging.debug("Succesfully deleted items from AI Search index.")
+    else:
+        logging.debug("No items to delete from AI Search index.")
+
 def main(mytimer: func.TimerRequest) -> None:
+    '''This function is a cron job that runs every 10 miuntes, detects when 
+    a file has been deleted in the upload container and 
+        1. removes the generated Blob chunks from the content container, 
+        2. removes the CosmosDB tags entry, and
+        3. updates the CosmosDB logging entry to the Delete state
+    If a file has already gone through this process, updates to the code in
+    shared_code/status_log.py prevent the status from being continually updated'''
     utc_timestamp = datetime.utcnow().replace(
         tzinfo=timezone.utc).isoformat()
 
@@ -42,101 +119,23 @@ def main(mytimer: func.TimerRequest) -> None:
 
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
 
-    connect_str = BLOB_CONN_STRING
-    upload_cont_name = UPLOAD_CONT_NAME
-
-    statusLog = StatusLog(COSMOS_URL, COSMOS_KEY, COSMOS_STATUS_DB, COSMOS_STATUS_CONTAINER)
-
     # Create Blob Service Client
+    blob_service_client = BlobServiceClient.from_connection_string(blob_connection_string)
+    deleted_blobs = get_deleted_blobs(blob_service_client)
+    deleted_content_blobs = delete_content_blobs(blob_service_client, deleted_blobs)
+    delete_search_entries(deleted_content_blobs)
+    tags_helper.delete_docs(deleted_blobs)
 
-    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-
-    # Create Container Client for uploaded blobs and list all blobs, including those that are soft-delted
-    upload_container_client = blob_service_client.get_container_client(upload_cont_name)
-    temp_list = upload_container_client.list_blobs(include="deleted")
-    deleted_blobs = []
-
-    # Pull out the soft-deleted blob names
-    for blob in temp_list:
-        if blob.deleted == True:
-            logging.info("\t Deleted Blob name: " + blob.name)
-            deleted_blobs.append(blob.name)
-
-    # Sanity check
-    logging.info("Deleted blobs are {}".format(deleted_blobs))
-
-    content_container_client = blob_service_client.get_container_client(CONTENT_CONT_NAME)
-
-    blobs_to_delete = {}
-    for blob in deleted_blobs:
-        content_list = content_container_client.list_blobs(name_starts_with=blob)
-        for blob in content_list:
-            logging.info("\t Found blob " + blob.name)
-            blobs_to_delete[blob.name] = None
-
-    logging.info("Blobs to delete are {}".format(blobs_to_delete))
-
-    logging.info("Total number of Blobs to delete - {}".format(len(blobs_to_delete)))
-
-    chunked_blobs_to_delete = list(chunks(blobs_to_delete, 255))
-
-    logging.info("Number of chunks with blobs to delete - {}".format(len(chunked_blobs_to_delete)))
-
-    for item in chunked_blobs_to_delete:
-        content_container_client.delete_blobs(*item)
-
-    service_endpoint = SEARCH_ENDPOINT
-    index_name = SEARCH_INDEX
-    key = SEARCH_KEY
-
-    search_client = SearchClient(service_endpoint, index_name, AzureKeyCredential(key))
-
-    search_id_list_to_delete = []
-
-    for file_path in blobs_to_delete:
-        search_id_list_to_delete.append({"id": StatusLog.encode_document_id(file_path)})
-
-    # for blob in deleted_blobs:
-    #     search_response = search_client.search(search_text="*", filter="file_name eq 'upload/{}'".format(blob), include_total_count=True)
-    #     logging.info("Number of results for {}: ".format(blob) + str(search_response.get_count()))
-
-    #     for result in search_response:
-    #         id_list.append({"id": result["id"]})
-
-    logging.info("Total IDs to delete: {}".format(len(search_id_list_to_delete)))
-
-    if len(search_id_list_to_delete) > 0:
-        delete_result = search_client.delete_documents(documents=search_id_list_to_delete)
-
-        for entry in delete_result:
-            logging.info("Delete document succeeded: {}".format(entry.succeeded))
-            # logging.info("Deleted {} items from index.".format(len(delete_result)))
-    else:
-        logging.debug("No items to delete from AI Search Index.")
-
-    cosmos_client = CosmosClient(url=COSMOS_URL, credential=COSMOS_KEY)
-    database = cosmos_client.get_database_client(COSMOS_TAG_DB)
-    container = database.get_container_client(COSMOS_TAG_CONTAINER)
-
-    for doc in deleted_blobs:
-        doc_id = statusLog.encode_document_id("upload/{}".format(doc))
-        doc_name = "upload/{}".format(doc)
-
-        logging.info("deleting tags item for doc {} \n \t with ID {}".format(doc, doc_id))
-
-        try:
-            container.delete_item(item=doc_id, partition_key=doc_name)
-            logging.info("deleted tags for document name {}".format(doc_name))
-        except exceptions.CosmosResourceNotFoundError:
-            logging.info("Tag entry for {} already deleted".format(doc_name))
-    
     for doc in deleted_blobs:
         doc_base = os.path.basename(doc)
-        doc_path = "upload/{}".format(doc)
+        doc_path = f"upload/{format(doc)}"
 
-        temp_doc_id = statusLog.encode_document_id(doc_path)
+        temp_doc_id = status_log.encode_document_id(doc_path)
 
-        logging.info("Modifying status for doc {} \n \t with ID {}".format(doc_base, temp_doc_id))
+        logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
 
-        statusLog.upsert_document(doc_path, f'Updating document status post deletion', StatusClassification.INFO, State.DELETED)
-        statusLog.save_document(doc_path)
+        status_log.upsert_document(doc_path,
+                                   'Updating document status post deletion',
+                                   StatusClassification.INFO,
+                                   State.DELETED)
+        status_log.save_document(doc_path)

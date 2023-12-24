@@ -123,6 +123,7 @@ def main(mytimer: func.TimerRequest) -> None:
     blob_service_client = BlobServiceClient.from_connection_string(blob_connection_string)
     deleted_blobs = get_deleted_blobs(blob_service_client)
     deleted_content_blobs = delete_content_blobs(blob_service_client, deleted_blobs)
+    logging.info("%s content blobs were deleted.", str(len(deleted_content_blobs)))
     delete_search_entries(deleted_content_blobs)
     tags_helper.delete_docs(deleted_blobs)
 
@@ -135,7 +136,7 @@ def main(mytimer: func.TimerRequest) -> None:
         logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
 
         status_log.upsert_document(doc_path,
-                                   'Updating document status post deletion',
+                                   'Document chunks, tags, and entries in AI Search have been deleted',
                                    StatusClassification.INFO,
                                    State.DELETED)
         status_log.save_document(doc_path)

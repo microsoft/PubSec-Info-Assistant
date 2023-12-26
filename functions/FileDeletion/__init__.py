@@ -37,6 +37,16 @@ tags_helper = TagsHelper(cosmosdb_url,
                          cosmosdb_tags_database_name,
                          cosmosdb_tags_container_name)
 
+def chunks(data, size):
+    '''max number of blobs to delete in one request is 256, so this breaks
+    chunks the dictionary'''
+    # create an iterator over the keys
+    it = iter(data)
+    # loop over the range of the length of the data
+    for i in range(0, len(data), size):
+        # yield a dictionary with a slice of keys and their values
+        yield {k: data [k] for k in islice(it, size)}
+
 def get_deleted_blobs(blob_service_client: BlobServiceClient) -> list:
     '''Creates and returns a list of file paths that are soft-deleted.'''
     # Create Uploaded Container Client and list all blobs, including deleted blobs
@@ -52,19 +62,18 @@ def get_deleted_blobs(blob_service_client: BlobServiceClient) -> list:
             deleted_blobs.append(blob.name)
     return deleted_blobs
 
-def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blobs: list) -> dict:
+def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blob: str) -> dict:
     '''Deletes blobs in the content container that correspond to a given
     soft-deleted blob from the upload container. Returns a list of deleted
     content blobs for use in other methods.'''
     # Create Content Container Client
     content_container_client = blob_service_client.get_container_client(
         blob_storage_account_output_container_name)
-    # Get a dict with all chunked blobs that came from a deleted blob in the upload container
+    # Get a dict with all chunked blobs that came from the deleted blob in the upload container
     chunked_blobs_to_delete = {}
-    for blob in deleted_blobs:
-        content_list = content_container_client.list_blobs(name_starts_with=blob)
-        for blob in content_list:
-            chunked_blobs_to_delete[blob.name] = None
+    content_list = content_container_client.list_blobs(name_starts_with=deleted_blob)
+    for blob in content_list:
+        chunked_blobs_to_delete[blob.name] = None
     logging.debug("Total number of chunked blobs to delete - %s", str(len(chunked_blobs_to_delete)))
     # Split the chunked blob dict into chunks of less than 256
     chunked_content_blob_dict = list(chunks(chunked_blobs_to_delete, 255))
@@ -72,16 +81,6 @@ def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blobs: 
     for item in chunked_content_blob_dict:
         content_container_client.delete_blobs(*item)
     return chunked_blobs_to_delete
-
-def chunks(data, size):
-    '''max number of blobs to delete in one request is 256, so this breaks
-    chunks the dictionary'''
-    # create an iterator over the keys
-    it = iter(data)
-    # loop over the range of the length of the data
-    for i in range(0, len(data), size):
-        # yield a dictionary with a slice of keys and their values
-        yield {k: data [k] for k in islice(it, size)}
 
 def delete_search_entries(deleted_content_blobs: dict) -> None:
     '''Takes a list of content blobs that were deleted in a previous
@@ -122,21 +121,37 @@ def main(mytimer: func.TimerRequest) -> None:
     # Create Blob Service Client
     blob_service_client = BlobServiceClient.from_connection_string(blob_connection_string)
     deleted_blobs = get_deleted_blobs(blob_service_client)
-    deleted_content_blobs = delete_content_blobs(blob_service_client, deleted_blobs)
-    logging.info("%s content blobs were deleted.", str(len(deleted_content_blobs)))
-    delete_search_entries(deleted_content_blobs)
-    tags_helper.delete_docs(deleted_blobs)
 
-    for doc in deleted_blobs:
-        doc_base = os.path.basename(doc)
-        doc_path = f"upload/{format(doc)}"
+    blob_name = ""
+    try:
+        for blob in deleted_blobs:
+            blob_name = blob
+            deleted_content_blobs = delete_content_blobs(blob_service_client, blob)
+            logging.info("%s content blobs deleted.", str(len(deleted_content_blobs)))
+            delete_search_entries(deleted_content_blobs)
+            tags_helper.delete_doc(blob)
 
+            # for doc in deleted_blobs:
+            doc_base = os.path.basename(blob)
+            doc_path = f"upload/{format(blob)}"
+
+            temp_doc_id = status_log.encode_document_id(doc_path)
+
+            logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
+
+            status_log.upsert_document(doc_path,
+                                    'Document chunks, tags, and entries in AI Search have been deleted',
+                                    StatusClassification.INFO,
+                                    State.DELETED)
+            status_log.save_document(doc_path)
+    except Exception as err:
+        logging.info("An exception occured with doc %s: %s", blob_name, str(err))
+        doc_base = os.path.basename(blob)
+        doc_path = f"upload/{format(blob)}"
         temp_doc_id = status_log.encode_document_id(doc_path)
-
         logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
-
         status_log.upsert_document(doc_path,
-                                   'Document chunks, tags, and entries in AI Search have been deleted',
-                                   StatusClassification.INFO,
-                                   State.DELETED)
+                                f'Error deleting document from system: {str(err)}',
+                                StatusClassification.ERROR,
+                                State.ERROR)
         status_log.save_document(doc_path)

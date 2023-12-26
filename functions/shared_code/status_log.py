@@ -151,15 +151,17 @@ class StatusLog:
             else:
                 json_document = self._log_document[document_id]
 
-            if json_document['state'] != State.DELETED.value:
+            json_state = json_document['state']
+            if json_state != State.DELETED.value and json_state != State.ERROR.value:
                 # Check if there has been a state change, and therefore to update state
                 if json_document['state'] != state.value:
                     json_document['state'] = state.value
-                    json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                    
+                    json_document['state_timestamp'] = str(datetime
+                                                           .now()
+                                                           .strftime('%Y-%m-%d %H:%M:%S'))
+
                 # Update state description with latest status
                 json_document['state_description'] = status
-
                 # Append a new item to the array
                 status_updates = json_document["status_updates"]
                 new_item = {
@@ -170,10 +172,11 @@ class StatusLog:
 
                 if status_classification == StatusClassification.ERROR:
                     new_item["stack_trace"] = self.get_stack_trace()
-
                 status_updates.append(new_item)
             else:
-                logging.debug("%s is already marked as deleted. No new status to update.", document_path)
+                logging.debug("%s is already marked as %s. No new status to update.",
+                              document_path,
+                              json_state)
         except exceptions.CosmosResourceNotFoundError:
             if state != State.DELETED:
                 # this is a valid new document
@@ -193,9 +196,10 @@ class StatusLog:
                         }
                     ]
                 }
-            else:
+            elif state == State.DELETED:
                 # the status file was previously deleted. Do nothing.
-                logging.debug("No record found for deleted document %s. Nothing to do.", document_path)
+                logging.debug("No record found for deleted document %s. Nothing to do.",
+                              document_path)
         except Exception as err:
             # log the exception with stack trace to the status log
             logging.error("Unexpected exception upserting document %s", str(err))

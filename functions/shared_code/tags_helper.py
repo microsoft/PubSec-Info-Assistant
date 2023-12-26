@@ -63,14 +63,13 @@ class TagsHelper:
             stackstr += '  ' + traceback.format_exc().lstrip(trc)
         return stackstr
 
-    def delete_docs(self, doc_list: list) -> None:
-        '''Deletes tag docs for a list of file paths'''
-        for doc in doc_list:
-            doc_id = self.encode_document_id(f"upload/{doc}")
-            file_path = f"upload/{doc}"
-            logging.debug("deleting tags item for doc %s \n \t with ID %s", doc, doc_id)
-            try:
-                self.container.delete_item(item=doc_id, partition_key=file_path)
-                logging.info("deleted tags for document path %s", file_path)
-            except exceptions.CosmosResourceNotFoundError:
-                logging.info("Tag entry for %s already deleted", file_path)
+    def delete_doc(self, doc: str) -> None:
+        '''Deletes tag docs for a file paths'''
+        doc_id = self.encode_document_id(f"upload/{doc}")
+        file_path = f"upload/{doc}"
+        logging.debug("deleting tags item for doc %s \n \t with ID %s", doc, doc_id)
+        try:
+            self.container.delete_item(item=doc_id, partition_key=file_path)
+            logging.info("deleted tags for document path %s", file_path)
+        except exceptions.CosmosResourceNotFoundError:
+            logging.info("Tag entry for %s already deleted", file_path)

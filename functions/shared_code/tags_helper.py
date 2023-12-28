@@ -1,9 +1,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-from azure.cosmos import CosmosClient, PartitionKey
+from azure.cosmos import CosmosClient, PartitionKey, exceptions
 import traceback, sys
 import base64
+import logging
 
 class TagsHelper:
     """ Helper class for tag functions"""
@@ -33,7 +34,7 @@ class TagsHelper:
         query = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
         tag_array = self.container.query_items(query=query, enable_cross_partition_query=True)
         return ",".join(tag_array)
-    
+
     def upsert_document(self, document_path, tags_list):
         """ Upserts a document into the database """
         document_id = self.encode_document_id(document_path)
@@ -48,7 +49,7 @@ class TagsHelper:
         """ encode a path/file name to remove unsafe chars for a cosmos db id """
         safe_id = base64.urlsafe_b64encode(document_id.encode()).decode()
         return safe_id
-    
+
     def get_stack_trace(self):
         """ Returns the stack trace of the current exception"""
         exc = sys.exc_info()[0]
@@ -61,3 +62,14 @@ class TagsHelper:
         if exc is not None:
             stackstr += '  ' + traceback.format_exc().lstrip(trc)
         return stackstr
+
+    def delete_doc(self, doc: str) -> None:
+        '''Deletes tag docs for a file paths'''
+        doc_id = self.encode_document_id(f"upload/{doc}")
+        file_path = f"upload/{doc}"
+        logging.debug("deleting tags item for doc %s \n \t with ID %s", doc, doc_id)
+        try:
+            self.container.delete_item(item=doc_id, partition_key=file_path)
+            logging.info("deleted tags for document path %s", file_path)
+        except exceptions.CosmosResourceNotFoundError:
+            logging.info("Tag entry for %s already deleted", file_path)

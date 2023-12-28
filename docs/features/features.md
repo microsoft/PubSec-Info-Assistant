@@ -95,6 +95,10 @@ To learn more, please visit the [Cognitive Search](/docs/features/cognitive_sear
 
 The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page.
 
+## Document Deletion
+
+In order to delete a document from the system entirely, one must only delete the document from the upload container in the `infoasststore*****` Storage Account. The Azure Function `FileDeletion` runs on a 10 minute timer and will delete the relevant documents from the content Storage container, the AI Search Index, and the Cosmos DB tag container. It will then update the state of the document, which can be viewed in the Upload Status portion of the UI under the Manage Content tab at the top right.
+
 ## Works in Progress (Future releases)
 
 ### Image Similarity Search
@@ -104,3 +108,7 @@ We've starting with text-based image retrieval, but in the future, we have plans
 ### Adding Evaluation Guidance and Metrics
 
 To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
+
+### File Deletion in the UI
+
+The ability to delete documents from the system will be enabled through a future UI update.

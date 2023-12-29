@@ -386,3 +386,10 @@ packages-microsoft*
 
 # docker container build artifacts
 app/enrichment/shared_code
+
+#terraform
+.terraform
+infra-tf/.terraform
+infra/.terraform
+terraform.tfstate
+terraform.tfstate.d

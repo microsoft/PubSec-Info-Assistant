@@ -22,7 +22,7 @@ build-containers: extract-env
 	@./app/enrichment/docker-build.sh
 
 infrastructure: check-subscription ## Deploy infrastructure
-	@./scripts/inf-create.sh
+	@./scripts-tf/inf-create.sh
 
 extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
 	 @./scripts/json-to-env.sh < infra_output.json > ./scripts/environments/infrastructure.env

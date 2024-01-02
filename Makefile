@@ -16,7 +16,7 @@ build-deploy-enrichments: build extract-env deploy-enrichments ##Build and Deplo
 build-deploy-functions: build extract-env deploy-functions ##Build and Deploy the Functions
 
 build: ## Build application code
-	@./scripts/build.sh
+	@./scripts-tf/build.sh
 
 build-containers: extract-env
 	@./app/enrichment/docker-build.sh
@@ -24,30 +24,30 @@ build-containers: extract-env
 infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts-tf/inf-create.sh
 
-extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
-	 @./scripts/json-to-env.sh < infra_output.json > ./scripts/environments/infrastructure.env
+extract-env: #extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
+	 @./scripts-tf/json-to-env.sh < inf_output.json > ./scripts-tf/environments/infrastructure.env
 
 deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
-	@./scripts/deploy-webapp.sh
+	@./scripts-tf/deploy-webapp.sh
 
 deploy-functions: extract-env ## Deploys the function code to Azure Function Host
-	@./scripts/deploy-functions.sh
+	@./scripts-tf/deploy-functions.sh
 
 deploy-enrichments: extract-env ## Deploys the web app code to Azure App Service
-	@./scripts/deploy-enrichment-webapp.sh
+	@./scripts-tf/deploy-enrichment-webapp.sh
 
 deploy-search-indexes: extract-env ## Deploy search indexes
-	@./scripts/deploy-search-indexes.sh
+	@./scripts-tf/deploy-search-indexes.sh
 
 extract-env-debug-webapp: ## Extract infrastructure.debug.env file from BICEP output
-	@./scripts/json-to-env.webapp.debug.sh < infra_output.json > ./scripts/environments/infrastructure.debug.env
+	@./scripts-tf/json-to-env.webapp.debug.sh < inf_output.json > ./scripts/environments/infrastructure.debug.env
 
 extract-env-debug-functions: ## Extract local.settings.json to debug functions from BICEP output
-	@./scripts/json-to-env.function.debug.sh < infra_output.json > ./functions/local.settings.json
+	@./scripts-tf/json-to-env.function.debug.sh < inf_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
 check-subscription:
-	@./scripts/check-subscription.sh 
+	@./scripts-tf/check-subscription.sh 
 
 # CI rules (used by automated builds)
 take-dir-ownership:

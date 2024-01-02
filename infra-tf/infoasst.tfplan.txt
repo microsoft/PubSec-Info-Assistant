@@ -7,22 +7,16 @@ Terraform will perform the following actions:
 
   # module.backend.azurerm_app_service.app_service will be updated in-place
   ~ resource "azurerm_app_service" "app_service" {
+      ~ app_settings                      = {
+          ~ "AZURE_CLIENT_SECRET"                   = (sensitive value)
+            # (38 unchanged elements hidden)
+        }
         id                                = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1/providers/Microsoft.Web/sites/infoasst-web-axyz"
         name                              = "infoasst-web-axyz"
         tags                              = {}
-        # (17 unchanged attributes hidden)
+        # (16 unchanged attributes hidden)
 
-      ~ auth_settings {
-            # (5 unchanged attributes hidden)
-
-          + active_directory {
-              + allowed_audiences = [
-                  + "api://infoasst-web-axyz",
-                ]
-            }
-        }
-
-        # (4 unchanged blocks hidden)
+        # (5 unchanged blocks hidden)
     }
 
   # module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs will be updated in-place
@@ -224,4 +218,13 @@ Terraform will perform the following actions:
         # (4 unchanged blocks hidden)
     }
 
-Plan: 0 to add, 4 to change, 0 to destroy.
+  # module.kvModule.azurerm_key_vault_secret.spClientKeySecret will be updated in-place
+  ~ resource "azurerm_key_vault_secret" "spClientKeySecret" {
+        id                      = "https://infoasst-kv-axyz.vault.azure.net/secrets/AZURE-CLIENT-SECRET/3017c59654dd42d49468a484d1ed04a5"
+        name                    = "AZURE-CLIENT-SECRET"
+        tags                    = {}
+      ~ value                   = (sensitive value)
+        # (5 unchanged attributes hidden)
+    }
+
+Plan: 0 to add, 5 to change, 0 to destroy.

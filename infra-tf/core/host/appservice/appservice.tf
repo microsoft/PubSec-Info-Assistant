@@ -52,6 +52,8 @@ resource "azurerm_app_service" "app_service" {
 
   auth_settings {
     enabled = true
+    default_provider = "AzureActiveDirectory"
+    issuer = "https://sts.windows.net/${var.tenantId}/v2.0"
     active_directory {
       client_id = var.aadClientId
       allowed_audiences = [
@@ -60,6 +62,25 @@ resource "azurerm_app_service" "app_service" {
     }
   }
 }
+
+# resource "azurerm_app_service_auth_settings" "auth_settings" {
+#   resource_group_name = var.resourceGroupName
+#   app_service_name    = azurerm_app_service.app_service.name
+
+#   enabled = true
+
+#   unauthenticated_client_action = "RedirectToLoginPage"
+#   token_store_enabled           = true
+
+#   active_directory {
+#     client_id     = var.aadClientId
+#     client_secret = var.aadClientSecret
+#   }
+
+#   allowed_external_redirect_urls = [
+#     "api://${azurerm_app_service.app_service.name}"
+#   ]
+# }
 
 resource "azurerm_key_vault" "key_vault" {
   count               = var.keyVaultName != "" ? 1 : 0
@@ -117,7 +138,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   }
 }
 
-output "identity_principal_id" {
+output "identityPrincipalId" {
   value = var.managedIdentity ? azurerm_app_service.app_service.identity.0.principal_id : ""
 }
 

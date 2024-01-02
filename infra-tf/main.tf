@@ -87,6 +87,7 @@ module "enrichmentApp" {
   tags = local.tags
   runtimeName = "python"
   runtimeVersion = "3.10"
+  linuxFxVersion = "PYTHON|3.10"
   scmDoBuildDuringDeployment = true
   managedIdentity = true
   logAnalyticsWorkspaceName = module.logging.logAnalyticsName
@@ -97,34 +98,35 @@ module "enrichmentApp" {
   appCommandLine = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
   resourceGroupName = azurerm_resource_group.rg.name
   appSettings = {
-    azureBlobStorageKey = module.storage.key
-    embeddingsQueue = var.embeddingsQueue
-    logLevel = "DEBUG"
-    dequeueMessageBatchSize = 1
-    azureBlobStorageAccount = module.storage.name
-    azureBlobStorageContainer = var.containerName
-    azureBlobStorageUploadContainer = var.uploadContainerName
-    azureBlobStorageEndpoint = module.storage.primary_endpoints
-    cosmosdbUrl = module.cosmosdb.CosmosDBEndpointURL
-    cosmosdbKey = module.cosmosdb.CosmosDBKey
-    cosmosdbLogDatabaseName = module.cosmosdb.CosmosDBLogDatabaseName
-    cosmosdbLogContainerName = module.cosmosdb.CosmosDBLogContainerName
-    cosmosdbTagsDatabaseName = module.cosmosdb.CosmosDBTagsDatabaseName
-    cosmosdbTagsContainerName = module.cosmosdb.CosmosDBTagsContainerName
-    maxEmbeddingRequeueCount = 5
-    embeddingRequeueBackoff = 60
-    azureOpenAIService = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
-    azureOpenAIServiceKey = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
-    azureOpenAIEmbeddingDeploymentName = var.azureOpenAIEmbeddingDeploymentName
-    azureSearchIndex = var.searchIndexName
-    azureSearchServiceKey = module.searchServices.searchServiceKey
-    azureSearchService = module.searchServices.name
-    blobConnectionString = module.storage.connection_string
-    azureStorageConnectionString = module.storage.connection_string
-    targetEmbeddingsModel = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    embeddingVectorSize = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
-    azureSearchServiceEndpoint = module.searchServices.endpoint
-    websitesContainerStartTimeLimit = 600
+    AZURE_BLOB_STORAGE_KEY = module.storage.key
+    EMBEDDINGS_QUEUE = var.embeddingsQueue
+    LOG_LEVEL = "DEBUG"
+    DEQUEUE_MESSAGE_BATCH_SIZE = 1
+    AZURE_BLOB_STORAGE_ACCOUNT = module.storage.name
+    AZURE_BLOB_STORAGE_CONTAINER = var.containerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER = var.uploadContainerName
+    AZURE_BLOB_STORAGE_ENDPOINT = module.storage.primary_endpoints
+    COSMOSDB_URL = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_KEY = module.cosmosdb.CosmosDBKey
+    COSMOSDB_LOG_DATABASE_NAME = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME = module.cosmosdb.CosmosDBLogContainerName
+    COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
+    COSMOSDB_TAGS_CONTAINER_NAME = module.cosmosdb.CosmosDBTagsContainerName
+    MAX_EMBEDDING_REQUEUE_COUNT = 5
+    EMBEDDING_REQUEUE_BACKOFF = 60
+    AZURE_OPENAI_SERVICE = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
+    # AZURE_OPENAI_RESOURCE_GROUP: var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
+    AZURE_OPENAI_SERVICE_KEY = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
+    AZURE_SEARCH_INDEX = var.searchIndexName
+    AZURE_SEARCH_SERVICE_KEY = module.searchServices.searchServiceKey
+    AZURE_SEARCH_SERVICE = module.searchServices.name
+    BLOB_CONNECTION_STRING = module.storage.connection_string
+    AZURE_STORAGE_CONNECTION_STRING = module.storage.connection_string
+    TARGET_EMBEDDINGS_MODEL = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    EMBEDDING_VECTOR_SIZE = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
+    AZURE_SEARCH_SERVICE_ENDPOINT = module.searchServices.endpoint
+    WEBSITES_CONTAINER_START_TIME_LIMIT = 600
   }
 }
 
@@ -152,43 +154,43 @@ module "backend" {
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
 
   app_settings = {
-    applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
-    azureBlobStorageAccount = module.storage.name
-    azureBlobStorageEndpoint = module.storage.primary_endpoints
-    azureBlobStorageContainer = var.containerName
-    azureBlobStorageUploadContainer = var.uploadContainerName
-    azureBlobStorageKey = module.storage.key
-    azureOpenAIService = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
-    azureOpenAIResourceGroup = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-    azureSearchIndex = var.searchIndexName
-    azureSearchService = module.searchServices.name
-    azureSearchServiceEndpoint = module.searchServices.endpoint
-    azureSearchServiceKey = module.searchServices.searchServiceKey
-    azureOpenAIChatGptDeployment = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-    azureOpenAIChatGptModelName = var.chatGptModelName
-    azureOpenAIChatGptModelVersion = var.chatGptModelVersion
-    useAzureOpenAIEmbeddings = var.useAzureOpenAIEmbeddings
-    embeddingDeploymentName = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
-    azureOpenAIEmbeddingsModelName = var.azureOpenAIEmbeddingsModelName
-    azureOpenAIEmbeddingsModelVersion = var.azureOpenAIEmbeddingsModelVersion
-    azureOpenAIServiceKey = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
-    appInsightsInstrumentationKey = module.logging.applicationInsightsInstrumentationKey
-    cosmosDbUrl = module.cosmosdb.CosmosDBEndpointURL
-    cosmosDbKey = module.cosmosdb.CosmosDBKey
-    cosmosDbLogDatabaseName = module.cosmosdb.CosmosDBLogDatabaseName
-    cosmosDbLogContainerName = module.cosmosdb.CosmosDBLogContainerName
-    cosmosDbTagsDatabaseName = module.cosmosdb.CosmosDBTagsDatabaseName
-    cosmosDbTagsContainerName = module.cosmosdb.CosmosDBTagsContainerName
-    queryTermLanguage = var.queryTermLanguage
-    azureClientId = var.aadMgmtClientId
-    azureClientSecret = var.aadMgmtClientSecret
-    azureTenantId = var.tenantId
-    azureSubscriptionId = var.subscriptionId
-    isGovCloudDeployment = var.isGovCloudDeployment
-    chatWarningBannerText = var.chatWarningBannerText
-    targetEmbeddingsModel = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    enrichmentAppServiceName = module.enrichmentApp.name
-    applicationTitle = var.applicationtitle
+    APPLICATIONINSIGHTS_CONNECTION_STRING = module.logging.applicationInsightsConnectionString
+    AZURE_BLOB_STORAGE_ACCOUNT = module.storage.name
+    AZURE_BLOB_STORAGE_ENDPOINT = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_CONTAINER = var.containerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER = var.uploadContainerName
+    AZURE_BLOB_STORAGE_KEY = module.storage.key
+    AZURE_OPENAI_SERVICE = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
+    AZURE_OPENAI_RESOURCE_GROUP = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
+    AZURE_SEARCH_INDEX = var.searchIndexName
+    AZURE_SEARCH_SERVICE = module.searchServices.name
+    AZURE_SEARCH_SERVICE_ENDPOINT = module.searchServices.endpoint
+    AZURE_SEARCH_SERVICE_KEY = module.searchServices.searchServiceKey
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
+    AZURE_OPENAI_CHATGPT_MODEL_NAME = var.chatGptModelName
+    AZURE_OPENAI_CHATGPT_MODEL_VERSION = var.chatGptModelVersion
+    USE_AZURE_OPENAI_EMBEDDINGS = var.useAzureOpenAIEmbeddings
+    EMBEDDING_DEPLOYMENT_NAME = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = var.azureOpenAIEmbeddingsModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION = var.azureOpenAIEmbeddingsModelVersion
+    AZURE_OPENAI_SERVICE_KEY = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
+    APPINSIGHTS_INSTRUMENTATIONKEY = module.logging.applicationInsightsInstrumentationKey
+    COSMOSDB_URL = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_KEY = module.cosmosdb.CosmosDBKey
+    COSMOSDB_LOG_DATABASE_NAME = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME = module.cosmosdb.CosmosDBLogContainerName
+    COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
+    COSMOSDB_TAGS_CONTAINER_NAME = module.cosmosdb.CosmosDBTagsContainerName
+    QUERY_TERM_LANGUAGE = var.queryTermLanguage
+    AZURE_CLIENT_ID = var.aadMgmtClientId
+    AZURE_CLIENT_SECRET = var.aadMgmtClientSecret
+    AZURE_TENANT_ID = var.tenantId
+    AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
+    IS_GOV_CLOUD_DEPLOYMENT = var.isGovCloudDeployment
+    CHAT_WARNING_BANNER_TEXT = var.chatWarningBannerText
+    TARGET_EMBEDDINGS_MODEL = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    ENRICHMENT_APPSERVICE_NAME = module.enrichmentApp.name
+    APPLICATION_TITLE = var.applicationtitle
   }
 
   aadClientId = var.aadWebClientId
@@ -403,50 +405,50 @@ module "userRoles" {
 
 
 # # // SYSTEM IDENTITIES
-# module "openAiRoleBackend" {
-#   source = "./core/security/role"
+module "openAiRoleBackend" {
+  source = "./core/security/role"
 
-#   scope            = azurerm_resource_group.rg.id
-#   principalId      = module.backend.identityPrincipalId
-#   roleDefinitionId = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
-#   principalType    = "ServicePrincipal"
-#   subscriptionId   = data.azurerm_client_config.current.subscription_id
-#   resourceGroupId  = azurerm_resource_group.rg.id
-# }
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.backend.identityPrincipalId
+  roleDefinitionId = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
 
 
-# module "ACRRoleContainerAppService" {
-#   source = "./core/security/role"
+module "ACRRoleContainerAppService" {
+  source = "./core/security/role"
 
-#   scope            = azurerm_resource_group.rg.id
-#   principalId     = module.enrichmentApp.identityPrincipalId
-#   roleDefinitionId = "7f951dda-4ed3-4680-a7ca-43fe172d538d"
-#   principalType   = "ServicePrincipal"
-#   subscriptionId   = data.azurerm_client_config.current.subscription_id
-#   resourceGroupId  = azurerm_resource_group.rg.id
-# }
+  scope            = azurerm_resource_group.rg.id
+  principalId     = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = "7f951dda-4ed3-4680-a7ca-43fe172d538d"
+  principalType   = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
 
-# module "storageRoleBackend" {
-#   source = "./core/security/role"
+module "storageRoleBackend" {
+  source = "./core/security/role"
 
-#   scope            = azurerm_resource_group.rg.id
-#   principalId      = module.backend.identityPrincipalId
-#   roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
-#   principalType    = "ServicePrincipal"
-#   subscriptionId   = data.azurerm_client_config.current.subscription_id
-#   resourceGroupId  = azurerm_resource_group.rg.id
-# }
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.backend.identityPrincipalId
+  roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
 
-# module "searchRoleBackend" {
-#   source = "./core/security/role"
+module "searchRoleBackend" {
+  source = "./core/security/role"
 
-#   scope            = azurerm_resource_group.rg.id
-#   principalId      = module.backend.identityPrincipalId
-#   roleDefinitionId = "1407120a-92aa-4202-b7e9-c0e197c71c8f"
-#   principalType    = "ServicePrincipal"
-#   subscriptionId   = data.azurerm_client_config.current.subscription_id
-#   resourceGroupId  = azurerm_resource_group.rg.id
-# }
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.backend.identityPrincipalId
+  roleDefinitionId = "1407120a-92aa-4202-b7e9-c0e197c71c8f"
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
 
 module "storageRoleFunc" {
   source = "./core/security/role"
@@ -459,29 +461,34 @@ module "storageRoleFunc" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-# module "containerRegistryPush" {
-#   source = "./core/security/role"
+module "containerRegistryPush" {
+  source = "./core/security/role"
 
-#   scope            = azurerm_resource_group.rg.id
-#   principalId      = var.aadMgmtServicePrincipalId
-#   roleDefinitionId = "8311e382-0749-4cb8-b61a-304f252e45ec"
-#   principalType    = "ServicePrincipal"
-#   subscriptionId   = data.azurerm_client_config.current.subscription_id
-#   resourceGroupId  = azurerm_resource_group.rg.id
-# }
+  scope            = azurerm_resource_group.rg.id
+  principalId      = var.aadMgmtServicePrincipalId
+  roleDefinitionId = "8311e382-0749-4cb8-b61a-304f252e45ec"
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
 
-# # // MANAGEMENT SERVICE PRINCIPAL
-# module "openAiRoleMgmt" {
-#   source = "./core/security/role"
-#   count  = var.isInAutomation ? 0 : 1
+# // MANAGEMENT SERVICE PRINCIPAL
+data "azurerm_resource_group" "existing" {
+  count = var.useExistingAOAIService ? 1 : 0
+  name  = var.azureOpenAIResourceGroup
+}
+module "openAiRoleMgmt" {
+  source = "./core/security/role"
+  count  = var.isInAutomation ? 0 : 1
 
-#   scope            = var.useExistingAOAIService && !var.isGovCloudDeployment ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-#   principalId     = var.aadMgmtServicePrincipalId
-#   roleDefinitionId = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
-#   principalType   = "ServicePrincipal"
-#   subscriptionId   = data.azurerm_client_config.current.subscription_id
-#   resourceGroupId  = azurerm_resource_group.rg.id
-# }
+  # scope            = var.useExistingAOAIService && !var.isGovCloudDeployment ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.id
+  scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId     = var.aadMgmtServicePrincipalId
+  roleDefinitionId = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+  principalType   = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
 
 # module "azMonitor" {
 #   source = "./core/logging/monitor"

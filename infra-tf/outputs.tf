@@ -35,13 +35,13 @@ output "AZURE_STORAGE_UPLOAD_CONTAINER" {
   value = var.uploadContainerName
 }
 
-# output "BACKEND_URI" {
-#   value = azurerm_app_service.example.site_credential[0].default_site_hostname
-# }
+output "BACKEND_URI" {
+  value = module.backend.uri
+}
 
-# output "BACKEND_NAME" {
-#   value = azurerm_app_service.example.name
-# }
+output "BACKEND_NAME" {
+  value = module.backend.name 
+}
 
 output "RESOURCE_GROUP_NAME" {
   value = azurerm_resource_group.rg.name
@@ -55,9 +55,9 @@ output "AZURE_OPENAI_RESOURCE_GROUP" {
   value = var.azureOpenAIResourceGroup
 }
 
-# output "AZURE_FUNCTION_APP_NAME" {
-#   value = azurerm_function_app.example.name
-# }
+output "AZURE_FUNCTION_APP_NAME" {
+  value = module.functions.function_app_name
+}
 
 output "AZURE_COSMOSDB_URL" {
   value = module.cosmosdb.CosmosDBEndpointURL
@@ -164,9 +164,9 @@ output "EMBEDDING_DEPLOYMENT_NAME" {
   value = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
 }
 
-# output "ENRICHMENT_APPSERVICE_NAME" {
-#   value = azurerm_app_service.example.name
-# }
+output "ENRICHMENT_APPSERVICE_NAME" {
+  value = module.enrichmentApp.name
+}
 
 output "DEPLOYMENT_KEYVAULT_NAME" {
   value = module.kvModule.keyVaultName

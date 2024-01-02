@@ -135,6 +135,10 @@ export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
 export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
 export TF_VAR_kvAccessObjectId=$kvAccessObjectId
 export TF_VAR_principalId=$signedInUserId
+export TF_VAR_aadMgmtClientId=$aadMgmtAppId
+export TF_VAR_aadMgmtClientSecret=$aadMgmtAppSecret
+export TF_VAR_aadMgmtServicePrincipalId=$aadMgmtSPId
+export TF_VAR_aadWebClientId=$aadWebAppId
 
 if [ -n "${IN_AUTOMATION}" ]; then 
   export IS_IN_AUTOMATION=true

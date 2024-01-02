@@ -58,7 +58,7 @@ output "name" {
   value = azurerm_app_service.app_service.name
 }
 
-output "identity_principal_id" {
+output "identityPrincipalId" {
   value = var.managedIdentity ? azurerm_app_service.app_service.identity.0.principal_id : ""
 }
 

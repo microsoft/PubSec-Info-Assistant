@@ -393,3 +393,7 @@ infra-tf/.terraform
 infra/.terraform
 terraform.tfstate
 terraform.tfstate.d
+.tfplan.txt
+infra-tf/infoasst
+infra-tf/infoasst.tfplan.txt
+infra/infoasst

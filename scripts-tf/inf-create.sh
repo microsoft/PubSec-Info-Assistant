@@ -139,6 +139,7 @@ export TF_VAR_aadMgmtClientId=$aadMgmtAppId
 export TF_VAR_aadMgmtClientSecret=$aadMgmtAppSecret
 export TF_VAR_aadMgmtServicePrincipalId=$aadMgmtSPId
 export TF_VAR_aadWebClientId=$aadWebAppId
+export TF_VAR_randomString=$RANDOM_STRING
 
 if [ -n "${IN_AUTOMATION}" ]; then 
   export IS_IN_AUTOMATION=true

@@ -5,25 +5,39 @@ plan. Resource actions are indicated with the following symbols:
 
 Terraform will perform the following actions:
 
-  # module.backend.azurerm_app_service.app_service will be updated in-place
-  ~ resource "azurerm_app_service" "app_service" {
-      ~ app_settings                      = {
+  # module.backend.azurerm_linux_web_app.app_service will be updated in-place
+  ~ resource "azurerm_linux_web_app" "app_service" {
+      ~ app_settings                                   = {
           ~ "AZURE_CLIENT_SECRET"                   = (sensitive value)
             # (38 unchanged elements hidden)
         }
-        id                                = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1/providers/Microsoft.Web/sites/infoasst-web-axyz"
-        name                              = "infoasst-web-axyz"
-        tags                              = {}
-        # (16 unchanged attributes hidden)
+      ~ ftp_publish_basic_authentication_enabled       = false -> true
+        id                                             = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1a/providers/Microsoft.Web/sites/infoasst-web-wlsgp"
+        name                                           = "infoasst-web-wlsgp"
+        tags                                           = {}
+      ~ webdeploy_publish_basic_authentication_enabled = false -> true
+        # (18 unchanged attributes hidden)
 
-        # (5 unchanged blocks hidden)
+      ~ logs {
+            # (2 unchanged attributes hidden)
+
+          ~ http_logs {
+              ~ file_system {
+                  ~ retention_in_days = 0 -> 1
+                    # (1 unchanged attribute hidden)
+                }
+            }
+
+            # (1 unchanged block hidden)
+        }
+
+        # (3 unchanged blocks hidden)
     }
 
   # module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs will be updated in-place
   ~ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
-        id                             = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1/providers/Microsoft.Web/sites/infoasst-web-axyz|infoasst-web-axyz"
-      + log_analytics_destination_type = "AzureDiagnostics"
-        name                           = "infoasst-web-axyz"
+        id                         = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1a/providers/Microsoft.Web/sites/infoasst-web-wlsgp|infoasst-web-wlsgp"
+        name                       = "infoasst-web-wlsgp"
         # (2 unchanged attributes hidden)
 
       - log {
@@ -113,9 +127,8 @@ Terraform will perform the following actions:
 
   # module.enrichmentApp.azurerm_monitor_diagnostic_setting.example will be updated in-place
   ~ resource "azurerm_monitor_diagnostic_setting" "example" {
-        id                             = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1/providers/Microsoft.Web/sites/infoasst-enrichmentweb-axyz|example"
-      + log_analytics_destination_type = "AzureDiagnostics"
-        name                           = "example"
+        id                         = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1a/providers/Microsoft.Web/sites/infoasst-enrichmentweb-wlsgp|example"
+        name                       = "example"
         # (2 unchanged attributes hidden)
 
       - log {
@@ -210,8 +223,8 @@ Terraform will perform the following actions:
           ~ "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"   = (sensitive value)
             # (50 unchanged elements hidden)
         }
-        id                              = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1/providers/Microsoft.Web/sites/infoasst-func-axyz"
-        name                            = "infoasst-func-axyz"
+        id                              = "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-ryon-tf-1a/providers/Microsoft.Web/sites/infoasst-func-wlsgp"
+        name                            = "infoasst-func-wlsgp"
         tags                            = {}
         # (18 unchanged attributes hidden)
 
@@ -220,7 +233,7 @@ Terraform will perform the following actions:
 
   # module.kvModule.azurerm_key_vault_secret.spClientKeySecret will be updated in-place
   ~ resource "azurerm_key_vault_secret" "spClientKeySecret" {
-        id                      = "https://infoasst-kv-axyz.vault.azure.net/secrets/AZURE-CLIENT-SECRET/3017c59654dd42d49468a484d1ed04a5"
+        id                      = "https://infoasst-kv-wlsgp.vault.azure.net/secrets/AZURE-CLIENT-SECRET/188080cf841c4d709c7b420e7c43748c"
         name                    = "AZURE-CLIENT-SECRET"
         tags                    = {}
       ~ value                   = (sensitive value)

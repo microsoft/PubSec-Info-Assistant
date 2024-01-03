@@ -25,6 +25,7 @@ from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.tags_helper import TagsHelper
 
 
+
 # === ENV Setup ===
 
 ENV = {
@@ -269,28 +270,8 @@ async def get_all_upload_status(request: Request):
         raise HTTPException(status_code=500, detail=str(ex))
     return results
 
-@app.route("/retryFile", methods=["POST"])
-async def retryFile():
-    filePath = request.json["filePath"]
-    try:
-
-        file_path_parsed = filePath.replace(AZURE_BLOB_STORAGE_UPLOAD_CONTAINER + "/", "")
-        blob = blob_client.get_blob_client(AZURE_BLOB_STORAGE_UPLOAD_CONTAINER, file_path_parsed)  
-  
-        if blob.exists():
-            raw_file = blob.download_blob().readall()
-  
-            # Overwrite the existing blob with new data
-            blob.upload_blob(raw_file, overwrite=True) 
-
-    except Exception as ex:
-        logging.exception("Exception in /retryFile")
-        return jsonify({"error": ex.message}), 500
-    
-    return jsonify({"status": 200})
-
-@app.route("/logstatus", methods=["POST"])
-async def logstatus():
+@app.post("/logstatus")
+async def logstatus(request: Request):
     """
     Log the status of a file upload to CosmosDB.
 
@@ -413,6 +394,29 @@ async def get_all_tags():
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex))
     return results
+
+@app.post("/retryFile")
+async def retryFile(request: Request):
+
+    json_body = await request.json()
+    filePath = json_body.get("filePath")
+    
+    try:
+
+        file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
+        blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
+
+        if blob.exists():
+            raw_file = blob.download_blob().readall()
+
+            # Overwrite the existing blob with new data
+            blob.upload_blob(raw_file, overwrite=True) 
+
+    except Exception as ex:
+        logging.exception("Exception in /retryFile")
+        raise HTTPException(status_code=500, detail=str(ex))
+    return {"status": 200}
+
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

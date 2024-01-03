@@ -9,19 +9,14 @@
             "name": "Python: WebApp backend",
             "type": "python",
             "request": "launch",
-            "module": "flask",
-            "cwd": "${workspaceFolder}/app/backend",
-            "env": {
-                "FLASK_APP": "app.py",
-                "FLASK_ENV": "development",
-                "FLASK_DEBUG": "0"
-            },
+            "module": "uvicorn",
             "args": [
-                "run",
-                "--no-debugger",
-                "--no-reload",
-                "-p 5000"
+                "app:app",
+                "--reload",
+                "--port",
+                "5000"
             ],
+            "cwd": "${workspaceFolder}/app/backend",
             "console": "integratedTerminal",
             "justMyCode": true,
             "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",

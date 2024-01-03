@@ -121,10 +121,12 @@ class Utilities:
                     if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
                         tag = "th"
                 cell_spans = ""
-                if hasattr(cell, 'columnSpan'):
+                #if hasattr(cell, 'columnSpan'):
+                if 'columnSpan' in cell:
                     if cell["columnSpan"] > 1:
                         cell_spans += f" colSpan={cell['columnSpan']}"
-                if hasattr(cell, 'rowSpan'):
+                #if hasattr(cell, 'rowSpan'):
+                if 'rowSpan' in cell:
                     if cell["rowSpan"] > 1:
                         cell_spans += f" rowSpan={cell['rowSpan']}"
                 table_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
@@ -310,12 +312,21 @@ class Utilities:
     def chunk_table_with_headers(self, prefix_text, table_html, standard_chunk_target_size, first_chunk_target_size, 
                                  previous_paragraph_element_is_a_table, previous_paragraph_text):
         soup = BeautifulSoup(table_html, 'html.parser')
-
-        # Check for and extract the thead and tbody, or default to entire table
-        thead = soup.find('th')
-        tbody = soup.find('tbody') or soup.find('table')
-        rows = soup.find_all('tr') if not tbody else tbody.find_all('tr')
+        rows = soup.find_all('tr')
         header_html = f"<table>{str(thead)}" if thead else "<table>"
+        
+        
+        
+        
+# NEED TO ADD CODE TO CHECK IF THE PREVIOUS PARA WAS A TABLE AND IF SO, USE THE HEADER ROWS FOR THIS NEW CHUNK 
+# WE NEED TO CHECK IF ITS AN ACTUAL CONTINUATION SOMEHOW. 
+# WE NEED A WAY TO FIND THE HEADER ROW(S) AND ADD THEM TO A STACK
+        
+        
+        
+        
+        
+        
         
         # check if this new table is a continuation of a table on a previous page. If yes
         # and it doesn't have a header row, apply the header row from the previous table
@@ -337,7 +348,7 @@ class Utilities:
 
         for i, row in enumerate(rows):
             row_html = str(row)
-            # Set a different chunk target size for the first iteration based on teh length of the prefix
+            # Set a different chunk target size for the first iteration based on the length of the prefix
             if i == 0:
                 chunk_target_size = first_chunk_target_size
             else: 
@@ -390,7 +401,7 @@ class Utilities:
                     # We need a speciality way of splitting a table that is greater than
                     # our target chunk size                    
                     if paragraph_element["type"] == "table":
-                        # set the taregt size of the first chunk to be teh standard max, minus the size
+                        # set the target size of the first chunk to be teh standard max, minus the size
                         # of the previous paragraph(s) which we need to incldue in the first
                         first_chunk_target_size = chunk_target_size - chunk_size
                         
@@ -498,9 +509,7 @@ class Utilities:
             else:
                 previous_paragraph_element_is_a_table = False
                 self.previous_table_header = ""
-                 
-
-        
+                         
             previous_paragraph_text = paragraph_text
             
             # If this is the last paragraph then write the chunk

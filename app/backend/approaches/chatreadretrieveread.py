@@ -44,7 +44,7 @@ class ChatReadRetrieveReadApproach(Approach):
     USER = "user"
     ASSISTANT = "assistant"
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
+    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about the Australian Charity and Not-for-profit Commission's data. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above in {query_term_language}
     Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
     

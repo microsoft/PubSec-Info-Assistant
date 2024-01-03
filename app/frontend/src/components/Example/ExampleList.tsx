@@ -11,9 +11,9 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "What impact does China have on climate change?", value: "What impact does China have on climate change?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "Provide a report comparing the Arleigh Burke destroyers with the Chinese Type 055.", value: "Provide a report comparing the Arleigh Burke destroyers with the Chinese Type 055." }
+    { text: "What was the total income in 2022 for the Brompton's Children Centre?", value: "What was the total income in 2022 for the Brompton's Children Centre?" },
+    { text: "Who are the Directors of New Haven Farm Home", value: "Who are the Directors of New Haven Farm Home" },
+    { text: "Does the Clarendon Children's Home report have a signed auditor's report?", value: "Does the Clarendon Children's Home report have a signed auditor's report?" }
 ];
 
 interface Props {

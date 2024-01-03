@@ -56,11 +56,11 @@ param azureOpenAIEmbeddingsModelVersion string = '2'
 param useAzureOpenAIEmbeddings bool = true
 param sentenceTransformersModelName string = 'BAAI/bge-small-en-v1.5'
 param sentenceTransformerEmbeddingVectorSize string = '384'
-param embeddingsDeploymentCapacity int = 240
+param embeddingsDeploymentCapacity int = 110
 param chatWarningBannerText string = ''
 param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
-param chatGptDeploymentCapacity int = 240
+param chatGptDeploymentCapacity int = 110
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750'

@@ -4,6 +4,8 @@
 import json
 import logging
 import os
+import threading
+import time
 import re
 from datetime import datetime
 from typing import List
@@ -276,9 +278,17 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     tagsHelper.upsert_document(blob_path, tags_list)
     return tags_list
 
-        
 @app.on_event("startup") 
-@repeat_every(seconds=5, logger=log, raise_exceptions=True)
+def startup_event():
+    poll_thread = threading.Thread(target=poll_queue_thread)
+    poll_thread.daemon = True
+    poll_thread.start()
+
+def poll_queue_thread():
+    while True:
+        poll_queue()
+        time.sleep(5)     
+        
 def poll_queue() -> None:
     """Polls the queue for messages and embeds them"""
     
@@ -293,6 +303,11 @@ def poll_queue() -> None:
     log.debug("Polling embeddings queue for messages...")
     response = queue_client.receive_messages(max_messages=int(ENV["DEQUEUE_MESSAGE_BATCH_SIZE"]))
     messages = [x for x in response]
+
+    if not messages:
+        log.debug("No messages to process. Waiting for a couple of minutes...")
+        time.sleep(120)  # Sleep for 2 minutes
+        return
 
     target_embeddings_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"])
 
@@ -318,10 +333,10 @@ def poll_queue() -> None:
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             chunks = list(chunk_list)
             i = 0
+            
             for chunk in chunks:
-
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.INDEXING)
-                # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING 
+                # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING
                 # open the file and extract the content
                 blob_path_plus_sas = utilities_helper.get_blob_and_sas(
                     ENV["AZURE_BLOB_STORAGE_CONTAINER"] + '/' + chunk.name)
@@ -345,15 +360,18 @@ def poll_queue() -> None:
                         chunk_dict["content"]
                     )
 
-                # create embedding
-                embedding = embed_texts(target_embeddings_model, [text])
-                if 'data' in embedding:
+
+                try:
+                    # try first to read the embedding from the chunk, in case it was already created
+                    embedding_data = chunk_dict['contentVector']
+                except KeyError:      
+                    # create embedding
+                    embedding = embed_texts(target_embeddings_model, [text])
                     embedding_data = embedding['data']
-                else:
-                    raise ValueError(embedding['message']) 
 
                 tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
 
+                # PRepare the index schema based representation of the chunk with the embedding
                 index_chunk = {}
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"
@@ -371,9 +389,15 @@ def poll_queue() -> None:
                 index_chunk['entities'] = chunk_dict["entities"]
                 index_chunk['key_phrases'] = chunk_dict["key_phrases"]
                 index_chunks.append(index_chunk)
+
+                # write the updated chunk, with embedding to storage in case of failure
+                chunk_dict['contentVector'] = embedding_data
+                json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
+                block_blob_client = blob_service_client.get_blob_client(container=ENV["AZURE_BLOB_STORAGE_CONTAINER"], blob=chunk.name)
+                block_blob_client.upload_blob(json_str, overwrite=True)
                 i += 1
                 
-                # push batch of content to index
+                # push batch of content to index, rather than each individual chunk
                 if i % 200 == 0:
                     index_sections(index_chunks)
                     index_chunks = []

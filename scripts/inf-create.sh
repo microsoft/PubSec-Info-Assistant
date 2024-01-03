@@ -87,6 +87,7 @@ if [ -n "${IN_AUTOMATION}" ]; then
       echo "Please create the Azure AD objects using the script at /scripts/create-ad-objs-for-deployment.sh and set the AD_WEBAPP_CLIENT_ID pipeline variable in Azure DevOps."
       exit 1  
     fi
+    aadWebSPId=$ARM_SERVICE_PRINCIPAL_ID
     aadMgmtAppId=$AD_MGMTAPP_CLIENT_ID
     aadMgmtAppSecret=$AD_MGMTAPP_CLIENT_SECRET
     aadMgmtSPId=$AD_MGMT_SERVICE_PRINCIPAL_ID
@@ -195,6 +196,9 @@ echo $parameter_json > $DIR/../infra/main.parameters.json
 
 #make sure bicep is always the latest version
 az bicep upgrade
+
+#Check and Remove if exists the CUA deployment Object to resolve Bicep limitations
+az deployment sub delete --name "pid-${CUSTOMER_USAGE_ATTRIBUTION_ID}"
 
 #deploy bicep
 az deployment sub what-if --location $LOCATION --template-file main.bicep --parameters main.parameters.json --name $RG_NAME

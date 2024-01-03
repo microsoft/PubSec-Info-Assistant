@@ -155,8 +155,8 @@ module funcServicePlan 'core/host/funcserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'S3'
-      capacity: 5
+      name: 'S2'
+      capacity: 2
     }
     kind: 'linux'
   }
@@ -175,11 +175,10 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
       tier: 'PremiumV3'
       size: 'P1v3'
       family: 'Pv3'
-      capacity: 3
+      capacity: 1
     }
     kind: 'linux'
     reserved: true
-    storageAccountId: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
   }
 }
 
@@ -204,7 +203,7 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
       LOG_LEVEL: 'DEBUG'
-      DEQUEUE_MESSAGE_BATCH_SIZE: 1
+      DEQUEUE_MESSAGE_BATCH_SIZE: 3
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName

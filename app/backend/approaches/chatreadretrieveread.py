@@ -45,18 +45,18 @@ class ChatReadRetrieveReadApproach(Approach):
     ASSISTANT = "assistant"
      
     system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources above in {query_term_language}
-    Your goal is to provide accurate and relevant answers based on the facts listed above in the provided source documents. Make sure to reference the above source documents appropriately and avoid making assumptions or adding personal opinions.
+    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
+    Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
+       
     
-    Emphasize the use of facts listed in the above provided source documents.Instruct the model to use source name for each fact used in the response.  Avoid generating speculative or generalized information. Each source has a file name followed by a pipe character and 
-    the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     Never cite the source content using the examples provided in this paragraph that start with info.
-    
+      
     Here is how you should answer every question:
     
-    -Look for relevant information in the above source documents to answer the question in {query_term_language}.
-    -If the source document does not include the exact answer, please respond with relevant information from the data in the response along with citation.You must include a citation to each document referenced.      
-    -If you cannot find any relevant information in the above sources, respond with I am not sure.Do not provide personal opinions or assumptions.
+    -Look for information in the source documents to answer the question in {query_term_language}.
+    -If the source document has an answer, please respond with citation.You must include a citation to each document referenced only once when you find answer in source documents.      
+    -If you cannot find answer in below sources, respond with I am not sure.Do not provide personal opinions or assumptions and do not include citations.
     
     {follow_up_questions_prompt}
     {injected_prompt}
@@ -170,7 +170,8 @@ class ChatReadRetrieveReadApproach(Approach):
             model=self.model_name,
             messages=messages,
             temperature=0.0,
-            max_tokens=32,
+            # max_tokens=32, # setting it too low may cause malformed JSON
+            max_tokens=100,
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
@@ -243,6 +244,18 @@ class ChatReadRetrieveReadApproach(Approach):
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
+        
+        #  #print search results with score
+        # for idx, doc in enumerate(r):  # for each document in the search results
+        #     print(f"File{idx}: ", doc['@search.score'])
+        
+        # cutoff_score=0.01
+        
+        # # Only include results where search.score is greater than cutoff_score
+        # filtered_results = [doc for doc in r if doc['@search.score'] > cutoff_score]
+        # # print("Filtered Results: ", len(filtered_results))
+        
+      
 
         for idx, doc in enumerate(r):  # for each document in the search results
             # include the "FileX" moniker in the prompt, and the actual file name in the response
@@ -322,7 +335,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 system_message,
                 self.model_name,
                 history,
-                history[-1]["user"] + "Sources:\n" + content + "\n\n",
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
                 self.response_prompt_few_shots,
                 max_tokens=self.chatgpt_token_limit - 500
             )
@@ -348,11 +361,12 @@ class ChatReadRetrieveReadApproach(Approach):
 
         elif self.model_name.startswith("gpt-4"):
             messages = self.get_messages_from_history(
-                "Sources:\n" + content + "\n\n" + system_message,
-                # system_message + "\n\nSources:\n" + content,
+                system_message,
+                # "Sources:\n" + content + "\n\n" + system_message,
                 self.model_name,
                 history,
-                history[-1]["user"],
+                # history[-1]["user"],
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
                 self.response_prompt_few_shots,
                 max_tokens=self.chatgpt_token_limit
             )

@@ -51,7 +51,7 @@ You can view the status up files that have been uploaded to the system through t
 
 ### Using sample data - optional
 
-Referring to the manage content sections above for [Upload files](/docs/images/upload-files-link.png) and [View upload status](/docs/images/view-upload-status-link.png), you can optionally load open source sample data for a demonstration of the Information Assistant. The following data sources may be useful for your initial demonstration purposes:
+Referring to the manage content sections above for [Upload files](/docs/images/upload-files-link.png) and [View upload status](/docs/images/view-upload-status-link.png), you can optionally load open source sample data to demonstrate the capabilities of the Information Assistant. The following data sources may be useful for your initial demonstration purposes:
 
 > 1. Microsoft financial statements are available at the SEC Filings site. This dataset enables the user to ask questions such as "What are Microsoft sources of revenue?". You can optionally load Microsoft's [SEC Filings at gcs-web.com](https://github.com/microsoft/PubSec-Info-Assistant/assets/113293560/6d813f55-b633-495d-b033-ede43a661f59)
 

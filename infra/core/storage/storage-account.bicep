@@ -19,6 +19,7 @@ param sku object = { name: 'Standard_LRS' }
 
 param containers array = []
 param queueNames array = []
+param keyVaultName string = ''
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
@@ -75,10 +76,26 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 
 }
 
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
+  name: keyVaultName
+}
+
+resource blobStorageKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+  parent: keyVault
+  name: 'AZURE-BLOB-STORAGE-KEY'
+  properties: {
+    value: storage.listKeys().keys[0].value 
+  }
+}
+
+resource blobConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+  parent: keyVault
+  name: 'BLOB-CONNECTION-STRING'
+  properties: {
+    value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}' 
+  }
+}
+
 output name string = storage.name
 output primaryEndpoints object = storage.properties.primaryEndpoints
-#disable-next-line outputs-should-not-contain-secrets 
-output key string = storage.listKeys().keys[0].value
-#disable-next-line outputs-should-not-contain-secrets
-output connectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
 output id string = storage.id

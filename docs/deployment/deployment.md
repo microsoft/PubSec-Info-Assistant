@@ -146,6 +146,8 @@ Once deployed, you can find the URL of your installation by:
 
 At this point deployment is complete. Please go to the [Using the IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md) section and complete the following steps.
 
+Review Considerations for adopting and [migrating to a production environment](/docs/deployment/considerations_production.md).
+
 ## Need Help?
 
 To review logs try [Using the Workbook Template](/docs/deployment/worbook_usage.md)

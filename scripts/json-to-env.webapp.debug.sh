@@ -134,6 +134,10 @@ jq -r  '
         {
             "path": "deploymenT_KEYVAULT_NAME",
             "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+        },
+        {
+            "path": "azurE_OPENAI_CHATGPT_MODEL_NAME",
+            "env_var": "AZURE_OPENAI_CHATGPT_MODEL_NAME"
         }
     ]
         as $env_vars_to_extract

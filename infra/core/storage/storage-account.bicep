@@ -20,6 +20,7 @@ param sku object = { name: 'Standard_LRS' }
 param containers array = []
 param queueNames array = []
 param keyVaultName string = ''
+param storeSecretsInKeyVault bool = false
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
@@ -76,11 +77,11 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 
 }
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName)) && storeSecretsInKeyVault) {
   name: keyVaultName
 }
 
-resource blobStorageKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+resource blobStorageKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (storeSecretsInKeyVault) {
   parent: keyVault
   name: 'AZURE-BLOB-STORAGE-KEY'
   properties: {
@@ -88,7 +89,7 @@ resource blobStorageKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
   }
 }
 
-resource blobConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+resource blobConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (storeSecretsInKeyVault) {
   parent: keyVault
   name: 'BLOB-CONNECTION-STRING'
   properties: {

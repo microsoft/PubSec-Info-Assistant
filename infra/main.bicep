@@ -385,6 +385,7 @@ module storage 'core/storage/storage-account.bicep' = {
     location: location
     tags: tags
     keyVaultName: kvModule.outputs.keyVaultName
+    storeSecretsInKeyVault: true
     publicNetworkAccess: 'Enabled'
     sku: {
       name: 'Standard_LRS'
@@ -447,6 +448,7 @@ module storageMedia 'core/storage/storage-account.bicep' = {
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}media${randomString}'
     keyVaultName: kvModule.outputs.keyVaultName
+    storeSecretsInKeyVault: false //Not needed for media service
     location: location
     tags: tags
     publicNetworkAccess: 'Enabled'

@@ -36,14 +36,6 @@ param blobStorageAccountOutputContainerName string
 @description('Azure Blob Storage Account Log Container Name')
 param blobStorageAccountLogContainerName string
 
-@description('Azure Blob Storage Account Key')
-@secure()
-param blobStorageAccountKey string
-
-@description('Azure Blob Storage Account Connection String')
-@secure()
-param blobStorageAccountConnectionString string
-
 @description('Chunk Target Size ')
 param chunkTargetSize string
 
@@ -56,16 +48,8 @@ param formRecognizerApiVersion string
 @description('Form Recognizer Endpoint')
 param formRecognizerEndpoint string
 
-@description('Form Recognizer API Key')
-@secure()
-param formRecognizerApiKey string
-
 @description('CosmosDB Endpoint')
 param CosmosDBEndpointURL string
-
-@description('CosmosDB Key')
-@secure()
-param CosmosDBKey string
 
 @description('CosmosDB Log Database Name')
 param CosmosDBLogDatabaseName string
@@ -121,9 +105,6 @@ param pollingBackoff string
 @description('The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response')
 param maxReadAttempts string
 
-@description('Key to access the enrichment service')
-param enrichmentKey string
-
 @description('Endpoint of the enrichment service')
 param enrichmentEndpoint string
 
@@ -154,8 +135,8 @@ param azureSearchIndex string
 @description('Endpoint of the Azure Search Service to post data to for ingestion')
 param azureSearchServiceEndpoint string
 
-@description('Used to connect and authenticate to Azure Search Service')
-param azureSearchServiceKey string
+@description('Name of the Azure KeyVault to pull Secret values and create Access Policy')
+param keyVaultName string = ''
 
 // Create function app resource
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
@@ -177,17 +158,17 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       connectionStrings: [
         {
           name: 'BLOB_CONNECTION_STRING'
-          connectionString: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
+          connectionString: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${existingStorageAccount.listKeys().keys[0].value}'
         }
       ]
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${existingStorageAccount.listKeys().keys[0].value}'
         }
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${blobStorageAccountKey}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${blobStorageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${existingStorageAccount.listKeys().keys[0].value}'
         }
         {
           name: 'WEBSITE_CONTENTSHARE'
@@ -235,7 +216,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_BLOB_STORAGE_KEY'
-          value: blobStorageAccountKey
+          value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-BLOB-STORAGE-KEY)'
         }
         {
           name: 'CHUNK_TARGET_SIZE'
@@ -255,11 +236,11 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_FORM_RECOGNIZER_KEY'
-          value: formRecognizerApiKey
+          value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-FORM-RECOGNIZER-KEY)'
         }
         {
           name: 'BLOB_CONNECTION_STRING'
-          value: blobStorageAccountConnectionString
+          value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/BLOB-CONNECTION-STRING)'
         }
         {
           name: 'COSMOSDB_URL'
@@ -267,7 +248,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'COSMOSDB_KEY'
-          value: CosmosDBKey
+          value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/COSMOSDB-KEY)'
         }
         {
           name: 'COSMOSDB_LOG_DATABASE_NAME'
@@ -343,7 +324,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'ENRICHMENT_KEY'
-          value: enrichmentKey
+          value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/ENRICHMENT-KEY)'
         }
         {
           name: 'ENRICHMENT_ENDPOINT'
@@ -379,7 +360,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'AZURE_SEARCH_SERVICE_KEY'
-          value: azureSearchServiceKey 
+          value: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)'
         }  
         {
           name: 'AZURE_SEARCH_SERVICE_ENDPOINT'
@@ -392,6 +373,33 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
 
       ]
     }
+  }
+}
+
+resource existingStorageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
+  name: blobStorageAccountName
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
+  name: keyVaultName
+}
+
+resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01' = {
+  parent: keyVault
+  name: 'add'
+  properties: {
+    accessPolicies: [
+      {
+        tenantId: functionApp.identity.tenantId
+        objectId: functionApp.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+      }
+    ]
   }
 }
 

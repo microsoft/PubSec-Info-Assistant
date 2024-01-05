@@ -199,8 +199,8 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
     applicationInsightsName: logging.outputs.applicationInsightsName
     healthCheckPath: '/health'
     appCommandLine: 'gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app'
+    keyVaultName: kvModule.outputs.keyVaultName
     appSettings: {
-      AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
       LOG_LEVEL: 'DEBUG'
       DEQUEUE_MESSAGE_BATCH_SIZE: 3
@@ -209,7 +209,6 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
       AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
-      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
       COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
       COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
@@ -217,19 +216,18 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       MAX_EMBEDDING_REQUEUE_COUNT: 5
       EMBEDDING_REQUEUE_BACKOFF: 60
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
-      AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingDeploymentName
       AZURE_SEARCH_INDEX: searchIndexName
-      AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
-      BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       WEBSITES_CONTAINER_START_TIME_LIMIT: 600
     }
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 // The application frontend
@@ -249,18 +247,17 @@ module backend 'core/host/appservice.bicep' = {
     applicationInsightsName: logging.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
     appSettings: {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
-      AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : rg.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
-      AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
       AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
@@ -268,17 +265,14 @@ module backend 'core/host/appservice.bicep' = {
       EMBEDDING_DEPLOYMENT_NAME: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
       AZURE_OPENAI_EMBEDDINGS_MODEL_NAME: azureOpenAIEmbeddingsModelName
       AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION: azureOpenAIEmbeddingsModelVersion
-      AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
-      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
       COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
       COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
       COSMOSDB_TAGS_CONTAINER_NAME: cosmosdb.outputs.CosmosDBTagsContainerName
       QUERY_TERM_LANGUAGE: queryTermLanguage
       AZURE_CLIENT_ID: aadMgmtClientId
-      AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
@@ -287,10 +281,11 @@ module backend 'core/host/appservice.bicep' = {
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       APPLICATION_TITLE: applicationtitle
     }
-
-
     aadClientId: aadWebClientId
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
@@ -345,6 +340,7 @@ module formrecognizer 'core/ai/formrecognizer.bicep' = {
       name: formRecognizerSkuName
     }
     isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
   }
 }
 
@@ -357,6 +353,7 @@ module enrichment 'core/ai/enrichment.bicep' = {
     tags: tags
     sku: enrichmentSkuName
     isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
   }
 }
 
@@ -365,6 +362,7 @@ module searchServices 'core/search/search-services.bicep' = {
   name: 'search-services'
   params: {
     name: !empty(searchServicesName) ? searchServicesName : '${prefix}-${abbrs.searchSearchServices}${randomString}'
+    keyVaultName: kvModule.outputs.keyVaultName
     location: location
     tags: tags
     authOptions: {
@@ -387,6 +385,8 @@ module storage 'core/storage/storage-account.bicep' = {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}${randomString}'
     location: location
     tags: tags
+    keyVaultName: kvModule.outputs.keyVaultName
+    storeSecretsInKeyVault: true
     publicNetworkAccess: 'Enabled'
     sku: {
       name: 'Standard_LRS'
@@ -448,6 +448,8 @@ module storageMedia 'core/storage/storage-account.bicep' = {
   scope: rg
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}media${randomString}'
+    keyVaultName: kvModule.outputs.keyVaultName
+    storeSecretsInKeyVault: false //Not needed for media service
     location: location
     tags: tags
     publicNetworkAccess: 'Enabled'
@@ -459,6 +461,9 @@ module storageMedia 'core/storage/storage-account.bicep' = {
       days: 7
     }
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 module cosmosdb 'core/db/cosmosdb.bicep' = {
@@ -468,11 +473,15 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
     name: !empty(cosmosdbName) ? cosmosdbName : '${prefix}-${abbrs.cosmosDBAccounts}${randomString}'
     location: location
     tags: tags
+    keyVaultName: kvModule.outputs.keyVaultName
     logDatabaseName: 'statusdb'
     logContainerName: 'statuscontainer'
     tagDatabaseName: 'tagdb'
     tagContainerName: 'tagcontainer'
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 
@@ -486,19 +495,16 @@ module functions 'core/function/function.bicep' = {
     tags: tags
     appServicePlanId: funcServicePlan.outputs.id
     runtime: 'python'
+    keyVaultName: kvModule.outputs.keyVaultName
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
-    blobStorageAccountKey: storage.outputs.key
     blobStorageAccountName: storage.outputs.name
     blobStorageAccountEndpoint: storage.outputs.primaryEndpoints.blob
-    blobStorageAccountConnectionString: storage.outputs.connectionString
     blobStorageAccountOutputContainerName: containerName
     blobStorageAccountUploadContainerName: uploadContainerName
     blobStorageAccountLogContainerName: functionLogsContainerName
     formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
-    formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
     CosmosDBEndpointURL: cosmosdb.outputs.CosmosDBEndpointURL
-    CosmosDBKey: cosmosdb.outputs.CosmosDBKey
     CosmosDBLogDatabaseName: cosmosdb.outputs.CosmosDBLogDatabaseName
     CosmosDBLogContainerName: cosmosdb.outputs.CosmosDBLogContainerName
     CosmosDBTagsDatabaseName: cosmosdb.outputs.CosmosDBTagsDatabaseName
@@ -520,7 +526,6 @@ module functions 'core/function/function.bicep' = {
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
     maxReadAttempts: maxReadAttempts
-    enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     enrichmentEndpoint: enrichment.outputs.cognitiveServiceEndpoint
     enrichmentName: enrichment.outputs.cognitiveServicerAccountName
     enrichmentLocation: location
@@ -531,13 +536,13 @@ module functions 'core/function/function.bicep' = {
     EMBEDDINGS_QUEUE: embeddingsQueue
     azureSearchIndex: searchIndexName
     azureSearchServiceEndpoint: searchServices.outputs.endpoint
-    azureSearchServiceKey: searchServices.outputs.searchServiceKey
 
   }
   dependsOn: [
     appServicePlan
     storage
     cosmosdb
+    kvModule
   ]
 }
 
@@ -705,14 +710,8 @@ module kvModule 'core/security/keyvault.bicep' = {
     name: '${prefix}-${abbrs.keyvault}${randomString}'
     location: location
     kvAccessObjectId: kvAccessObjectId
-    searchServiceKey: searchServices.outputs.searchServiceKey 
     openaiServiceKey: azureOpenAIServiceKey
-    cosmosdbKey: cosmosdb.outputs.CosmosDBKey
-    formRecognizerKey: formrecognizer.outputs.formRecognizerAccountKey
-    blobConnectionString: storage.outputs.connectionString
-    enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     spClientSecret: aadMgmtClientSecret
-    blobStorageKey: storage.outputs.key
   }
 }
 
@@ -758,7 +757,6 @@ output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
 output CHUNK_TARGET_SIZE string = chunkTargetSize
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
-output AzureWebJobsStorage string = storage.outputs.connectionString
 output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
 output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
 output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage

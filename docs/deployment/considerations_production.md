@@ -1,6 +1,6 @@
 # Considerations For Adopting Into Production
 
-This documentation outlines essential considerations for adopting the Information Assistant (IA) accelerator into a production environment. Focused on scalability, high availability, security, and proactive management, the recommendations cover various components, including App Server scaling, App Gateway deployment for handling increased traffic, Load Balancing strategies, and leveraging Azure Front Door for global-scale content delivery. Additional guidance is provided for GPT Model throttling, security enhancements through Private Endpoints, proactive monitoring with Azure Monitor, and ensuring redundancy through multiple OpenAI instances. Consider the importance of safeguarding against cyber threats, integrating seamlessly with existing ecosystems, and proactively managing the environment through comprehensive monitoring and alerting mechanisms. Overall, these considerations serve as a guide for teams deploying IA, ensuring a smooth transition from a Proof of Concept to a production-ready implementation.
+This documentation outlines essential considerations for moving into Production for teams deploying IA, ensuring a smooth transition from an accelerator to a production-ready implementation.
 
 ##  Scalability and High Availability
 

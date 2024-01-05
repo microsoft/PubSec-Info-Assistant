@@ -68,6 +68,11 @@ properties: {
       {
         SCM_DO_BUILD_DURING_DEPLOYMENT: toLower(string(scmDoBuildDuringDeployment))
         ENABLE_ORYX_BUILD: string(enableOryxBuild)
+        COSMOSDB_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/COSMOSDB-KEY)'
+        AZURE_SEARCH_SERVICE_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)'
+        BLOB_CONNECTION_STRING: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/BLOB-CONNECTION-STRING)'
+        AZURE_OPENAI_SERVICE_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)'
+        AZURE_BLOB_STORAGE_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-BLOB-STORAGE-KEY)'
       },
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
       !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})
@@ -89,6 +94,25 @@ properties: {
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
   name: keyVaultName
+}
+
+resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2019-09-01' = {
+  parent: keyVault
+  name: 'add'
+  properties: {
+    accessPolicies: [
+      {
+        tenantId: appService.identity.tenantId
+        objectId: appService.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+      }
+    ]
+  }
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = if (!empty(applicationInsightsName)) {

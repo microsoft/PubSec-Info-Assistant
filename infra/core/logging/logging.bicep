@@ -28,6 +28,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02-preview' 
   }
 }
 
+
 output applicationInsightsId string = applicationInsights.id
 output logAnalyticsId string = logAnalytics.id
 output applicationInsightsName string = applicationInsights.name

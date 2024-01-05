@@ -33,6 +33,7 @@ ENV = {
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
     "AZURE_BLOB_STORAGE_KEY": None,
     "AZURE_BLOB_STORAGE_CONTAINER": "content",
+    "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
     "AZURE_SEARCH_SERVICE": "gptkb",
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
     "AZURE_SEARCH_SERVICE_KEY": None,
@@ -393,6 +394,29 @@ async def get_all_tags():
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex))
     return results
+
+@app.post("/retryFile")
+async def retryFile(request: Request):
+
+    json_body = await request.json()
+    filePath = json_body.get("filePath")
+    
+    try:
+
+        file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
+        blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
+
+        if blob.exists():
+            raw_file = blob.download_blob().readall()
+
+            # Overwrite the existing blob with new data
+            blob.upload_blob(raw_file, overwrite=True) 
+
+    except Exception as ex:
+        logging.exception("Exception in /retryFile")
+        raise HTTPException(status_code=500, detail=str(ex))
+    return {"status": 200}
+
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

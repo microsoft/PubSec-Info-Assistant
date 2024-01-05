@@ -107,38 +107,96 @@ class Utilities:
         """ Function to retrieve the uri and sas token for a given blob in azure storage"""
         return self.utilities_helper.get_blob_and_sas(blob_path)
 
+    # def table_to_html(self, table):
+    #     """ Function to take an output FR table json structure and convert to HTML """
+    #     header_processing_complete = False
+    #     table_html = "<table>"
+    #     rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i],
+    #                    key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
+    #     for row_cells in rows:
+    #         is_row_a_header = False
+    #         row_html = "<tr>"
+    #         for cell in row_cells:
+    #             tag = "td"
+    #             #if hasattr(cell, 'kind'):
+    #             if 'kind' in cell:                      
+    #                 if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
+    #                     tag = "th"
+    #                 if (cell["kind"] == "columnHeader"):
+    #                     is_row_a_header = True
+    #             else:
+    #                 # we have encountered a cell that isn't tagged as a header, 
+    #                 # so assume we have now rerached regular table cells
+    #                 header_processing_complete = True
+    #             cell_spans = ""
+    #             #if hasattr(cell, 'columnSpan'):
+    #             if 'columnSpan' in cell:
+    #                 if cell["columnSpan"] > 1:
+    #                     cell_spans += f" colSpan={cell['columnSpan']}"
+    #             #if hasattr(cell, 'rowSpan'):
+    #             if 'rowSpan' in cell:
+    #                 if cell["rowSpan"] > 1:
+    #                     cell_spans += f" rowSpan={cell['rowSpan']}"
+    #             row_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
+    #         row_html += "</tr>"
+            
+    #         if is_row_a_header and header_processing_complete == False:
+    #             row_html = "<thead>" + row_html + "</thead>"     
+    #         table_html += row_html
+    #     table_html += "</table>"
+    #     return table_html
+
+
+
+
+
+
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
         table_html = "<table>"
         rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i],
                        key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
-        for row_cells in rows:
+        thead_open_added = False
+        thead_closed_added = False 
+
+        for i, row_cells in enumerate(rows):
             is_row_a_header = False
             row_html = "<tr>"
             for cell in row_cells:
                 tag = "td"
-                #if hasattr(cell, 'kind'):
                 if 'kind' in cell:                      
                     if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
                         tag = "th"
                     if (cell["kind"] == "columnHeader"):
                         is_row_a_header = True
                 cell_spans = ""
-                #if hasattr(cell, 'columnSpan'):
                 if 'columnSpan' in cell:
                     if cell["columnSpan"] > 1:
                         cell_spans += f" colSpan={cell['columnSpan']}"
-                #if hasattr(cell, 'rowSpan'):
                 if 'rowSpan' in cell:
                     if cell["rowSpan"] > 1:
                         cell_spans += f" rowSpan={cell['rowSpan']}"
                 row_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
             row_html += "</tr>"
-            if is_row_a_header:
-                row_html = "<thead>" + row_html + "</thead>"            
+            
+            # add the opening thead if this is the first row and the first header row encountered
+            if is_row_a_header and i == 0 and not thead_open_added:
+                row_html = "<thead>" + row_html 
+                thead_open_added = True 
+                            
+            # add the closing thead if we have added an opening thead and if this is not a header row
+            if not is_row_a_header and thead_open_added and not thead_closed_added:
+                row_html = "</thead>" + row_html                 
+                thead_closed_added = True
+                
             table_html += row_html
         table_html += "</table>"
         return table_html
+
+
+
+
+
 
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container, enable_dev_code):
         """ Function to build a json structure representing the paragraphs in a document, 
@@ -424,7 +482,8 @@ class Utilities:
                                 # combined with the next in the outer loop
                                 paragraph_size = self.token_count(table_chunk)
                                 paragraph_text = table_chunk
-                                chunk_text = ''                                
+                                chunk_text = ''
+                                file_number += 1                                
                                         
                     else:
                         # text processing & splitting
@@ -464,6 +523,7 @@ class Utilities:
                                 paragraph_size = self.token_count(chunk_text_p)
                                 paragraph_text = chunk_text_p
                                 chunk_text = ''
+                                file_number += 1
                 else:
                     # if this para is not large by itself but will put us over the max token count
                     # or it is a new section, then write out the chunk text we have to this point

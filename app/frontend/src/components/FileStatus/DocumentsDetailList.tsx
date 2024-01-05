@@ -2,8 +2,10 @@
 // Licensed under the MIT license.
 
 import { useState } from "react";
-import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, BaseSelectedItemsList } from "@fluentui/react";
+import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, Text, BaseSelectedItemsList } from "@fluentui/react";
 import { TooltipHost } from '@fluentui/react';
+import { retryFile } from "../../api";
+import React, { useRef } from "react";
 
 import styles from "./DocumentsDetailList.module.css";
 
@@ -13,6 +15,7 @@ export interface IDocument {
     value: string;
     iconName: string;
     fileType: string;
+    filePath: string;
     state: string;
     state_description: string;
     upload_timestamp: string;
@@ -25,6 +28,7 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
+    const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
         const newColumns: IColumn[] = columns.slice();
@@ -56,6 +60,30 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     function onItemInvoked(item: any): void {
         alert(`Item invoked: ${item.name}`);
     }
+
+    const [itemList, setItems] = useState<IDocument[]>(items);
+    function retryErroredFile(item: IDocument): void {
+        retryFile(item.filePath)
+            .then(() => {
+                // Create a new array with the updated item
+                const updatedItems = itemList.map((i) => {
+                    if (i.key === item.key) {
+                        return {
+                            ...i,
+                            state: "Queued"
+                        };
+                    }
+                    return i;
+                });
+    
+                setItems(updatedItems); // Update the state with the new array
+                console.log("State updated, triggering re-render");
+            })
+            .catch((error) => {
+                console.error("Error retrying file:", error);
+            });
+    }
+
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -100,11 +128,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
-            // onRender: (item: IDocument) => (
-            //     <TooltipHost content={`${item.state_description} `}>
-            //         <span>{item.state}</span>
-            //     </TooltipHost>
-            // ),
+            onRender: (item: IDocument) => (  
+                <TooltipHost content={`${item.state} `}>  
+                    <span>{item.state}</span>  
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                </TooltipHost>  
+            ), 
             isPadded: true,
         },
         {
@@ -152,7 +181,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isCollapsible: true,
             ariaLabel: 'Column operations for status detail',
             data: 'string',
-            onColumnClick: onColumnClick
+            onColumnClick: onColumnClick,
+            onRender: (item: IDocument) => (
+                <TooltipHost content={`${item.state_description} `}>
+                    <span>{item.state}</span>
+                </TooltipHost>
+            ),
         }
     ]);
 
@@ -160,7 +194,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         <div>
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <DetailsList
-                items={items}
+                // items={items}
+                items={itemList}
                 compact={true}
                 columns={columns}
                 selectionMode={SelectionMode.none}

@@ -155,8 +155,8 @@ module funcServicePlan 'core/host/funcserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'S3'
-      capacity: 5
+      name: 'S2'
+      capacity: 2
     }
     kind: 'linux'
   }
@@ -175,11 +175,10 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
       tier: 'PremiumV3'
       size: 'P1v3'
       family: 'Pv3'
-      capacity: 3
+      capacity: 1
     }
     kind: 'linux'
     reserved: true
-    storageAccountId: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
   }
 }
 
@@ -204,7 +203,7 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
       LOG_LEVEL: 'DEBUG'
-      DEQUEUE_MESSAGE_BATCH_SIZE: 1
+      DEQUEUE_MESSAGE_BATCH_SIZE: 3
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
@@ -246,6 +245,7 @@ module backend 'core/host/appservice.bicep' = {
     runtimeVersion: '3.10'
     scmDoBuildDuringDeployment: true
     managedIdentity: true
+    appCommandLine: 'gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600'
     applicationInsightsName: logging.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     isGovCloudDeployment: isGovCloudDeployment
@@ -744,6 +744,7 @@ output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
+output AZURE_OPENAI_CHATGPT_MODEL_NAME string = chatGptModelName
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
 output AZURE_FUNCTION_APP_NAME string = functions.outputs.name
 output AZURE_COSMOSDB_URL string = cosmosdb.outputs.CosmosDBEndpointURL

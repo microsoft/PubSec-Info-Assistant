@@ -8,6 +8,12 @@
     margin-top: 20px;
 }
 
+.topRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .chatRoot {
     flex: 1;
     display: flex;
@@ -117,7 +123,7 @@
     width: 100%;
     max-width: 1028px;
     background: #f2f2f2;
-}
+    }
 
 .chatAnalysisPanel {
     flex: 1;
@@ -137,10 +143,22 @@
 
 .commandsContainer {
     display: flex;
-    align-self: flex-end;
+    align-self: flex-start;
 }
 
 .commandButton {
     margin-right: 20px;
     margin-bottom: 20px;
+}
+
+.logoContainer {
+    display: flex;
+    align-self: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.logoImage {
+    position: relative;
 }

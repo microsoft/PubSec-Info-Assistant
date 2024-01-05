@@ -113,13 +113,16 @@ class Utilities:
         rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i],
                        key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
         for row_cells in rows:
-            table_html += "<tr>"
+            is_row_a_header = False
+            row_html = "<tr>"
             for cell in row_cells:
                 tag = "td"
                 #if hasattr(cell, 'kind'):
                 if 'kind' in cell:                      
                     if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
                         tag = "th"
+                    if (cell["kind"] == "columnHeader"):
+                        is_row_a_header = True
                 cell_spans = ""
                 #if hasattr(cell, 'columnSpan'):
                 if 'columnSpan' in cell:
@@ -129,8 +132,11 @@ class Utilities:
                 if 'rowSpan' in cell:
                     if cell["rowSpan"] > 1:
                         cell_spans += f" rowSpan={cell['rowSpan']}"
-                table_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
-            table_html +="</tr>"
+                row_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
+            row_html += "</tr>"
+            if is_row_a_header:
+                row_html = "<thead>" + row_html + "</thead>"            
+            table_html += row_html
         table_html += "</table>"
         return table_html
 
@@ -309,60 +315,52 @@ class Utilities:
     
     previous_table_header = ""
     
-    def chunk_table_with_headers(self, prefix_text, table_html, standard_chunk_target_size, first_chunk_target_size, 
-                                 previous_paragraph_element_is_a_table, previous_paragraph_text):
+    def chunk_table_with_headers(self, prefix_text, table_html, standard_chunk_target_size, 
+                                 previous_paragraph_element_is_a_table):
         soup = BeautifulSoup(table_html, 'html.parser')
-        rows = soup.find_all('tr')
-        header_html = f"<table>{str(thead)}" if thead else "<table>"
-        
-        
-        
-        
-# NEED TO ADD CODE TO CHECK IF THE PREVIOUS PARA WAS A TABLE AND IF SO, USE THE HEADER ROWS FOR THIS NEW CHUNK 
-# WE NEED TO CHECK IF ITS AN ACTUAL CONTINUATION SOMEHOW. 
-# WE NEED A WAY TO FIND THE HEADER ROW(S) AND ADD THEM TO A STACK
-        
-        
-        
-        
-        
-        
-        
-        # check if this new table is a continuation of a table on a previous page. If yes
-        # and it doesn't have a header row, apply the header row from the previous table
-        if thead == "" and previous_paragraph_element_is_a_table:
-            thead = self.previous_table_header
-        
-        # Initialize chunks list and current_chunk with the header
-        current_chunk = prefix_text + " " + header_html
-        chunks = []
-
-        def add_current_chunk():
-            nonlocal current_chunk
-            # Close the table tag for the current chunk and add it to the chunks list
-            if current_chunk.strip() and not current_chunk.endswith("<table>"):
-                current_chunk += '</table>'
-                chunks.append(current_chunk)
-                # Start a new chunk with header if it exists
-                current_chunk = header_html
-
-        for i, row in enumerate(rows):
-            row_html = str(row)
-            # Set a different chunk target size for the first iteration based on the length of the prefix
-            if i == 0:
-                chunk_target_size = first_chunk_target_size
-            else: 
-                chunk_target_size = standard_chunk_target_size
+        thead = str(soup.find('thead'))
+          
+        # check if this table is a continuation of a table on a previous page. 
+        # If yes then apply the header row from the previous table
+        if previous_paragraph_element_is_a_table:
+            if thead != "":
+                # update thead to include the main table header
+                thead = thead.replace("<thead>", "<thead>"+self.previous_table_header)
             
+            else:
+                # just use the previoud thead
+                thead = "<thead>"+self.previous_table_header+"</thead>"    
+
+        def add_current_table_chunk(chunk):
+            # Close the table tag for the current chunk and add it to the chunks list
+            if chunk.strip() and not chunk.endswith("<table>"):
+                chunk = '<table>' + chunk + '</table>'
+                chunks.append(chunk)
+                # Start a new chunk with header if it exists                
+        
+        # Initialize chunks list
+        chunks = []
+        current_chunk = prefix_text
+        # set the target size of the first chunk 
+        chunk_target_size = standard_chunk_target_size - self.token_count(prefix_text)
+        rows = soup.find_all('tr')
+        # Filter out rows that are part of thead block
+        filtered_rows = [row for row in rows if row.parent.name != "thead"] 
+               
+        for i, row in enumerate(filtered_rows):
+            row_html = str(row)
+
             # If adding this row to the current chunk exceeds the target size, start a new chunk
             if self.token_count(current_chunk + row_html) > chunk_target_size:
-                add_current_chunk()                
+                add_current_table_chunk(current_chunk)    
+                current_chunk = thead
+                chunk_target_size = standard_chunk_target_size                
 
             # Add the current row to the chunk
             current_chunk += row_html
 
         # Add the final chunk if there's any content left
-        add_current_chunk()
+        add_current_table_chunk(current_chunk)      
 
         return chunks
     
@@ -401,17 +399,11 @@ class Utilities:
                     # We need a speciality way of splitting a table that is greater than
                     # our target chunk size                    
                     if paragraph_element["type"] == "table":
-                        # set the target size of the first chunk to be teh standard max, minus the size
-                        # of the previous paragraph(s) which we need to incldue in the first
-                        first_chunk_target_size = chunk_target_size - chunk_size
-                        
                         # table processing & splitting
                         table_chunks = self.chunk_table_with_headers(chunk_text, 
                                                                      paragraph_text, 
-                                                                     chunk_target_size, 
-                                                                     first_chunk_target_size, 
-                                                                     previous_paragraph_element_is_a_table, 
-                                                                     previous_paragraph_text)
+                                                                     chunk_target_size,
+                                                                     previous_paragraph_element_is_a_table)
                         
                         for i, table_chunk in enumerate(table_chunks):
                                                    
@@ -502,15 +494,16 @@ class Utilities:
 
             if paragraph_element["type"] == "table":
                 previous_paragraph_element_is_a_table = True
-                # Stash the current tables heading to apply to subsequent page tables if they are missing column headings
-                soup = BeautifulSoup(paragraph_text, 'html.parser')
-                # Check for and extract the thead and tbody, or default to entire table
-                self.previous_table_header = soup.find('thead')
+                if self.previous_table_header == "":
+                    # Stash the current tables heading to apply to subsequent page tables if they are missing column headings,
+                    # but only for the first page of the multi-page table
+                    soup = BeautifulSoup(paragraph_text, 'html.parser')
+                    # Extract the thead and strip the thead wrapper to just leave the header cells
+                    self.previous_table_header = str(soup.find('thead'))
+                    self.previous_table_header = self.previous_table_header.replace("<thead>", "").replace("</thead>", "")
             else:
                 previous_paragraph_element_is_a_table = False
                 self.previous_table_header = ""
-                         
-            previous_paragraph_text = paragraph_text
             
             # If this is the last paragraph then write the chunk
             if index == len(document_map['structure'])-1:

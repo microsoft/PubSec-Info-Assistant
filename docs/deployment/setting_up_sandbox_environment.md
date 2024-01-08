@@ -50,7 +50,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
     TENANT_ID | The ID of the tenant that should be deployed to.
     AZURE_STORAGE_ACCOUNT<br/>AZURE_STORAGE_ACCOUNT_KEY | Bicep is used to create Infrastructure as Code. This is the storage account that the Bicep State is stored.
 	CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
-    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
+    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_GPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
     environment | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env`
 
 2. **Save your pipeline:** After updating the variable, save your pipeline configuration.

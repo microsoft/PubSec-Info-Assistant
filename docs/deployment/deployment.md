@@ -6,9 +6,16 @@ Follow these steps to get the accelerator up and running in a subscription of yo
 
 ## Development Environment Configuration
 
-The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container, or dev container hosted on a virtual machine using GitHub Codespaces.
+The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container or dev container hosted on a virtual machine using GitHub Codespaces.
 
-[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
+Begin by first forking the Information Assistant repository into your own repository. This can be useful for managing any changes you may require for your local environment. It will also enable you to accept and merge changes from the Information Assistant repo as future releases and hotfixes are made available.
+
+To fork the repo simply click the **Fork** button at the top of the Information Assistant Repo page and follow the steps to set up your new fork.
+![Fork the Information Assistant Repo](/docs/images/fork_repo.png)
+
+Once you have forked the repo, you can then use the following button to open the Information Assistant Codespace. You will need to select your forked repo and the location for your Codespace to run in.
+
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=false&ref=main&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json)
 
 Begin by setting up your own Codespace using our  [Developing in Codespaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
 

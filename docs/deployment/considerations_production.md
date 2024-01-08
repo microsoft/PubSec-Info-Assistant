@@ -1,6 +1,6 @@
 # Considerations For Adopting Into Production
 
-This documentation outlines essential considerations for moving into Production for teams deploying IA, ensuring a smooth transition from an accelerator to a production-ready implementation.
+This documentation highlights key considerations for transitioning from an Intelligent Applications (IA) accelerator to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT Model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
 
 ##  Scalability and High Availability
 
@@ -75,7 +75,7 @@ Learn more [here](https://azure.microsoft.com/en-us/products/monitor/?ef_id=_k_2
 
 ## Document Ingestion Limitations
 
-**Consideration:** This accelerator uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes it can handle. The page limit and document size limits for PDFs on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
+**Consideration:** This accelerator uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes they can handle. The page limit and document size limits for PDFs on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
 
 More info on unstructured.io for other supported document types can be found [here](https://unstructured-io.github.io/unstructured/introduction.html).
 
@@ -90,14 +90,13 @@ If you would like to give custom branding to the Front End Web App interface, th
 **Consideration:** To give custom branding to the existing Front End Web App interface.
 This can be achieved by modifying the currently provided UI by making a couple of configuration changes.
 
-**Recommendation:** In the local.env used to deploy the solution, there exists a parameter called "APPLICATION_TITLE" that can be given any string value to change the title that appears on the title bar of the existing UI. You may also change the image files displayed by replacing them in the /app/frontend/src/assets folder. You may need to change the reference names in the code where it is refferencing if you change the file name of the referenced image file. The sky is the limit when it comes to modifying the existing front end source code for your own use cases.
+**Recommendation:** In the local.env used to deploy the solution, there exists a parameter called "APPLICATION_TITLE" that can be given any string value to change the title that appears on the title bar of the existing UI. See [this section](/docs/deployment/deployment.md#configure-env-files) for a list of configurable environment variables. You may also change the image files displayed by replacing them in the /app/frontend/src/assets folder. You may need to change the reference names in the code where it is refferencing if you change the file name of the referenced image file. The sky is the limit when it comes to modifying the existing front end source code for your own use cases.
 
 ### Replacing Existing UI
 
-**Consideration:** Enabling token oauth implementation on the API could enable to have a different custom UI call the web app backend API.
+**Consideration:** When considering the replacement of the existing UI, it is important to assess the potential for enabling token OAuth implementation on the API. This could allow for the integration of a distinct custom UI to call the web app backend API.
 
-**Recommendation:** Ability to call the api securely and with another custom interface can be achieved by enabling [Client Credentials Flow](/docs/deployment/client_credentials_flow.md) which will enable oauth token authentication for the API and would need to then be passed from your own UI or processes.
-
+**Recommendation:** To securely invoke the API with an alternative interface, it is recommended to implement the [Client Credentials Flow](/docs/deployment/client_credentials_flow.md). This approach facilitates OAuth token authentication for the API, requiring subsequent integration into your own UI or processes.
 
 
 ## In Summary

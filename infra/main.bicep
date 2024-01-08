@@ -65,7 +65,7 @@ param chatGptDeploymentCapacity int = 240
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
-param formRecognizerApiVersion string = '2022-08-31'
+param formRecognizerApiVersion string = '2023-07-31'
 param queryTermLanguage string = 'English'
 param isGovCloudDeployment bool = contains(location, 'usgov')
 

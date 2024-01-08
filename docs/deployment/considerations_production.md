@@ -75,7 +75,7 @@ Learn more [here](https://azure.microsoft.com/en-us/products/monitor/?ef_id=_k_2
 
 ## Document Ingestion Limitations
 
-**Consideration:** This accelerator uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes it can handle. The page limit for PDFs on Document Intelligence in Azure is 2000 pages. However, with a free tier subscription, only the first two pages are processed. The maximum document size to process with Azure AI Document Intelligence must not exceed 20 MB. The file size for analyzing documents must be less than 500 MB for paid (S0) tier and 4 MB for free (F0) tier. Learn more [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
+**Consideration:** This accelerator uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes it can handle. The page limit and document size limits for PDFs on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
 
 More info on unstructured.io for other supported document types can be found [here](https://unstructured-io.github.io/unstructured/introduction.html).
 

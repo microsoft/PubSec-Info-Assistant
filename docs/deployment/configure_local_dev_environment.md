@@ -130,5 +130,5 @@ The next step is to open the source code and build the dev container. To do this
 - Type Rebuild and select "Dev Containers: Rebuild Container"
 
 ---
-This step is complete, please continue on to the next step [Configuring your Development Environment for PS Info Assistant](./development_environment.md) section and complete the next step.
+This step is complete, please continue on to the next step [Configuring your Development Environment for PS Info Assistant](./deployment.md) section and complete the next step.
 

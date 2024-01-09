@@ -82,6 +82,8 @@ Please follow the instructions in [the deployment guide](/docs/deployment/deploy
 
 Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
 
+You may choose to **[view the deployment and usage click-through videos](https://aka.ms/InfoAssists/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
+
 ## Responsible AI
 
 The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.

@@ -153,6 +153,12 @@ Once deployed, you can find the URL of your installation by:
 
 At this point deployment is complete. Please go to the [Using the IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md) section and complete the following steps.
 
+
+## Additional Considerations for a Production Adoption
+
+There are considerations for adopting the Information Assistant (IA) accelerator into a production environment. [See this documentation](/docs/deployment/considerations_production.md).
+
+
 ## Need Help?
 
 To review logs try [Using the Workbook Template](/docs/deployment/worbook_usage.md)

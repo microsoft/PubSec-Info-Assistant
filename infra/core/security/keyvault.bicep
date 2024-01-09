@@ -5,6 +5,7 @@ param kvAccessObjectId string
 param openaiServiceKey string
 @secure()
 param spClientSecret string 
+param useExistingAOAIService bool
 
 
 
@@ -33,7 +34,7 @@ resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
   }
 }
 
-resource openaiServiceKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
+resource openaiServiceKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = if (useExistingAOAIService){
   parent: kv
   name: 'AZURE-OPENAI-SERVICE-KEY'
   properties: {

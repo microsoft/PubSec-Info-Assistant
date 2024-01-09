@@ -294,6 +294,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
     name: !empty(openAiServiceName) ? openAiServiceName : '${prefix}-${abbrs.openAIServices}${randomString}'
     location: location
     tags: tags
+    keyVaultName: kvModule.outputs.keyVaultName
     sku: {
       name: openAiSkuName
     }
@@ -711,6 +712,7 @@ module kvModule 'core/security/keyvault.bicep' = {
     kvAccessObjectId: kvAccessObjectId
     openaiServiceKey: azureOpenAIServiceKey
     spClientSecret: aadMgmtClientSecret
+    useExistingAOAIService: useExistingAOAIService
   }
 }
 

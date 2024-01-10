@@ -169,7 +169,7 @@ chat_approaches = {
                                     ENV["QUERY_TERM_LANGUAGE"],
                                     model_name,
                                     model_version,
-                                    ENV["IS_GOV_CLOUD_DEPLOYMENT"],
+                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
                                     ENV["ENRICHMENT_APPSERVICE_NAME"]
                                 )

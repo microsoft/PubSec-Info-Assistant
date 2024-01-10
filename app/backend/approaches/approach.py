@@ -32,7 +32,7 @@ class Approach:
     documents.
     """
 
-    def run(self, history: list[dict], overrides: dict) -> any:
+    async def run(self, history: list[dict], overrides: dict) -> any:
         """
         Run the approach on the query and documents. Not implemented.
 

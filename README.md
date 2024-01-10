@@ -84,7 +84,7 @@ Please follow the instructions in [the deployment guide](/docs/deployment/deploy
 
 Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
 
-You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssists/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
+You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssist/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
 
 ## Responsible AI
 

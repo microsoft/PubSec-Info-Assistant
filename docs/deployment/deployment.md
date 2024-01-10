@@ -4,6 +4,8 @@
 
 Follow these steps to get the accelerator up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
 
+If you prefer to have a more guided experience, you may choose to [view the click-through deployment guide](https://aka.ms/InfoAssist/deploy) for this accelerator.  
+
 ## Development Environment Configuration
 
 The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container or dev container hosted on a virtual machine using GitHub Codespaces.

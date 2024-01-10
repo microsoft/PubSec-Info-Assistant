@@ -15,16 +15,17 @@ A codespace is a development environment that's hosted in the cloud. You can cus
 ---
 ## Creating your codespace
 
-1.	Click on    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/microsoft/PubSec-Info-Assistant)
-2.	New window will open where you can create a new codespace
-3.	By default, you will be on **main** branch, you can switch to specific branch where you would like to create a codespace.
-    Also it would provide option to select **Region**,**Machine type**
-4. Then click on  **Create codespace**
-![Codespaces creation](/docs/images/codespaces_creation.png)
+1. Click on    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/)
+1. New window will open where you can create a new Codespace
+1. First you will need to select your repository you forked from the Information Assistant repo
+1. Next, by default you will be on **main** branch, you can switch to specific branch where you would like to create a Codespace.
+1. Then select options for **Region** and **Machine type**. The "Dev Container configuration" will be prepopulated and does not need to be changed.
+1. Next, click on  **Create codespace**
+![Codespaces creation](/docs/images/codespace_creation.png)
 
-5.	Then it automatically start building container in the github codespaces ( wait for until container successfully created)
+1. Then it automatically start building container in the github codespaces ( wait for until container successfully created)
 ![Building container](/docs/images/codespaces_building_container.png)
-6. When you create a new codespace from a template, it is always opened in the Visual Studio Code web client. You can reopen an existing codespace in any supported editor
+1. When you create a new Codespace from a template, it is always opened in the Visual Studio Code web client. You can reopen an existing Codespace in any supported editor
 ![Codespaces in vscode](/docs/images/codespaces_open_in_vs_code_desktop.png)
 
 ---

@@ -17,9 +17,11 @@ Error: This subscription cannot create CognitiveServices until you agree to Resp
 4. Review and accept the terms "Responsible AI Notice".
 5. Create the Azure AI Service.
 
+***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
+
 ---
 
-## Error "Your adminstrator has configured the application infoasst_web_access_xxxxx to block users..."
+## Error "Your administrator has configured the application infoasst_web_access_xxxxx to block users..."
 
 By default Info Assistant deploys the webapp to require users to be a member of an Azure Active Directory Enterprise Application to access the website. If a user is not a member of the AAD EA they will receive this error:
 
@@ -108,3 +110,21 @@ If you see a jq parse error while doing deployments, it means one of the makefil
 
 ### Solution:
 To resolve carefully check your deployment .env file for any missing but required values. There are rare times when ARM has issues and output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` and/or ```make extract-env``` command so that the bicep outputs can be written again
+
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).

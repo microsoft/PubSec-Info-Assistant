@@ -14,6 +14,7 @@
   - [Authenticating to Azure](./docs/deployment/deployment.md#log-into-azure-using-the-azure-cli)
   - [Deploying to Azure](./docs/deployment/deployment.md#deploy-and-configure-azure-resources)
   - [Troubleshooting Deployment & Startup Issues](./docs/deployment/worbook_usage.md)
+  - [Considerations for Production Adoption](./docs/deployment/considerations_production.md)
 - [Enabling optional features](./docs/features/optional_features.md)
 - [Using the app](/docs/deployment/using_ia_first_time.md)
 - [Responsible AI](#responsible-ai)

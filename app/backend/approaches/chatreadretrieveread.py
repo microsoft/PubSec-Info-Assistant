@@ -31,7 +31,7 @@ from urllib.parse import quote
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
-# then constructs a prompt with them, and then uses OpenAI to generate
+# then constructs a prompt with them, and then uses OpenAI to generate 
 # an completion (answer) with that prompt.
 
 class ChatReadRetrieveReadApproach(Approach):

@@ -10,11 +10,8 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from approaches.approach import Approaches
 from approaches.approach import PromptTemplate
-from azure.core.credentials import AzureKeyCredential 
 from azure.search.documents import SearchClient  
-from azure.search.documents.indexes import SearchIndexClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
 
@@ -27,8 +24,6 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from text import nonewlines
-import tiktoken
-from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 from core.modelhelper import num_tokens_from_messages
 import requests

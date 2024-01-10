@@ -13,7 +13,7 @@ Vector Hybrid Search combines vector similarity with keyword matching to enhance
 - **Scoring**: Documents are scored using RRF (Reciprocal Rank Fusion), which combines the cosine similarity score and a BM25 keyword matching score. Documents with high scores for both vectors and keywords are ranked higher, ensuring the most relevant results.
 
 
-* **Data Enrichments:** Uses many Out-of-the-box Skillsets to extract enrichments from files such as utilizing Optical Character Recognition (OCR) to process images or converting tables within text into searchable text.
+* **Data Enrichments:** Uses many Out-of-the-box skillsets to extract enrichments from files such as utilizing Optical Character Recognition (OCR) to process images or converting tables within text into searchable text.
 
 * **Multilingual Translation:** Leverages the Text Translation skill to interact with your data in supported native languages*, expanding your application's global reach.
 
@@ -34,7 +34,7 @@ In Information Assistant, we empower users to select the embedding model that wo
 | Model                                    | Dimensions | Accessibility | Strengths                                             | Considerations                                      |
 |-----------------------------------------|------------|--------------|------------------------------------------------------|-----------------------------------------------------|
 | text-embedding-ada-002 (Azure Open AI)   | 1536       | Closed Source | Effective with rare and uncommon words, higher dimension allows capturing more semantic nuance | Larger model size, slower inference, Throttling, Cost |
-| sentence-transformers/all-mpnet-base-v2  | 768        | Open Source   | Captures semantics, benefits from an established pretrained BERT Model, easy implementation/out of the box usage | Requires more compute resources, less optimized than Ada |
+| sentence-transformers/all-mpnet-base-v2  | 768        | Open Source   | Captures semantics, benefits from an established pre-trained BERT Model, easy implementation/out of the box usage | Requires more compute resources, less optimized than Ada |
 | sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 | 384 | Open Source | Handles multiple languages | Lower dimensionality misses some semantics |
 | BAII/bge-small-en-v1.5                   | 384        | Open Source   | Rated top for Retrieval tasks. Very efficient for scaling with massive document size. Enables fast document embedding. Lower cost. | Lower dimensionality misses some semantics, May suffer from limited linguistic knowledge |
 

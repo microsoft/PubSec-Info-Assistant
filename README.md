@@ -47,7 +47,7 @@ The IA Accelerator contains several features, many of which have their own docum
 
 For a detailed review see our [Features](./docs/features/features.md) page.
 
-![Process Flow](/docs/process_flow.drawio.png)
+![Process Flow](/docs/process_flow.png)
 
 ## Azure account requirements
 

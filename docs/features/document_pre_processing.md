@@ -1,6 +1,6 @@
 # Document Pre-processing
-The Information Assistant relies on a multi-step process to preprocess documents in preparation for them being used in the NLP based chat interface. 
-The pre-processing of documents is a crucial step as it involves several steps, such as text extraction and normalizing the text, to convert the raw data into a format that can be easily analyzed by the OpenAI model. Information Assistant preprocess different types of documents, ensuring that the text is cleaned and processed effectively for better understanding and analysis of large complex documents.
+The Information Assistant relies on a multi-step process to pre-process documents in preparation for them being used in the NLP based chat interface. 
+The pre-processing of documents is a crucial step as it involves several steps, such as text extraction and normalizing the text, to convert the raw data into a format that can be easily analyzed by the OpenAI model. Information Assistant pre-process different types of documents, ensuring that the text is cleaned and processed effectively for better understanding and analysis of large complex documents.
 
 ```mermaid
 graph LR

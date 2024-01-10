@@ -8,7 +8,7 @@
 - [Features](#features)
 - [Azure account requirements](#azure-account-requirements)
 - [Azure Deployment](./docs/deployment/deployment.md)
-  - [Codespaces Setup](./docs/deployment/deployment.md#development-environment-configuration)
+  - [GitHub Codespaces Setup](./docs/deployment/deployment.md#development-environment-configuration)
   - [Cost Estimation](./docs/deployment/deployment.md#sizing-estimator)
   - [Configuring ENV parameters](./docs/deployment/deployment.md#configure-env-files)
   - [Authenticating to Azure](./docs/deployment/deployment.md#log-into-azure-using-the-azure-cli)
@@ -77,7 +77,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
   * Your Azure account also needs `Microsoft.Resources/deployments/write` permissions on the subscription level.
   * Your Azure account also needs `microsoft.directory/applications/create` and `microsoft.directory/servicePrincipals/create`, such as [Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#application-administrator) Entra built-in role.
 * **To have accepted the Azure AI Services Responsible AI Notice** for your subscription. If you have not manually accepted this notice please follow our guide at [Accepting Azure AI Service Responsible AI Notice](./docs/deployment/accepting_responsible_ai_notice.md).
-* (Optional) Have [Visual Studio Code](https://code.visualstudio.com/) installed on your development machine. If your Azure tenant and subscription have conditional access policies or device policies required, you may need to open your Codespace in VS Code to satisfy the required polices.
+* (Optional) Have [Visual Studio Code](https://code.visualstudio.com/) installed on your development machine. If your Azure tenant and subscription have conditional access policies or device policies required, you may need to open your GitHub Codespaces in VS Code to satisfy the required polices.
 
 ## Deployment
 
@@ -119,7 +119,7 @@ This project has the following structure:
 
 File/Folder | Description
 ---|---
-.devcontainer/ | Dockerfile, devcontainer configuration, and supporting script to enable both Codespaces and local DevContainers.
+.devcontainer/ | Dockerfile, devcontainer configuration, and supporting script to enable both GitHub Codespaces and local DevContainers.
 app/backend/ | The middleware part of the IA website that contains the prompt engineering and provides an API layer for the client code to pass through when communicating with the various Azure services. This code is python based and hosted as a Flask app.
 app/enrichment/ | The text-based file enrichment process that handles language translation, embedding the text chunks, and inserting text chunks into the Azure AI Search hybrid index. This code is python based and is hosted as a Flask app that subscribes to an Azure Storage Queue.
 app/frontend/ | The User Experience layer of the IA website. This code is Typescript based and hosted as a Vite app and compiled using npm.

@@ -90,7 +90,7 @@ If you would like to give custom branding to the Front End Web App interface, th
 **Consideration:** To give custom branding to the existing Front End Web App interface.
 This can be achieved by modifying the currently provided UI by making a couple of configuration changes.
 
-**Recommendation:** In the local.env used to deploy the solution, there exists a parameter called "APPLICATION_TITLE" that can be given any string value to change the title that appears on the title bar of the existing UI. See [this section](/docs/deployment/deployment.md#configure-env-files) for a list of configurable environment variables. You may also change the image files displayed by replacing them in the /app/frontend/src/assets folder. You may need to change the reference names in the code where it is refferencing if you change the file name of the referenced image file. The sky is the limit when it comes to modifying the existing front end source code for your own use cases.
+**Recommendation:** In the local.env used to deploy the solution, there exists a parameter called "APPLICATION_TITLE" that can be given any string value to change the title that appears on the title bar of the existing UI. See [this section](/docs/deployment/deployment.md#configure-env-files) for a list of configurable environment variables. You may also change the image files displayed by replacing them in the /app/frontend/src/assets folder. You may need to change the reference names in the code where it is referencing if you change the file name of the referenced image file. The sky is the limit when it comes to modifying the existing front end source code for your own use cases.
 
 ### Replacing Existing UI
 

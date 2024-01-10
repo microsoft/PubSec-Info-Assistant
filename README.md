@@ -75,7 +75,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
   * Your Azure account also needs `Microsoft.Resources/deployments/write` permissions on the subscription level.
   * Your Azure account also needs `microsoft.directory/applications/create` and `microsoft.directory/servicePrincipals/create`, such as [Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#application-administrator) Entra built-in role.
 * **To have accepted the Azure AI Services Responsible AI Notice** for your subscription. If you have not manually accepted this notice please follow our guide at [Accepting Azure AI Service Responsible AI Notice](./docs/deployment/accepting_responsible_ai_notice.md).
-* (Optional) Have [Visual Studio Code](https://code.visualstudio.com/) installed on your development machine. If your Azure tenant and subscription have conditional access policies or device policies required, you may need to open your GitHub GitHub Codespaces in VS Code to satisfy the required polices.
+* (Optional) Have [Visual Studio Code](https://code.visualstudio.com/) installed on your development machine. If your Azure tenant and subscription have conditional access policies or device policies required, you may need to open your GitHub Codespaces in VS Code to satisfy the required polices.
 
 ## Deployment
 

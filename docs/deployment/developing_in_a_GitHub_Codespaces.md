@@ -1,11 +1,11 @@
 # Developing in a GitHub Codespaces
 
 - [Developing in a GitHub Codespaces](#developing-in-a-github-codespaces)
-  - [Getting started with GitHub Codespaces](#getting-started-with-GitHub Codespaces)
+  - [Getting started with GitHub Codespaces](#getting-started-with-GitHub-Codespaces)
   - [Creating your GitHub Codespaces](#creating-your-codespace)
   - [Using GitHub Codespaces in Visual Studio Code](#using-github-codespaces-in-visual-studio-code)
   - [Prerequisites](#prerequisites)
-  - [Opening a codespace in VS Code](#opening-a-codespace-in-vs-code)
+  - [Opening a GitHub Codespaces in VS Code](#opening-a-codespace-in-vs-code)
   - [Navigating to an existing codespace](#navigating-to-an-existing-codespace)
 ---
 ## Getting started with codespace
@@ -15,13 +15,13 @@ A codespace is a development environment that's hosted in the cloud. You can cus
 ---
 ## Creating your codespace
 
-1. Click on    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://GitHub Codespaces.new/)
-1. New window will open where you can create a new Codespace
+1. Click on    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/)
+1. New window will open where you can create a new codespace
 1. First you will need to select your repository you forked from the Information Assistant repo
-1. Next, by default you will be on **main** branch, you can switch to specific branch where you would like to create a Codespace.
+1. Next, by default you will be on **main** branch, you can switch to specific branch where you would like to create a Codespaces.
 1. Then select options for **Region** and **Machine type**. The "Dev Container configuration" will be pre-populated and does not need to be changed.
 1. Next, click on  **Create codespace**
-![Codespaces creation](/docs/images/codespace_creation.png)
+![GitHub Codespaces creation](/docs/images/codespace_creation.png)
 
 1. Then it automatically start building container in the github codespaces ( wait for until container successfully created)
 ![Building container](/docs/images/codespaces_building_container.png)

@@ -15,9 +15,9 @@ To fork the repo simply click the **Fork** button at the top of the Information 
 
 Once you have forked the repo, you can then use the following button to open the Information Assistant GitHub Codespaces. You will need to select your forked repo and the location for your GitHub Codespaces to run in.
 
-[![Open in GitHub Codespacess](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=false&ref=main&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json)
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=false&ref=main&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json)
 
-Begin by setting up your own GitHub Codespaces using our  [Developing in Codespaces](/docs/deployment/developing_in_a_codespaces.md) documentation.
+Begin by setting up your own GitHub Codespaces using our  [Developing in Codespaces](/docs/deployment/developing_in_a_GitHub_Codespaces.md) documentation.
 
 *If you want to configure your local desktop for development container or you do not have access to GitHub Codespaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 

@@ -8,12 +8,12 @@
   - [Opening a GitHub Codespaces in VS Code](#opening-a-codespace-in-vs-code)
   - [Navigating to an existing codespace](#navigating-to-an-existing-codespace)
 ---
-## Getting started with GitHub codespaces
+## Getting started with GitHub Codespaces
 
 A codespace is a development environment that's hosted in the cloud. You can customize your project for GitHub Codespaces by committing configuration files to your repository, which creates a repeatable codespace configuration for all users of your project.
 
 ---
-## Creating your GitHub codespaces
+## Creating your GitHub Codespaces
 
 1. Click on    [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new/)
 1. New window will open where you can create a new codespace
@@ -25,7 +25,7 @@ A codespace is a development environment that's hosted in the cloud. You can cus
 
 1. Then it automatically start building container in the github codespaces ( wait for until container successfully created)
 ![Building container](/docs/images/codespaces_building_container.png)
-1. When you create a new Codespace from a template, it is always opened in the Visual Studio Code web client. You can reopen an existing Codespace in any supported editor
+1. When you create a new codespace from a template, it is always opened in the Visual Studio Code web client. You can reopen an existing codespace in any supported editor
 ![Codespaces in vscode](/docs/images/codespaces_open_in_vs_code_desktop.png)
 
 ---

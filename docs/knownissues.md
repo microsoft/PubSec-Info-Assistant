@@ -55,7 +55,7 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ## Errors due to throttling or overloading Form Recognizer
 
-Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by Form Recognzer in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is deisgned to back off and retry at a later time, up to a maxmum set of retries, which is configurable. These values surface as configuration settinsg in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
+Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable. These values surface as configuration settings in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
 
 ```
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
@@ -97,7 +97,7 @@ This means that you have exceeded the quota assigned to your deployment for the 
 
 ## Error:'OpenAI' is either invalid or unavailable in given region
 ```
-InvalidTemplateDeployment - The template deployment 'infoasst-asbanger-vnext1' is not valid according to the validation procedure. The tracking id is '4c3fd9d0-59fb-47f3-aa5a-ddb13c9313e8'. See inner errors for details.
+InvalidTemplateDeployment - The template deployment 'infoasst-myworkspace-xxxxx' is not valid according to the validation procedure. The tracking id is 'xxxxx-xxxx-xxxxx-xxxx-xxxxxxx'. See inner errors for details.
 InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in given region.
 ```
 ### Solution:
@@ -127,4 +127,4 @@ make: *** [Makefile:18: infrastructure] Error 1
 
 ### Solution
 
-You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+You will need to open your GitHub Codespaces in VSCode on your managed device. Please read more about opening your [GitHub Codespaces using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).

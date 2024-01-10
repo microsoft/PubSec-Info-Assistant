@@ -37,6 +37,8 @@ This industry accelerator showcases integration between Azure and OpenAI's large
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
+Please [see this video](https://www.youtube.com/watch?v=gwUhmMexmgw) for use cases that may be achievable with this accelerator.
+
 ## Features
 
 The IA Accelerator contains several features, many of which have their own documentation.
@@ -82,6 +84,8 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the IA Accelerator in your Azure subscription.
 
 Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
+
+You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssist/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
 
 ## Responsible AI
 

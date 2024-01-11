@@ -30,7 +30,7 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 
 - The proposed the cost estimation prepared based on Sandbox environment, estimation may vary customer to customer.
 - For detailed Azure OpenAI Service [pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing)
-- Customers with latency-sensitive scenarios can expect predictable performance, provisioned throughput allows customers to reserve model processing capacity. [Read More](/docs/deployment/considerations_production.md#gpt-model---throttling)
+- Customers with latency-sensitive scenarios can opt for provisioned throughput which allows customers to reserve model processing capacity. [Read More](/docs/deployment/considerations_production.md#gpt-model---throttling)
 
 ---
 

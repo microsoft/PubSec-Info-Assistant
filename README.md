@@ -37,7 +37,7 @@ This industry accelerator showcases integration between Azure and OpenAI's large
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
-Please [see this video](https://www.youtube.com/watch?v=gwUhmMexmgw) for use cases that may be achievable with this accelerator.
+Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with this accelerator.
 
 ## Features
 

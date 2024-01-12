@@ -1,10 +1,12 @@
 param location string = resourceGroup().location
 param logWorkbookName string = ''
 param componentResource string = ''
+param tags object = {}
 
 resource logworkbook 'Microsoft.Insights/workbooktemplates@2020-11-20' = {
   name: logWorkbookName
   location: location
+  tags: tags
   properties: {
     galleries: [
       {

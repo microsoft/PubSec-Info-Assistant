@@ -6,13 +6,13 @@ param openaiServiceKey string
 @secure()
 param spClientSecret string 
 param useExistingAOAIService bool
-
+param tags object = {}
 
 
 resource kv 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: name
   location: location
-  
+  tags: tags  
   properties: {
     enabledForTemplateDeployment: true
     createMode: 'default'

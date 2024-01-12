@@ -56,11 +56,11 @@ param azureOpenAIEmbeddingsModelVersion string = '2'
 param useAzureOpenAIEmbeddings bool = true
 param sentenceTransformersModelName string = 'BAAI/bge-small-en-v1.5'
 param sentenceTransformerEmbeddingVectorSize string = '384'
-param embeddingsDeploymentCapacity int = 240
+param embeddingsDeploymentCapacity int = 30 //240
 param chatWarningBannerText string = ''
 param chatGptModelName string = 'gpt-35-turbo-16k'
 param chatGptModelVersion string = '0613'
-param chatGptDeploymentCapacity int = 240
+param chatGptDeploymentCapacity int = 30 //240
 // metadata in our chunking strategy adds about 180-200 tokens to the size of the chunks, 
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750'
@@ -108,7 +108,8 @@ param principalId string = ''
 param kvAccessObjectId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
-var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
+//var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
+var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber, environment: 'sandbox', application: 'core', businessArea: 'Cross-Cutting', expiresAfter: '2025-12-30', builtFrom: 'https://github.com/hmcts/CP-CoPilot-v2'}
 var prefix = 'infoasst'
 
 // Organize resources in a resource group
@@ -698,6 +699,7 @@ module azMonitor 'core/logging/monitor.bicep' = {
   name: 'azure-monitor'
   params: {
     location: location
+    tags: tags
     logWorkbookName: '${prefix}-${abbrs.logWorkbook}${randomString}'
     componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
   }
@@ -709,6 +711,7 @@ module kvModule 'core/security/keyvault.bicep' = {
   params: {
     name: '${prefix}-${abbrs.keyvault}${randomString}'
     location: location
+    tags: tags
     kvAccessObjectId: kvAccessObjectId
     openaiServiceKey: azureOpenAIServiceKey
     spClientSecret: aadMgmtClientSecret

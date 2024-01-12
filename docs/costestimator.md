@@ -1,4 +1,4 @@
-# IA Accelerator, version 0.4 delta - Estimation
+# IA Accelerator, version 0.5 delta - Estimation
 
 The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 0.4 delta, and provides cost estimates based on the chosen configurations.
 

@@ -45,7 +45,7 @@ Microsoft’s Transparency Notes are part of a broader effort at Microsoft to pu
 
 ## Introduction
 
-The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services. IA Accelerator is an implementation of the [Retreival Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
+The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services. IA Accelerator is an implementation of the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
 
 The system aims to provide the functionality mentioned above while also focusing on the following key areas:
 
@@ -74,11 +74,11 @@ Terminology | Definition
 [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/#overview) | Collection of large-scale generative AI models available as a service via Azure. 
 [ChatGPT](https://en.wikipedia.org/wiki/ChatGPT) | "ChatGPT is an artificial intelligence chatbot developed by OpenAI based on the company's Generative Pre-trained Transformer (GPT) series of large language models (LLMs)."
 [Chunking](https://learn.microsoft.com/en-us/samples/azure-samples/azure-search-power-skills/azure-open-ai-embeddings-generator/) | Chunking is a strategy of breaking down large documents into smaller pieces which satisfy the token limits of OpenAI models. 
-[Fabrications (aka Hallucinations)](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)) | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data". The term "Fabrication" is prefered as the term "hallucination" may be offensive to people with certain disabilities. 
+[Fabrications (aka Hallucinations)](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)) | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data". The term "Fabrication" is preferred as the term "hallucination" may be offensive to people with certain disabilities. 
 [Generative AI](https://en.wikipedia.org/wiki/Generative_artificial_intelligence) | "A type of artificial intelligence (AI) system capable of generating text, images, or other media in response to prompts."
 [Grounding](https://www.expert.ai/glossary-of-ai-terms/grounding/) | "The ability of generative applications to map the factual information contained in a generative output or completion. It links generative applications to available factual sources — for example, documents or knowledge bases — as a direct citation, or it searches for new links."
 [Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering) | "A concept in artificial intelligence, particularly natural language processing. In prompt engineering, the description of the task that the AI is supposed to accomplish is embedded in the input, e.g. as a question, instead of it being explicitly given. Prompt engineering typically works by converting one or more tasks to a prompt-based dataset and training a language model with what has been called "prompt-based learning" or just "prompt learning"."
-[RAG](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) | Retreival Augmented Generation; a pattern where data is retreived (such as from a search system) and sent to Generative AI with a prompt to provide specific data to answer a question. 
+[RAG](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) | Retrieval Augmented Generation; a pattern where data is retrieved (such as from a search system) and sent to Generative AI with a prompt to provide specific data to answer a question. 
 [Semantic Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) | "A collection of query-related capabilities that bring semantic relevance and language understanding to textual search results."
 [Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant. 
 
@@ -89,7 +89,7 @@ Terminology | Definition
 ### Overview
 This system is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
 
-By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.** 
+By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.**
 
 ### Data Preparation
 
@@ -121,9 +121,9 @@ In this section we describe several known limitations of the IA Accelerator syst
 
 This system does not provide a confidence score for results returned. It is required that the end user evaluate the response quality to ensure that it is relevant to the asked question.
 
-### Accuracy 
+### Accuracy
 
-This system provides citations for all answers given. All answers should be validated by a human reviewing the citations. If no citations are given, the answer **must not** be assumed accurate. 
+This system provides citations for all answers given. All answers should be validated by a human reviewing the citations. If no citations are given, the answer **must not** be assumed accurate.
 
 ## Technical limitations, operational factors and ranges
 
@@ -162,7 +162,7 @@ All documents submitted to the system should be confirmed to have successfully p
 
 # Evaluation of IA Accelerator
 
-At the time of this writing, this accelerator is in a **Pre-Release** state. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated. 
+At the time of this writing, this accelerator is in a **Pre-Release** state. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated.
 
 ## Evaluating and Integrating IA Accelerator for your use
 
@@ -190,7 +190,7 @@ You can find the technical documentation in our [Using IA Accelerator for the fi
 
 **This system has not been evaluated for its intended purpose against your data!**
 
-This system makes no claim for precision or accuracy. The behaviour and performance of IA Accelerator depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA Accelerator for your purposes.
+This system makes no claim for precision or accuracy. The behavior and performance of IA Accelerator depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA Accelerator for your purposes.
 
 # Learn more about responsible AI
 

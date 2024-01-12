@@ -1,6 +1,6 @@
 # Considerations For Adopting Into Production
 
-This documentation highlights key considerations for transitioning from an Intelligent Applications (IA) accelerator to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT Model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
+This documentation highlights key considerations for transitioning from an Information Assistant (IA) accelerator to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT Model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
 
 ##  Scalability and High Availability
 
@@ -10,7 +10,7 @@ These recommendations offer options for load balancing and high availability, ca
 
 **Consideration:** As the load on the App Server increases, scaling becomes crucial to handle varying levels of traffic efficiently.
 
-**Recommendation:** Refer to the Azure [Autoscaling documentation](/docs/deployment/autoscale_sku.md) to set up dynamic scaling based on demand. Configure autoscaling rules to automatically adjust the number of instances in response to changes in load. You can also adjust the sku to scale vertically and adjust the number of workers in the app server. Alternatively, you could  consider deploying the App to a container orchestration platform like Azure Kubernetes Service (AKS) for management and scaling.
+**Recommendation:** Learn more about Azure Monitor based app service scaling [here](https://learn.microsoft.com/en-us/azure/app-service/manage-automatic-scaling?tabs=azure-portal). Alternatively, you can modify the existing Auto scaling rules. See this documentation on the explanation of the [existing auto scaling rules](/docs/deployment/autoscale_sku.md). Configure autoscaling rules to automatically adjust the number of instances in response to changes in load. You can also adjust the sku to scale vertically and adjust the number of workers in the app server. Alternatively, you could  consider deploying the App to a container orchestration platform like Azure Kubernetes Service (AKS) for management and scaling.
 
 ### App Gateway
 **Consideration:** Ensure App Gateway handles increased traffic and maintains high availability. Learn more about App Gateway [here](https://learn.microsoft.com/en-us/azure/application-gateway/overview).
@@ -90,7 +90,7 @@ If you would like to give custom branding to the Front End Web App interface, th
 **Consideration:** To give custom branding to the existing Front End Web App interface.
 This can be achieved by modifying the currently provided UI by making a couple of configuration changes.
 
-**Recommendation:** In the local.env used to deploy the solution, there exists a parameter called "APPLICATION_TITLE" that can be given any string value to change the title that appears on the title bar of the existing UI. See [this section](/docs/deployment/deployment.md#configure-env-files) for a list of configurable environment variables. You may also change the image files displayed by replacing them in the /app/frontend/src/assets folder. You may need to change the reference names in the code where it is refferencing if you change the file name of the referenced image file. The sky is the limit when it comes to modifying the existing front end source code for your own use cases.
+**Recommendation:** In the local.env used to deploy the solution, there exists a parameter called "APPLICATION_TITLE" that can be given any string value to change the title that appears on the title bar of the existing UI. See [this section](/docs/deployment/deployment.md#configure-env-files) for a list of configurable environment variables. You may also change the image files displayed by replacing them in the /app/frontend/src/assets folder. You may need to change the reference names in the code where it is referencing if you change the file name of the referenced image file. The sky is the limit when it comes to modifying the existing front end source code for your own use cases.
 
 ### Replacing Existing UI
 

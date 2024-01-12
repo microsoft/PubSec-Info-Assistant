@@ -56,7 +56,9 @@ If you encounter merge conflicts, Git will pause the merge process and mark the 
 
 - Go to the repository in GitHub.
 - Open a pull request for the `test-upstream-changes` branch against the `main` branch.
-- This initiates the review process. 
+- This initiates the review process.
+
+> Do not merge it yet.
 
 ## 8. Deploy the Test branch
 
@@ -74,6 +76,10 @@ After merging the pull request, update the local `main` branch and delete the te
 `git pull origin main`
 `git branch -d test-upstream-changes`
 `git push origin --delete test-upstream-changes`
+
+## 11. Redeploy from main
+
+Re-deploy the codebase from the `main` branch.
 
 # Conclusion
 

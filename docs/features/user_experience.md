@@ -28,7 +28,7 @@ When you engage with IA Accelerator in the "Manage Content" method, the system a
 
 ### Uploading files
 
-You can upload documents in the [supported formats listed above](#document-pre-processing) through the user interface. To do so:
+You can upload documents in the [supported formats listed above](/docs/features/features.md#document-pre-processing) through the user interface. To do so:
 
 > 1. Click on the Manage Content link in the top of the interface
 > ![Manage Content](/docs/images/manage-content-interface.png)
@@ -45,15 +45,14 @@ You can view the status up files that have been uploaded to the system through t
 > ![Manage Content](/docs/images/manage-content-interface.png)
 > 1. Then click on the "Upload Status" tab.
 > ![Upload Status Link](/docs/images/view-upload-status-link.png)
-> 1. Select options and **Refresh** the view. The options defaults to *4 hours* Timespan and *All* File Status. 
+> 1. Select options and **Refresh** the view. The options defaults to *4 hours* Timespan and *All* File Status.
 > ![Upload Status Options and Refresh Links](/docs/images/view-upload-status-options-and-refresh.png)
-
 
 ### Using sample data - optional
 
 Referring to the manage content sections above for [Upload files](/docs/images/upload-files-link.png) and [View upload status](/docs/images/view-upload-status-link.png), you can optionally load open source sample data to demonstrate the capabilities of the Information Assistant. The following data sources may be useful for your initial demonstration purposes:
 
-> 1. Microsoft financial statements are available at the SEC Filings site. This dataset enables the user to ask questions such as "What are Microsoft sources of revenue?". You can optionally load Microsoft's [SEC Filings at gcs-web.com](https://github.com/microsoft/PubSec-Info-Assistant/assets/113293560/6d813f55-b633-495d-b033-ede43a661f59)
-
-> 2. An Ice Cream data set is available at kaggle.com. This dataset enables the user to ask questions such ase "What are flavors of breyers?" You can optionally load the [Ice Cream Dataset from kaggle.com](https://github.com/microsoft/PubSec-Info-Assistant/assets/113293560/0b4f80ed-dcf7-408f-b478-684cc1f997e5)
-
+> 1. Microsoft financial statements are available at the SEC Filings site. This dataset enables the user to ask questions such as "What are Microsoft sources of revenue?". You can optionally load Microsoft's [SEC Filings at gcs-web.com](https://microsoft.gcs-web.com/financial-information/sec-filings)
+> 2. An Ice Cream data set is available at kaggle.com. This dataset enables the user to ask questions such ase "What are flavors of breyers?" You can optionally load the [Ice Cream Dataset from kaggle.com](https://www.kaggle.com/datasets/tysonpo/ice-cream-dataset)
+>
+> 3. Education Policy documents from US FERPA guidelines. This dataset enables the user to ask "How is strengthening student data privacy accomplished?". You can optionally load [US FERPA Policy documents](https://studentprivacy.ed.gov/node/548/)

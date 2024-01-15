@@ -11,9 +11,9 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How is strengthening student data privacy accomplished?", value: "How is strengthening student data privacy accomplished?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "What are some flavors of Breyers?", value: "What are some flavors of Breyers?" }
+    { text: "What are the steps I need to take to discontinue a case?", value: "What are the steps I need to take to discontinue a case?" },
+    { text: "What systems are required for issuing a discontinuance?", value: "What systems are required for issuing a discontinuance?" },
+    { text: "What do I need to do if there are co-defendants?", value: "What do I need to do if there are co-defendants?" }
 ];
 
 interface Props {

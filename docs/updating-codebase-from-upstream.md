@@ -84,6 +84,11 @@ Deploy the `test-upstream-changes` branch to Azure to test the changes.
 
 > Linear history is being retained so you will need to use **Rebase and Merge** or **Squash and Merge**.
 
+### When to use Rebase
+Use this when you want to maintain a detailed commit history from the feature/test branch in the main branch. It's suitable for code changes where each commit's history is important for context, such as new features or significant code revisions.
+
+### When to use Squash
+Opt for this when dealing with a series of minor or incremental changes, such as documentation updates or small tweaks. It combines all feature branch commits into a single commit for a cleaner main branch history, making it ideal for simpler or less impactful changes.
 
 ## 10. Update the local main branch and clean up
 

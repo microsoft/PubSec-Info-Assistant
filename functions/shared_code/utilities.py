@@ -148,14 +148,26 @@ class Utilities:
 
         # update content_type array where spans are tables
         for index, table in enumerate(result["tables"]):
+            # initialize start_char and end_char based on the first span
             start_char = table["spans"][0]["offset"]
             end_char = start_char + table["spans"][0]["length"] - 1
+            
+            # iterate over the remaining spans
+            for span in table["spans"][1:]:
+                span_start = span["offset"]
+                # update start_char to the minimum offset
+                start_char = min(start_char, span_start)
+                # update total_length by adding the length of the current span
+                end_char += span["length"] -1
+            
+            # update the content_type array
             document_map['content_type'][start_char] = ContentType.TABLE_START
-            for i in range(start_char+1, end_char):
+            for i in range(start_char + 1, end_char):
                 document_map['content_type'][i] = ContentType.TABLE_CHAR
             document_map['content_type'][end_char] = ContentType.TABLE_END
             # tag the end point in content of a table with the index of which table this is
             document_map['table_index'][end_char] = index
+
 
         # update content_type array where spans are titles, section headings or regular content,
         # BUT skip over the table paragraphs

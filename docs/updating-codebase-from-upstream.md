@@ -1,6 +1,20 @@
 # Introduction
 This document outlines the steps to pull changes from an upstream repository into a separate branch for testing and then merge those changes into the main branch after testing and resolving conflicts.
 
+## High-level workflow for Merging Upstream Changes:
+
+1. **Creating a New Branch:** When there are upstream changes you want to merge, create a new branch in the forked repository.
+
+2. **Pulling Upstream Changes:** Pull the changes from the upstream repository into this new branch. Resolve any conflicts here.
+
+3. **Testing:** Use this branch to test the deployment in Azure. Ensure everything works as expected.
+
+4. **Creating a Pull Request:** Once you're confident with the changes, create a pull request to merge this branch into your main branch.
+
+5. **Review and Merge:** Review the pull request. After approval, merge the pull request.
+
+6. **Delete the Branch:** After the merge, you can safely delete the branch.
+
 ## Prerequisites
 
 - Ensure you have Git installed on your system.
@@ -67,6 +81,14 @@ Deploy the `test-upstream-changes` branch to Azure to test the changes.
 ## 9. Review and merge the pull request
 
 - If the tests are successful, merge the changes into main by merging the pull request into the `main` branch through the GitHub interface.
+
+> Linear history is being retained so you will need to use **Rebase and Merge** or **Squash and Merge**.
+
+### When to use Rebase
+Use this when you want to maintain a detailed commit history from the feature/test branch in the main branch. It's suitable for code changes where each commit's history is important for context, such as new features or significant code revisions.
+
+### When to use Squash
+Opt for this when dealing with a series of minor or incremental changes, such as documentation updates or small tweaks. It combines all feature branch commits into a single commit for a cleaner main branch history, making it ideal for simpler or less impactful changes.
 
 ## 10. Update the local main branch and clean up
 

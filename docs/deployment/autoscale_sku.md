@@ -104,7 +104,11 @@ More information can be found [here.](https://azure.microsoft.com/en-us/pricing/
 - **Capacity:** `1`
 
 ### Enrichment Message Dequeue Parameter
+<<<<<<< HEAD
 There exist a property that can be set in the local.env file called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.bicep` and `app/enrichment/app.py` to the value of **3**. This means the app will process 3 messages from the queue at a time. This is found to be the most opitmal with the existing configuration but can be increased if you also increase the enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
+=======
+There exist a property that can be set in the local.env file called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.bicep` and `app/enrichment/app.py` to the value of **3**. This means the app will process 3 messages from the queue at a time. This is found to be the most optimal with the existing configuration but can be increased if you also increase the enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
+>>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
 
 ### Customization
 
@@ -112,7 +116,11 @@ To customize the App Service Plans SKU settings, modify the `sku` parameters in 
 
 This can also be adjusted in the Azure Portal.
 
+<<<<<<< HEAD
 **Note:** Adjusting the scale or Tier can cause outages until the redeployment occurrs.
+=======
+**Note:** Adjusting the scale or Tier can cause outages until the redeployment occurs.
+>>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
 
 
 ### Steps to Scale Up:

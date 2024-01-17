@@ -19,6 +19,11 @@ Error: This subscription cannot create CognitiveServices until you agree to Resp
 
 ***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
+<<<<<<< HEAD
+=======
+***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
+
+>>>>>>> 3faba43c904db668697c16df33a11c67629bd490
 ---
 
 ## Error "Your administrator has configured the application infoasst_web_access_xxxxx to block users..."
@@ -127,4 +132,68 @@ make: *** [Makefile:18: infrastructure] Error 1
 
 ### Solution
 
+<<<<<<< HEAD
+=======
+The error is interesting as it seems to indicate the media service cannot be created. This is not the case, it does work in regions where VI and Media Services are available. I have updated this to an enhancement and we will add a ticket to the board to action this when VI can be deployed without this supporting service.
+
+## Error: Token limit often exceeded with PDF files
+
+### Solution:
+
+The root of this is table processing. If a table is greater than our target token count for a chunk, this is not respected.Essentially tables are not chunked, but treated as units. We have added a task to our board to split tables by chunk size and repeat the table header rows in each chunk..
+
+When we switched to using unstructured.io for non-PDF documents, we were aware of the same issue there. They were planning on adding this feature. So, we need to make the change in our code, and follow up with unstructured to confirm if this has been fixed and update that path also.
+
+This issue has been updated to an enhancement.
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+>>>>>>> 3faba43c904db668697c16df33a11c67629bd490
 You will need to open your GitHub Codespaces in VSCode on your managed device. Please read more about opening your [GitHub Codespaces using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).

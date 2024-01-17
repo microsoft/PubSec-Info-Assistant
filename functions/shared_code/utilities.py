@@ -107,49 +107,6 @@ class Utilities:
         """ Function to retrieve the uri and sas token for a given blob in azure storage"""
         return self.utilities_helper.get_blob_and_sas(blob_path)
 
-    # def table_to_html(self, table):
-    #     """ Function to take an output FR table json structure and convert to HTML """
-    #     header_processing_complete = False
-    #     table_html = "<table>"
-    #     rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i],
-    #                    key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
-    #     for row_cells in rows:
-    #         is_row_a_header = False
-    #         row_html = "<tr>"
-    #         for cell in row_cells:
-    #             tag = "td"
-    #             #if hasattr(cell, 'kind'):
-    #             if 'kind' in cell:                      
-    #                 if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
-    #                     tag = "th"
-    #                 if (cell["kind"] == "columnHeader"):
-    #                     is_row_a_header = True
-    #             else:
-    #                 # we have encountered a cell that isn't tagged as a header, 
-    #                 # so assume we have now rerached regular table cells
-    #                 header_processing_complete = True
-    #             cell_spans = ""
-    #             #if hasattr(cell, 'columnSpan'):
-    #             if 'columnSpan' in cell:
-    #                 if cell["columnSpan"] > 1:
-    #                     cell_spans += f" colSpan={cell['columnSpan']}"
-    #             #if hasattr(cell, 'rowSpan'):
-    #             if 'rowSpan' in cell:
-    #                 if cell["rowSpan"] > 1:
-    #                     cell_spans += f" rowSpan={cell['rowSpan']}"
-    #             row_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
-    #         row_html += "</tr>"
-            
-    #         if is_row_a_header and header_processing_complete == False:
-    #             row_html = "<thead>" + row_html + "</thead>"     
-    #         table_html += row_html
-    #     table_html += "</table>"
-    #     return table_html
-
-
-
-
-
 
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
@@ -192,10 +149,6 @@ class Utilities:
             table_html += row_html
         table_html += "</table>"
         return table_html
-
-
-
-
 
 
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container, enable_dev_code):
@@ -375,27 +328,24 @@ class Utilities:
     
     def chunk_table_with_headers(self, prefix_text, table_html, standard_chunk_target_size, 
                                  previous_paragraph_element_is_a_table):
+        """ Function to split a table that is larger than the target size """
         soup = BeautifulSoup(table_html, 'html.parser')
-        thead = str(soup.find('thead'))
-          
+        thead = str(soup.find('thead'))          
         # check if this table is a continuation of a table on a previous page. 
         # If yes then apply the header row from the previous table
         if previous_paragraph_element_is_a_table:
             if thead != "":
                 # update thead to include the main table header
-                thead = thead.replace("<thead>", "<thead>"+self.previous_table_header)
-            
+                thead = thead.replace("<thead>", "<thead>"+self.previous_table_header)            
             else:
                 # just use the previoud thead
                 thead = "<thead>"+self.previous_table_header+"</thead>"    
-
         def add_current_table_chunk(chunk):
             # Close the table tag for the current chunk and add it to the chunks list
             if chunk.strip() and not chunk.endswith("<table>"):
                 chunk = '<table>' + chunk + '</table>'
                 chunks.append(chunk)
-                # Start a new chunk with header if it exists                
-        
+                # Start a new chunk with header if it exists 
         # Initialize chunks list
         chunks = []
         current_chunk = prefix_text
@@ -404,19 +354,15 @@ class Utilities:
         rows = soup.find_all('tr')
         # Filter out rows that are part of thead block
         filtered_rows = [row for row in rows if row.parent.name != "thead"] 
-               
         for i, row in enumerate(filtered_rows):
             row_html = str(row)
-
             # If adding this row to the current chunk exceeds the target size, start a new chunk
             if self.token_count(current_chunk + row_html) > chunk_target_size:
                 add_current_table_chunk(current_chunk)    
                 current_chunk = thead
-                chunk_target_size = standard_chunk_target_size                
-
+                chunk_target_size = standard_chunk_target_size    
             # Add the current row to the chunk
             current_chunk += row_html
-
         # Add the final chunk if there's any content left
         add_current_table_chunk(current_chunk)      
 
@@ -434,6 +380,10 @@ class Utilities:
         previous_subtitle_name = document_map['structure'][0]["subtitle"]
         page_list = []
         chunk_count = 0
+        # We allow a special chunk size for tables, which is 1024, the current
+        # recommended max chunk size
+        TABLE_CHUNK_TARGET_SIZE = 1024
+        
 
         # iterate over the paragraphs and build a chuck based on a section
         # and/or title of the document
@@ -460,7 +410,7 @@ class Utilities:
                         # table processing & splitting
                         table_chunks = self.chunk_table_with_headers(chunk_text, 
                                                                      paragraph_text, 
-                                                                     chunk_target_size,
+                                                                     TABLE_CHUNK_TARGET_SIZE,
                                                                      previous_paragraph_element_is_a_table)
                         
                         for i, table_chunk in enumerate(table_chunks):

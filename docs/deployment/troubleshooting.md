@@ -1,15 +1,25 @@
 # Troubleshooting
 
+<<<<<<< HEAD
 
 ## Infrastructure Deployment
 Please see below sections for troubleshooting the solution depending on what area of the process that is giving issue.
 
+=======
+## Infrastructure Deployment
+
+Please see below sections for troubleshooting the solution depending on what area of the process that is giving issue.
+>>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
 
 If you are having issues with infrastructure deployment then the errors should be apparent in the make deploy output.
 
 You can also navigate to the Subscription in Azure portal, click the option for "Deployments" and find your deployment and related details and errors there.
 
+<<<<<<< HEAD
 Take the full error and logs and post them to this github repo Issues tab with your configuration used.
+=======
+Take the full error and logs and post them to this GitHub repo Issues tab with your configuration used.
+>>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
 
 More info can be found [here](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-history?tabs=azure-portal)
 
@@ -20,7 +30,10 @@ Check out this section for more details [CosmosDB Usage](/docs/deployment/status
 
 For more information on how to use Cosmos, look [here](https://learn.microsoft.com/en-us/azure/cosmos-db/data-explorer).
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
 ## Log Analytics Workbook
 
 WebApp logs, Function logs and App Service logs can be found in Log Analytics Workspace.
@@ -28,4 +41,8 @@ WebApp logs, Function logs and App Service logs can be found in Log Analytics Wo
 There exist in this solution a workbook with default queries that can be used to explore and troubleshoot further.
 Check out the section [Workbook Usage](/docs/deployment/worbook_usage.md).
 
+<<<<<<< HEAD
 For more information on log analytics and kusto query language, look [here](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/queries?tabs=groupby).
+=======
+For more information on log analytics and Kusto query language, look [here](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/queries?tabs=groupby).
+>>>>>>> c3dca962f39fa8834aa70895953aef3409b92870

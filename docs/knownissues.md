@@ -19,8 +19,11 @@ Error: This subscription cannot create CognitiveServices until you agree to Resp
 
 ***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
+<<<<<<< HEAD
+=======
 ***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
+>>>>>>> 3faba43c904db668697c16df33a11c67629bd490
 ---
 
 ## Error "Your administrator has configured the application infoasst_web_access_xxxxx to block users..."
@@ -105,6 +108,7 @@ InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in 
 ### Solution:
 Deploy Azure OpenAI Service only in the supported regions. Review the local.env file and update the location as per supported models and [region availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability)
 
+
 ## Error: jq parse error: Expected value before ','
 
 If you see a jq parse error while doing deployments, it means one of the makefile scripts to extract environment variables is failing to find a value it expects to be there. The files related would be the main.parameters.json file which is the variables from bicep output from the infrastructure create. The other would be the env file used during build and deploy time
@@ -112,18 +116,24 @@ If you see a jq parse error while doing deployments, it means one of the makefil
 ### Solution:
 To resolve carefully check your deployment .env file for any missing but required values. There are rare times when ARM has issues and output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` and/or ```make extract-env``` command so that the bicep outputs can be written again
 
-## Error: Creation of new Media Service accounts are not allowed as the resource has been deprecated
+## Error: 
 
-### Solution:
-Media Services is scheduled for 30th June 2024. This is the [guide](https://learn.microsoft.com/en-us/azure/media-services/latest/azure-media-services-retirement). On deeper investigation Video Indexer, which is the service we use that sits on top of Media Services, will switch away from this before the end date....
+If you encounter an error similar to the one below that indicates your device must be managed.
 
 ```
-Is Azure Video Indexer being retired?
-No, Azure Video Indexer isn't part of the Media Services retirement. Although Video Indexer currently relies on a Media Services account as part of its workflow, this dependency will be eliminated before Media Services is retired on June 30, 2024. See the following for more [impact of Media Services retirement for Video Indexer](https://aka.ms/vi-ams-retirement-announcement)
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
 ```
 
-As of today, Video Indexer still requires a Media Services service to be created, and so we can't remove it from bicep deployment. We will need to assess closer to the date if VI is working without the service and we can then remove the dependency.
+### Solution
 
+<<<<<<< HEAD
+=======
 The error is interesting as it seems to indicate the media service cannot be created. This is not the case, it does work in regions where VI and Media Services are available. I have updated this to an enhancement and we will add a ticket to the board to action this when VI can be deployed without this supporting service.
 
 ## Error: Token limit often exceeded with PDF files
@@ -185,4 +195,5 @@ make: *** [Makefile:18: infrastructure] Error 1
 
 ### Solution
 
+>>>>>>> 3faba43c904db668697c16df33a11c67629bd490
 You will need to open your GitHub Codespaces in VSCode on your managed device. Please read more about opening your [GitHub Codespaces using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).

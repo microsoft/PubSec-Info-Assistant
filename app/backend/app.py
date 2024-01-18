@@ -64,7 +64,8 @@ ENV = {
     "COSMOSDB_TAGS_CONTAINER_NAME": "tagscontainer",
     "QUERY_TERM_LANGUAGE": "English",
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
-    "ENRICHMENT_APPSERVICE_NAME": "enrichment"
+    "ENRICHMENT_APPSERVICE_NAME": "enrichment",
+    "TARGET_TRANSLATION_LANGUAGE": "en",
 }
 
 for key, value in ENV.items():
@@ -170,7 +171,8 @@ chat_approaches = {
         model_version,
         str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
         ENV["TARGET_EMBEDDINGS_MODEL"],
-        ENV["ENRICHMENT_APPSERVICE_NAME"]
+        ENV["ENRICHMENT_APPSERVICE_NAME"],
+        ENV["TARGET_TRANSLATION_LANGUAGE"],
     )
 }
 

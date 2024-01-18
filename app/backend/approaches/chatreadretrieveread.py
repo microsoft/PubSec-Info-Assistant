@@ -27,6 +27,10 @@ from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 import requests
 
+# Import the necessary libraries for language detection and translation
+from langdetect import detect
+from deep_translator import GoogleTranslator
+
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
 # then constructs a prompt with them, and then uses OpenAI to generate
@@ -108,7 +112,9 @@ class ChatReadRetrieveReadApproach(Approach):
         model_version: str,
         is_gov_cloud_deployment: str,
         TARGET_EMBEDDING_MODEL: str,
-        ENRICHMENT_APPSERVICE_NAME: str
+        ENRICHMENT_APPSERVICE_NAME: str,
+        target_translation_language: str
+        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -122,6 +128,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.chatgpt_token_limit = get_token_limit(model_name)
         #escape target embeddiong model name
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
+        self.target_translation_language=target_translation_language
         
         if is_gov_cloud_deployment:
             self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
@@ -154,6 +161,11 @@ class ChatReadRetrieveReadApproach(Approach):
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
         
+        
+        # Detect the language of the user's question
+        detected_language = detect(user_q)
+       
+        
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
         
 
@@ -180,6 +192,7 @@ class ChatReadRetrieveReadApproach(Approach):
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
+        
 
         # Generate embedding using REST API
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
@@ -390,10 +403,19 @@ class ChatReadRetrieveReadApproach(Approach):
         )
         # STEP 4: Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+       
+                  
+        # Translate the response if the detected language is not English
+                              
+        if detected_language != 'en':
+            translated_response= GoogleTranslator(source=self.target_translation_language, target=detected_language).translate(chat_completion.choices[0].message.content) 
+        else:
+            translated_response = chat_completion.choices[0].message.content
+ 
 
         return {
             "data_points": data_points,
-            "answer": f"{urllib.parse.unquote(chat_completion.choices[0].message.content)}",
+            "answer": f"{urllib.parse.unquote(translated_response)}",
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }

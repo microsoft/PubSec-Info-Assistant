@@ -128,28 +128,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
-<<<<<<< HEAD
             onRender: (item: IDocument) => (  
                 <TooltipHost content={`${item.state} `}>  
                     <span>{item.state}</span>  
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
                 </TooltipHost>  
             ), 
-=======
-            onRender: (item: IDocument) => (
-                <TooltipHost content={`${item.state_description} `}>
-                    <span>{item.state}</span>
-                </TooltipHost>
-            ),
->>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
             isPadded: true,
         },
         {
             key: 'column4',
             name: 'Submitted On',
             fieldName: 'upload_timestamp',
-            minWidth: 70,
-            maxWidth: 90,
+            minWidth: 90,
+            maxWidth: 120,
             isResizable: true,
             isCollapsible: true,
             ariaLabel: 'Column operations for submitted on date, Press to sort by submitted date',
@@ -164,8 +156,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             key: 'column5',
             name: 'Last Updated',
             fieldName: 'modified_timestamp',
-            minWidth: 70,
-            maxWidth: 90,
+            minWidth: 90,
+            maxWidth: 120,
             isResizable: true,
             isSorted: true,
             isSortedDescending: false,
@@ -179,7 +171,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 return <span>{item.modified_timestamp}</span>;
             },
         },
-<<<<<<< HEAD
         {
             key: 'column6',
             name: 'Status Detail',
@@ -197,8 +188,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 </TooltipHost>
             ),
         }
-=======
->>>>>>> c3dca962f39fa8834aa70895953aef3409b92870
     ]);
 
     return (

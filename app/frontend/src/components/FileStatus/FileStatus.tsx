@@ -29,8 +29,11 @@ const dropdownFileStateOptions = [
     { key: FileState.Complete, text: 'Completed' },
     { key: FileState.Error, text: 'Error' },
     { key: FileState.Processing, text: 'Processing' },
+    { key: FileState.Indexing, text: 'Indexing' },
     { key: FileState.Queued, text: 'Queued' },
     { key: FileState.Skipped, text: 'Skipped'},
+    { key: FileState.UPLOADED, text: 'Uploaded'},
+    { key: FileState.THROTTLED, text: 'Throttled'},    
   ];
 
 interface Props {

@@ -10,11 +10,7 @@ The Azure pricing calculator helps estimate costs by considering the amount of d
 ---
 ### Azure Services
 
-<<<<<<< HEAD
-The following list of Azure Services will be deployed for IA Accelerator, version 1.0:
-=======
 The following list of Azure Services will be deployed for IA Accelerator, version 0.4 delta:
->>>>>>> 3faba43c904db668697c16df33a11c67629bd490
 
 - App Service [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Azure Function(App Service plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/functions/#pricing)

@@ -22,12 +22,19 @@ keyVaultName=$(cat infra_output.json | jq -r .properties.outputs.deploymenT_KEYV
 
 # Names of your secrets
 secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "ENRICHMENT-KEY")
+azWebJobSecretName="BLOB-CONNECTION-STRING"
+azWebJobVarName="AzureWebJobsStorage"
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do
   secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
   envVarName=$(echo $secretName | tr '-' '_')
   secrets+="\"$envVarName\": \"$secretValue\","
+
+  if [ "$secretName" == "$azWebJobSecretName" ]; then
+    export $azWebJobVarName=$secretValue
+    secrets+="\"$azWebJobVarName\": \"$secretValue\","
+  fi
 done 
 secrets=${secrets%?} # Remove the trailing comma
 secrets+="}"
@@ -87,10 +94,6 @@ jq -r --arg secrets "$secrets" '
         {
             "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
             "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
-            "path": "azureWebJobsStorage",
-            "env_var": "AzureWebJobsStorage"
         },
         {
             "path": "enrichmenT_ENDPOINT",

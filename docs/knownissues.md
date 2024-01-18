@@ -17,9 +17,13 @@ Error: This subscription cannot create CognitiveServices until you agree to Resp
 4. Review and accept the terms "Responsible AI Notice".
 5. Create the Azure AI Service.
 
+***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
+
+***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
+
 ---
 
-## Error "Your adminstrator has configured the application infoasst_web_access_xxxxx to block users..."
+## Error "Your administrator has configured the application infoasst_web_access_xxxxx to block users..."
 
 By default Info Assistant deploys the webapp to require users to be a member of an Azure Active Directory Enterprise Application to access the website. If a user is not a member of the AAD EA they will receive this error:
 
@@ -53,7 +57,7 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ## Errors due to throttling or overloading Form Recognizer
 
-Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by Form Recognzer in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is deisgned to back off and retry at a later time, up to a maxmum set of retries, which is configurable. These values surface as configuration settinsg in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
+Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable. These values surface as configuration settings in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
 
 ```
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
@@ -95,7 +99,7 @@ This means that you have exceeded the quota assigned to your deployment for the 
 
 ## Error:'OpenAI' is either invalid or unavailable in given region
 ```
-InvalidTemplateDeployment - The template deployment 'infoasst-asbanger-vnext1' is not valid according to the validation procedure. The tracking id is '4c3fd9d0-59fb-47f3-aa5a-ddb13c9313e8'. See inner errors for details.
+InvalidTemplateDeployment - The template deployment 'infoasst-myworkspace-xxxxx' is not valid according to the validation procedure. The tracking id is 'xxxxx-xxxx-xxxxx-xxxx-xxxxxxx'. See inner errors for details.
 InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in given region.
 ```
 ### Solution:
@@ -131,3 +135,54 @@ The root of this is table processing. If a table is greater than our target toke
 When we switched to using unstructured.io for non-PDF documents, we were aware of the same issue there. They were planning on adding this feature. So, we need to make the change in our code, and follow up with unstructured to confirm if this has been fixed and update that path also.
 
 This issue has been updated to an enhancement.
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+## Error: 
+
+If you encounter an error similar to the one below that indicates your device must be managed.
+
+```
+ERROR: AADSTS530003: Your device is required to be managed to access this resource.
+Trace ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Correlation ID: xxxxxxxx-xxxx-xxxx-xxxxxxxx
+Timestamp: 2023-10-05 19:54:05Z
+Interactive authentication is needed. Please run:
+az login --scope https://graph.microsoft.com//.default
+make: *** [Makefile:18: infrastructure] Error 1
+```
+
+### Solution
+
+You will need to open your GitHub Codespaces in VSCode on your managed device. Please read more about opening your [GitHub Codespaces using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).

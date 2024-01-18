@@ -40,7 +40,6 @@ class ChatReadRetrieveReadApproach(Approach):
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
-     
     
     # # Define a class variable for the base URL
     # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
@@ -128,7 +127,8 @@ class ChatReadRetrieveReadApproach(Approach):
             model=self.model_name,
             messages=messages,
             temperature=0.0,
-            max_tokens=32,
+            # max_tokens=32, # setting it too low may cause malformed JSON
+            max_tokens=100,
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
@@ -200,6 +200,18 @@ class ChatReadRetrieveReadApproach(Approach):
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
+        
+        #  #print search results with score
+        # for idx, doc in enumerate(r):  # for each document in the search results
+        #     print(f"File{idx}: ", doc['@search.score'])
+        
+        # cutoff_score=0.01
+        
+        # # Only include results where search.score is greater than cutoff_score
+        # filtered_results = [doc for doc in r if doc['@search.score'] > cutoff_score]
+        # # print("Filtered Results: ", len(filtered_results))
+        
+      
 
         for idx, doc in enumerate(r):  # for each document in the search results
             # include the "FileX" moniker in the prompt, and the actual file name in the response
@@ -278,7 +290,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 system_message,
                 self.model_name,
                 history,
-                history[-1]["user"] + "Sources:\n" + content + "\n\n",
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
                 prompt_template.Response_Prompt_Few_Shots,
                 max_tokens=self.chatgpt_token_limit - 500
             )
@@ -304,11 +316,12 @@ class ChatReadRetrieveReadApproach(Approach):
         elif self.model_name.startswith("gpt-4"):
             messages = self.get_messages_from_history(
                 prompt_template,
-                "Sources:\n" + content + "\n\n" + system_message,
-                # system_message + "\n\nSources:\n" + content,
+                system_message,
+                # "Sources:\n" + content + "\n\n" + system_message,
                 self.model_name,
                 history,
-                history[-1]["user"],
+                # history[-1]["user"],
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
                 prompt_template.Response_Prompt_Few_Shots,
                 max_tokens=self.chatgpt_token_limit
             )

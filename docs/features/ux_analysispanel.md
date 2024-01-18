@@ -1,6 +1,6 @@
 # Analysis Panel
 
-he Analysis Panel in the UX allows the user to explore three details about the answer to their question:
+The Analysis Panel in the UX allows the user to explore three details about the answer to their question:
 
 * Thought Process
 * Supporting Content
@@ -10,15 +10,23 @@ In this documentation we will cover the specifics of that detail tab.
 
 ## Thought Process
 
-TBD
+The ***Thought Process*** sub-tab of the ***Analysis*** panel displays the entire thought process used throughout the Retrieval Augmented Generation (RAG) process. In the screenshot below, you can see
+
+* Generative AI assisted query terms derived from the users question in orange
+* System Prompt, derived from configured options in the ***Adjust*** panel,in yellow
+* Few shot prompting questions and answer examples in blue
+
+![Analysis Panel Thought Process sub tab view](/docs/images/UX_analysispanel_thoughtprocess.png)
 
 ## Supporting Content
 
-TBD
+The ***Supporting Content*** sub-tab of the ***Analysis*** panel displays the total number of document chunks returned from the Azure AI Search index. The number of chunks returned are driven by settings in the ***Adjust*** panel.
+
+![Analysis Panel Supporting Content sub tab view](/docs/images/UX_analysispanel_supportingcontent.png)
 
 ## Citations
 
-The Citations detail tab includes to sub views. One to display the section of the document ("chunk") that was indexed and returned as a selected result of the search. The second uses metadata from the document section ("chunk") to display the source file and page where the chunk was derived from.
+The ***Citations*** sub-tab of the ***Analysis*** panel includes to sub views itself. One to display a view of the indexed content for the cited section of the document ("chunk"). The second uses metadata from the document section ("chunk") to display the source file and page where the cited chunk originated from.
 
 An example of a "chunk" would be in JSON format like:
 
@@ -40,10 +48,10 @@ An example of a "chunk" would be in JSON format like:
 
 From this content we can derive the file name and pages the "chunk" was derived from using the **file_name** and **pages** attributes.
 
-The "chunk" displays in the **Document Section** tab of the **Citation** tab of the **Analysis Panel**.
+The "chunk" metadata displays in the ***Document Section*** sub view of the ***Citation*** sub-tab of the ***Analysis*** panel.
 
-![Document Section tab of the Citation tab of the Analysis Panel](../images/UX_anlysispanel_citation_documentsection.png)
+![Document Section sub view of the Citation sub tab of the Analysis Panel](../images/UX_anlysispanel_citation_documentsection.png)
 
-The full file displays in the **Document** tab of the **Citation** tab of the **Analysis Panel**.
+The full file displays in the ***Document*** sub view of the ***Citation*** sub-tab of the ***Analysis*** panel.
 
-![Source Document tab of the Citation tab of the Analysis Panel](../images/UX_anlysispanel_citation_document.png)
+![Source Document sub view of the Citation sub tab of the Analysis Panel](../images/UX_anlysispanel_citation_document.png)

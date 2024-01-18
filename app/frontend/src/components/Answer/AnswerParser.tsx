@@ -58,15 +58,16 @@ export function parseAnswerToHtml(answer: string, citation_lookup: CitationLooku
             }
             else {
                 let citationIndex: number;
-                if (citations.indexOf((citation_lookup as any)[part]) !== -1) {
-                    citationIndex = citations.indexOf((citation_lookup as any)[part]) + 1;
-               
+                // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
+                // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
+                let citationShortName: string = (citation_lookup)[part].citation.split("/").slice(4).join("/");
+
+                // Check if the citationShortName is already in the citations array
+                if (citations.includes(citationShortName)) {
+                    // If it exists, use the existing index (add 1 because array is 0-based but citation numbers are 1-based)
+                    citationIndex = citations.indexOf(citationShortName) + 1;
+
                 } else {
-                    // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
-                    // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                  
-                    //Updated below code section for citation bug. aparmar
-                    let citationShortName: string = (citation_lookup)[part].citation.split("/").slice(4).join("/");
                     citations.push(citationShortName);
                     // switch these to the citationShortName as key to allow dynamic lookup of the source path and page number
                     // The "FileX" moniker will not be used beyond this point in the UX code

@@ -249,7 +249,7 @@ variable "targetPages" {
 
 variable "formRecognizerApiVersion" {
   type    = string
-  default = "2022-08-31"
+  default = "2023-07-31"
 }
 
 variable "queryTermLanguage" {

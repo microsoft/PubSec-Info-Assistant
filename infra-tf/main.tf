@@ -2,6 +2,8 @@ locals {
   abbrs  = jsondecode(file("${path.module}/abbreviations.json"))
   tags   = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   prefix = "infoasst"
+  azure_roles = jsondecode(file("${path.module}/azure_roles.json"))
+  selected_roles = ["CognitiveServicesOpenAIUser", "StorageBlobDataReader", "StorageBlobDataContributor", "SearchIndexDataReader", "SearchIndexDataContributor"]
 }
 
 data "azurerm_client_config" "current" {}
@@ -381,19 +383,11 @@ module "functions" {
 
 
 // USER ROLES
-variable "role_definition_ids" {
-  type    = list(string)
-  default = ["5e0bd9bd-7b93-4f28-af87-19fc36ad61bd", #openAiRoleUser
-             "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1", #storageRoleUser
-             "ba92f5b4-2d11-453d-a403-e96b0029c9fe", #storageContribRoleUser
-             "1407120a-92aa-4202-b7e9-c0e197c71c8f", #searchRoleUser
-             "8ebe5a00-799e-43f5-93ac-243d3dce84a7"] #searchContribRoleUser
-}
-
 module "userRoles" {
   source = "./core/security/role"
 
-  for_each = { for idx, role_definition_id in var.role_definition_ids : idx => { role_definition_id = role_definition_id } }
+  # for_each = { for idx, role_definition_id in var.role_definition_ids : idx => { role_definition_id = role_definition_id } }
+  for_each = { for role in local.selected_roles : role => { role_definition_id = local.azure_roles[role] } }
 
   scope            = azurerm_resource_group.rg.id
   principalId      = var.principalId
@@ -410,7 +404,7 @@ module "openAiRoleBackend" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.backend.identityPrincipalId
-  roleDefinitionId = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+  roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -422,7 +416,7 @@ module "ACRRoleContainerAppService" {
 
   scope            = azurerm_resource_group.rg.id
   principalId     = module.enrichmentApp.identityPrincipalId
-  roleDefinitionId = "7f951dda-4ed3-4680-a7ca-43fe172d538d"
+  roleDefinitionId = local.azure_roles.AcrPull
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -433,7 +427,7 @@ module "storageRoleBackend" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.backend.identityPrincipalId
-  roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+  roleDefinitionId = local.azure_roles.StorageBlobDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -444,7 +438,7 @@ module "searchRoleBackend" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.backend.identityPrincipalId
-  roleDefinitionId = "1407120a-92aa-4202-b7e9-c0e197c71c8f"
+  roleDefinitionId = local.azure_roles.SearchIndexDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -455,7 +449,7 @@ module "storageRoleFunc" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.functions.function_app_identity_principal_id
-  roleDefinitionId = "2a2b9908-6ea1-4ae2-8e65-a410df84e7d1"
+  roleDefinitionId = local.azure_roles.StorageBlobDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -466,7 +460,7 @@ module "containerRegistryPush" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = var.aadMgmtServicePrincipalId
-  roleDefinitionId = "8311e382-0749-4cb8-b61a-304f252e45ec"
+  roleDefinitionId = local.azure_roles.AcrPush
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -484,7 +478,7 @@ module "openAiRoleMgmt" {
   # scope            = var.useExistingAOAIService && !var.isGovCloudDeployment ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.id
   scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
   principalId     = var.aadMgmtServicePrincipalId
-  roleDefinitionId = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+  roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id

@@ -12,20 +12,6 @@ class Approaches(Enum):
     ReadDecomposeAsk = 2
     GPTDirect = 3
 
-class PromptTemplate:
-
-    # Chat roles
-    System = "system"
-    User = "user"
-    Assistant = "assistant"
-
-    System_Message_Chat_Conversation = ""
-    Follow_Up_Questions_Prompt_Content = ""
-    Query_Prompt_Template = ""
-    Query_Prompt_Few_Shots = []
-    Response_Prompt_Few_Shots = []
-
-
 class Approach:
     """
     An approach is a method for answering a question from a query and a set of
@@ -45,7 +31,6 @@ class Approach:
      #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
     def get_messages_from_history(
         self,
-        prompt_template: PromptTemplate,
         system_prompt: str,
         model_id: str,
         history: Sequence[dict[str, str]],

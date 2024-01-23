@@ -279,6 +279,7 @@ module backend 'core/host/appservice.bicep' = {
       CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
+      ENRICHMENT_ENDPOINT: enrichment.outputs.cognitiveServiceEndpoint
       APPLICATION_TITLE: applicationtitle
     }
     aadClientId: aadWebClientId

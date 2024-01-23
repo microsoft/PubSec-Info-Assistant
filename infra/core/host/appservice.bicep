@@ -82,6 +82,7 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
         AZURE_BLOB_STORAGE_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-BLOB-STORAGE-KEY)'
         COSMOSDB_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/COSMOSDB-KEY)'
         AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/AZURE-CLIENT-SECRET)'
+        ENRICHMENT_KEY: '@Microsoft.KeyVault(SecretUri=${keyVault.properties.vaultUri}secrets/ENRICHMENT-KEY)'
       },
       !empty(applicationInsightsName) ? { APPLICATIONINSIGHTS_CONNECTION_STRING: applicationInsights.properties.ConnectionString } : {},
       !empty(keyVaultName) ? { AZURE_KEY_VAULT_ENDPOINT: keyVault.properties.vaultUri } : {})

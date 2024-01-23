@@ -66,6 +66,8 @@ ENV = {
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
     "ENRICHMENT_APPSERVICE_NAME": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
+    "ENRICHMENT_ENDPOINT": None,
+    "ENRICHMENT_KEY": None
 }
 
 for key, value in ENV.items():
@@ -94,6 +96,10 @@ azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"]
 openai.api_type = "azure"
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
 openai.api_version = "2023-06-01-preview"
+
+# Cognitive Services Enrichment API
+enrichmentEndpoint = ENV["ENRICHMENT_ENDPOINT"]
+enrichmentKey = ENV["ENRICHMENT_KEY"]
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(

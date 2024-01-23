@@ -5,7 +5,7 @@ import logging
 import os
 import re
 
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 
 
 def load_models():
@@ -20,23 +20,23 @@ def load_models():
     models = {}
     model_info = {}
 
-    try:
-        for model_name in models_to_download:
-            # Ignore AOAI models as they are downloaded elsewhere
-            if model_name.startswith("azure-openai"):
-                continue
-            model = SentenceTransformer(model_name)
-            sanitized_model_name = re.sub(r'[^a-zA-Z0-9_\-.]', '_', model_name)
-            model.save(os.path.join(models_path,sanitized_model_name))
-            models[sanitized_model_name] = model
-            logging.debug(f"Loaded model {model_name}")
+    # try:
+    #     for model_name in models_to_download:
+    #         # Ignore AOAI models as they are downloaded elsewhere
+    #         if model_name.startswith("azure-openai"):
+    #             continue
+    #         model = SentenceTransformer(model_name)
+    #         sanitized_model_name = re.sub(r'[^a-zA-Z0-9_\-.]', '_', model_name)
+    #         model.save(os.path.join(models_path,sanitized_model_name))
+    #         models[sanitized_model_name] = model
+    #         logging.debug(f"Loaded model {model_name}")
 
-            model_info_entry = {
-                "model": sanitized_model_name,
-                "vector_size": model.get_sentence_embedding_dimension(),
-            }
-            model_info[sanitized_model_name] = model_info_entry
-    except Exception as error:
-        logging.error(f"Failed to retrieve models - {str(error)}")
+    #         model_info_entry = {
+    #             "model": sanitized_model_name,
+    #             "vector_size": model.get_sentence_embedding_dimension(),
+    #         }
+    #         model_info[sanitized_model_name] = model_info_entry
+    # except Exception as error:
+    #     logging.error(f"Failed to retrieve models - {str(error)}")
 
     return models, model_info

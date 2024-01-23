@@ -21,11 +21,11 @@ from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from fastapi_utils.tasks import repeat_every
+# from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
 import openai
 from tenacity import retry, wait_random_exponential, stop_after_attempt
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.tags_helper import TagsHelper
@@ -84,23 +84,25 @@ class AzOAIEmbedding(object):
     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
     def encode(self, texts):
         """Embeds a list of texts using a given model"""
+        logging.info("Attempting to call Azure OpenAI Embedding API...")
         response = openai.Embedding.create(
             engine=self.deployment_name,
             input=texts
         )
+        logging.info(f"Azure OpenAI Embedding API call successful!")
         return response
 
-class STModel(object):
-    """A wrapper for a sentence-transformers model"""
-    def __init__(self, deployment_name) -> None:
-        self.deployment_name = deployment_name
+# class STModel(object):
+#     """A wrapper for a sentence-transformers model"""
+#     def __init__(self, deployment_name) -> None:
+#         self.deployment_name = deployment_name
         
-    @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
-    def encode(self, texts) -> None:
-        """Embeds a list of texts using a given model"""
-        model = SentenceTransformer(self.deployment_name)
-        response = model.encode(texts)
-        return response
+#     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
+#     def encode(self, texts) -> None:
+#         """Embeds a list of texts using a given model"""
+#         model = SentenceTransformer(self.deployment_name)
+#         response = model.encode(texts)
+#         return response
     
 # === Get Logger ===
 
@@ -226,6 +228,7 @@ def embed_texts(model: str, texts: List[str]):
 
     model_obj = models[model]
     try:
+        logging.info(f"Trying to embed with model: {str(model)}")
         if model.startswith("azure-openai_"):
             embeddings = model_obj.encode(texts)
             embeddings = embeddings['data'][0]['embedding']
@@ -310,7 +313,7 @@ def poll_queue() -> None:
         return
 
     target_embeddings_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', ENV["TARGET_EMBEDDINGS_MODEL"])
-
+    log.debug(f"Processing {len(messages)} messages with model {target_embeddings_model}")
     # Remove from queue to prevent duplicate processing from any additional instances
     for message in messages:
         queue_client.delete_message(message)

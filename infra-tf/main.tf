@@ -146,6 +146,7 @@ module "backend" {
   managedIdentity = true
   runtimeNameAndVersion = "python|3.10"
   linuxFxVersion = "PYTHON|3.10"
+  appCommandLine = "gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
   applicationInsightsName = module.logging.applicationInsightsName
   logAnalyticsWorkspaceName = module.logging.logAnalyticsName
   logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId

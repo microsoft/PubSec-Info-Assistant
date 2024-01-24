@@ -27,11 +27,6 @@ class ChatReadRetrieveReadApproach(Approach):
     Azure OpenAI APIs directly. It first retrieves top documents from search,
     then constructs a prompt with them, and then uses Azure OpenAI to generate
     an completion (answer) with that prompt."""
-
-     # Chat roles
-    SYSTEM = "system"
-    USER = "user"
-    ASSISTANT = "assistant"
      
     system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
@@ -68,18 +63,18 @@ class ChatReadRetrieveReadApproach(Approach):
 
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
+    {'role' : Approach.USER, 'content' : 'What are the future plans for public transportation development?' },
+    {'role' : Approach.ASSISTANT, 'content' : 'Future plans for public transportation' },
+    {'role' : Approach.USER, 'content' : 'how much renewable energy was generated last year?' },
+    {'role' : Approach.ASSISTANT, 'content' : 'Renewable energy generation last year' }
     ]
 
     #Few Shot prompting for Response. This will feed into Chain of thought system message.
     response_prompt_few_shots = [
-    {"role": USER ,'content': 'I am looking for information in source documents'},
-    {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
+    {"role": Approach.USER ,'content': 'I am looking for information in source documents'},
+    {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
+    {'role': Approach.USER, 'content': 'What steps are being taken to promote energy conservation?'},
+    {'role': Approach.ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
     ]
     
     # # Define a class variable for the base URL

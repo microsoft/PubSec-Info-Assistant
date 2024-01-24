@@ -17,6 +17,10 @@ class Approach:
     An approach is a method for answering a question from a query and a set of
     documents.
     """
+    # Chat roles
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
 
     async def run(self, history: list[dict], overrides: dict) -> any:
         """

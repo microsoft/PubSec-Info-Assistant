@@ -18,4 +18,4 @@ azure-ai-vision == 0.15.1b1
 unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.10.27
 pyoo == 1.4
 azure-search-documents == 11.4.0b11
-
+beautifulsoup4 == 4.12.2

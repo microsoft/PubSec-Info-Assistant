@@ -138,6 +138,10 @@ jq -r  '
         {
             "path": "azurE_OPENAI_CHATGPT_MODEL_NAME",
             "env_var": "AZURE_OPENAI_CHATGPT_MODEL_NAME"
+        },
+        {
+            "path": "enrichmenT_ENDPOINT",
+            "env_var": "ENRICHMENT_ENDPOINT"
         }
     ]
         as $env_vars_to_extract
@@ -181,7 +185,7 @@ fi
 keyVaultName=$(cat infra_output.json | jq -r .properties.outputs.deploymenT_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET")
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do

@@ -1,7 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import json
 import re
 import logging
 import urllib.parse
@@ -13,9 +12,6 @@ from approaches.approach import Approach
 from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
-
-from text import nonewlines
-from datetime import datetime, timedelta
 from azure.storage.blob import (
     AccountSasPermissions,
     BlobServiceClient,
@@ -24,36 +20,31 @@ from azure.storage.blob import (
 )
 from text import nonewlines
 from core.modelhelper import get_token_limit
-from core.modelhelper import num_tokens_from_messages
 import requests
-from urllib.parse import quote
-
-# Simple retrieve-then-read implementation, using the Cognitive Search and
-# OpenAI APIs directly. It first retrieves top documents from search,
-# then constructs a prompt with them, and then uses OpenAI to generate 
-# an completion (answer) with that prompt.
 
 class ChatReadRetrieveReadApproach(Approach):
-
-     # Chat roles
-    SYSTEM = "system"
-    USER = "user"
-    ASSISTANT = "assistant"
+    """Approach that uses a simple retrieve-then-read implementation, using the Azure AI Search and
+    Azure OpenAI APIs directly. It first retrieves top documents from search,
+    then constructs a prompt with them, and then uses Azure OpenAI to generate
+    an completion (answer) with that prompt."""
      
     system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
     Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
-       
+   
     
     Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     Never cite the source content using the examples provided in this paragraph that start with info.
       
     Here is how you should answer every question:
     
+        
     -Look for information in the source documents to answer the question in {query_term_language}.
     -If the source document has an answer, please respond with citation.You must include a citation to each document referenced only once when you find answer in source documents.      
     -If you cannot find answer in below sources, respond with I am not sure.Do not provide personal opinions or assumptions and do not include citations.
-    
+    -Identify the language of the user's question and translate the final response to that language.if the final answer is " I am not sure" then also translate it to the language of the user's question and then display translated response only. nothing else.
+
+  
     {follow_up_questions_prompt}
     {injected_prompt}
     
@@ -67,24 +58,23 @@ class ChatReadRetrieveReadApproach(Approach):
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<<>>> in the search query terms.
     Do not include any special characters like '+'.
-    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
     If you cannot generate a search query, return just the number 0.
     """
 
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
+    {'role' : Approach.USER, 'content' : 'What are the future plans for public transportation development?' },
+    {'role' : Approach.ASSISTANT, 'content' : 'Future plans for public transportation' },
+    {'role' : Approach.USER, 'content' : 'how much renewable energy was generated last year?' },
+    {'role' : Approach.ASSISTANT, 'content' : 'Renewable energy generation last year' }
     ]
 
     #Few Shot prompting for Response. This will feed into Chain of thought system message.
     response_prompt_few_shots = [
-    {"role": USER ,'content': 'I am looking for information in source documents'},
-    {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
+    {"role": Approach.USER ,'content': 'I am looking for information in source documents'},
+    {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
+    {'role': Approach.USER, 'content': 'What steps are being taken to promote energy conservation?'},
+    {'role': Approach.ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
     ]
     
     # # Define a class variable for the base URL
@@ -106,8 +96,12 @@ class ChatReadRetrieveReadApproach(Approach):
         model_name: str,
         model_version: str,
         is_gov_cloud_deployment: str,
-        TARGET_EMBEDDING_MODEL: str,
-        ENRICHMENT_APPSERVICE_NAME: str
+        target_embedding_model: str,
+        enrichment_appservice_name: str,
+        target_translation_language: str,
+        enrichment_endpoint:str,
+        enrichment_key:str
+        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -120,13 +114,16 @@ class ChatReadRetrieveReadApproach(Approach):
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         #escape target embeddiong model name
-        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
-        
+        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
+        self.target_translation_language=target_translation_language
+        self.enrichment_endpoint=enrichment_endpoint
+        self.enrichment_key=enrichment_key
+
         if is_gov_cloud_deployment:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
+            self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.us'
         else:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
-        
+            self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.net'
+
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
@@ -134,7 +131,6 @@ class ChatReadRetrieveReadApproach(Approach):
         self.model_name = model_name
         self.model_version = model_version
         self.is_gov_cloud_deployment = is_gov_cloud_deployment
-        
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -153,16 +149,24 @@ class ChatReadRetrieveReadApproach(Approach):
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
 
+        # Detect the language of the user's question
+        detectedlanguage = self.detect_language(user_q)
+
+        if detectedlanguage != self.target_translation_language:
+            user_question = self.translate_response(user_q, self.target_translation_language)
+        else:
+            user_question = user_q
+
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
-        
+
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
             query_prompt,
             self.model_name,
             history,
-            user_q,
+            user_question,
             self.query_prompt_few_shots,
-            self.chatgpt_token_limit - len(user_q)
+            self.chatgpt_token_limit - len(user_question)
             )
 
         chat_completion = await openai.ChatCompletion.acreate(
@@ -175,6 +179,7 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
+        
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
@@ -225,9 +230,6 @@ class ChatReadRetrieveReadApproach(Approach):
             r = self.search_client.search(
                 generated_query,
                 query_type=QueryType.SEMANTIC,
-                query_language="en-us",
-                # query_language=self.query_term_language,
-                query_speller="lexicon",
                 semantic_configuration_name="default",
                 top=top,
                 query_caption="extractive|highlight-false"
@@ -243,18 +245,15 @@ class ChatReadRetrieveReadApproach(Approach):
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
-        
+
         #  #print search results with score
         # for idx, doc in enumerate(r):  # for each document in the search results
         #     print(f"File{idx}: ", doc['@search.score'])
-        
+
         # cutoff_score=0.01
-        
         # # Only include results where search.score is greater than cutoff_score
         # filtered_results = [doc for doc in r if doc['@search.score'] > cutoff_score]
         # # print("Filtered Results: ", len(filtered_results))
-        
-      
 
         for idx, doc in enumerate(r):  # for each document in the search results
             # include the "FileX" moniker in the prompt, and the actual file name in the response
@@ -388,13 +387,66 @@ class ChatReadRetrieveReadApproach(Approach):
         )
         # STEP 4: Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+        generated_response=chat_completion.choices[0].message.content
+
+        # # Detect the language of the response
+        response_language = self.detect_language(generated_response)
+        #if response is not in user's language, translate it to user's language
+        if response_language != detectedlanguage:
+            translated_response = self.translate_response(generated_response, detectedlanguage)
+        else:
+            translated_response = generated_response
 
         return {
             "data_points": data_points,
-            "answer": f"{urllib.parse.unquote(chat_completion.choices[0].message.content)}",
+            "answer": f"{urllib.parse.unquote(translated_response)}",
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }
+
+    def detect_language(self, text: str) -> str:
+        """ Function to detect the language of the text"""
+        try:
+            endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0] 
+            suffix = "us" if self.is_gov_cloud_deployment else "com"
+            api_detect_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
+            headers = {
+                'Ocp-Apim-Subscription-Key': self.enrichment_key,
+                'Content-type': 'application/json',
+                'Ocp-Apim-Subscription-Region': endpoint_region
+            }
+            data = [{"text": text}]
+            response = requests.post(api_detect_endpoint, headers=headers, json=data)
+
+            if response.status_code == 200:
+                detected_language = response.json()[0]['language']
+                return detected_language
+            else:
+                raise Exception(f"Error detecting language: {response.status_code}")
+        except Exception as e:
+            raise Exception(f"An error occurred during language detection: {str(e)}") from e
+     
+    def translate_response(self, response: str, target_language: str) -> str:
+        """ Function to translate the response to target language"""
+        endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
+        suffix = "us" if self.is_gov_cloud_deployment else "com"         
+        api_translate_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.enrichment_key,
+            'Content-type': 'application/json',
+            'Ocp-Apim-Subscription-Region': endpoint_region
+        }
+        params={'to': target_language }
+        data = [{
+            "text": response
+        }]          
+        response = requests.post(api_translate_endpoint, headers=headers, json=data, params=params)
+        
+        if response.status_code == 200:
+            translated_response = response.json()[0]['translations'][0]['text']
+            return translated_response
+        else:
+            raise Exception(f"Error translating response: {response.status_code}")
 
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""

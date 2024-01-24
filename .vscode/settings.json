@@ -13,5 +13,9 @@
         "latex",
         "plaintext",
         "shellscript"
+    ],
+    "cSpell.words": [
+        "Codespaces",
+        "referenceable"
     ]
 }

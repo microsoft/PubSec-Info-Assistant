@@ -35,15 +35,15 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
-## Find your deploment URL
+## Find your deployment URL
 
 Once deployed, you can find the URL of your installation by:
 
 1) Browse to your new Resource Group at https://portal.azure.com and locate the "App Service"
-![Location of App Service in Portal](./docs/images/deployment_app_service_location.jpg)
+![Location of App Service in Portal](../docs/images/deployment_app_service_location.jpg)
 
 2) After clicking on the App Service, you will see the "Default domain" listed. This is the link to your installation.
-![Default Domain of App Service in Portal](./docs/images/deployment_default_domain.jpg)
+![Default Domain of App Service in Portal](../docs/images/deployment_default_domain.jpg)
 
 
 ## Next steps

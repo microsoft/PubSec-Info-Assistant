@@ -20,6 +20,7 @@ class State(Enum):
     ERROR = "Error"
     THROTTLED = "Throttled"
     UPLOADED = "Uploaded"
+    DELETED = "Deleted"
     ALL = "All"
 
 class StatusClassification(Enum):
@@ -32,7 +33,6 @@ class StatusQueryLevel(Enum):
     """ Enum for level of detail of a status query """
     CONCISE = "Concise"
     VERBOSE = "Verbose"
-
 
 class StatusLog:
     """ Class for logging status of various processes to Cosmos DB"""
@@ -91,7 +91,6 @@ class StatusLog:
 
         return items
 
-
     def read_files_status_by_timeframe(self, 
                        within_n_hours: int,
                        state: State = State.ALL
@@ -134,7 +133,7 @@ class StatusLog:
         document_id = self.encode_document_id(document_path)
 
         # add status to standard logger
-        logging.info(f"{status} DocumentID - {document_id}")
+        logging.info("%s DocumentID - %s", status, document_id)
 
         # If this event is the start of an upload, remove any existing status files for this path
         if fresh_start:
@@ -152,46 +151,58 @@ class StatusLog:
             else:
                 json_document = self._log_document[document_id]
 
-            # Check if there has been a state change, and therefore to update state
-            if json_document['state'] != state.value:
-                json_document['state'] = state.value
-                json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                
-            # Update state description with latest status
-            json_document['state_description'] = status
+            json_state = json_document['state']
+            if json_state != State.DELETED.value and json_state != State.ERROR.value:
+                # Check if there has been a state change, and therefore to update state
+                if json_document['state'] != state.value:
+                    json_document['state'] = state.value
+                    json_document['state_timestamp'] = str(datetime
+                                                           .now()
+                                                           .strftime('%Y-%m-%d %H:%M:%S'))
 
-            # Append a new item to the array
-            status_updates = json_document["status_updates"]
-            new_item = {
-                "status": status,
-                "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                "status_classification": str(status_classification.value)
-            }
+                # Update state description with latest status
+                json_document['state_description'] = status
+                # Append a new item to the array
+                status_updates = json_document["status_updates"]
+                new_item = {
+                    "status": status,
+                    "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    "status_classification": str(status_classification.value)
+                }
 
-            if status_classification == StatusClassification.ERROR:
-                new_item["stack_trace"] = self.get_stack_trace()
-
-            status_updates.append(new_item)
+                if status_classification == StatusClassification.ERROR:
+                    new_item["stack_trace"] = self.get_stack_trace()
+                status_updates.append(new_item)
+            else:
+                logging.debug("%s is already marked as %s. No new status to update.",
+                              document_path,
+                              json_state)
         except exceptions.CosmosResourceNotFoundError:
-            # this is a new document
-            json_document = {
-                "id": document_id,
-                "file_path": document_path,
-                "file_name": base_name,
-                "state": str(state.value),
-                "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                "state_description": status,
-                "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                "status_updates": [
-                    {
-                        "status": status,
-                        "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                        "status_classification": str(status_classification.value)
-                    }
-                ]
-            }
-        except Exception:
+            if state != State.DELETED:
+                # this is a valid new document
+                json_document = {
+                    "id": document_id,
+                    "file_path": document_path,
+                    "file_name": base_name,
+                    "state": str(state.value),
+                    "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    "state_description": status,
+                    "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    "status_updates": [
+                        {
+                            "status": status,
+                            "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                            "status_classification": str(status_classification.value)
+                        }
+                    ]
+                }
+            elif state == State.DELETED:
+                # the status file was previously deleted. Do nothing.
+                logging.debug("No record found for deleted document %s. Nothing to do.",
+                              document_path)
+        except Exception as err:
             # log the exception with stack trace to the status log
+            logging.error("Unexpected exception upserting document %s", str(err))
             json_document = {
                 "id": document_id,
                 "file_path": document_path,
@@ -212,33 +223,32 @@ class StatusLog:
 
         #self.container.upsert_item(body=json_document)
         self._log_document[document_id] = json_document
-                        
-        
+
     def update_document_state(self, document_path, status, state=State.PROCESSING):
         """Updates the state of the document in the storage"""
         try:
             document_id = self.encode_document_id(document_path)
-            logging.info(f"{status} DocumentID - {document_id}")
+            logging.info("%sDocumentID - %s", status, document_id)
             if self._log_document.get(document_id, "") != "":
                 json_document = self._log_document[document_id]
-                
                 json_document['state'] = state.value
                 json_document['state_description'] = status
                 json_document['state_timestamp'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                 self.save_document(document_path)
                 self._log_document[document_id] = json_document
             else:
-                logging.warning(f"Document with ID {document_id} not found.")
+                logging.warning("Document with ID %s not found.", document_id)
         except Exception as err:
-            logging.error(f"An error occurred while updating the document state: {str(err)}") 
-                 
+            logging.error("An error occurred while updating the document state: %s", str(err))
 
     def save_document(self, document_path):
         """Saves the document in the storage"""
         document_id = self.encode_document_id(document_path)
-        self.container.upsert_item(body=self._log_document[document_id])
+        if self._log_document[document_id] != "":
+            self.container.upsert_item(body=self._log_document[document_id])
+        else:
+            logging.debug("no update to be made for %s, skipping.", document_path)
         self._log_document[document_id] = ""
-        
 
     def get_stack_trace(self):
         """ Returns the stack trace of the current exception"""

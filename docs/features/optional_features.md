@@ -2,14 +2,15 @@
 
 Please see below sections for coverage of IA Accelerator optional features.
 
-* [Configuring your own language ENV file](/docs/features/features.md#configuring-your-own-language-env-file)
-* [Debugging functions](/docs/features/features.md#debugging-functions)
-* [Debugging the web app](/docs/features/features.md#debugging-the-web-app)
-* [Debugging the container web app](/docs/features/features.md#debugging-the-container-web-app)
-* [Build pipeline for Sandbox](/docs/features/features.md#build-pipeline-for-sandbox)
-* [Customer Usage Attribution](/docs/features/features.md#customer-usage-attribution)
-* [Sovereign Region Deployment](/docs/features/features.md#sovereign-region-deployment)
+* [Configuring your own language ENV file](#configuring-your-own-language-env-file)
+* [Debugging functions](#debugging-functions)
+* [Debugging the web app](#debugging-the-web-app)
+* [Debugging the enrichment web app](#debugging-the-enrichment-web-app)
+* [Build pipeline for Sandbox](#build-pipeline-for-sandbox)
+* [Customer Usage Attribution](#customer-usage-attribution)
+* [Sovereign Region Deployment](#sovereign-region-deployment)
 * [Configure REST API access](#configure-rest-api-access)
+* [Customize Autoscale and App Service SKU's](#customize-autoscale)
 
 ## Configuring your own language ENV file
 
@@ -23,9 +24,9 @@ Check out how to [Debug the Azure functions locally in VSCode](/docs/function_de
 
 Check out how to [Debug the Information Assistant Web App](/docs/webapp_debug.md)
 
-## Debugging the container web app
+## Debugging the enrichment web app
 
-Check out how to [Debug the Information Assistant Web App](/docs/container_webapp_debug.md)
+Check out how to [Debug the Information Assistant Enrichment Web App](/docs/container_webapp_debug.md)
 
 ## Build pipeline for Sandbox
 
@@ -45,3 +46,8 @@ Check out how to [setup Sovereign Region Deployment](/docs/deployment/enable_sov
 
 If you are wanting to use the API stand-alone or use a custom UI.
 Check out how to [enable OAuth Client Credentials Flow](/docs/deployment/client_credentials_flow.md)
+
+## Customize Autoscale
+
+If you want to learn more about Autoscale Settings and App Service SKU's
+Check out how to [customize Autoscale settings](/docs/deployment/autoscale_sku.md)

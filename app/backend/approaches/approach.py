@@ -12,27 +12,13 @@ class Approaches(Enum):
     ReadDecomposeAsk = 2
     GPTDirect = 3
 
-class PromptTemplate:
-
-    # Chat roles
-    System = "system"
-    User = "user"
-    Assistant = "assistant"
-
-    System_Message_Chat_Conversation = ""
-    Follow_Up_Questions_Prompt_Content = ""
-    Query_Prompt_Template = ""
-    Query_Prompt_Few_Shots = []
-    Response_Prompt_Few_Shots = []
-
-
 class Approach:
     """
     An approach is a method for answering a question from a query and a set of
     documents.
     """
 
-    def run(self, history: list[dict], overrides: dict) -> any:
+    async def run(self, history: list[dict], overrides: dict) -> any:
         """
         Run the approach on the query and documents. Not implemented.
 
@@ -45,7 +31,6 @@ class Approach:
      #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
     def get_messages_from_history(
         self,
-        prompt_template: PromptTemplate,
         system_prompt: str,
         model_id: str,
         history: Sequence[dict[str, str]],
@@ -65,12 +50,12 @@ class Approach:
         user_content = user_conv
         append_index = len(few_shots) + 1
 
-        message_builder.append_message(prompt_template.User, user_content, index=append_index)
+        message_builder.append_message(self.USER, user_content, index=append_index)
 
         for h in reversed(history[:-1]):
             if h.get("bot"):
-                message_builder.append_message(prompt_template.Assistant, h.get('bot'), index=append_index)
-            message_builder.append_message(prompt_template.User, h.get('user'), index=append_index)
+                message_builder.append_message(self.ASSISTANT, h.get('bot'), index=append_index)
+            message_builder.append_message(self.USER, h.get('user'), index=append_index)
             if message_builder.token_length > max_tokens:
                 break
 

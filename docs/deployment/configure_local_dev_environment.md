@@ -11,7 +11,7 @@
 
 ---
 ## Getting started with development containers
-The Visual Studio Code Dev Containers extension lets you use a container as a full-featured development environment. It allows you to open any folder inside (or mounted into) a container and take advantage of Visual Studio Code's full feature set. A devcontainer.json file in your project tells VS Code how to access (or create) a development container with a well-defined tool and runtime stack. This container can be used to run an application or to separate tools, libraries, or runtimes needed for working with a codebase.
+The Visual Studio Code Dev Containers extension lets you use a container as a full-featured development environment. It allows you to open any folder inside (or mounted into) a container and take advantage of Visual Studio Code's full feature set. A devcontainer.json file in your project tells VS Code how to access (or create) a development container with a well-defined tool and runtime stack. This container can be used to run an application or to separate tools, libraries, or runtime needed for working with a codebase.
 
 *More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
@@ -95,7 +95,7 @@ Follow these steps to get the accelerator up and running in a subscription of yo
 The first step will be to clone the Git repo into your Ubuntu 18.04 WSL environment and, for production deployments, checkout the version that you would like to deploy. For development, stay on main and checkout an appropriate branch. To do this:
 
 >1. In GitHub, on the Source Tab select **<> Code** and get the HTTPS Clone path.
->2. Launch VSCode. Open the Ubunut 22.04(WSL) Terminal.
+>2. Launch VSCode. Open the Ubuntu 22.04(WSL) Terminal.
 >3. Run the following command from the bash command prompt
 >
 >   ``` bash
@@ -106,7 +106,7 @@ The first step will be to clone the Git repo into your Ubuntu 18.04 WSL environm
 >   ```
 >
 
-This will now have created the **info-assist** folder on your Ubuntu 22.04 WSL environemnt.
+This will now have created the **info-assist** folder on your Ubuntu 22.04 WSL environment.
 
 ---
 
@@ -130,5 +130,5 @@ The next step is to open the source code and build the dev container. To do this
 - Type Rebuild and select "Dev Containers: Rebuild Container"
 
 ---
-This step is complete, please continue on to the next step [Configuring your Development Environment for PS Info Assistant](./development_environment.md) section and complete the next step.
+This step is complete, please continue on to the next step [Configuring your Development Environment for PS Info Assistant](./deployment.md) section and complete the next step.
 

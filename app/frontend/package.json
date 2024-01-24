@@ -20,16 +20,18 @@
     "classnames": "^2.3.1",
     "nanoid": "3.3.4",
     "prop-types": "15.8.1",
-    "react-bootstrap": "^2.7.4"
+    "react-bootstrap": "^2.7.4",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^3.0.0"
   },
   "devDependencies": {
     "@types/dompurify": "^2.4.0",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
-    "@vitejs/plugin-react": "^4.0.1",
+    "@vitejs/plugin-react": "^4.2.1",
     "prettier": "^2.8.3",
     "typescript": "^4.9.3",
-    "vite": "^4.1.0",
+    "vite": "^5.0.10",
     "postcss-nesting": "^11.2.2"
   }
 }

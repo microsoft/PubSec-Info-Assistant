@@ -65,7 +65,7 @@ param chatGptDeploymentCapacity int = 240
 // our default target size is 750 tokens so the chunk files that get indexed will be around 950 tokens each
 param chunkTargetSize string = '750'
 param targetPages string = 'ALL'
-param formRecognizerApiVersion string = '2022-08-31'
+param formRecognizerApiVersion string = '2023-07-31'
 param queryTermLanguage string = 'English'
 param isGovCloudDeployment bool = contains(location, 'usgov')
 
@@ -108,6 +108,7 @@ param principalId string = ''
 param kvAccessObjectId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
+var azureRoles = loadJsonContent('azure_roles.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 
@@ -155,8 +156,8 @@ module funcServicePlan 'core/host/funcserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'S3'
-      capacity: 5
+      name: 'S2'
+      capacity: 2
     }
     kind: 'linux'
   }
@@ -175,11 +176,10 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
       tier: 'PremiumV3'
       size: 'P1v3'
       family: 'Pv3'
-      capacity: 3
+      capacity: 1
     }
     kind: 'linux'
     reserved: true
-    storageAccountId: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.Storage/storageAccounts/${storage.outputs.name}/services/queue/queues/${embeddingsQueue}'
   }
 }
 
@@ -200,17 +200,16 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
     applicationInsightsName: logging.outputs.applicationInsightsName
     healthCheckPath: '/health'
     appCommandLine: 'gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app'
+    keyVaultName: kvModule.outputs.keyVaultName
     appSettings: {
-      AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       EMBEDDINGS_QUEUE: embeddingsQueue
       LOG_LEVEL: 'DEBUG'
-      DEQUEUE_MESSAGE_BATCH_SIZE: 1
+      DEQUEUE_MESSAGE_BATCH_SIZE: 3
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
       AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
-      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
       COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
       COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
@@ -218,19 +217,18 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       MAX_EMBEDDING_REQUEUE_COUNT: 5
       EMBEDDING_REQUEUE_BACKOFF: 60
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
-      AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME: azureOpenAIEmbeddingDeploymentName
       AZURE_SEARCH_INDEX: searchIndexName
-      AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
-      BLOB_CONNECTION_STRING: storage.outputs.connectionString
-      AZURE_STORAGE_CONNECTION_STRING: storage.outputs.connectionString
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       WEBSITES_CONTAINER_START_TIME_LIMIT: 600
     }
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 // The application frontend
@@ -246,21 +244,21 @@ module backend 'core/host/appservice.bicep' = {
     runtimeVersion: '3.10'
     scmDoBuildDuringDeployment: true
     managedIdentity: true
+    appCommandLine: 'gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600'
     applicationInsightsName: logging.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
     isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
     appSettings: {
       AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
       AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
-      AZURE_BLOB_STORAGE_KEY: storage.outputs.key
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
       AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : rg.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
-      AZURE_SEARCH_SERVICE_KEY: searchServices.outputs.searchServiceKey
       AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
       AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
       AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
@@ -268,17 +266,14 @@ module backend 'core/host/appservice.bicep' = {
       EMBEDDING_DEPLOYMENT_NAME: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
       AZURE_OPENAI_EMBEDDINGS_MODEL_NAME: azureOpenAIEmbeddingsModelName
       AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION: azureOpenAIEmbeddingsModelVersion
-      AZURE_OPENAI_SERVICE_KEY: useExistingAOAIService ? azureOpenAIServiceKey : cognitiveServices.outputs.key
       APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
-      COSMOSDB_KEY: cosmosdb.outputs.CosmosDBKey
       COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
       COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
       COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
       COSMOSDB_TAGS_CONTAINER_NAME: cosmosdb.outputs.CosmosDBTagsContainerName
       QUERY_TERM_LANGUAGE: queryTermLanguage
       AZURE_CLIENT_ID: aadMgmtClientId
-      AZURE_CLIENT_SECRET: aadMgmtClientSecret
       AZURE_TENANT_ID: tenantId
       AZURE_SUBSCRIPTION_ID: subscriptionId
       IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
@@ -287,10 +282,11 @@ module backend 'core/host/appservice.bicep' = {
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       APPLICATION_TITLE: applicationtitle
     }
-
-
     aadClientId: aadWebClientId
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
@@ -300,6 +296,7 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
     name: !empty(openAiServiceName) ? openAiServiceName : '${prefix}-${abbrs.openAIServices}${randomString}'
     location: location
     tags: tags
+    keyVaultName: kvModule.outputs.keyVaultName
     sku: {
       name: openAiSkuName
     }
@@ -345,6 +342,7 @@ module formrecognizer 'core/ai/formrecognizer.bicep' = {
       name: formRecognizerSkuName
     }
     isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
   }
 }
 
@@ -357,6 +355,7 @@ module enrichment 'core/ai/enrichment.bicep' = {
     tags: tags
     sku: enrichmentSkuName
     isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
   }
 }
 
@@ -365,6 +364,7 @@ module searchServices 'core/search/search-services.bicep' = {
   name: 'search-services'
   params: {
     name: !empty(searchServicesName) ? searchServicesName : '${prefix}-${abbrs.searchSearchServices}${randomString}'
+    keyVaultName: kvModule.outputs.keyVaultName
     location: location
     tags: tags
     authOptions: {
@@ -387,6 +387,8 @@ module storage 'core/storage/storage-account.bicep' = {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}${randomString}'
     location: location
     tags: tags
+    keyVaultName: kvModule.outputs.keyVaultName
+    storeSecretsInKeyVault: true
     publicNetworkAccess: 'Enabled'
     sku: {
       name: 'Standard_LRS'
@@ -448,6 +450,8 @@ module storageMedia 'core/storage/storage-account.bicep' = {
   scope: rg
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}media${randomString}'
+    keyVaultName: kvModule.outputs.keyVaultName
+    storeSecretsInKeyVault: false //Not needed for media service
     location: location
     tags: tags
     publicNetworkAccess: 'Enabled'
@@ -459,6 +463,9 @@ module storageMedia 'core/storage/storage-account.bicep' = {
       days: 7
     }
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 module cosmosdb 'core/db/cosmosdb.bicep' = {
@@ -468,11 +475,15 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
     name: !empty(cosmosdbName) ? cosmosdbName : '${prefix}-${abbrs.cosmosDBAccounts}${randomString}'
     location: location
     tags: tags
+    keyVaultName: kvModule.outputs.keyVaultName
     logDatabaseName: 'statusdb'
     logContainerName: 'statuscontainer'
     tagDatabaseName: 'tagdb'
     tagContainerName: 'tagcontainer'
   }
+  dependsOn: [
+    kvModule
+  ]
 }
 
 
@@ -486,19 +497,16 @@ module functions 'core/function/function.bicep' = {
     tags: tags
     appServicePlanId: funcServicePlan.outputs.id
     runtime: 'python'
+    keyVaultName: kvModule.outputs.keyVaultName
     appInsightsConnectionString: logging.outputs.applicationInsightsConnectionString
     appInsightsInstrumentationKey: logging.outputs.applicationInsightsInstrumentationKey
-    blobStorageAccountKey: storage.outputs.key
     blobStorageAccountName: storage.outputs.name
     blobStorageAccountEndpoint: storage.outputs.primaryEndpoints.blob
-    blobStorageAccountConnectionString: storage.outputs.connectionString
     blobStorageAccountOutputContainerName: containerName
     blobStorageAccountUploadContainerName: uploadContainerName
     blobStorageAccountLogContainerName: functionLogsContainerName
     formRecognizerEndpoint: formrecognizer.outputs.formRecognizerAccountEndpoint
-    formRecognizerApiKey: formrecognizer.outputs.formRecognizerAccountKey
     CosmosDBEndpointURL: cosmosdb.outputs.CosmosDBEndpointURL
-    CosmosDBKey: cosmosdb.outputs.CosmosDBKey
     CosmosDBLogDatabaseName: cosmosdb.outputs.CosmosDBLogDatabaseName
     CosmosDBLogContainerName: cosmosdb.outputs.CosmosDBLogContainerName
     CosmosDBTagsDatabaseName: cosmosdb.outputs.CosmosDBTagsDatabaseName
@@ -520,7 +528,6 @@ module functions 'core/function/function.bicep' = {
     submitRequeueHideSeconds: submitRequeueHideSeconds
     pollingBackoff: pollingBackoff
     maxReadAttempts: maxReadAttempts
-    enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     enrichmentEndpoint: enrichment.outputs.cognitiveServiceEndpoint
     enrichmentName: enrichment.outputs.cognitiveServicerAccountName
     enrichmentLocation: location
@@ -531,13 +538,13 @@ module functions 'core/function/function.bicep' = {
     EMBEDDINGS_QUEUE: embeddingsQueue
     azureSearchIndex: searchIndexName
     azureSearchServiceEndpoint: searchServices.outputs.endpoint
-    azureSearchServiceKey: searchServices.outputs.searchServiceKey
 
   }
   dependsOn: [
     appServicePlan
     storage
     cosmosdb
+    kvModule
   ]
 }
 
@@ -571,7 +578,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   name: 'openai-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: azureRoles.CognitiveServicesOpenAIUser
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -581,7 +588,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   name: 'storage-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+    roleDefinitionId: azureRoles.StorageBlobDataReader
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -591,7 +598,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   name: 'storage-contribrole-user'
   params: {
     principalId: principalId
-    roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    roleDefinitionId: azureRoles.StorageBlobDataContributor
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -601,7 +608,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   name: 'search-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+    roleDefinitionId: azureRoles.SearchIndexDataReader
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -611,7 +618,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   name: 'search-contrib-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
+    roleDefinitionId: azureRoles.SearchIndexDataContributor
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -622,7 +629,7 @@ module openAiRoleBackend 'core/security/role.bicep' = {
   name: 'openai-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: azureRoles.CognitiveServicesOpenAIUser
     principalType: 'ServicePrincipal'
   }
 }
@@ -632,7 +639,7 @@ module ACRRoleContainerAppService 'core/security/role.bicep' = {
   name: 'container-webapp-acrpull-role'
   params: {
     principalId: enrichmentApp.outputs.identityPrincipalId
-    roleDefinitionId: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+    roleDefinitionId: azureRoles.AcrPull
     principalType: 'ServicePrincipal'
   }
 }
@@ -642,7 +649,7 @@ module storageRoleBackend 'core/security/role.bicep' = {
   name: 'storage-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
-    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+    roleDefinitionId: azureRoles.StorageBlobDataReader
     principalType: 'ServicePrincipal'
   }
 }
@@ -652,7 +659,7 @@ module searchRoleBackend 'core/security/role.bicep' = {
   name: 'search-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
-    roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+    roleDefinitionId: azureRoles.SearchIndexDataReader
     principalType: 'ServicePrincipal'
   }
 }
@@ -662,7 +669,7 @@ module storageRoleFunc 'core/security/role.bicep' = {
   name: 'storage-role-Func'
   params: {
     principalId: functions.outputs.identityPrincipalId
-    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+    roleDefinitionId: azureRoles.StorageBlobDataReader
     principalType: 'ServicePrincipal'
   }
 }
@@ -672,7 +679,7 @@ module containerRegistryPush 'core/security/role.bicep' = {
   name: 'AcrPush'
   params: {
     principalId: aadMgmtServicePrincipalId
-    roleDefinitionId: '8311e382-0749-4cb8-b61a-304f252e45ec'
+    roleDefinitionId: azureRoles.AcrPush
     principalType: 'ServicePrincipal'
   }
 }
@@ -683,7 +690,7 @@ module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: azureRoles.CognitiveServicesOpenAIUser
     principalType: 'ServicePrincipal'
   }
 }
@@ -705,14 +712,9 @@ module kvModule 'core/security/keyvault.bicep' = {
     name: '${prefix}-${abbrs.keyvault}${randomString}'
     location: location
     kvAccessObjectId: kvAccessObjectId
-    searchServiceKey: searchServices.outputs.searchServiceKey 
     openaiServiceKey: azureOpenAIServiceKey
-    cosmosdbKey: cosmosdb.outputs.CosmosDBKey
-    formRecognizerKey: formrecognizer.outputs.formRecognizerAccountKey
-    blobConnectionString: storage.outputs.connectionString
-    enrichmentKey: enrichment.outputs.cognitiveServiceAccountKey
     spClientSecret: aadMgmtClientSecret
-    blobStorageKey: storage.outputs.key
+    useExistingAOAIService: useExistingAOAIService
   }
 }
 
@@ -744,6 +746,7 @@ output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
+output AZURE_OPENAI_CHATGPT_MODEL_NAME string = chatGptModelName
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
 output AZURE_FUNCTION_APP_NAME string = functions.outputs.name
 output AZURE_COSMOSDB_URL string = cosmosdb.outputs.CosmosDBEndpointURL
@@ -757,7 +760,6 @@ output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName
 output CHUNK_TARGET_SIZE string = chunkTargetSize
 output FR_API_VERSION string = formRecognizerApiVersion
 output TARGET_PAGES string = targetPages
-output AzureWebJobsStorage string = storage.outputs.connectionString
 output ENRICHMENT_ENDPOINT string = enrichment.outputs.cognitiveServiceEndpoint
 output ENRICHMENT_NAME string = enrichment.outputs.cognitiveServicerAccountName
 output TARGET_TRANSLATION_LANGUAGE string = targetTranslationLanguage

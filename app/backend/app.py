@@ -7,10 +7,11 @@ import json
 import urllib.parse
 from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
-import openai
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
+import openai
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
@@ -97,16 +98,18 @@ openai.api_type = "azure"
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
 openai.api_version = "2023-06-01-preview"
 
-# Cognitive Services Enrichment API
-enrichmentEndpoint = ENV["ENRICHMENT_ENDPOINT"]
-enrichmentKey = ENV["ENRICHMENT_KEY"]
-
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
-    ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"]
+    ENV["COSMOSDB_URL"],
+    ENV["COSMOSDB_KEY"],
+    ENV["COSMOSDB_LOG_DATABASE_NAME"],
+    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
 )
 tagsHelper = TagsHelper(
-    ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_TAGS_DATABASE_NAME"], ENV["COSMOSDB_TAGS_CONTAINER_NAME"]
+    ENV["COSMOSDB_URL"],
+    ENV["COSMOSDB_KEY"],
+    ENV["COSMOSDB_TAGS_DATABASE_NAME"],
+    ENV["COSMOSDB_TAGS_CONTAINER_NAME"]
 )
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
@@ -129,7 +132,7 @@ blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAI
 model_name = ''
 model_version = ''
 
-if (str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"])):
+if str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]):
     model_name = ENV["AZURE_OPENAI_CHATGPT_MODEL_NAME"]
     model_version = ENV["AZURE_OPENAI_CHATGPT_MODEL_VERSION"]
     embedding_model_name = ENV["AZURE_OPENAI_EMBEDDINGS_MODEL_NAME"]
@@ -161,27 +164,27 @@ else:
         embedding_model_version = ""
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(
-        search_client,
-        ENV["AZURE_OPENAI_SERVICE"],
-        ENV["AZURE_OPENAI_SERVICE_KEY"],
-        ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-        ENV["KB_FIELDS_SOURCEFILE"],
-        ENV["KB_FIELDS_CONTENT"],
-        ENV["KB_FIELDS_PAGENUMBER"],
-        ENV["KB_FIELDS_CHUNKFILE"],
-        ENV["AZURE_BLOB_STORAGE_CONTAINER"],
-        blob_client,
-        ENV["QUERY_TERM_LANGUAGE"],
-        model_name,
-        model_version,
-        str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
-        ENV["TARGET_EMBEDDINGS_MODEL"],
-        ENV["ENRICHMENT_APPSERVICE_NAME"],
-        ENV["TARGET_TRANSLATION_LANGUAGE"] ,
-        enrichmentEndpoint,
-        enrichmentKey     
-    )
+    Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
+                                    search_client,
+                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["KB_FIELDS_SOURCEFILE"],
+                                    ENV["KB_FIELDS_CONTENT"],
+                                    ENV["KB_FIELDS_PAGENUMBER"],
+                                    ENV["KB_FIELDS_CHUNKFILE"],
+                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+                                    blob_client,
+                                    ENV["QUERY_TERM_LANGUAGE"],
+                                    model_name,
+                                    model_version,
+                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
+                                    ENV["TARGET_EMBEDDINGS_MODEL"],
+                                    ENV["ENRICHMENT_APPSERVICE_NAME"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["ENRICHMENT_ENDPOINT"],
+                                    ENV["ENRICHMENT_KEY"]
+                                )
 }
 
 
@@ -195,6 +198,7 @@ app = FastAPI(
 
 @app.get("/", include_in_schema=False, response_class=RedirectResponse)
 async def root():
+    """Redirect to the index.html page"""
     return RedirectResponse(url="/index.html")
 
 
@@ -214,7 +218,7 @@ async def chat(request: Request):
     json_body = await request.json()
     approach = json_body.get("approach")
     try:
-        impl = chat_approaches.get(approach)
+        impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
         r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
@@ -229,7 +233,7 @@ async def chat(request: Request):
 
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
-        raise HTTPException(status_code=500, detail=str(ex))
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 @app.get("/getblobclienturl")
 async def get_blob_client_url():
@@ -277,7 +281,7 @@ async def get_all_upload_status(request: Request):
         results = statusLog.read_files_status_by_timeframe(timeframe, State[state])
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
-        raise HTTPException(status_code=500, detail=str(ex))
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
 @app.post("/logstatus")
@@ -289,7 +293,8 @@ async def logstatus(request: Request):
     - request: Request object containing the HTTP request data.
 
     Returns:
-    - A dictionary with the status code 200 if successful, or an error message with status code 500 if an exception occurs.
+    - A dictionary with the status code 200 if successful, or an error
+        message with status code 500 if an exception occurs.
     """
     try:
         json_body = await request.json()
@@ -304,10 +309,10 @@ async def logstatus(request: Request):
                                   state=state,
                                   fresh_start=True)
         statusLog.save_document(document_path=path)
-        
+
     except Exception as ex:
         log.exception("Exception in /logstatus")
-        raise HTTPException(status_code=500, detail=str(ex))
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     raise HTTPException(status_code=200, detail="Success")
 
 # Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
@@ -374,7 +379,7 @@ async def get_citation(request: Request):
         results = json.loads(decoded_text)
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
-        raise HTTPException(status_code=500, detail=str(ex))
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
 # Return APPLICATION_TITLE
@@ -402,7 +407,7 @@ async def get_all_tags():
         results = tagsHelper.get_all_tags()
     except Exception as ex:
         log.exception("Exception in /getalltags")
-        raise HTTPException(status_code=500, detail=str(ex))
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
 @app.post("/retryFile")
@@ -424,7 +429,7 @@ async def retryFile(request: Request):
 
     except Exception as ex:
         logging.exception("Exception in /retryFile")
-        raise HTTPException(status_code=500, detail=str(ex))
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     return {"status": 200}
 
 

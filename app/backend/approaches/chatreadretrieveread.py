@@ -9,12 +9,9 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from azure.search.documents import SearchClient   
+from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
-
-from text import nonewlines
-from datetime import datetime, timedelta
 from azure.storage.blob import (
     AccountSasPermissions,
     BlobServiceClient,
@@ -22,19 +19,14 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from text import nonewlines
-import tiktoken
-from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 import requests
 
-
-
-# Simple retrieve-then-read implementation, using the Cognitive Search and
-# OpenAI APIs directly. It first retrieves top documents from search,
-# then constructs a prompt with them, and then uses OpenAI to generate
-# an completion (answer) with that prompt.
-
 class ChatReadRetrieveReadApproach(Approach):
+    """Approach that uses a simple retrieve-then-read implementation, using the Azure AI Search and
+    Azure OpenAI APIs directly. It first retrieves top documents from search,
+    then constructs a prompt with them, and then uses Azure OpenAI to generate
+    an completion (answer) with that prompt."""
 
      # Chat roles
     SYSTEM = "system"
@@ -92,7 +84,6 @@ class ChatReadRetrieveReadApproach(Approach):
     
     # # Define a class variable for the base URL
     # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
-
     
     def __init__(
         self,
@@ -110,11 +101,11 @@ class ChatReadRetrieveReadApproach(Approach):
         model_name: str,
         model_version: str,
         is_gov_cloud_deployment: str,
-        TARGET_EMBEDDING_MODEL: str,
-        ENRICHMENT_APPSERVICE_NAME: str,
+        target_embedding_model: str,
+        enrichment_appservice_name: str,
         target_translation_language: str,
-        enrichmentEndpoint:str,
-        enrichmentKey:str
+        enrichment_endpoint:str,
+        enrichment_key:str
         
     ):
         self.search_client = search_client
@@ -128,16 +119,16 @@ class ChatReadRetrieveReadApproach(Approach):
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         #escape target embeddiong model name
-        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
+        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
-        self.enrichmentEndpoint=enrichmentEndpoint
-        self.enrichmentKey=enrichmentKey
-        
+        self.enrichment_endpoint=enrichment_endpoint
+        self.enrichment_key=enrichment_key
+
         if is_gov_cloud_deployment:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
+            self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.us'
         else:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
-        
+            self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.net'
+
         openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
@@ -145,7 +136,6 @@ class ChatReadRetrieveReadApproach(Approach):
         self.model_name = model_name
         self.model_version = model_version
         self.is_gov_cloud_deployment = is_gov_cloud_deployment
-        
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -163,20 +153,16 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
-             
-    
+
         # Detect the language of the user's question
         detectedlanguage = self.detect_language(user_q)
-        
+
         if detectedlanguage != self.target_translation_language:
             user_question = self.translate_response(user_q, self.target_translation_language)
-            
         else:
             user_question = user_q
-       
-        
+
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
-        
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
@@ -202,7 +188,6 @@ class ChatReadRetrieveReadApproach(Approach):
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
-        
 
         # Generate embedding using REST API
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
@@ -211,7 +196,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 'Accept': 'application/json',  
                 'Content-Type': 'application/json',
             }
- 
+
         response = requests.post(url, json=data,headers=headers,timeout=60)
         if response.status_code == 200:
             response_data = response.json()
@@ -259,24 +244,21 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vector_queries =[vector], filter=search_filter
+                generated_query, top=top,vector_queries=[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
-        
+
         #  #print search results with score
         # for idx, doc in enumerate(r):  # for each document in the search results
         #     print(f"File{idx}: ", doc['@search.score'])
-        
+
         # cutoff_score=0.01
-        
         # # Only include results where search.score is greater than cutoff_score
         # filtered_results = [doc for doc in r if doc['@search.score'] > cutoff_score]
         # # print("Filtered Results: ", len(filtered_results))
-        
-      
 
         for idx, doc in enumerate(r):  # for each document in the search results
             # include the "FileX" moniker in the prompt, and the actual file name in the response
@@ -411,21 +393,14 @@ class ChatReadRetrieveReadApproach(Approach):
         # STEP 4: Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
         generated_response=chat_completion.choices[0].message.content
-        
+
         # # Detect the language of the response
-       
         response_language = self.detect_language(generated_response)
-        
         #if response is not in user's language, translate it to user's language
-              
         if response_language != detectedlanguage:
             translated_response = self.translate_response(generated_response, detectedlanguage)
-            
         else:
             translated_response = generated_response
-        
-                 
-           
 
         return {
             "data_points": data_points,
@@ -433,19 +408,15 @@ class ChatReadRetrieveReadApproach(Approach):
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }
-     
-     #function to detect language of the text   
-    def detect_language(self, text: str) -> str:
-    
-        try:
-            endpoint_region = self.enrichmentEndpoint.split("https://")[1].split(".api")[0] 
-            suffix = "us" if self.is_gov_cloud_deployment else "com"                        
 
+    def detect_language(self, text: str) -> str:
+        """ Function to detect the language of the text"""
+        try:
+            endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0] 
+            suffix = "us" if self.is_gov_cloud_deployment else "com"
             api_detect_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
-            # enrich_endpoint = f"https://{endpoint_region}.api.cognitive.microsoft.{suffix}/language/:analyze-text?api-version=2022-05-01"
-            
             headers = {
-                'Ocp-Apim-Subscription-Key': self.enrichmentKey,
+                'Ocp-Apim-Subscription-Key': self.enrichment_key,
                 'Content-type': 'application/json',
                 'Ocp-Apim-Subscription-Region': endpoint_region
             }
@@ -458,88 +429,29 @@ class ChatReadRetrieveReadApproach(Approach):
             else:
                 raise Exception(f"Error detecting language: {response.status_code}")
         except Exception as e:
-            raise Exception(f"An error occurred during language detection: {str(e)}")
-     
-     #function to translate text to target language   
+            raise Exception(f"An error occurred during language detection: {str(e)}") from e
      
     def translate_response(self, response: str, target_language: str) -> str:
-        
-        endpoint_region = self.enrichmentEndpoint.split("https://")[1].split(".api")[0]
+        """ Function to translate the response to target language"""
+        endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
         suffix = "us" if self.is_gov_cloud_deployment else "com"         
         api_translate_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
-        
         headers = {
-            'Ocp-Apim-Subscription-Key': self.enrichmentKey,
+            'Ocp-Apim-Subscription-Key': self.enrichment_key,
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': endpoint_region
         }
-        
         params={'to': target_language }
-        
         data = [{
             "text": response
-           
         }]          
-              
-        
         response = requests.post(api_translate_endpoint, headers=headers, json=data, params=params)
-        
         
         if response.status_code == 200:
             translated_response = response.json()[0]['translations'][0]['text']
             return translated_response
         else:
-            raise Exception(f"Error translating response: {response.status_code}")   
-        
-    #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
-    def get_messages_from_history(
-        self,
-        system_prompt: str,
-        model_id: str,
-        history: Sequence[dict[str, str]],
-        user_conv: str,
-        few_shots = [],
-        max_tokens: int = 4096) -> []:
-        """
-        Construct a list of messages from the chat history and the user's question.
-        """
-        message_builder = MessageBuilder(system_prompt, model_id)
-
-        # Few Shot prompting. Add examples to show the chat what responses we want. It will try to mimic any responses and make sure they match the rules laid out in the system message.
-        for shot in few_shots:
-            message_builder.append_message(shot.get('role'), shot.get('content'))
-
-        user_content = user_conv
-        append_index = len(few_shots) + 1
-
-        message_builder.append_message(self.USER, user_content, index=append_index)
-
-        for h in reversed(history[:-1]):
-            if h.get("bot"):
-                message_builder.append_message(self.ASSISTANT, h.get('bot'), index=append_index)
-            message_builder.append_message(self.USER, h.get('user'), index=append_index)
-            if message_builder.token_length > max_tokens:
-                break
-
-        messages = message_builder.messages
-        return messages
-
-    #Get the prompt text for the response length
-    def get_response_length_prompt_text(self, response_length: int):
-        """ Function to return the response length prompt text"""
-        levels = {
-            1024: "succinct",
-            2048: "standard",
-            3072: "thorough",
-        }
-        level = levels[response_length]
-        return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
-
-    def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
-        """ Function to return the number of tokens in a text string"""
-        encoding = tiktoken.get_encoding(encoding_name)
-        num_tokens = len(encoding.encode(string))
-        return num_tokens
+            raise Exception(f"Error translating response: {response.status_code}")
 
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""
@@ -562,5 +474,5 @@ class ChatReadRetrieveReadApproach(Approach):
             )
             return source_file + "?" + sas_token
         except Exception as error:
-            print(f"Unable to parse source file name: {str(error)}")
+            logging.error(f"Unable to parse source file name: {str(error)}")
             return ""

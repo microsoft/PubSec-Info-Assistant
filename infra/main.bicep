@@ -108,6 +108,7 @@ param principalId string = ''
 param kvAccessObjectId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
+var azureRoles = loadJsonContent('azure_roles.json')
 var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
 var prefix = 'infoasst'
 
@@ -578,7 +579,7 @@ module openAiRoleUser 'core/security/role.bicep' = {
   name: 'openai-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: azureRoles.CognitiveServicesOpenAIUser
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -588,7 +589,7 @@ module storageRoleUser 'core/security/role.bicep' = {
   name: 'storage-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+    roleDefinitionId: azureRoles.StorageBlobDataReader
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -598,7 +599,7 @@ module storageContribRoleUser 'core/security/role.bicep' = {
   name: 'storage-contribrole-user'
   params: {
     principalId: principalId
-    roleDefinitionId: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    roleDefinitionId: azureRoles.StorageBlobDataContributor
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -608,7 +609,7 @@ module searchRoleUser 'core/security/role.bicep' = {
   name: 'search-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+    roleDefinitionId: azureRoles.SearchIndexDataReader
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -618,7 +619,7 @@ module searchContribRoleUser 'core/security/role.bicep' = {
   name: 'search-contrib-role-user'
   params: {
     principalId: principalId
-    roleDefinitionId: '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
+    roleDefinitionId: azureRoles.SearchIndexDataContributor
     principalType: isInAutomation ? 'ServicePrincipal' : 'User'
   }
 }
@@ -629,7 +630,7 @@ module openAiRoleBackend 'core/security/role.bicep' = {
   name: 'openai-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: azureRoles.CognitiveServicesOpenAIUser
     principalType: 'ServicePrincipal'
   }
 }
@@ -639,7 +640,7 @@ module ACRRoleContainerAppService 'core/security/role.bicep' = {
   name: 'container-webapp-acrpull-role'
   params: {
     principalId: enrichmentApp.outputs.identityPrincipalId
-    roleDefinitionId: '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+    roleDefinitionId: azureRoles.AcrPull
     principalType: 'ServicePrincipal'
   }
 }
@@ -649,7 +650,7 @@ module storageRoleBackend 'core/security/role.bicep' = {
   name: 'storage-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
-    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+    roleDefinitionId: azureRoles.StorageBlobDataReader
     principalType: 'ServicePrincipal'
   }
 }
@@ -659,7 +660,7 @@ module searchRoleBackend 'core/security/role.bicep' = {
   name: 'search-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
-    roleDefinitionId: '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+    roleDefinitionId: azureRoles.SearchIndexDataReader
     principalType: 'ServicePrincipal'
   }
 }
@@ -669,7 +670,7 @@ module storageRoleFunc 'core/security/role.bicep' = {
   name: 'storage-role-Func'
   params: {
     principalId: functions.outputs.identityPrincipalId
-    roleDefinitionId: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+    roleDefinitionId: azureRoles.StorageBlobDataReader
     principalType: 'ServicePrincipal'
   }
 }
@@ -679,7 +680,7 @@ module containerRegistryPush 'core/security/role.bicep' = {
   name: 'AcrPush'
   params: {
     principalId: aadMgmtServicePrincipalId
-    roleDefinitionId: '8311e382-0749-4cb8-b61a-304f252e45ec'
+    roleDefinitionId: azureRoles.AcrPush
     principalType: 'ServicePrincipal'
   }
 }
@@ -690,7 +691,7 @@ module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId
-    roleDefinitionId: '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+    roleDefinitionId: azureRoles.CognitiveServicesOpenAIUser
     principalType: 'ServicePrincipal'
   }
 }

@@ -34,7 +34,7 @@ class Approach:
         model_id: str,
         history: Sequence[dict[str, str]],
         user_conv: str,
-        few_shots = [],
+        few_shots = [dict[str, str]],
         max_tokens: int = 4096,
         ) -> []:
         """

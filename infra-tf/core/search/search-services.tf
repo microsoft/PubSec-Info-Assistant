@@ -12,6 +12,7 @@ resource "azurerm_search_service" "search" {
   public_network_access_enabled = true
   replica_count                 = 1
   partition_count               = 1
+  semantic_search_sku           = var.semanticSearch //TODO Gov?
 }
 
 output "id" {

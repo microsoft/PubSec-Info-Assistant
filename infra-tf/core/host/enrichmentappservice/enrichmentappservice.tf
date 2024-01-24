@@ -7,11 +7,12 @@ resource "azurerm_app_service" "app_service" {
   tags                = var.tags
 
   site_config {
-    always_on        = var.alwaysOn
-    linux_fx_version = var.linuxFxVersion
-    ftps_state       = var.ftpsState
+    app_command_line  = var.appCommandLine
+    always_on         = var.alwaysOn
+    linux_fx_version  = var.linuxFxVersion
+    ftps_state        = var.ftpsState
     health_check_path = var.healthCheckPath
-    min_tls_version  = "1.2"
+    min_tls_version   = "1.2"
   }
 
   app_settings = merge(

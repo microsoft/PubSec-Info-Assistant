@@ -11,6 +11,7 @@ import openai
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
@@ -154,24 +155,24 @@ else:
         embedding_model_version = ""
 
 chat_approaches = {
-    "rrr": ChatReadRetrieveReadApproach(
-        search_client,
-        ENV["AZURE_OPENAI_SERVICE"],
-        ENV["AZURE_OPENAI_SERVICE_KEY"],
-        ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-        ENV["KB_FIELDS_SOURCEFILE"],
-        ENV["KB_FIELDS_CONTENT"],
-        ENV["KB_FIELDS_PAGENUMBER"],
-        ENV["KB_FIELDS_CHUNKFILE"],
-        ENV["AZURE_BLOB_STORAGE_CONTAINER"],
-        blob_client,
-        ENV["QUERY_TERM_LANGUAGE"],
-        model_name,
-        model_version,
-        str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
-        ENV["TARGET_EMBEDDINGS_MODEL"],
-        ENV["ENRICHMENT_APPSERVICE_NAME"]
-    )
+    Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
+                                    search_client,
+                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["KB_FIELDS_SOURCEFILE"],
+                                    ENV["KB_FIELDS_CONTENT"],
+                                    ENV["KB_FIELDS_PAGENUMBER"],
+                                    ENV["KB_FIELDS_CHUNKFILE"],
+                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+                                    blob_client,
+                                    ENV["QUERY_TERM_LANGUAGE"],
+                                    model_name,
+                                    model_version,
+                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
+                                    ENV["TARGET_EMBEDDINGS_MODEL"],
+                                    ENV["ENRICHMENT_APPSERVICE_NAME"]
+                                )
 }
 
 
@@ -204,7 +205,7 @@ async def chat(request: Request):
     json_body = await request.json()
     approach = json_body.get("approach")
     try:
-        impl = chat_approaches.get(approach)
+        impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
         r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))

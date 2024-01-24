@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+import json
 import re
 import logging
 import urllib.parse
@@ -9,7 +10,7 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from azure.search.documents import SearchClient   
+from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
 
@@ -22,14 +23,14 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from text import nonewlines
-import tiktoken
-from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
+from core.modelhelper import num_tokens_from_messages
 import requests
+from urllib.parse import quote
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
-# then constructs a prompt with them, and then uses OpenAI to generate
+# then constructs a prompt with them, and then uses OpenAI to generate 
 # an completion (answer) with that prompt.
 
 class ChatReadRetrieveReadApproach(Approach):
@@ -88,8 +89,6 @@ class ChatReadRetrieveReadApproach(Approach):
     
     # # Define a class variable for the base URL
     # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
-
-
     
     def __init__(
         self,
@@ -153,10 +152,9 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
-        
+
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
         
-
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
             query_prompt,
@@ -188,7 +186,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 'Accept': 'application/json',  
                 'Content-Type': 'application/json',
             }
- 
+
         response = requests.post(url, json=data,headers=headers,timeout=60)
         if response.status_code == 200:
             response_data = response.json()
@@ -239,7 +237,7 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vector_queries =[vector], filter=search_filter
+                generated_query, top=top,vector_queries=[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
@@ -398,56 +396,6 @@ class ChatReadRetrieveReadApproach(Approach):
             "citation_lookup": citation_lookup
         }
 
-    #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
-    def get_messages_from_history(
-        self,
-        system_prompt: str,
-        model_id: str,
-        history: Sequence[dict[str, str]],
-        user_conv: str,
-        few_shots = [],
-        max_tokens: int = 4096) -> []:
-        """
-        Construct a list of messages from the chat history and the user's question.
-        """
-        message_builder = MessageBuilder(system_prompt, model_id)
-
-        # Few Shot prompting. Add examples to show the chat what responses we want. It will try to mimic any responses and make sure they match the rules laid out in the system message.
-        for shot in few_shots:
-            message_builder.append_message(shot.get('role'), shot.get('content'))
-
-        user_content = user_conv
-        append_index = len(few_shots) + 1
-
-        message_builder.append_message(self.USER, user_content, index=append_index)
-
-        for h in reversed(history[:-1]):
-            if h.get("bot"):
-                message_builder.append_message(self.ASSISTANT, h.get('bot'), index=append_index)
-            message_builder.append_message(self.USER, h.get('user'), index=append_index)
-            if message_builder.token_length > max_tokens:
-                break
-
-        messages = message_builder.messages
-        return messages
-
-    #Get the prompt text for the response length
-    def get_response_length_prompt_text(self, response_length: int):
-        """ Function to return the response length prompt text"""
-        levels = {
-            1024: "succinct",
-            2048: "standard",
-            3072: "thorough",
-        }
-        level = levels[response_length]
-        return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
-
-    def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
-        """ Function to return the number of tokens in a text string"""
-        encoding = tiktoken.get_encoding(encoding_name)
-        num_tokens = len(encoding.encode(string))
-        return num_tokens
-
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""
         try:
@@ -469,5 +417,5 @@ class ChatReadRetrieveReadApproach(Approach):
             )
             return source_file + "?" + sas_token
         except Exception as error:
-            print(f"Unable to parse source file name: {str(error)}")
+            logging.error(f"Unable to parse source file name: {str(error)}")
             return ""

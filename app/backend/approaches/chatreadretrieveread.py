@@ -27,9 +27,7 @@ from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 import requests
 
-# Import the necessary libraries for language detection and translation
-from langdetect import detect
-from deep_translator import GoogleTranslator
+
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
@@ -73,7 +71,6 @@ class ChatReadRetrieveReadApproach(Approach):
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<<>>> in the search query terms.
     Do not include any special characters like '+'.
-    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
     If you cannot generate a search query, return just the number 0.
     """
 
@@ -115,7 +112,9 @@ class ChatReadRetrieveReadApproach(Approach):
         is_gov_cloud_deployment: str,
         TARGET_EMBEDDING_MODEL: str,
         ENRICHMENT_APPSERVICE_NAME: str,
-        target_translation_language: str
+        target_translation_language: str,
+        enrichmentEndpoint:str,
+        enrichmentKey:str
         
     ):
         self.search_client = search_client
@@ -131,6 +130,8 @@ class ChatReadRetrieveReadApproach(Approach):
         #escape target embeddiong model name
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
         self.target_translation_language=target_translation_language
+        self.enrichmentEndpoint=enrichmentEndpoint
+        self.enrichmentKey=enrichmentKey
         
         if is_gov_cloud_deployment:
             self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
@@ -162,10 +163,16 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
-        
-        
+             
+    
         # Detect the language of the user's question
-        detected_language = detect(user_q)
+        detectedlanguage = self.detect_language(user_q)
+        
+        if detectedlanguage != self.target_translation_language:
+            user_question = self.translate_response(user_q, self.target_translation_language)
+            
+        else:
+            user_question = user_q
        
         
         query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
@@ -176,9 +183,9 @@ class ChatReadRetrieveReadApproach(Approach):
             query_prompt,
             self.model_name,
             history,
-            user_q,
+            user_question,
             self.query_prompt_few_shots,
-            self.chatgpt_token_limit - len(user_q)
+            self.chatgpt_token_limit - len(user_question)
             )
 
         chat_completion = await openai.ChatCompletion.acreate(
@@ -191,6 +198,7 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
+        
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
@@ -242,9 +250,6 @@ class ChatReadRetrieveReadApproach(Approach):
             r = self.search_client.search(
                 generated_query,
                 query_type=QueryType.SEMANTIC,
-                query_language="en-us",
-                # query_language=self.query_term_language,
-                query_speller="lexicon",
                 semantic_configuration_name="default",
                 top=top,
                 query_caption="extractive|highlight-false"
@@ -405,15 +410,22 @@ class ChatReadRetrieveReadApproach(Approach):
         )
         # STEP 4: Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+        generated_response=chat_completion.choices[0].message.content
+        
+        # # Detect the language of the response
        
-                  
-        # Translate the response if the detected language is not English
-                              
-        if detected_language != 'en':
-            translated_response= GoogleTranslator(source=self.target_translation_language, target=detected_language).translate(chat_completion.choices[0].message.content) 
+        response_language = self.detect_language(generated_response)
+        
+        #if response is not in user's language, translate it to user's language
+              
+        if response_language != detectedlanguage:
+            translated_response = self.translate_response(generated_response, detectedlanguage)
+            
         else:
-            translated_response = chat_completion.choices[0].message.content
- 
+            translated_response = generated_response
+        
+                 
+           
 
         return {
             "data_points": data_points,
@@ -421,7 +433,64 @@ class ChatReadRetrieveReadApproach(Approach):
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": citation_lookup
         }
+     
+     #function to detect language of the text   
+    def detect_language(self, text: str) -> str:
+    
+        try:
+            endpoint_region = self.enrichmentEndpoint.split("https://")[1].split(".api")[0] 
+            suffix = "us" if self.is_gov_cloud_deployment else "com"                        
 
+            api_detect_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
+            # enrich_endpoint = f"https://{endpoint_region}.api.cognitive.microsoft.{suffix}/language/:analyze-text?api-version=2022-05-01"
+            
+            headers = {
+                'Ocp-Apim-Subscription-Key': self.enrichmentKey,
+                'Content-type': 'application/json',
+                'Ocp-Apim-Subscription-Region': endpoint_region
+            }
+            data = [{"text": text}]
+            response = requests.post(api_detect_endpoint, headers=headers, json=data)
+
+            if response.status_code == 200:
+                detected_language = response.json()[0]['language']
+                return detected_language
+            else:
+                raise Exception(f"Error detecting language: {response.status_code}")
+        except Exception as e:
+            raise Exception(f"An error occurred during language detection: {str(e)}")
+     
+     #function to translate text to target language   
+     
+    def translate_response(self, response: str, target_language: str) -> str:
+        
+        endpoint_region = self.enrichmentEndpoint.split("https://")[1].split(".api")[0]
+        suffix = "us" if self.is_gov_cloud_deployment else "com"         
+        api_translate_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
+        
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.enrichmentKey,
+            'Content-type': 'application/json',
+            'Ocp-Apim-Subscription-Region': endpoint_region
+        }
+        
+        params={'to': target_language }
+        
+        data = [{
+            "text": response
+           
+        }]          
+              
+        
+        response = requests.post(api_translate_endpoint, headers=headers, json=data, params=params)
+        
+        
+        if response.status_code == 200:
+            translated_response = response.json()[0]['translations'][0]['text']
+            return translated_response
+        else:
+            raise Exception(f"Error translating response: {response.status_code}")   
+        
     #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
     def get_messages_from_history(
         self,

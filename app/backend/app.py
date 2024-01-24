@@ -178,7 +178,9 @@ chat_approaches = {
         str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
         ENV["TARGET_EMBEDDINGS_MODEL"],
         ENV["ENRICHMENT_APPSERVICE_NAME"],
-        ENV["TARGET_TRANSLATION_LANGUAGE"],
+        ENV["TARGET_TRANSLATION_LANGUAGE"] ,
+        enrichmentEndpoint,
+        enrichmentKey     
     )
 }
 

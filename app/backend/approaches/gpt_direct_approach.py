@@ -10,7 +10,6 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from approaches.approach import PromptTemplate
 
 from text import nonewlines
 from datetime import datetime, timedelta
@@ -30,7 +29,52 @@ from urllib.parse import quote
 
 class GPTDirectApproach(Approach):
 
+       # Chat roles
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+     
+    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
+        User persona is {userPersona} 
+        Your goal is to provide accurate and relevant answers based on the facts. Make sure to avoid making assumptions or adding personal opinions.
+        
+        Emphasize the use of facts.
+        
+        Here is how you should answer every question:
+        -Please respond with relevant information from the data in the response.    
+        
+        {follow_up_questions_prompt}
+        {injected_prompt}
+        
+        """
+    follow_up_questions_prompt_content = """
+        Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
+        Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
+        """
+    
+    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered.
+        Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
+        Do not include cited sources e.g info or doc in the search query terms.
+        Do not include any text inside [] or <<<>>> in the search query terms.
+        Do not include any special characters like '+'.
+        If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
+        If you cannot generate a search query, return just the number 0.
+        """
 
+    #Few Shot prompting for Keyword Search Query
+    query_prompt_few_shots = [
+        {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
+        {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
+        {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
+        {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
+        ]
+
+    #Few Shot prompting for Response. This will feed into Chain of thought system message.
+    response_prompt_few_shots = [
+        {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
+        {'role': USER, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources. Citations[info1.json]'}
+        ]
+    
     # # Define a class variable for the base URL
     # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
     
@@ -64,18 +108,15 @@ class GPTDirectApproach(Approach):
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
 
-        prompt_template = self.get_prompt_template()
-
-        query_prompt=prompt_template.Query_Prompt_Template.format(query_term_language=self.query_term_language)
+        query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
-            prompt_template,
             query_prompt,
             self.model_name,
             history,
             user_q,
-            prompt_template.Query_Prompt_Few_Shots,
+            self.query_prompt_few_shots,
             self.chatgpt_token_limit - len(user_q)
             )
 
@@ -95,7 +136,7 @@ class GPTDirectApproach(Approach):
 
         #Generate the follow up prompt to be sent to the GPT model
         follow_up_questions_prompt = (
-            prompt_template.Follow_Up_Questions_Prompt_Content
+            self.follow_up_questions_prompt_content
             if overrides.get("suggest_followup_questions")
             else ""
         )
@@ -104,7 +145,7 @@ class GPTDirectApproach(Approach):
         prompt_override = overrides.get("prompt_template")
 
         if prompt_override is None:
-            system_message = prompt_template.System_Message_Chat_Conversation.format(
+            system_message = self.system_message_chat_conversation.format(
                 injected_prompt="",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -114,7 +155,7 @@ class GPTDirectApproach(Approach):
                 systemPersona=system_persona,
             )
         elif prompt_override.startswith(">>>"):
-            system_message = prompt_template.System_Message_Chat_Conversation.format(
+            system_message = self.system_message_chat_conversation.format(
                 injected_prompt=prompt_override[3:] + "\n ",
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -124,7 +165,7 @@ class GPTDirectApproach(Approach):
                 systemPersona=system_persona,
             )
         else:
-            system_message = prompt_template.System_Message_Chat_Conversation.format(
+            system_message = self.system_message_chat_conversation.format(
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
                     response_length
@@ -136,12 +177,11 @@ class GPTDirectApproach(Approach):
         #Generate a contextual and content-specific answer using the search results and chat history.
         #Added conditional block to use different system messages for different models.
         messages = self.get_messages_from_history(
-            prompt_template,
             system_message,
             self.model_name,
             history,
             history[-1]["user"] + "\n\n",
-            prompt_template.Response_Prompt_Few_Shots,
+            self.response_prompt_few_shots,
             max_tokens=self.chatgpt_token_limit - 500
         )
 
@@ -163,48 +203,3 @@ class GPTDirectApproach(Approach):
             "citation_lookup": {}
         }
     
-    def get_prompt_template(self) -> PromptTemplate:      
-        template = PromptTemplate()
-
-        template.System_Message_Chat_Conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-        User persona is {userPersona} 
-        Your goal is to provide accurate and relevant answers based on the facts. Make sure to avoid making assumptions or adding personal opinions.
-        
-        Emphasize the use of facts.
-        
-        Here is how you should answer every question:
-        -Please respond with relevant information from the data in the response.    
-        
-        {follow_up_questions_prompt}
-        {injected_prompt}
-        
-        """
-        template.Follow_Up_Questions_Prompt_Content = """
-        Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-        Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
-        """
-
-        template.Query_Prompt_Template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered.
-        Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
-        Do not include cited sources e.g info or doc in the search query terms.
-        Do not include any text inside [] or <<<>>> in the search query terms.
-        Do not include any special characters like '+'.
-        If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
-        If you cannot generate a search query, return just the number 0.
-        """
-
-        #Few Shot prompting for Keyword Search Query
-        template.Query_Prompt_Few_Shots = [
-        {'role' : template.User, 'content' : 'What are the future plans for public transportation development?' },
-        {'role' : template.Assistant, 'content' : 'Future plans for public transportation' },
-        {'role' : template.User, 'content' : 'how much renewable energy was generated last year?' },
-        {'role' : template.Assistant, 'content' : 'Renewable energy generation last year' }
-        ]
-
-        #Few Shot prompting for Response. This will feed into Chain of thought system message.
-        template.Response_Prompt_Few_Shots = [
-        {'role': template.User, 'content': 'What steps are being taken to promote energy conservation?'},
-        {'role': template.Assistant, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources. Citations[info1.json]'}
-        ]
-
-        return template

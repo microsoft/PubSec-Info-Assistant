@@ -17,6 +17,10 @@ class Approach:
     An approach is a method for answering a question from a query and a set of
     documents.
     """
+    # Chat roles
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
 
     async def run(self, history: list[dict], overrides: dict) -> any:
         """
@@ -28,14 +32,13 @@ class Approach:
         """
         raise NotImplementedError
 
-     #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
     def get_messages_from_history(
         self,
         system_prompt: str,
         model_id: str,
         history: Sequence[dict[str, str]],
         user_conv: str,
-        few_shots = [],
+        few_shots = [dict[str, str]],
         max_tokens: int = 4096,
         ) -> []:
         """

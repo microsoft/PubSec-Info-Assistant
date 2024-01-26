@@ -12,26 +12,30 @@ variable "location" {
   type        = string
 }
 
-variable "aadWebClientId" {
-  type    = string
-  default = ""
+variable "webAppSuffix" {
+  type        = string
 }
 
-variable "aadMgmtClientId" {
-  type    = string
-  default = ""
-}
+# variable "aadWebClientId" {
+#   type    = string
+#   default = ""
+# }
 
-variable "aadMgmtClientSecret" {
-  type      = string
-  default   = ""
-  sensitive = true
-}
+# variable "aadMgmtClientId" {
+#   type    = string
+#   default = ""
+# }
 
-variable "aadMgmtServicePrincipalId" {
-  type    = string
-  default = ""
-}
+# variable "aadMgmtClientSecret" {
+#   type      = string
+#   default   = ""
+#   sensitive = true
+# }
+
+# variable "aadMgmtServicePrincipalId" {
+#   type    = string
+#   default = ""
+# }
 
 variable "buildNumber" {
   type    = string
@@ -382,13 +386,18 @@ variable "subscriptionId" {
   default = ""
 }
 
-variable "principalId" {
-  type    = string
-  default = ""
-  description = "Id of the user or app to assign application roles"
-}
+# variable "principalId" {
+#   type    = string
+#   default = ""
+#   description = "Id of the user or app to assign application roles"
+# }
 
-variable "kvAccessObjectId" {
-  type    = string
-  default = ""
+# variable "kvAccessObjectId" {
+#   type    = string
+#   default = ""
+# }
+
+variable "requireWebsiteSecurityMembership" {
+  type    = bool
+  default = false
 }

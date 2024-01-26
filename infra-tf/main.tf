@@ -8,6 +8,10 @@ locals {
 
 data "azurerm_client_config" "current" {}
 
+# data "azuread_user" "current_user" {
+#   object_id = data.azurerm_client_config.current.object_id
+# }
+
 
 // Organize resources in a resource group
 resource "azurerm_resource_group" "rg" {
@@ -185,18 +189,20 @@ module "backend" {
     COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
     COSMOSDB_TAGS_CONTAINER_NAME = module.cosmosdb.CosmosDBTagsContainerName
     QUERY_TERM_LANGUAGE = var.queryTermLanguage
-    AZURE_CLIENT_ID = var.aadMgmtClientId
-    AZURE_CLIENT_SECRET = var.aadMgmtClientSecret
+    AZURE_CLIENT_ID = module.entraRoles.azure_ad_mgmt_app_client_id #var.aadMgmtClientId
+    AZURE_CLIENT_SECRET = module.entraRoles.azure_ad_mgmt_app_secret #var.aadMgmtClientSecret
     AZURE_TENANT_ID = var.tenantId
     AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
     IS_GOV_CLOUD_DEPLOYMENT = var.isGovCloudDeployment
     CHAT_WARNING_BANNER_TEXT = var.chatWarningBannerText
     TARGET_EMBEDDINGS_MODEL = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     ENRICHMENT_APPSERVICE_NAME = module.enrichmentApp.name
+    ENRICHMENT_KEY                         = module.enrichment.cognitiveServiceAccountKey
+    ENRICHMENT_ENDPOINT                    = module.enrichment.cognitiveServiceEndpoint
     APPLICATION_TITLE = var.applicationtitle
   }
 
-  aadClientId = var.aadWebClientId
+  aadClientId = module.entraRoles.azure_ad_web_app_client_id #var.aadWebClientId
 }
 
 
@@ -391,7 +397,7 @@ module "userRoles" {
   for_each = { for role in local.selected_roles : role => { role_definition_id = local.azure_roles[role] } }
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = var.principalId
+  principalId      = data.azurerm_client_config.current.object_id #module.entraRoles.signed_in_user_principal #var.principalId
   roleDefinitionId = each.value.role_definition_id
   principalType    = var.isInAutomation ? "ServicePrincipal" : "User"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -460,7 +466,7 @@ module "containerRegistryPush" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = var.aadMgmtServicePrincipalId
+  principalId      = module.entraRoles.azure_ad_mgmt_sp_id #var.aadMgmtServicePrincipalId
   roleDefinitionId = local.azure_roles.AcrPush
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -478,7 +484,7 @@ module "openAiRoleMgmt" {
 
   # scope            = var.useExistingAOAIService && !var.isGovCloudDeployment ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.id
   scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId     = var.aadMgmtServicePrincipalId
+  principalId     = module.entraRoles.azure_ad_mgmt_sp_id #var.aadMgmtServicePrincipalId
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -500,18 +506,26 @@ module "kvModule" {
 
   name                = "${local.prefix}-${local.abbrs["keyvault"]}${var.randomString}"
   location            = var.location
-  kvAccessObjectId = var.kvAccessObjectId
+  kvAccessObjectId = data.azurerm_client_config.current.object_id #module.entraRoles.signed_in_user_principal #var.kvAccessObjectId
   searchServiceKey  = module.searchServices.searchServiceKey
   openaiServiceKey  = var.azureOpenAIServiceKey
   cosmosdbKey        = module.cosmosdb.CosmosDBKey 
   formRecognizerKey = module.formrecognizer.formRecognizerAccountKey
   blobConnectionString = module.storage.connection_string
   enrichmentKey      = module.enrichment.cognitiveServiceAccountKey
-  spClientSecret    = var.aadMgmtClientSecret
+  spClientSecret    = module.entraRoles.azure_ad_mgmt_app_secret #var.aadMgmtClientSecret
   blobStorageKey    = module.storage.key 
   subscriptionId = var.subscriptionId
   resourceGroupId = azurerm_resource_group.rg.id
   resourceGroupName = azurerm_resource_group.rg.name
+}
+
+module "entraRoles" {
+  source = "./core/aad"
+
+  requireWebsiteSecurityMembership = var.requireWebsiteSecurityMembership
+  randomString = var.randomString
+  webAppSuffix = var.webAppSuffix
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

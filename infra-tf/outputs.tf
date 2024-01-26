@@ -124,9 +124,9 @@ output "ENABLE_DEV_CODE" {
   value = var.enableDevCode
 }
 
-output "AZURE_CLIENT_ID" {
-  value = var.aadMgmtClientId
-}
+# output "AZURE_CLIENT_ID" {
+#   value = var.aadMgmtClientId
+# }
 
 output "AZURE_TENANT_ID" {
   value = var.tenantId

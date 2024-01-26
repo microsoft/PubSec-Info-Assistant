@@ -82,64 +82,67 @@ if [ -n "${IN_AUTOMATION}" ]; then
     aadMgmtAppSecret=$AD_MGMTAPP_CLIENT_SECRET
     aadMgmtSPId=$AD_MGMT_SERVICE_PRINCIPAL_ID
     kvAccessObjectId=$aadWebSPId
+
   fi
-else
-  signedInUserId=$(az ad signed-in-user show --query id --output tsv)
-  kvAccessObjectId=$signedInUserId
-  #if not in automation, create the app registration and service principal values
-  #set up azure ad app registration since there is no bicep support for this yet
-  aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
-  if [ -z $aadWebAppId ]
-    then
-      aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.$WEB_APP_ENDPOINT_SUFFIX/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
-      aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
-    fi
+
+  export SINGED_IN_USER_PRINCIPAL=$signedInUserId
+  export AZURE_AD_WEB_APP_CLIENT_ID=$aadWebAppId
+  export AZURE_AD_MGMT_APP_CLIENT_ID=$aadMgmtAppId
+  export AZURE_AD_MGMT_SP_ID=$aadMgmtSPId
+  export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
+  export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
+  export TF_VAR_kvAccessObjectId=$kvAccessObjectId
+  export TF_VAR_principalId=$signedInUserId
+  export TF_VAR_aadMgmtClientId=$aadMgmtAppId
+  export TF_VAR_aadMgmtClientSecret=$aadMgmtAppSecret
+  export TF_VAR_aadMgmtServicePrincipalId=$aadMgmtSPId
+  export TF_VAR_aadWebClientId=$aadWebAppId
+# else
+#   signedInUserId=$(az ad signed-in-user show --query id --output tsv)
+#   kvAccessObjectId=$signedInUserId
+#   #if not in automation, create the app registration and service principal values
+#   #set up azure ad app registration since there is no bicep support for this yet
+#   aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+#   if [ -z $aadWebAppId ]
+#     then
+#       aadWebAppId=$(az ad app create --display-name infoasst_web_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --identifier-uris "api://infoasst-$RANDOM_STRING" --web-redirect-uris "https://infoasst-web-$RANDOM_STRING.$WEB_APP_ENDPOINT_SUFFIX/.auth/login/aad/callback" --enable-access-token-issuance true --enable-id-token-issuance true --output tsv --query "[].appId")
+#       aadWebAppId=$(az ad app list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query [].appId)
+#     fi
   
-  aadWebSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-  if [ -z $aadWebSPId ]; then
-      aadWebSPId=$(az ad sp create --id $aadWebAppId --output tsv --query "[].id")
-      aadWebSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
-  fi
+#   aadWebSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
+#   if [ -z $aadWebSPId ]; then
+#       aadWebSPId=$(az ad sp create --id $aadWebAppId --output tsv --query "[].id")
+#       aadWebSPId=$(az ad sp list --display-name infoasst_web_access_$RANDOM_STRING --output tsv --query "[].id")
+#   fi
 
-  aadMgmtAppId=$(az ad app list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query [].appId)
-  if [ -z $aadMgmtAppId ]
-    then
-      aadMgmtAppId=$(az ad app create --display-name infoasst_mgmt_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --output tsv --query "[].appId")
-      aadMgmtAppId=$(az ad app list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query [].appId)
-    fi
-    aadMgmtAppSecret=$(az ad app credential reset --id $aadMgmtAppId --display-name infoasst-mgmt --output tsv --query password)
+#   aadMgmtAppId=$(az ad app list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query [].appId)
+#   if [ -z $aadMgmtAppId ]
+#     then
+#       aadMgmtAppId=$(az ad app create --display-name infoasst_mgmt_access_$RANDOM_STRING --sign-in-audience AzureADMyOrg --output tsv --query "[].appId")
+#       aadMgmtAppId=$(az ad app list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query [].appId)
+#     fi
+#     aadMgmtAppSecret=$(az ad app credential reset --id $aadMgmtAppId --display-name infoasst-mgmt --output tsv --query password)
 
-  aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
-  if [ -z $aadMgmtSPId ]; then
-      aadMgmtSPId=$(az ad sp create --id $aadMgmtAppId --output tsv --query "[].id")
-      aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
-  fi
+#   aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
+#   if [ -z $aadMgmtSPId ]; then
+#       aadMgmtSPId=$(az ad sp create --id $aadMgmtAppId --output tsv --query "[].id")
+#       aadMgmtSPId=$(az ad sp list --display-name infoasst_mgmt_access_$RANDOM_STRING --output tsv --query "[].id")
+#   fi
 
-  #Default true if undefined
-  REQUIRE_WEBSITE_SECURITY_MEMBERSHIP=${REQUIRE_WEBSITE_SECURITY_MEMBERSHIP:-true}
+#   #Default true if undefined
+#   REQUIRE_WEBSITE_SECURITY_MEMBERSHIP=${REQUIRE_WEBSITE_SECURITY_MEMBERSHIP:-true}
 
-  if [ "$REQUIRE_WEBSITE_SECURITY_MEMBERSHIP" = "true" ]; then
-    # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
-    az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=true"
-  else
-    # otherwise the default is to allow all users in the tenant to access the app
-    az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=false"
-  fi
+#   if [ "$REQUIRE_WEBSITE_SECURITY_MEMBERSHIP" = "true" ]; then
+#     # if the REQUIRE_WEBSITE_SECURITY_MEMBERSHIP is set to true, then we need to update the app registration to require assignment
+#     az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=true"
+#   else
+#     # otherwise the default is to allow all users in the tenant to access the app
+#     az ad sp update --id $aadWebAppId --set "appRoleAssignmentRequired=false"
+#   fi
 fi
 
-export SINGED_IN_USER_PRINCIPAL=$signedInUserId
-export AZURE_AD_WEB_APP_CLIENT_ID=$aadWebAppId
-export AZURE_AD_MGMT_APP_CLIENT_ID=$aadMgmtAppId
-export AZURE_AD_MGMT_SP_ID=$aadMgmtSPId
-export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
-export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
-export TF_VAR_kvAccessObjectId=$kvAccessObjectId
-export TF_VAR_principalId=$signedInUserId
-export TF_VAR_aadMgmtClientId=$aadMgmtAppId
-export TF_VAR_aadMgmtClientSecret=$aadMgmtAppSecret
-export TF_VAR_aadMgmtServicePrincipalId=$aadMgmtSPId
-export TF_VAR_aadWebClientId=$aadWebAppId
 export TF_VAR_randomString=$RANDOM_STRING
+export TF_VAR_webAppSuffix=$WEB_APP_ENDPOINT_SUFFIX
 
 if [ -n "${IN_AUTOMATION}" ]; then 
   export IS_IN_AUTOMATION=true
@@ -149,9 +152,6 @@ fi
 
 ############################################################
 
-echo "Test vars"
-echo $TF_VAR_azure_environment
-echo $TF_VAR_azureOpenAIResourceGroup
 
 # Initialise Terraform with the correct path
 ${DIR}/terraform-init.sh "$DIR/../infra-tf/"

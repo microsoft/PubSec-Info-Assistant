@@ -10,3 +10,8 @@ variable "requireWebsiteSecurityMembership" {
 variable "webAppSuffix" {
   type        = string
 }
+
+variable "isInAutomation" {
+  type    = bool
+  default = false
+}

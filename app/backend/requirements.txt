@@ -13,3 +13,17 @@ tiktoken == 0.4.0
 fastapi == 0.103.2
 fastapi-utils == 0.2.1
 uvicorn == 0.23.2
+microsoft-bing-websearch
+microsoft-bing-visualsearch
+microsoft-bing-videosearch
+microsoft-bing-imagesearch
+microsoft-bing-newssearch
+microsoft-bing-spellcheck
+microsoft-bing-entitysearch
+microsoft-bing-autosuggest
+microsoft-bing-customimagesearch
+microsoft-bing-customwebsearch
+msrest
+azure-common
+msrestazure
+azure-core

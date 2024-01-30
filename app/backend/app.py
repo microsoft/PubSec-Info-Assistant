@@ -24,6 +24,7 @@ from azure.storage.blob import (
 )
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.tags_helper import TagsHelper
+from approaches.chatbingsearch import ChatBingSearch
 
 
 
@@ -218,10 +219,11 @@ async def chat(request: Request):
     json_body = await request.json()
     approach = json_body.get("approach")
     try:
-        impl = chat_approaches.get(Approaches(int(approach)))
-        if not impl:
-            return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+        # impl = chat_approaches.get(Approaches(int(approach)))
+        # if not impl:
+        #     return {"error": "unknown approach"}, 400
+        # r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+        r = await ChatBingSearch().search(json_body.get("history", []), ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"], model_name)
 
         # To fix citation bug,below code is added.aparmar
         return {

@@ -59,7 +59,7 @@ export const Answer = ({
                             title="Show supporting content"
                             ariaLabel="Show supporting content"
                             onClick={() => onSupportingContentClicked()}
-                            disabled={!answer.data_points.length}
+                            disabled={!answer.data_points || !answer.data_points.length}
                         />
                     </div>
                 </Stack>

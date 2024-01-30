@@ -8,11 +8,6 @@ locals {
 
 data "azurerm_client_config" "current" {}
 
-# data "azuread_user" "current_user" {
-#   object_id = data.azurerm_client_config.current.object_id
-# }
-
-
 // Organize resources in a resource group
 resource "azurerm_resource_group" "rg" {
   name     = var.resourceGroupName != "" ? var.resourceGroupName : "${local.prefix}-${var.environmentName}"
@@ -41,6 +36,7 @@ module "appServicePlan" {
   sku = {
     tier = "Standard"
     size = "S1"
+    capacity = 1
   }
   kind     = "linux"
   resourceGroupName = azurerm_resource_group.rg.name
@@ -54,10 +50,10 @@ module "funcServicePlan" {
   location = var.location
   tags     = local.tags
   sku = {
-    size = "S3"
+    size = "S2"
     tier = "Standard"
+    capacity = 2
   }
-  # sku_capacity = 5
   kind     = "linux"
   resourceGroupName = azurerm_resource_group.rg.name
 }
@@ -70,13 +66,10 @@ module "enrichmentAppServicePlan" {
   location = var.location
   tags     = local.tags
   sku = {
-    size = "P1v3"
-    tier = "PremiumV3"
+    size     = "P1v3"
+    tier     = "PremiumV3"
+    capacity = 3
   }
-  # sku_tier = "PremiumV3"
-  # sku_size = "P1v3"
-  # sku_family = "Pv3"
-  # sku_capacity = 3
   kind     = "linux"
   reserved = true
   resourceGroupName = azurerm_resource_group.rg.name

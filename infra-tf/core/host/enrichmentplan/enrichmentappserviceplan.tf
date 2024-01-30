@@ -1,17 +1,12 @@
 
 
 // Create an App Service Plan to group applications under the same payment plan and SKU, specifically for containers
-resource "azurerm_app_service_plan" "appServicePlan" {
+resource "azurerm_service_plan" "appServicePlan" {
   name                = var.name
   location            = var.location
   resource_group_name = var.resourceGroupName
-  kind                = var.kind
-  reserved            = var.reserved
-
-  sku {
-    tier = var.sku["tier"]
-    size = var.sku["size"]
-  }
+  sku_name = "P1v3"
+  os_type = "Linux"
 
   tags = var.tags
 }
@@ -54,9 +49,9 @@ resource "azurerm_app_service_plan" "appServicePlan" {
 # }
 
 output "id" {
-  value = azurerm_app_service_plan.appServicePlan.id
+  value = azurerm_service_plan.appServicePlan.id
 }
 
 output "name" {
-  value = azurerm_app_service_plan.appServicePlan.name
+  value = azurerm_service_plan.appServicePlan.name
 }

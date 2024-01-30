@@ -45,12 +45,12 @@ resource "azuread_service_principal" "aad_mgmt_sp" {
 
 
 output "azure_ad_web_app_client_id" {
-  value       = azuread_application.aad_web_app[0].application_id
+  value       = azuread_application.aad_web_app[0].object_id
   description = "Client ID of the Azure AD Web App"
 }
 
 output "azure_ad_mgmt_app_client_id" {
-  value       = azuread_application.aad_mgmt_app[0].application_id
+  value       = azuread_application.aad_mgmt_app[0].object_id
   description = "Client ID of the Azure AD Management App"
 }
 

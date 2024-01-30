@@ -1,22 +1,18 @@
 
 
 // Create function app resource
-resource "azurerm_function_app" "function_app" {
+resource "azurerm_linux_function_app" "function_app" {
   name                      = var.name
   location                  = var.location
   resource_group_name       = var.resourceGroupName
-  app_service_plan_id       = var.appServicePlanId
+  service_plan_id       = var.appServicePlanId
   storage_account_name      = var.blobStorageAccountName
   storage_account_access_key= var.blobStorageAccountKey
-  version                   = "~4"
-  os_type                   = "linux"
   https_only                = true
 
   site_config {
-    linux_fx_version = "python|3.10"
     always_on        = true
     http2_enabled    = true
-    min_tls_version  = "1.2"
   }
 
   app_settings = {
@@ -80,9 +76,9 @@ resource "azurerm_function_app" "function_app" {
 }
 
 output "function_app_name" {
-  value = azurerm_function_app.function_app.name
+  value = azurerm_linux_function_app.function_app.name
 }
 
 output "function_app_identity_principal_id" {
-  value = azurerm_function_app.function_app.identity.0.principal_id
+  value = azurerm_linux_function_app.function_app.identity.0.principal_id
 }

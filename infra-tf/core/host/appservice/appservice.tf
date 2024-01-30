@@ -84,44 +84,21 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   target_resource_id         = azurerm_linux_web_app.app_service.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
 
-  log {
+  enabled_log  {
     category = "AppServiceAppLogs"
-    enabled  = true
-
-    retention_policy {
-      days    = 0
-      enabled = true
-    }
   }
 
-  log {
+  enabled_log {
     category = "AppServicePlatformLogs"
-    enabled  = true
-
-    retention_policy {
-      days    = 0
-      enabled = true
-    }
   }
 
-  log {
+  enabled_log {
     category = "AppServiceConsoleLogs"
-    enabled  = true
-
-    retention_policy {
-      days    = 0
-      enabled = true
-    }
   }
 
   metric {
     category = "AllMetrics"
     enabled  = true
-
-    retention_policy {
-      days    = 0
-      enabled = true
-    }
   }
 }
 

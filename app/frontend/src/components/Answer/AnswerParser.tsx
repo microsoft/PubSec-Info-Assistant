@@ -52,6 +52,14 @@ export function parseAnswerToHtml(answer: string, citation_lookup: CitationLooku
                 return "";
             }
             else {
+                console.log("CITATION: "+citation.citation)
+                if (citation.citation.startsWith("http")) {
+                    return renderToStaticMarkup(
+                        <a href={citation.citation} target="_blank" rel="noopener noreferrer">
+                            {citation.citation}
+                        </a>
+                    );
+                }
                 let citationIndex: number;
                 // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                 // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display

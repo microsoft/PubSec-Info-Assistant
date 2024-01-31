@@ -209,11 +209,10 @@ class ChatReadRetrieveReadApproach(Approach):
         else:
             search_filter = None
         if tags_filter != "" :
-            quoted_tags_filter = tags_filter.replace(",","','")
             if search_filter is not None:
-                search_filter = search_filter + f" and tags/any(t: search.in(t, '{quoted_tags_filter}', ','))"
+                search_filter = search_filter + f" and tags/any(t: search.in(t, '{tags_filter}', ','))"
             else:
-                search_filter = f"tags/any(t: search.in(t, '{quoted_tags_filter}', ','))"
+                search_filter = f"tags/any(t: search.in(t, '{tags_filter}', ','))"
 
         # Hybrid Search
         # r = self.search_client.search(generated_query, vector_queries =[vector], top=top)

@@ -28,9 +28,6 @@ if [[ -n $TF_IN_AUTOMATION ]]; then
     
 fi
 
-# Override in local.env if you want to use a different version of Apache Tika
-export APACHE_TIKA_JAR_URI='https://archive.apache.org/dist/tika/2.1.0/tika-app-2.1.0.jar'
-
 # Override in local.env if you want to disable cleaning functional test data
 export DISABLE_TEST_CLEANUP=false
 export IGNORE_TEST_PIPELINE_QUERY=false

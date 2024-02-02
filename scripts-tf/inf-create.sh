@@ -6,6 +6,7 @@ figlet Infrastructure
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
+source "${DIR}/prepare-tf-variables.sh"
 pushd "$DIR/../infra-tf" > /dev/null
 
 # reset the current directory on exit using a trap so that the directory is reset even on error

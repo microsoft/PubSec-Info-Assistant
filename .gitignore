@@ -369,6 +369,7 @@ main.parameters.json
 infrastructure.env
 infrastructure.debug.env
 infra_output.json
+inf_output.json
 random.txt
 .state
 

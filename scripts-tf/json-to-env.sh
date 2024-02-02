@@ -4,7 +4,7 @@
 #!/bin/bash
 set -e
 
-echo "# Generated environment variables from bicep output"
+echo "# Generated environment variables from terraform output"
 
 jq -r  '
     [

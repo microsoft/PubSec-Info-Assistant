@@ -95,6 +95,12 @@ The output here should show that you're logged into the intended Azure subscript
     az account list
 ```
 
+If you're a part of multiple tenants, ensure you're in the right tenant by setting the tenantID
+
+``` bash
+    az login --tenant tenantID
+```
+
 From this output, grab the Subscription ID of the subscription you intend to deploy to and run:
 
 ``` bash

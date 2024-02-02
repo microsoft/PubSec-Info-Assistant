@@ -5,17 +5,28 @@ resource "azurerm_linux_function_app" "function_app" {
   name                      = var.name
   location                  = var.location
   resource_group_name       = var.resourceGroupName
-  service_plan_id       = var.appServicePlanId
+  service_plan_id           = var.appServicePlanId
   storage_account_name      = var.blobStorageAccountName
   storage_account_access_key= var.blobStorageAccountKey
   https_only                = true
 
   site_config {
+    application_stack {
+      python_version = "3.10"
+    }
     always_on        = true
     http2_enabled    = true
   }
 
+  connection_string {
+    name  = "BLOB_CONNECTION_STRING"
+    type  = "Custom"
+    value = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${var.blobStorageAccountKey}"
+  }
+
   app_settings = {
+    SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
+    ENABLE_ORYX_BUILD              = "true"
     AzureWebJobsStorage = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${var.blobStorageAccountKey}"
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${var.blobStorageAccountKey}"
     WEBSITE_CONTENTSHARE = lower(var.name)

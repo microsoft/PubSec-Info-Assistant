@@ -52,6 +52,7 @@ resource "azurerm_monitor_diagnostic_setting" "example" {
   }
 }
 
+
 output "name" {
   value = azurerm_linux_web_app.app_service.name
 }

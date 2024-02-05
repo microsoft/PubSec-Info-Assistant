@@ -1,4 +1,3 @@
-
 resource "azurerm_cognitive_account" "formRecognizerAccount" {
   name                     = var.name
   location                 = var.location
@@ -10,6 +9,12 @@ resource "azurerm_cognitive_account" "formRecognizerAccount" {
   tags                     = var.tags
 }
 
+resource "azurerm_key_vault_secret" "docIntelligenceKey" {
+  name         = "AZURE-FORM-RECOGNIZER-KEY"
+  value        = azurerm_cognitive_account.formRecognizerAccount.primary_access_key
+  key_vault_id = var.keyVaultId
+}
+
 
 output "formRecognizerAccountName" {
   value = azurerm_cognitive_account.formRecognizerAccount.name
@@ -17,8 +22,4 @@ output "formRecognizerAccountName" {
 
 output "formRecognizerAccountEndpoint" {
   value = azurerm_cognitive_account.formRecognizerAccount.endpoint
-}
-
-output "formRecognizerAccountKey" {
-  value = azurerm_cognitive_account.formRecognizerAccount.primary_access_key
 }

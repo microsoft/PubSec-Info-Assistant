@@ -61,16 +61,6 @@ variable "blobStorageAccountLogContainerName" {
   type        = string
 }
 
-variable "blobStorageAccountKey" {
-  description = "Azure Blob Storage Account Key"
-  type        = string
-}
-
-variable "blobStorageAccountConnectionString" {
-  description = "Azure Blob Storage Account Connection String"
-  type        = string
-}
-
 variable "chunkTargetSize" {
   description = "Chunk Target Size"
   type        = string
@@ -91,18 +81,8 @@ variable "formRecognizerEndpoint" {
   type        = string
 }
 
-variable "formRecognizerApiKey" {
-  description = "Form Recognizer API Key"
-  type        = string
-}
-
 variable "CosmosDBEndpointURL" {
   description = "CosmosDB Endpoint"
-  type        = string
-}
-
-variable "CosmosDBKey" {
-  description = "CosmosDB Key"
   type        = string
 }
 
@@ -196,11 +176,6 @@ variable "maxReadAttempts" {
   type        = string
 }
 
-variable "enrichmentKey" {
-  description = "Key to access the enrichment service"
-  type        = string
-}
-
 variable "enrichmentEndpoint" {
   description = "Endpoint of the enrichment service"
   type        = string
@@ -251,11 +226,6 @@ variable "azureSearchServiceEndpoint" {
   type        = string
 }
 
-variable "azureSearchServiceKey" {
-  description = "Used to connect and authenticate to Azure Search Service"
-  type        = string
-}
-
 variable "resourceGroupName" {
   type    = string
   default = ""
@@ -264,4 +234,12 @@ variable "resourceGroupName" {
 variable "endpointSuffix" {
   type    = string
   default = "core.windows.net"
+}
+
+variable "keyVaultUri" { 
+  type = string
+}
+
+variable "keyVaultName" {
+  type = string
 }

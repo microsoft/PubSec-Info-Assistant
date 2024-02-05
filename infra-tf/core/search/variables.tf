@@ -4,7 +4,6 @@ variable "name" {
 
 variable "location" {
   type = string
-  default = "Your_Resource_Group_Location"
 }
 
 variable "tags" {
@@ -37,5 +36,8 @@ variable "isGovCloudDeployment" {
 
 variable "resourceGroupName" {
   type    = string
-  default = ""
+}
+
+variable "keyVaultId" { 
+  type = string
 }

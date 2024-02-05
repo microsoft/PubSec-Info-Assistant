@@ -95,9 +95,10 @@ module "enrichmentApp" {
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   healthCheckPath = "/health"
   appCommandLine = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
+  keyVaultUri = module.kvModule.keyVaultUri
+  keyVaultName = module.kvModule.keyVaultName
   resourceGroupName = azurerm_resource_group.rg.name
   appSettings = {
-    AZURE_BLOB_STORAGE_KEY = module.storage.key
     EMBEDDINGS_QUEUE = var.embeddingsQueue
     LOG_LEVEL = "DEBUG"
     DEQUEUE_MESSAGE_BATCH_SIZE = 1
@@ -106,7 +107,6 @@ module "enrichmentApp" {
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER = var.uploadContainerName
     AZURE_BLOB_STORAGE_ENDPOINT = module.storage.primary_endpoints
     COSMOSDB_URL = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_KEY = module.cosmosdb.CosmosDBKey
     COSMOSDB_LOG_DATABASE_NAME = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME = module.cosmosdb.CosmosDBLogContainerName
     COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
@@ -114,19 +114,16 @@ module "enrichmentApp" {
     MAX_EMBEDDING_REQUEUE_COUNT = 5
     EMBEDDING_REQUEUE_BACKOFF = 60
     AZURE_OPENAI_SERVICE = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
-    # AZURE_OPENAI_RESOURCE_GROUP: var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
     AZURE_OPENAI_SERVICE_KEY = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
     AZURE_SEARCH_INDEX = var.searchIndexName
-    AZURE_SEARCH_SERVICE_KEY = module.searchServices.searchServiceKey
     AZURE_SEARCH_SERVICE = module.searchServices.name
-    BLOB_CONNECTION_STRING = module.storage.connection_string
-    AZURE_STORAGE_CONNECTION_STRING = module.storage.connection_string
     TARGET_EMBEDDINGS_MODEL = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     EMBEDDING_VECTOR_SIZE = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
     AZURE_SEARCH_SERVICE_ENDPOINT = module.searchServices.endpoint
     WEBSITES_CONTAINER_START_TIME_LIMIT = 600
   }
+  depends_on = [ module.kvModule ]
 }
 
 # // The application frontend
@@ -152,6 +149,8 @@ module "backend" {
   enableOryxBuild = true
   resourceGroupName = azurerm_resource_group.rg.name
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
+  keyVaultUri = module.kvModule.keyVaultUri
+  keyVaultName = module.kvModule.keyVaultName
 
   app_settings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING = module.logging.applicationInsightsConnectionString
@@ -159,13 +158,11 @@ module "backend" {
     AZURE_BLOB_STORAGE_ENDPOINT = module.storage.primary_endpoints
     AZURE_BLOB_STORAGE_CONTAINER = var.containerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER = var.uploadContainerName
-    AZURE_BLOB_STORAGE_KEY = module.storage.key
     AZURE_OPENAI_SERVICE = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
     AZURE_OPENAI_RESOURCE_GROUP = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
     AZURE_SEARCH_INDEX = var.searchIndexName
     AZURE_SEARCH_SERVICE = module.searchServices.name
     AZURE_SEARCH_SERVICE_ENDPOINT = module.searchServices.endpoint
-    AZURE_SEARCH_SERVICE_KEY = module.searchServices.searchServiceKey
     AZURE_OPENAI_CHATGPT_DEPLOYMENT = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
     AZURE_OPENAI_CHATGPT_MODEL_NAME = var.chatGptModelName
     AZURE_OPENAI_CHATGPT_MODEL_VERSION = var.chatGptModelVersion
@@ -176,26 +173,25 @@ module "backend" {
     AZURE_OPENAI_SERVICE_KEY = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
     APPINSIGHTS_INSTRUMENTATIONKEY = module.logging.applicationInsightsInstrumentationKey
     COSMOSDB_URL = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_KEY = module.cosmosdb.CosmosDBKey
     COSMOSDB_LOG_DATABASE_NAME = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME = module.cosmosdb.CosmosDBLogContainerName
     COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
     COSMOSDB_TAGS_CONTAINER_NAME = module.cosmosdb.CosmosDBTagsContainerName
     QUERY_TERM_LANGUAGE = var.queryTermLanguage
-    AZURE_CLIENT_ID = module.entraRoles.azure_ad_mgmt_app_client_id #var.aadMgmtClientId
-    AZURE_CLIENT_SECRET = module.entraRoles.azure_ad_mgmt_app_secret #var.aadMgmtClientSecret
+    AZURE_CLIENT_ID = module.entraRoles.azure_ad_mgmt_app_client_id 
+    AZURE_CLIENT_SECRET = module.entraRoles.azure_ad_mgmt_app_secret 
     AZURE_TENANT_ID = var.tenantId
     AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
     IS_GOV_CLOUD_DEPLOYMENT = var.isGovCloudDeployment
     CHAT_WARNING_BANNER_TEXT = var.chatWarningBannerText
     TARGET_EMBEDDINGS_MODEL = var.useAzureOpenAIEmbeddings ? "${local.abbrs["openAIEmbeddingModel"]}${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     ENRICHMENT_APPSERVICE_NAME = module.enrichmentApp.name
-    ENRICHMENT_KEY                         = module.enrichment.cognitiveServiceAccountKey
     ENRICHMENT_ENDPOINT                    = module.enrichment.cognitiveServiceEndpoint
     APPLICATION_TITLE = var.applicationtitle
   }
 
-  aadClientId = module.entraRoles.azure_ad_web_app_client_id #var.aadWebClientId
+  aadClientId = module.entraRoles.azure_ad_web_app_client_id
+  depends_on = [ module.kvModule ]
 }
 
 
@@ -237,10 +233,10 @@ module "formrecognizer" {
   name     = "${local.prefix}-${local.abbrs["formRecognizer"]}${var.randomString}"
   location = var.location
   tags     = local.tags
-  # sku      = var.formRecognizerSkuName
   customSubDomainName = "${local.prefix}-${local.abbrs["formRecognizer"]}${var.randomString}"
   isGovCloudDeployment = var.isGovCloudDeployment
   resourceGroupName = azurerm_resource_group.rg.name
+  keyVaultId = module.kvModule.keyVaultId 
 }
 
 module "enrichment" {
@@ -249,7 +245,7 @@ module "enrichment" {
   name     = "${local.prefix}-enrichment-${local.abbrs["cognitiveServicesAccounts"]}${var.randomString}"
   location = var.location 
   tags     = local.tags
-  # sku = var.enrichmentSkuName
+  keyVaultId = module.kvModule.keyVaultId 
   isGovCloudDeployment = var.isGovCloudDeployment
   resourceGroupName = azurerm_resource_group.rg.name
 }
@@ -265,6 +261,7 @@ module "searchServices" {
   semanticSearch = "free"
   isGovCloudDeployment = var.isGovCloudDeployment
   resourceGroupName = azurerm_resource_group.rg.name
+  keyVaultId = module.kvModule.keyVaultId
 }
 
 module "storage" {
@@ -278,6 +275,7 @@ module "storage" {
   # account_replication_type = "LRS"
   # enable_https_traffic_only = true
   resourceGroupName = azurerm_resource_group.rg.name
+  keyVaultId      = module.kvModule.keyVaultId 
   deleteRetentionPolicy = {
     days = 7
   }
@@ -312,33 +310,32 @@ module "cosmosdb" {
   tagDatabaseName   = "tagdb"
   tagContainerName  = "tagcontainer"
   resourceGroupName = azurerm_resource_group.rg.name
+  keyVaultId        = module.kvModule.keyVaultId 
 }
 
 
 # // Function App 
-module "functions" {
+module "functions" { 
   source = "./core/function"
 
   name                                  = var.functionsAppName != "" ? var.functionsAppName : "${local.prefix}-${local.abbrs["webSitesFunctions"]}${var.randomString}"
   location                              = var.location
   tags                                  = local.tags
   appServicePlanId                      = module.funcServicePlan.id
+  keyVaultUri                           = module.kvModule.keyVaultUri
+  keyVaultName                          = module.kvModule.keyVaultName
 
   runtime                               = "python"
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
-  blobStorageAccountKey                 = module.storage.key
   blobStorageAccountName                = module.storage.name
   blobStorageAccountEndpoint            = module.storage.primary_endpoints
-  blobStorageAccountConnectionString    = module.storage.connection_string
   blobStorageAccountOutputContainerName = var.containerName
-  blobStorageAccountUploadContainerName = var.uploadContainerName
-  blobStorageAccountLogContainerName    = var.functionLogsContainerName
+  blobStorageAccountUploadContainerName = var.uploadContainerName 
+  blobStorageAccountLogContainerName    = var.functionLogsContainerName 
   formRecognizerEndpoint                = module.formrecognizer.formRecognizerAccountEndpoint
-  formRecognizerApiKey                  = module.formrecognizer.formRecognizerAccountKey
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
-  CosmosDBKey                           = module.cosmosdb.CosmosDBKey
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
   CosmosDBLogContainerName              = module.cosmosdb.CosmosDBLogContainerName
   CosmosDBTagsDatabaseName              = module.cosmosdb.CosmosDBTagsDatabaseName
@@ -360,7 +357,6 @@ module "functions" {
   submitRequeueHideSeconds              = var.submitRequeueHideSeconds
   pollingBackoff                        = var.pollingBackoff
   maxReadAttempts                       = var.maxReadAttempts
-  enrichmentKey                         = module.enrichment.cognitiveServiceAccountKey
   enrichmentEndpoint                    = module.enrichment.cognitiveServiceEndpoint
   enrichmentName                        = module.enrichment.cognitiveServicerAccountName
   enrichmentLocation                    = var.location
@@ -371,13 +367,13 @@ module "functions" {
   EMBEDDINGS_QUEUE                      = var.embeddingsQueue
   azureSearchIndex                      = var.searchIndexName
   azureSearchServiceEndpoint            = module.searchServices.endpoint
-  azureSearchServiceKey                 = module.searchServices.searchServiceKey
   endpointSuffix                        = var.isGovCloudDeployment ? "core.usgovcloudapi.net" : "core.windows.net"
 
   depends_on = [
-    module.appServicePlan,
+    module.funcServicePlan,
     module.storage,
-    module.cosmosdb
+    module.cosmosdb,
+    module.kvModule
   ]
 }
 
@@ -385,12 +381,10 @@ module "functions" {
 // USER ROLES
 module "userRoles" {
   source = "./core/security/role"
-
-  # for_each = { for idx, role_definition_id in var.role_definition_ids : idx => { role_definition_id = role_definition_id } }
   for_each = { for role in local.selected_roles : role => { role_definition_id = local.azure_roles[role] } }
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = data.azurerm_client_config.current.object_id #module.entraRoles.signed_in_user_principal #var.principalId
+  principalId      = data.azurerm_client_config.current.object_id 
   roleDefinitionId = each.value.role_definition_id
   principalType    = var.isInAutomation ? "ServicePrincipal" : "User"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -459,7 +453,7 @@ module "containerRegistryPush" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = module.entraRoles.azure_ad_mgmt_sp_id #var.aadMgmtServicePrincipalId
+  principalId      = module.entraRoles.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.AcrPush
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -475,9 +469,8 @@ module "openAiRoleMgmt" {
   source = "./core/security/role"
   count  = var.isInAutomation ? 0 : 1
 
-  # scope            = var.useExistingAOAIService && !var.isGovCloudDeployment ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.id
   scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId     = module.entraRoles.azure_ad_mgmt_sp_id #var.aadMgmtServicePrincipalId
+  principalId     = module.entraRoles.azure_ad_mgmt_sp_id 
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -495,21 +488,15 @@ module "openAiRoleMgmt" {
 # }
 
 module "kvModule" {
-  source = "./core/security/keyvault"
+  source = "./core/security/keyvault" 
 
   name                = "${local.prefix}-${local.abbrs["keyvault"]}${var.randomString}"
   location            = var.location
-  kvAccessObjectId = data.azurerm_client_config.current.object_id #module.entraRoles.signed_in_user_principal #var.kvAccessObjectId
-  searchServiceKey  = module.searchServices.searchServiceKey
+  kvAccessObjectId = data.azurerm_client_config.current.object_id 
   openaiServiceKey  = var.azureOpenAIServiceKey
-  cosmosdbKey        = module.cosmosdb.CosmosDBKey 
-  formRecognizerKey = module.formrecognizer.formRecognizerAccountKey
-  blobConnectionString = module.storage.connection_string
-  enrichmentKey      = module.enrichment.cognitiveServiceAccountKey
-  spClientSecret    = module.entraRoles.azure_ad_mgmt_app_secret #var.aadMgmtClientSecret
-  blobStorageKey    = module.storage.key 
+  spClientSecret    = module.entraRoles.azure_ad_mgmt_app_secret 
   subscriptionId = var.subscriptionId
-  resourceGroupId = azurerm_resource_group.rg.id
+  resourceGroupId = azurerm_resource_group.rg.id 
   resourceGroupName = azurerm_resource_group.rg.name
 }
 

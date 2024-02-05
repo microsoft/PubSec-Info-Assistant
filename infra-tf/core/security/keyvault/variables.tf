@@ -9,7 +9,6 @@ variable "principalType" {
   }
 }
 
-
 variable "resourceGroupId" {
   type = string
 }
@@ -35,43 +34,13 @@ variable "kvAccessObjectId" {
   type        = string
 }
 
-variable "searchServiceKey" {
-  description = "The search service key"
-  type        = string
-}
-
 variable "openaiServiceKey" {
   description = "The OpenAI service key"
   type        = string
 }
 
-variable "cosmosdbKey" {
-  description = "The CosmosDB key"
-  type        = string
-}
-
-variable "formRecognizerKey" {
-  description = "The Form Recognizer key"
-  type        = string
-}
-
-variable "blobConnectionString" {
-  description = "The blob connection string"
-  type        = string
-}
-
-variable "enrichmentKey" {
-  description = "The enrichment key"
-  type        = string
-}
-
 variable "spClientSecret" {
   description = "The client secret for the service principal"
-  type        = string
-}
-
-variable "blobStorageKey" {
-  description = "The blob storage key"
   type        = string
 }
 

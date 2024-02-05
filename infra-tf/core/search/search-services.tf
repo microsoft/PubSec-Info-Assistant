@@ -15,6 +15,12 @@ resource "azurerm_search_service" "search" {
   semantic_search_sku           = var.semanticSearch //TODO Gov?
 }
 
+resource "azurerm_key_vault_secret" "search_service_key" {
+  name         = "AZURE-SEARCH-SERVICE-KEY"
+  value        = data.azurerm_search_service.search.primary_key
+  key_vault_id = var.keyVaultId
+}
+
 output "id" {
   value = azurerm_search_service.search.id
 }
@@ -30,8 +36,4 @@ output "name" {
 data "azurerm_search_service" "search" {
   name                = azurerm_search_service.search.name
   resource_group_name = var.resourceGroupName
-}
-
-output "searchServiceKey" {
-  value = data.azurerm_search_service.search.primary_key
 }

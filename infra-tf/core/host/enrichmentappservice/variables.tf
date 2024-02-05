@@ -136,3 +136,7 @@ variable "applicationInsightsConnectionString" {
   type    = string
   default = ""
 }
+
+variable "keyVaultUri" { 
+  type = string
+}

@@ -24,39 +24,9 @@ resource "azurerm_key_vault" "kv" {
   }
 }
 
-resource "azurerm_key_vault_secret" "searchServiceKeySecret" {
-  name         = "AZURE-SEARCH-SERVICE-KEY"
-  value        = var.searchServiceKey
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
 resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {
   name         = "AZURE-OPENAI-SERVICE-KEY"
   value        = var.openaiServiceKey
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-resource "azurerm_key_vault_secret" "cosmosdbKeySecret" {
-  name         = "COSMOSDB-KEY"
-  value        = var.cosmosdbKey
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-resource "azurerm_key_vault_secret" "formRecognizerKeySecret" {
-  name         = "AZURE-FORM-RECOGNIZER-KEY"
-  value        = var.formRecognizerKey
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-resource "azurerm_key_vault_secret" "blobConnectionStringSecret" {
-  name         = "BLOB-CONNECTION-STRING"
-  value        = var.blobConnectionString
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-resource "azurerm_key_vault_secret" "enrichmentKeySecret" {
-  name         = "ENRICHMENT-KEY"
-  value        = var.enrichmentKey
   key_vault_id = azurerm_key_vault.kv.id
 }
 
@@ -66,12 +36,14 @@ resource "azurerm_key_vault_secret" "spClientKeySecret" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
-resource "azurerm_key_vault_secret" "blobStorageKeySecret" {
-  name         = "AZURE-BLOB-STORAGE-KEY"
-  value        = var.blobStorageKey
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
 output "keyVaultName" {
   value = azurerm_key_vault.kv.name
+}
+
+output "keyVaultId" {
+  value = azurerm_key_vault.kv.id
+}
+
+output "keyVaultUri" {
+  value = azurerm_key_vault.kv.vault_uri
 }

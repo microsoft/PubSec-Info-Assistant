@@ -1,6 +1,3 @@
-
-
-
 resource "azurerm_linux_web_app" "app_service" {
   name                = var.name
   location            = var.location
@@ -31,6 +28,9 @@ resource "azurerm_linux_web_app" "app_service" {
       "SCM_DO_BUILD_DURING_DEPLOYMENT" = lower(tostring(var.scmDoBuildDuringDeployment))
       "ENABLE_ORYX_BUILD"              = tostring(var.enableOryxBuild)
       "APPLICATIONINSIGHTS_CONNECTION_STRING" = var.applicationInsightsConnectionString
+      "AZURE_SEARCH_SERVICE_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)"
+      "COSMOSDB_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
+      "AZURE_BLOB_STORAGE_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
     }
   )
 
@@ -68,14 +68,21 @@ resource "azurerm_linux_web_app" "app_service" {
 
 }
 
-
-resource "azurerm_key_vault" "key_vault" {
-  count               = var.keyVaultName != "" ? 1 : 0
+data "azurerm_key_vault" "existing" {
   name                = var.keyVaultName
-  location            = var.location
   resource_group_name = var.resourceGroupName
-  tenant_id           = var.tenantId
-  sku_name            = "standard"
+}
+
+resource "azurerm_key_vault_access_policy" "policy" {
+  key_vault_id = data.azurerm_key_vault.existing.id
+
+  tenant_id = azurerm_linux_web_app.app_service.identity.0.tenant_id
+  object_id = azurerm_linux_web_app.app_service.identity.0.principal_id
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
 }
 
 

@@ -103,11 +103,6 @@ output "TARGET_PAGES" {
   value = var.targetPages
 }
 
-output "AzureWebJobsStorage" {
-  sensitive = true
-  value = module.storage.connection_string
-}
-
 output "ENRICHMENT_ENDPOINT" {
   value = length(module.cognitiveServices) > 0 ? module.cognitiveServices[0].endpoint : null
 }
@@ -123,10 +118,6 @@ output "TARGET_TRANSLATION_LANGUAGE" {
 output "ENABLE_DEV_CODE" {
   value = var.enableDevCode
 }
-
-# output "AZURE_CLIENT_ID" {
-#   value = var.aadMgmtClientId
-# }
 
 output "AZURE_TENANT_ID" {
   value = var.tenantId

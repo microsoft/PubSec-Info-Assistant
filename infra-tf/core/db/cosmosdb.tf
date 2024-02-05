@@ -90,13 +90,14 @@ resource "azurerm_cosmosdb_sql_container" "tag_container" {
   }
 }
 
-output "CosmosDBEndpointURL" {
-  value = azurerm_cosmosdb_account.cosmosdb_account.endpoint
+resource "azurerm_key_vault_secret" "search_service_key" {
+  name         = "COSMOSDB-KEY"
+  value        = azurerm_cosmosdb_account.cosmosdb_account.primary_key
+  key_vault_id = var.keyVaultId
 }
 
-output "CosmosDBKey" {
-  value = azurerm_cosmosdb_account.cosmosdb_account.primary_key
-  sensitive = true
+output "CosmosDBEndpointURL" {
+  value = azurerm_cosmosdb_account.cosmosdb_account.endpoint
 }
 
 output "CosmosDBLogDatabaseName" {

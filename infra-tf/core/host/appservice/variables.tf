@@ -29,7 +29,6 @@ variable "appServicePlanId" {
 
 variable "keyVaultName" {
   type = string
-  default = ""
 }
 
 variable "managedIdentity" {
@@ -166,4 +165,8 @@ variable "app_settings" {
 variable "applicationInsightsConnectionString" {
   type    = string
   default = ""
+}
+
+variable "keyVaultUri" { 
+  type = string
 }

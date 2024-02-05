@@ -85,3 +85,7 @@ variable "resourceGroupName" {
   type    = string
   default = ""
 }
+
+variable "keyVaultId" { 
+  type = string
+}

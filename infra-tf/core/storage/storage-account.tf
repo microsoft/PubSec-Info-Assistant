@@ -42,22 +42,24 @@ resource "azurerm_storage_queue" "queue" {
   storage_account_name = azurerm_storage_account.storage.name
 }
 
+resource "azurerm_key_vault_secret" "storage_connection_string" {
+  name         = "BLOB-CONNECTION-STRING"
+  value        = azurerm_storage_account.storage.primary_connection_string
+  key_vault_id = var.keyVaultId
+}
+
+resource "azurerm_key_vault_secret" "storage_key" {
+  name         = "AZURE-BLOB-STORAGE-KEY"
+  value        = azurerm_storage_account.storage.primary_access_key
+  key_vault_id = var.keyVaultId
+}
+
 output "name" {
   value = azurerm_storage_account.storage.name
 }
 
 output "primary_endpoints" {
   value = azurerm_storage_account.storage.primary_blob_endpoint
-}
-
-output "key" {
-  value = azurerm_storage_account.storage.primary_access_key
-  sensitive = true
-}
-
-output "connection_string" {
-  value = azurerm_storage_account.storage.primary_connection_string
-  sensitive = true
 }
 
 output "id" {

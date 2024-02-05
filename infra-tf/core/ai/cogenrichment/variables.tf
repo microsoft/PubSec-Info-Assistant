@@ -45,3 +45,7 @@ variable "isGovCloudDeployment" {
   type    = bool
   default = false
 }
+
+variable "keyVaultId" { 
+  type = string
+}

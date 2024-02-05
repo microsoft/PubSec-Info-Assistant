@@ -1,4 +1,12 @@
+data "azurerm_key_vault" "existing_kv" {
+  name                = var.keyVaultName
+  resource_group_name = var.resourceGroupName
+}
 
+data "azurerm_storage_account" "existing_sa" {
+  name                = var.blobStorageAccountName
+  resource_group_name = var.resourceGroupName
+}
 
 // Create function app resource
 resource "azurerm_linux_function_app" "function_app" {
@@ -7,7 +15,7 @@ resource "azurerm_linux_function_app" "function_app" {
   resource_group_name       = var.resourceGroupName
   service_plan_id           = var.appServicePlanId
   storage_account_name      = var.blobStorageAccountName
-  storage_account_access_key= var.blobStorageAccountKey
+  storage_account_access_key= "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
   https_only                = true
 
   site_config {
@@ -21,14 +29,14 @@ resource "azurerm_linux_function_app" "function_app" {
   connection_string {
     name  = "BLOB_CONNECTION_STRING"
     type  = "Custom"
-    value = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${var.blobStorageAccountKey}"
+    value = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
   }
 
   app_settings = {
     SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
     ENABLE_ORYX_BUILD              = "true"
-    AzureWebJobsStorage = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${var.blobStorageAccountKey}"
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${var.blobStorageAccountKey}"
+    AzureWebJobsStorage = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
     WEBSITE_CONTENTSHARE = lower(var.name)
     FUNCTIONS_WORKER_RUNTIME = var.runtime
     FUNCTIONS_EXTENSION_VERSION = "~4"
@@ -40,15 +48,14 @@ resource "azurerm_linux_function_app" "function_app" {
     BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME = var.blobStorageAccountUploadContainerName
     BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME = var.blobStorageAccountOutputContainerName
     BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME = var.blobStorageAccountLogContainerName
-    AZURE_BLOB_STORAGE_KEY = var.blobStorageAccountKey
+    AZURE_BLOB_STORAGE_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
     CHUNK_TARGET_SIZE = var.chunkTargetSize
     TARGET_PAGES = var.targetPages
     FR_API_VERSION = var.formRecognizerApiVersion
     AZURE_FORM_RECOGNIZER_ENDPOINT = var.formRecognizerEndpoint
-    AZURE_FORM_RECOGNIZER_KEY = var.formRecognizerApiKey
-    BLOB_CONNECTION_STRING = var.blobStorageAccountConnectionString
+    AZURE_FORM_RECOGNIZER_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-FORM-RECOGNIZER-KEY)"
+    BLOB_CONNECTION_STRING = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
     COSMOSDB_URL = var.CosmosDBEndpointURL
-    COSMOSDB_KEY = var.CosmosDBKey
     COSMOSDB_LOG_DATABASE_NAME = var.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME = var.CosmosDBLogContainerName
     COSMOSDB_TAGS_DATABASE_NAME = var.CosmosDBTagsDatabaseName
@@ -67,7 +74,7 @@ resource "azurerm_linux_function_app" "function_app" {
     SUBMIT_REQUEUE_HIDE_SECONDS = var.submitRequeueHideSeconds
     POLLING_BACKOFF = var.pollingBackoff
     MAX_READ_ATTEMPTS = var.maxReadAttempts
-    ENRICHMENT_KEY = var.enrichmentKey
+    ENRICHMENT_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/ENRICHMENT-KEY)"
     ENRICHMENT_ENDPOINT = var.enrichmentEndpoint
     ENRICHMENT_NAME = var.enrichmentName
     ENRICHMENT_LOCATION = var.enrichmentLocation
@@ -76,7 +83,8 @@ resource "azurerm_linux_function_app" "function_app" {
     ENRICHMENT_BACKOFF = var.enrichmentBackoff
     ENABLE_DEV_CODE = tostring(var.enableDevCode)
     EMBEDDINGS_QUEUE = var.EMBEDDINGS_QUEUE
-    AZURE_SEARCH_SERVICE_KEY = var.azureSearchServiceKey
+    AZURE_SEARCH_SERVICE_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)"
+    COSMOSDB_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX = var.azureSearchIndex
   }
@@ -84,6 +92,19 @@ resource "azurerm_linux_function_app" "function_app" {
   identity {
     type = "SystemAssigned"
   }
+}
+
+
+resource "azurerm_key_vault_access_policy" "policy" {
+  key_vault_id = data.azurerm_key_vault.existing_kv.id
+
+  tenant_id = azurerm_linux_function_app.function_app.identity.0.tenant_id
+  object_id = azurerm_linux_function_app.function_app.identity.0.principal_id
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
 }
 
 output "function_app_name" {

@@ -22,12 +22,35 @@ resource "azurerm_linux_web_app" "app_service" {
       "SCM_DO_BUILD_DURING_DEPLOYMENT" = var.scmDoBuildDuringDeployment
       "ENABLE_ORYX_BUILD" = var.enableOryxBuild
       "APPLICATIONINSIGHTS_CONNECTION_STRING" = var.applicationInsightsConnectionString
+      "AZURE_SEARCH_SERVICE_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)"
+      "COSMOSDB_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
+      "ENRICHMENT_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/ENRICHMENT-KEY)"
+      "AZURE_BLOB_STORAGE_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
+      "BLOB_CONNECTION_STRING" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
+      "AZURE_STORAGE_CONNECTION_STRING" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
     }
   )
 
   identity {
     type = var.managedIdentity ? "SystemAssigned" : "None"
   }
+}
+
+data "azurerm_key_vault" "existing" {
+  name                = var.keyVaultName
+  resource_group_name = var.resourceGroupName
+}
+
+resource "azurerm_key_vault_access_policy" "policy" {
+  key_vault_id = data.azurerm_key_vault.existing.id
+
+  tenant_id = azurerm_linux_web_app.app_service.identity.0.tenant_id
+  object_id = azurerm_linux_web_app.app_service.identity.0.principal_id
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
 }
 
 resource "azurerm_monitor_diagnostic_setting" "example" {

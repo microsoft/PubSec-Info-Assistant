@@ -110,7 +110,7 @@ variable "numberOfWorkers" {
 
 variable "scmDoBuildDuringDeployment" {
   type = bool
-  default = false
+  default = true
 }
 
 variable "use32BitWorkerProcess" {

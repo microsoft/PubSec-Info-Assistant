@@ -104,7 +104,7 @@ variable "minimumElasticInstanceCount" {
 
 variable "scmDoBuildDuringDeployment" {
   type = bool
-  default = false
+  default = true
 }
 
 variable "use32BitWorkerProcess" {

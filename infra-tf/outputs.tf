@@ -80,7 +80,7 @@ output "AZURE_COSMOSDB_TAGS_CONTAINER_NAME" {
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = length(module.cognitiveServices) > 0 ? module.cognitiveServices[0].endpoint : null
+  value = module.formrecognizer.formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -104,11 +104,11 @@ output "TARGET_PAGES" {
 }
 
 output "ENRICHMENT_ENDPOINT" {
-  value = length(module.cognitiveServices) > 0 ? module.cognitiveServices[0].endpoint : null
+  value = module.enrichment.cognitiveServiceEndpoint
 }
 
 output "ENRICHMENT_NAME" {
-  value = length(module.cognitiveServices) > 0 ? module.cognitiveServices[0].name : null
+  value = module.enrichment.cognitiveServicerAccountName
 }
 
 output "TARGET_TRANSLATION_LANGUAGE" {

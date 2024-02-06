@@ -1,7 +1,7 @@
 #### Any version change made here should also be made and tested for the webapp backend and function apps in /functions and /app/backend
 
 sentence-transformers == 2.2.2
-fastapi == 0.103.2
+fastapi == 0.109.1
 fastapi-utils == 0.2.1
 uvicorn == 0.23.2
 azure-storage-queue == 12.6.0

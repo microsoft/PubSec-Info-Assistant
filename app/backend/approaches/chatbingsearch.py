@@ -9,7 +9,7 @@ from azure.core.credentials import AzureKeyCredential
 import openai
 from approaches.approach import Approach
 
-SUBSCRIPTION_KEY = "4525e27a0c4247a7b5306d20cf8ccec5"
+SUBSCRIPTION_KEY = "b530d2f9ff574559aa1ceb2632e81653"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 

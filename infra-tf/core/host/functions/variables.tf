@@ -1,23 +1,50 @@
-variable "name" {
-  description = "Name of the function app"
-  type        = string
+variable "plan_name" {
+  type = string
 }
 
-variable "appServicePlanId" {
-  description = "Id of the function app hosting plan"
-  type        = string
+variable "name" {
+  type = string
 }
 
 variable "location" {
-  description = "Location of the function app"
-  type        = string
-  default     = "resourceGroup().location"
+  type = string
 }
 
 variable "tags" {
-  description = "Tags for the function app"
-  type        = map(string)
-  default     = {}
+  type = map(string)
+  default = {}
+}
+
+variable "kind" {
+  type = string
+  default = ""
+}
+
+variable "reserved" {
+  type = bool
+  default = true
+}
+
+variable "sku" {
+  type = map(string)
+}
+
+variable "resourceGroupName" {
+  type    = string
+  default = ""
+}
+
+variable "storageAccountId" {
+  type    = string
+  default = ""
+}
+
+variable "keyVaultUri" { 
+  type = string
+}
+
+variable "keyVaultName" {
+  type = string
 }
 
 variable "runtime" {
@@ -226,20 +253,7 @@ variable "azureSearchServiceEndpoint" {
   type        = string
 }
 
-variable "resourceGroupName" {
-  type    = string
-  default = ""
-}
-
 variable "endpointSuffix" {
   type    = string
   default = "core.windows.net"
-}
-
-variable "keyVaultUri" { 
-  type = string
-}
-
-variable "keyVaultName" {
-  type = string
 }

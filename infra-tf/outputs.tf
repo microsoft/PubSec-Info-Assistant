@@ -40,7 +40,7 @@ output "BACKEND_URI" {
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.name 
+  value = module.backend.web_app_name 
 }
 
 output "RESOURCE_GROUP_NAME" {

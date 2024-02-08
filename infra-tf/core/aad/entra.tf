@@ -1,4 +1,5 @@
 data "azurerm_client_config" "current" {}
+data "azuread_client_config" "current" {}
 
 resource "azuread_application" "aad_web_app" {
   count = var.isInAutomation ? 0 : 1
@@ -22,6 +23,7 @@ resource "azuread_service_principal" "aad_web_sp" {
   count = var.isInAutomation ? 0 : 1
   client_id               = azuread_application.aad_web_app[0].client_id
   app_role_assignment_required = var.requireWebsiteSecurityMembership
+  owners    = [data.azuread_client_config.current.object_id]
 }
 
 resource "azuread_application" "aad_mgmt_app" {
@@ -39,18 +41,19 @@ resource "azuread_application_password" "aad_mgmt_app_password" {
 resource "azuread_service_principal" "aad_mgmt_sp" {
   count = var.isInAutomation ? 0 : 1
   client_id = azuread_application.aad_mgmt_app[0].client_id
+  owners    = [data.azuread_client_config.current.object_id]
 }
 
 
 
 
 output "azure_ad_web_app_client_id" {
-  value       = azuread_application.aad_web_app[0].object_id
+  value       = azuread_application.aad_web_app[0].client_id
   description = "Client ID of the Azure AD Web App"
 }
 
 output "azure_ad_mgmt_app_client_id" {
-  value       = azuread_application.aad_mgmt_app[0].object_id
+  value       = azuread_application.aad_mgmt_app[0].client_id
   description = "Client ID of the Azure AD Management App"
 }
 

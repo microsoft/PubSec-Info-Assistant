@@ -26,44 +26,12 @@ module "logging" {
   resourceGroupName = azurerm_resource_group.rg.name
 }
 
-// Create an App Service Plan to group applications under the same payment plan and SKU
-module "appServicePlan" {
-  source = "./core/host/appplan"
 
-  name     = var.appServicePlanName != "" ? var.appServicePlanName : "${local.prefix}-${local.abbrs["webServerFarms"]}${var.randomString}"
-  location = var.location
-  tags     = local.tags
-  sku = {
-    tier = "Standard"
-    size = "S1"
-    capacity = 1
-  }
-  kind     = "linux"
-  resourceGroupName = azurerm_resource_group.rg.name
-}
+module "enrichmentApp" {
+  source = "./core/host/enrichmentapp"
 
-// Create an App Service Plan for functions
-module "funcServicePlan" {
-  source = "./core/host/funcplan"
-
-  name     = var.appServicePlanName != "" ? var.appServicePlanName : "${local.prefix}-${local.abbrs["funcServerFarms"]}${var.randomString}"
-  location = var.location
-  tags     = local.tags
-  sku = {
-    size = "S2"
-    tier = "Standard"
-    capacity = 2
-  }
-  kind     = "linux"
-  resourceGroupName = azurerm_resource_group.rg.name
-}
-
-// Create an App Service Plan to group applications under the same payment plan and SKU
-module "enrichmentAppServicePlan" {
-  source = "./core/host/enrichmentplan"
-
-  name     = var.enrichmentAppServicePlanName != "" ? var.enrichmentAppServicePlanName : "${local.prefix}-enrichment${local.abbrs["webServerFarms"]}${var.randomString}"
-  location = var.location
+  plan_name     = var.enrichmentAppServicePlanName != "" ? var.enrichmentAppServicePlanName : "${local.prefix}-enrichment${local.abbrs["webServerFarms"]}${var.randomString}"
+  location = var.location 
   tags     = local.tags
   sku = {
     size     = "P1v3"
@@ -74,30 +42,16 @@ module "enrichmentAppServicePlan" {
   reserved = true
   resourceGroupName = azurerm_resource_group.rg.name
   storageAccountId = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
-}
-
-
-module "enrichmentApp" {
-  source = "./core/host/enrichmentappservice"
 
   name = var.enrichmentServiceName != "" ? var.enrichmentServiceName : "${local.prefix}-enrichment${local.abbrs["webSitesAppService"]}${var.randomString}"
-  appServicePlanId = module.enrichmentAppServicePlan.id
-  location = var.location
-  tags = local.tags
-  runtimeName = "python"
-  runtimeVersion = "3.10"
-  linuxFxVersion = "PYTHON|3.10"
   scmDoBuildDuringDeployment = true
   managedIdentity = true
-  logAnalyticsWorkspaceName = module.logging.logAnalyticsName
   logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
-  applicationInsightsName = module.logging.applicationInsightsName
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   healthCheckPath = "/health"
   appCommandLine = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
   keyVaultUri = module.kvModule.keyVaultUri
   keyVaultName = module.kvModule.keyVaultName
-  resourceGroupName = azurerm_resource_group.rg.name
   appSettings = {
     EMBEDDINGS_QUEUE = var.embeddingsQueue
     LOG_LEVEL = "DEBUG"
@@ -128,31 +82,32 @@ module "enrichmentApp" {
 
 # // The application frontend
 module "backend" {
-  source = "./core/host/appservice"
+  source = "./core/host/webapp"
+
+  plan_name     = var.appServicePlanName != "" ? var.appServicePlanName : "${local.prefix}-${local.abbrs["webServerFarms"]}${var.randomString}"
+  sku = {
+    tier = "Standard"
+    size = "S1" 
+    capacity = 1
+  }
+  kind     = "linux"
+  resourceGroupName = azurerm_resource_group.rg.name
 
   name = var.backendServiceName != "" ? var.backendServiceName : "${local.prefix}-${local.abbrs["webSitesAppService"]}${var.randomString}"
   location = var.location
   tags = merge(local.tags, { "azd-service-name" = "backend" })
-  appServicePlanId = module.appServicePlan.id
-  runtimeName = "python"
-  runtimeVersion = "3.10"
+  runtimeVersion = "3.10" 
   scmDoBuildDuringDeployment = true
   managedIdentity = true
-  runtimeNameAndVersion = "python|3.10"
-  linuxFxVersion = "PYTHON|3.10"
   appCommandLine = "gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
-  applicationInsightsName = module.logging.applicationInsightsName
-  logAnalyticsWorkspaceName = module.logging.logAnalyticsName
   logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
-  isGovCloudDeployment = var.isGovCloudDeployment
   portalURL = var.isGovCloudDeployment ? "https://portal.azure.us" : "https://portal.azure.com"
   enableOryxBuild = true
-  resourceGroupName = azurerm_resource_group.rg.name
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   keyVaultUri = module.kvModule.keyVaultUri
   keyVaultName = module.kvModule.keyVaultName
 
-  app_settings = {
+  appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING = module.logging.applicationInsightsConnectionString
     AZURE_BLOB_STORAGE_ACCOUNT = module.storage.name
     AZURE_BLOB_STORAGE_ENDPOINT = module.storage.primary_endpoints
@@ -203,7 +158,6 @@ module "cognitiveServices" {
   customSubDomainName = var.openAiServiceName != "" ? var.openAiServiceName : "${local.prefix}-${local.abbrs["openAIServices"]}${var.randomString}"
   location = var.location
   tags     = local.tags
-  # sku = var.openAiSkuName
 
   deployments = [
     {
@@ -316,14 +270,22 @@ module "cosmosdb" {
 
 # // Function App 
 module "functions" { 
-  source = "./core/function"
+  source = "./core/host/functions"
 
   name                                  = var.functionsAppName != "" ? var.functionsAppName : "${local.prefix}-${local.abbrs["webSitesFunctions"]}${var.randomString}"
   location                              = var.location
   tags                                  = local.tags
-  appServicePlanId                      = module.funcServicePlan.id
   keyVaultUri                           = module.kvModule.keyVaultUri
-  keyVaultName                          = module.kvModule.keyVaultName
+  keyVaultName                          = module.kvModule.keyVaultName 
+
+  plan_name     = var.appServicePlanName != "" ? var.appServicePlanName : "${local.prefix}-${local.abbrs["funcServerFarms"]}${var.randomString}"
+
+  sku = {
+    size = "S2"
+    tier = "Standard"
+    capacity = 2
+  }
+  kind     = "linux"
 
   runtime                               = "python"
   resourceGroupName                     = azurerm_resource_group.rg.name
@@ -370,7 +332,6 @@ module "functions" {
   endpointSuffix                        = var.isGovCloudDeployment ? "core.usgovcloudapi.net" : "core.windows.net"
 
   depends_on = [
-    module.funcServicePlan,
     module.storage,
     module.cosmosdb,
     module.kvModule

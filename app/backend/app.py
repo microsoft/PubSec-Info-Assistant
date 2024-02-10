@@ -85,7 +85,12 @@ azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
 
 # Used by the OpenAI SDK
 openai.api_type = "azure"
-openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
+
+if (IS_GOV_CLOUD_DEPLOYMENT):
+    openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.us"
+else:
+    openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
+
 openai.api_version = "2023-06-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging

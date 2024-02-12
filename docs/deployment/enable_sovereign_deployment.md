@@ -25,7 +25,7 @@ To enable a Sovereign region deployment, you need to update the local.env file w
 3. Set **USE_EXISTING_AOAI** parameter to `true` if you have a existing AOAI instance deployed.  If you want to create Azure Open AI resource during deployment then set this parameter to `false`
 
 4. If **USE_EXISTING_AOAI** is set to `true` then set the following parameters based on your AOAI deployment:
-   *You can find these values from https://oai.azure.us/portal via the Deployments URL.*
+   *You can find these values from https://aoai.azure.us/portal via the Deployments URL.*
 
    ```bash
    export AZURE_OPENAI_CHATGPT_MODEL_NAME="gpt-35-turbo-16k"

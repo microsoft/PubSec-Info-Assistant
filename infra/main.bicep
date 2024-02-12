@@ -223,6 +223,7 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       WEBSITES_CONTAINER_START_TIME_LIMIT: 600
+      IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
     }
   }
   dependsOn: [

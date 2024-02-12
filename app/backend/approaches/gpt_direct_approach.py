@@ -101,7 +101,7 @@ class GPTDirectApproach(Approach):
         self.is_gov_cloud_deployment = is_gov_cloud_deployment
 
     # def run(self, history: list[dict], overrides: dict) -> any:
-    def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)

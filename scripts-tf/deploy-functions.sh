@@ -8,7 +8,7 @@ figlet Deploy Azure Functions
 
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source "${DIR}"/../scripts/load-env.sh
+source "${DIR}"/../scripts-tf/load-env.sh
 source "${DIR}/environments/infrastructure.env"
 BINARIES_OUTPUT_PATH="${DIR}/../artifacts/build/"
 

@@ -34,11 +34,6 @@ variable "kvAccessObjectId" {
   type        = string
 }
 
-variable "openaiServiceKey" {
-  description = "The OpenAI service key"
-  type        = string
-}
-
 variable "spClientSecret" {
   description = "The client secret for the service principal"
   type        = string

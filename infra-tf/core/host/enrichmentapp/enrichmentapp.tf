@@ -99,6 +99,7 @@ resource "azurerm_linux_web_app" "app_service" {
       "AZURE_BLOB_STORAGE_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
       "BLOB_CONNECTION_STRING" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
       "AZURE_STORAGE_CONNECTION_STRING" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
+      "AZURE_OPENAI_SERVICE_KEY" = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
     }
   )
 
@@ -158,11 +159,3 @@ output "identityPrincipalId" {
 output "uri" {
   value = "https://${azurerm_linux_web_app.app_service.default_hostname}"
 }
-
-# output "id" {
-#   value = azurerm_service_plan.appServicePlan.id
-# }
-
-# output "name" {
-#   value = azurerm_service_plan.appServicePlan.name
-# }

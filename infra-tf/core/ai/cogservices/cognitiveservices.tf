@@ -1,4 +1,5 @@
 resource "azurerm_cognitive_account" "account" {
+  count = var.useExistingAOAIService ? 0 : 1
   name                = var.name
   location            = var.location
   resource_group_name = var.resourceGroupName
@@ -9,34 +10,39 @@ resource "azurerm_cognitive_account" "account" {
   tags = var.tags
 }
 
-# resource "azurerm_cognitive_account_deployment" "deployment" {
-#   count = length(var.deployments)
 
-#   name                = var.deployments[count.index]["name"]
-#   resource_group_name = var.resourceGroupName
-#   account_name        = azurerm_cognitive_account.account.name
+resource "azurerm_cognitive_deployment" "deployment" {
+  count = var.useExistingAOAIService ? 0 : length(var.deployments)
 
-#   model = var.deployments[count.index]["model"]
+  name                 = var.deployments[count.index].name
+  cognitive_account_id = azurerm_cognitive_account.account[0].id
 
-#   sku_name = lookup(var.deployments[count.index], "sku", false) ? var.deployments[count.index]["sku"]["name"] : "Standard"
-#   sku_capacity = lookup(var.deployments[count.index], "sku", false) ? var.deployments[count.index]["sku"]["capacity"] : 20
+  model {
+    format  = "OpenAI"
+    name    = var.deployments[count.index].model.name
+    version = var.deployments[count.index].model.version
+  }
 
-#   rai_policy_name = lookup(var.deployments[count.index], "raiPolicyName", null)
-# }
+  scale {
+    type = "Standard"
+  }
+}
+
+resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {
+  name         = "AZURE-OPENAI-SERVICE-KEY"
+  value        = var.useExistingAOAIService ? var.openaiServiceKey : azurerm_cognitive_account.account[0].primary_access_key
+  key_vault_id = var.keyVaultId
+}
 
 
 output "endpoint" {
-  value = azurerm_cognitive_account.account.endpoint
+  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.account[0].endpoint
 }
 
 output "id" {
-  value = azurerm_cognitive_account.account.id
+  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.account[0].id
 }
 
 output "name" {
-  value = azurerm_cognitive_account.account.name
-}
-
-output "key" {
-  value = azurerm_cognitive_account.account.primary_access_key
+  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.account[0].name
 }

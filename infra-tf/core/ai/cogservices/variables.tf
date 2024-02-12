@@ -49,3 +49,17 @@ variable "isGovCloudDeployment" {
   type    = bool
   default = false
 }
+
+variable "keyVaultId" { 
+  type = string
+}
+
+variable "useExistingAOAIService" {
+  type    = bool
+  default = false
+}
+
+variable "openaiServiceKey" {
+  description = "The OpenAI service key"
+  type        = string
+}

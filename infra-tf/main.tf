@@ -68,7 +68,6 @@ module "enrichmentApp" {
     MAX_EMBEDDING_REQUEUE_COUNT = 5
     EMBEDDING_REQUEUE_BACKOFF = 60
     AZURE_OPENAI_SERVICE = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.cognitiveServices.name
-    AZURE_OPENAI_SERVICE_KEY = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
     AZURE_SEARCH_INDEX = var.searchIndexName
     AZURE_SEARCH_SERVICE = module.searchServices.name
@@ -125,7 +124,6 @@ module "backend" {
     EMBEDDING_DEPLOYMENT_NAME = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
     AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = var.azureOpenAIEmbeddingsModelName
     AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION = var.azureOpenAIEmbeddingsModelVersion
-    AZURE_OPENAI_SERVICE_KEY = var.useExistingAOAIService ? var.azureOpenAIServiceKey : module.cognitiveServices.key
     APPINSIGHTS_INSTRUMENTATIONKEY = module.logging.applicationInsightsInstrumentationKey
     COSMOSDB_URL = module.cosmosdb.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME = module.cosmosdb.CosmosDBLogDatabaseName
@@ -151,29 +149,36 @@ module "backend" {
 
 
 module "cognitiveServices" {
-  count = var.useExistingAOAIService ? 0 : 1
   source = "./core/ai/cogservices"
 
   name     = var.openAiServiceName != "" ? var.openAiServiceName : "${local.prefix}-${local.abbrs["openAIServices"]}${var.randomString}"
   customSubDomainName = var.openAiServiceName != "" ? var.openAiServiceName : "${local.prefix}-${local.abbrs["openAIServices"]}${var.randomString}"
   location = var.location
   tags     = local.tags
+  resourceGroupName = azurerm_resource_group.rg.name
+  keyVaultId = module.kvModule.keyVaultId
+  useExistingAOAIService = var.useExistingAOAIService
+  openaiServiceKey = var.azureOpenAIServiceKey
 
   deployments = [
     {
       name = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-      model_format = "OpenAI"
-      model_name = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
-      model_version = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
+      model = {
+        format = "OpenAI"
+        name = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
+        version = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
+      }
       sku_name = "Standard"
       sku_capacity = var.chatGptDeploymentCapacity
       rai_policy_name = "Microsoft.Default"
     },
     {
-      name = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : var.azureOpenAIEmbeddingDeploymentName
-      model_format = "OpenAI"
-      model_name = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : "text-embedding-ada-002"
-      model_version = "2"
+      name = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : "text-embedding-ada-002"
+      model = {
+        format = "OpenAI"
+        name = var.azureOpenAIEmbeddingsModelName != "" ? var.azureOpenAIEmbeddingsModelName : "text-embedding-ada-002"
+        version = "2"
+      }
       sku_name = "Standard"
       sku_capacity = var.embeddingsDeploymentCapacity
       rai_policy_name = "Microsoft.Default"
@@ -454,7 +459,6 @@ module "kvModule" {
   name                = "${local.prefix}-${local.abbrs["keyvault"]}${var.randomString}"
   location            = var.location
   kvAccessObjectId = data.azurerm_client_config.current.object_id 
-  openaiServiceKey  = var.azureOpenAIServiceKey
   spClientSecret    = module.entraRoles.azure_ad_mgmt_app_secret 
   subscriptionId = var.subscriptionId
   resourceGroupId = azurerm_resource_group.rg.id 

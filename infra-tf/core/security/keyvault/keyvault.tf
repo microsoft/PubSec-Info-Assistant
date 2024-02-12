@@ -24,12 +24,6 @@ resource "azurerm_key_vault" "kv" {
   }
 }
 
-resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {
-  name         = "AZURE-OPENAI-SERVICE-KEY"
-  value        = var.openaiServiceKey
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
 resource "azurerm_key_vault_secret" "spClientKeySecret" {
   name         = "AZURE-CLIENT-SECRET"
   value        = var.spClientSecret

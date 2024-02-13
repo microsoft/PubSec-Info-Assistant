@@ -96,7 +96,7 @@ azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"]
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
-openai.api_version = "2023-06-01-preview"
+openai.api_version = "2023-12-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(

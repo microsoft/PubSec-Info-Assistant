@@ -443,15 +443,15 @@ module "openAiRoleMgmt" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-# module "azMonitor" {
-#   source = "./core/logging/monitor"
+module "azMonitor" {
+  source = "./core/logging/monitor"
 
-#   logAnalyticsName = module.logging.logAnalyticsName
-#   location         = var.location
-#   logWorkbookName = "${local.prefix}-${local.abbrs["logWorkbook"]}${var.randomString}"
-#   resourceGroupName = azurerm_resource_group.rg.name 
-#   componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
-# }
+  logAnalyticsName = module.logging.logAnalyticsName
+  location         = var.location
+  logWorkbookName = "${local.prefix}-${local.abbrs["logWorkbook"]}${var.randomString}"
+  resourceGroupName = azurerm_resource_group.rg.name 
+  componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
+}
 
 module "kvModule" {
   source = "./core/security/keyvault" 

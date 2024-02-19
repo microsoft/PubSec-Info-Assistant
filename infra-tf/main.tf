@@ -131,8 +131,8 @@ module "backend" {
     COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
     COSMOSDB_TAGS_CONTAINER_NAME = module.cosmosdb.CosmosDBTagsContainerName
     QUERY_TERM_LANGUAGE = var.queryTermLanguage
-    AZURE_CLIENT_ID = module.entraRoles.azure_ad_mgmt_app_client_id 
-    AZURE_CLIENT_SECRET = module.entraRoles.azure_ad_mgmt_app_secret 
+    AZURE_CLIENT_ID = var.isInAutomation ? var.aadMgmtClientId : module.entraRoles.azure_ad_mgmt_app_client_id 
+    AZURE_CLIENT_SECRET = var.isInAutomation ? var.aadMgmtClientSecret : module.entraRoles.azure_ad_mgmt_app_secret 
     AZURE_TENANT_ID = var.tenantId
     AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
     IS_GOV_CLOUD_DEPLOYMENT = var.isGovCloudDeployment
@@ -143,7 +143,7 @@ module "backend" {
     APPLICATION_TITLE = var.applicationtitle
   }
 
-  aadClientId = module.entraRoles.azure_ad_web_app_client_id
+  aadClientId = var.isInAutomation ? var.aadWebClientId :module.entraRoles.azure_ad_web_app_client_id
   depends_on = [ module.kvModule ]
 }
 
@@ -419,7 +419,7 @@ module "containerRegistryPush" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = module.entraRoles.azure_ad_mgmt_sp_id
+  principalId      = var.isInAutomation ? var.principalId : module.entraRoles.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.AcrPush
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -436,7 +436,7 @@ module "openAiRoleMgmt" {
   count  = var.isInAutomation ? 0 : 1
 
   scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId     = module.entraRoles.azure_ad_mgmt_sp_id 
+  principalId     = var.isInAutomation ? var.principalId : module.entraRoles.azure_ad_mgmt_sp_id 
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -459,7 +459,7 @@ module "kvModule" {
   name                = "${local.prefix}-${local.abbrs["keyvault"]}${var.randomString}"
   location            = var.location
   kvAccessObjectId = data.azurerm_client_config.current.object_id 
-  spClientSecret    = module.entraRoles.azure_ad_mgmt_app_secret 
+  spClientSecret    = var.isInAutomation ? var.aadMgmtClientSecret : module.entraRoles.azure_ad_mgmt_app_secret 
   subscriptionId = var.subscriptionId
   resourceGroupId = azurerm_resource_group.rg.id 
   resourceGroupName = azurerm_resource_group.rg.name

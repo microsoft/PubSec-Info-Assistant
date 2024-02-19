@@ -16,21 +16,21 @@ variable "webAppSuffix" {
   type        = string
 }
 
-# variable "aadWebClientId" {
-#   type    = string
-#   default = ""
-# }
+variable "aadWebClientId" {
+  type    = string
+  default = ""
+}
 
-# variable "aadMgmtClientId" {
-#   type    = string
-#   default = ""
-# }
+variable "aadMgmtClientId" {
+  type    = string
+  default = ""
+}
 
-# variable "aadMgmtClientSecret" {
-#   type      = string
-#   default   = ""
-#   sensitive = true
-# }
+variable "aadMgmtClientSecret" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
 
 # variable "aadMgmtServicePrincipalId" {
 #   type    = string
@@ -73,18 +73,6 @@ variable "openAiSkuName" {
   type    = string
   default = "S0"
 }
-
-# variable "cosmosdbName" {
-#   type = string
-# }
-
-# variable "formRecognizerName" {
-#   type = string
-# }
-
-# variable "enrichmentName" {
-#   type = string
-# }
 
 variable "formRecognizerSkuName" {
   type    = string
@@ -386,11 +374,11 @@ variable "subscriptionId" {
   default = ""
 }
 
-# variable "principalId" {
-#   type    = string
-#   default = ""
-#   description = "Id of the user or app to assign application roles"
-# }
+variable "principalId" {
+  type    = string
+  default = ""
+  description = "Id of the user or app to assign application roles"
+}
 
 # variable "kvAccessObjectId" {
 #   type    = string

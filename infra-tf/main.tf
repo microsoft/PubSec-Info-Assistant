@@ -467,6 +467,7 @@ module "kvModule" {
 
 module "entraRoles" {
   source = "./core/aad"
+  count  = var.isInAutomation ? 0 : 1
 
   requireWebsiteSecurityMembership = var.requireWebsiteSecurityMembership
   randomString = var.randomString

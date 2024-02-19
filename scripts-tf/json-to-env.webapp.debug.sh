@@ -170,7 +170,7 @@ jq -r  '
 
 if [ -n "${IN_AUTOMATION}" ]
 then
-    IS_USGOV_DEPLOYMENT=$(jq -r '.properties.outputs.iS_USGOV_DEPLOYMENT.value' infra_output.json)
+    IS_USGOV_DEPLOYMENT=$(jq -r '.IS_USGOV_DEPLOYMENT.value' inf_output.json)
 
     if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1

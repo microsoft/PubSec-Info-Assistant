@@ -415,16 +415,16 @@ module "storageRoleFunc" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "containerRegistryPush" {
-  source = "./core/security/role"
+# module "containerRegistryPush" {
+#   source = "./core/security/role"
 
-  scope            = azurerm_resource_group.rg.id
-  principalId      = var.isInAutomation ? var.principalId : module.entraRoles.azure_ad_mgmt_sp_id
-  roleDefinitionId = local.azure_roles.AcrPush
-  principalType    = "ServicePrincipal"
-  subscriptionId   = data.azurerm_client_config.current.subscription_id
-  resourceGroupId  = azurerm_resource_group.rg.id
-}
+#   scope            = azurerm_resource_group.rg.id
+#   principalId      = var.isInAutomation ? var.principalId : module.entraRoles.azure_ad_mgmt_sp_id
+#   roleDefinitionId = local.azure_roles.AcrPush
+#   principalType    = "ServicePrincipal"
+#   subscriptionId   = data.azurerm_client_config.current.subscription_id
+#   resourceGroupId  = azurerm_resource_group.rg.id
+# }
 
 # // MANAGEMENT SERVICE PRINCIPAL
 data "azurerm_resource_group" "existing" {

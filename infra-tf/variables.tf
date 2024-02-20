@@ -32,11 +32,6 @@ variable "aadMgmtClientSecret" {
   sensitive = true
 }
 
-# variable "aadMgmtServicePrincipalId" {
-#   type    = string
-#   default = ""
-# }
-
 variable "buildNumber" {
   type    = string
   default = "local"
@@ -379,11 +374,6 @@ variable "principalId" {
   default = ""
   description = "Id of the user or app to assign application roles"
 }
-
-# variable "kvAccessObjectId" {
-#   type    = string
-#   default = ""
-# }
 
 variable "requireWebsiteSecurityMembership" {
   type    = bool

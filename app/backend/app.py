@@ -277,12 +277,41 @@ async def get_all_upload_status(request: Request):
     json_body = await request.json()
     timeframe = json_body.get("timeframe")
     state = json_body.get("state")
+    folder = json_body.get("folder")
     try:
         results = statusLog.read_files_status_by_timeframe(timeframe, State[state])
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+@app.post("/getfolders")
+async def get_folders(request: Request):
+    """
+    Get all folders.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of folders.
+    """
+    try:
+        blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        # Initialize an empty list to hold the folder paths
+        folders = []
+        # List all blobs in the container
+        blob_list = blob_container.list_blobs()
+        # Iterate through the blobs and extract folder names and add unique values to the list
+        for blob in blob_list:
+            # Extract the folder path if exists
+            folder_path = os.path.dirname(blob.name)
+            if folder_path and folder_path not in folders:
+                folders.append(folder_path)
+    except Exception as ex:
+        log.exception("Exception in /getalluploadstatus")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return folders
 
 @app.post("/logstatus")
 async def logstatus(request: Request):
@@ -372,8 +401,7 @@ async def get_citation(request: Request):
     """
     try:
         json_body = await request.json()
-        citation = urllib.parse.unquote(json_body.get("citation"))
-    
+        citation = urllib.parse.unquote(json_body.get("citation"))    
         blob = blob_container.get_blob_client(citation).download_blob()
         decoded_text = blob.readall().decode()
         results = json.loads(decoded_text)

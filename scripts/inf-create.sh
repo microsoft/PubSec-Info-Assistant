@@ -137,12 +137,16 @@ else
   fi
 fi
 
+#Get the Management url
+$azureMgmtUrl=$(az cloud show --output tsv --query "endpoints.management")
+
 export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 export AZURE_AD_WEB_APP_CLIENT_ID=$aadWebAppId
 export AZURE_AD_MGMT_APP_CLIENT_ID=$aadMgmtAppId
 export AZURE_AD_MGMT_SP_ID=$aadMgmtSPId
 export AZURE_AD_MGMT_APP_SECRET=$aadMgmtAppSecret
 export AZURE_KV_ACCESS_OBJ_ID=$kvAccessObjectId
+export AZURE_MANAGEMENT_URL=$azureMgmtUrl
 
 if [ -n "${IN_AUTOMATION}" ]; then 
   export IS_IN_AUTOMATION=true
@@ -186,6 +190,7 @@ declare -A REPLACE_TOKENS=(
     [\${OPEN_SOURCE_EMBEDDING_MODEL}]=${OPEN_SOURCE_EMBEDDING_MODEL}
     [\${APPLICATION_TITLE}]=${APPLICATION_TITLE}
     [\${AZURE_KV_ACCESS_OBJ_ID}]=${AZURE_KV_ACCESS_OBJ_ID}
+    [\${AZURE_MANAGEMENT_URL}]=${AZURE_MANAGEMENT_URL}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

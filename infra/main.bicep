@@ -15,6 +15,7 @@ param location string
 
 param aadWebClientId string = ''
 param aadMgmtClientId string = ''
+param aadMgmtUrl string = ''
 @secure()
 param aadMgmtClientSecret string = ''
 param aadMgmtServicePrincipalId string = ''
@@ -280,6 +281,7 @@ module backend 'core/host/appservice.bicep' = {
       TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       APPLICATION_TITLE: applicationtitle
+      AZURE_MANAGEMENT_URL:aadMgmtUrl
     }
     aadClientId: aadWebClientId
   }

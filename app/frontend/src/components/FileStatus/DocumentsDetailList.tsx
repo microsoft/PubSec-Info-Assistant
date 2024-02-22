@@ -138,6 +138,24 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         },
         {
             key: 'column4',
+            name: 'Folder',
+            fieldName: 'folder',
+            minWidth: 70,
+            maxWidth: 90,
+            isResizable: true,
+            ariaLabel: 'Column operations for folder, Press to sort by folder',
+            onColumnClick: onColumnClick,
+            data: 'string',
+            onRender: (item: IDocument) => (  
+                <TooltipHost content={`${item.state} `}>  
+                    <span>{item.filePath.split('/').slice(1, -1).join('/')}</span>  
+                    {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                </TooltipHost>  
+            ), 
+            isPadded: true,
+        },
+        {
+            key: 'column5',
             name: 'Submitted On',
             fieldName: 'upload_timestamp',
             minWidth: 90,
@@ -153,7 +171,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column5',
+            key: 'column6',
             name: 'Last Updated',
             fieldName: 'modified_timestamp',
             minWidth: 90,
@@ -172,7 +190,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             },
         },
         {
-            key: 'column6',
+            key: 'column7',
             name: 'Status Detail',
             fieldName: 'state_description',
             minWidth: 90,

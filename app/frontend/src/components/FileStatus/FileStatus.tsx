@@ -93,7 +93,7 @@ export const FileStatus = ({ className }: Props) => {
         const request: GetUploadStatusRequest = {
             timeframe: timeframe,
             state: selectedFileStateItem?.key == undefined ? FileState.All : selectedFileStateItem?.key as FileState,
-            folder: SelectedFolderItem?.key == undefined ? 'ALL' : SelectedFolderItem?.key as string
+            folder: SelectedFolderItem?.key == undefined ? 'Root' : SelectedFolderItem?.key as string
         }
         const response = await getAllUploadStatus(request);
         const list = convertStatusToItems(response.statuses);
@@ -107,9 +107,8 @@ export const FileStatus = ({ className }: Props) => {
             // Replace this with the actual API call to Azure Blob Storage
             //const folders = await getUniqueFoldersFromAzureBlobStorage();
             const folders = await getFolders(); // Await the promise
-            const allOption = { key: 'ALL', text: 'ALL' }; // Create the "ALL" option
-            const rootOption = { key: 'Root', text: 'ROOT' }; // Create the "ALL" option            
-            const folderDropdownOptions = [allOption, rootOption, ...folders.map((folder: string) => ({ key: folder, text: folder }))];
+            const rootOption = { key: 'Root', text: 'Root' }; // Create the "ALL" option            
+            const folderDropdownOptions = [rootOption, ...folders.map((folder: string) => ({ key: folder, text: folder }))];
             setFolderOptions(folderDropdownOptions);
         }
         catch (e) {
@@ -185,7 +184,7 @@ export const FileStatus = ({ className }: Props) => {
                 />
             <Dropdown
                 label="Folder:"
-                defaultSelectedKey={'ALL'}
+                defaultSelectedKey={'Root'}
                 onChange={onFolderChange}
                 placeholder="Select folder"
                 options={folderOptions}

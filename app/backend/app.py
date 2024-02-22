@@ -279,7 +279,8 @@ async def get_all_upload_status(request: Request):
     state = json_body.get("state")
     folder = json_body.get("folder")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, State[state])
+        results = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
+            folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
@@ -309,7 +310,7 @@ async def get_folders(request: Request):
             if folder_path and folder_path not in folders:
                 folders.append(folder_path)
     except Exception as ex:
-        log.exception("Exception in /getalluploadstatus")
+        log.exception("Exception in /getfolders")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return folders
 

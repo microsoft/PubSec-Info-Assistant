@@ -138,7 +138,7 @@ else
 fi
 
 #Get the Management url
-$azureMgmtUrl=$(az cloud show --output tsv --query "endpoints.management")
+azureMgmtUrl=$(az cloud show --output tsv --query "endpoints.management")
 
 export SINGED_IN_USER_PRINCIPAL=$signedInUserId
 export AZURE_AD_WEB_APP_CLIENT_ID=$aadWebAppId

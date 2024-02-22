@@ -41,8 +41,6 @@ param applicationInsightsName string = ''
 param backendServiceName string = ''
 param enrichmentServiceName string = ''
 param functionsAppName string = ''
-param mediaServiceName string = ''
-param videoIndexerName string = ''
 param searchServicesName string = ''
 param searchServicesSkuName string = 'standard'
 param storageAccountName string = ''
@@ -547,30 +545,6 @@ module functions 'core/function/function.bicep' = {
     cosmosdb
     kvModule
   ]
-}
-
-// Media Service
-module media_service 'core/video_indexer/media_service.bicep' = {
-  name: 'media_service'
-  scope: rg
-  params: {
-    name: !empty(mediaServiceName) ? mediaServiceName : '${prefix}${abbrs.mediaService}${randomString}'
-    location: location
-    tags: tags
-    storageAccountID: storageMedia.outputs.id
-  }
-}
-
-// AVAM Service
-module avam 'core/video_indexer/video_indexer.bicep' = {
-  name: 'avam'
-  scope: rg
-  params: {
-    name: !empty(videoIndexerName) ? videoIndexerName : '${prefix}${abbrs.videoIndexer}${randomString}'
-    location: location
-    tags: tags
-    mediaServiceAccountResourceId: media_service.outputs.id
-  }
 }
 
 // USER ROLES

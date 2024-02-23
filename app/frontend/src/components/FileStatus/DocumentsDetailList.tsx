@@ -94,19 +94,42 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     
     // Initialize Selection with items
     useEffect(() => {
-        selection.setItems(itemList, false);
+        selectionRef.current.setItems(itemList, false);
     }, [itemList]);
 
-    const selection = new Selection({
+    const selectionRef = useRef(new Selection({
         onSelectionChanged: () => {
-            // Update itemList state to reflect the current selection state
-            const selectedIndices = new Set(selection.getSelectedIndices());
-            setItems(items.map((item, index) => ({
+            const selectedIndices = new Set(selectionRef.current.getSelectedIndices());
+            setItems(prevItems => prevItems.map((item, index) => ({
                 ...item,
                 isSelected: selectedIndices.has(index)
             })));
+            checkSelectAllState();
         }
-    });
+    }));
+
+    const checkSelectAllState = () => {
+        const areAllSelected = selectionRef.current.count > 0 && selectionRef.current.count === items.length;
+        setSelectAllChecked(areAllSelected);
+    };
+    
+    const [selectAllChecked, setSelectAllChecked] = useState(false);
+
+    useEffect(() => {
+        // Ensure that the select all checkbox is in the correct state when items change
+        setSelectAllChecked(selectionRef.current.count > 0 && selectionRef.current.count === items.length);
+    }, [items]);
+    
+    useEffect(() => {
+        selectionRef.current.setItems(itemList, false);
+        checkSelectAllState(); // Update the select all checkbox state
+    }, [itemList]);
+
+
+    const toggleSelectAll = (checked: boolean) => {
+        setSelectAllChecked(checked);
+        selectionRef.current.setAllSelected(checked);
+    };
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -228,31 +251,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     <span>{item.state}</span>
                 </TooltipHost>
             )
-        },
-        {
-            key: 'select',
-            name: 'Select',
-            fieldName: 'select',
-            minWidth: 20,
-            maxWidth: 20,
-            isResizable: false,
-            isCollapsible: true,
-            ariaLabel: 'Column operations for selection of rows',
-            data: 'string',
-            onColumnClick: onColumnClick,
-            onRender: (item: IDocument, index?: number) => {
-                return (
-                    <Checkbox 
-                    checked={item.isSelected}
-                    onChange={(ev, checked) => {
-                        if (index !== undefined) {
-                            // Ensure that 'checked' is always a boolean
-                            selection.setIndexSelected(index, checked || false, false);
-                        }
-                    }}
-                />
-                );
-            }
         }
     ]);
 
@@ -263,7 +261,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 items={itemList}
                 compact={true}
                 columns={columns}
-                selection={selection} // 3. Update DetailsList Props
+                selection={selectionRef.current}
                 selectionMode={SelectionMode.multiple} // Allow multiple selection
                 getKey={getKey}
                 setKey="none"

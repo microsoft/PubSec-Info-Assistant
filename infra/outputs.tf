@@ -28,7 +28,7 @@ output "AZURE_STORAGE_ACCOUNT_ENDPOINT" {
 }
 
 output "AZURE_STORAGE_CONTAINER" {
-  value = var.containerName
+  value = var.contentContainerName
 }
 
 output "AZURE_STORAGE_UPLOAD_CONTAINER" {

@@ -20,6 +20,18 @@ resource "azurerm_resource_group" "rg" {
   tags     = local.tags
 }
 
+module "entraObjects" {
+  source                            = "./core/aad"
+  isInAutomation                    = var.isInAutomation
+  requireWebsiteSecurityMembership  = var.requireWebsiteSecurityMembership
+  randomString                      = random_string.random.result
+  webAppSuffix                      = var.webAppSuffix
+  aadWebClientId                    = var.aadWebClientId
+  aadMgmtClientId                   = var.aadMgmtClientId
+  aadMgmtServicePrincipalId         = var.aadMgmtServicePrincipalId
+  aadMgmtClientSecret               = var.aadMgmtClientSecret
+}
+
 module "logging" {
   source = "./core/logging/loganalytics"
 
@@ -76,7 +88,7 @@ module "enrichmentApp" {
     LOG_LEVEL                               = "DEBUG"
     DEQUEUE_MESSAGE_BATCH_SIZE              = 1
     AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
-    AZURE_BLOB_STORAGE_CONTAINER            = var.containerName
+    AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
     AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
     COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
@@ -125,47 +137,46 @@ module "backend" {
   tenantId                            = var.tenantId
 
   appSettings = {
-    APPLICATIONINSIGHTS_CONNECTION_STRING = module.logging.applicationInsightsConnectionString
-    AZURE_BLOB_STORAGE_ACCOUNT = module.storage.name
-    AZURE_BLOB_STORAGE_ENDPOINT = module.storage.primary_endpoints
-    AZURE_BLOB_STORAGE_CONTAINER = var.containerName
-    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER = var.uploadContainerName
-    AZURE_OPENAI_SERVICE = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
-    AZURE_OPENAI_RESOURCE_GROUP = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-    AZURE_OPENAI_ENDPOINT = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
-    AZURE_SEARCH_INDEX = var.searchIndexName
-    AZURE_SEARCH_SERVICE = module.searchServices.name
-    AZURE_SEARCH_SERVICE_ENDPOINT = module.searchServices.endpoint
-    AZURE_OPENAI_CHATGPT_DEPLOYMENT = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-    AZURE_OPENAI_CHATGPT_MODEL_NAME = var.chatGptModelName
-    AZURE_OPENAI_CHATGPT_MODEL_VERSION = var.chatGptModelVersion
-    USE_AZURE_OPENAI_EMBEDDINGS = var.useAzureOpenAIEmbeddings
-    EMBEDDING_DEPLOYMENT_NAME = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
-    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = var.azureOpenAIEmbeddingsModelName
-    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION = var.azureOpenAIEmbeddingsModelVersion
-    APPINSIGHTS_INSTRUMENTATIONKEY = module.logging.applicationInsightsInstrumentationKey
-    COSMOSDB_URL = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_LOG_DATABASE_NAME = module.cosmosdb.CosmosDBLogDatabaseName
-    COSMOSDB_LOG_CONTAINER_NAME = module.cosmosdb.CosmosDBLogContainerName
-    COSMOSDB_TAGS_DATABASE_NAME = module.cosmosdb.CosmosDBTagsDatabaseName
-    COSMOSDB_TAGS_CONTAINER_NAME = module.cosmosdb.CosmosDBTagsContainerName
-    QUERY_TERM_LANGUAGE = var.queryTermLanguage
-    AZURE_CLIENT_ID = var.isInAutomation ? var.aadMgmtClientId : module.entraObjects[0].azure_ad_mgmt_app_client_id 
-    AZURE_CLIENT_SECRET = var.isInAutomation ? var.aadMgmtClientSecret : module.entraObjects[0].azure_ad_mgmt_app_secret 
-    AZURE_TENANT_ID = var.tenantId
-    AZURE_SUBSCRIPTION_ID = data.azurerm_client_config.current.subscription_id
-    IS_GOV_CLOUD_DEPLOYMENT = var.isGovCloudDeployment
-    CHAT_WARNING_BANNER_TEXT = var.chatWarningBannerText
-    TARGET_EMBEDDINGS_MODEL = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    ENRICHMENT_APPSERVICE_NAME = module.enrichmentApp.name
-    ENRICHMENT_ENDPOINT                    = module.cognitiveServices.cognitiveServiceEndpoint
-    APPLICATION_TITLE = var.applicationtitle
+    APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
+    AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
+    AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_RESOURCE_GROUP             = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
+    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
+    AZURE_SEARCH_INDEX                      = var.searchIndexName
+    AZURE_SEARCH_SERVICE                    = module.searchServices.name
+    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT         = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
+    AZURE_OPENAI_CHATGPT_MODEL_NAME         = var.chatGptModelName
+    AZURE_OPENAI_CHATGPT_MODEL_VERSION      = var.chatGptModelVersion
+    USE_AZURE_OPENAI_EMBEDDINGS             = var.useAzureOpenAIEmbeddings
+    EMBEDDING_DEPLOYMENT_NAME               = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME      = var.azureOpenAIEmbeddingsModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION   = var.azureOpenAIEmbeddingsModelVersion
+    APPINSIGHTS_INSTRUMENTATIONKEY          = module.logging.applicationInsightsInstrumentationKey
+    COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
+    COSMOSDB_TAGS_DATABASE_NAME             = module.cosmosdb.CosmosDBTagsDatabaseName
+    COSMOSDB_TAGS_CONTAINER_NAME            = module.cosmosdb.CosmosDBTagsContainerName
+    QUERY_TERM_LANGUAGE                     = var.queryTermLanguage
+    AZURE_CLIENT_ID                         = module.entraObjects.azure_ad_mgmt_app_client_id 
+    AZURE_CLIENT_SECRET                     = module.entraObjects.azure_ad_mgmt_app_secret 
+    AZURE_TENANT_ID                         = var.tenantId
+    AZURE_SUBSCRIPTION_ID                   = data.azurerm_client_config.current.subscription_id
+    IS_GOV_CLOUD_DEPLOYMENT                 = var.isGovCloudDeployment
+    CHAT_WARNING_BANNER_TEXT                = var.chatWarningBannerText
+    TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    ENRICHMENT_APPSERVICE_NAME              = module.enrichmentApp.name
+    ENRICHMENT_ENDPOINT                     = module.cognitiveServices.cognitiveServiceEndpoint
+    APPLICATION_TITLE                       = var.applicationtitle
   }
 
-  aadClientId = var.isInAutomation ? var.aadWebClientId :module.entraObjects[0].azure_ad_web_app_client_id
+  aadClientId = module.entraObjects.azure_ad_web_app_client_id
   depends_on = [ module.kvModule ]
 }
-
 
 module "openaiServices" {
   source = "./core/ai/openaiservices"
@@ -280,7 +291,7 @@ module "functions" {
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
   blobStorageAccountName                = module.storage.name
   blobStorageAccountEndpoint            = module.storage.primary_endpoints
-  blobStorageAccountOutputContainerName = var.containerName
+  blobStorageAccountOutputContainerName = var.contentContainerName
   blobStorageAccountUploadContainerName = var.uploadContainerName 
   blobStorageAccountLogContainerName    = var.functionLogsContainerName 
   formRecognizerEndpoint                = module.formrecognizer.formRecognizerAccountEndpoint
@@ -340,7 +351,7 @@ module "userRoles" {
 }
 
 
-# # // SYSTEM IDENTITIES
+# # // SYSTEM IDENTITY ROLES
 module "openAiRoleBackend" {
   source = "./core/security/role"
 
@@ -385,7 +396,7 @@ module "storageRoleFunc" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-# // MANAGEMENT SERVICE PRINCIPAL
+# // MANAGEMENT SERVICE PRINCIPAL ROLES
 data "azurerm_resource_group" "existing" {
   count = var.useExistingAOAIService ? 1 : 0
   name  = var.azureOpenAIResourceGroup
@@ -394,7 +405,7 @@ data "azurerm_resource_group" "existing" {
 module "openAiRoleMgmt" {
   source = "./core/security/role"
   scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId     = var.isInAutomation ? var.principalId : module.entraObjects[0].azure_ad_mgmt_sp_id 
+  principalId     = module.entraObjects.azure_ad_mgmt_sp_id 
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -415,27 +426,18 @@ module "kvModule" {
   name              = "infoasst-kv-${random_string.random.result}"
   location          = var.location
   kvAccessObjectId  = data.azurerm_client_config.current.object_id 
-  spClientSecret    = var.isInAutomation ? var.aadMgmtClientSecret : module.entraObjects[0].azure_ad_mgmt_app_secret 
+  spClientSecret    = module.entraObjects.azure_ad_mgmt_app_secret 
   subscriptionId    = var.subscriptionId
   resourceGroupId   = azurerm_resource_group.rg.id 
   resourceGroupName = azurerm_resource_group.rg.name
   tags              = local.tags
 }
 
-module "entraObjects" {
-  source = "./core/aad"
-  count  = var.isInAutomation ? 0 : 1
-
-  requireWebsiteSecurityMembership = var.requireWebsiteSecurityMembership
-  randomString = random_string.random.result
-  webAppSuffix = var.webAppSuffix
-}
-
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource "azurerm_resource_group_template_deployment" "customer_attribution" {
   count               = var.cuaEnabled ? 1 : 0
   name                = "pid-${var.cuaId}"
-  resource_group_name = var.resourceGroupName
+  resource_group_name = azurerm_resource_group.rg.name
   deployment_mode     = "Incremental"
   template_content    = <<TEMPLATE
 {

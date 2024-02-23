@@ -8,8 +8,60 @@ variable "location" {
   type        = string
 }
 
+variable "resourceGroupName" {
+  type    = string
+  default = ""
+}
+
+variable "tenantId" {
+  type    = string
+  default = ""
+}
+
+variable "subscriptionId" {
+  type    = string
+  default = ""
+}
+
+variable "buildNumber" {
+  type    = string
+  default = "local"
+}
+
+variable "isGovCloudDeployment" {
+  type    = bool
+  default = false
+}
+
+variable "cuaEnabled" {
+  type    = bool
+  default = false
+}
+
+variable "cuaId" {
+  type    = string
+  default = ""
+}
+
+variable "requireWebsiteSecurityMembership" {
+  type    = bool
+  default = false
+}
+////
+// variables that can vary based on the Azure environment being targeted
+////
 variable "webAppSuffix" {
   type        = string
+}
+
+////
+
+////
+// Variables that are used for CI/CD automation
+////
+variable "isInAutomation" {
+  type    = bool
+  default = false
 }
 
 variable "aadWebClientId" {
@@ -28,16 +80,15 @@ variable "aadMgmtClientSecret" {
   sensitive = true
 }
 
-variable "buildNumber" {
-  type    = string
-  default = "local"
+variable "aadMgmtServicePrincipalId" {
+  type = string
+  default = ""
 }
+////
 
-variable "isInAutomation" {
-  type    = bool
-  default = false
-}
-
+////
+// Variables that are used for the Azure OpenAI service
+////
 variable "useExistingAOAIService" {
   type = bool
 }
@@ -63,101 +114,6 @@ variable "openAIServiceName" {
 variable "openAiSkuName" {
   type    = string
   default = "S0"
-}
-
-variable "formRecognizerSkuName" {
-  type    = string
-  default = "S0"
-}
-
-variable "enrichmentSkuName" {
-  type    = string
-  default = "S0"
-}
-
-variable "appServicePlanName" {
-  type    = string
-  default = ""
-}
-
-variable "enrichmentAppServicePlanName" {
-  type    = string
-  default = ""
-}
-
-variable "resourceGroupName" {
-  type    = string
-  default = ""
-}
-
-variable "logAnalyticsName" {
-  type    = string
-  default = ""
-}
-
-variable "applicationInsightsName" {
-  type    = string
-  default = ""
-}
-
-variable "backendServiceName" {
-  type    = string
-  default = ""
-}
-
-variable "enrichmentServiceName" {
-  type    = string
-  default = ""
-}
-
-variable "functionsAppName" {
-  type    = string
-  default = ""
-}
-
-variable "mediaServiceName" {
-  type    = string
-  default = ""
-}
-
-variable "videoIndexerName" {
-  type    = string
-  default = ""
-}
-
-variable "searchServicesName" {
-  type    = string
-  default = ""
-}
-
-variable "searchServicesSkuName" {
-  type    = string
-  default = "standard"
-}
-
-variable "storageAccountName" {
-  type    = string
-  default = ""
-}
-
-variable "containerName" {
-  type    = string
-  default = "content"
-}
-
-variable "uploadContainerName" {
-  type    = string
-  default = "upload"
-}
-
-variable "functionLogsContainerName" {
-  type    = string
-  default = "logs"
-}
-
-variable "searchIndexName" {
-  type    = string
-  default = "vector-index"
 }
 
 variable "chatGptDeploymentName" {
@@ -199,6 +155,92 @@ variable "embeddingsDeploymentCapacity" {
   type    = number
   default = 240
 }
+////
+
+variable "formRecognizerSkuName" {
+  type    = string
+  default = "S0"
+}
+
+variable "enrichmentSkuName" {
+  type    = string
+  default = "S0"
+}
+
+variable "appServicePlanName" {
+  type    = string
+  default = ""
+}
+
+variable "enrichmentAppServicePlanName" {
+  type    = string
+  default = ""
+}
+
+variable "logAnalyticsName" {
+  type    = string
+  default = ""
+}
+
+variable "applicationInsightsName" {
+  type    = string
+  default = ""
+}
+
+variable "backendServiceName" {
+  type    = string
+  default = ""
+}
+
+variable "enrichmentServiceName" {
+  type    = string
+  default = ""
+}
+
+variable "functionsAppName" {
+  type    = string
+  default = ""
+}
+
+variable "videoIndexerName" {
+  type    = string
+  default = ""
+}
+
+variable "searchServicesName" {
+  type    = string
+  default = ""
+}
+
+variable "searchServicesSkuName" {
+  type    = string
+  default = "standard"
+}
+
+variable "storageAccountName" {
+  type    = string
+  default = ""
+}
+
+variable "contentContainerName" {
+  type    = string
+  default = "content"
+}
+
+variable "uploadContainerName" {
+  type    = string
+  default = "upload"
+}
+
+variable "functionLogsContainerName" {
+  type    = string
+  default = "logs"
+}
+
+variable "searchIndexName" {
+  type    = string
+  default = "vector-index"
+}
 
 variable "chatWarningBannerText" {
   type    = string
@@ -238,11 +280,6 @@ variable "formRecognizerApiVersion" {
 variable "queryTermLanguage" {
   type    = string
   default = "English"
-}
-
-variable "isGovCloudDeployment" {
-  type    = bool
-  default = false
 }
 
 variable "maxSecondsHideOnUpload" {
@@ -340,38 +377,7 @@ variable "applicationtitle" {
   default = ""
 }
 
-variable "cuaEnabled" {
-  type    = bool
-  default = false
-}
-
-variable "cuaId" {
-  type    = string
-  default = ""
-}
-
 variable "enableDevCode" {
-  type    = bool
-  default = false
-}
-
-variable "tenantId" {
-  type    = string
-  default = ""
-}
-
-variable "subscriptionId" {
-  type    = string
-  default = ""
-}
-
-variable "principalId" {
-  type    = string
-  default = ""
-  description = "Id of the user or app to assign application roles"
-}
-
-variable "requireWebsiteSecurityMembership" {
   type    = bool
   default = false
 }

@@ -15,3 +15,20 @@ variable "isInAutomation" {
   type    = bool
   default = false
 }
+
+variable "aadWebClientId" {
+  type = string
+}
+
+variable "aadMgmtClientId" {
+  type = string
+}
+
+variable "aadMgmtServicePrincipalId" {
+  type = string
+}
+
+variable "aadMgmtClientSecret" {
+  type      = string
+  sensitive = true
+}

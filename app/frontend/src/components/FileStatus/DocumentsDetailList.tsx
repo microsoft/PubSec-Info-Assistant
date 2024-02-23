@@ -15,6 +15,7 @@ import { DetailsList,
     Button } from "@fluentui/react";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
+import { deleteItem, DeleteItemRequest } from "../../api";
 
 export interface IDocument {
     key: string;
@@ -117,7 +118,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         console.log("Items to delete:", selectedItems); // Debug log
         selectedItems.forEach(item => {
             console.log(`Deleting item: ${item.name}`);
-            // Perform the deletion or any other action here
+            // delete this item
+            const request: DeleteItemRequest = {
+                path: item.filePath
+            }
+            const response = deleteItem(request);
         });
     };
 

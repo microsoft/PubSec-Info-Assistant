@@ -282,10 +282,6 @@ async def get_all_upload_status(request: Request):
         results = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
             folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
-
-
-
-
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
@@ -302,15 +298,7 @@ async def get_all_upload_status(request: Request):
         unique_tags = set()
         for item in items:
             tags = item.split(',')
-            unique_tags.update(tags)              
-        
-        
-        
-        
-        
-        
-        
-        
+            unique_tags.update(tags)        
         
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
@@ -344,6 +332,32 @@ async def get_folders(request: Request):
         log.exception("Exception in /getfolders")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return folders
+
+
+@app.post("/deleteItems")
+async def delete_Items(request: Request):
+    """
+    Delete a blob.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique folders.
+    """
+    json_body = await request.json()
+    path = json_body.get("path")
+    # remove the container prefix
+    path = path.split("/", 1)[1]
+    try:
+        blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        blob_container.delete_blob(path)
+
+    except Exception as ex:
+        log.exception("Exception in /getfolders")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return True
+
 
 @app.post("/gettags")
 async def get_tags(request: Request):

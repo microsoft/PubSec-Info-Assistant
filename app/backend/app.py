@@ -266,7 +266,7 @@ async def get_blob_client_url():
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):
     """
-    Get the status of all file uploads in the last N hours.
+    Get the status and tags of all file uploads in the last N hours.
 
     Parameters:
     - request: The HTTP request object.
@@ -281,6 +281,37 @@ async def get_all_upload_status(request: Request):
     try:
         results = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
             folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+
+
+
+
+
+        # retrieve tags for each file
+         # Initialize an empty list to hold the tags
+        items = []              
+        cosmos_client = CosmosClient(url=tagsHelper._url, credential=tagsHelper._key)
+        database = cosmos_client.get_database_client(tagsHelper._database_name)
+        container = database.get_container_client(tagsHelper._container_name)
+        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
+        items = list(container.query_items(
+            query=query_string,
+            enable_cross_partition_query=True
+        ))           
+
+        # Extract and split tags
+        unique_tags = set()
+        for item in items:
+            tags = item.split(',')
+            unique_tags.update(tags)              
+        
+        
+        
+        
+        
+        
+        
+        
+        
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
         raise HTTPException(status_code=500, detail=str(ex)) from ex

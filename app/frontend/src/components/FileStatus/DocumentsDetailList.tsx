@@ -1,12 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { useState } from "react";
-import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, Text, BaseSelectedItemsList } from "@fluentui/react";
-import { TooltipHost } from '@fluentui/react';
+import React, { useState, useEffect, useRef } from "react";
+import { DetailsList, 
+    DetailsListLayoutMode, 
+    SelectionMode, 
+    IColumn, 
+    Selection, 
+    Checkbox,
+    Label, 
+    Text, 
+    BaseSelectedItemsList,
+    TooltipHost } from "@fluentui/react";
 import { retryFile } from "../../api";
-import React, { useRef } from "react";
-
 import styles from "./DocumentsDetailList.module.css";
 
 export interface IDocument {
@@ -20,6 +26,7 @@ export interface IDocument {
     state_description: string;
     upload_timestamp: string;
     modified_timestamp: string;
+    isSelected?: boolean; // Optional property to track selection state
 }
 
 interface Props {
@@ -84,10 +91,49 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             });
     }
 
+    
+    // Initialize Selection with items
+    useEffect(() => {
+        selectionRef.current.setItems(itemList, false);
+    }, [itemList]);
+
+    const selectionRef = useRef(new Selection({
+        onSelectionChanged: () => {
+            const selectedIndices = new Set(selectionRef.current.getSelectedIndices());
+            setItems(prevItems => prevItems.map((item, index) => ({
+                ...item,
+                isSelected: selectedIndices.has(index)
+            })));
+            checkSelectAllState();
+        }
+    }));
+
+    const checkSelectAllState = () => {
+        const areAllSelected = selectionRef.current.count > 0 && selectionRef.current.count === items.length;
+        setSelectAllChecked(areAllSelected);
+    };
+    
+    const [selectAllChecked, setSelectAllChecked] = useState(false);
+
+    useEffect(() => {
+        // Ensure that the select all checkbox is in the correct state when items change
+        setSelectAllChecked(selectionRef.current.count > 0 && selectionRef.current.count === items.length);
+    }, [items]);
+    
+    useEffect(() => {
+        selectionRef.current.setItems(itemList, false);
+        checkSelectAllState(); // Update the select all checkbox state
+    }, [itemList]);
+
+
+    const toggleSelectAll = (checked: boolean) => {
+        setSelectAllChecked(checked);
+        selectionRef.current.setAllSelected(checked);
+    };
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
-            key: 'column1',
+            key: 'file_type',
             name: 'File Type',
             className: styles.fileIconCell,
             iconClassName: styles.fileIconHeaderIcon,
@@ -105,7 +151,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ),
         },
         {
-            key: 'column2',
+            key: 'name',
             name: 'Name',
             fieldName: 'name',
             minWidth: 210,
@@ -119,7 +165,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column3',
+            key: 'state',
             name: 'State',
             fieldName: 'state',
             minWidth: 70,
@@ -137,7 +183,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column4',
+            key: 'folder',
             name: 'Folder',
             fieldName: 'folder',
             minWidth: 70,
@@ -155,7 +201,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column5',
+            key: 'upload_timestamp',
             name: 'Submitted On',
             fieldName: 'upload_timestamp',
             minWidth: 90,
@@ -171,7 +217,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column6',
+            key: 'modified_timestamp',
             name: 'Last Updated',
             fieldName: 'modified_timestamp',
             minWidth: 90,
@@ -190,7 +236,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             },
         },
         {
-            key: 'column7',
+            key: 'state_description',
             name: 'Status Detail',
             fieldName: 'state_description',
             minWidth: 90,
@@ -204,7 +250,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 <TooltipHost content={`${item.state_description} `}>
                     <span>{item.state}</span>
                 </TooltipHost>
-            ),
+            )
         }
     ]);
 
@@ -212,11 +258,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         <div>
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <DetailsList
-                // items={items}
                 items={itemList}
                 compact={true}
                 columns={columns}
-                selectionMode={SelectionMode.none}
+                selection={selectionRef.current}
+                selectionMode={SelectionMode.multiple} // Allow multiple selection
                 getKey={getKey}
                 setKey="none"
                 layoutMode={DetailsListLayoutMode.justified}

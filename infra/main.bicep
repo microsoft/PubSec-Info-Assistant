@@ -15,6 +15,7 @@ param location string
 
 param aadWebClientId string = ''
 param aadMgmtClientId string = ''
+param aadMgmtUrl string = ''
 @secure()
 param aadMgmtClientSecret string = ''
 param aadMgmtServicePrincipalId string = ''
@@ -224,6 +225,8 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       EMBEDDING_VECTOR_SIZE: useAzureOpenAIEmbeddings ? 1536 : sentenceTransformerEmbeddingVectorSize
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
       WEBSITES_CONTAINER_START_TIME_LIMIT: 600
+      IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
+      AZURE_MANAGEMENT_URL:aadMgmtUrl
     }
   }
   dependsOn: [
@@ -282,6 +285,7 @@ module backend 'core/host/appservice.bicep' = {
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       ENRICHMENT_ENDPOINT: enrichment.outputs.cognitiveServiceEndpoint
       APPLICATION_TITLE: applicationtitle
+      AZURE_MANAGEMENT_URL:aadMgmtUrl
     }
     aadClientId: aadWebClientId
   }

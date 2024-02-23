@@ -54,9 +54,9 @@ const Content = () => {
                 <PivotItem headerText="Upload Status" aria-label="Upload Status Tab">
                     <FileStatus className=""/>
                 </PivotItem>
-                <PivotItem headerText="Approach" aria-label="Approach Tab">
+                {/* <PivotItem headerText="Approach" aria-label="Approach Tab">
                     <ApproachesButtonGroup className="" onClick={onSelectedApproach}/>
-                </PivotItem>
+                </PivotItem> */}
             </Pivot>
         </div>
     );

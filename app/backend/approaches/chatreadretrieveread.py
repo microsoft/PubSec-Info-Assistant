@@ -124,7 +124,11 @@ class ChatReadRetrieveReadApproach(Approach):
         else:
             self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.net'
 
-        openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
+        if is_gov_cloud_deployment:
+            openai.api_base = 'https://' + oai_service_name + '.openai.azure.us/'
+        else:
+            openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
+               
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 

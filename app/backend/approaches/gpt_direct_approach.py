@@ -92,7 +92,11 @@ class GPTDirectApproach(Approach):
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         
-        openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
+        if is_gov_cloud_deployment:
+            openai.api_base = 'https://' + oai_service_name + '.openai.azure.us/'
+        else:
+            openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
+        
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 

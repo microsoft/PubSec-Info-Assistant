@@ -11,7 +11,8 @@ import { DetailsList,
     Label, 
     Text, 
     BaseSelectedItemsList,
-    TooltipHost } from "@fluentui/react";
+    TooltipHost,
+    Button } from "@fluentui/react";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
+    
     const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
@@ -107,6 +109,17 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             checkSelectAllState();
         }
     }));
+
+    
+    // Function to handle the delete button click
+    const handleDeleteClick = () => {
+        const selectedItems = selectionRef.current.getSelection() as IDocument[];
+        console.log("Items to delete:", selectedItems); // Debug log
+        selectedItems.forEach(item => {
+            console.log(`Deleting item: ${item.name}`);
+            // Perform the deletion or any other action here
+        });
+    };
 
     const checkSelectAllState = () => {
         const areAllSelected = selectionRef.current.count > 0 && selectionRef.current.count === items.length;
@@ -270,6 +283,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 onItemInvoked={onItemInvoked}
             />
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
+            <Button text="Delete" onClick={handleDeleteClick} />
         </div>
     );
 }

@@ -23,13 +23,20 @@ fi
 
 echo "Environment set: $ENVIRONMENT_NAME."
 
-if [[ -n $IN_AUTOMATION ]]; then
+if [[ -n $TF_IN_AUTOMATION ]]; then
+
     if [[ -z $BUILD_BUILDID ]]; then
         echo "Require BUILD_BUILDID to be set for CI builds"
         exit 1        
-    fi
-    export BUILD_NUMBER=$BUILD_BUILDNUMBER
+    fi    
+    export TF_VAR_build_number=$BUILD_BUILDNUMBER
 fi
+
+# Override in local.env if you want to disable cleaning functional test data
+export DISABLE_TEST_CLEANUP=false
+export IGNORE_TEST_PIPELINE_QUERY=false
+
+export NOTEBOOK_CONFIG_OVERRIDE_FOLDER="default"
 
 # Pull in variables dependent on the environment we are deploying to.
 if [ -f "$ENV_DIR/environments/$ENVIRONMENT_NAME.env" ]; then
@@ -45,6 +52,20 @@ else
     echo "No Language set, please check local.env.example for DEFAULT_LANGUAGE"
     exit 1
 fi
+# # Pull in variables dependent on the Azure Environment being targeted
+# if [ -f "$ENV_DIR/environments/AzureEnvironments/$TF_VAR_azure_environment.env" ]; then
+#     echo "Loading environment variables for Azure Environment: $TF_VAR_azure_environment."
+#     source "$ENV_DIR/environments/AzureEnvironments/$TF_VAR_azure_environment.env"
+# else
+#     echo "No Azure Environment set, please check local.env.example for TF_VAR_azure_environment"
+#     exit 1
+# fi
+
+# # Pull in variables for performance run if enabled
+# if [ "$PERFORMANCE_TEST" == true ]; then
+#     echo "Loading environment variables for a performance configuration"
+#     source "$ENV_DIR/environments/perf.env"
+# fi
 
 # Fail if the following environment variables are not set
 if [[ -z $WORKSPACE ]]; then
@@ -56,6 +77,9 @@ elif [[ "${WORKSPACE}" =~ [[:upper:]] ]]; then
 fi
 
 # Set the name of the resource group
-export RG_NAME="infoasst-$WORKSPACE"
+export TF_VAR_resource_group_name="infoasst-$WORKSPACE"
 
-echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$RG_NAME\e[0m\n"
+# The default key that is used in the remote state
+export TF_BACKEND_STATE_KEY="shared.infoasst.tfstate"
+
+echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$TF_VAR_resource_group_name\e[0m\n"

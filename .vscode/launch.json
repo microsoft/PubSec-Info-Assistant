@@ -19,7 +19,7 @@
             "cwd": "${workspaceFolder}/app/backend",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "envFile": "${workspaceFolder}/scripts-tf/environments/infrastructure.debug.env",
+            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
             "preLaunchTask": "pip_install"
         },
         {
@@ -36,7 +36,7 @@
             "cwd": "${workspaceFolder}/app/enrichment",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "envFile": "${workspaceFolder}/scripts-tf/environments/infrastructure.debug.env",
+            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
             "preLaunchTask": "pip_install_enrichment"
         },
         {
@@ -105,7 +105,7 @@
                 "SEARCH_KEY": "${env:AZURE_SEARCH_SERVICE_KEY}"
             },
             "cwd": "${workspaceFolder}/tests",
-            "envFile": "${workspaceFolder}/scripts-tf/environments/infrastructure.debug.env",
+            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
             "preLaunchTask": "pip_install_func_tests",
             "presentation": {
                 "hidden": false,

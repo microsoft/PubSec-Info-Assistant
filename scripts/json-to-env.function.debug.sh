@@ -6,7 +6,7 @@ set -e
 
 if [ -n "${IN_AUTOMATION}" ]
 then
-    IS_USGOV_DEPLOYMENT=$(jq -r '.properties.outputs.iS_USGOV_DEPLOYMENT.value' infra_output.json)
+    IS_USGOV_DEPLOYMENT=$(jq -r '.IS_USGOV_DEPLOYMENT.value' inf_output.json)
     
     if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
@@ -18,7 +18,7 @@ fi
 
 secrets="{"
 # Name of your Key Vault
-keyVaultName=$(cat infra_output.json | jq -r .properties.outputs.deploymenT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
 
 # Names of your secrets
 secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "ENRICHMENT-KEY")
@@ -41,94 +41,97 @@ secrets+="}"
 secrets="${secrets%,}"
 
 jq -r --arg secrets "$secrets" '
-    .properties.outputs |
         [
         {
-            "path": "azurE_STORAGE_ACCOUNT",
+            "path": "AZURE_STORAGE_ACCOUNT",
             "env_var": "BLOB_STORAGE_ACCOUNT"
         },
         {
-            "path": "azurE_BLOB_DROP_STORAGE_CONTAINER",
+            "path": "AZURE_BLOB_DROP_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
         },
         {
-            "path": "azurE_STORAGE_CONTAINER",
+            "path": "AZURE_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
         },
         {
-            "path": "azurE_BLOB_LOG_STORAGE_CONTAINER",
+            "path": "AZURE_BLOB_LOG_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"
         },
         {
-            "path": "chunK_TARGET_SIZE",
+            "path": "CHUNK_TARGET_SIZE",
             "env_var": "CHUNK_TARGET_SIZE"
         },
         {
-            "path": "fR_API_VERSION",
+            "path": "FR_API_VERSION",
             "env_var": "FR_API_VERSION"
         },
         {
-            "path": "targeT_PAGES",
+            "path": "TARGET_PAGES",
             "env_var": "TARGET_PAGES"
         },
         {
-            "path": "azurE_FORM_RECOGNIZER_ENDPOINT",
+            "path": "AZURE_FORM_RECOGNIZER_ENDPOINT",
             "env_var": "AZURE_FORM_RECOGNIZER_ENDPOINT"
         },
         {
-            "path": "azurE_COSMOSDB_URL",
+            "path": "AZURE_COSMOSDB_URL",
             "env_var": "COSMOSDB_URL"
         },
         {
-            "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
+            "path": "AZURE_COSMOSDB_LOG_DATABASE_NAME",
             "env_var": "COSMOSDB_LOG_DATABASE_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_LOG_CONTAINER_NAME",
+            "path": "AZURE_COSMOSDB_LOG_CONTAINER_NAME",
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
+            "path": "AZURE_COSMOSDB_TAGS_DATABASE_NAME",
             "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
+            "path": "AZURE_COSMOSDB_TAGS_CONTAINER_NAME",
             "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
         },
         {
-            "path": "enrichmenT_ENDPOINT",
+            "path": "AzureWebJobsStorage",
+            "env_var": "AzureWebJobsStorage"
+        },
+        {
+            "path": "ENRICHMENT_ENDPOINT",
             "env_var": "ENRICHMENT_ENDPOINT"
         },
         {
-            "path": "enrichmenT_NAME",
+            "path": "ENRICHMENT_NAME",
             "env_var": "ENRICHMENT_NAME"
         },
         {
-            "path": "targeT_TRANSLATION_LANGUAGE",
+            "path": "TARGET_TRANSLATION_LANGUAGE",
             "env_var": "TARGET_TRANSLATION_LANGUAGE"
         },
         {
-            "path": "enablE_DEV_CODE",
+            "path": "ENABLE_DEV_CODE",
             "env_var": "ENABLE_DEV_CODE"
         },
         {
-            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "path": "BLOB_STORAGE_ACCOUNT_ENDPOINT",
             "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
         },
         {
-            "path": "azurE_LOCATION",
+            "path": "AZURE_LOCATION",
             "env_var": "ENRICHMENT_LOCATION"
         },
         {
-            "path": "azurE_SEARCH_INDEX",
+            "path": "AZURE_SEARCH_INDEX",
             "env_var": "AZURE_SEARCH_INDEX"
         },
         {
-            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "path": "AZURE_SEARCH_SERVICE_ENDPOINT",
             "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
         },
         {
-            "path": "deploymenT_KEYVAULT_NAME",
+            "path": "DEPLOYMENT_KEYVAULT_NAME",
             "env_var": "DEPLOYMENT_KEYVAULT_NAME"
         }
     ] 

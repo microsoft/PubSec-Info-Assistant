@@ -16,45 +16,45 @@ build-deploy-enrichments: build extract-env deploy-enrichments ##Build and Deplo
 build-deploy-functions: build extract-env deploy-functions ##Build and Deploy the Functions
 
 build: ## Build application code
-	@./scripts-tf/build.sh
+	@./scripts/build.sh
 
 build-containers: extract-env
 	@./app/enrichment/docker-build.sh
 
 infrastructure: check-subscription ## Deploy infrastructure
-	@./scripts-tf/inf-create.sh
+	@./scripts/inf-create.sh
 
 extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
-	 @./scripts-tf/json-to-env.sh < inf_output.json > ./scripts-tf/environments/infrastructure.env
+	 @./scripts/json-to-env.sh < inf_output.json > ./scripts/environments/infrastructure.env
 
 deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
-	@./scripts-tf/deploy-webapp.sh
+	@./scripts/deploy-webapp.sh
 
 deploy-functions: extract-env ## Deploys the function code to Azure Function Host
-	@./scripts-tf/deploy-functions.sh
+	@./scripts/deploy-functions.sh
 
 deploy-enrichments: extract-env ## Deploys the web app code to Azure App Service
-	@./scripts-tf/deploy-enrichment-webapp.sh
+	@./scripts/deploy-enrichment-webapp.sh
 
 deploy-search-indexes: extract-env ## Deploy search indexes
-	@./scripts-tf/deploy-search-indexes.sh
+	@./scripts/deploy-search-indexes.sh
 
 extract-env-debug-webapp: ## Extract infrastructure.debug.env file from BICEP output
-	@./scripts-tf/json-to-env.webapp.debug.sh < inf_output.json > ./scripts-tf/environments/infrastructure.debug.env
+	@./scripts/json-to-env.webapp.debug.sh < inf_output.json > ./scripts/environments/infrastructure.debug.env
 
 extract-env-debug-functions: ## Extract local.settings.json to debug functions from BICEP output
-	@./scripts-tf/json-to-env.function.debug.sh < inf_output.json > ./functions/local.settings.json
+	@./scripts/json-to-env.function.debug.sh < inf_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
 check-subscription:
-	@./scripts-tf/check-subscription.sh 
+	@./scripts/check-subscription.sh 
 
 # CI rules (used by automated builds)
 take-dir-ownership:
 	@sudo chown -R vscode .
 
 destroy-inf: check-subscription
-	@./scripts-tf/inf-destroy.sh
+	@./scripts/inf-destroy.sh
 
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
-	@./scripts-tf/functional-tests.sh	
+	@./scripts/functional-tests.sh	

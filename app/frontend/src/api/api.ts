@@ -102,7 +102,8 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
         },
         body: JSON.stringify({
             timeframe: options.timeframe,
-            state: options.state as string
+            state: options.state as string,
+            folder: options.folder as string
             })
         });
     
@@ -113,6 +114,31 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
     const results: AllFilesUploadStatus = {statuses: parsedResponse};
     return results;
 }
+
+
+export async function getFolders(): Promise<string[]> {
+    const response = await fetch("/getfolders", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            })
+        });
+    
+    const parsedResponse: any = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    // Assuming parsedResponse is the array of strings (folder names) we want
+    // Check if it's actually an array and contains strings
+    if (Array.isArray(parsedResponse) && parsedResponse.every(item => typeof item === 'string')) {
+        return parsedResponse;
+    } else {
+        throw new Error("Invalid response format");
+    }
+}
+
 
 export async function retryFile(filePath: string): Promise<boolean> {
     const response = await fetch("/retryFile", {

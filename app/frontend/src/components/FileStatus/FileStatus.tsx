@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dropdown, DropdownMenuItemType, IDropdownOption, IDropdownStyles } from '@fluentui/react/lib/Dropdown';
 import { Stack } from "@fluentui/react";
 import { DocumentsDetailList, IDocument } from "./DocumentsDetailList";
 import { ArrowClockwise24Filled } from "@fluentui/react-icons";
 import { animated, useSpring } from "@react-spring/web";
-import { getAllUploadStatus, FileUploadBasicStatus, GetUploadStatusRequest, FileState } from "../../api";
+import { getAllUploadStatus, FileUploadBasicStatus, GetUploadStatusRequest, FileState, getFolders } from "../../api";
 
 import styles from "./FileStatus.module.css";
 
 const dropdownTimespanStyles: Partial<IDropdownStyles> = { dropdown: { width: 150 } };
 const dropdownFileStateStyles: Partial<IDropdownStyles> = { dropdown: { width: 200 } };
+const dropdownFoldertyles: Partial<IDropdownStyles> = { dropdown: { width: 200 } };
 
 const dropdownTimespanOptions = [
     { key: 'Time Range', text: 'End time range', itemType: DropdownMenuItemType.Header },
@@ -36,6 +37,7 @@ const dropdownFileStateOptions = [
     { key: FileState.THROTTLED, text: 'Throttled'},    
   ];
 
+
 interface Props {
     className?: string;
 }
@@ -43,6 +45,8 @@ interface Props {
 export const FileStatus = ({ className }: Props) => {
     const [selectedTimeFrameItem, setSelectedTimeFrameItem] = useState<IDropdownOption>();
     const [selectedFileStateItem, setSelectedFileStateItem] = useState<IDropdownOption>();
+    const [SelectedFolderItem, setSelectedFolderItem] = useState<IDropdownOption>();
+    const [folderOptions, setFolderOptions] = useState<IDropdownOption[]>([]);
     const [files, setFiles] = useState<IDocument[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -53,6 +57,10 @@ export const FileStatus = ({ className }: Props) => {
     const onFileStateChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption<any> | undefined): void => {
         setSelectedFileStateItem(item);
     };
+
+    const onFolderChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption<any> | undefined): void => {
+        setSelectedFolderItem(item);
+    };    
 
     const onFilesSorted = (items: IDocument[]): void => {
         setFiles(items);
@@ -84,13 +92,34 @@ export const FileStatus = ({ className }: Props) => {
 
         const request: GetUploadStatusRequest = {
             timeframe: timeframe,
-            state: selectedFileStateItem?.key == undefined ? FileState.All : selectedFileStateItem?.key as FileState
+            state: selectedFileStateItem?.key == undefined ? FileState.All : selectedFileStateItem?.key as FileState,
+            folder: SelectedFolderItem?.key == undefined ? 'Root' : SelectedFolderItem?.key as string
         }
         const response = await getAllUploadStatus(request);
         const list = convertStatusToItems(response.statuses);
         setIsLoading(false);
         setFiles(list);
     }
+
+    // Function to fetch unique folder names from Azure Blob Storage
+    const fetchFolders = async () => {
+        try {
+            // Replace this with the actual API call to Azure Blob Storage
+            //const folders = await getUniqueFoldersFromAzureBlobStorage();
+            const folders = await getFolders(); // Await the promise
+            const rootOption = { key: 'Root', text: 'Root' }; // Create the "ALL" option            
+            const folderDropdownOptions = [rootOption, ...folders.map((folder: string) => ({ key: folder, text: folder }))];
+            setFolderOptions(folderDropdownOptions);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    };
+
+    // Effect to fetch folders on mount
+    useEffect(() => {
+        fetchFolders();
+    }, []);
 
     function convertStatusToItems(fileList: FileUploadBasicStatus[]) {
         const items: IDocument[] = [];
@@ -153,6 +182,15 @@ export const FileStatus = ({ className }: Props) => {
                     styles={dropdownFileStateStyles}
                     aria-label="file state options for file statuses to be displayed"
                 />
+            <Dropdown
+                label="Folder:"
+                defaultSelectedKey={'Root'}
+                onChange={onFolderChange}
+                placeholder="Select folder"
+                options={folderOptions}
+                styles={dropdownFoldertyles}
+                aria-label="folder options for file statuses to be displayed"
+            />
             <div className={styles.refresharea} onClick={onGetStatusClick} aria-label="Refresh displayed file statuses">
                 <ArrowClockwise24Filled className={styles.refreshicon} />
                 <span className={styles.refreshtext}>Refresh</span>

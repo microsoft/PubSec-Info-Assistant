@@ -30,3 +30,4 @@ export TF_VAR_chatWarningBannerText=$CHAT_WARNING_BANNER_TEXT
 export TF_VAR_cuaEnabled=$ENABLE_CUSTOMER_USAGE_ATTRIBUTION
 export TF_VAR_cuaId=$CUSTOMER_USAGE_ATTRIBUTION_ID
 export TF_VAR_enableDevCode=$ENABLE_DEV_CODE
+export TF_VAR_video_indexer_api_version=$VIDEO_INDEXER_API_VERSION

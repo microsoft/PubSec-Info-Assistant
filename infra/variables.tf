@@ -50,10 +50,21 @@ variable "requireWebsiteSecurityMembership" {
 ////
 // variables that can vary based on the Azure environment being targeted
 ////
+variable "azure_environment" {
+  type        = string
+  default     = "AzureCloud"
+  description = "The Azure Environemnt to target. More info can be found at https://docs.microsoft.com/en-us/cli/azure/manage-clouds-azure-cli?toc=/cli/azure/toc.json&bc=/cli/azure/breadcrumb/toc.json. Defaults to value for 'AzureCloud'"
+}
+
 variable "webAppSuffix" {
   type        = string
 }
 
+variable "arm_template_schema_mgmt_api" {
+  type        = string
+  default     = "https://schema.management.azure.com"
+  description = "The URI root for ARM template Management API. Defaults to value for 'AzureCloud'"
+}
 ////
 
 ////
@@ -375,6 +386,11 @@ variable "embeddingsQueue" {
 variable "applicationtitle" {
   type    = string
   default = ""
+}
+
+variable "video_indexer_api_version" {
+  type = string
+  default = "2024-01-01"
 }
 
 variable "enableDevCode" {

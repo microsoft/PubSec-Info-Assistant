@@ -337,6 +337,17 @@ module "functions" {
   ]
 }
 
+module "video_indexer" {
+  source                              = "./core/videoindexer"
+  location                            = azurerm_resource_group.rg.location
+  resource_group_name                 = azurerm_resource_group.rg.name
+  subscription_id                     = data.azurerm_client_config.current.subscription_id
+  random_string                       = random_string.random.result
+  tags                                = local.tags
+  azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
+  arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
+  video_indexer_api_version           = var.video_indexer_api_version
+}
 
 // USER ROLES
 module "userRoles" {
@@ -351,12 +362,16 @@ module "userRoles" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
+data "azurerm_resource_group" "existing" {
+  count = var.useExistingAOAIService ? 1 : 0
+  name  = var.azureOpenAIResourceGroup
+}
 
 # # // SYSTEM IDENTITY ROLES
 module "openAiRoleBackend" {
   source = "./core/security/role"
 
-  scope            = azurerm_resource_group.rg.id
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
   principalId      = module.backend.identityPrincipalId
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType    = "ServicePrincipal"
@@ -397,16 +412,25 @@ module "storageRoleFunc" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-# // MANAGEMENT SERVICE PRINCIPAL ROLES
-data "azurerm_resource_group" "existing" {
-  count = var.useExistingAOAIService ? 1 : 0
-  name  = var.azureOpenAIResourceGroup
+module "aviRoleBackend" {
+  source = "./core/security/role"
+
+  scope           = module.video_indexer.vi_id
+  principalId     = module.backend.identityPrincipalId
+  roleDefinitionId = local.azure_roles.Contributor
+  principalType   = "ServicePrincipal"
+  subscriptionId  = data.azurerm_client_config.current.subscription_id
+  resourceGroupId = azurerm_resource_group.rg.id 
 }
 
+# // MANAGEMENT SERVICE PRINCIPAL ROLES
 module "openAiRoleMgmt" {
   source = "./core/security/role"
-  scope = var.useExistingAOAIService && !var.isGovCloudDeployment ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId     = module.entraObjects.azure_ad_mgmt_sp_id 
+  # If running under automation, the principalId is the same as the webapp and this will result in a duplicate assignment.
+  # When not under automation, the principalId will be unique between the webapp and mgmt service principals. 
+  count = module.entraObjects.azure_ad_web_app_client_id == module.entraObjects.azure_ad_mgmt_app_client_id ? 0 : 1
+  scope = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId     = module.entraObjects.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id

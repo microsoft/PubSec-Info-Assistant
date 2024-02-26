@@ -85,6 +85,10 @@ export type GetUploadStatusRequest = {
     folder: string
 }
 
+export type DeleteItemRequest = {
+    path: string
+}
+
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
 export const enum FileState {

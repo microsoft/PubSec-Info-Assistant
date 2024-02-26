@@ -1,7 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner, StatusLogEntry, StatusLogResponse, ApplicationTitle, GetTagsResponse } from "./models";
+import { AskRequest, 
+    AskResponse, 
+    ChatRequest, 
+    BlobClientUrlResponse, 
+    AllFilesUploadStatus, 
+    GetUploadStatusRequest, 
+    GetInfoResponse, 
+    ActiveCitation, 
+    GetWarningBanner, 
+    StatusLogEntry, 
+    StatusLogResponse, 
+    ApplicationTitle, 
+    GetTagsResponse,
+    DeleteItemRequest
+    } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -113,6 +127,30 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
     }
     const results: AllFilesUploadStatus = {statuses: parsedResponse};
     return results;
+}
+
+export async function deleteItem(options: DeleteItemRequest): Promise<boolean> {
+    try {
+        const response = await fetch("/deleteItems", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                path: options.path
+            })
+        });
+        if (!response.ok) {
+            // If the response is not ok, throw an error
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.error || "Unknown error");
+        }
+        // If the response is ok, return true
+        return true;
+    } catch (error) {
+        console.error("Error during deleteItem:", error);
+        return false;
+    }
 }
 
 

@@ -185,7 +185,11 @@ chat_approaches = {
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["ENRICHMENT_ENDPOINT"],
                                     ENV["ENRICHMENT_KEY"]
-                                )
+                                ),
+    Approaches.ChatBingSearch: ChatBingSearch(
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"]
+    )
 }
 
 
@@ -219,12 +223,11 @@ async def chat(request: Request):
     json_body = await request.json()
     approach = json_body.get("approach")
     try:
-        # impl = chat_approaches.get(Approaches(int(approach)))
-        # if not impl:
-        #     return {"error": "unknown approach"}, 400
-        # r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
-        r = await ChatBingSearch().search(json_body.get("history", []), ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"], model_name)
-
+        impl = chat_approaches.get(Approaches(int(approach)))
+        if not impl:
+            return {"error": "unknown approach"}, 400
+        r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+       
         # To fix citation bug,below code is added.aparmar
         return {
                 "data_points": r["data_points"],
@@ -236,6 +239,39 @@ async def chat(request: Request):
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
+    
+@app.post("/bing")
+async def bing(request: Request):
+    """Chat with the bot using a given approach
+
+    Args:
+        request (Request): The incoming request object
+
+    Returns:
+        dict: The response containing the chat results
+
+    Raises:
+        dict: The error response if an exception occurs during the chat
+    """
+    json_body = await request.json()
+    approach = json_body.get("approach")
+    try:
+        impl = chat_approaches.get(Approaches(int(approach)))
+        if not impl:
+            return {"error": "unknown approach"}, 400
+        r = await impl.run(json_body.get("question", ""), json_body.get("raganswer", ""), json_body.get("compare", False))
+
+        # To fix citation bug,below code is added.aparmar
+        return {
+                "data_points": r["data_points"],
+                "answer": r["answer"],
+                "thoughts": r["thoughts"],
+                "citation_lookup": r["citation_lookup"],
+            }
+
+    except Exception as ex:
+        log.error(f"Error in bing api:: {ex}")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex    
 
 @app.get("/getblobclienturl")
 async def get_blob_client_url():

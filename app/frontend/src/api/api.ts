@@ -74,6 +74,28 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
     return parsedResponse;
 }
 
+export async function bingApi(question: string, raganswer: string, compare: boolean, approach: number): Promise<AskResponse> {
+    const response = await fetch("/bing", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            approach: approach,
+            question: question,
+            raganswer: raganswer,
+            compare: compare
+        })
+    });
+
+    const parsedResponse: AskResponse = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+   
+    return parsedResponse;
+}
+
 export function getCitationFilePath(citation: string): string {
     return `${encodeURIComponent(citation)}`;
 }

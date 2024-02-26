@@ -8,44 +8,28 @@ from web_search_client.models import SafeSearch
 from azure.core.credentials import AzureKeyCredential
 import openai
 from approaches.approach import Approach
+from core.messagebuilder import MessageBuilder
+from core.prompt_strings import PromptStrings
 
-SUBSCRIPTION_KEY = "b530d2f9ff574559aa1ceb2632e81653"
+SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
 
 class ChatBingSearch(Approach):
 
-
-    response_prompt_few_shots = [
-        {"role": Approach.USER ,'content': 'I am looking for information in source urls and its snippets'},
-        {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source urls and its snippets.'}
-    ]
-
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is Assistant who helps answer questions about an agency's data.
-    User persona is Assistant Answer ONLY with the facts listed in the list of sources below in english with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
-    Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
-    
-    Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [url1]. Do not combine sources, list each source separately, e.g. [url1][url2].
-    Never cite the source content using the examples provided in this paragraph that start with info.
-      
-    Here is how you should answer every question:
-        
-    -Look for information in the source documents to answer the question in english.
-    -If the source document has an answer, please respond with citation.You must include a citation to each document referenced only once when you find answer in source documents.      
-    -If you cannot find answer in below sources, respond with I am not sure.Do not provide personal opinions or assumptions and do not include citations.
-    -Identify the language of the user's question and translate the final response to that language.if the final answer is " I am not sure" then also translate it to the language of the user's question and then display translated response only. nothing else.    
-    """
-
     citations = {}
 
-    def __init__(self):
+    def __init__(self, model_name: str, chatgpt_deployment: str):
         self.name = "ChatBingSearch"
+        self.model_name = model_name
+        self.chatgpt_deployment = chatgpt_deployment
+        
 
-    async def search(self, history, chatgpt_deployment, model_name) -> Any:
+    async def run(self, question, raganswer, compare) -> Any:
 
-        user_query = history[-1]["user"]
-        resp = await self.web_search_with_answer_count_promote_and_safe_search(user_query, chatgpt_deployment, model_name, history)
+        user_query = question
+        resp = await self.web_search_with_answer_count_promote_and_safe_search(user_query, raganswer, compare)
 
 
         return {
@@ -56,7 +40,7 @@ class ChatBingSearch(Approach):
         }
     
 
-    async def web_search_with_answer_count_promote_and_safe_search(self, user_query, chatgpt_deployment, model_name, history):
+    async def web_search_with_answer_count_promote_and_safe_search(self, user_query, raganswer, compare):
         """ WebSearchWithAnswerCountPromoteAndSafeSearch.
         """
 
@@ -82,7 +66,7 @@ class ChatBingSearch(Approach):
                     # self.citations.append(page.url)
                     url_snippet_dict[page.url] = page.snippet.replace("[", "").replace("]", "")
 
-                return await self.make_chat_completion(url_snippet_dict, chatgpt_deployment, model_name, history)    
+                return await self.make_chat_completion(url_snippet_dict, raganswer, compare, user_query)    
 
             else:
                 print("Didn't see any Web data..")
@@ -90,32 +74,53 @@ class ChatBingSearch(Approach):
         except Exception as err:
             print("Encountered exception. {}".format(err))
 
-    async def make_chat_completion(self, url_snippet_dict, chatgpt_deployment, model_name, history):
+    async def make_chat_completion(self, url_snippet_dict, raganswer, compare, user_query):
+
+
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
 
-        messages = self.get_messages_from_history(
-            self.system_message_chat_conversation,
-            model_name,
-            history,
-            history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
-            self.response_prompt_few_shots,
+        messages = self.get_messages_builder(
+            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message"),
+            self.model_name,
+            user_query + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
+            PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get(self.__class__.__name__, "Default system message"),
              max_tokens=4097 - 500
          )
 
-        # messages = []
-        # for url, snippet in url_snippet_dict.items():
-        #     # message = f"{snippet}\nSource: {url}"
-        #     message = snippet
-        #     messages.append(message)
 
         chat_completion = await openai.ChatCompletion.acreate(
-            deployment_id=chatgpt_deployment,
-            model=model_name,
+            deployment_id=self.chatgpt_deployment,
+            model=self.model_name,
             messages=messages,
             temperature=0.6,
             n=1
         )
         return chat_completion.choices[0].message.content
+    
+    def get_messages_builder(
+        self,
+        system_prompt: str,
+        model_id: str,
+        user_conv: str,
+        few_shots = [dict[str, str]],
+        max_tokens: int = 4096,
+        ) -> []:
+        """
+        Construct a list of messages from the chat history and the user's question.
+        """
+        message_builder = MessageBuilder(system_prompt, model_id)
+
+        # Few Shot prompting. Add examples to show the chat what responses we want. It will try to mimic any responses and make sure they match the rules laid out in the system message.
+        for shot in few_shots:
+            message_builder.append_message(shot.get('role'), shot.get('content'))
+
+        user_content = user_conv
+        append_index = len(few_shots) + 1
+
+        message_builder.append_message(self.USER, user_content, index=append_index)
+
+        messages = message_builder.messages
+        return messages    
       
 
 

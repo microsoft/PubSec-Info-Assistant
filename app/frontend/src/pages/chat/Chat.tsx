@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator} from "@fluentui/react";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator, Icon } from "@fluentui/react";
 import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
 import { ITag } from '@fluentui/react/lib/Pickers';
 
@@ -10,7 +10,7 @@ import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
-import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn } from "../../api";
+import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, bingApi } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { ExampleList } from "../../components/Example";
@@ -50,6 +50,7 @@ const Chat = () => {
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isBingPrompt, setBingPrompt] = useState<boolean>(false);
     const [error, setError] = useState<unknown>();
 
     const [activeCitation, setActiveCitation] = useState<string>();
@@ -92,11 +93,34 @@ const Chat = () => {
                 }
             };
             const result = await chatApi(request);
+            result.source = "chat";
             setAnswers([...answers, [question, result]]);
         } catch (e) {
             setError(e);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const makeBingRequest = async (question: string, raganswer: string, compare: boolean) => {
+        // lastQuestionRef.current = question;
+
+        error && setError(undefined);
+        setIsLoading(true);
+        setBingPrompt(true);
+        setActiveCitation(undefined);
+        setActiveAnalysisPanelTab(undefined);
+
+        try {
+            // const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
+            const result = await bingApi(question, raganswer, compare, Approaches.BingSearch,);
+            result.source = "bing";
+            setAnswers([...answers, [question, result]]);
+        } catch (e) {
+            setError(e);
+        } finally {
+            setIsLoading(false);
+            setBingPrompt(false);
         }
     };
 
@@ -124,7 +148,7 @@ const Chat = () => {
                     default:
                         //do nothing
                         break;
-                }                
+                }
             }
             else {
                 switch (node.value) {
@@ -163,7 +187,7 @@ const Chat = () => {
                     default:
                         //do nothing
                         break;
-                }                
+                }
             }
             else {
                 switch (node.value) {
@@ -253,7 +277,7 @@ const Chat = () => {
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
                             <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your private data</h1>
                             <span className={styles.chatEmptyObjectives}>
-                                The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components 
+                                The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components
                                 to enable you to <b>Chat</b> (Have a conversation) with your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
                             </span>
                             <span className={styles.chatEmptyObjectivesList}>
@@ -277,15 +301,15 @@ const Chat = () => {
                                     <PersonStarFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Person Star icon" />
                                     <span className={styles.chatEmptyObjectivesListItemText}>Personalized: Responses should be tailored to your personal settings you <b>Adjust</b> to</span>
                                 </span>
-                                <span className={styles.chatEmptyObjectivesListItem}> 
+                                <span className={styles.chatEmptyObjectivesListItem}>
                                     <TextBulletListSquareSparkleFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Text Bullet List Square Sparkle icon" />
                                     <span className={styles.chatEmptyObjectivesListItemText}>Explainable: Each response should include details on the <b>Thought Process</b> that was used</span>
                                 </span>
                             </span>
                             <span className={styles.chatEmptyObjectives}>
-                                <i>Though the Accelerator is focused on the key areas above, human oversight to confirm accuracy is crucial. 
-                                All responses from the system must be verified with the citations provided. 
-                                The responses are only as accurate as the data provided.</i>
+                                <i>Though the Accelerator is focused on the key areas above, human oversight to confirm accuracy is crucial.
+                                    All responses from the system must be verified with the citations provided.
+                                    The responses are only as accurate as the data provided.</i>
                             </span>
                             <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
                             <ExampleList onExampleClicked={onExampleClicked} />
@@ -294,7 +318,10 @@ const Chat = () => {
                         <div className={styles.chatMessageStream}>
                             {answers.map((answer, index) => (
                                 <div key={index}>
-                                    <UserChatMessage message={answer[0]} />
+                                    <UserChatMessage
+                                        message={answer[0]}
+                                        iconName={answer[1].source === "bing" ? "BingLogo" : undefined}
+                                    />
                                     <div className={styles.chatMessageGpt}>
                                         <Answer
                                             key={index}
@@ -306,14 +333,19 @@ const Chat = () => {
                                             onFollowupQuestionClicked={q => makeApiRequest(q)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                                            onRegenerateClick={() => makeApiRequest(answers[index][0])}
+                                            onRegenerateClick={() => answer[1].source === "bing" ? makeBingRequest(answers[index][0], answer[1].answer, false) : makeApiRequest(answers[index][0])}
+                                            onBingSearchClicked={() => makeBingRequest(answers[index][0], answer[1].answer, false)}
+                                            onBingCompareClicked={() => makeBingRequest(answers[index][0], answer[1].answer, true)}
                                         />
                                     </div>
                                 </div>
                             ))}
                             {isLoading && (
                                 <>
-                                    <UserChatMessage message={lastQuestionRef.current} />
+                                    <UserChatMessage
+                                        message={lastQuestionRef.current}
+                                        iconName={isBingPrompt ? "BingLogo" : undefined}
+                                    />
                                     <div className={styles.chatMessageGptMinWidth}>
                                         <AnswerLoading />
                                     </div>
@@ -368,27 +400,27 @@ const Chat = () => {
                     onRenderFooterContent={() => <DefaultButton onClick={() => setIsConfigPanelOpen(false)}>Close</DefaultButton>}
                     isFooterAtBottom={true}
                 >
-                            <SpinButton
-                                className={styles.chatSettingsSeparator}
-                                label="Retrieve this many documents from search:"
-                                min={1}
-                                max={50}
-                                defaultValue={retrieveCount.toString()}
-                                onChange={onRetrieveCountChange}
-                            />
-                            <Checkbox
-                                className={styles.chatSettingsSeparator}
-                                checked={useSuggestFollowupQuestions}
-                                label="Suggest follow-up questions"
-                                onChange={onUseSuggestFollowupQuestionsChange}
-                            />
-                            <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
-                            <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
-                            <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength}/>
-                            <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp}/>
-                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
-                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders}/>
-                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags}/>
+                    <SpinButton
+                        className={styles.chatSettingsSeparator}
+                        label="Retrieve this many documents from search:"
+                        min={1}
+                        max={50}
+                        defaultValue={retrieveCount.toString()}
+                        onChange={onRetrieveCountChange}
+                    />
+                    <Checkbox
+                        className={styles.chatSettingsSeparator}
+                        checked={useSuggestFollowupQuestions}
+                        label="Suggest follow-up questions"
+                        onChange={onUseSuggestFollowupQuestionsChange}
+                    />
+                    <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
+                    <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
+                    <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength} />
+                    <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp} />
+                    <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                    <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders} />
+                    <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags} />
                 </Panel>
 
                 <Panel
@@ -399,9 +431,9 @@ const Chat = () => {
                     closeButtonAriaLabel="Close"
                     onRenderFooterContent={() => <DefaultButton onClick={() => setIsInfoPanelOpen(false)}>Close</DefaultButton>}
                     isFooterAtBottom={true}                >
-                        <div className={styles.resultspanel}>
-                            <InfoContent/>
-                        </div>
+                    <div className={styles.resultspanel}>
+                        <InfoContent />
+                    </div>
                 </Panel>
             </div>
         </div>

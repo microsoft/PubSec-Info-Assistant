@@ -18,7 +18,7 @@ type CitationLookup = Record<string, {
     page_number: string;
 }>;
 
-export function parseAnswerToHtml(answer: string, citation_lookup: CitationLookup, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
+export function parseAnswerToHtml(answer: string, source: string, citation_lookup: CitationLookup, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
     const citations: string[] = [];
     // const sourceFiles: {} = {};
     const sourceFiles: Record<string, string> = {};
@@ -42,6 +42,7 @@ export function parseAnswerToHtml(answer: string, citation_lookup: CitationLooku
             // Even parts are just text
             return part;
         } else {
+
             // Odd parts are citations as the "FileX" moniker
             const citation = citation_lookup[part];
 
@@ -52,18 +53,17 @@ export function parseAnswerToHtml(answer: string, citation_lookup: CitationLooku
                 return "";
             }
             else {
-                console.log("CITATION: "+citation.citation)
-                if (citation.citation.startsWith("http")) {
-                    return renderToStaticMarkup(
-                        <a href={citation.citation} target="_blank" rel="noopener noreferrer">
-                            {citation.citation}
-                        </a>
-                    );
-                }
+                console.log("CITATION: "+ citation.citation)
+                let isBing = source === "bing";
                 let citationIndex: number;
+                let citationShortName: string
                 // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                 // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                let citationShortName: string = (citation_lookup)[part].citation.split("/").slice(4).join("/");
+                if (isBing){
+                    citationShortName = new URL(citation.citation).hostname;
+                }else{
+                    citationShortName = (citation_lookup)[part].citation.split("/").slice(4).join("/");
+                }
 
                 // Check if the citationShortName is already in the citations array
                 if (citations.includes(citationShortName)) {
@@ -74,7 +74,7 @@ export function parseAnswerToHtml(answer: string, citation_lookup: CitationLooku
                     // switch these to the citationShortName as key to allow dynamic lookup of the source path and page number
                     // The "FileX" moniker will not be used beyond this point in the UX code
                     sourceFiles[citationShortName] = citation.source_path;
-                    // pageNumbers[citationShortName] = citation.page_number;
+                    citationIndex = citations.length;
 
                     // Check if the page_number property is a valid number.
                     if (!isNaN(Number(citation.page_number))) {
@@ -85,7 +85,13 @@ export function parseAnswerToHtml(answer: string, citation_lookup: CitationLooku
                         // The page_number property is not a valid number, but we still generate a citation.
                         pageNumbers[citationShortName] = NaN;
                     }
-                    citationIndex = citations.length;
+                }
+                if (isBing) {
+                    return renderToStaticMarkup(
+                        <a className="supContainer" title={citationShortName} href={citation.citation} target="_blank" rel="noopener noreferrer">
+                            <sup>{citationIndex}</sup>
+                        </a>
+                    );
                 }
                 const path = getCitationFilePath(citation.citation);
                 const sourcePath = citation.source_path;

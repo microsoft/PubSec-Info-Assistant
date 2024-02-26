@@ -5,7 +5,8 @@ export const enum Approaches {
     RetrieveThenRead = 0,
     ReadRetrieveRead = 1,
     ReadDecomposeAsk = 2,
-    BingSearch = 4
+    BingSearch = 4,
+    BingSearchCompare = 5
 }
 
 export type AskRequestOverrides = {

@@ -102,7 +102,7 @@ const Chat = () => {
         }
     };
 
-    const makeBingRequest = async (question: string, raganswer: string, compare: boolean) => {
+    const makeBingRequest = async (question: string, compare: boolean) => {
         // lastQuestionRef.current = question;
 
         error && setError(undefined);
@@ -112,8 +112,14 @@ const Chat = () => {
         setActiveAnalysisPanelTab(undefined);
 
         try {
-            // const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
-            const result = await bingApi(question, raganswer, compare, Approaches.BingSearch,);
+            const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
+            const request: ChatRequest = {
+                history: [...history, { user: question, bot: undefined }],
+                approach: compare ? Approaches.BingSearchCompare :Approaches.BingSearch
+            };
+            // const result = await bingApi(question, compare, Approaches.BingSearch,);
+            //const result = await bingApi(request);
+            const result = await chatApi(request);
             result.source = "bing";
             setAnswers([...answers, [question, result]]);
         } catch (e) {
@@ -333,9 +339,9 @@ const Chat = () => {
                                             onFollowupQuestionClicked={q => makeApiRequest(q)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                                            onRegenerateClick={() => answer[1].source === "bing" ? makeBingRequest(answers[index][0], answer[1].answer, false) : makeApiRequest(answers[index][0])}
-                                            onBingSearchClicked={() => makeBingRequest(answers[index][0], answer[1].answer, false)}
-                                            onBingCompareClicked={() => makeBingRequest(answers[index][0], answer[1].answer, true)}
+                                            onRegenerateClick={() => answer[1].source === "bing" ? makeBingRequest(answers[index][0], false) : makeApiRequest(answers[index][0])}
+                                            onBingSearchClicked={() => makeBingRequest(answers[index][0], false)}
+                                            onBingCompareClicked={() => makeBingRequest(answers[index][0], true)}
                                         />
                                     </div>
                                 </div>

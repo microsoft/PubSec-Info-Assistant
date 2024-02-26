@@ -12,6 +12,7 @@ class Approaches(Enum):
     ReadDecomposeAsk = 2
     GPTDirect = 3
     ChatBingSearch = 4
+    ChatBingSearchCompare = 5
 
 class Approach:
     """

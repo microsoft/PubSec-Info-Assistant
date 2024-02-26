@@ -74,17 +74,15 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
     return parsedResponse;
 }
 
-export async function bingApi(question: string, raganswer: string, compare: boolean, approach: number): Promise<AskResponse> {
-    const response = await fetch("/bing", {
+export async function bingApi(options: ChatRequest): Promise<AskResponse> {
+    const response = await fetch("/chat", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            approach: approach,
-            question: question,
-            raganswer: raganswer,
-            compare: compare
+            history: options.history,
+            approach: options.approach
         })
     });
 

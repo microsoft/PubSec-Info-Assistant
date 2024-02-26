@@ -16,22 +16,24 @@ ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
 
-class ChatBingSearch(Approach):
+class ChatBingSearchCompare(Approach):
 
     citations = {}
     approach_class = ""
 
     def __init__(self, model_name: str, chatgpt_deployment: str):
-        self.name = "ChatBingSearch"
+        self.name = "ChatBingSearchCompare"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
         
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:  
 
         user_query = history[-1].get("user")
+        rag_answer = history[-1].get("bot")
 
-        resp = await self.web_search_with_answer_count_promote_and_safe_search(user_query)
+        resp = await self.web_search_with_answer_count_promote_and_safe_search(user_query, rag_answer)
+
 
         return {
             "data_points": None,
@@ -41,7 +43,7 @@ class ChatBingSearch(Approach):
         }
     
 
-    async def web_search_with_answer_count_promote_and_safe_search(self, user_query):
+    async def web_search_with_answer_count_promote_and_safe_search(self, user_query, raganswer):
         """ WebSearchWithAnswerCountPromoteAndSafeSearch.
         """
 
@@ -64,10 +66,10 @@ class ChatBingSearch(Approach):
                         "source_path": "",
                         "page_number": "0",
                     }
-
+                    # self.citations.append(page.url)
                     url_snippet_dict[page.url] = page.snippet.replace("[", "").replace("]", "")
 
-                return await self.make_chat_completion(url_snippet_dict, user_query)    
+                return await self.make_chat_completion(url_snippet_dict, raganswer, user_query)    
 
             else:
                 print("Didn't see any Web data..")
@@ -75,11 +77,12 @@ class ChatBingSearch(Approach):
         except Exception as err:
             print("Encountered exception. {}".format(err))
 
-    async def make_chat_completion(self, url_snippet_dict, user_query):
+    async def make_chat_completion(self, url_snippet_dict, raganswer, user_query):
 
 
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
-        user_query += "Url Sources:\n" + content + "\n\n"
+        user_query += "Bing Results:\n" + content + "\n\n" + "Internal Documents:\n" + raganswer + "\n\n"
+              
 
         messages = self.get_messages_builder(
             PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message"),
@@ -88,6 +91,7 @@ class ChatBingSearch(Approach):
             PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get(self.__class__.__name__, "Default system message"),
              max_tokens=4097 - 500
          )
+
 
         chat_completion = await openai.ChatCompletion.acreate(
             deployment_id=self.chatgpt_deployment,

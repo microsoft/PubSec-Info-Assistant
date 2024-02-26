@@ -2,14 +2,15 @@
 
 // Create Enrichment App Service Plan 
 resource "azurerm_service_plan" "appServicePlan" {
-  name                = var.plan_name
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  sku_name = var.sku["size"]
-  worker_count = var.sku["capacity"]
-  os_type = "Linux"
-
-  tags = var.tags
+  name                          = var.plan_name
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  sku_name                      = var.sku["size"]
+  worker_count                  = var.sku["capacity"]
+  os_type                       = "Linux"
+  tags                          = var.tags
+  per_site_scaling_enabled      = false
+  zone_balancing_enabled        = false
 }
 
 resource "azurerm_monitor_autoscale_setting" "scaleout" {
@@ -70,18 +71,23 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 
 # Create the Enrichment App Service
 resource "azurerm_linux_web_app" "app_service" {
-  name                = var.name
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  service_plan_id = azurerm_service_plan.appServicePlan.id
-  https_only          = true
-  tags                = var.tags
-
+  name                                            = var.name
+  location                                        = var.location
+  resource_group_name                             = var.resourceGroupName
+  service_plan_id                                 = azurerm_service_plan.appServicePlan.id
+  https_only                                      = true
+  tags                                            = var.tags
+  webdeploy_publish_basic_authentication_enabled  = false
+  client_affinity_enabled                         = false
+  enabled                                         = true
   site_config {
-    app_command_line  = var.appCommandLine
     always_on         = var.alwaysOn
+    app_command_line  = var.appCommandLine
     ftps_state        = var.ftpsState
     health_check_path = var.healthCheckPath
+    http2_enabled     = true
+    use_32_bit_worker = false
+    worker_count      = 1
     application_stack {
       python_version = "3.10"
     }
@@ -104,7 +110,7 @@ resource "azurerm_linux_web_app" "app_service" {
   )
 
   identity {
-    type = var.managedIdentity ? "SystemAssigned" : "None"
+    type = var.managedIdentity ? "SystemAssigned" : null
   }
 }
 

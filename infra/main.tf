@@ -79,6 +79,7 @@ module "enrichmentApp" {
   managedIdentity                           = true
   logAnalyticsWorkspaceResourceId           = module.logging.logAnalyticsId
   applicationInsightsConnectionString       = module.logging.applicationInsightsConnectionString
+  alwaysOn                                  = true
   healthCheckPath                           = "/health"
   appCommandLine                            = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
   keyVaultUri                               = module.kvModule.keyVaultUri

@@ -93,7 +93,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 console.error("Error retrying file:", error);
             });
     }
-
     
     // Initialize Selection with items
     useEffect(() => {
@@ -109,7 +108,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             })));
         }
     }));
-
     
     // Function to handle the delete button click
     const handleDeleteClick = () => {
@@ -124,7 +122,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             const response = deleteItem(request);
         });
     };
-
     
     // Function to handle the resubmit button click
     const handleResubmitClick = () => {

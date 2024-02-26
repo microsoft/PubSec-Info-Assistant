@@ -107,7 +107,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 ...item,
                 isSelected: selectedIndices.has(index)
             })));
-            checkSelectAllState();
         }
     }));
 
@@ -141,29 +140,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         });
     };
     
-    const checkSelectAllState = () => {
-        const areAllSelected = selectionRef.current.count > 0 && selectionRef.current.count === items.length;
-        setSelectAllChecked(areAllSelected);
-    };
-    
-    const [selectAllChecked, setSelectAllChecked] = useState(false);
-
-    useEffect(() => {
-        // Ensure that the select all checkbox is in the correct state when items change
-        setSelectAllChecked(selectionRef.current.count > 0 && selectionRef.current.count === items.length);
-    }, [items]);
-    
-    useEffect(() => {
-        selectionRef.current.setItems(itemList, false);
-        checkSelectAllState(); // Update the select all checkbox state
-    }, [itemList]);
-
-
-    const toggleSelectAll = (checked: boolean) => {
-        setSelectAllChecked(checked);
-        selectionRef.current.setAllSelected(checked);
-    };
-
     const [columns, setColumns] = useState<IColumn[]> ([
         {
             key: 'file_type',

@@ -354,7 +354,7 @@ async def delete_Items(request: Request):
         blob_container.delete_blob(path)
 
     except Exception as ex:
-        log.exception("Exception in /getfolders")
+        log.exception("Exception in /delete_Items")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
 

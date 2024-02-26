@@ -359,6 +359,40 @@ async def delete_Items(request: Request):
     return True
 
 
+@app.post("/resubmitItems")
+async def resubmit_Items(request: Request):
+    """
+    Resubmit a blob.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique folders.
+    """
+    json_body = await request.json()
+    path = json_body.get("path")
+    # remove the container prefix
+    path = path.split("/", 1)[1]
+    try:
+        blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        # Read the blob content into memory
+        blob_data = blob_container.download_blob(path).readall()
+        # Overwrite the blob with the modified data
+        blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
+        statusLog.upsert_document(document_path=path,
+                    status='Resubmitted to the processing pipeline',
+                    status_classification=StatusClassification.INFO,
+                    state=State.QUEUED,
+                    fresh_start=False)
+        statusLog.save_document(document_path=path)   
+
+    except Exception as ex:
+        log.exception("Exception in /delete_Items")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return True
+
+
 @app.post("/gettags")
 async def get_tags(request: Request):
     """
@@ -531,9 +565,14 @@ async def retryFile(request: Request):
 
         if blob.exists():
             raw_file = blob.download_blob().readall()
-
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+            statusLog.upsert_document(document_path=filePath,
+                        status='Resubmitted to the processing pipeline',
+                        status_classification=StatusClassification.INFO,
+                        state=State.QUEUED,
+                        fresh_start=False)
+            statusLog.save_document(document_path=filePath)   
 
     except Exception as ex:
         logging.exception("Exception in /retryFile")

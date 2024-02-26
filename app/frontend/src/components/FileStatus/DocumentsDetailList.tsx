@@ -15,7 +15,7 @@ import { DetailsList,
     Button } from "@fluentui/react";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
-import { deleteItem, DeleteItemRequest } from "../../api";
+import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 
 export interface IDocument {
     key: string;
@@ -126,6 +126,21 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         });
     };
 
+    
+    // Function to handle the resubmit button click
+    const handleResubmitClick = () => {
+        const selectedItems = selectionRef.current.getSelection() as IDocument[];
+        console.log("Items to resubmit:", selectedItems); // Debug log
+        selectedItems.forEach(item => {
+            console.log(`Resubmitting item: ${item.name}`);
+            // delete this item
+            const request: ResubmitItemRequest = {
+                path: item.filePath
+            }
+            const response = resubmitItem(request);
+        });
+    };
+    
     const checkSelectAllState = () => {
         const areAllSelected = selectionRef.current.count > 0 && selectionRef.current.count === items.length;
         setSelectAllChecked(areAllSelected);
@@ -195,7 +210,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onRender: (item: IDocument) => (  
                 <TooltipHost content={`${item.state} `}>  
                     <span>{item.state}</span>  
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}  
                 </TooltipHost>  
             ), 
             isPadded: true,
@@ -210,12 +225,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for folder, Press to sort by folder',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => (  
-                <TooltipHost content={`${item.state} `}>  
-                    <span>{item.filePath.split('/').slice(1, -1).join('/')}</span>  
-                    {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
-                </TooltipHost>  
-            ), 
+            onRender: (item: IDocument) => {
+                return <span>{item.filePath}</span>;
+            },
             isPadded: true,
         },
         {
@@ -289,6 +301,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             />
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <Button text="Delete" onClick={handleDeleteClick} />
+            <Button text="Resubmit" onClick={handleResubmitClick} />
         </div>
     );
 }

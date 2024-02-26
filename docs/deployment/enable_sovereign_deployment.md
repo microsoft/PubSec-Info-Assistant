@@ -2,7 +2,7 @@
 
 Follow these steps to enable a Sovereign region deployment.  If you need access to AOAI in a UsGov region please fill out this form https://aka.ms/AOAIgovaccess.
 
-Only Sovereign regions supported today are **US Gov Virginia, US Gov Arizona**.
+Only Sovereign regions / models supported are listed here: https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#azure-government-regions
 
 ## Setup the environment
 

@@ -23,6 +23,7 @@ const dropdownTimespanOptions = [
     { key: '24hours', text: '24 hours' },
     { key: '7days', text: '7 days' },
     { key: '30days', text: '30 days' },
+    { key: '-1days', text: 'All' },
   ];
 
 const dropdownFileStateOptions = [
@@ -92,6 +93,9 @@ export const FileStatus = ({ className }: Props) => {
                 break;
             case "30days":
                 timeframe = 720;
+                break;
+            case "-1days":
+                timeframe = -1;
                 break;
             default:
                 timeframe = 4;

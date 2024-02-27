@@ -37,6 +37,8 @@ const dropdownFileStateOptions = [
     { key: FileState.Skipped, text: 'Skipped'},
     { key: FileState.UPLOADED, text: 'Uploaded'},
     { key: FileState.THROTTLED, text: 'Throttled'},    
+    { key: FileState.DELETING, text: 'Deleting'},  
+    { key: FileState.DELETED, text: 'Deleted'},  
   ];
 
 

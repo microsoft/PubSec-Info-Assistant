@@ -14,7 +14,8 @@ import { AskRequest,
     StatusLogResponse, 
     ApplicationTitle, 
     GetTagsResponse,
-    DeleteItemRequest
+    DeleteItemRequest,
+    ResubmitItemRequest
     } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
@@ -132,6 +133,31 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
 export async function deleteItem(options: DeleteItemRequest): Promise<boolean> {
     try {
         const response = await fetch("/deleteItems", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                path: options.path
+            })
+        });
+        if (!response.ok) {
+            // If the response is not ok, throw an error
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.error || "Unknown error");
+        }
+        // If the response is ok, return true
+        return true;
+    } catch (error) {
+        console.error("Error during deleteItem:", error);
+        return false;
+    }
+}
+
+
+export async function resubmitItem(options: ResubmitItemRequest): Promise<boolean> {
+    try {
+        const response = await fetch("/resubmitItems", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -111,6 +111,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         }
     }));
     
+
+    // *************************************************************
+    // Delete processing
     // New state for managing dialog visibility and selected items
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [selectedItemsForDeletion, setSelectedItemsForDeletion] = useState<IDocument[]>([]);
@@ -141,19 +144,42 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         showDeleteConfirmation();
     };
 
-    // Function to handle the resubmit button click
-    const handleResubmitClick = () => {
+
+    // *************************************************************
+    // Resubmit processing
+    // New state for managing resubmit dialog visibility and selected items
+    const [isResubmitDialogVisible, setIsResubmitDialogVisible] = useState(false);
+    const [selectedItemsForResubmit, setSelectedItemsForResubmit] = useState<IDocument[]>([]);
+
+    // Function to open the resubmit dialog with selected items
+    const showResubmitConfirmation = () => {
         const selectedItems = selectionRef.current.getSelection() as IDocument[];
-        console.log("Items to resubmit:", selectedItems); // Debug log
-        selectedItems.forEach(item => {
+        setSelectedItemsForResubmit(selectedItems);
+        setIsResubmitDialogVisible(true);
+    };
+
+    // Function to handle actual resubmission
+    const handleResubmit = () => {
+        setIsResubmitDialogVisible(false);
+        console.log("Items to resubmit:", selectedItemsForResubmit);
+        selectedItemsForResubmit.forEach(item => {
             console.log(`Resubmitting item: ${item.name}`);
-            // delete this item
+            // resubmit this item
             const request: ResubmitItemRequest = {
                 path: item.filePath
             }
             const response = resubmitItem(request);
         });
     };
+
+    // Function to handle the resubmit button click
+    const handleResubmitClick = () => {
+        showResubmitConfirmation();
+    };
+
+
+
+
     
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -310,6 +336,25 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 <DialogFooter>
                     <PrimaryButton onClick={handleDelete} text="Delete" />
                     <DefaultButton onClick={() => setIsDialogVisible(false)} text="Cancel" />
+                </DialogFooter>
+            </Dialog>
+                        {/* Dialog for resubmit confirmation */}
+                        <Dialog
+                hidden={!isResubmitDialogVisible}
+                onDismiss={() => setIsResubmitDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'Resubmit Confirmation',
+                    subText: 'Are you sure you want to resubmit the selected items?'
+                }}
+                modalProps={{
+                    isBlocking: true,
+                    styles: { main: { maxWidth: 450 } }
+                }}
+            >
+                <DialogFooter>
+                    <PrimaryButton onClick={handleResubmit} text="Resubmit" />
+                    <DefaultButton onClick={() => setIsResubmitDialogVisible(false)} text="Cancel" />
                 </DialogFooter>
             </Dialog>
         </div>

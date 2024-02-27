@@ -83,7 +83,7 @@ class ChatReadRetrieveReadApproach(Approach):
     def __init__(
         self,
         search_client: SearchClient,
-        oai_service_name: str,
+        oai_endpoint: str,
         oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
@@ -118,13 +118,14 @@ class ChatReadRetrieveReadApproach(Approach):
         self.target_translation_language=target_translation_language
         self.enrichment_endpoint=enrichment_endpoint
         self.enrichment_key=enrichment_key
+        self.oai_endpoint=oai_endpoint
 
         if is_gov_cloud_deployment:
             self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.us'
         else:
             self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.net'
 
-        openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
+        openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 

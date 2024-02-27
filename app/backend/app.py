@@ -41,6 +41,7 @@ ENV = {
     "AZURE_SEARCH_INDEX": "gptkbindex",
     "AZURE_OPENAI_SERVICE": "myopenai",
     "AZURE_OPENAI_RESOURCE_GROUP": "",
+    "AZURE_OPENAI_ENDPOINT": "",
     "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "gpt-35-turbo-16k",
     "AZURE_OPENAI_CHATGPT_MODEL_NAME": "",
     "AZURE_OPENAI_CHATGPT_MODEL_VERSION": "",
@@ -95,8 +96,8 @@ azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"]
 
 # Used by the OpenAI SDK
 openai.api_type = "azure"
-openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
-openai.api_version = "2023-06-01-preview"
+openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
+openai.api_version = "2023-12-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
@@ -166,7 +167,7 @@ else:
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
                                     search_client,
-                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
                                     ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],

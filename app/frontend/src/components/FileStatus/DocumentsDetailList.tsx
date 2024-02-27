@@ -17,7 +17,7 @@ import { DetailsList,
 
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
-import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
+import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest, getStateDetail, StatusItemRequest } from "../../api";
 
 export interface IDocument {
     key: string;
@@ -202,6 +202,48 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     };
     
 
+    // ********************************************************************
+    // State detail dialog
+    const [stateDialogVisible, setStateDialogVisible] = useState(false);
+    const [stateDialogContent, setStateDialogContent] = useState("");
+    
+    const getTextForState = async (item: IDocument): Promise<string> => {
+        try {
+            console.log("Retrieving state of:", item);
+            const request: StatusItemRequest = {
+                path: item.filePath
+            };
+
+            const response = await getStateDetail(request);
+            // Check if the response array is empty
+            if (response.length > 0) {
+                const status_detail: string = response[0];
+                const status_detail_json = JSON.parse(status_detail); // Convert the string to a JSON object
+                return response;
+            } else {
+                // Handle the case where the response array is empty
+                throw new Error("Response array is empty");
+            }
+
+        } catch (error) {
+            console.error("Error retrieving state:", error);
+            // Return an error message or handle it as appropriate
+            throw error;
+        }
+    };
+
+    const onStateColumnClick = async (item: IDocument) => {
+        try {
+            const text = await getTextForState(item);
+            setStateDialogContent(text);
+            setStateDialogVisible(true);
+        } catch (error) {
+            console.error("Error on state column click:", error);
+            // Handle error here, perhaps show an error message to the user
+        }
+    };
+
+
     // Function to handle the resubmit button click
     const handleResubmitClick = () => {
         showResubmitConfirmation();
@@ -251,11 +293,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => (  
-                <TooltipHost content={`${item.state} `}>  
-                    <span>{item.state}</span>  
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}  
-                </TooltipHost>  
+            // onRender: (item: IDocument) => (  
+                // <TooltipHost content={`${item.state} `}>  
+                //     <span>{item.state}</span>  
+                //     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}  
+                // </TooltipHost>  
+            // ),    
+            onRender: (item: IDocument) => (
+                <TooltipHost content={`${item.state} `}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                        {item.state}
+                    </span>
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
+                </TooltipHost>
+
             ), 
             isPadded: true,
         },
@@ -269,9 +320,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for folder, Press to sort by folder',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => {
-                return <span>{item.filePath}</span>;
-            },
+            onRender: (item: IDocument) => (  
+                <TooltipHost content={`${item.state} `}>  
+                    <span>{item.filePath.split('/').slice(1, -1).join('/')}</span>  
+                    {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                </TooltipHost>  
+            ), 
             isPadded: true,
         },
         {
@@ -387,6 +441,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             <div>
                 <Notification message={notification.message} />
             </div>
+            <Dialog
+                hidden={!stateDialogVisible}
+                onDismiss={() => setStateDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'State Details',
+                    closeButtonAriaLabel: 'Close',
+                }}
+            >
+                <p>{stateDialogContent}</p>
+                <DialogFooter>
+                    <PrimaryButton onClick={() => setStateDialogVisible(false)} text="OK" />
+                </DialogFooter>
+            </Dialog>
         </div>
     );
 }

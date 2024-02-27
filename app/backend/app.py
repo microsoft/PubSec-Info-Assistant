@@ -22,7 +22,7 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from shared_code.tags_helper import TagsHelper
 from azure.cosmos import CosmosClient
 
@@ -363,6 +363,30 @@ async def delete_Items(request: Request):
         log.exception("Exception in /delete_Items")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
+
+
+@app.post("/getStateDetail")
+async def get_status_detail(request: Request):
+    """
+    Retrievs status detail for a blob.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique folders.
+    """
+    json_body = await request.json()
+    path = json_body.get("path")
+    try:
+        # status = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
+        #     folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        status = statusLog.read_file_status(path, StatusQueryLevel.VERBOSE)
+
+    except Exception as ex:
+        log.exception("Exception in /delete_Items")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return status
 
 
 @app.post("/resubmitItems")

@@ -8,8 +8,9 @@ import random
 import time
 from shared_code.status_log import StatusLog, State, StatusClassification
 import azure.functions as func
-from azure.storage.blob import generate_blob_sas
+from azure.storage.blob import BlobServiceClient, generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+
 
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -22,10 +23,11 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 media_submit_queue = os.environ["MEDIA_SUBMIT_QUEUE"]
 image_enrichment_queue = os.environ["IMAGE_ENRICHMENT_QUEUE"]
 max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
+azure_blob_content_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+azure_blob_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_blob_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
+
 function_name = "FileUploadedFunc"
-
-
-
 
 def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
@@ -69,6 +71,23 @@ def main(myblob: func.InputStream):
             "submit_queued_count": 1
         }        
         message_string = json.dumps(message)
+        
+        # If this is an update to the blob, then we need to delete any residual chunks
+        # as processing will overlay chunks, but if the new file version is smaller
+        # than the old, then the residual old chunks will remain. The following
+        # code handles this for PDF and non-PDF files.
+        blob_client = BlobServiceClient(
+            account_url=azure_blob_endpoint,
+            credential=azure_blob_key,
+        )
+        blob_container = blob_client.get_container_client(azure_blob_content_container)
+        # List all blobs in the container that start with the name of the blob being processed
+        # first remove the container prefix
+        myblob_filename = myblob.name.split("/", 1)[1]
+        blobs = blob_container.list_blobs(name_starts_with=myblob_filename)
+        # Iterate through the blobs and delete each one
+        for blob in blobs:
+            blob_client.get_blob_client(container=azure_blob_content_container, blob=blob.name).delete_blob()
         
         # Queue message with a random backoff so as not to put the next function under unnecessary load
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())

@@ -139,19 +139,19 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     // *************************************************************
     // Delete processing
     // New state for managing dialog visibility and selected items
-    const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [selectedItemsForDeletion, setSelectedItemsForDeletion] = useState<IDocument[]>([]);
 
     // Function to open the dialog with selected items
     const showDeleteConfirmation = () => {
         const selectedItems = selectionRef.current.getSelection() as IDocument[];
         setSelectedItemsForDeletion(selectedItems);
-        setIsDialogVisible(true);
+        setIsDeleteDialogVisible(true);
     };
 
     // Function to handle actual deletion
     const handleDelete = () => {
-        setIsDialogVisible(false);
+        setIsDeleteDialogVisible(false);
         console.log("Items to delete:", selectedItemsForDeletion);
         selectedItemsForDeletion.forEach(item => {
             console.log(`Deleting item: ${item.name}`);
@@ -348,8 +348,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             <Button text="Resubmit" onClick={handleResubmitClick} />
             {/* Dialog for delete confirmation */}
             <Dialog
-                hidden={!isDialogVisible}
-                onDismiss={() => setIsDialogVisible(false)}
+                hidden={!isDeleteDialogVisible}
+                onDismiss={() => setIsDeleteDialogVisible(false)}
                 dialogContentProps={{
                     type: DialogType.normal,
                     title: 'Delete Confirmation',
@@ -362,7 +362,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             >
                 <DialogFooter>
                     <PrimaryButton onClick={handleDelete} text="Delete" />
-                    <DefaultButton onClick={() => setIsDialogVisible(false)} text="Cancel" />
+                    <DefaultButton onClick={() => setIsDeleteDialogVisible(false)} text="Cancel" />
                 </DialogFooter>
             </Dialog>
             {/* Dialog for resubmit confirmation */}

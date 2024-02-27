@@ -26,7 +26,8 @@
                             "name": "jsonConfig",
                             "type": "object",
                             "value": {
-                                "SharepointEntryFolder": "/Shared Documents"
+                                "SharepointEntryFolder": "/Shared Documents",
+                                "SharepointSite": "https://wwpubsec.sharepoint.com/sites/SharepointTest"
                             }
                         }
                     ]
@@ -143,7 +144,7 @@
                                         }
                                     },
                                     "method": "get",
-                                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://wwpubsec.sharepoint.com/sites/SharepointTest'))}/files/@{encodeURIComponent(items('For_each')?['Id'])}/content",
+                                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent(variables('jsonconfig')['SharepointSite']))}/files/@{encodeURIComponent(items('For_each')?['Id'])}/content",
                                     "queries": {
                                         "inferContentType": true
                                     }
@@ -371,7 +372,7 @@
                                 }
                             },
                             "method": "get",
-                            "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://wwpubsec.sharepoint.com/sites/SharepointTest'))}/folders/@{encodeURIComponent(encodeURIComponent(skip(variables('UncrawledFolders'),variables('LoopIndex'))[0]))}"
+                            "path": "/datasets/@{encodeURIComponent(encodeURIComponent(variables('jsonconfig')['SharepointSite']))}/folders/@{encodeURIComponent(encodeURIComponent(skip(variables('UncrawledFolders'),variables('LoopIndex'))[0]))}"
                         },
                         "metadata": {
                             "%252fLists%252fTaxonomyHiddenList%252fItem": "/Lists/TaxonomyHiddenList/Item",

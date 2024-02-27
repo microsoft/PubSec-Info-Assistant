@@ -11,7 +11,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.prompt_strings import PromptStrings
 
-SUBSCRIPTION_KEY = "YourKeyHere"
+SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
@@ -45,7 +45,9 @@ class ChatBingSearchCompare(Approach):
          )
         bing_resp = await self.make_chat_completion(messages)
 
-        bing_compare_query = user_query + " Bing Search Response:\n" + bing_resp + "\n\n" + "Bing Search Content:\n" + content + "\n\n" + "Internal Documents:\n" + rag_answer + "\n\n"
+        # bing_compare_query = user_query + " Bing Search Response:\n" + bing_resp + "\n\n" + "Bing Search Content:\n" + content + "\n\n" + "Internal Documents:\n" + rag_answer + "\n\n"
+        bing_compare_query = user_query + " Bing Search Response:\n" + bing_resp + "\n\n" + "Internal Documents:\n" + rag_answer + "\n\n"
+
         messages = self.get_messages_builder(
             PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message"),
             self.model_name,
@@ -55,9 +57,11 @@ class ChatBingSearchCompare(Approach):
          )
         bing_compare_resp = await self.make_chat_completion(messages)
 
+        final_response = f"{urllib.parse.unquote(bing_resp) + ' ' + urllib.parse.unquote(bing_compare_resp)}"
+
         return {
             "data_points": None,
-            "answer": f"{urllib.parse.unquote(bing_compare_resp)}",
+            "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": f"Searched for:<br>{user_query}<br><br>Conversations:<br>",
             "citation_lookup": self.citations
         }

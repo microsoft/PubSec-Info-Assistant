@@ -346,12 +346,18 @@ async def delete_Items(request: Request):
     - results: list of unique folders.
     """
     json_body = await request.json()
-    path = json_body.get("path")
+    full_path = json_body.get("path")
     # remove the container prefix
-    path = path.split("/", 1)[1]
+    path = full_path.split("/", 1)[1]
     try:
         blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
         blob_container.delete_blob(path)
+        statusLog.upsert_document(document_path=full_path,
+            status='Delete intiated',
+            status_classification=StatusClassification.INFO,
+            state=State.DELETING,
+            fresh_start=False)
+        statusLog.save_document(document_path=full_path)   
 
     except Exception as ex:
         log.exception("Exception in /delete_Items")

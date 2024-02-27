@@ -104,7 +104,9 @@ export const enum FileState {
     Complete = "COMPLETE",
     Error = "ERROR",
     THROTTLED = "THROTTLED",
-    UPLOADED = "UPLOADED"
+    UPLOADED = "UPLOADED",
+    DELETING = "DELETING",
+    DELETED = "DELETED"    
 }
 
 

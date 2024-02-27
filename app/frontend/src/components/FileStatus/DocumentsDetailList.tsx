@@ -344,7 +344,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 onItemInvoked={onItemInvoked}
             />
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
-            <Button text="Delete" onClick={handleDeleteClick} />
+            <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
             <Button text="Resubmit" onClick={handleResubmitClick} />
             {/* Dialog for delete confirmation */}
             <Dialog
@@ -365,8 +365,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     <DefaultButton onClick={() => setIsDialogVisible(false)} text="Cancel" />
                 </DialogFooter>
             </Dialog>
-                        {/* Dialog for resubmit confirmation */}
-                        <Dialog
+            {/* Dialog for resubmit confirmation */}
+            <Dialog
                 hidden={!isResubmitDialogVisible}
                 onDismiss={() => setIsResubmitDialogVisible(false)}
                 dialogContentProps={{

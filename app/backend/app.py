@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import openai
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from azure.core.credentials import AzureKeyCredential
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, AzureAuthorityHosts
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
 from azure.storage.blob import (
@@ -49,6 +49,7 @@ USE_AZURE_OPENAI_EMBEDDINGS = str_to_bool.get(os.environ.get("USE_AZURE_OPENAI_E
 EMBEDDING_DEPLOYMENT_NAME = ( os.environ.get("EMBEDDING_DEPLOYMENT_NAME") or "")
 AZURE_OPENAI_EMBEDDINGS_MODEL_NAME = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_MODEL_NAME") or "")
 AZURE_OPENAI_EMBEDDINGS_VERSION = ( os.environ.get("AZURE_OPENAI_EMBEDDINGS_VERSION") or "")
+AZURE_MANAGEMENT_URL = ( os.environ.get("AZURE_MANAGEMENT_URL") or "")
 
 AZURE_OPENAI_SERVICE_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 AZURE_SUBSCRIPTION_ID = os.environ.get("AZURE_SUBSCRIPTION_ID")
@@ -76,17 +77,25 @@ ENRICHMENT_APPSERVICE_NAME = os.environ.get("ENRICHMENT_APPSERVICE_NAME") or "en
 
 # embedding_service_suffix = "xyoek"
 
+# Used by the OpenAI SDK
+openai.api_type = "azure"
+
+authority = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+if (IS_GOV_CLOUD_DEPLOYMENT):
+    authority = AzureAuthorityHosts.AZURE_GOVERNMENT
+    openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.us"
+else:
+    openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
+
+openai.api_version = "2023-06-01-preview"
+
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
-azure_credential = DefaultAzureCredential()
+azure_credential = DefaultAzureCredential(authority=authority)
 azure_search_key_credential = AzureKeyCredential(AZURE_SEARCH_SERVICE_KEY)
-
-# Used by the OpenAI SDK
-openai.api_type = "azure"
-openai.api_base = f"https://{AZURE_OPENAI_SERVICE}.openai.azure.com"
-openai.api_version = "2023-06-01-preview"
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
@@ -116,16 +125,19 @@ blob_container = blob_client.get_container_client(AZURE_BLOB_STORAGE_CONTAINER)
 model_name = ''
 model_version = ''
 
+# Python issue Logged > https://github.com/Azure/azure-sdk-for-python/issues/34337
+# Once fixed, this If statement can be removed. 
 if (IS_GOV_CLOUD_DEPLOYMENT):
     model_name = AZURE_OPENAI_CHATGPT_MODEL_NAME
     model_version = AZURE_OPENAI_CHATGPT_MODEL_VERSION
     embedding_model_name = AZURE_OPENAI_EMBEDDINGS_MODEL_NAME
     embedding_model_version = AZURE_OPENAI_EMBEDDINGS_VERSION
 else:
-    # Set up OpenAI management client
+    #Set up OpenAI management client
     openai_mgmt_client = CognitiveServicesManagementClient(
         credential=azure_credential,
-        subscription_id=AZURE_SUBSCRIPTION_ID)
+        subscription_id=AZURE_SUBSCRIPTION_ID,
+        base_url=AZURE_MANAGEMENT_URL)
 
     deployment = openai_mgmt_client.deployments.get(
         resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,

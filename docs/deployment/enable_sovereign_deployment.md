@@ -1,8 +1,8 @@
 # Enable Sovereign Region Deployment
 
-Follow these steps to enable a split deployment.  All resources outside of AOAI will be deployed in an Sovereign region.
+Follow these steps to enable a Sovereign region deployment.  If you need access to AOAI in a UsGov region please fill out this form https://aka.ms/AOAIgovaccess.
 
-Only Sovereign regions supported today are **US Gov**.
+Only Sovereign regions / models supported are listed here: https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#azure-government-regions
 
 ## Setup the environment
 
@@ -14,12 +14,18 @@ To enable a Sovereign region deployment, you need to update the local.env file w
    export LOCATION="usgovvirginia"
    ```
 
+   or
+
+   ```bash
+   export LOCATION="usgovvarizona"
+   ```
+
 2. Set **IS_USGOV_DEPLOYMENT** parameter to `true` 
 
-3. Set **USE_EXISTING_AOAI** parameter to `true` 
+3. Set **USE_EXISTING_AOAI** parameter to `true` if you have a existing AOAI instance deployed.  If you want to create Azure Open AI resource during deployment then set this parameter to `false`
 
-4. Set the following parameters based on your AOAI deployment:
-   *You can find these values from https://oai.azure.com/portal via the Deployments URL.*
+4. If **USE_EXISTING_AOAI** is set to `true` then set the following parameters based on your AOAI deployment:
+   *You can find these values from https://aoai.azure.us/portal via the Deployments URL.*
 
    ```bash
    export AZURE_OPENAI_CHATGPT_MODEL_NAME="gpt-35-turbo-16k"

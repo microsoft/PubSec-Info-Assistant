@@ -109,6 +109,9 @@
     },
     "applicationtitle": {
       "value": "${APPLICATION_TITLE}"
+    },
+    "aadMgmtUrl": {
+      "value": "${AZURE_MANAGEMENT_URL}"
     }
   }
 }

@@ -112,6 +112,30 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     }));
     
 
+    // Notification of processing
+    // Define a type for the props of Notification component
+    interface NotificationProps {
+        message: string;
+    }
+
+    const [notification, setNotification] = useState({ show: false, message: '' });
+
+    const Notification = ({ message }: NotificationProps) => {
+        // Ensure to return null when notification should not be shown
+        if (!notification.show) return null;
+    
+        return <div className={styles.notification}>{message}</div>;
+    };
+
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification({ show: false, message: '' });
+            }, 3000); // Hides the notification after 3 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
     // *************************************************************
     // Delete processing
     // New state for managing dialog visibility and selected items
@@ -137,7 +161,10 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             }
             const response = deleteItem(request);
         });
+        // Notification after deletion
+        setNotification({ show: true, message: 'Processing deletion. Hit \'Refresh\' to track progress' });
     };
+    
 
     // Function to handle the delete button click
     const handleDeleteClick = () => {
@@ -170,15 +197,15 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             }
             const response = resubmitItem(request);
         });
+        // Notification after resubmission
+        setNotification({ show: true, message: 'Processing resubmit. Hit \'Refresh\' to track progress' });
     };
+    
 
     // Function to handle the resubmit button click
     const handleResubmitClick = () => {
         showResubmitConfirmation();
     };
-
-
-
 
     
     const [columns, setColumns] = useState<IColumn[]> ([
@@ -357,6 +384,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     <DefaultButton onClick={() => setIsResubmitDialogVisible(false)} text="Cancel" />
                 </DialogFooter>
             </Dialog>
+            <div>
+                <Notification message={notification.message} />
+            </div>
         </div>
     );
 }

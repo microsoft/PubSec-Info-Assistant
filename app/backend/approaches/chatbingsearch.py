@@ -11,7 +11,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.prompt_strings import PromptStrings
 
-SUBSCRIPTION_KEY = "<YourKeyHere>"
+SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
@@ -31,7 +31,8 @@ class ChatBingSearch(Approach):
 
         user_query = history[-1].get("user")
 
-        resp = await self.web_search_with_answer_count_promote_and_safe_search(user_query)
+        url_snippet_dict = await self.web_search_with_answer_count_promote_and_safe_search(user_query)
+        resp = await self.make_chat_completion(url_snippet_dict, user_query)  
 
         return {
             "data_points": None,
@@ -67,7 +68,7 @@ class ChatBingSearch(Approach):
 
                     url_snippet_dict[page.url] = page.snippet.replace("[", "").replace("]", "")
 
-                return await self.make_chat_completion(url_snippet_dict, user_query)    
+                return url_snippet_dict
 
             else:
                 print("Didn't see any Web data..")

@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
+from approaches.chatbingsearchcompare import ChatBingSearchCompare
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -187,6 +188,10 @@ chat_approaches = {
                                     ENV["ENRICHMENT_KEY"]
                                 ),
     Approaches.ChatBingSearch: ChatBingSearch(
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"]
+    ),
+    Approaches.ChatBingSearchCompare: ChatBingSearchCompare(
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"]
     )

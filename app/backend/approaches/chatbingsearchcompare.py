@@ -11,7 +11,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.prompt_strings import PromptStrings
 
-SUBSCRIPTION_KEY = "<YourKeyHere>"
+SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
@@ -30,20 +30,40 @@ class ChatBingSearchCompare(Approach):
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:  
 
         user_query = history[-1].get("user")
-        rag_answer = history[-1].get("bot")
+        rag_answer = history[0].get("bot")
 
-        resp = await self.web_search_with_answer_count_promote_and_safe_search(user_query, rag_answer)
+        url_snippet_dict = await self.web_search_with_answer_count_promote_and_safe_search(user_query)
+        content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
 
+        bing_search_query = user_query + " Bing Results:\n" + content + "\n\n" #+ "Internal Documents:\n" + rag_answer + "\n\n"
+        messages = self.get_messages_builder(
+            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get("ChatBingSearch", "Default system message"),
+            self.model_name,
+            bing_search_query,
+            PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get("ChatBingSearch", "Default system message"),
+             max_tokens=4097 - 500
+         )
+        bing_resp = await self.make_chat_completion(messages)
+
+        bing_compare_query = user_query + " Bing Search Response:\n" + bing_resp + "\n\n" + "Bing Search Content:\n" + content + "\n\n" + "Internal Documents:\n" + rag_answer + "\n\n"
+        messages = self.get_messages_builder(
+            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message"),
+            self.model_name,
+            bing_compare_query,
+            PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get(self.__class__.__name__, "Default system message"),
+             max_tokens=4097 - 500
+         )
+        bing_compare_resp = await self.make_chat_completion(messages)
 
         return {
             "data_points": None,
-            "answer": f"{urllib.parse.unquote(resp)}",
+            "answer": f"{urllib.parse.unquote(bing_compare_resp)}",
             "thoughts": f"Searched for:<br>{user_query}<br><br>Conversations:<br>",
             "citation_lookup": self.citations
         }
     
 
-    async def web_search_with_answer_count_promote_and_safe_search(self, user_query, raganswer):
+    async def web_search_with_answer_count_promote_and_safe_search(self, user_query):
         """ WebSearchWithAnswerCountPromoteAndSafeSearch.
         """
 
@@ -69,7 +89,7 @@ class ChatBingSearchCompare(Approach):
                     # self.citations.append(page.url)
                     url_snippet_dict[page.url] = page.snippet.replace("[", "").replace("]", "")
 
-                return await self.make_chat_completion(url_snippet_dict, raganswer, user_query)    
+                return url_snippet_dict
 
             else:
                 print("Didn't see any Web data..")
@@ -77,20 +97,7 @@ class ChatBingSearchCompare(Approach):
         except Exception as err:
             print("Encountered exception. {}".format(err))
 
-    async def make_chat_completion(self, url_snippet_dict, raganswer, user_query):
-
-
-        content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
-        user_query += "Bing Results:\n" + content + "\n\n" + "Internal Documents:\n" + raganswer + "\n\n"
-              
-
-        messages = self.get_messages_builder(
-            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message"),
-            self.model_name,
-            user_query,
-            PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get(self.__class__.__name__, "Default system message"),
-             max_tokens=4097 - 500
-         )
+    async def make_chat_completion(self, messages):
 
 
         chat_completion = await openai.ChatCompletion.acreate(

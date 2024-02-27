@@ -100,10 +100,6 @@ jq -r  '
         {
             "path": "EMBEDDING_VECTOR_SIZE",
             "env_var": "EMBEDDING_VECTOR_SIZE"
-        },       
-        {
-            "path": "IS_USGOV_DEPLOYMENT",
-            "env_var": "IS_USGOV_DEPLOYMENT"
         },
         {
             "path": "BLOB_STORAGE_ACCOUNT_ENDPOINT",
@@ -139,9 +135,9 @@ jq -r  '
 
 if [ -n "${IN_AUTOMATION}" ]
 then
-    IS_USGOV_DEPLOYMENT=$(jq -r '.IS_USGOV_DEPLOYMENT.value' inf_output.json)
+    AZURE_ENVIRONMENT=$(jq -r '.AZURE_ENVIRONMENT.value' inf_output.json)
     
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AZUReUSGovernment > /dev/null 2>&1
     fi
 

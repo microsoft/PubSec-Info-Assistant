@@ -30,7 +30,7 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-IS_USGOV_DEPLOYMENT = os.getenv("IS_USGOV_DEPLOYMENT", False)
+azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
 
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -53,22 +53,12 @@ SEARCH_CREDS = AzureKeyCredential(os.environ.get("AZURE_SEARCH_SERVICE_KEY"))
 # Translation params for OCR'd text
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
-# If running in the US Gov cloud, use the US Gov translation endpoint, Default to global
-if not IS_USGOV_DEPLOYMENT:
-    API_DETECT_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
+API_DETECT_ENDPOINT = (
+        "https://${azure_ai_translation_domain}/detect?api-version=3.0"
     )
-    API_TRANSLATE_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
+API_TRANSLATE_ENDPOINT = (
+        "https://${azure_ai_translation_domain}/translate?api-version=3.0"
     )
-else:
-    API_DETECT_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.us/detect?api-version=3.0"
-    )
-    API_TRANSLATE_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.us/translate?api-version=3.0"
-    )
-
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {

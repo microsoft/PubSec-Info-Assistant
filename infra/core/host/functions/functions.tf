@@ -157,6 +157,8 @@ resource "azurerm_linux_function_app" "function_app" {
     COSMOSDB_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX = var.azureSearchIndex
+    AZURE_AI_TRANSLATION_DOMAIN = var.azure_ai_translation_domain
+    AZURE_AI_TEXT_ANALYTICS_DOMAIN = var.azure_ai_text_analytics_domain
   }
 
   identity {

@@ -15,13 +15,6 @@ function finish {
 }
 trap finish EXIT
 
-WEB_APP_ENDPOINT_SUFFIX="azurewebsites.net"
-
-if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
-  WEB_APP_ENDPOINT_SUFFIX="azurewebsites.us"
-fi
-export TF_VAR_webAppSuffix=$WEB_APP_ENDPOINT_SUFFIX
-
 if [ -n "${IN_AUTOMATION}" ]; then
   export TF_VAR_isInAutomation=true
   

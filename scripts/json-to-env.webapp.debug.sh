@@ -112,10 +112,6 @@ jq -r  '
             "env_var": "EMBEDDING_VECTOR_SIZE"
         },
         {
-            "path": "IS_USGOV_DEPLOYMENT",
-            "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
-        },
-        {
             "path": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
             "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
         },
@@ -176,9 +172,9 @@ jq -r  '
 
 if [ -n "${IN_AUTOMATION}" ]
 then
-    IS_USGOV_DEPLOYMENT=$(jq -r '.IS_USGOV_DEPLOYMENT.value' inf_output.json)
-
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+    AZURE_ENVIRONMENT=$(jq -r '.AZURE_ENVIRONMENT.value' inf_output.json)
+    
+    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi
 

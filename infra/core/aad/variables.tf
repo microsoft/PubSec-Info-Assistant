@@ -7,7 +7,7 @@ variable "requireWebsiteSecurityMembership" {
   default = false
 }
 
-variable "webAppSuffix" {
+variable "azure_websites_domain" {
   type        = string
 }
 

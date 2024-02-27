@@ -16,7 +16,7 @@ if [ -n "${IN_AUTOMATION}" ]
 then
     echo "Delete the resource group $RG_NAME, but don't wait (fire and forget)"
 
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AzureUSGovernment 
     fi
 

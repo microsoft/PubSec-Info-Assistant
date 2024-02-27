@@ -28,11 +28,6 @@ variable "buildNumber" {
   default = "local"
 }
 
-variable "isGovCloudDeployment" {
-  type    = bool
-  default = false
-}
-
 variable "cuaEnabled" {
   type    = bool
   default = false
@@ -56,8 +51,45 @@ variable "azure_environment" {
   description = "The Azure Environemnt to target. More info can be found at https://docs.microsoft.com/en-us/cli/azure/manage-clouds-azure-cli?toc=/cli/azure/toc.json&bc=/cli/azure/breadcrumb/toc.json. Defaults to value for 'AzureCloud'"
 }
 
-variable "webAppSuffix" {
+variable "azure_websites_domain" {
   type        = string
+}
+
+variable "azure_portal_domain" {
+  type = string
+}
+
+variable "azure_openai_domain" {
+  type = string
+}
+
+variable "azure_openai_authority_host" {
+  type = string  
+}
+
+variable "azure_endpoints_management_api" {
+  type        = string
+}
+
+variable "azure_ai_translation_domain" {
+  type = string
+}
+
+variable "azure_ai_text_analytics_domain" {
+  type = string
+}
+
+variable "azure_search_domain" {
+  type = string
+}
+
+variable "use_semantic_reranker" {
+  type    = bool
+  default = true
+}
+
+variable "azure_storage_domain" {
+  type = string
 }
 
 variable "arm_template_schema_mgmt_api" {

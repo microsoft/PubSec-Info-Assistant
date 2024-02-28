@@ -29,12 +29,13 @@ import React from "react";
 
 const Chat = () => {
     const { toggle } = React.useContext(ToggleContext);
-      // Use the toggle state to make changes. For example:
     React.useEffect(() => {
         if (toggle === 'Work') {
-         console.log('Work');
+         clearChat();
+         setWebWorkspace(false);
         }else {
-         console.log('Web');
+         clearChat();
+         setWebWorkspace(true);
         }
     }, [toggle]);
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -62,6 +63,7 @@ const Chat = () => {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isBingPrompt, setBingPrompt] = useState<boolean>(false);
+    const [isWebWorkspace, setWebWorkspace] = useState<boolean>(false);
     const [error, setError] = useState<unknown>();
 
     const [activeCitation, setActiveCitation] = useState<string>();
@@ -114,7 +116,7 @@ const Chat = () => {
     };
 
     const makeBingRequest = async (question: string, compare: boolean) => {
-        // lastQuestionRef.current = question;
+        lastQuestionRef.current = question;
 
         error && setError(undefined);
         setIsLoading(true);
@@ -252,7 +254,7 @@ const Chat = () => {
     };
 
     const onExampleClicked = (example: string) => {
-        makeApiRequest(example);
+        isWebWorkspace ? makeBingRequest(example, false) : makeApiRequest(example);
     };
 
     const onShowCitation = (citation: string, citationSourceFile: string, citationSourceFilePageNumber: string, index: number) => {
@@ -391,12 +393,12 @@ const Chat = () => {
                             clearOnSend
                             placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
                             disabled={isLoading}
-                            onSend={question => makeApiRequest(question)}
+                            onSend={question => isWebWorkspace ? makeBingRequest(question, false) : makeApiRequest(question)}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
                             onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
                             showClearChat={true}
                             onClearClick={clearChat}
-                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current)}
+                            onRegenerateClick={() => isWebWorkspace ? makeBingRequest(lastQuestionRef.current, false) :makeApiRequest(lastQuestionRef.current)}
                         />
                     </div>
                 </div>

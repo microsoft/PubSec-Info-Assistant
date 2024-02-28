@@ -136,8 +136,7 @@ else:
     #Set up OpenAI management client
     openai_mgmt_client = CognitiveServicesManagementClient(
         credential=azure_credential,
-        subscription_id=AZURE_SUBSCRIPTION_ID,
-        base_url=AZURE_MANAGEMENT_URL)
+        subscription_id=AZURE_SUBSCRIPTION_ID)
 
     deployment = openai_mgmt_client.deployments.get(
         resource_group_name=AZURE_OPENAI_RESOURCE_GROUP,

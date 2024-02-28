@@ -30,15 +30,3 @@ resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {
   value        = var.useExistingAOAIService ? var.openaiServiceKey : azurerm_cognitive_account.account[0].primary_access_key
   key_vault_id = var.keyVaultId
 }
-
-output "name" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.account[0].name
-}
-
-output "endpoint" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.account[0].endpoint
-}
-
-output "id" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.account[0].id
-}

@@ -14,12 +14,3 @@ resource "azurerm_key_vault_secret" "docIntelligenceKey" {
   value        = azurerm_cognitive_account.formRecognizerAccount.primary_access_key
   key_vault_id = var.keyVaultId
 }
-
-
-output "formRecognizerAccountName" {
-  value = azurerm_cognitive_account.formRecognizerAccount.name
-}
-
-output "formRecognizerAccountEndpoint" {
-  value = azurerm_cognitive_account.formRecognizerAccount.endpoint
-}

@@ -53,14 +53,3 @@ resource "azurerm_key_vault_secret" "storage_key" {
   key_vault_id = var.keyVaultId
 }
 
-output "name" {
-  value = azurerm_storage_account.storage.name
-}
-
-output "primary_endpoints" {
-  value = azurerm_storage_account.storage.primary_blob_endpoint
-}
-
-output "id" {
-  value = azurerm_storage_account.storage.id
-}

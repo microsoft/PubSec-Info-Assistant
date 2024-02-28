@@ -69,11 +69,19 @@ export type FileUploadBasicStatus = {
     start_timestamp: string;
     state_description: string;
     state_timestamp: string;
+    status_updates: StatusUpdates[];
+}
+
+export type StatusUpdates = {
+    status: string;
+    status_timestamp: string;
+    status_classification: string;
 }
 
 export type AllFilesUploadStatus = {
     statuses: FileUploadBasicStatus[];
 }
+
 
 export type AllFolders = {
     folders: string;
@@ -92,11 +100,6 @@ export type DeleteItemRequest = {
 export type ResubmitItemRequest = {
     path: string
 }
-
-export type StatusItemRequest = {
-    path: string
-}
-
 
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)

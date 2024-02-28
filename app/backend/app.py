@@ -279,9 +279,11 @@ async def get_all_upload_status(request: Request):
     state = json_body.get("state")
     folder = json_body.get("folder")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
-            folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-
+        results = statusLog.read_files_status_by_timeframe(timeframe, 
+            State[state], 
+            folder, 
+            os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
@@ -364,29 +366,6 @@ async def delete_Items(request: Request):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
 
-
-@app.post("/getStateDetail")
-async def get_status_detail(request: Request):
-    """
-    Retrievs status detail for a blob.
-
-    Parameters:
-    - request: The HTTP request object.
-
-    Returns:
-    - results: list of unique folders.
-    """
-    json_body = await request.json()
-    path = json_body.get("path")
-    try:
-        # status = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
-        #     folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-        status = statusLog.read_file_status(path, StatusQueryLevel.VERBOSE)
-
-    except Exception as ex:
-        log.exception("Exception in /delete_Items")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return status
 
 
 @app.post("/resubmitItems")

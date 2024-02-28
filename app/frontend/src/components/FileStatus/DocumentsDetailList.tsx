@@ -7,15 +7,17 @@ import { DetailsList,
     SelectionMode, 
     IColumn, 
     Selection, 
-    Checkbox,
-    Label, 
-    Text, 
-    BaseSelectedItemsList,
     TooltipHost,
-    Button } from "@fluentui/react";
+    Button,
+    Dialog, 
+    DialogType, 
+    DialogFooter, 
+    PrimaryButton,
+    DefaultButton } from "@fluentui/react";
+
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
-import { deleteItem, DeleteItemRequest } from "../../api";
+import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 
 export interface IDocument {
     key: string;
@@ -93,7 +95,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 console.error("Error retrying file:", error);
             });
     }
-
     
     // Initialize Selection with items
     useEffect(() => {
@@ -107,16 +108,52 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 ...item,
                 isSelected: selectedIndices.has(index)
             })));
-            checkSelectAllState();
         }
     }));
-
     
-    // Function to handle the delete button click
-    const handleDeleteClick = () => {
+
+    // Notification of processing
+    // Define a type for the props of Notification component
+    interface NotificationProps {
+        message: string;
+    }
+
+    const [notification, setNotification] = useState({ show: false, message: '' });
+
+    const Notification = ({ message }: NotificationProps) => {
+        // Ensure to return null when notification should not be shown
+        if (!notification.show) return null;
+    
+        return <div className={styles.notification}>{message}</div>;
+    };
+
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification({ show: false, message: '' });
+            }, 3000); // Hides the notification after 3 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
+    // *************************************************************
+    // Delete processing
+    // New state for managing dialog visibility and selected items
+    const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [selectedItemsForDeletion, setSelectedItemsForDeletion] = useState<IDocument[]>([]);
+
+    // Function to open the dialog with selected items
+    const showDeleteConfirmation = () => {
         const selectedItems = selectionRef.current.getSelection() as IDocument[];
-        console.log("Items to delete:", selectedItems); // Debug log
-        selectedItems.forEach(item => {
+        setSelectedItemsForDeletion(selectedItems);
+        setIsDialogVisible(true);
+    };
+
+    // Function to handle actual deletion
+    const handleDelete = () => {
+        setIsDialogVisible(false);
+        console.log("Items to delete:", selectedItemsForDeletion);
+        selectedItemsForDeletion.forEach(item => {
             console.log(`Deleting item: ${item.name}`);
             // delete this item
             const request: DeleteItemRequest = {
@@ -124,31 +161,53 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             }
             const response = deleteItem(request);
         });
-    };
-
-    const checkSelectAllState = () => {
-        const areAllSelected = selectionRef.current.count > 0 && selectionRef.current.count === items.length;
-        setSelectAllChecked(areAllSelected);
+        // Notification after deletion
+        setNotification({ show: true, message: 'Processing deletion. Hit \'Refresh\' to track progress' });
     };
     
-    const [selectAllChecked, setSelectAllChecked] = useState(false);
 
-    useEffect(() => {
-        // Ensure that the select all checkbox is in the correct state when items change
-        setSelectAllChecked(selectionRef.current.count > 0 && selectionRef.current.count === items.length);
-    }, [items]);
-    
-    useEffect(() => {
-        selectionRef.current.setItems(itemList, false);
-        checkSelectAllState(); // Update the select all checkbox state
-    }, [itemList]);
-
-
-    const toggleSelectAll = (checked: boolean) => {
-        setSelectAllChecked(checked);
-        selectionRef.current.setAllSelected(checked);
+    // Function to handle the delete button click
+    const handleDeleteClick = () => {
+        showDeleteConfirmation();
     };
 
+
+    // *************************************************************
+    // Resubmit processing
+    // New state for managing resubmit dialog visibility and selected items
+    const [isResubmitDialogVisible, setIsResubmitDialogVisible] = useState(false);
+    const [selectedItemsForResubmit, setSelectedItemsForResubmit] = useState<IDocument[]>([]);
+
+    // Function to open the resubmit dialog with selected items
+    const showResubmitConfirmation = () => {
+        const selectedItems = selectionRef.current.getSelection() as IDocument[];
+        setSelectedItemsForResubmit(selectedItems);
+        setIsResubmitDialogVisible(true);
+    };
+
+    // Function to handle actual resubmission
+    const handleResubmit = () => {
+        setIsResubmitDialogVisible(false);
+        console.log("Items to resubmit:", selectedItemsForResubmit);
+        selectedItemsForResubmit.forEach(item => {
+            console.log(`Resubmitting item: ${item.name}`);
+            // resubmit this item
+            const request: ResubmitItemRequest = {
+                path: item.filePath
+            }
+            const response = resubmitItem(request);
+        });
+        // Notification after resubmission
+        setNotification({ show: true, message: 'Processing resubmit. Hit \'Refresh\' to track progress' });
+    };
+    
+
+    // Function to handle the resubmit button click
+    const handleResubmitClick = () => {
+        showResubmitConfirmation();
+    };
+
+    
     const [columns, setColumns] = useState<IColumn[]> ([
         {
             key: 'file_type',
@@ -195,7 +254,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onRender: (item: IDocument) => (  
                 <TooltipHost content={`${item.state} `}>  
                     <span>{item.state}</span>  
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}  
                 </TooltipHost>  
             ), 
             isPadded: true,
@@ -210,12 +269,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for folder, Press to sort by folder',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => (  
-                <TooltipHost content={`${item.state} `}>  
-                    <span>{item.filePath.split('/').slice(1, -1).join('/')}</span>  
-                    {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
-                </TooltipHost>  
-            ), 
+            onRender: (item: IDocument) => {
+                return <span>{item.filePath}</span>;
+            },
             isPadded: true,
         },
         {
@@ -288,7 +344,49 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 onItemInvoked={onItemInvoked}
             />
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
-            <Button text="Delete" onClick={handleDeleteClick} />
+            <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
+            <Button text="Resubmit" onClick={handleResubmitClick} />
+            {/* Dialog for delete confirmation */}
+            <Dialog
+                hidden={!isDialogVisible}
+                onDismiss={() => setIsDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'Delete Confirmation',
+                    subText: 'Are you sure you want to delete the selected items?'
+                }}
+                modalProps={{
+                    isBlocking: true,
+                    styles: { main: { maxWidth: 450 } }
+                }}
+            >
+                <DialogFooter>
+                    <PrimaryButton onClick={handleDelete} text="Delete" />
+                    <DefaultButton onClick={() => setIsDialogVisible(false)} text="Cancel" />
+                </DialogFooter>
+            </Dialog>
+            {/* Dialog for resubmit confirmation */}
+            <Dialog
+                hidden={!isResubmitDialogVisible}
+                onDismiss={() => setIsResubmitDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'Resubmit Confirmation',
+                    subText: 'Are you sure you want to resubmit the selected items?'
+                }}
+                modalProps={{
+                    isBlocking: true,
+                    styles: { main: { maxWidth: 450 } }
+                }}
+            >
+                <DialogFooter>
+                    <PrimaryButton onClick={handleResubmit} text="Resubmit" />
+                    <DefaultButton onClick={() => setIsResubmitDialogVisible(false)} text="Cancel" />
+                </DialogFooter>
+            </Dialog>
+            <div>
+                <Notification message={notification.message} />
+            </div>
         </div>
     );
 }

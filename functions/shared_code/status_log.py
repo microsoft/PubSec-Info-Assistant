@@ -21,6 +21,7 @@ class State(Enum):
     THROTTLED = "Throttled"
     UPLOADED = "Uploaded"
     DELETED = "Deleted"
+    DELETING = "Deleting"
     ALL = "All"
 
 class StatusClassification(Enum):

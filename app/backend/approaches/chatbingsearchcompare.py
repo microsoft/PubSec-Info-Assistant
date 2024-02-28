@@ -11,7 +11,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.prompt_strings import PromptStrings
 
-SUBSCRIPTION_KEY = "YourKeyHere"
+SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
@@ -21,23 +21,41 @@ class ChatBingSearchCompare(Approach):
     citations = {}
     approach_class = ""
 
-    def __init__(self, model_name: str, chatgpt_deployment: str):
+    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str):
         self.name = "ChatBingSearchCompare"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
+        self.query_term_language = query_term_language
         
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:  
 
         user_query = history[-1].get("user")
         rag_answer = history[0].get("bot")
+        user_persona = overrides.get("user_persona", "")
+        system_persona = overrides.get("system_persona", "")
+        response_length = int(overrides.get("response_length") or 1024)
+
+        follow_up_questions_prompt = (
+            PromptStrings.FOLLOW_UP_QUESTIONS_PROMPT_CONTENT.get(self.__class__.__name__, "Default followup prompt")
+            if overrides.get("suggest_followup_questions")
+            else ""
+        )
 
         url_snippet_dict = await self.web_search_with_answer_count_promote_and_safe_search(user_query)
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
 
         bing_search_query = user_query + " Bing Results:\n" + content + "\n\n" #+ "Internal Documents:\n" + rag_answer + "\n\n"
         messages = self.get_messages_builder(
-            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get("ChatBingSearch", "Default system message"),
+            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get("ChatBingSearch", "Default system message").format(
+                query_term_language=self.query_term_language,
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                response_length_prompt=self.get_response_length_prompt_text(
+                    response_length
+                ),
+                userPersona=user_persona,
+                systemPersona=system_persona,
+            ),
             self.model_name,
             bing_search_query,
             PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get("ChatBingSearch", "Default system message"),
@@ -49,7 +67,15 @@ class ChatBingSearchCompare(Approach):
         bing_compare_query = user_query + " Bing Search Response:\n" + bing_resp + "\n\n" + "Internal Documents:\n" + rag_answer + "\n\n"
 
         messages = self.get_messages_builder(
-            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message"),
+            PromptStrings.SYSTEM_MESSAGE_CHAT_CONVERSATION.get(self.__class__.__name__, "Default system message").format(
+                query_term_language=self.query_term_language,
+                follow_up_questions_prompt=follow_up_questions_prompt,
+                response_length_prompt=self.get_response_length_prompt_text(
+                    response_length
+                ),
+                userPersona=user_persona,
+                systemPersona=system_persona,
+            ),
             self.model_name,
             bing_compare_query,
             PromptStrings.RESPONSE_PROMPT_FEW_SHOTS.get(self.__class__.__name__, "Default system message"),

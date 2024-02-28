@@ -189,11 +189,13 @@ chat_approaches = {
                                 ),
     Approaches.ChatBingSearch: ChatBingSearch(
                                     model_name,
-                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"]
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
     ),
-    Approaches.ChatBingSearchCompare: ChatBingSearchCompare(
+    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
                                     model_name,
-                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"]
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],    
     )
 }
 

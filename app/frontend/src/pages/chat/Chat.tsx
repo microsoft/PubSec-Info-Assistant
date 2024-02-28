@@ -24,8 +24,19 @@ import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGrou
 import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
+import { ToggleContext } from '../../components/Title/Toggle';
+import React from "react";
 
 const Chat = () => {
+    const { toggle } = React.useContext(ToggleContext);
+      // Use the toggle state to make changes. For example:
+    React.useEffect(() => {
+        if (toggle === 'Work') {
+         console.log('Work');
+        }else {
+         console.log('Web');
+        }
+    }, [toggle]);
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [promptTemplate, setPromptTemplate] = useState<string>("");
@@ -115,10 +126,16 @@ const Chat = () => {
             const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
             const request: ChatRequest = {
                 history: [...history, { user: question, bot: undefined }],
-                approach: compare ? Approaches.BingSearchCompare :Approaches.BingSearch
+                approach: compare ? Approaches.BingSearchCompare :Approaches.BingSearch,
+                overrides: {
+                    suggestFollowupQuestions: useSuggestFollowupQuestions,
+                    userPersona: userPersona,
+                    systemPersona: systemPersona,
+                    aiPersona: aiPersona,
+                    responseLength: responseLength,
+                    responseTemp: responseTemp
+                }
             };
-            // const result = await bingApi(question, compare, Approaches.BingSearch,);
-            //const result = await bingApi(request);
             const result = await chatApi(request);
             result.source = "bing";
             setAnswers([...answers, [question, result]]);

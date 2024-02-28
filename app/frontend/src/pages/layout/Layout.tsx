@@ -7,8 +7,15 @@ import openai from "../../assets/openai.svg";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 import { Title } from "../../components/Title/Title";
+import { ToggleContext } from '../../components/Title/Toggle';
+import React from "react";
 
 const Layout = () => {
+    const { toggle, setToggle } = React.useContext(ToggleContext);
+
+    const handleToggle = () => {
+      setToggle(prevToggle => prevToggle === 'Work' ? 'Web' : 'Work');
+    };
     return (
         <div className={styles.layout}>
             <header className={styles.header} role={"banner"}>
@@ -36,6 +43,9 @@ const Layout = () => {
             </header>
             <div className={styles.raibanner}>
                 <span className={styles.raiwarning}>AI-generated content may be incorrect</span>
+                <button onClick={handleToggle}>
+                    {toggle === 'Work' ? 'Switch to Web' : 'Switch to Work'}
+                </button>
             </div>
 
             <Outlet />

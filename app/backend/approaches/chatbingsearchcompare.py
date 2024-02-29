@@ -33,21 +33,30 @@ class ChatBingSearchCompare(Approach):
     {follow_up_questions_prompt}   
     """
 
-    COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps compare Bing Search Response with agency data. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the of sources provided and answer in the language {query_term_language}. For tabular information return it as an html table. Do not return markdown format.
-    Your goal is to provide comnparative analysis based on the facts listed in the provided Bing Search Response and Bing Search Content and to compare them with Internal Documents. Avoid making assumptions, generating speculative or generalized information or adding personal opinions.
-    Do not assume which source may be more accurate, just give comparative analysis between the two sources and nothing else.
+    # COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps compare Bing Search Response with agency data. {response_length_prompt}
+    # User persona is {userPersona} Answer ONLY with the facts listed in the of sources provided and answer in the language {query_term_language}. For tabular information return it as an html table. Do not return markdown format.
+    # Your goal is to provide comnparative analysis based on the facts listed in the provided Bing Search Response and Bing Search Content and to compare them with Internal Documents. Avoid making assumptions, generating speculative or generalized information or adding personal opinions.
+    # Do not assume which source may be more accurate, just give comparative analysis between the two sources and nothing else.
     
-    You must compare what you find within the Bing Search Response with the Internal Documents response previoulsy provided in summary at the end.
-    Do not repeat information in the final response.
-    Do not tranlsate your response to any language but {query_term_language}.
+    # You must compare what you find within the Bing Search Response with the Internal Documents response previoulsy provided in summary at the end.
+    # Do not repeat information in the final response.
+    # Do not tranlsate your response to any language but {query_term_language}.
       
-    Here is how you should answer every question:
-    -Compare information in the provided content to answer the question in {query_term_language}. Do not repeate information in the final response      
-    -If you cannot find answer in below sources, respond with I am not sure. Do not provide personal opinions or assumptions.
-    -You must compare what you find within the Bing Search Response with the Internal Documents response provided.
-    -If the final answer is " I am not sure" then also translate it to the {query_term_language} language and then display translated response only. nothing else.    
+    # Here is how you should answer every question:
+    # -Compare information in the provided content to answer the question in {query_term_language}. Do not repeate information in the final response      
+    # -If you cannot find answer in below sources, respond with I am not sure. Do not provide personal opinions or assumptions.
+    # -You must compare what you find within the Bing Search Response with the Internal Documents response provided.
+    # -If the final answer is " I am not sure" then also translate it to the {query_term_language} language and then display translated response only. nothing else.    
     
+    # {follow_up_questions_prompt}
+    # """
+
+    COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona}. User persona is {userPersona}.
+    Compare and contrast the answers provided below from two sources of data. The first source is internal data indexed using a RAG pattern while the second source is from Bing Chat.
+    Only explain the differences between the two sources and nothing else. Do not provide personal opinions or assumptions.
+    Only answer in the language {query_term_language}.
+    If you cannot find answer in below sources, respond with I am not sure. Do not provide personal opinions or assumptions.
+
     {follow_up_questions_prompt}
     """
 
@@ -145,7 +154,7 @@ class ChatBingSearchCompare(Approach):
         bing_resp = await self.make_chat_completion(messages)
 
 
-        bing_compare_query = user_query + " Bing Search Response:\n" + bing_resp + "\n\n" + "Internal Documents:\n" + rag_answer + "\n\n"
+        bing_compare_query = user_query + "Internal Documents:\n" + rag_answer + "\n\n" + " Bing Search Response:\n" + bing_resp + "\n\n"
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
@@ -166,7 +175,11 @@ class ChatBingSearchCompare(Approach):
         # Step 4: Use the search results to compare the Bing search based response with the internal documents response
         bing_compare_resp = await self.make_chat_completion(messages)
 
-        final_response = f"{urllib.parse.unquote(bing_resp)} \n\n {urllib.parse.unquote(bing_compare_resp)}"
+        # final_response = f"{urllib.parse.unquote(bing_resp)} \n\n {urllib.parse.unquote(bing_compare_resp)}"
+        final_response = f"{urllib.parse.unquote(bing_compare_resp)}"
+
+        for idx, url in enumerate(url_snippet_dict.keys(), start=1):
+            final_response += f" [url{idx}]"
 
         return {
             "data_points": None,

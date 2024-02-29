@@ -53,7 +53,7 @@ ENV = {
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
     "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_SUBSCRIPTION_ID": None,
-    "AZURE_ENDPOINTS_MANAGEMENT_API": "https://management.core.windows.net/"
+    "AZURE_ENDPOINTS_MANAGEMENT_API": "https://management.core.windows.net/",
     "CHAT_WARNING_BANNER_TEXT": "",
     "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
     "KB_FIELDS_CONTENT": "content",

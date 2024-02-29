@@ -105,7 +105,7 @@ class StatusLog:
         """
 
         query_string = "SELECT c.id,  c.file_path, c.file_name, c.state, \
-            c.start_timestamp, c.state_description, c.state_timestamp \
+            c.start_timestamp, c.state_description, c.state_timestamp, c.status_updates \
             FROM c"
 
         conditions = []    

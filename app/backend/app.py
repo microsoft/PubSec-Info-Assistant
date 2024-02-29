@@ -22,7 +22,7 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from shared_code.tags_helper import TagsHelper
 from azure.cosmos import CosmosClient
 
@@ -279,9 +279,11 @@ async def get_all_upload_status(request: Request):
     state = json_body.get("state")
     folder = json_body.get("folder")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
-            folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-
+        results = statusLog.read_files_status_by_timeframe(timeframe, 
+            State[state], 
+            folder, 
+            os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
@@ -363,6 +365,7 @@ async def delete_Items(request: Request):
         log.exception("Exception in /delete_Items")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
+
 
 
 @app.post("/resubmitItems")
@@ -576,7 +579,6 @@ async def retryFile(request: Request):
             raw_file = blob.download_blob().readall()
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
-
             statusLog.upsert_document(document_path=filePath,
                         status='Resubmitted to the processing pipeline',
                         status_classification=StatusClassification.INFO,

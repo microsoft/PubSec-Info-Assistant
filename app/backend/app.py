@@ -560,19 +560,23 @@ async def get_all_tags():
 
 @app.post("/retryFile")
 async def retryFile(request: Request):
+    """
+    Retries submission of a file
 
+    Returns:
+        dict: A dictionary containing the status of all tags
+    """
     json_body = await request.json()
     filePath = json_body.get("filePath")
     
     try:
-
         file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
         blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
-
         if blob.exists():
             raw_file = blob.download_blob().readall()
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+
             statusLog.upsert_document(document_path=filePath,
                         status='Resubmitted to the processing pipeline',
                         status_classification=StatusClassification.INFO,

@@ -37,8 +37,6 @@ cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
-cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
-cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
 
 # Cognitive Services
 cognitive_services_key = os.environ["ENRICHMENT_KEY"]
@@ -322,7 +320,7 @@ def main(msg: func.QueueMessage) -> None:
             tags_list = []
         # Write the tags to cosmos db
         tags_helper = TagsHelper(
-            cosmosdb_url, cosmosdb_key, cosmosdb_tags_database_name, cosmosdb_tags_container_name
+            cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
         )
         tags_helper.upsert_document(blob_path, tags_list)
 

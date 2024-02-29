@@ -61,8 +61,6 @@ ENV = {
     "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
-    "COSMOSDB_TAGS_DATABASE_NAME": "tagsdb",
-    "COSMOSDB_TAGS_CONTAINER_NAME": "tagscontainer",
     "QUERY_TERM_LANGUAGE": "English",
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
     "ENRICHMENT_APPSERVICE_NAME": "enrichment",
@@ -108,8 +106,8 @@ statusLog = StatusLog(
 tagsHelper = TagsHelper(
     ENV["COSMOSDB_URL"],
     ENV["COSMOSDB_KEY"],
-    ENV["COSMOSDB_TAGS_DATABASE_NAME"],
-    ENV["COSMOSDB_TAGS_CONTAINER_NAME"]
+    ENV["COSMOSDB_LOG_DATABASE_NAME"],
+    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
 )
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead

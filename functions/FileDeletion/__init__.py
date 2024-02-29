@@ -22,8 +22,6 @@ azure_search_index = os.environ["AZURE_SEARCH_INDEX"]
 azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
-cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
@@ -34,8 +32,8 @@ status_log = StatusLog(cosmosdb_url,
 
 tags_helper = TagsHelper(cosmosdb_url,
                          cosmosdb_key,
-                         cosmosdb_tags_database_name,
-                         cosmosdb_tags_container_name)
+                         cosmosdb_log_database_name,
+                         cosmosdb_log_container_name)
 
 def chunks(data, size):
     '''max number of blobs to delete in one request is 256, so this breaks

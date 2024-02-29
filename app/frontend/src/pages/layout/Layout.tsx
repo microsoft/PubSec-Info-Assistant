@@ -14,7 +14,7 @@ const Layout = () => {
     const { toggle, setToggle } = React.useContext(ToggleContext);
 
     const handleToggle = () => {
-      setToggle(prevToggle => prevToggle === 'Work' ? 'Web' : 'Work');
+        setToggle(prevToggle => prevToggle === 'Work' ? 'Web' : 'Work');
     };
     return (
         <div className={styles.layout}>
@@ -23,7 +23,7 @@ const Layout = () => {
                 <div className={styles.headerContainer}>
                     <div className={styles.headerTitleContainer}>
                         <img src={openai} alt="Azure OpenAI" className={styles.headerLogo} />
-                        <h3 className={styles.headerTitle}><Title/></h3>
+                        <h3 className={styles.headerTitle}><Title /></h3>
                     </div>
                     <nav>
                         <ul className={styles.headerNavList}>
@@ -42,10 +42,15 @@ const Layout = () => {
                 </div>
             </header>
             <div className={styles.raibanner}>
-                <span className={styles.raiwarning}>AI-generated content may be incorrect</span>
-                <button onClick={handleToggle}>
-                    {toggle === 'Work' ? 'Switch to Web' : 'Switch to Work'}
-                </button>
+                <div></div>
+                <div className={styles.centered}>
+                    <span className={styles.raiwarning}>AI-generated content may be incorrect</span>
+                </div>
+                <div className={styles.right}>
+                    <button onClick={handleToggle}>
+                        {toggle === 'Work' ? 'Switch to Web' : 'Switch to Work'}
+                    </button>
+                </div>
             </div>
 
             <Outlet />

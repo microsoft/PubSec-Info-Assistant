@@ -19,10 +19,10 @@ ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 class ChatBingSearch(Approach):
 
     SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions. {response_length_prompt}
-    User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
-    Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
+    User persona is {userPersona} Answer ONLY with the facts listed in the list of source urls below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
+    Your goal is to provide answers based on the facts listed below in the provided urls and content. Avoid making assumptions, generating speculative or generalized information or adding personal opinions.
     
-    Each source has a file name followed by a pipe character and the actual information. Use square brackets to reference the source url and they must be in this format as example [url0]. Do not combine sources, list each source url separately, e.g. [url1][url2].
+    Each source has content followed by a pipe character and the url. Use square brackets to reference and cite the url and they must be in this format as example [url1] using the word url and nothing else. Do not combine sources, list each source url separately, e.g. [url1][url2].
     Here is how you should answer every question:
         
     -Look for information in the provided content to answer the question in {query_term_language}.
@@ -96,7 +96,7 @@ class ChatBingSearch(Approach):
         # STEP 2: Use the search query to get the top web search results
         url_snippet_dict = await self.web_search_with_answer_count_promote_and_safe_search(query_resp)
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
-        user_query += "Urls:\n" + content + "\n\n"
+        user_query += "Url Sources:\n" + content + "\n\n"
 
         # Use re.sub to replace anything within square brackets with an empty string
         query_resp = re.sub(r'\[.*?\]', '', query_resp)

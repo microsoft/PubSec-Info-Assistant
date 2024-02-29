@@ -165,9 +165,9 @@ resource "azurerm_subnet" "appOutbound" {
   address_prefixes     = [var.snetAppOutboundCIDR]
   service_endpoints = ["Microsoft.Storage"]
   delegation {
-    name = "Microsoft.Web/serverfarms"
+    name = "Microsoft.Web/serverFarms"
     service_delegation {
-      name    = "Microsoft.Web/serverfarms"
+      name    = "Microsoft.Web/serverFarms"
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
@@ -197,9 +197,9 @@ resource "azurerm_subnet" "functionOutbound" {
   address_prefixes     = [var.snetFunctionOutboundCIDR]
   service_endpoints = ["Microsoft.Storage"]
   delegation {
-    name = "Microsoft.Web/serverfarms"
+    name = "Microsoft.Web/serverFarms"
     service_delegation {
-      name    = "Microsoft.Web/serverfarms"
+      name    = "Microsoft.Web/serverFarms"
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
@@ -229,9 +229,9 @@ resource "azurerm_subnet" "enrichmentOutbound" {
   address_prefixes     = [var.snetEnrichmentOutboundCIDR]
   service_endpoints = ["Microsoft.Storage"]
   delegation {
-    name = "Microsoft.Web/serverfarms"
+    name = "Microsoft.Web/serverFarms"
     service_delegation {
-      name    = "Microsoft.Web/serverfarms"
+      name    = "Microsoft.Web/serverFarms"
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }

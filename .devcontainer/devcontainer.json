@@ -23,7 +23,7 @@
 		"type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock"
 	],
 
-	// Set *default* container specific settings.json values on container create.
+	// Set *default* container specific settings values on container create.
 	"customizations": {
     	"vscode": {
 			"settings": { 
@@ -50,6 +50,7 @@
 					"*.workbook": "[jsonc]"
 				}
 			},
+			// Add extensions you want installed when the container is created into this array
 			"extensions": [
 				"ms-python.python",
 				"ms-python.vscode-pylance",

@@ -579,6 +579,13 @@ async def retryFile(request: Request):
             raw_file = blob.download_blob().readall()
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+            statusLog.upsert_document(document_path=filePath,
+                        status='Resubmitted to the processing pipeline',
+                        status_classification=StatusClassification.INFO,
+                        state=State.QUEUED,
+                        fresh_start=False)
+            statusLog.save_document(document_path=filePath)   
+
     except Exception as ex:
         logging.exception("Exception in /retryFile")
         raise HTTPException(status_code=500, detail=str(ex)) from ex

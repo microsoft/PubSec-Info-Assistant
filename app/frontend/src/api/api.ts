@@ -1,7 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner, StatusLogEntry, StatusLogResponse, ApplicationTitle, GetTagsResponse } from "./models";
+import { AskRequest, 
+    AskResponse, 
+    ChatRequest, 
+    BlobClientUrlResponse, 
+    AllFilesUploadStatus, 
+    GetUploadStatusRequest, 
+    GetInfoResponse, 
+    ActiveCitation, 
+    GetWarningBanner, 
+    StatusLogEntry, 
+    StatusLogResponse, 
+    ApplicationTitle, 
+    GetTagsResponse,
+    DeleteItemRequest,
+    ResubmitItemRequest
+    } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
     const response = await fetch("/ask", {
@@ -102,7 +117,8 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
         },
         body: JSON.stringify({
             timeframe: options.timeframe,
-            state: options.state as string
+            state: options.state as string,
+            folder: options.folder as string
             })
         });
     
@@ -113,6 +129,104 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
     const results: AllFilesUploadStatus = {statuses: parsedResponse};
     return results;
 }
+
+export async function deleteItem(options: DeleteItemRequest): Promise<boolean> {
+    try {
+        const response = await fetch("/deleteItems", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                path: options.path
+            })
+        });
+        if (!response.ok) {
+            // If the response is not ok, throw an error
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.error || "Unknown error");
+        }
+        // If the response is ok, return true
+        return true;
+    } catch (error) {
+        console.error("Error during deleteItem:", error);
+        return false;
+    }
+}
+
+
+export async function resubmitItem(options: ResubmitItemRequest): Promise<boolean> {
+    try {
+        const response = await fetch("/resubmitItems", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                path: options.path
+            })
+        });
+        if (!response.ok) {
+            // If the response is not ok, throw an error
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.error || "Unknown error");
+        }
+        // If the response is ok, return true
+        return true;
+    } catch (error) {
+        console.error("Error during deleteItem:", error);
+        return false;
+    }
+}
+
+
+export async function getFolders(): Promise<string[]> {
+    const response = await fetch("/getfolders", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            })
+        });
+    
+    const parsedResponse: any = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    // Assuming parsedResponse is the array of strings (folder names) we want
+    // Check if it's actually an array and contains strings
+    if (Array.isArray(parsedResponse) && parsedResponse.every(item => typeof item === 'string')) {
+        return parsedResponse;
+    } else {
+        throw new Error("Invalid response format");
+    }
+}
+
+
+export async function getTags(): Promise<string[]> {
+    const response = await fetch("/gettags", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            })
+        });
+    
+    const parsedResponse: any = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    // Assuming parsedResponse is the array of strings (folder names) we want
+    // Check if it's actually an array and contains strings
+    if (Array.isArray(parsedResponse) && parsedResponse.every(item => typeof item === 'string')) {
+        return parsedResponse;
+    } else {
+        throw new Error("Invalid response format");
+    }
+}
+
 
 export async function retryFile(filePath: string): Promise<boolean> {
     const response = await fetch("/retryFile", {

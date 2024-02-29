@@ -48,7 +48,7 @@ export const Answer = ({
             <Stack.Item>
                 <Stack horizontal horizontalAlign="space-between">
                     <AnswerIcon source={answer.source} />
-                    {answer.source !== 'bing' && <div>
+                    <div>
                         <IconButton
                             style={{ color: "black" }}
                             iconProps={{ iconName: "Lightbulb" }}
@@ -57,15 +57,17 @@ export const Answer = ({
                             onClick={() => onThoughtProcessClicked()}
                             disabled={!answer.thoughts}
                         />
-                        <IconButton
-                            style={{ color: "black" }}
-                            iconProps={{ iconName: "ClipboardList" }}
-                            title="Show supporting content"
-                            ariaLabel="Show supporting content"
-                            onClick={() => onSupportingContentClicked()}
-                            disabled={!answer.data_points || !answer.data_points.length}
-                        />
-                    </div>}
+                        {answer.source !== 'bing' && 
+                            <IconButton
+                                style={{ color: "black" }}
+                                iconProps={{ iconName: "ClipboardList" }}
+                                title="Show supporting content"
+                                ariaLabel="Show supporting content"
+                                onClick={() => onSupportingContentClicked()}
+                                disabled={!answer.data_points || !answer.data_points.length}
+                            />
+                        }
+                    </div>
                 </Stack>
             </Stack.Item>
 

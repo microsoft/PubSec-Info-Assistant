@@ -21,6 +21,7 @@ class State(Enum):
     THROTTLED = "Throttled"
     UPLOADED = "Uploaded"
     DELETED = "Deleted"
+    DELETING = "Deleting"
     ALL = "All"
 
 class StatusClassification(Enum):
@@ -93,7 +94,9 @@ class StatusLog:
 
     def read_files_status_by_timeframe(self, 
                        within_n_hours: int,
-                       state: State = State.ALL
+                       state: State = State.ALL,
+                       folder_path: str = 'All',
+                       container: str = 'upload'
                        ):
         """ 
         Function to issue a query and return resulting docs          
@@ -113,6 +116,12 @@ class StatusLog:
 
         if state != State.ALL:
             conditions.append(f"c.state = '{state.value}'")
+            
+        path_prefix = container + '/'
+        if folder_path == 'Root':
+            conditions.append(f"STARTSWITH(c.file_path, '{path_prefix}')")
+        else:
+            conditions.append(f"STARTSWITH(c.file_path, '{path_prefix + folder_path}')")
 
         if conditions:
             query_string += " WHERE " + " AND ".join(conditions)

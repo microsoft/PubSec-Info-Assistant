@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { string } from "prop-types";
+
 export const enum Approaches {
     RetrieveThenRead = 0,
     ReadRetrieveRead = 1,
@@ -76,11 +78,23 @@ export type AllFilesUploadStatus = {
     statuses: FileUploadBasicStatus[];
 }
 
-export type GetUploadStatusRequest = {
-    timeframe: number;
-    state: FileState
+export type AllFolders = {
+    folders: string;
 }
 
+export type GetUploadStatusRequest = {
+    timeframe: number;
+    state: FileState;
+    folder: string
+}
+
+export type DeleteItemRequest = {
+    path: string
+}
+
+export type ResubmitItemRequest = {
+    path: string
+}
 
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
@@ -93,7 +107,9 @@ export const enum FileState {
     Complete = "COMPLETE",
     Error = "ERROR",
     THROTTLED = "THROTTLED",
-    UPLOADED = "UPLOADED"
+    UPLOADED = "UPLOADED",
+    DELETING = "DELETING",
+    DELETED = "DELETED"    
 }
 
 

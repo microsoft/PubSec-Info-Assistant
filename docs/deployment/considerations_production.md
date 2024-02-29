@@ -51,6 +51,12 @@ Learn more [here](https://learn.microsoft.com/en-us/azure/private-link/private-e
 
 **Recommendation:** Implement Azure WAF to protect against common web vulnerabilities and attacks. Regularly update WAF rules and policies to stay resilient against evolving security threats. Integrate with Azure Security Center for comprehensive threat detection and response. Learn more [here](https://learn.microsoft.com/en-us/azure/web-application-firewall/overview).
 
+### Proactive Monitoring
+
+**Consideration:** Security monitoring alerts you to potential threats and helps you respond effectively to potential incidents.
+
+**Recommendation:** Consider deploying Microsoft Defender for Cloud to secure your workloads, understand your security posture and improve your overall security. Defender for Cloud combines the capabilities of a cloud security posture management (CSPM) solution and a cloud workload protection platform (CWPP). Defender for Cloud also uses role-based access control (RBAC) allowing you to assign roles to users, groups, and services so users only see information related to resources they have access to.  
+Learn more [here](https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-cloud-introduction).
 
 ## AOAI Instances - Redundancy and Reliability
 

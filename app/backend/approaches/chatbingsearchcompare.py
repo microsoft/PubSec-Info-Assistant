@@ -1,6 +1,7 @@
 
 
 import os
+import re
 from typing import Any, Sequence
 import urllib.parse
 from web_search_client import WebSearchClient
@@ -21,13 +22,13 @@ class ChatBingSearchCompare(Approach):
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
     Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
     
-    Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [url1]. Do not combine sources, list each source separately, e.g. [url1][url2].
+    Each source has a file name followed by a pipe character and the actual information. Use square brackets to reference the url and they must be in this format as example [url0]. Do not combine sources, list each source separately, e.g. [url1][url2].
     Never cite the source content using the examples provided in this paragraph that start with info.
       
     Here is how you should answer every question:
         
     -Look for information in the source content to answer the question in {query_term_language}.
-    -If the source document has an answer, please respond with citation.You must include a citation to each document referenced only once when you find answer in source documents.      
+    -If the source url has an answer, please respond with citation. You must include a citation to each document referenced only once when you find answer in source urls.      
     -If you cannot find answer in below sources, respond with I am not sure. Do not provide personal opinions or assumptions and do not include citations.
     -Identify the language of the user's question and translate the final response to that language.if the final answer is " I am not sure" then also translate it to the language of the user's question and then display translated response only. nothing else. 
 
@@ -52,7 +53,7 @@ class ChatBingSearchCompare(Approach):
     QUERY_PROMPT_TEMPLATE = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in Bing Search.
     Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
     Do not include cited sources in the search query terms.
-    Do not include any text inside [] or <<<>>> in the search query terms.
+    Do not include any brackets or text within [] or <<<>>> in the search query terms.
     Do not include any special characters like '+'.
     If you cannot generate a search query, return just the number 0.
     """
@@ -104,6 +105,7 @@ class ChatBingSearchCompare(Approach):
         )
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
+        
         messages = self.get_messages_from_history(
             self.QUERY_PROMPT_TEMPLATE,
             self.model_name,
@@ -114,6 +116,9 @@ class ChatBingSearchCompare(Approach):
             )
         
         query_resp = await self.make_chat_completion(messages)
+        # Use re.sub to replace anything within square brackets with an empty string
+        query_resp = re.sub(r'\[.*?\]', '', query_resp)
+        rag_answer = re.sub(r'\[.*?\]', '', rag_answer)
 
         # STEP 2: Use the search query to get the top web search results
         url_snippet_dict = await self.web_search_with_answer_count_promote_and_safe_search(query_resp)
@@ -156,15 +161,16 @@ class ChatBingSearchCompare(Approach):
             self.COMPARATIVE_RESPONSE_PROMPT_FEW_SHOTS,
              max_tokens=4097 - 500
          )
+        msg_to_display = '\n\n'.join([str(message) for message in messages])
         # Step 4: Use the search results to compare the Bing search based response with the internal documents response
         bing_compare_resp = await self.make_chat_completion(messages)
 
-        final_response = f"{urllib.parse.unquote(bing_resp) + ' ' + urllib.parse.unquote(bing_compare_resp)}"
+        final_response = f"{urllib.parse.unquote(bing_resp)} \n\n {urllib.parse.unquote(bing_compare_resp)}"
 
         return {
             "data_points": None,
             "answer": f"{urllib.parse.unquote(final_response)}",
-            "thoughts": f"Searched for:<br>{user_query}<br><br>Conversations:<br>",
+            "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": self.citations
         }
     

@@ -269,9 +269,9 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     tags = blob_properties.metadata.get("tags")
     if tags is not None:
         if isinstance(tags, str):
-            tags_list = [unquote(tags)]
+            tags_list = [unquote(tag.strip()) for tag in tags.split(",")]
         else:
-            tags_list = [unquote(tag) for tag in tags.split(",")]
+            tags_list = [unquote(tag.strip()) for tag in tags]
     else:
         tags_list = []
     # Write the tags to cosmos db

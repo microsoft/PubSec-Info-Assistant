@@ -1,13 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { useState } from "react";
-import { DetailsList, DetailsListLayoutMode, SelectionMode, IColumn, Selection, Label, Text, BaseSelectedItemsList } from "@fluentui/react";
-import { TooltipHost } from '@fluentui/react';
-import { retryFile } from "../../api";
-import React, { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { DetailsList, 
+    DetailsListLayoutMode, 
+    SelectionMode, 
+    IColumn, 
+    Selection, 
+    TooltipHost,
+    Button,
+    Dialog, 
+    DialogType, 
+    DialogFooter, 
+    PrimaryButton,
+    DefaultButton } from "@fluentui/react";
 
+import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
+import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 
 export interface IDocument {
     key: string;
@@ -20,6 +30,7 @@ export interface IDocument {
     state_description: string;
     upload_timestamp: string;
     modified_timestamp: string;
+    isSelected?: boolean; // Optional property to track selection state
 }
 
 interface Props {
@@ -28,6 +39,7 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
+    
     const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
@@ -83,11 +95,122 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 console.error("Error retrying file:", error);
             });
     }
+    
+    // Initialize Selection with items
+    useEffect(() => {
+        selectionRef.current.setItems(itemList, false);
+    }, [itemList]);
+
+    const selectionRef = useRef(new Selection({
+        onSelectionChanged: () => {
+            const selectedIndices = new Set(selectionRef.current.getSelectedIndices());
+            setItems(prevItems => prevItems.map((item, index) => ({
+                ...item,
+                isSelected: selectedIndices.has(index)
+            })));
+        }
+    }));
+    
+
+    // Notification of processing
+    // Define a type for the props of Notification component
+    interface NotificationProps {
+        message: string;
+    }
+
+    const [notification, setNotification] = useState({ show: false, message: '' });
+
+    const Notification = ({ message }: NotificationProps) => {
+        // Ensure to return null when notification should not be shown
+        if (!notification.show) return null;
+    
+        return <div className={styles.notification}>{message}</div>;
+    };
+
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification({ show: false, message: '' });
+            }, 3000); // Hides the notification after 3 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
+
+    // *************************************************************
+    // Delete processing
+    // New state for managing dialog visibility and selected items
+    const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [selectedItemsForDeletion, setSelectedItemsForDeletion] = useState<IDocument[]>([]);
+
+    // Function to open the dialog with selected items
+    const showDeleteConfirmation = () => {
+        const selectedItems = selectionRef.current.getSelection() as IDocument[];
+        setSelectedItemsForDeletion(selectedItems);
+        setIsDialogVisible(true);
+    };
+
+    // Function to handle actual deletion
+    const handleDelete = () => {
+        setIsDialogVisible(false);
+        console.log("Items to delete:", selectedItemsForDeletion);
+        selectedItemsForDeletion.forEach(item => {
+            console.log(`Deleting item: ${item.name}`);
+            // delete this item
+            const request: DeleteItemRequest = {
+                path: item.filePath
+            }
+            const response = deleteItem(request);
+        });
+        // Notification after deletion
+        setNotification({ show: true, message: 'Processing deletion. Hit \'Refresh\' to track progress' });
+    };
+    
+
+    // Function to handle the delete button click
+    const handleDeleteClick = () => {
+        showDeleteConfirmation();
+    };
 
 
+    // *************************************************************
+    // Resubmit processing
+    // New state for managing resubmit dialog visibility and selected items
+    const [isResubmitDialogVisible, setIsResubmitDialogVisible] = useState(false);
+    const [selectedItemsForResubmit, setSelectedItemsForResubmit] = useState<IDocument[]>([]);
+
+    // Function to open the resubmit dialog with selected items
+    const showResubmitConfirmation = () => {
+        const selectedItems = selectionRef.current.getSelection() as IDocument[];
+        setSelectedItemsForResubmit(selectedItems);
+        setIsResubmitDialogVisible(true);
+    };
+
+    // Function to handle actual resubmission
+    const handleResubmit = () => {
+        setIsResubmitDialogVisible(false);
+        console.log("Items to resubmit:", selectedItemsForResubmit);
+        selectedItemsForResubmit.forEach(item => {
+            console.log(`Resubmitting item: ${item.name}`);
+            // resubmit this item
+            const request: ResubmitItemRequest = {
+                path: item.filePath
+            }
+            const response = resubmitItem(request);
+        });
+        // Notification after resubmission
+        setNotification({ show: true, message: 'Processing resubmit. Hit \'Refresh\' to track progress' });
+    };
+    
+
+    // Function to handle the resubmit button click
+    const handleResubmitClick = () => {
+        showResubmitConfirmation();
+    };
+
+    
     const [columns, setColumns] = useState<IColumn[]> ([
         {
-            key: 'column1',
+            key: 'file_type',
             name: 'File Type',
             className: styles.fileIconCell,
             iconClassName: styles.fileIconHeaderIcon,
@@ -105,7 +228,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ),
         },
         {
-            key: 'column2',
+            key: 'name',
             name: 'Name',
             fieldName: 'name',
             minWidth: 210,
@@ -119,7 +242,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column3',
+            key: 'state',
             name: 'State',
             fieldName: 'state',
             minWidth: 70,
@@ -131,13 +254,28 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onRender: (item: IDocument) => (  
                 <TooltipHost content={`${item.state} `}>  
                     <span>{item.state}</span>  
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}  
                 </TooltipHost>  
             ), 
             isPadded: true,
         },
         {
-            key: 'column4',
+            key: 'folder',
+            name: 'Folder',
+            fieldName: 'folder',
+            minWidth: 70,
+            maxWidth: 90,
+            isResizable: true,
+            ariaLabel: 'Column operations for folder, Press to sort by folder',
+            onColumnClick: onColumnClick,
+            data: 'string',
+            onRender: (item: IDocument) => {
+                return <span>{item.filePath}</span>;
+            },
+            isPadded: true,
+        },
+        {
+            key: 'upload_timestamp',
             name: 'Submitted On',
             fieldName: 'upload_timestamp',
             minWidth: 90,
@@ -153,7 +291,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             isPadded: true,
         },
         {
-            key: 'column5',
+            key: 'modified_timestamp',
             name: 'Last Updated',
             fieldName: 'modified_timestamp',
             minWidth: 90,
@@ -172,7 +310,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             },
         },
         {
-            key: 'column6',
+            key: 'state_description',
             name: 'Status Detail',
             fieldName: 'state_description',
             minWidth: 90,
@@ -186,7 +324,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 <TooltipHost content={`${item.state_description} `}>
                     <span>{item.state}</span>
                 </TooltipHost>
-            ),
+            )
         }
     ]);
 
@@ -194,11 +332,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         <div>
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <DetailsList
-                // items={items}
                 items={itemList}
                 compact={true}
                 columns={columns}
-                selectionMode={SelectionMode.none}
+                selection={selectionRef.current}
+                selectionMode={SelectionMode.multiple} // Allow multiple selection
                 getKey={getKey}
                 setKey="none"
                 layoutMode={DetailsListLayoutMode.justified}
@@ -206,6 +344,49 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 onItemInvoked={onItemInvoked}
             />
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
+            <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
+            <Button text="Resubmit" onClick={handleResubmitClick} />
+            {/* Dialog for delete confirmation */}
+            <Dialog
+                hidden={!isDialogVisible}
+                onDismiss={() => setIsDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'Delete Confirmation',
+                    subText: 'Are you sure you want to delete the selected items?'
+                }}
+                modalProps={{
+                    isBlocking: true,
+                    styles: { main: { maxWidth: 450 } }
+                }}
+            >
+                <DialogFooter>
+                    <PrimaryButton onClick={handleDelete} text="Delete" />
+                    <DefaultButton onClick={() => setIsDialogVisible(false)} text="Cancel" />
+                </DialogFooter>
+            </Dialog>
+            {/* Dialog for resubmit confirmation */}
+            <Dialog
+                hidden={!isResubmitDialogVisible}
+                onDismiss={() => setIsResubmitDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'Resubmit Confirmation',
+                    subText: 'Are you sure you want to resubmit the selected items?'
+                }}
+                modalProps={{
+                    isBlocking: true,
+                    styles: { main: { maxWidth: 450 } }
+                }}
+            >
+                <DialogFooter>
+                    <PrimaryButton onClick={handleResubmit} text="Resubmit" />
+                    <DefaultButton onClick={() => setIsResubmitDialogVisible(false)} text="Cancel" />
+                </DialogFooter>
+            </Dialog>
+            <div>
+                <Notification message={notification.message} />
+            </div>
         </div>
     );
 }

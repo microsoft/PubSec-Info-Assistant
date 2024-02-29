@@ -25,7 +25,7 @@
 
 	// Set *default* container specific settings values on container create.
 	"customizations": {
-    	"vscode": {
+		"vscode": {
 			"settings": { 
 				"python.pythonPath": "/opt/conda/envs/development/bin/python",
 				"python.languageServer": "Pylance",
@@ -41,10 +41,10 @@
 				"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 				"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 				"files.watcherExclude": {
-          			"**/.git/objects/**": true,
-         			"**/.git/subtree-cache/**": true,
-            		"**/node_modules/*/**": true,
-           			"**/.python_packages/*/**": true
+          				"**/.git/objects/**": true,
+         				"**/.git/subtree-cache/**": true,
+            			"**/node_modules/*/**": true,
+           				"**/.python_packages/*/**": true
 				},
 				"files.associations": {
 					"*.workbook": "[jsonc]"
@@ -76,8 +76,6 @@
 				"ms-python.pylint"
 			],
 		}
-
-    },
-
+	},
 	"remoteUser": "vscode"
 }

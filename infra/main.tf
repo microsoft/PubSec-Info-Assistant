@@ -247,7 +247,7 @@ module "searchServices" {
   tags     = local.tags
   # aad_auth_failure_mode = "http401WithBearerChallenge"
   # sku_name = var.searchServicesSkuName
-  semanticSearch = "free"
+  semanticSearch = var.use_semantic_reranker ? "free" : null
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId
   azure_search_domain = var.azure_search_domain

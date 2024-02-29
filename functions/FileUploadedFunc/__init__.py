@@ -33,11 +33,10 @@ def main(myblob: func.InputStream):
     try:
         time.sleep(random.randint(1, 2))  # add a random delay
         statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
-        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
+        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, True)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
-        # Create message structure to send to queue
-      
+        # Create message structure to send to queue      
         file_extension = os.path.splitext(myblob.name)[1][1:].lower()
         if file_extension == 'pdf':
              # If the file is a PDF a message is sent to the PDF processing queue.

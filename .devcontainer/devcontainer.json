@@ -40,12 +40,12 @@
 				"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
 				"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
 				"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
-        		"files.watcherExclude": {
+				"files.watcherExclude": {
           			"**/.git/objects/**": true,
-         		 	"**/.git/subtree-cache/**": true,
+         			"**/.git/subtree-cache/**": true,
             		"**/node_modules/*/**": true,
            			"**/.python_packages/*/**": true
-          		},
+				},
 				"files.associations": {
 					"*.workbook": "[jsonc]"
 				}

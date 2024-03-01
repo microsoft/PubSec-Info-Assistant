@@ -147,7 +147,7 @@ module "backend" {
     AZURE_OPENAI_RESOURCE_GROUP             = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
     AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
     AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
-    AZURE_ENDPOINTS_MANAGEMENT_API          = var.azure_endpoints_management_api
+    AZURE_ARM_MANAGEMENT_API          = var.azure_arm_management_api
     AZURE_SEARCH_INDEX                      = var.searchIndexName
     AZURE_SEARCH_SERVICE                    = module.searchServices.name
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint

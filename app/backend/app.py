@@ -53,7 +53,7 @@ ENV = {
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
     "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_SUBSCRIPTION_ID": None,
-    "AZURE_ENDPOINTS_MANAGEMENT_API": "https://management.core.windows.net/",
+    "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
     "CHAT_WARNING_BANNER_TEXT": "",
     "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
     "KB_FIELDS_CONTENT": "content",
@@ -139,30 +139,39 @@ model_name = ''
 model_version = ''
 
 # Set up OpenAI management client
-openai_mgmt_client = CognitiveServicesManagementClient(
-    credential=azure_credential,
-    subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
-    base_url=ENV["AZURE_ENDPOINTS_MANAGEMENT_API"])
 
-deployment = openai_mgmt_client.deployments.get(
-    resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
-    account_name=ENV["AZURE_OPENAI_SERVICE"],
-    deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
+## Temp fix for issue https://github.com/Azure/azure-sdk-for-python/issues/34337.
+## Remove this if/else once the issue is fixed in the SDK.
+if ENV["AZURE_OPENAI_DOMAIN"].endswith(".us"):
+    model_name = ENV["AZURE_OPENAI_CHATGPT_MODEL_NAME"]
+    model_version = ENV["AZURE_OPENAI_CHATGPT_MODEL_VERSION"]
+    embedding_model_name = ENV["AZURE_OPENAI_EMBEDDINGS_MODEL_NAME"]
+    embedding_model_version = ENV["AZURE_OPENAI_EMBEDDINGS_VERSION"]
+else:
+    openai_mgmt_client = CognitiveServicesManagementClient(
+        credential=azure_credential,
+        subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
+        base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
 
-model_name = deployment.properties.model.name
-model_version = deployment.properties.model.version
-
-if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
-    embedding_deployment = openai_mgmt_client.deployments.get(
+    deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
         account_name=ENV["AZURE_OPENAI_SERVICE"],
-        deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
+        deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
 
-    embedding_model_name = embedding_deployment.properties.model.name
-    embedding_model_version = embedding_deployment.properties.model.version
-else:
-    embedding_model_name = ""
-    embedding_model_version = ""
+    model_name = deployment.properties.model.name
+    model_version = deployment.properties.model.version
+
+    if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
+        embedding_deployment = openai_mgmt_client.deployments.get(
+            resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
+            account_name=ENV["AZURE_OPENAI_SERVICE"],
+            deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
+
+        embedding_model_name = embedding_deployment.properties.model.name
+        embedding_model_version = embedding_deployment.properties.model.version
+    else:
+        embedding_model_name = ""
+        embedding_model_version = ""
 
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(

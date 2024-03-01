@@ -67,7 +67,7 @@ variable "azure_openai_authority_host" {
   type = string  
 }
 
-variable "azure_endpoints_management_api" {
+variable "azure_arm_management_api" {
   type        = string
 }
 

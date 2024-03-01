@@ -70,6 +70,16 @@ class ChatBingSearch(Approach):
         
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+        """
+        Runs the approach to simulate experience with Bing Chat.
+
+        Args:
+            history (Sequence[dict[str, str]]): The conversation history.
+            overrides (dict[str, Any]): The overrides for the approach.
+
+        Returns:
+            Any: The result of the approach.
+        """
 
         user_query = history[-1].get("user")
         user_persona = overrides.get("user_persona", "")
@@ -130,9 +140,15 @@ class ChatBingSearch(Approach):
     
 
     async def web_search_with_answer_count_promote_and_safe_search(self, user_query):
-        """ WebSearchWithAnswerCountPromoteAndSafeSearch.
         """
+        Performs a web search with specified parameters.
 
+        Args:
+            user_query (str): The query string for the web search.
+
+        Returns:
+            dict: A dictionary containing URL snippets as values and corresponding URLs as keys.
+        """
         client = WebSearchClient(AzureKeyCredential(SUBSCRIPTION_KEY))
 
         try:
@@ -164,7 +180,15 @@ class ChatBingSearch(Approach):
             print("Encountered exception. {}".format(err))
 
     async def make_chat_completion(self, messages):
+        """
+        Generates a chat completion response using the chat-based language model.
 
+        Args:
+            messages (List[dict[str, str]]): The list of messages for the chat-based language model.
+
+        Returns:
+            str: The generated chat completion response.
+        """
 
         chat_completion = await openai.ChatCompletion.acreate(
             deployment_id=self.chatgpt_deployment,

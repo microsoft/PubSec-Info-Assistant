@@ -15,8 +15,9 @@ from azure.storage.blob import (
 from core.modelhelper import get_token_limit
 
 class ChatReadRetrieveReadBingCompare(Approach):
-     
-
+    """
+    Approach for comparing and contrasting answers from internal data and Bing Chat.
+    """
 
     COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona}. User persona is {userPersona}.
     Compare and contrast the answers provided below from two sources of data. The first source is internal data indexed using a RAG pattern while the second source is from Bing Chat.
@@ -33,7 +34,6 @@ class ChatReadRetrieveReadBingCompare(Approach):
     ]
 
     citations = {}
-    
     
     def __init__(
         self,
@@ -56,7 +56,6 @@ class ChatReadRetrieveReadBingCompare(Approach):
         target_translation_language: str,
         enrichment_endpoint:str,
         enrichment_key:str
-        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -79,8 +78,17 @@ class ChatReadRetrieveReadBingCompare(Approach):
         self.model_version = model_version
         self.enrichment_appservice_name = enrichment_appservice_name
 
-
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+        """
+        Runs the approach to compare and contrast answers from internal data and Bing Chat.
+
+        Args:
+            history (Sequence[dict[str, str]]): The conversation history.
+            overrides (dict[str, Any]): The overrides for the approach.
+
+        Returns:
+            Any: The result of the approach.
+        """
         chat_rrr_approach = ChatReadRetrieveReadApproach(
                                     self.search_client,
                                     self.oai_service_name,
@@ -139,7 +147,7 @@ class ChatReadRetrieveReadBingCompare(Approach):
 
         # Step 4: Append web citations from the Bing Search approach
         for idx, url in enumerate(self.citations.keys(), start=1):
-            final_response += f" [File{idx}]"        
+            final_response += f" [File{idx}]"
 
         return {
             "data_points": None,
@@ -148,12 +156,12 @@ class ChatReadRetrieveReadBingCompare(Approach):
             "citation_lookup": self.citations
         }
     
-    async def make_chat_completion(self, messages):
+    async def make_chat_completion(self, messages) -> str:
         """
         Generates a chat completion response using the chat-based language model.
 
         Args:
-            messages: The list of messages for the chat-based language model.
+            messages (List[dict[str, str]]): The list of messages for the chat-based language model.
 
         Returns:
             str: The generated chat completion response.
@@ -167,7 +175,7 @@ class ChatReadRetrieveReadBingCompare(Approach):
         )
         return chat_completion.choices[0].message.content
     
-    def get_messages_builder(self, system_prompt: str, model_id: str, user_conv: str, few_shots = [dict[str, str]], max_tokens: int = 4096,) -> []:
+    def get_messages_builder(self, system_prompt: str, model_id: str, user_conv: str, few_shots = [dict[str, str]], max_tokens: int = 4096) -> []:
         """
         Constructs a list of messages for the chat-based language model.
 
@@ -193,4 +201,4 @@ class ChatReadRetrieveReadBingCompare(Approach):
         message_builder.append_message(self.USER, user_content, index=append_index)
 
         messages = message_builder.messages
-        return messages    
+        return messages

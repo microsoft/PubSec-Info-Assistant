@@ -112,9 +112,6 @@ class ChatBingSearchCompare(Approach):
         """
         Generates a chat completion response using the chat-based language model.
 
-        Args:
-            messages: The list of messages for the chat-based language model.
-
         Returns:
             str: The generated chat completion response.
         """
@@ -130,13 +127,6 @@ class ChatBingSearchCompare(Approach):
     def get_messages_builder(self, system_prompt: str, model_id: str, user_conv: str, few_shots = [dict[str, str]], max_tokens: int = 4096,) -> []:
         """
         Constructs a list of messages for the chat-based language model.
-
-        Args:
-            system_prompt (str): The system prompt for the chat-based language model.
-            model_id (str): The ID of the model to be used for chat-based language model.
-            user_conv (str): The user conversation for the chat-based language model.
-            few_shots (List[dict[str, str]]): Few shot prompts for the chat-based language model.
-            max_tokens (int): The maximum number of tokens allowed for the chat-based language model.
 
         Returns:
             List[dict[str, str]]: The list of messages for the chat-based language model.

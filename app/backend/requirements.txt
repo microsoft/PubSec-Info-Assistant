@@ -15,8 +15,4 @@ fastapi-utils == 0.2.1
 uvicorn == 0.23.2
 numexpr == 2.9.0
 langchain-experimental==0.0.49
-microsoft-bing-websearch
-msrest
-azure-common
-msrestazure
-azure-core
+microsoft-bing-websearch==1.0.0

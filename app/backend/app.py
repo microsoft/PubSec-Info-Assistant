@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
+from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
 from approaches.chatbingsearchcompare import ChatBingSearchCompare
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approaches
@@ -196,7 +197,28 @@ chat_approaches = {
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],    
-    )
+    ),
+    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+                                    search_client,
+                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["KB_FIELDS_SOURCEFILE"],
+                                    ENV["KB_FIELDS_CONTENT"],
+                                    ENV["KB_FIELDS_PAGENUMBER"],
+                                    ENV["KB_FIELDS_CHUNKFILE"],
+                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+                                    blob_client,
+                                    ENV["QUERY_TERM_LANGUAGE"],
+                                    model_name,
+                                    model_version,
+                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
+                                    ENV["TARGET_EMBEDDINGS_MODEL"],
+                                    ENV["ENRICHMENT_APPSERVICE_NAME"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["ENRICHMENT_ENDPOINT"],
+                                    ENV["ENRICHMENT_KEY"]
+                                )   
 }
 
 
@@ -246,39 +268,6 @@ async def chat(request: Request):
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-    
-@app.post("/bing")
-async def bing(request: Request):
-    """Chat with the bot using a given approach
-
-    Args:
-        request (Request): The incoming request object
-
-    Returns:
-        dict: The response containing the chat results
-
-    Raises:
-        dict: The error response if an exception occurs during the chat
-    """
-    json_body = await request.json()
-    approach = json_body.get("approach")
-    try:
-        impl = chat_approaches.get(Approaches(int(approach)))
-        if not impl:
-            return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("question", ""), json_body.get("raganswer", ""), json_body.get("compare", False))
-
-        # To fix citation bug,below code is added.aparmar
-        return {
-                "data_points": r["data_points"],
-                "answer": r["answer"],
-                "thoughts": r["thoughts"],
-                "citation_lookup": r["citation_lookup"],
-            }
-
-    except Exception as ex:
-        log.error(f"Error in bing api:: {ex}")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex    
 
 @app.get("/getblobclienturl")
 async def get_blob_client_url():

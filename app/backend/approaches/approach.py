@@ -13,6 +13,7 @@ class Approaches(Enum):
     GPTDirect = 3
     ChatBingSearch = 4
     ChatBingSearchCompare = 5
+    BingRRRCompare = 6
 
 class Approach:
     """

@@ -19,6 +19,7 @@ interface Props {
     onThoughtProcessClicked: () => void;
     onBingSearchClicked: () => void;
     onBingCompareClicked: () => void;
+    onRagCompareClicked: () => void;
     onSupportingContentClicked: () => void;
     onFollowupQuestionClicked?: (question: string) => void;
     showFollowupQuestions?: boolean;
@@ -33,6 +34,7 @@ export const Answer = ({
     onThoughtProcessClicked,
     onBingSearchClicked,
     onBingCompareClicked,
+    onRagCompareClicked,
     onSupportingContentClicked,
     onFollowupQuestionClicked,
     showFollowupQuestions,
@@ -111,7 +113,7 @@ export const Answer = ({
                 </Stack.Item>
             )}
             <Stack.Item align="center">
-                <RAIPanel source={answer.source} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onBingSearchClicked={onBingSearchClicked} onBingCompareClicked={onBingCompareClicked} />
+                <RAIPanel source={answer.source} comparative={answer.comparative} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onBingSearchClicked={onBingSearchClicked} onBingCompareClicked={onBingCompareClicked} onRagCompareClicked={onRagCompareClicked} />
             </Stack.Item>
         </Stack>
     );

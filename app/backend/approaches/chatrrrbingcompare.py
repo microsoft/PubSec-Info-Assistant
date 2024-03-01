@@ -1,23 +1,22 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import os
-from typing import Any, Sequence
+import re
 import urllib.parse
+from typing import Any, Sequence
 import openai
-from approaches.chatbingsearch import ChatBingSearch
+from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approach
+from azure.search.documents import SearchClient  
 from core.messagebuilder import MessageBuilder
+from azure.storage.blob import (
+    BlobServiceClient
+)
 from core.modelhelper import get_token_limit
 
-SUBSCRIPTION_KEY = "YourKeyHere"
-ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
+class ChatReadRetrieveReadBingCompare(Approach):
+     
 
-
-class ChatBingSearchCompare(Approach):
-    """
-    Approach class for performing comparative analysis between Bing Search Response and Internal Documents.
-    """
 
     COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona}. User persona is {userPersona}.
     Compare and contrast the answers provided below from two sources of data. The first source is internal data indexed using a RAG pattern while the second source is from Bing Chat.
@@ -34,46 +33,87 @@ class ChatBingSearchCompare(Approach):
     ]
 
     citations = {}
-
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str):
-        """
-        Initializes the ChatBingSearchCompare approach.
-
-        Args:
-            model_name (str): The name of the model to be used for chat-based language model.
-            chatgpt_deployment (str): The deployment ID of the chat-based language model.
-            query_term_language (str): The language to be used for querying the data.
-        """
-        self.name = "ChatBingSearchCompare"
-        self.model_name = model_name
+    
+    
+    def __init__(
+        self,
+        search_client: SearchClient,
+        oai_service_name: str,
+        oai_service_key: str,
+        chatgpt_deployment: str,
+        source_file_field: str,
+        content_field: str,
+        page_number_field: str,
+        chunk_file_field: str,
+        content_storage_container: str,
+        blob_client: BlobServiceClient,
+        query_term_language: str,
+        model_name: str,
+        model_version: str,
+        is_gov_cloud_deployment: str,
+        target_embedding_model: str,
+        enrichment_appservice_name: str,
+        target_translation_language: str,
+        enrichment_endpoint:str,
+        enrichment_key:str
+        
+    ):
+        self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
+        self.source_file_field = source_file_field
+        self.content_field = content_field
+        self.page_number_field = page_number_field
+        self.chunk_file_field = chunk_file_field
+        self.content_storage_container = content_storage_container
+        self.blob_client = blob_client
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
+        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
+        self.target_translation_language=target_translation_language
+        self.enrichment_endpoint=enrichment_endpoint
+        self.enrichment_key=enrichment_key
+        self.oai_service_name = oai_service_name
+        self.oai_service_key = oai_service_key
+        self.is_gov_cloud_deployment = is_gov_cloud_deployment
+        self.model_name = model_name
+        self.model_version = model_version
+        self.enrichment_appservice_name = enrichment_appservice_name
+
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
-        """
-        Runs the comparative analysis between Bing Search Response and Internal Documents.
+        chat_rrr_approach = ChatReadRetrieveReadApproach(
+                                    self.search_client,
+                                    self.oai_service_name,
+                                    self.oai_service_key,
+                                    self.chatgpt_deployment,
+                                    self.source_file_field,
+                                    self.content_field,
+                                    self.page_number_field,
+                                    self.chunk_file_field,
+                                    self.content_storage_container,
+                                    self.blob_client,
+                                    self.query_term_language,
+                                    self.model_name,
+                                    self.model_version,
+                                    self.is_gov_cloud_deployment,
+                                    self.escaped_target_model,
+                                    self.enrichment_appservice_name,
+                                    self.target_translation_language,
+                                    self.enrichment_endpoint,
+                                    self.enrichment_key
+                                )
+        rrr_response = await chat_rrr_approach.run(history, overrides)
 
-        Args:
-            history (Sequence[dict[str, str]]): The chat conversation history.
-            overrides (dict[str, Any]): Overrides for user and system personas, response length, etc.
-
-        Returns:
-            Any: The result of the comparative analysis.
-        """
-        # Step 1: Call bing Search Approach for a Bing LLM Response and Citations
-        chat_bing_search = ChatBingSearch(self.model_name, self.chatgpt_deployment, self.query_term_language)
-        bing_search_response = await chat_bing_search.run(history, overrides)
-        self.citations = bing_search_response.get("citation_lookup")
+        self.citations = rrr_response.get("citation_lookup")
 
         user_query = history[-1].get("user")
-        rag_answer = history[0].get("bot")
+        bing_answer = history[0].get("bot")
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
-        bing_compare_query = user_query + "Internal Documents:\n" + rag_answer + "\n\n" + " Bing Search Response:\n" + bing_search_response.get("answer") + "\n\n"
+        bing_compare_query = user_query + "Internal Documents:\n" + rrr_response.get("answer") + "\n\n" + " Bing Search Response:\n" + bing_answer + "\n\n"
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
@@ -99,7 +139,7 @@ class ChatBingSearchCompare(Approach):
 
         # Step 4: Append web citations from the Bing Search approach
         for idx, url in enumerate(self.citations.keys(), start=1):
-            final_response += f" [url{idx}]"
+            final_response += f" [File{idx}]"        
 
         return {
             "data_points": None,
@@ -107,7 +147,7 @@ class ChatBingSearchCompare(Approach):
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": self.citations
         }
-
+    
     async def make_chat_completion(self, messages):
         """
         Generates a chat completion response using the chat-based language model.
@@ -153,7 +193,4 @@ class ChatBingSearchCompare(Approach):
         message_builder.append_message(self.USER, user_content, index=append_index)
 
         messages = message_builder.messages
-        return messages
-      
-
-
+        return messages    

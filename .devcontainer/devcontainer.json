@@ -29,22 +29,14 @@
 			"settings": { 
 				"python.pythonPath": "/opt/conda/envs/development/bin/python",
 				"python.languageServer": "Pylance",
-				"python.linting.enabled": true,
-				"python.linting.pylintEnabled": true,
 				"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
 				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
 				"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
-				"python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
-				"python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
-				"python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
-				"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
-				"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
-				"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 				"files.watcherExclude": {
-          				"**/.git/objects/**": true,
-         				"**/.git/subtree-cache/**": true,
+          			"**/.git/objects/**": true,
+         			"**/.git/subtree-cache/**": true,
 					"**/node_modules/*/**": true,
-           				"**/.python_packages/*/**": true
+           			"**/.python_packages/*/**": true
 				},
 				"files.associations": {
 					"*.workbook": "[jsonc]"
@@ -73,8 +65,9 @@
 				"BelkacemBerras.spellcheck",
 				"ms-azuretools.vscode-azureresourcegroups",
 				"ms-azuretools.vscode-azurefunctions",
-				"ms-python.pylint"
-			],
+				"ms-python.pylint",
+				"ms-python.mypy"
+			]
 		}
 	},
 	"remoteUser": "vscode"

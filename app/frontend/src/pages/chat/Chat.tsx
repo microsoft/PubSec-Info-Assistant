@@ -357,13 +357,14 @@ const Chat = () => {
                                             onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
                                             onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab, index)}
                                             onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
-                                            onFollowupQuestionClicked={q => makeApiRequest(q, false)}
+                                            onFollowupQuestionClicked={q => answer[1].source === "bing" ? makeBingRequest(q, false) : makeApiRequest(q, false)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
                                             onRegenerateClick={() => answer[1].source === "bing" ? makeBingRequest(answers[index][0], false) : makeApiRequest(answers[index][0], false)}
                                             onBingSearchClicked={() => makeBingRequest(answers[index][0], false)}
                                             onBingCompareClicked={() => makeBingRequest(answers[index][0], true)}
                                             onRagCompareClicked={() => makeApiRequest(answers[index][0], true)}
+                                            onRagSearchClicked={() => makeApiRequest(answers[index][0], false)}
                                         />
                                     </div>
                                 </div>

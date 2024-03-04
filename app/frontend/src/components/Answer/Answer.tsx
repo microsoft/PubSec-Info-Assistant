@@ -18,6 +18,7 @@ interface Props {
     onCitationClicked: (filePath: string, sourcePath: string, pageNumber: string) => void;
     onThoughtProcessClicked: () => void;
     onBingSearchClicked: () => void;
+    onRagSearchClicked: () => void;
     onBingCompareClicked: () => void;
     onRagCompareClicked: () => void;
     onSupportingContentClicked: () => void;
@@ -33,6 +34,7 @@ export const Answer = ({
     onCitationClicked,
     onThoughtProcessClicked,
     onBingSearchClicked,
+    onRagSearchClicked,
     onBingCompareClicked,
     onRagCompareClicked,
     onSupportingContentClicked,
@@ -113,7 +115,7 @@ export const Answer = ({
                 </Stack.Item>
             )}
             <Stack.Item align="center">
-                <RAIPanel source={answer.source} comparative={answer.comparative} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onBingSearchClicked={onBingSearchClicked} onBingCompareClicked={onBingCompareClicked} onRagCompareClicked={onRagCompareClicked} />
+                <RAIPanel source={answer.source} comparative={answer.comparative} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onBingSearchClicked={onBingSearchClicked} onBingCompareClicked={onBingCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
             </Stack.Item>
         </Stack>
     );

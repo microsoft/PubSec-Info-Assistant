@@ -12,11 +12,12 @@ interface Props {
     onAdjustClick?: () => void;
     onRegenerateClick?: () => void;
     onBingSearchClicked?: () => void;
+    onRagSearchClicked?: () => void;
     onBingCompareClicked?: () => void;
     onRagCompareClicked?: () => void;
 }
 
-export const RAIPanel = ({ source, comparative, onAdjustClick, onRegenerateClick, onBingSearchClicked, onBingCompareClicked, onRagCompareClicked }: Props) => {
+export const RAIPanel = ({ source, comparative, onAdjustClick, onRegenerateClick, onBingSearchClicked, onRagSearchClicked, onBingCompareClicked, onRagCompareClicked }: Props) => {
     return (
         <div className={styles.adjustInputContainer}>
             <div className={styles.adjustInput} onClick={onAdjustClick}>
@@ -29,10 +30,16 @@ export const RAIPanel = ({ source, comparative, onAdjustClick, onRegenerateClick
             </div>
             {!comparative && (
                 source === 'bing' ? (
-                    <div className={styles.adjustInput} onClick={onRagCompareClicked}>
-                        <DatabaseStack16Filled primaryFill="rgba(133, 133, 133, 1)" />
-                        <span className={styles.adjustInputText}>Compare Data</span>
-                    </div>
+                    <>
+                        <div className={styles.adjustInput} onClick={onRagSearchClicked}>
+                            <DatabaseStack16Filled primaryFill="rgba(133, 133, 133, 1)" />
+                            <span className={styles.adjustInputText}>Search Data</span>
+                        </div>
+                        <div className={styles.adjustInput} onClick={onRagCompareClicked}>
+                            <DatabaseStack16Filled primaryFill="rgba(133, 133, 133, 1)" />
+                            <span className={styles.adjustInputText}>Compare Data</span>
+                        </div>
+                    </>
                 ) : (
                     <>
                         <div className={styles.adjustInput} onClick={onBingSearchClicked}>

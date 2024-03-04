@@ -36,6 +36,7 @@ export interface IDocument {
         status_classification: string;
     }>;
     isSelected?: boolean; // Optional property to track selection state
+    tags: string;
 }
 
 
@@ -336,6 +337,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
                 </TooltipHost>  
             ), 
+            isPadded: true,
+        },
+        {
+            key: 'tags',
+            name: 'Tags',
+            fieldName: 'tags',
+            minWidth: 70,
+            maxWidth: 90,
+            isRowHeader: true,
+            isResizable: true,
+            sortAscendingAriaLabel: 'Sorted A to Z',
+            sortDescendingAriaLabel: 'Sorted Z to A',
+            onColumnClick: onColumnClick,
+            data: 'string',
             isPadded: true,
         },
         {

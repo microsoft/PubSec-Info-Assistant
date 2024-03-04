@@ -171,6 +171,7 @@ export const FileStatus = ({ className }: Props) => {
                         status_classification: su.status_classification,
                     })),
                     value: fileList[i].id,
+                    tags: fileList[i].tags
                 });
             }
             catch (e) {

@@ -10,7 +10,6 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient
 from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.tags_helper import TagsHelper
 
 blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 blob_storage_account_upload_container_name = os.environ[
@@ -29,11 +28,6 @@ status_log = StatusLog(cosmosdb_url,
                        cosmosdb_key,
                        cosmosdb_log_database_name,
                        cosmosdb_log_container_name)
-
-tags_helper = TagsHelper(cosmosdb_url,
-                         cosmosdb_key,
-                         cosmosdb_log_database_name,
-                         cosmosdb_log_container_name)
 
 def chunks(data, size):
     '''max number of blobs to delete in one request is 256, so this breaks

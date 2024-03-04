@@ -23,7 +23,6 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
-from shared_code.tags_helper import TagsHelper
 from azure.cosmos import CosmosClient
 
 
@@ -282,7 +281,7 @@ async def get_all_upload_status(request: Request):
         cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)
         database = cosmos_client.get_database_client(statusLog._database_name)
         container = database.get_container_client(statusLog._container_name)
-        query_string = "SELECT DISTINCT c.tags"
+        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
         items = list(container.query_items(
             query=query_string,
             enable_cross_partition_query=True
@@ -408,9 +407,9 @@ async def get_tags(request: Request):
     try:
         # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=tagsHelper._url, credential=tagsHelper._key)     
-        database = cosmos_client.get_database_client(tagsHelper._database_name)               
-        container = database.get_container_client(tagsHelper._container_name) 
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)     
+        database = cosmos_client.get_database_client(statusLog._database_name)               
+        container = database.get_container_client(statusLog._container_name) 
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  
         items = list(container.query_items(
             query=query_string,
@@ -547,7 +546,7 @@ async def get_all_tags():
         dict: A dictionary containing the status of all tags
     """
     try:
-        results = tagsHelper.get_all_tags()
+        results = statusLog.get_all_tags()
     except Exception as ex:
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex)) from ex

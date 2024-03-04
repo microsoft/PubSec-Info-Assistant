@@ -28,7 +28,6 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
 from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.tags_helper import TagsHelper
 
 # === ENV Setup ===
 
@@ -116,7 +115,6 @@ utilities_helper = UtilitiesHelper(
 )
 
 statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
-tagsHelper = TagsHelper(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
 # === API Setup ===
 
 start_time = datetime.now()
@@ -271,7 +269,7 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     else:
         tags_list = []
     # Write the tags to cosmos db
-    tagsHelper.upsert_document(blob_path, tags_list)
+    statusLog.update_document_tags(blob_path, tags_list)
     return tags_list
 
 @app.on_event("startup") 

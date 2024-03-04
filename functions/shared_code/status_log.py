@@ -249,6 +249,20 @@ class StatusLog:
                 logging.warning("Document with ID %s not found.", document_id)
         except Exception as err:
             logging.error("An error occurred while updating the document state: %s", str(err))
+            
+    def update_document_tags(self, document_path, tags_list):
+        """ Upserts document tags into the database """
+        try:       
+            document_id = self.encode_document_id(document_path)
+             # retrieve the stored document from cosmos
+            base_name = os.path.basename(document_path)
+            json_document = self.container.read_item(item=document_id, partition_key=base_name)
+            json_document['tags'] = tags_list
+            self._log_document[document_id] = json_document
+            self.save_document(document_path)
+
+        except Exception as err:
+            logging.error("An error occurred while updating the document state: %s", str(err))
 
     def save_document(self, document_path):
         """Saves the document in the storage"""
@@ -271,3 +285,20 @@ class StatusLog:
         if exc is not None:
             stackstr += '  ' + traceback.format_exc().lstrip(trc)
         return stackstr
+
+    def get_all_tags(self):
+        """ Returns all tags in the database """
+        query = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
+        tag_array = self.container.query_items(query=query, enable_cross_partition_query=True)
+        return ",".join(tag_array)
+    
+    def delete_doc(self, doc: str) -> None:
+        '''Deletes doc for a file paths'''
+        doc_id = self.encode_document_id(f"upload/{doc}")
+        file_path = f"upload/{doc}"
+        logging.debug("deleting tags item for doc %s \n \t with ID %s", doc, doc_id)
+        try:
+            self.container.delete_item(item=doc_id, partition_key=file_path)
+            logging.info("deleted tags for document path %s", file_path)
+        except exceptions.CosmosResourceNotFoundError:
+            logging.info("Tag entry for %s already deleted", file_path)

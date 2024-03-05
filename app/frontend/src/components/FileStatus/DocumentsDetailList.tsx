@@ -217,21 +217,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
-    
-    // const onStateColumnClick = async (item: IDocument) => {
-    //     try {
-    //         //const text = await getTextForState(item);
-    //         // const text = item.status_updates[0].status;
-    //         const text = item.status_updates.map(update => update.status).join("\n");       
-    //         setStateDialogContent(text);
-    //         setStateDialogVisible(true);
-    //     } catch (error) {
-    //         console.error("Error on state column click:", error);
-    //         // Handle error here, perhaps show an error message to the user
-    //     }
-    // };
-
-
+ 
     const onStateColumnClick = (item: IDocument) => {
         try {
             const statusElements = item.status_updates.map((update, index) => (

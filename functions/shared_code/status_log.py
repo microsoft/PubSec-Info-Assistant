@@ -96,6 +96,7 @@ class StatusLog:
                        within_n_hours: int,
                        state: State = State.ALL,
                        folder_path: str = 'All',
+                       tag: str = 'All',
                        container: str = 'upload'
                        ):
         """ 
@@ -116,6 +117,14 @@ class StatusLog:
 
         if state != State.ALL:
             conditions.append(f"c.state = '{state.value}'")
+            
+            
+        #********************************************************
+        # add a query clause to query the tags arays to only return
+        # docs that have the specified tag
+        #********************************************************
+        if tag != "All":
+            conditions.append(f"ARRAY_CONTAINS(c.tags, '{tag}')")
             
         path_prefix = container + '/'
         if folder_path == 'Root':

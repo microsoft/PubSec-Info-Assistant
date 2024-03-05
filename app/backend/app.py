@@ -269,29 +269,14 @@ async def get_all_upload_status(request: Request):
     timeframe = json_body.get("timeframe")
     state = json_body.get("state")
     folder = json_body.get("folder")
+    tag = json_body.get("tag")   
     try:
         results = statusLog.read_files_status_by_timeframe(timeframe, 
             State[state], 
             folder, 
+            tag,
             os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-        
-        # retrieve tags for each file
-         # Initialize an empty list to hold the tags
-        items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)
-        database = cosmos_client.get_database_client(statusLog._database_name)
-        container = database.get_container_client(statusLog._container_name)
-        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
-        items = list(container.query_items(
-            query=query_string,
-            enable_cross_partition_query=True
-        ))           
-
-        # Extract and split tags
-        unique_tags = set()
-        for item in items:
-            tags = item.split(',')
-            unique_tags.update(tags)        
+     
         
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")

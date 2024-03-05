@@ -91,7 +91,8 @@ export type AllFolders = {
 export type GetUploadStatusRequest = {
     timeframe: number;
     state: FileState;
-    folder: string
+    folder: string;
+    tag: string
 }
 
 export type DeleteItemRequest = {

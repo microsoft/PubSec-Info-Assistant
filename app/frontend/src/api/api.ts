@@ -118,7 +118,8 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
         body: JSON.stringify({
             timeframe: options.timeframe,
             state: options.state as string,
-            folder: options.folder as string
+            folder: options.folder as string,
+            tag: options.tag as string
             })
         });
     

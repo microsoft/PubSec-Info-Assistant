@@ -33,7 +33,6 @@ cd ../backend
 mkdir -p ./shared_code
 cp  ../../functions/shared_code/status_log.py ./shared_code
 cp  ../../functions/shared_code/__init__.py ./shared_code
-cp ../../functions/shared_code/tags_helper.py ./shared_code
 
 # zip the webapp content from app/backend to the ./artifacts folders
 zip -q -r ${BINARIES_OUTPUT_PATH}/webapp.zip .
@@ -52,7 +51,6 @@ cd ${ENRICHMENT_ROOT_PATH}
 mkdir -p ./shared_code
 cp  ../../functions/shared_code/status_log.py ./shared_code
 cp  ../../functions/shared_code/utilities_helper.py ./shared_code
-cp  ../../functions/shared_code/tags_helper.py ./shared_code
 zip -q -r ${BINARIES_OUTPUT_PATH}/enrichment.zip . -x "models/*" @
 echo "Successfully zipped enrichment app"
 echo -e "\n"

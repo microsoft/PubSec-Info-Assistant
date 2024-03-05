@@ -107,7 +107,8 @@ export const FileStatus = ({ className }: Props) => {
         const request: GetUploadStatusRequest = {
             timeframe: timeframe,
             state: selectedFileStateItem?.key == undefined ? FileState.All : selectedFileStateItem?.key as FileState,
-            folder: SelectedFolderItem?.key == undefined ? 'Root' : SelectedFolderItem?.key as string
+            folder: SelectedFolderItem?.key == undefined ? 'Root' : SelectedFolderItem?.key as string,
+            tag: SelectedTagItem?.key == undefined ? 'All' : SelectedTagItem?.key as string
         }
         const response = await getAllUploadStatus(request);
         const list = convertStatusToItems(response.statuses);
@@ -166,6 +167,7 @@ export const FileStatus = ({ className }: Props) => {
                     upload_timestamp: fileList[i].start_timestamp,
                     modified_timestamp: fileList[i].state_timestamp,
                     value: fileList[i].id,
+                    tags: fileList[i].tags
                 });
             }
             catch (e) {

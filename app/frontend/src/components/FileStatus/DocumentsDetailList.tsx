@@ -31,6 +31,7 @@ export interface IDocument {
     upload_timestamp: string;
     modified_timestamp: string;
     isSelected?: boolean; // Optional property to track selection state
+    tags: string;
 }
 
 interface Props {
@@ -207,6 +208,46 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         showResubmitConfirmation();
     };
 
+    // ********************************************************************
+    // State detail dialog
+    const [stateDialogVisible, setStateDialogVisible] = useState(false);
+    const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
+    const scrollableContentRef = useRef<HTMLDivElement>(null);
+ 
+    const onStateColumnClick = (item: IDocument) => {
+        try {
+            const statusElements = item.status_updates.map((update, index) => (
+                <div key={index}>
+                    <b>{update.status_timestamp}</b> - {update.status}
+                </div>
+            ));
+            setStateDialogContent(statusElements);
+            setStateDialogVisible(true);
+        } catch (error) {
+            console.error("Error on state column click:", error);
+            // Handle error here, perhaps show an error message to the user
+        }
+    };
+    
+
+    const dialogStyles = {
+        main: {
+            width: '400px',  // Set the width to 400 pixels
+            maxWidth: '400px', // Set the maximum width to 400 pixels
+            maxHeight: '400px', // Set the maximum height to 400 pixels
+            overflowY: 'auto', // Enable vertical scrolling for the entire dialog if needed
+        },
+    };
+
+
+    useEffect(() => {
+        // Scroll to the top when the dialog opens
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, []);
+    
+    // ********************************************************************
+
+
     
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -272,6 +313,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onRender: (item: IDocument) => {
                 return <span>{item.filePath}</span>;
             },
+            isPadded: true,
+        },
+        {
+            key: 'tags',
+            name: 'Tags',
+            fieldName: 'tags',
+            minWidth: 70,
+            maxWidth: 90,
+            isRowHeader: true,
+            isResizable: true,
+            sortAscendingAriaLabel: 'Sorted A to Z',
+            sortDescendingAriaLabel: 'Sorted Z to A',
+            onColumnClick: onColumnClick,
+            data: 'string',
             isPadded: true,
         },
         {

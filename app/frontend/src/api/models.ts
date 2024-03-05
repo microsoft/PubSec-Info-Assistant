@@ -69,19 +69,11 @@ export type FileUploadBasicStatus = {
     start_timestamp: string;
     state_description: string;
     state_timestamp: string;
-    status_updates: StatusUpdates[];
-}
-
-export type StatusUpdates = {
-    status: string;
-    status_timestamp: string;
-    status_classification: string;
 }
 
 export type AllFilesUploadStatus = {
     statuses: FileUploadBasicStatus[];
 }
-
 
 export type AllFolders = {
     folders: string;

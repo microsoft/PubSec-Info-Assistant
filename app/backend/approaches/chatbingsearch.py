@@ -13,7 +13,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 
-SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
+SUBSCRIPTION_KEY = "YourKeyHere"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 

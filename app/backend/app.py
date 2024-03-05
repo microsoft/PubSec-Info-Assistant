@@ -71,7 +71,8 @@ ENV = {
     "ENRICHMENT_APPSERVICE_NAME": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
     "ENRICHMENT_ENDPOINT": None,
-    "ENRICHMENT_KEY": None    
+    "ENRICHMENT_KEY": None,
+    "ENABLE_BING_SAFE_SEARCH": "true"   
 }
 
 for key, value in ENV.items():
@@ -192,11 +193,13 @@ chat_approaches = {
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
     ),
     Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                    ENV["TARGET_TRANSLATION_LANGUAGE"],    
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"], 
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),   
     ),
     Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
                                     search_client,

@@ -13,7 +13,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 
-SUBSCRIPTION_KEY = "YourKeyHere"
+SUBSCRIPTION_KEY = "a33c0ffc04144dd2b553f90796f87792"
 ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
 
 
@@ -61,12 +61,13 @@ class ChatBingSearch(Approach):
     citations = {}
     approach_class = ""
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str):
+    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_safe_search: bool):
         self.name = "ChatBingSearch"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
+        self.bing_safe_search = bing_safe_search
         
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
@@ -105,7 +106,7 @@ class ChatBingSearch(Approach):
         query_resp = await self.make_chat_completion(messages)
 
         # STEP 2: Use the search query to get the top web search results
-        url_snippet_dict = await self.web_search_with_answer_count_promote_and_safe_search(query_resp)
+        url_snippet_dict = await self.web_search_with_safe_search(query_resp)
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
         user_query += "Url Sources:\n" + content + "\n\n"
 
@@ -139,7 +140,7 @@ class ChatBingSearch(Approach):
         }
     
 
-    async def web_search_with_answer_count_promote_and_safe_search(self, user_query):
+    async def web_search_with_safe_search(self, user_query):
         """
         Performs a web search with specified parameters.
 
@@ -152,11 +153,15 @@ class ChatBingSearch(Approach):
         client = WebSearchClient(AzureKeyCredential(SUBSCRIPTION_KEY))
 
         try:
+            if self.bing_safe_search:
+                safe_search = SafeSearch.STRICT
+            else:
+                safe_search = SafeSearch.OFF
+
             web_data = client.web.search(
                 query=user_query,
                 answer_count=10,
-                promote=["videos"],
-                safe_search=SafeSearch.strict 
+                safe_search=safe_search
             )
 
             if web_data.web_pages.value:

@@ -100,6 +100,7 @@ param applicationtitle string = ''
 param cuaEnabled bool = false
 param cuaId string = ''
 param enableDevCode bool = false
+param enableBingSafeSearch bool = true
 param tenantId string = ''
 param subscriptionId string = ''
 
@@ -282,6 +283,7 @@ module backend 'core/host/appservice.bicep' = {
       ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
       ENRICHMENT_ENDPOINT: enrichment.outputs.cognitiveServiceEndpoint
       APPLICATION_TITLE: applicationtitle
+      ENABLE_BING_SAFE_SEARCH: enableBingSafeSearch
     }
     aadClientId: aadWebClientId
   }
@@ -777,3 +779,4 @@ output USE_AZURE_OPENAI_EMBEDDINGS bool = useAzureOpenAIEmbeddings
 output EMBEDDING_DEPLOYMENT_NAME string = useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
 output ENRICHMENT_APPSERVICE_NAME string = enrichmentApp.outputs.name 
 output DEPLOYMENT_KEYVAULT_NAME string = kvModule.outputs.keyVaultName
+output ENABLE_BING_SAFE_SEARCH bool = enableBingSafeSearch

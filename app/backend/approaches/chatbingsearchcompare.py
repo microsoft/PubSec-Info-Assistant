@@ -10,9 +10,6 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 
-SUBSCRIPTION_KEY = "YourKeyHere"
-ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
-
 
 class ChatBingSearchCompare(Approach):
     """
@@ -35,7 +32,7 @@ class ChatBingSearchCompare(Approach):
 
     citations = {}
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str):
+    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_safe_search: bool):
         """
         Initializes the ChatBingSearchCompare approach.
 
@@ -49,6 +46,7 @@ class ChatBingSearchCompare(Approach):
         self.chatgpt_deployment = chatgpt_deployment
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
+        self.bing_safe_search = bing_safe_search
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
         """
@@ -62,7 +60,7 @@ class ChatBingSearchCompare(Approach):
             Any: The result of the comparative analysis.
         """
         # Step 1: Call bing Search Approach for a Bing LLM Response and Citations
-        chat_bing_search = ChatBingSearch(self.model_name, self.chatgpt_deployment, self.query_term_language)
+        chat_bing_search = ChatBingSearch(self.model_name, self.chatgpt_deployment, self.query_term_language, self.bing_safe_search)
         bing_search_response = await chat_bing_search.run(history, overrides)
         self.citations = bing_search_response.get("citation_lookup")
 

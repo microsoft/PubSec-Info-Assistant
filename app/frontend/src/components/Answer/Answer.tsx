@@ -48,7 +48,7 @@ export const Answer = ({
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
     return (
-        <Stack className={`${answer.source === 'bing' ? styles.bingAnswerContainer : styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
+        <Stack className={`${answer.comparative ? styles.comparativeAnswerContainer : (answer.source === 'bing' ? styles.bingAnswerContainer : styles.answerContainer)} ${isSelected && styles.selected}`} verticalAlign="space-between">
             <Stack.Item>
                 <Stack horizontal horizontalAlign="space-between">
                     <AnswerIcon source={answer.source} />

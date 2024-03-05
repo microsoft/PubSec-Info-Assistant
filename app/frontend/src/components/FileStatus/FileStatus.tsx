@@ -165,11 +165,6 @@ export const FileStatus = ({ className }: Props) => {
                     state_description: fileList[i].state_description,
                     upload_timestamp: fileList[i].start_timestamp,
                     modified_timestamp: fileList[i].state_timestamp,
-                    status_updates: fileList[i].status_updates.map(su => ({
-                        status: su.status,
-                        status_timestamp: su.status_timestamp,
-                        status_classification: su.status_classification,
-                    })),
                     value: fileList[i].id,
                 });
             }

@@ -343,7 +343,6 @@ async def delete_Items(request: Request):
     return True
 
 
-
 @app.post("/resubmitItems")
 async def resubmit_Items(request: Request):
     """
@@ -555,6 +554,7 @@ async def retryFile(request: Request):
             raw_file = blob.download_blob().readall()
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+
             statusLog.upsert_document(document_path=filePath,
                         status='Resubmitted to the processing pipeline',
                         status_classification=StatusClassification.INFO,

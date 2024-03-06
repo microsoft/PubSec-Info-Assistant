@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { DetailsList, 
     DetailsListLayoutMode, 
     SelectionMode, 
@@ -30,6 +30,11 @@ export interface IDocument {
     state_description: string;
     upload_timestamp: string;
     modified_timestamp: string;
+    status_updates: Array<{
+        status: string;
+        status_timestamp: string;
+        status_classification: string;
+    }>;
     isSelected?: boolean; // Optional property to track selection state
 }
 
@@ -139,19 +144,19 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     // *************************************************************
     // Delete processing
     // New state for managing dialog visibility and selected items
-    const [isDialogVisible, setIsDialogVisible] = useState(false);
+    const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [selectedItemsForDeletion, setSelectedItemsForDeletion] = useState<IDocument[]>([]);
 
     // Function to open the dialog with selected items
     const showDeleteConfirmation = () => {
         const selectedItems = selectionRef.current.getSelection() as IDocument[];
         setSelectedItemsForDeletion(selectedItems);
-        setIsDialogVisible(true);
+        setIsDeleteDialogVisible(true);
     };
 
     // Function to handle actual deletion
     const handleDelete = () => {
-        setIsDialogVisible(false);
+        setIsDeleteDialogVisible(false);
         console.log("Items to delete:", selectedItemsForDeletion);
         selectedItemsForDeletion.forEach(item => {
             console.log(`Deleting item: ${item.name}`);
@@ -207,7 +212,60 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         showResubmitConfirmation();
     };
 
-    
+    // ********************************************************************
+    // State detail dialog
+    const [stateDialogVisible, setStateDialogVisible] = useState(false);
+    const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
+    const scrollableContentRef = useRef<HTMLDivElement>(null);
+
+    // const onStateColumnClick = async (item: IDocument) => {
+    //     try {
+    //         //const text = await getTextForState(item);
+    //         // const text = item.status_updates[0].status;
+    //         const text = item.status_updates.map(update => update.status).join("\n");       
+    //         setStateDialogContent(text);
+    //         setStateDialogVisible(true);
+    //     } catch (error) {
+    //         console.error("Error on state column click:", error);
+    //         // Handle error here, perhaps show an error message to the user
+    //     }
+    // };
+
+
+    const onStateColumnClick = (item: IDocument) => {
+        try {
+            const statusElements = item.status_updates.map((update, index) => (
+                <div key={index}>
+                    <b>{update.status_timestamp}</b> - {update.status}
+                </div>
+            ));
+            setStateDialogContent(statusElements);
+            setStateDialogVisible(true);
+        } catch (error) {
+            console.error("Error on state column click:", error);
+            // Handle error here, perhaps show an error message to the user
+        }
+    };
+
+
+    const dialogStyles = {
+        main: {
+            width: '400px',  // Set the width to 400 pixels
+            maxWidth: '400px', // Set the maximum width to 400 pixels
+            maxHeight: '400px', // Set the maximum height to 400 pixels
+            overflowY: 'auto', // Enable vertical scrolling for the entire dialog if needed
+        },
+    };
+
+
+    useEffect(() => {
+        // Scroll to the top when the dialog opens
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }, []);
+
+    // ********************************************************************
+
+
     const [columns, setColumns] = useState<IColumn[]> ([
         {
             key: 'file_type',
@@ -251,11 +309,13 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for state, Press to sort by states',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => (  
-                <TooltipHost content={`${item.state} `}>  
-                    <span>{item.state}</span>  
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}  
-                </TooltipHost>  
+            onRender: (item: IDocument) => (
+                <TooltipHost content={`${item.state} `}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                        {item.state}
+                    </span>
+                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
+                </TooltipHost> 
             ), 
             isPadded: true,
         },
@@ -269,9 +329,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             ariaLabel: 'Column operations for folder, Press to sort by folder',
             onColumnClick: onColumnClick,
             data: 'string',
-            onRender: (item: IDocument) => {
-                return <span>{item.filePath}</span>;
-            },
+            onRender: (item: IDocument) => (  
+                <TooltipHost content={`${item.state} `}>  
+                    <span>{item.filePath.split('/').slice(1, -1).join('/')}</span>  
+                    {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
+                </TooltipHost>  
+            ), 
             isPadded: true,
         },
         {
@@ -322,7 +385,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => (
                 <TooltipHost content={`${item.state_description} `}>
-                    <span>{item.state}</span>
+                     <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                        {item.state_description}
+                    </span>
                 </TooltipHost>
             )
         }
@@ -348,8 +413,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             <Button text="Resubmit" onClick={handleResubmitClick} />
             {/* Dialog for delete confirmation */}
             <Dialog
-                hidden={!isDialogVisible}
-                onDismiss={() => setIsDialogVisible(false)}
+                hidden={!isDeleteDialogVisible}
+                onDismiss={() => setIsDeleteDialogVisible(false)}
                 dialogContentProps={{
                     type: DialogType.normal,
                     title: 'Delete Confirmation',
@@ -362,7 +427,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             >
                 <DialogFooter>
                     <PrimaryButton onClick={handleDelete} text="Delete" />
-                    <DefaultButton onClick={() => setIsDialogVisible(false)} text="Cancel" />
+                    <DefaultButton onClick={() => setIsDeleteDialogVisible(false)} text="Cancel" />
                 </DialogFooter>
             </Dialog>
             {/* Dialog for resubmit confirmation */}
@@ -387,6 +452,25 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             <div>
                 <Notification message={notification.message} />
             </div>
+            <Dialog
+                hidden={!stateDialogVisible}
+                onDismiss={() => setStateDialogVisible(false)}
+                dialogContentProps={{
+                    type: DialogType.normal,
+                    title: 'State Details',
+                    closeButtonAriaLabel: 'Close',
+                }}
+                modalProps={{
+                    styles: dialogStyles,
+                }}
+            >
+                <div className="scrollableDialogContent" ref={scrollableContentRef}>
+                    {stateDialogContent}
+                </div>
+                <DialogFooter>
+                    <PrimaryButton onClick={() => setStateDialogVisible(false)} text="OK" />
+                </DialogFooter>
+            </Dialog>
         </div>
     );
 }

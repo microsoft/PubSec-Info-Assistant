@@ -88,7 +88,7 @@ resource "azurerm_linux_web_app" "app_service" {
     app_command_line               = var.appCommandLine
     health_check_path              = var.healthCheckPath
     cors {
-      allowed_origins = concat([var.portalURL, "https://ms.portal.azure.com"], var.allowedOrigins)
+      allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
   }
 

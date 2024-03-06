@@ -25,7 +25,7 @@ module "entraObjects" {
   isInAutomation                    = var.isInAutomation
   requireWebsiteSecurityMembership  = var.requireWebsiteSecurityMembership
   randomString                      = random_string.random.result
-  webAppSuffix                      = var.webAppSuffix
+  azure_websites_domain                      = var.azure_websites_domain
   aadWebClientId                    = var.aadWebClientId
   aadMgmtClientId                   = var.aadMgmtClientId
   aadMgmtServicePrincipalId         = var.aadMgmtServicePrincipalId
@@ -130,7 +130,7 @@ module "backend" {
   managedIdentity                     = true
   appCommandLine                      = "gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
   logAnalyticsWorkspaceResourceId     = module.logging.logAnalyticsId
-  portalURL                           = var.isGovCloudDeployment ? "https://portal.azure.us" : "https://portal.azure.com"
+  azure_portal_domain                 = var.azure_portal_domain
   enableOryxBuild                     = true
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   keyVaultUri                         = module.kvModule.keyVaultUri
@@ -145,7 +145,9 @@ module "backend" {
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
     AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
     AZURE_OPENAI_RESOURCE_GROUP             = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
+    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
+    AZURE_ARM_MANAGEMENT_API          = var.azure_arm_management_api
     AZURE_SEARCH_INDEX                      = var.searchIndexName
     AZURE_SEARCH_SERVICE                    = module.searchServices.name
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
@@ -167,12 +169,13 @@ module "backend" {
     AZURE_CLIENT_SECRET                     = module.entraObjects.azure_ad_mgmt_app_secret 
     AZURE_TENANT_ID                         = var.tenantId
     AZURE_SUBSCRIPTION_ID                   = data.azurerm_client_config.current.subscription_id
-    IS_GOV_CLOUD_DEPLOYMENT                 = var.isGovCloudDeployment
     CHAT_WARNING_BANNER_TEXT                = var.chatWarningBannerText
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    ENRICHMENT_APPSERVICE_NAME              = module.enrichmentApp.name
+    ENRICHMENT_APPSERVICE_URL               = module.enrichmentApp.uri
     ENRICHMENT_ENDPOINT                     = module.cognitiveServices.cognitiveServiceEndpoint
     APPLICATION_TITLE                       = var.applicationtitle
+    AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
+    USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -222,7 +225,6 @@ module "formrecognizer" {
   location = var.location
   tags     = local.tags
   customSubDomainName = "infoasst-fr-${random_string.random.result}"
-  isGovCloudDeployment = var.isGovCloudDeployment
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId 
 }
@@ -234,7 +236,6 @@ module "cognitiveServices" {
   location = var.location 
   tags     = local.tags
   keyVaultId = module.kvModule.keyVaultId 
-  isGovCloudDeployment = var.isGovCloudDeployment
   resourceGroupName = azurerm_resource_group.rg.name
 }
 
@@ -246,10 +247,10 @@ module "searchServices" {
   tags     = local.tags
   # aad_auth_failure_mode = "http401WithBearerChallenge"
   # sku_name = var.searchServicesSkuName
-  semanticSearch = "free"
-  isGovCloudDeployment = var.isGovCloudDeployment
+  semanticSearch = var.use_semantic_reranker ? "free" : null
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId
+  azure_search_domain = var.azure_search_domain
 }
 
 module "cosmosdb" {
@@ -328,7 +329,9 @@ module "functions" {
   EMBEDDINGS_QUEUE                      = var.embeddingsQueue
   azureSearchIndex                      = var.searchIndexName
   azureSearchServiceEndpoint            = module.searchServices.endpoint
-  endpointSuffix                        = var.isGovCloudDeployment ? "core.usgovcloudapi.net" : "core.windows.net"
+  endpointSuffix                        = var.azure_storage_domain
+  azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
+  azure_ai_translation_domain           = var.azure_ai_translation_domain
 
   depends_on = [
     module.storage,

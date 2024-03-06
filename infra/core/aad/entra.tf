@@ -8,7 +8,7 @@ resource "azuread_application" "aad_web_app" {
   sign_in_audience              = "AzureADMyOrg"
   oauth2_post_response_required = true
   web {
-    redirect_uris = ["https://infoasst-web-${var.randomString}.${var.webAppSuffix}/.auth/login/aad/callback"]
+    redirect_uris = ["https://infoasst-web-${var.randomString}.${var.azure_websites_domain}/.auth/login/aad/callback"]
     implicit_grant {
       access_token_issuance_enabled = true
       id_token_issuance_enabled     = true

@@ -26,7 +26,7 @@ output "id" {
 }
 
 output "endpoint" {
-  value = var.isGovCloudDeployment ? "https://${azurerm_search_service.search.name}.search.azure.us/" : "https://${azurerm_search_service.search.name}.search.windows.net/"
+  value = "https://${azurerm_search_service.search.name}.${var.azure_search_domain}/"
 }
 
 output "name" {

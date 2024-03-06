@@ -30,14 +30,14 @@ variable "semanticSearch" {
   default = "disabled"
 }
 
-variable "isGovCloudDeployment" {
-  type = bool
-}
-
 variable "resourceGroupName" {
   type    = string
 }
 
 variable "keyVaultId" { 
   type = string
+}
+
+variable "azure_search_domain" {
+  type = string  
 }

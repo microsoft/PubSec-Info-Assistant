@@ -35,12 +35,10 @@ fi
 
 export RANDOM_STRING="${randomString,,}"
 
-if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
   az cloud set --name AzureUSGovernment 
-  auth_callback_url="https://infoasst-web-$RANDOM_STRING.azurewebsites.us/.auth/login/aad/callback"
-else
-  auth_callback_url="https://infoasst-web-$RANDOM_STRING.azurewebsites.net/.auth/login/aad/callback"
 fi
+auth_callback_url="https://infoasst-web-$RANDOM_STRING.$TF_VAR_azure_websites_domain/.auth/login/aad/callback"
 
 # add the random.txt to the state container
 #echo "az storage blob exists --account-name $AZURE_STORAGE_ACCOUNT --account-key $AZURE_STORAGE_ACCOUNT_KEY --container-name state --name ${WORKSPACE}.random.txt --output tsv --query exists"

@@ -127,10 +127,6 @@ output "AZURE_SUBSCRIPTION_ID" {
   value = var.subscriptionId
 }
 
-output "IS_USGOV_DEPLOYMENT" {
-  value = var.isGovCloudDeployment
-}
-
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
   value = module.storage.primary_endpoints
 }
@@ -169,4 +165,8 @@ output "CHAT_WARNING_BANNER_TEXT" {
 
 output "AZURE_OPENAI_ENDPOINT"  {
   value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
+}
+
+output "AZURE_ENVIRONMENT" {
+  value = var.azure_environment
 }

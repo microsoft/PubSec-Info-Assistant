@@ -257,3 +257,11 @@ variable "endpointSuffix" {
   type    = string
   default = "core.windows.net"
 }
+
+variable "azure_ai_translation_domain" {
+  type = string
+}
+
+variable "azure_ai_text_analytics_domain" {
+  type = string
+}

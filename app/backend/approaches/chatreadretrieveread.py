@@ -95,12 +95,13 @@ class ChatReadRetrieveReadApproach(Approach):
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str,
         target_embedding_model: str,
-        enrichment_appservice_name: str,
+        enrichment_appservice_uri: str,
         target_translation_language: str,
         enrichment_endpoint:str,
-        enrichment_key:str
+        enrichment_key:str,
+        azure_ai_translation_domain: str,
+        use_semantic_reranker: bool
         
     ):
         self.search_client = search_client
@@ -119,20 +120,17 @@ class ChatReadRetrieveReadApproach(Approach):
         self.enrichment_endpoint=enrichment_endpoint
         self.enrichment_key=enrichment_key
         self.oai_endpoint=oai_endpoint
-
-        if is_gov_cloud_deployment:
-            self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.us'
-        else:
-            self.embedding_service_url = f'https://{enrichment_appservice_name}.azurewebsites.net'
-
+        self.embedding_service_url = enrichment_appservice_uri
+        self.azure_ai_translation_domain=azure_ai_translation_domain
+        self.use_semantic_reranker=use_semantic_reranker
+        
         openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 
         self.model_name = model_name
         self.model_version = model_version
-        self.is_gov_cloud_deployment = is_gov_cloud_deployment
-
+        
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
 
@@ -226,7 +224,7 @@ class ChatReadRetrieveReadApproach(Approach):
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
         #  hybrid semantic search using semantic reranker
-        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
+        if (self.use_semantic_reranker and overrides.get("semantic_ranker")):
             r = self.search_client.search(
                 generated_query,
                 query_type=QueryType.SEMANTIC,
@@ -407,8 +405,7 @@ class ChatReadRetrieveReadApproach(Approach):
     def detect_language(self, text: str) -> str:
         """ Function to detect the language of the text"""
         try:
-            endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0] 
-            suffix = "us" if self.is_gov_cloud_deployment else "com"
+            endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
             api_detect_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
             headers = {
                 'Ocp-Apim-Subscription-Key': self.enrichment_key,
@@ -428,9 +425,8 @@ class ChatReadRetrieveReadApproach(Approach):
      
     def translate_response(self, response: str, target_language: str) -> str:
         """ Function to translate the response to target language"""
-        endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
-        suffix = "us" if self.is_gov_cloud_deployment else "com"         
-        api_translate_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
+        endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]      
+        api_translate_endpoint = f"https://{self.azure_ai_translation_domain}/translate?api-version=3.0"
         headers = {
             'Ocp-Apim-Subscription-Key': self.enrichment_key,
             'Content-type': 'application/json',

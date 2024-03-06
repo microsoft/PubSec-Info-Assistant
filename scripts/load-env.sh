@@ -52,20 +52,15 @@ else
     echo "No Language set, please check local.env.example for DEFAULT_LANGUAGE"
     exit 1
 fi
-# # Pull in variables dependent on the Azure Environment being targeted
-# if [ -f "$ENV_DIR/environments/AzureEnvironments/$TF_VAR_azure_environment.env" ]; then
-#     echo "Loading environment variables for Azure Environment: $TF_VAR_azure_environment."
-#     source "$ENV_DIR/environments/AzureEnvironments/$TF_VAR_azure_environment.env"
-# else
-#     echo "No Azure Environment set, please check local.env.example for TF_VAR_azure_environment"
-#     exit 1
-# fi
 
-# # Pull in variables for performance run if enabled
-# if [ "$PERFORMANCE_TEST" == true ]; then
-#     echo "Loading environment variables for a performance configuration"
-#     source "$ENV_DIR/environments/perf.env"
-# fi
+# Pull in variables dependent on the Azure Environment being targeted
+if [ -f "$ENV_DIR/environments/AzureEnvironments/$AZURE_ENVIRONMENT.env" ]; then
+    echo "Loading environment variables for Azure Environment: $AZURE_ENVIRONMENT."
+    source "$ENV_DIR/environments/AzureEnvironments/$AZURE_ENVIRONMENT.env"
+else
+    echo "No Azure Environment set, please check local.env.example for AZURE_ENVIRONMENT"
+    exit 1
+fi
 
 # Fail if the following environment variables are not set
 if [[ -z $WORKSPACE ]]; then

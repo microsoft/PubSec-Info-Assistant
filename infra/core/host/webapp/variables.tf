@@ -107,7 +107,7 @@ variable "healthCheckPath" {
   default = ""
 }
 
-variable "portalURL" {
+variable "azure_portal_domain" {
   type    = string
   default = ""
 }

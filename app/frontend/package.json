@@ -22,7 +22,8 @@
     "prop-types": "15.8.1",
     "react-bootstrap": "^2.7.4",
     "react-markdown": "^9.0.1",
-    "remark-gfm": "^3.0.0"
+    "remark-gfm": "^3.0.0",
+    "react-switch": "^7.0.0"
   },
   "devDependencies": {
     "@types/dompurify": "^2.4.0",

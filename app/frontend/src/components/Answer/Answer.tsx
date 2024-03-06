@@ -61,7 +61,7 @@ export const Answer = ({
                             onClick={() => onThoughtProcessClicked()}
                             disabled={!answer.thoughts}
                         />
-                        {answer.source !== 'bing' && 
+                        {answer.source !== 'bing' && !answer.comparative &&
                             <IconButton
                                 style={{ color: "black" }}
                                 iconProps={{ iconName: "ClipboardList" }}

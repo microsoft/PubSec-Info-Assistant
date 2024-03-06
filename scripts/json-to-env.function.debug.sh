@@ -88,14 +88,6 @@ jq -r --arg secrets "$secrets" '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
             "path": "enrichmenT_ENDPOINT",
             "env_var": "ENRICHMENT_ENDPOINT"
         },

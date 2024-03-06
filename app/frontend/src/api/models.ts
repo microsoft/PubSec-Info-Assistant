@@ -70,6 +70,7 @@ export type FileUploadBasicStatus = {
     state_description: string;
     state_timestamp: string;
     status_updates: StatusUpdates[];
+    tags: string;
 }
 
 export type StatusUpdates = {
@@ -89,7 +90,8 @@ export type AllFolders = {
 export type GetUploadStatusRequest = {
     timeframe: number;
     state: FileState;
-    folder: string
+    folder: string;
+    tag: string
 }
 
 export type DeleteItemRequest = {

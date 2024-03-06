@@ -57,12 +57,6 @@ param CosmosDBLogDatabaseName string
 @description('CosmosDB Log Container Name')
 param CosmosDBLogContainerName string
 
-@description('CosmosDB Tags Database Name')
-param CosmosDBTagsDatabaseName string
-
-@description('CosmosDB Tags Container Name')
-param CosmosDBTagsContainerName string
-
 @description('Name of the submit queue for PDF files')
 param pdfSubmitQueue string
 
@@ -257,14 +251,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'COSMOSDB_LOG_CONTAINER_NAME'
           value: CosmosDBLogContainerName
-        }
-        {
-          name: 'COSMOSDB_TAGS_DATABASE_NAME'
-          value: CosmosDBTagsDatabaseName
-        }
-        {
-          name: 'COSMOSDB_TAGS_CONTAINER_NAME'
-          value: CosmosDBTagsContainerName
         }
         {
           name: 'PDF_SUBMIT_QUEUE'

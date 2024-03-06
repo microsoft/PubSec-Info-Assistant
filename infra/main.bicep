@@ -213,8 +213,6 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
       COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
       COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
-      COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
-      COSMOSDB_TAGS_CONTAINER_NAME: cosmosdb.outputs.CosmosDBTagsContainerName
       MAX_EMBEDDING_REQUEUE_COUNT: 5
       EMBEDDING_REQUEUE_BACKOFF: 60
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
@@ -271,8 +269,6 @@ module backend 'core/host/appservice.bicep' = {
       COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
       COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
       COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
-      COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
-      COSMOSDB_TAGS_CONTAINER_NAME: cosmosdb.outputs.CosmosDBTagsContainerName
       QUERY_TERM_LANGUAGE: queryTermLanguage
       AZURE_CLIENT_ID: aadMgmtClientId
       AZURE_TENANT_ID: tenantId
@@ -481,8 +477,6 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
     keyVaultName: kvModule.outputs.keyVaultName
     logDatabaseName: 'statusdb'
     logContainerName: 'statuscontainer'
-    tagDatabaseName: 'tagdb'
-    tagContainerName: 'tagcontainer'
   }
   dependsOn: [
     kvModule
@@ -512,8 +506,6 @@ module functions 'core/function/function.bicep' = {
     CosmosDBEndpointURL: cosmosdb.outputs.CosmosDBEndpointURL
     CosmosDBLogDatabaseName: cosmosdb.outputs.CosmosDBLogDatabaseName
     CosmosDBLogContainerName: cosmosdb.outputs.CosmosDBLogContainerName
-    CosmosDBTagsDatabaseName: cosmosdb.outputs.CosmosDBTagsDatabaseName
-    CosmosDBTagsContainerName: cosmosdb.outputs.CosmosDBTagsContainerName
     chunkTargetSize: chunkTargetSize
     targetPages: targetPages
     formRecognizerApiVersion: formRecognizerApiVersion
@@ -755,8 +747,6 @@ output AZURE_FUNCTION_APP_NAME string = functions.outputs.name
 output AZURE_COSMOSDB_URL string = cosmosdb.outputs.CosmosDBEndpointURL
 output AZURE_COSMOSDB_LOG_DATABASE_NAME string = cosmosdb.outputs.CosmosDBLogDatabaseName
 output AZURE_COSMOSDB_LOG_CONTAINER_NAME string = cosmosdb.outputs.CosmosDBLogContainerName
-output AZURE_COSMOSDB_TAGS_DATABASE_NAME string = cosmosdb.outputs.CosmosDBTagsDatabaseName
-output AZURE_COSMOSDB_TAGS_CONTAINER_NAME string = cosmosdb.outputs.CosmosDBTagsContainerName
 output AZURE_FORM_RECOGNIZER_ENDPOINT string = formrecognizer.outputs.formRecognizerAccountEndpoint
 output AZURE_BLOB_DROP_STORAGE_CONTAINER string = uploadContainerName
 output AZURE_BLOB_LOG_STORAGE_CONTAINER string = functionLogsContainerName

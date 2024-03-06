@@ -24,7 +24,7 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from shared_code.status_log import State, StatusClassification, StatusLog
+from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from shared_code.tags_helper import TagsHelper
 from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
@@ -316,8 +316,10 @@ async def get_all_upload_status(request: Request):
     state = json_body.get("state")
     folder = json_body.get("folder")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, State[state], 
-            folder, os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        results = statusLog.read_files_status_by_timeframe(timeframe, 
+            State[state], 
+            folder, 
+            os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
@@ -597,19 +599,23 @@ async def get_all_tags():
 
 @app.post("/retryFile")
 async def retryFile(request: Request):
+    """
+    Retries submission of a file
 
+    Returns:
+        dict: A dictionary containing the status of all tags
+    """
     json_body = await request.json()
     filePath = json_body.get("filePath")
     
     try:
-
         file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
         blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
-
         if blob.exists():
             raw_file = blob.download_blob().readall()
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+
             statusLog.upsert_document(document_path=filePath,
                         status='Resubmitted to the processing pipeline',
                         status_classification=StatusClassification.INFO,

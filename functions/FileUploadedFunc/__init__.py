@@ -8,8 +8,11 @@ import random
 import time
 from shared_code.status_log import StatusLog, State, StatusClassification
 import azure.functions as func
-from azure.storage.blob import generate_blob_sas
+from azure.storage.blob import BlobServiceClient, generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.search.documents import SearchClient
+from azure.core.credentials import AzureKeyCredential
+
 
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -22,10 +25,14 @@ pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 media_submit_queue = os.environ["MEDIA_SUBMIT_QUEUE"]
 image_enrichment_queue = os.environ["IMAGE_ENRICHMENT_QUEUE"]
 max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
+azure_blob_content_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
+azure_blob_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_blob_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
+azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
+azure_search_service_index = os.environ["AZURE_SEARCH_INDEX"]
+azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
+
 function_name = "FileUploadedFunc"
-
-
-
 
 def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
@@ -69,6 +76,37 @@ def main(myblob: func.InputStream):
             "submit_queued_count": 1
         }        
         message_string = json.dumps(message)
+        
+        # If this is an update to the blob, then we need to delete any residual chunks
+        # as processing will overlay chunks, but if the new file version is smaller
+        # than the old, then the residual old chunks will remain. The following
+        # code handles this for PDF and non-PDF files.
+        blob_client = BlobServiceClient(
+            account_url=azure_blob_endpoint,
+            credential=azure_blob_key,
+        )
+        blob_container = blob_client.get_container_client(azure_blob_content_container)
+        # List all blobs in the container that start with the name of the blob being processed
+        # first remove the container prefix
+        myblob_filename = myblob.name.split("/", 1)[1]
+        blobs = blob_container.list_blobs(name_starts_with=myblob_filename)
+        
+        # instantiate the search sdk elements
+        search_client = SearchClient(azure_search_service_endpoint,
+                                azure_search_service_index,
+                                AzureKeyCredential(azure_search_service_key))
+        search_id_list_to_delete = []
+        
+        # Iterate through the blobs and delete each one from blob and the search index
+        for blob in blobs:
+            blob_client.get_blob_client(container=azure_blob_content_container, blob=blob.name).delete_blob()
+            search_id_list_to_delete.append({"id": blob.name})
+        
+        if len(search_id_list_to_delete) > 0:
+            search_client.delete_documents(documents=search_id_list_to_delete)
+            logging.debug("Succesfully deleted items from AI Search index.")
+        else:
+            logging.debug("No items to delete from AI Search index.")        
         
         # Queue message with a random backoff so as not to put the next function under unnecessary load
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())

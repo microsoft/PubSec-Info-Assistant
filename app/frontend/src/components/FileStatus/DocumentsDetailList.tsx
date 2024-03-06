@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+
 import { DetailsList, 
     DetailsListLayoutMode, 
     SelectionMode, 
@@ -36,7 +37,9 @@ export interface IDocument {
         status_classification: string;
     }>;
     isSelected?: boolean; // Optional property to track selection state
+    tags: string;
 }
+
 
 interface Props {
     items: IDocument[];
@@ -176,7 +179,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         showDeleteConfirmation();
     };
 
-
     // *************************************************************
     // Resubmit processing
     // New state for managing resubmit dialog visibility and selected items
@@ -206,7 +208,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         setNotification({ show: true, message: 'Processing resubmit. Hit \'Refresh\' to track progress' });
     };
     
-
     // Function to handle the resubmit button click
     const handleResubmitClick = () => {
         showResubmitConfirmation();
@@ -217,21 +218,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
-
-    // const onStateColumnClick = async (item: IDocument) => {
-    //     try {
-    //         //const text = await getTextForState(item);
-    //         // const text = item.status_updates[0].status;
-    //         const text = item.status_updates.map(update => update.status).join("\n");       
-    //         setStateDialogContent(text);
-    //         setStateDialogVisible(true);
-    //     } catch (error) {
-    //         console.error("Error on state column click:", error);
-    //         // Handle error here, perhaps show an error message to the user
-    //     }
-    // };
-
-
     const onStateColumnClick = (item: IDocument) => {
         try {
             const statusElements = item.status_updates.map((update, index) => (
@@ -247,7 +233,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         }
     };
 
-
     const dialogStyles = {
         main: {
             width: '400px',  // Set the width to 400 pixels
@@ -262,9 +247,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         // Scroll to the top when the dialog opens
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, []);
-
-    // ********************************************************************
-
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -315,7 +297,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                         {item.state}
                     </span>
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
-                </TooltipHost> 
+                </TooltipHost>
             ), 
             isPadded: true,
         },
@@ -335,6 +317,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
                 </TooltipHost>  
             ), 
+        },
+        {
+            key: 'tags',
+            name: 'Tags',
+            fieldName: 'tags',
+            minWidth: 70,
+            maxWidth: 90,
+            isRowHeader: true,
+            isResizable: true,
+            sortAscendingAriaLabel: 'Sorted A to Z',
+            sortDescendingAriaLabel: 'Sorted Z to A',
+            onColumnClick: onColumnClick,
+            data: 'string',
+
             isPadded: true,
         },
         {
@@ -385,7 +381,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => (
                 <TooltipHost content={`${item.state_description} `}>
-                     <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
                         {item.state_description}
                     </span>
                 </TooltipHost>

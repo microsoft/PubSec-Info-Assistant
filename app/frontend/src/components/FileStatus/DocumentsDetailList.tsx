@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import React, { useState, useEffect, useRef, useLayoutEffect  } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+
 import { DetailsList, 
     DetailsListLayoutMode, 
     SelectionMode, 
@@ -217,7 +218,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
- 
     const onStateColumnClick = (item: IDocument) => {
         try {
             const statusElements = item.status_updates.map((update, index) => (
@@ -232,7 +232,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             // Handle error here, perhaps show an error message to the user
         }
     };
-    
 
     const dialogStyles = {
         main: {
@@ -248,11 +247,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         // Scroll to the top when the dialog opens
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, []);
-    
-    // ********************************************************************
 
-
-    
     const [columns, setColumns] = useState<IColumn[]> ([
         {
             key: 'file_type',
@@ -303,7 +298,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     </span>
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
                 </TooltipHost>
-
             ), 
             isPadded: true,
         },
@@ -323,7 +317,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
                 </TooltipHost>  
             ), 
-            isPadded: true,
         },
         {
             key: 'tags',
@@ -337,6 +330,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             sortDescendingAriaLabel: 'Sorted Z to A',
             onColumnClick: onColumnClick,
             data: 'string',
+
             isPadded: true,
         },
         {

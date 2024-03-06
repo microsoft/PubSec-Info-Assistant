@@ -53,7 +53,6 @@ export function parseAnswerToHtml(answer: string, source: string, citation_looku
                 return "";
             }
             else {
-                console.log("CITATION: "+ citation.citation)
                 let isBing = source === "bing";
                 let citationIndex: number;
                 let citationShortName: string

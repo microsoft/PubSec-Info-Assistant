@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import React, { useState, useEffect, useRef, useLayoutEffect  } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { DetailsList, 
     DetailsListLayoutMode, 
     SelectionMode, 
@@ -43,7 +43,6 @@ export interface IDocument {
     }>;
     isSelected?: boolean; // Optional property to track selection state
 }
-
 
 interface Props {
     items: IDocument[];
@@ -182,6 +181,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         showDeleteConfirmation();
     };
 
+
     // *************************************************************
     // Resubmit processing
     // New state for managing resubmit dialog visibility and selected items
@@ -211,6 +211,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         setNotification({ show: true, message: 'Processing resubmit. Hit \'Refresh\' to track progress' });
     };
     
+
     // Function to handle the resubmit button click
     const handleResubmitClick = () => {
         showResubmitConfirmation();
@@ -222,7 +223,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
-    
+
     // const onStateColumnClick = async (item: IDocument) => {
     //     try {
     //         //const text = await getTextForState(item);
@@ -248,7 +249,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             // Handle error here, perhaps show an error message to the user
         }
     };
-    
+
 
     const dialogStyles = {
         main: {
@@ -264,11 +265,10 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         // Scroll to the top when the dialog opens
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, []);
-    
+
     // ********************************************************************
 
 
-    
     const [columns, setColumns] = useState<IColumn[]> ([
         {
             key: 'file_type',
@@ -318,8 +318,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                         {item.state}
                     </span>
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
-                </TooltipHost>
-
+                </TooltipHost> 
             ), 
             isPadded: true,
         },
@@ -389,7 +388,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => (
                 <TooltipHost content={`${item.state_description} `}>
-                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                     <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
                         {item.state_description}
                     </span>
                 </TooltipHost>

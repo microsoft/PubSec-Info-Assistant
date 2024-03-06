@@ -82,7 +82,6 @@ export type AllFilesUploadStatus = {
     statuses: FileUploadBasicStatus[];
 }
 
-
 export type AllFolders = {
     folders: string;
 }

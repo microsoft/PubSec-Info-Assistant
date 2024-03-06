@@ -283,7 +283,7 @@ async def get_all_upload_status(request: Request):
             State[state], 
             folder, 
             os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-        
+
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
@@ -365,7 +365,6 @@ async def delete_Items(request: Request):
         log.exception("Exception in /delete_Items")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
-
 
 
 @app.post("/resubmitItems")
@@ -579,6 +578,7 @@ async def retryFile(request: Request):
             raw_file = blob.download_blob().readall()
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+
             statusLog.upsert_document(document_path=filePath,
                         status='Resubmitted to the processing pipeline',
                         status_classification=StatusClassification.INFO,

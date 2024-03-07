@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useMemo } from "react";
-import { Stack, IconButton } from "@fluentui/react";
+import { Stack, IconButton, Icon } from "@fluentui/react";
 import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
@@ -17,6 +17,10 @@ interface Props {
     isSelected?: boolean;
     onCitationClicked: (filePath: string, sourcePath: string, pageNumber: string) => void;
     onThoughtProcessClicked: () => void;
+    onBingSearchClicked: () => void;
+    onRagSearchClicked: () => void;
+    onBingCompareClicked: () => void;
+    onRagCompareClicked: () => void;
     onSupportingContentClicked: () => void;
     onFollowupQuestionClicked?: (question: string) => void;
     showFollowupQuestions?: boolean;
@@ -29,21 +33,25 @@ export const Answer = ({
     isSelected,
     onCitationClicked,
     onThoughtProcessClicked,
+    onBingSearchClicked,
+    onRagSearchClicked,
+    onBingCompareClicked,
+    onRagCompareClicked,
     onSupportingContentClicked,
     onFollowupQuestionClicked,
     showFollowupQuestions,
     onAdjustClick,
     onRegenerateClick
 }: Props) => {
-    const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.citation_lookup, onCitationClicked), [answer]);
+    const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.source, answer.citation_lookup, onCitationClicked), [answer]);
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
     return (
-        <Stack className={`${styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
+        <Stack className={`${answer.comparative ? styles.comparativeAnswerContainer : (answer.source === 'bing' ? styles.bingAnswerContainer : styles.answerContainer)} ${isSelected && styles.selected}`} verticalAlign="space-between">
             <Stack.Item>
                 <Stack horizontal horizontalAlign="space-between">
-                    <AnswerIcon />
+                    <AnswerIcon source={answer.source} />
                     <div>
                         <IconButton
                             style={{ color: "black" }}
@@ -53,19 +61,26 @@ export const Answer = ({
                             onClick={() => onThoughtProcessClicked()}
                             disabled={!answer.thoughts}
                         />
-                        <IconButton
-                            style={{ color: "black" }}
-                            iconProps={{ iconName: "ClipboardList" }}
-                            title="Show supporting content"
-                            ariaLabel="Show supporting content"
-                            onClick={() => onSupportingContentClicked()}
-                            disabled={!answer.data_points.length}
-                        />
+                        {answer.source !== 'bing' && !answer.comparative &&
+                            <IconButton
+                                style={{ color: "black" }}
+                                iconProps={{ iconName: "ClipboardList" }}
+                                title="Show supporting content"
+                                ariaLabel="Show supporting content"
+                                onClick={() => onSupportingContentClicked()}
+                                disabled={!answer.data_points || !answer.data_points.length}
+                            />
+                        }
                     </div>
                 </Stack>
             </Stack.Item>
 
             <Stack.Item grow>
+                {answer.source === 'bing' &&
+                    <div className={styles.warningText}>
+                        ****Warning: This response is from the internet using Bing****
+                    </div>
+                }
                 <div className={styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div>
             </Stack.Item>
 
@@ -100,7 +115,7 @@ export const Answer = ({
                 </Stack.Item>
             )}
             <Stack.Item align="center">
-                <RAIPanel onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick}/>
+                <RAIPanel source={answer.source} comparative={answer.comparative} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onBingSearchClicked={onBingSearchClicked} onBingCompareClicked={onBingCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
             </Stack.Item>
         </Stack>
     );

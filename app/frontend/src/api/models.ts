@@ -6,7 +6,11 @@ import { string } from "prop-types";
 export const enum Approaches {
     RetrieveThenRead = 0,
     ReadRetrieveRead = 1,
-    ReadDecomposeAsk = 2
+    ReadDecomposeAsk = 2,
+    BingSearch = 4,
+    BingSearchCompare = 5,
+    BingRRRCompare = 6
+
 }
 
 export type AskRequestOverrides = {
@@ -38,6 +42,8 @@ export type AskResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
+    source: string;
+    comparative: boolean;
     // citation_lookup: {}
     // added this for citation bug. aparmar.
     citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };

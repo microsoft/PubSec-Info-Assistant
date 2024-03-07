@@ -34,7 +34,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const [plainTextContent, setPlainTextContent] = useState('');
 
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
-    const isDisabledSupportingContentTab: boolean = !answer.data_points.length;
+    const isDisabledSupportingContentTab: boolean = !answer.data_points?.length;
     const isDisabledCitationTab: boolean = !activeCitation;
     // the first split on ? separates the file from the sas token, then the second split on . separates the file extension
     const sourceFileExt: any = sourceFile?.split("?")[0].split(".").pop();
@@ -56,6 +56,9 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     }, [activeCitation]);
 
     useEffect(() => {
+        if (!sourceFile) {
+            return;
+        }
         const fetchMarkdownContent = async () => {
             try {
                 const response = await fetch(sourceFile!);

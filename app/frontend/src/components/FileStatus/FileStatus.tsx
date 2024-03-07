@@ -235,10 +235,6 @@ export const FileStatus = ({ className }: Props) => {
                 styles={dropdownTagStyles}
                 aria-label="tag options for file statuses to be displayed"
             />
-            <div className={styles.refresharea} onClick={onGetStatusClick} aria-label="Refresh displayed file statuses">
-                <ArrowClockwise24Filled className={styles.refreshicon} />
-                <span className={styles.refreshtext}>Refresh</span>
-            </div>
             </div>
             {isLoading ? (
                 <animated.div style={{ ...animatedStyles }}>

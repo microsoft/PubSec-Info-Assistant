@@ -124,7 +124,7 @@ def main(msg: func.QueueMessage) -> None:
                 blob_path,
                 f"{FUNCTION_NAME} - detected language of text is {detected_language}.",
                 StatusClassification.DEBUG,
-                State.QUEUED,
+                State.PROCESSING
             )             
         else:
             # error or requeue
@@ -137,7 +137,7 @@ def main(msg: func.QueueMessage) -> None:
                 blob_path,
                 f"{FUNCTION_NAME} - Non-target language detected",
                 StatusClassification.DEBUG,
-                State.ERROR,
+                State.PROCESSING
             )      
                
         # regenerate the iterator to reset it to the first chunk

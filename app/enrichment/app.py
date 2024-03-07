@@ -28,7 +28,6 @@ from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
 from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.tags_helper import TagsHelper
 
 # === ENV Setup ===
 
@@ -45,8 +44,6 @@ ENV = {
     "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": None,
     "COSMOSDB_LOG_CONTAINER_NAME": None,
-    "COSMOSDB_TAGS_DATABASE_NAME": None,
-    "COSMOSDB_TAGS_CONTAINER_NAME": None,
     "MAX_EMBEDDING_REQUEUE_COUNT": 5,
     "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
@@ -60,7 +57,8 @@ ENV = {
     "EMBEDDING_VECTOR_SIZE": None,
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
-    "IS_GOV_CLOUD_DEPLOYMENT": None
+    "IS_GOV_CLOUD_DEPLOYMENT": None,
+    "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": None
 }
 
 for key, value in ENV.items():
@@ -122,8 +120,6 @@ utilities_helper = UtilitiesHelper(
 )
 
 statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
-
-tagsHelper = TagsHelper(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_TAGS_DATABASE_NAME"], ENV["COSMOSDB_TAGS_CONTAINER_NAME"])
 # === API Setup ===
 
 start_time = datetime.now()
@@ -267,9 +263,7 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     """ Gets the tags from the blob metadata and uploads them to cosmos db"""
     file_name, file_extension, file_directory = utilities_helper.get_filename_and_extension(blob_path)
     path = file_directory + file_name + file_extension
-    blob_client = blob_service_client.get_blob_client(
-        container=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
-        blob=path)
+    blob_client = blob_service_client.get_blob_client(blob=path)
     blob_properties = blob_client.get_blob_properties()
     tags = blob_properties.metadata.get("tags")
     if tags is not None:
@@ -280,7 +274,7 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     else:
         tags_list = []
     # Write the tags to cosmos db
-    tagsHelper.upsert_document(blob_path, tags_list)
+    statusLog.update_document_tags(blob_path, tags_list)
     return tags_list
 
 @app.on_event("startup") 
@@ -324,13 +318,17 @@ def poll_queue() -> None:
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
         blob_path = message_json["blob_name"]
+        
+        # write tags to cosmos db once per file/message
+        blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
+        upload_container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        tag_list = get_tags_and_upload_to_cosmos(upload_container_client, blob_path)
 
         try:  
             statusLog.upsert_document(blob_path, f'Embeddings process started with model {target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
         
             file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
             chunk_folder_path = file_directory + file_name + file_extension
-            blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
             index_chunks = []
 
@@ -365,18 +363,20 @@ def poll_queue() -> None:
                         chunk_dict["content"]
                     )
 
-
                 try:
                     # try first to read the embedding from the chunk, in case it was already created
                     embedding_data = chunk_dict['contentVector']
                 except KeyError:      
                     # create embedding
                     embedding = embed_texts(target_embeddings_model, [text])
-                    embedding_data = embedding['data']
+                    embedding_data = embedding['data']      
+                    
+                # ****************************************************************************************************************************
+                # this only needs to be done once per file
+                # tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
+                # ****************************************************************************************************************************
 
-                tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
-
-                # PRepare the index schema based representation of the chunk with the embedding
+                # Prepare the index schema based representation of the chunk with the embedding
                 index_chunk = {}
                 index_chunk['id'] = statusLog.encode_document_id(chunk.name)
                 index_chunk['processed_datetime'] = f"{chunk_dict['processed_datetime']}+00:00"

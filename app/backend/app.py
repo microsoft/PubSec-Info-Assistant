@@ -23,9 +23,8 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.tags_helper import TagsHelper
-
+from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
+from azure.cosmos import CosmosClient
 
 
 # === ENV Setup ===
@@ -62,8 +61,6 @@ ENV = {
     "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
-    "COSMOSDB_TAGS_DATABASE_NAME": "tagsdb",
-    "COSMOSDB_TAGS_CONTAINER_NAME": "tagscontainer",
     "QUERY_TERM_LANGUAGE": "English",
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
     "ENRICHMENT_APPSERVICE_NAME": "enrichment",
@@ -113,12 +110,6 @@ statusLog = StatusLog(
     ENV["COSMOSDB_KEY"],
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
     ENV["COSMOSDB_LOG_CONTAINER_NAME"]
-)
-tagsHelper = TagsHelper(
-    ENV["COSMOSDB_URL"],
-    ENV["COSMOSDB_KEY"],
-    ENV["COSMOSDB_TAGS_DATABASE_NAME"],
-    ENV["COSMOSDB_TAGS_CONTAINER_NAME"]
 )
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
@@ -288,7 +279,7 @@ async def get_blob_client_url():
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):
     """
-    Get the status of all file uploads in the last N hours.
+    Get the status and tags of all file uploads in the last N hours.
 
     Parameters:
     - request: The HTTP request object.
@@ -299,12 +290,166 @@ async def get_all_upload_status(request: Request):
     json_body = await request.json()
     timeframe = json_body.get("timeframe")
     state = json_body.get("state")
+    folder = json_body.get("folder")
+    tag = json_body.get("tag")   
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, State[state])
+        results = statusLog.read_files_status_by_timeframe(timeframe, 
+            State[state], 
+            folder, 
+            tag,
+            os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+
+        # retrieve tags for each file
+         # Initialize an empty list to hold the tags
+        items = []              
+        cosmos_client = CosmosClient(url=tagsHelper._url, credential=tagsHelper._key)
+        database = cosmos_client.get_database_client(tagsHelper._database_name)
+        container = database.get_container_client(tagsHelper._container_name)
+        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
+        items = list(container.query_items(
+            query=query_string,
+            enable_cross_partition_query=True
+        ))           
+
+        # Extract and split tags
+        unique_tags = set()
+        for item in items:
+            tags = item.split(',')
+            unique_tags.update(tags)        
+
+        
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+@app.post("/getfolders")
+async def get_folders(request: Request):
+    """
+    Get all folders.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique folders.
+    """
+    try:
+        blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        # Initialize an empty list to hold the folder paths
+        folders = []
+        # List all blobs in the container
+        blob_list = blob_container.list_blobs()
+        # Iterate through the blobs and extract folder names and add unique values to the list
+        for blob in blob_list:
+            # Extract the folder path if exists
+            folder_path = os.path.dirname(blob.name)
+            if folder_path and folder_path not in folders:
+                folders.append(folder_path)
+    except Exception as ex:
+        log.exception("Exception in /getfolders")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return folders
+
+
+@app.post("/deleteItems")
+async def delete_Items(request: Request):
+    """
+    Delete a blob.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique folders.
+    """
+    json_body = await request.json()
+    full_path = json_body.get("path")
+    # remove the container prefix
+    path = full_path.split("/", 1)[1]
+    try:
+        blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        blob_container.delete_blob(path)
+        statusLog.upsert_document(document_path=full_path,
+            status='Delete intiated',
+            status_classification=StatusClassification.INFO,
+            state=State.DELETING,
+            fresh_start=False)
+        statusLog.save_document(document_path=full_path)   
+
+    except Exception as ex:
+        log.exception("Exception in /delete_Items")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return True
+
+
+@app.post("/resubmitItems")
+async def resubmit_Items(request: Request):
+    """
+    Resubmit a blob.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique folders.
+    """
+    json_body = await request.json()
+    path = json_body.get("path")
+    # remove the container prefix
+    path = path.split("/", 1)[1]
+    try:
+        blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        # Read the blob content into memory
+        blob_data = blob_container.download_blob(path).readall()
+        # Overwrite the blob with the modified data
+        blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
+        statusLog.upsert_document(document_path=path,
+                    status='Resubmitted to the processing pipeline',
+                    status_classification=StatusClassification.INFO,
+                    state=State.QUEUED,
+                    fresh_start=False)
+        statusLog.save_document(document_path=path)   
+
+    except Exception as ex:
+        log.exception("Exception in /delete_Items")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return True
+
+
+@app.post("/gettags")
+async def get_tags(request: Request):
+    """
+    Get all tags.
+
+    Parameters:
+    - request: The HTTP request object.
+
+    Returns:
+    - results: list of unique tags.
+    """
+    try:
+        # Initialize an empty list to hold the tags
+        items = []              
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)     
+        database = cosmos_client.get_database_client(statusLog._database_name)               
+        container = database.get_container_client(statusLog._container_name) 
+        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  
+        items = list(container.query_items(
+            query=query_string,
+            enable_cross_partition_query=True
+        ))           
+
+        # Extract and split tags
+        unique_tags = set()
+        for item in items:
+            tags = item.split(',')
+            unique_tags.update(tags)                  
+                
+    except Exception as ex:
+        log.exception("Exception in /gettags")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return unique_tags
 
 @app.post("/logstatus")
 async def logstatus(request: Request):
@@ -394,13 +539,12 @@ async def get_citation(request: Request):
     """
     try:
         json_body = await request.json()
-        citation = urllib.parse.unquote(json_body.get("citation"))
-    
+        citation = urllib.parse.unquote(json_body.get("citation"))    
         blob = blob_container.get_blob_client(citation).download_blob()
         decoded_text = blob.readall().decode()
         results = json.loads(decoded_text)
     except Exception as ex:
-        log.exception("Exception in /getalluploadstatus")
+        log.exception("Exception in /getcitation")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
@@ -426,7 +570,7 @@ async def get_all_tags():
         dict: A dictionary containing the status of all tags
     """
     try:
-        results = tagsHelper.get_all_tags()
+        results = statusLog.get_all_tags()
     except Exception as ex:
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
@@ -434,20 +578,29 @@ async def get_all_tags():
 
 @app.post("/retryFile")
 async def retryFile(request: Request):
+    """
+    Retries submission of a file
 
+    Returns:
+        dict: A dictionary containing the status of all tags
+    """
     json_body = await request.json()
     filePath = json_body.get("filePath")
     
     try:
-
         file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
         blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
-
         if blob.exists():
             raw_file = blob.download_blob().readall()
-
             # Overwrite the existing blob with new data
             blob.upload_blob(raw_file, overwrite=True) 
+
+            statusLog.upsert_document(document_path=filePath,
+                        status='Resubmitted to the processing pipeline',
+                        status_classification=StatusClassification.INFO,
+                        state=State.QUEUED,
+                        fresh_start=False)
+            statusLog.save_document(document_path=filePath)   
 
     except Exception as ex:
         logging.exception("Exception in /retryFile")

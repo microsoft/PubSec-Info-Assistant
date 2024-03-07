@@ -35,12 +35,6 @@ param logDatabaseName string
 @description('The name for the log container')
 param logContainerName string
 
-@description('The name for the tag database')
-param tagDatabaseName string
-
-@description('The name for the tag container')
-param tagContainerName string
-
 @description('Maximum autoscale throughput for the container')
 @minValue(1000)
 @maxValue(1000000)
@@ -126,45 +120,6 @@ resource logContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/contai
   }
 }
 
-resource tagDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
-  parent: cosmosDBAccount
-  name: tagDatabaseName
-  properties: {
-    resource: {
-      id: tagDatabaseName
-    }
-  }
-}
-
-resource tagContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
-  parent: tagDatabase
-  name: tagContainerName
-  properties: {
-    resource: {
-      id: tagContainerName
-      partitionKey: {
-        paths: [
-          '/file_path'
-        ]
-        kind: 'Hash'
-      }
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-      }
-    }
-    options: {
-      autoscaleSettings: {
-        maxThroughput: autoscaleMaxThroughput
-      }
-    }
-  }
-}
-
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = if (!(empty(keyVaultName))) {
   name: keyVaultName
 }
@@ -180,5 +135,3 @@ resource cosmosdbKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
 output CosmosDBEndpointURL string = cosmosDBAccount.properties.documentEndpoint
 output CosmosDBLogDatabaseName string = logDatabase.name
 output CosmosDBLogContainerName string = logContainer.name
-output CosmosDBTagsDatabaseName string = tagDatabase.name
-output CosmosDBTagsContainerName string = tagContainer.name

@@ -186,6 +186,7 @@ declare -A REPLACE_TOKENS=(
     [\${OPEN_SOURCE_EMBEDDING_MODEL}]=${OPEN_SOURCE_EMBEDDING_MODEL}
     [\${APPLICATION_TITLE}]=${APPLICATION_TITLE}
     [\${AZURE_KV_ACCESS_OBJ_ID}]=${AZURE_KV_ACCESS_OBJ_ID}
+    [\${ENABLE_BING_SAFE_SEARCH}]=${ENABLE_BING_SAFE_SEARCH}
 )
 parameter_json=$(cat "$DIR/../infra/main.parameters.json.template")
 for token in "${!REPLACE_TOKENS[@]}"

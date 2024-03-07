@@ -109,6 +109,9 @@
     },
     "applicationtitle": {
       "value": "${APPLICATION_TITLE}"
+    },
+    "enableBingSafeSearch": {
+      "value": ${ENABLE_BING_SAFE_SEARCH}
     }
   }
 }

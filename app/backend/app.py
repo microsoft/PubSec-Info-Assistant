@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
+from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
+from approaches.chatbingsearchcompare import ChatBingSearchCompare
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -23,6 +25,8 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
+from shared_code.tags_helper import TagsHelper
+from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -65,7 +69,8 @@ ENV = {
     "ENRICHMENT_APPSERVICE_NAME": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
     "ENRICHMENT_ENDPOINT": None,
-    "ENRICHMENT_KEY": None    
+    "ENRICHMENT_KEY": None,
+    "ENABLE_BING_SAFE_SEARCH": "true"   
 }
 
 for key, value in ENV.items():
@@ -175,7 +180,40 @@ chat_approaches = {
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["ENRICHMENT_ENDPOINT"],
                                     ENV["ENRICHMENT_KEY"]
-                                )
+                                ),
+    Approaches.ChatBingSearch: ChatBingSearch(
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
+    ),
+    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"], 
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
+    ),
+    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+                                    search_client,
+                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["KB_FIELDS_SOURCEFILE"],
+                                    ENV["KB_FIELDS_CONTENT"],
+                                    ENV["KB_FIELDS_PAGENUMBER"],
+                                    ENV["KB_FIELDS_CHUNKFILE"],
+                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+                                    blob_client,
+                                    ENV["QUERY_TERM_LANGUAGE"],
+                                    model_name,
+                                    model_version,
+                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
+                                    ENV["TARGET_EMBEDDINGS_MODEL"],
+                                    ENV["ENRICHMENT_APPSERVICE_NAME"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["ENRICHMENT_ENDPOINT"],
+                                    ENV["ENRICHMENT_KEY"]
+                                )   
 }
 
 
@@ -213,7 +251,7 @@ async def chat(request: Request):
         if not impl:
             return {"error": "unknown approach"}, 400
         r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
-
+       
         # To fix citation bug,below code is added.aparmar
         return {
                 "data_points": r["data_points"],

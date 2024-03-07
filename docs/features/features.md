@@ -5,6 +5,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
 * [Prompt Engineering](/docs/features/features.md#prompt-engineering)
 * [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
+* [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
 * [Image Search](/docs/features/features.md#image-search)
 * [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
@@ -56,6 +57,16 @@ The Information Assistant Accelerator [pre-processes](/docs/features/document_pr
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](/functions/shared_code/status_log.md) page for more details.
 
 Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](/docs/functions_flow.md)
+
+## Bing Search And Compare
+
+"Bing Search" and "Bing Compare." The former enables users to seamlessly perform Bing searches, with the retrieved results processed by the LLM and enriched with URL citations for more informative responses. 
+The latter, "Bing Compare," takes a grounded LLM response and performs a second Bing search, integrating citations from both sources for a comprehensive answer.
+
+Additionally, a "Switch to Web" button in the subtitle bar allows users to transition between "Work" and "Web" workspaces, directing prompts either to the grounded LLM with access to Bing-related functionalities or behaving as if the "Search Bing" button was pressed.
+ In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses. 
+ These features empower users to seamlessly access and validate information across various sources within the chat interface.
+ More information can be found in the [markdown here](/docs/features/bing_search.md)
 
 ## Image Search
 

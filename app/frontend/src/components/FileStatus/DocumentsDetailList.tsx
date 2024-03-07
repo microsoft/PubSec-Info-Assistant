@@ -14,11 +14,17 @@ import { DetailsList,
     DialogType, 
     DialogFooter, 
     PrimaryButton,
-    DefaultButton } from "@fluentui/react";
-
+    DefaultButton, 
+    Panel,
+    PanelType} from "@fluentui/react";
+ import { Resizable, ResizableBox } from "react-resizable";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
+import { StatusContent } from "../StatusContent/StatusContent";
+import Draggable from "react-draggable";
+// import Resizable from "re-resizable";
+// import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export interface IDocument {
     key: string;
@@ -47,7 +53,6 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
-    
     const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
@@ -215,17 +220,30 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     // ********************************************************************
     // State detail dialog
+    const [value, setValue] = useState('Initial value');
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
+    
+    // const onStateColumnClick = async (item: IDocument) => {
+    //     try {
+    //         //const text = await getTextForState(item);
+    //         // const text = item.status_updates[0].status;
+    //         const text = item.status_updates.map(update => update.status).join("\n");       
+    //         setStateDialogContent(text);
+    //         setStateDialogVisible(true);
+    //     } catch (error) {
+    //         console.error("Error on state column click:", error);
+    //         // Handle error here, perhaps show an error message to the user
+    //     }
+    // };
+    const refreshProp = (item: any) => {
+        setValue(item);
+      };
+
     const onStateColumnClick = (item: IDocument) => {
         try {
-            const statusElements = item.status_updates.map((update, index) => (
-                <div key={index}>
-                    <b>{update.status_timestamp}</b> - {update.status}
-                </div>
-            ));
-            setStateDialogContent(statusElements);
+            refreshProp(item);
             setStateDialogVisible(true);
         } catch (error) {
             console.error("Error on state column click:", error);
@@ -293,7 +311,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             data: 'string',
             onRender: (item: IDocument) => (
                 <TooltipHost content={`${item.state} `}>
-                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer', color:'blue', textDecoration:'underline' }}>
                         {item.state}
                     </span>
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
@@ -448,7 +466,23 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             <div>
                 <Notification message={notification.message} />
             </div>
-            <Dialog
+            
+                <Panel
+                    headerText="Status Log"
+                    isOpen={stateDialogVisible}
+                    isBlocking={false}
+                    onDismiss={() => setStateDialogVisible(false)}
+                    closeButtonAriaLabel="Close"
+                    onRenderFooterContent={() => <DefaultButton onClick={() => setStateDialogVisible(false)}>Close</DefaultButton>}
+                    isFooterAtBottom={true}
+                    type={PanelType.medium}
+                >
+                    <div className={styles.resultspanel}>
+                    <StatusContent item={value} />
+                    </div>
+                </Panel>
+                
+            {/* <Dialog
                 hidden={!stateDialogVisible}
                 onDismiss={() => setStateDialogVisible(false)}
                 dialogContentProps={{
@@ -466,7 +500,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 <DialogFooter>
                     <PrimaryButton onClick={() => setStateDialogVisible(false)} text="OK" />
                 </DialogFooter>
-            </Dialog>
+            </Dialog> */}
         </div>
     );
 }

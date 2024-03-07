@@ -142,7 +142,7 @@ model_version = ''
 
 ## Temp fix for issue https://github.com/Azure/azure-sdk-for-python/issues/34337.
 ## Remove this if/else once the issue is fixed in the SDK.
-if ENV["AZURE_OPENAI_ENDPOINT"].endswith(".us"):
+if "azure.us" in ENV["AZURE_OPENAI_ENDPOINT"]:
     model_name = ENV["AZURE_OPENAI_CHATGPT_MODEL_NAME"]
     model_version = ENV["AZURE_OPENAI_CHATGPT_MODEL_VERSION"]
     embedding_model_name = ENV["AZURE_OPENAI_EMBEDDINGS_MODEL_NAME"]

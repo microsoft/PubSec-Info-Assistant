@@ -406,7 +406,7 @@ class ChatReadRetrieveReadApproach(Approach):
         """ Function to detect the language of the text"""
         try:
             endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
-            api_detect_endpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
+            api_detect_endpoint = f"https://{self.azure_ai_translation_domain}/detect?api-version=3.0"
             headers = {
                 'Ocp-Apim-Subscription-Key': self.enrichment_key,
                 'Content-type': 'application/json',

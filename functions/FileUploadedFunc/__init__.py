@@ -100,7 +100,7 @@ def main(myblob: func.InputStream):
         # Iterate through the blobs and delete each one from blob and the search index
         for blob in blobs:
             blob_client.get_blob_client(container=azure_blob_content_container, blob=blob.name).delete_blob()
-            search_id_list_to_delete.append({"id": blob.name})
+            search_id_list_to_delete.append({"id": statusLog.encode_document_id(blob.name)})
         
         if len(search_id_list_to_delete) > 0:
             search_client.delete_documents(documents=search_id_list_to_delete)

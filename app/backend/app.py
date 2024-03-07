@@ -280,9 +280,9 @@ async def get_all_upload_status(request: Request):
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=tagsHelper._url, credential=tagsHelper._key)
-        database = cosmos_client.get_database_client(tagsHelper._database_name)
-        container = database.get_container_client(tagsHelper._container_name)
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)     
+        database = cosmos_client.get_database_client(statusLog._database_name)               
+        container = database.get_container_client(statusLog._container_name)         
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
         items = list(container.query_items(
             query=query_string,

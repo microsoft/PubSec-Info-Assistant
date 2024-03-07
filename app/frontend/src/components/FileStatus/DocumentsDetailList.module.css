@@ -97,6 +97,9 @@
   text-align: center;
 }
 
-.refreshicon {
-  fill: #606060; /* Mid-dark grey for SVG icons */
+.refreshtext {
+  font-size: 0.8em; /* Smaller text size, adjust as needed */
 }
+
+.refreshicon {
+  fill: #606060; /* Mid-dark grey for SVG icons */}

@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Delete24Regular,
-    Send24Regular
+    Send24Regular,
+    ArrowClockwise24Filled
     } from "@fluentui/react-icons";
 
 import { DetailsList, 
@@ -50,9 +51,11 @@ export interface IDocument {
 interface Props {
     items: IDocument[];
     onFilesSorted?: (items: IDocument[]) => void;
+    onRefresh: () => void; // Add this line
 }
 
-export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
+export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) => {
+
     const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
@@ -397,6 +400,10 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             {/* <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
             <Button text="Resubmit" onClick={handleResubmitClick} /> */}
             <div className={styles.buttonsContainer}>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={onRefresh} aria-label="Refresh">
+                    <ArrowClockwise24Filled className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Refresh</span>
+                </div>
                 <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleDeleteClick} aria-label="Delete">
                     <Delete24Regular className={styles.refreshicon} />
                     <span className={`${styles.refreshtext} ${styles.centeredText}`}>Delete</span>

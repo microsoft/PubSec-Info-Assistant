@@ -2,6 +2,9 @@
 // Licensed under the MIT license.
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { Delete24Regular,
+    Send24Regular
+    } from "@fluentui/react-icons";
 
 import { DetailsList, 
     DetailsListLayoutMode, 
@@ -16,15 +19,12 @@ import { DetailsList,
     PrimaryButton,
     DefaultButton, 
     Panel,
-    PanelType} from "@fluentui/react";
- import { Resizable, ResizableBox } from "react-resizable";
+    PanelType,} from "@fluentui/react";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 import { StatusContent } from "../StatusContent/StatusContent";
-import Draggable from "react-draggable";
-// import Resizable from "re-resizable";
-// import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+
 
 export interface IDocument {
     key: string;
@@ -178,7 +178,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         setNotification({ show: true, message: 'Processing deletion. Hit \'Refresh\' to track progress' });
     };
     
-
     // Function to handle the delete button click
     const handleDeleteClick = () => {
         showDeleteConfirmation();
@@ -222,21 +221,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     // State detail dialog
     const [value, setValue] = useState('Initial value');
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
-    const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
-    const scrollableContentRef = useRef<HTMLDivElement>(null);
     
-    // const onStateColumnClick = async (item: IDocument) => {
-    //     try {
-    //         //const text = await getTextForState(item);
-    //         // const text = item.status_updates[0].status;
-    //         const text = item.status_updates.map(update => update.status).join("\n");       
-    //         setStateDialogContent(text);
-    //         setStateDialogVisible(true);
-    //     } catch (error) {
-    //         console.error("Error on state column click:", error);
-    //         // Handle error here, perhaps show an error message to the user
-    //     }
-    // };
     const refreshProp = (item: any) => {
         setValue(item);
       };
@@ -409,22 +394,18 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     return (
         <div>
-            <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
-            <DetailsList
-                items={itemList}
-                compact={true}
-                columns={columns}
-                selection={selectionRef.current}
-                selectionMode={SelectionMode.multiple} // Allow multiple selection
-                getKey={getKey}
-                setKey="none"
-                layoutMode={DetailsListLayoutMode.justified}
-                isHeaderVisible={true}
-                onItemInvoked={onItemInvoked}
-            />
-            <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
-            <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
-            <Button text="Resubmit" onClick={handleResubmitClick} />
+            {/* <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
+            <Button text="Resubmit" onClick={handleResubmitClick} /> */}
+            <div className={styles.buttonsContainer}>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleDeleteClick} aria-label="Delete">
+                    <Delete24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Delete</span>
+                </div>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleResubmitClick} aria-label="Resubmit">
+                    <Send24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Resubmit</span>
+                </div>
+            </div>
             {/* Dialog for delete confirmation */}
             <Dialog
                 hidden={!isDeleteDialogVisible}
@@ -463,6 +444,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     <DefaultButton onClick={() => setIsResubmitDialogVisible(false)} text="Cancel" />
                 </DialogFooter>
             </Dialog>
+            <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
+            <DetailsList
+                items={itemList}
+                compact={true}
+                columns={columns}
+                selection={selectionRef.current}
+                selectionMode={SelectionMode.multiple} // Allow multiple selection
+                getKey={getKey}
+                setKey="none"
+                layoutMode={DetailsListLayoutMode.justified}
+                isHeaderVisible={true}
+                onItemInvoked={onItemInvoked}
+            />
+            <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <div>
                 <Notification message={notification.message} />
             </div>

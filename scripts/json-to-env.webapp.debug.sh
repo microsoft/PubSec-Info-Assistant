@@ -142,7 +142,11 @@ jq -r  '
         {
             "path": "AZURE_OPENAI_ENDPOINT",
             "env_var": "AZURE_OPENAI_ENDPOINT"
-        }
+        },
+        {
+            "path": "ENABLEE_BING_SAFE_SEARCH",
+            "env_var": "ENABLE_BING_SAFE_SEARCH"
+        }        
     ]
         as $env_vars_to_extract
     |

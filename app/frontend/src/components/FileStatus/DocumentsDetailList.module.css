@@ -48,3 +48,25 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: dimgrey;
 }
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #f8d7da; /* Light red background */
+  color: #721c24; /* Dark red text */
+  padding: 15px; /* More padding for larger area */
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Adds shadow for better visibility */
+  width: auto; /* Auto width to accommodate longer text */
+  max-width: 80%; /* Maximum width to prevent extremely long lines */
+  overflow: visible; /* Allow overflow */
+  text-overflow: clip; /* Clip text that overflows */
+  white-space: normal; /* Allow text to wrap */
+}
+
+.scrollableDialogContent {
+  max-height: 400px; /* Adjust the height as needed */
+  max-width: 400px;  /* Adjust the width as needed */
+  overflow-y: auto;  /* This enables vertical scrolling */
+}

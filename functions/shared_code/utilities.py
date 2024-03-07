@@ -446,6 +446,7 @@ class Utilities:
         previous_subtitle_name = document_map['structure'][0]["subtitle"]
         page_list = []
         chunk_count = 0
+        previous_paragraph_element_is_a_table = False
 
         # iterate over the paragraphs and build a chuck based on a section
         # and/or title of the document

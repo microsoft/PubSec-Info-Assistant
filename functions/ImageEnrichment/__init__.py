@@ -8,7 +8,6 @@ import requests
 from azure.storage.blob import BlobServiceClient
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
-from shared_code.tags_helper import TagsHelper
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from datetime import datetime
@@ -37,8 +36,6 @@ cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
-cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
-cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
 
 # Cognitive Services
 cognitive_services_key = os.environ["ENRICHMENT_KEY"]
@@ -321,10 +318,7 @@ def main(msg: func.QueueMessage) -> None:
         else:
             tags_list = []
         # Write the tags to cosmos db
-        tags_helper = TagsHelper(
-            cosmosdb_url, cosmosdb_key, cosmosdb_tags_database_name, cosmosdb_tags_container_name
-        )
-        tags_helper.upsert_document(blob_path, tags_list)
+        statusLog.update_document_tags(blob_path, tags_list)
 
         # Only one chunk per image currently.
         chunk_file=utilities.build_chunk_filepath(file_directory, file_name, file_extension, '0')

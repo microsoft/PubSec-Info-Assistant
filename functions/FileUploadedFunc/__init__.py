@@ -14,7 +14,6 @@ from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 
 
-
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
@@ -41,10 +40,11 @@ def main(myblob: func.InputStream):
     try:
         time.sleep(random.randint(1, 2))  # add a random delay
         statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
-        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, True)            
+        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
-        # Create message structure to send to queue      
+        # Create message structure to send to queue
+      
         file_extension = os.path.splitext(myblob.name)[1][1:].lower()
         if file_extension == 'pdf':
              # If the file is a PDF a message is sent to the PDF processing queue.
@@ -100,7 +100,7 @@ def main(myblob: func.InputStream):
         # Iterate through the blobs and delete each one from blob and the search index
         for blob in blobs:
             blob_client.get_blob_client(container=azure_blob_content_container, blob=blob.name).delete_blob()
-            search_id_list_to_delete.append({"id": blob.name})
+            search_id_list_to_delete.append({"id": statusLog.encode_document_id(blob.name)})
         
         if len(search_id_list_to_delete) > 0:
             search_client.delete_documents(documents=search_id_list_to_delete)

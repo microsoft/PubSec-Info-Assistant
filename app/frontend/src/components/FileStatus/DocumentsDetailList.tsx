@@ -298,13 +298,12 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             onColumnClick: onColumnClick,
             data: 'string',
             onRender: (item: IDocument) => (
-                <TooltipHost content={`${item.state} `}>
-                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer', color:'blue', textDecoration:'underline' }}>
-                        {item.state}
+                <TooltipHost content={`${item.state_description} `}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                        {item.state_description}
                     </span>
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
                 </TooltipHost>
-            ), 
+            ),
             isPadded: true,
         },
         {
@@ -483,26 +482,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
                     <StatusContent item={value} />
                     </div>
                 </Panel>
-                
-            {/* <Dialog
-                hidden={!stateDialogVisible}
-                onDismiss={() => setStateDialogVisible(false)}
-                dialogContentProps={{
-                    type: DialogType.normal,
-                    title: 'State Details',
-                    closeButtonAriaLabel: 'Close',
-                }}
-                modalProps={{
-                    styles: dialogStyles,
-                }}
-            >
-                <div className="scrollableDialogContent" ref={scrollableContentRef}>
-                    {stateDialogContent}
-                </div>
-                <DialogFooter>
-                    <PrimaryButton onClick={() => setStateDialogVisible(false)} text="OK" />
-                </DialogFooter>
-            </Dialog> */}
         </div>
     );
 }

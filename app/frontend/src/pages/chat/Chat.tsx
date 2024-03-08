@@ -25,6 +25,8 @@ import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
 
+import ailalogo from "../../assets/ailalogo.png"
+
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
@@ -250,12 +252,15 @@ const Chat = () => {
                 <div className={styles.chatContainer}>
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
-                            <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your private data</h1>
-                            <span className={styles.chatEmptyObjectives}>
+                            {/*<SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="AILA logo" />*/}
+                            <div>
+                                <img src={ailalogo} alt="AILA logo" width="600" />
+                            </div>
+                            <h1 className={styles.chatEmptyStateTitle}>Vprašaj AILO, kot bi vprašal sodelavko</h1>
+                            {/*<span className={styles.chatEmptyObjectives}>
                                 The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components 
                                 to enable you to <b>Chat</b> (Have a conversation) with your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
-                            </span>
+                    </span>*/}
                             <span className={styles.chatEmptyObjectivesList}>
                                 <span className={styles.chatEmptyObjectivesListItem}>
                                     <ClockFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Clock icon" />

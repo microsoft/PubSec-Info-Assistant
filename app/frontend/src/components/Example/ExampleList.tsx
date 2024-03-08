@@ -11,9 +11,9 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How is strengthening student data privacy accomplished?", value: "How is strengthening student data privacy accomplished?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "What are some flavors of Breyers?", value: "What are some flavors of Breyers?" }
+    { text: "Question 1?", value: "Question 1?" },
+    { text: "Question 2?", value: "Question 2?" },
+    { text: "Question 3?", value: "Question 3?" }
 ];
 
 interface Props {

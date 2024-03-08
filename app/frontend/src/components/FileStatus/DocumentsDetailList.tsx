@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { Delete24Regular,
-    Send24Regular,
-    ArrowClockwise24Filled
-    } from "@fluentui/react-icons";
-
+import React, { forwardRef, 
+    useImperativeHandle, 
+    useState, 
+    useEffect, 
+    useRef
+    } from "react";
 import { DetailsList, 
     DetailsListLayoutMode, 
     SelectionMode, 
     IColumn, 
     Selection, 
     TooltipHost,
-    Button,
     Dialog, 
     DialogType, 
     DialogFooter, 
@@ -25,7 +24,6 @@ import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 import { StatusContent } from "../StatusContent/StatusContent";
-
 
 export interface IDocument {
     key: string;
@@ -54,9 +52,21 @@ interface Props {
     onRefresh: () => void; // Add this line
 }
 
-export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) => {
+export interface IDocumentsDetailList {
+    handleDeleteClick: () => void;
+    handleResubmitClick: () => void;
+}
+
+
+
+export const DocumentsDetailList = forwardRef(({ items, onFilesSorted, onRefresh }: Props, ref) => {
 
     const itemsRef = useRef(items);
+
+    useImperativeHandle(ref, () => ({
+    handleDeleteClick,
+    handleResubmitClick
+}));
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
         const newColumns: IColumn[] = columns.slice();
@@ -88,6 +98,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
     function onItemInvoked(item: any): void {
         alert(`Item invoked: ${item.name}`);
     }
+
+    useImperativeHandle(ref, () => ({
+        handleDeleteClick,
+        handleResubmitClick
+    }));
 
     const [itemList, setItems] = useState<IDocument[]>(items);
     function retryErroredFile(item: IDocument): void {
@@ -224,7 +239,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
     // State detail dialog
     const [value, setValue] = useState('Initial value');
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
-    
+    const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
+    const scrollableContentRef = useRef<HTMLDivElement>(null);
+
     const refreshProp = (item: any) => {
         setValue(item);
       };
@@ -238,21 +255,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             // Handle error here, perhaps show an error message to the user
         }
     };
-
-    const dialogStyles = {
-        main: {
-            width: '400px',  // Set the width to 400 pixels
-            maxWidth: '400px', // Set the maximum width to 400 pixels
-            maxHeight: '400px', // Set the maximum height to 400 pixels
-            overflowY: 'auto', // Enable vertical scrolling for the entire dialog if needed
-        },
-    };
-
-
-    useEffect(() => {
-        // Scroll to the top when the dialog opens
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-    }, []);
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -396,22 +398,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
 
     return (
         <div>
-            {/* <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
-            <Button text="Resubmit" onClick={handleResubmitClick} /> */}
-            <div className={styles.buttonsContainer}>
-                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={onRefresh} aria-label="Refresh">
-                    <ArrowClockwise24Filled className={styles.refreshicon} />
-                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Refresh</span>
-                </div>
-                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleDeleteClick} aria-label="Delete">
-                    <Delete24Regular className={styles.refreshicon} />
-                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Delete</span>
-                </div>
-                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleResubmitClick} aria-label="Resubmit">
-                    <Send24Regular className={styles.refreshicon} />
-                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Resubmit</span>
-                </div>
-            </div>
             {/* Dialog for delete confirmation */}
             <Dialog
                 hidden={!isDeleteDialogVisible}
@@ -484,4 +470,4 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
                 </Panel>
         </div>
     );
-}
+})

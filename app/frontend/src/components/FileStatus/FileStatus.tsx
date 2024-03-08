@@ -1,13 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dropdown, DropdownMenuItemType, IDropdownOption, IDropdownStyles } from '@fluentui/react/lib/Dropdown';
 import { Stack } from "@fluentui/react";
-import { DocumentsDetailList, IDocument } from "./DocumentsDetailList";
-import { ArrowClockwise24Filled } from "@fluentui/react-icons";
+import { DocumentsDetailList, IDocument, IDocumentsDetailList } from "./DocumentsDetailList";
 import { animated, useSpring } from "@react-spring/web";
 import { getAllUploadStatus, FileUploadBasicStatus, GetUploadStatusRequest, FileState, getFolders, getTags } from "../../api";
+import { Delete24Regular,
+    Send24Regular,
+    ArrowClockwise24Filled
+    } from "@fluentui/react-icons";
 
 import styles from "./FileStatus.module.css";
 
@@ -41,10 +44,12 @@ const dropdownFileStateOptions = [
     { key: FileState.DELETED, text: 'Deleted'},  
   ];
 
+const detailListRef = useRef<IDocumentsDetailList>(null);
 
 interface Props {
     className?: string;
 }
+
 
 export const FileStatus = ({ className }: Props) => {
     const [selectedTimeFrameItem, setSelectedTimeFrameItem] = useState<IDropdownOption>();
@@ -56,6 +61,19 @@ export const FileStatus = ({ className }: Props) => {
     const [tagOptions, setTagOptions] = useState<IDropdownOption[]>([]);
     const [files, setFiles] = useState<IDocument[]>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const detailListRef = useRef();
+
+    // Function to call handleDeleteClick from the child component
+    const onDeleteClick = () => {
+        detailListRef.current?.handleDeleteClick();
+    };
+
+    // Function to call handleResubmitClick from the child component
+    const onResubmitClick = () => {
+        detailListRef.current?.handleResubmitClick();
+        
+    };
 
     const onTimeSpanChange = (event: React.FormEvent<HTMLDivElement>, item: IDropdownOption<any> | undefined): void => {
         setSelectedTimeFrameItem(item);
@@ -236,6 +254,20 @@ export const FileStatus = ({ className }: Props) => {
                 aria-label="tag options for file statuses to be displayed"
             />
             </div>
+            <div className={styles.buttonsContainer}>
+                <div className={styles.refresharea} onClick={onGetStatusClick} aria-label="Refresh displayed file statuses">
+                    <ArrowClockwise24Filled className={styles.refreshicon} />
+                    <span className={styles.refreshtext}>Refresh</span>
+                </div>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={onDeleteClick} aria-label="Delete">
+                    <Delete24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Delete</span>
+                </div>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={onResubmitClick} aria-label="Resubmit">
+                    <Send24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Resubmit</span>
+                </div>
+            </div>
             {isLoading ? (
                 <animated.div style={{ ...animatedStyles }}>
                      <Stack className={styles.loadingContainer} verticalAlign="space-between">
@@ -249,7 +281,12 @@ export const FileStatus = ({ className }: Props) => {
                 </animated.div>
             ) : (
                 <div className={styles.resultspanel}>
-                    <DocumentsDetailList items={files == undefined ? [] : files} onFilesSorted={onFilesSorted} onRefresh={onGetStatusClick}/>
+                    <DocumentsDetailList 
+                        ref={detailListRef}
+                        items={files == undefined ? [] : files} 
+                        onFilesSorted={onFilesSorted} 
+                        onRefresh={onGetStatusClick}
+                    />
                 </div>
             )}
         </div>

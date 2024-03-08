@@ -250,6 +250,21 @@ Question: {question}
 
 st.set_page_config(page_title="Your Friendly Math Tutor")
 st.title("Your Friendly Math Tutor")
+st.markdown(
+    r"""
+    <style>
+    .stDeployButton {
+            visibility: hidden;
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 
 with st.form('myform'):
     question = st.text_input('Enter question:', '')

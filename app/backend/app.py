@@ -4,6 +4,7 @@
 import logging
 import os
 import json
+import subprocess
 import urllib.parse
 from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
@@ -187,6 +188,8 @@ chat_approaches = {
                                 )
 }
 
+#run streamlit app
+subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", "0.0.0.0", "--server.port=8501"])
 
 # Create API
 app = FastAPI(

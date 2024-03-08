@@ -12,22 +12,26 @@ import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
+import { ToggleContext } from './components/Title/Toggle';
 import Tutor from "./pages/tutor/Tutor";
 
 initializeIcons();
 
 export default function App() {
+    const [toggle, setToggle] = React.useState('Work');
     return (
-        <HashRouter>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Chat />} />
-                    <Route path="content" element={<Content />} />
-                    <Route path="*" element={<NoPage />} />
-                    <Route path="tutor" element={<Tutor />} />
+        <ToggleContext.Provider value={{ toggle, setToggle }}>
+            <HashRouter>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Chat />} />
+                        <Route path="content" element={<Content />} />
+                        <Route path="*" element={<NoPage />} />
+                        <Route path="tutor" element={<Tutor />} />
                 </Route>
-            </Routes>
-        </HashRouter>
+                </Routes>
+            </HashRouter>
+        </ToggleContext.Provider>    
     );
 }
 

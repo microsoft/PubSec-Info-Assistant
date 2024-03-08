@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+
 import { DetailsList, 
     DetailsListLayoutMode, 
     SelectionMode, 
@@ -13,11 +14,17 @@ import { DetailsList,
     DialogType, 
     DialogFooter, 
     PrimaryButton,
-    DefaultButton } from "@fluentui/react";
-
+    DefaultButton, 
+    Panel,
+    PanelType} from "@fluentui/react";
+ import { Resizable, ResizableBox } from "react-resizable";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
+import { StatusContent } from "../StatusContent/StatusContent";
+import Draggable from "react-draggable";
+// import Resizable from "re-resizable";
+// import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
 export interface IDocument {
     key: string;
@@ -36,7 +43,9 @@ export interface IDocument {
         status_classification: string;
     }>;
     isSelected?: boolean; // Optional property to track selection state
+    tags: string;
 }
+
 
 interface Props {
     items: IDocument[];
@@ -44,7 +53,6 @@ interface Props {
 }
 
 export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
-    
     const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
@@ -176,7 +184,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         showDeleteConfirmation();
     };
 
-
     // *************************************************************
     // Resubmit processing
     // New state for managing resubmit dialog visibility and selected items
@@ -206,7 +213,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         setNotification({ show: true, message: 'Processing resubmit. Hit \'Refresh\' to track progress' });
     };
     
-
     // Function to handle the resubmit button click
     const handleResubmitClick = () => {
         showResubmitConfirmation();
@@ -214,10 +220,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     // ********************************************************************
     // State detail dialog
+    const [value, setValue] = useState('Initial value');
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
-
+    
     // const onStateColumnClick = async (item: IDocument) => {
     //     try {
     //         //const text = await getTextForState(item);
@@ -230,23 +237,19 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     //         // Handle error here, perhaps show an error message to the user
     //     }
     // };
-
+    const refreshProp = (item: any) => {
+        setValue(item);
+      };
 
     const onStateColumnClick = (item: IDocument) => {
         try {
-            const statusElements = item.status_updates.map((update, index) => (
-                <div key={index}>
-                    <b>{update.status_timestamp}</b> - {update.status}
-                </div>
-            ));
-            setStateDialogContent(statusElements);
+            refreshProp(item);
             setStateDialogVisible(true);
         } catch (error) {
             console.error("Error on state column click:", error);
             // Handle error here, perhaps show an error message to the user
         }
     };
-
 
     const dialogStyles = {
         main: {
@@ -262,9 +265,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
         // Scroll to the top when the dialog opens
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     }, []);
-
-    // ********************************************************************
-
 
     const [columns, setColumns] = useState<IColumn[]> ([
         {
@@ -311,11 +311,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             data: 'string',
             onRender: (item: IDocument) => (
                 <TooltipHost content={`${item.state} `}>
-                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer', color:'blue', textDecoration:'underline' }}>
                         {item.state}
                     </span>
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
-                </TooltipHost> 
+                </TooltipHost>
             ), 
             isPadded: true,
         },
@@ -335,6 +335,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     {item.filePath === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> Retry File</a>}  
                 </TooltipHost>  
             ), 
+        },
+        {
+            key: 'tags',
+            name: 'Tags',
+            fieldName: 'tags',
+            minWidth: 70,
+            maxWidth: 90,
+            isRowHeader: true,
+            isResizable: true,
+            sortAscendingAriaLabel: 'Sorted A to Z',
+            sortDescendingAriaLabel: 'Sorted Z to A',
+            onColumnClick: onColumnClick,
+            data: 'string',
+
             isPadded: true,
         },
         {
@@ -385,7 +399,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => (
                 <TooltipHost content={`${item.state_description} `}>
-                     <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
                         {item.state_description}
                     </span>
                 </TooltipHost>
@@ -452,7 +466,23 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             <div>
                 <Notification message={notification.message} />
             </div>
-            <Dialog
+            
+                <Panel
+                    headerText="Status Log"
+                    isOpen={stateDialogVisible}
+                    isBlocking={false}
+                    onDismiss={() => setStateDialogVisible(false)}
+                    closeButtonAriaLabel="Close"
+                    onRenderFooterContent={() => <DefaultButton onClick={() => setStateDialogVisible(false)}>Close</DefaultButton>}
+                    isFooterAtBottom={true}
+                    type={PanelType.medium}
+                >
+                    <div className={styles.resultspanel}>
+                    <StatusContent item={value} />
+                    </div>
+                </Panel>
+                
+            {/* <Dialog
                 hidden={!stateDialogVisible}
                 onDismiss={() => setStateDialogVisible(false)}
                 dialogContentProps={{
@@ -470,7 +500,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 <DialogFooter>
                     <PrimaryButton onClick={() => setStateDialogVisible(false)} text="OK" />
                 </DialogFooter>
-            </Dialog>
+            </Dialog> */}
         </div>
     );
 }

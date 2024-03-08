@@ -76,14 +76,6 @@ jq -r  '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
             "path": "azurE_CLIENT_ID",
             "env_var": "AZURE_CLIENT_ID"
         },
@@ -142,7 +134,11 @@ jq -r  '
         {
             "path": "enrichmenT_ENDPOINT",
             "env_var": "ENRICHMENT_ENDPOINT"
-        }
+        },
+        {
+            "path": "enablE_BING_SAFE_SEARCH",
+            "env_var": "ENABLE_BING_SAFE_SEARCH"
+        }        
     ]
         as $env_vars_to_extract
     |

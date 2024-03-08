@@ -11,6 +11,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
+from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
+from approaches.chatbingsearchcompare import ChatBingSearchCompare
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -25,6 +27,7 @@ from azure.storage.blob import (
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from shared_code.tags_helper import TagsHelper
+from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -62,14 +65,13 @@ ENV = {
     "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
-    "COSMOSDB_TAGS_DATABASE_NAME": "tagsdb",
-    "COSMOSDB_TAGS_CONTAINER_NAME": "tagscontainer",
     "QUERY_TERM_LANGUAGE": "English",
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
     "ENRICHMENT_APPSERVICE_NAME": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
     "ENRICHMENT_ENDPOINT": None,
-    "ENRICHMENT_KEY": None    
+    "ENRICHMENT_KEY": None,
+    "ENABLE_BING_SAFE_SEARCH": "true"   
 }
 
 for key, value in ENV.items():
@@ -105,12 +107,6 @@ statusLog = StatusLog(
     ENV["COSMOSDB_KEY"],
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
     ENV["COSMOSDB_LOG_CONTAINER_NAME"]
-)
-tagsHelper = TagsHelper(
-    ENV["COSMOSDB_URL"],
-    ENV["COSMOSDB_KEY"],
-    ENV["COSMOSDB_TAGS_DATABASE_NAME"],
-    ENV["COSMOSDB_TAGS_CONTAINER_NAME"]
 )
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
@@ -185,7 +181,40 @@ chat_approaches = {
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["ENRICHMENT_ENDPOINT"],
                                     ENV["ENRICHMENT_KEY"]
-                                )
+                                ),
+    Approaches.ChatBingSearch: ChatBingSearch(
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
+    ),
+    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"], 
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
+    ),
+    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+                                    search_client,
+                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["KB_FIELDS_SOURCEFILE"],
+                                    ENV["KB_FIELDS_CONTENT"],
+                                    ENV["KB_FIELDS_PAGENUMBER"],
+                                    ENV["KB_FIELDS_CHUNKFILE"],
+                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+                                    blob_client,
+                                    ENV["QUERY_TERM_LANGUAGE"],
+                                    model_name,
+                                    model_version,
+                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
+                                    ENV["TARGET_EMBEDDINGS_MODEL"],
+                                    ENV["ENRICHMENT_APPSERVICE_NAME"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["ENRICHMENT_ENDPOINT"],
+                                    ENV["ENRICHMENT_KEY"]
+                                )   
 }
 
 #run streamlit app
@@ -225,7 +254,7 @@ async def chat(request: Request):
         if not impl:
             return {"error": "unknown approach"}, 400
         r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
-
+       
         # To fix citation bug,below code is added.aparmar
         return {
                 "data_points": r["data_points"],
@@ -281,10 +310,12 @@ async def get_all_upload_status(request: Request):
     timeframe = json_body.get("timeframe")
     state = json_body.get("state")
     folder = json_body.get("folder")
+    tag = json_body.get("tag")   
     try:
         results = statusLog.read_files_status_by_timeframe(timeframe, 
             State[state], 
             folder, 
+            tag,
             os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
         # retrieve tags for each file
@@ -304,6 +335,7 @@ async def get_all_upload_status(request: Request):
         for item in items:
             tags = item.split(',')
             unique_tags.update(tags)        
+
         
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
@@ -418,9 +450,9 @@ async def get_tags(request: Request):
     try:
         # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=tagsHelper._url, credential=tagsHelper._key)     
-        database = cosmos_client.get_database_client(tagsHelper._database_name)               
-        container = database.get_container_client(tagsHelper._container_name) 
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)     
+        database = cosmos_client.get_database_client(statusLog._database_name)               
+        container = database.get_container_client(statusLog._container_name) 
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  
         items = list(container.query_items(
             query=query_string,
@@ -531,7 +563,7 @@ async def get_citation(request: Request):
         decoded_text = blob.readall().decode()
         results = json.loads(decoded_text)
     except Exception as ex:
-        log.exception("Exception in /getalluploadstatus")
+        log.exception("Exception in /getcitation")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
@@ -557,7 +589,7 @@ async def get_all_tags():
         dict: A dictionary containing the status of all tags
     """
     try:
-        results = tagsHelper.get_all_tags()
+        results = statusLog.get_all_tags()
     except Exception as ex:
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex)) from ex

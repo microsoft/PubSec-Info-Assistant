@@ -134,7 +134,11 @@ jq -r  '
         {
             "path": "enrichmenT_ENDPOINT",
             "env_var": "ENRICHMENT_ENDPOINT"
-        }
+        },
+        {
+            "path": "enablE_BING_SAFE_SEARCH",
+            "env_var": "ENABLE_BING_SAFE_SEARCH"
+        }        
     ]
         as $env_vars_to_extract
     |

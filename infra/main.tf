@@ -172,8 +172,8 @@ module "backend" {
     APPLICATION_TITLE                       = var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
-    BING_SEARCH_ENDPOINT                    = module.bingSearch[0].endpoint
-    BING_SEARCH_KEY                         = module.bingSearch[0].key
+    BING_SEARCH_ENDPOINT                    = var.azure_environment == "AzureCloud" ? module.bingSearch[0].endpoint : ""
+    BING_SEARCH_KEY                         = var.azure_environment == "AzureCloud" ? module.bingSearch[0].key : ""
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
   }
 

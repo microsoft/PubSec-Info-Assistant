@@ -331,13 +331,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             fieldName: 'tags',
             minWidth: 70,
             maxWidth: 90,
-            isRowHeader: true,
             isResizable: true,
             sortAscendingAriaLabel: 'Sorted A to Z',
             sortDescendingAriaLabel: 'Sorted Z to A',
             onColumnClick: onColumnClick,
             data: 'string',
-
             isPadded: true,
         },
         {

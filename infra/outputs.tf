@@ -71,14 +71,6 @@ output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
   value = module.cosmosdb.CosmosDBLogContainerName
 }
 
-output "AZURE_COSMOSDB_TAGS_DATABASE_NAME" {
-  value = module.cosmosdb.CosmosDBTagsDatabaseName
-}
-
-output "AZURE_COSMOSDB_TAGS_CONTAINER_NAME" {
-  value = module.cosmosdb.CosmosDBTagsContainerName
-}
-
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
   value = module.formrecognizer.formRecognizerAccountEndpoint
 }
@@ -155,6 +147,10 @@ output "ENRICHMENT_APPSERVICE_NAME" {
   value = module.enrichmentApp.name
 }
 
+output "ENRICHMENT_APPSERVICE_URL" {
+  value = module.enrichmentApp.uri
+}
+
 output "DEPLOYMENT_KEYVAULT_NAME" {
   value = module.kvModule.keyVaultName
 }
@@ -169,4 +165,16 @@ output "AZURE_OPENAI_ENDPOINT"  {
 
 output "AZURE_ENVIRONMENT" {
   value = var.azure_environment
+}
+
+output "BING_SEARCH_ENDPOINT" {
+  value = module.bingSearch.endpoint
+}
+
+output "BING_SEARCH_KEY" {
+  value = module.bingSearch.key
+}
+
+output "ENABLE_BING_SAFE_SEARCH" {
+  value = var.enableBingSafeSearch
 }

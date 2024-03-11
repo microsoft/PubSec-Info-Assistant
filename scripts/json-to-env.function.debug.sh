@@ -87,14 +87,6 @@ jq -r --arg secrets "$secrets" '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "AZURE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "AZURE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
             "path": "AzureWebJobsStorage",
             "env_var": "AzureWebJobsStorage"
         },

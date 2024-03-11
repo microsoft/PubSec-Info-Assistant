@@ -74,6 +74,8 @@ ENV = {
     "ENRICHMENT_ENDPOINT": None,
     "ENRICHMENT_KEY": None,
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
+    "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
+    "BING_SEARCH_KEY": "",
     "ENABLE_BING_SAFE_SEARCH": "true"   
 }
 
@@ -108,6 +110,12 @@ azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"]
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
+    ENV["COSMOSDB_URL"],
+    ENV["COSMOSDB_KEY"],
+    ENV["COSMOSDB_LOG_DATABASE_NAME"],
+    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
+)
+tagsHelper = TagsHelper(
     ENV["COSMOSDB_URL"],
     ENV["COSMOSDB_KEY"],
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
@@ -196,12 +204,16 @@ chat_approaches = {
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["BING_SEARCH_ENDPOINT"],
+                                    ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
     Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                    ENV["TARGET_TRANSLATION_LANGUAGE"], 
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["BING_SEARCH_ENDPOINT"],
+                                    ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
     Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
@@ -218,13 +230,14 @@ chat_approaches = {
                                     ENV["QUERY_TERM_LANGUAGE"],
                                     model_name,
                                     model_version,
-                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
-                                    ENV["ENRICHMENT_APPSERVICE_NAME"],
+                                    ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["ENRICHMENT_ENDPOINT"],
-                                    ENV["ENRICHMENT_KEY"]
-                                )   
+                                    ENV["ENRICHMENT_KEY"],
+                                    ENV["AZURE_AI_TRANSLATION_DOMAIN"],
+                                    str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
+                                )
 }
 
 

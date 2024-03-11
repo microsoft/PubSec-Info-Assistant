@@ -76,14 +76,6 @@ jq -r  '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "AZURE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "AZURE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
             "path": "AZURE_CLIENT_ID",
             "env_var": "AZURE_CLIENT_ID"
         },
@@ -124,8 +116,8 @@ jq -r  '
             "env_var": "USE_AZURE_OPENAI_EMBEDDINGS"
         },
         {
-            "path": "ENRICHMENT_APPSERVICE_NAME",
-            "env_var": "ENRICHMENT_APPSERVICE_NAME"
+            "path": "ENRICHMENT_APPSERVICE_URL",
+            "env_var": "ENRICHMENT_APPSERVICE_URL"
         },
         {
             "path": "DEPLOYMENT_KEYVAULT_NAME",
@@ -142,6 +134,14 @@ jq -r  '
         {
             "path": "AZURE_OPENAI_ENDPOINT",
             "env_var": "AZURE_OPENAI_ENDPOINT"
+        },
+        {
+            "path": "BING_SEARCH_ENDPOINT",
+            "env_var": "BING_SEARCH_ENDPOINT"
+        },
+        {
+            "path": "BING_SEARCH_KEY",
+            "env_var": "BING_SEARCH_KEY"
         },
         {
             "path": "ENABLEE_BING_SAFE_SEARCH",

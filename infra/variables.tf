@@ -198,6 +198,11 @@ variable "embeddingsDeploymentCapacity" {
   type    = number
   default = 240
 }
+
+variable "openai_public_network_access_enabled" {
+  type    = string
+  default = "Enabled"
+}
 ////
 
 ////

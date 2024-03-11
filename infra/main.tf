@@ -426,7 +426,7 @@ module "openAiRoleMgmt" {
   source = "./core/security/role"
   # If running under automation, the principalId is the same as the webapp and this will result in a duplicate assignment.
   # When not under automation, the principalId will be unique between the webapp and mgmt service principals. 
-  count = var.isInAutomation ? var.useExistingAOAIService ? 1 : 0 : 1
+  count = var.aadWebClientId == var.aadMgmtClientId ? 0 : 1
   scope = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
   principalId     = module.entraObjects.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser

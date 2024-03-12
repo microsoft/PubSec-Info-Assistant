@@ -4,7 +4,7 @@
 #!/bin/bash
 set -e
 
-source ./scripts/load-env.sh > /dev/null 2>&1
+source ./scripts/load-env.sh
 
 jq -r  '
     [

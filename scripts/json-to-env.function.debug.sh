@@ -4,7 +4,7 @@
 #!/bin/bash
 set -e
 
-source ./scripts/load-env.sh > /dev/null 2>&1
+source ./scripts/load-env.sh
 
 if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then

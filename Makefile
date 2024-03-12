@@ -25,7 +25,7 @@ infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts/inf-create.sh
 
 extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
-	 @./scripts/json-to-env.sh < infra_output.json > ./scripts/environments/infrastructure.env
+	 @./scripts/json-to-env.sh < inf_output.json > ./scripts/environments/infrastructure.env
 
 deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
 	@./scripts/deploy-webapp.sh
@@ -40,10 +40,10 @@ deploy-search-indexes: extract-env ## Deploy search indexes
 	@./scripts/deploy-search-indexes.sh
 
 extract-env-debug-webapp: ## Extract infrastructure.debug.env file from BICEP output
-	@./scripts/json-to-env.webapp.debug.sh < infra_output.json > ./scripts/environments/infrastructure.debug.env
+	@./scripts/json-to-env.webapp.debug.sh < inf_output.json > ./scripts/environments/infrastructure.debug.env
 
 extract-env-debug-functions: ## Extract local.settings.json to debug functions from BICEP output
-	@./scripts/json-to-env.function.debug.sh < infra_output.json > ./functions/local.settings.json
+	@./scripts/json-to-env.function.debug.sh < inf_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
 check-subscription:
@@ -58,4 +58,3 @@ destroy-inf: check-subscription
 
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
-	

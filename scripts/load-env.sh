@@ -23,13 +23,20 @@ fi
 
 echo "Environment set: $ENVIRONMENT_NAME."
 
-if [[ -n $IN_AUTOMATION ]]; then
+if [[ -n $TF_IN_AUTOMATION ]]; then
+
     if [[ -z $BUILD_BUILDID ]]; then
         echo "Require BUILD_BUILDID to be set for CI builds"
         exit 1        
-    fi
-    export BUILD_NUMBER=$BUILD_BUILDNUMBER
+    fi    
+    export TF_VAR_build_number=$BUILD_BUILDNUMBER
 fi
+
+# Override in local.env if you want to disable cleaning functional test data
+export DISABLE_TEST_CLEANUP=false
+export IGNORE_TEST_PIPELINE_QUERY=false
+
+export NOTEBOOK_CONFIG_OVERRIDE_FOLDER="default"
 
 # Pull in variables dependent on the environment we are deploying to.
 if [ -f "$ENV_DIR/environments/$ENVIRONMENT_NAME.env" ]; then
@@ -46,6 +53,15 @@ else
     exit 1
 fi
 
+# Pull in variables dependent on the Azure Environment being targeted
+if [ -f "$ENV_DIR/environments/AzureEnvironments/$AZURE_ENVIRONMENT.env" ]; then
+    echo "Loading environment variables for Azure Environment: $AZURE_ENVIRONMENT."
+    source "$ENV_DIR/environments/AzureEnvironments/$AZURE_ENVIRONMENT.env"
+else
+    echo "No Azure Environment set, please check local.env.example for AZURE_ENVIRONMENT"
+    exit 1
+fi
+
 # Fail if the following environment variables are not set
 if [[ -z $WORKSPACE ]]; then
     echo "WORKSPACE must be set."
@@ -56,6 +72,9 @@ elif [[ "${WORKSPACE}" =~ [[:upper:]] ]]; then
 fi
 
 # Set the name of the resource group
-export RG_NAME="infoasst-$WORKSPACE"
+export TF_VAR_resource_group_name="infoasst-$WORKSPACE"
 
-echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$RG_NAME\e[0m\n"
+# The default key that is used in the remote state
+export TF_BACKEND_STATE_KEY="shared.infoasst.tfstate"
+
+echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$TF_VAR_resource_group_name\e[0m\n"

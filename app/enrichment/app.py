@@ -73,7 +73,7 @@ search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
 openai.api_type = "azure"
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
-openai.api_version = "2023-06-01-preview"
+openai.api_version = "2023-12-01-preview"
 
 class AzOAIEmbedding(object):
     """A wrapper for a Azure OpenAI Embedding model"""

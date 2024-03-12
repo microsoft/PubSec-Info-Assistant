@@ -345,6 +345,11 @@ module "sharepoint" {
   key_vault_id                        = module.kvModule.keyVaultId 
   random_string                       = random_string.random.result
   tags                                = local.tags
+
+  depends_on = [
+    module.storage,
+    module.kvModule
+  ]
 }
 
 module "video_indexer" {

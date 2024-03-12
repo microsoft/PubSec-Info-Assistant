@@ -4,7 +4,7 @@
 #!/bin/bash
 set -e
 
-source ./scripts/load-env.sh
+source ./scripts/load-env.sh > /dev/null 2>&1
 
 jq -r  '
     [
@@ -176,7 +176,7 @@ jq -r  '
     echo "APPLICATION_TITLE='$APPLICATION_TITLE'"
 
 if [ -n "${IN_AUTOMATION}" ]; then
-    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi
 

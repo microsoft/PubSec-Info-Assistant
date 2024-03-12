@@ -3,11 +3,8 @@
 
 #!/bin/bash
 set -e
-
-if [ -n "${IN_AUTOMATION}" ]
-then
-    AZURE_ENVIRONMENT=$(jq -r '.AZURE_ENVIRONMENT.value' inf_output.json)
-    
+result=$(source ./scripts/load-env.sh)
+if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi
@@ -85,14 +82,6 @@ jq -r --arg secrets "$secrets" '
         {
             "path": "AZURE_COSMOSDB_LOG_CONTAINER_NAME",
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
-        },
-        {
-            "path": "AZURE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "AZURE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
         },
         {
             "path": "AzureWebJobsStorage",

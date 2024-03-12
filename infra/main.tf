@@ -95,8 +95,6 @@ module "enrichmentApp" {
     COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
-    COSMOSDB_TAGS_DATABASE_NAME             = module.cosmosdb.CosmosDBTagsDatabaseName
-    COSMOSDB_TAGS_CONTAINER_NAME            = module.cosmosdb.CosmosDBTagsContainerName
     MAX_EMBEDDING_REQUEUE_COUNT             = 5
     EMBEDDING_REQUEUE_BACKOFF               = 60
     AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
@@ -162,8 +160,6 @@ module "backend" {
     COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
-    COSMOSDB_TAGS_DATABASE_NAME             = module.cosmosdb.CosmosDBTagsDatabaseName
-    COSMOSDB_TAGS_CONTAINER_NAME            = module.cosmosdb.CosmosDBTagsContainerName
     QUERY_TERM_LANGUAGE                     = var.queryTermLanguage
     AZURE_CLIENT_ID                         = module.entraObjects.azure_ad_mgmt_app_client_id 
     AZURE_CLIENT_SECRET                     = module.entraObjects.azure_ad_mgmt_app_secret 
@@ -176,6 +172,9 @@ module "backend" {
     APPLICATION_TITLE                       = var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
+    BING_SEARCH_ENDPOINT                    = var.azure_environment == "AzureCloud" ? module.bingSearch[0].endpoint : ""
+    BING_SEARCH_KEY                         = var.azure_environment == "AzureCloud" ? module.bingSearch[0].key : ""
+    ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -261,8 +260,6 @@ module "cosmosdb" {
   tags                = local.tags
   logDatabaseName   = "statusdb"
   logContainerName  = "statuscontainer"
-  tagDatabaseName   = "tagdb"
-  tagContainerName  = "tagcontainer"
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId        = module.kvModule.keyVaultId 
 }
@@ -300,8 +297,6 @@ module "functions" {
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
   CosmosDBLogContainerName              = module.cosmosdb.CosmosDBLogContainerName
-  CosmosDBTagsDatabaseName              = module.cosmosdb.CosmosDBTagsDatabaseName
-  CosmosDBTagsContainerName             = module.cosmosdb.CosmosDBTagsContainerName
   chunkTargetSize                       = var.chunkTargetSize
   targetPages                           = var.targetPages
   formRecognizerApiVersion              = var.formRecognizerApiVersion
@@ -471,6 +466,16 @@ module "kvModule" {
   resourceGroupId   = azurerm_resource_group.rg.id 
   resourceGroupName = azurerm_resource_group.rg.name
   tags              = local.tags
+}
+
+module "bingSearch" {
+  count                         = var.azure_environment == "AzureCloud" ? 1 : 0
+  source                        = "./core/ai/bingSearch"
+  name                          = "infoasst-bing-${random_string.random.result}"
+  resourceGroupName             = azurerm_resource_group.rg.name
+  tags                          = local.tags
+  sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

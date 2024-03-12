@@ -13,11 +13,8 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 
-SUBSCRIPTION_KEY = "YourKeyHere"
-ENDPOINT = "https://api.bing.microsoft.com"+  "/v7.0/"
-
-
 class ChatBingSearch(Approach):
+    """Class to help perform RAG based on Bing Search and ChatGPT."""
 
     SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of source urls below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
@@ -61,12 +58,14 @@ class ChatBingSearch(Approach):
     citations = {}
     approach_class = ""
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_safe_search: bool):
+    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
         self.name = "ChatBingSearch"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
+        self.bing_search_endpoint = bing_search_endpoint
+        self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
         
 
@@ -150,7 +149,7 @@ class ChatBingSearch(Approach):
         Returns:
             dict: A dictionary containing URL snippets as values and corresponding URLs as keys.
         """
-        client = WebSearchClient(AzureKeyCredential(SUBSCRIPTION_KEY))
+        client = WebSearchClient(AzureKeyCredential(self.bing_search_key), endpoint=self.bing_search_endpoint)
 
         try:
             if self.bing_safe_search:

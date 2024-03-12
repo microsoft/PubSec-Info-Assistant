@@ -42,6 +42,12 @@ variable "requireWebsiteSecurityMembership" {
   type    = bool
   default = false
 }
+
+variable "enableBingSafeSearch" {
+  type    = bool
+  default = true
+}
+
 ////
 // variables that can vary based on the Azure environment being targeted
 ////

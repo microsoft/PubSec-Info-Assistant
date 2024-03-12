@@ -71,25 +71,6 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   }
 }
 
-resource "azurerm_cosmosdb_sql_database" "tag_database" {
-  name                = var.tagDatabaseName
-  resource_group_name = var.resourceGroupName
-  account_name        = azurerm_cosmosdb_account.cosmosdb_account.name
-}
-
-resource "azurerm_cosmosdb_sql_container" "tag_container" {
-  name                = var.tagContainerName
-  resource_group_name = var.resourceGroupName
-  account_name        = azurerm_cosmosdb_account.cosmosdb_account.name
-  database_name       = azurerm_cosmosdb_sql_database.tag_database.name
-
-  partition_key_path = "/file_path"
-
-  autoscale_settings {
-    max_throughput = var.autoscaleMaxThroughput
-  }
-}
-
 resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "COSMOSDB-KEY"
   value        = azurerm_cosmosdb_account.cosmosdb_account.primary_key
@@ -106,12 +87,4 @@ output "CosmosDBLogDatabaseName" {
 
 output "CosmosDBLogContainerName" {
   value = azurerm_cosmosdb_sql_container.log_container.name
-}
-
-output "CosmosDBTagsDatabaseName" {
-  value = azurerm_cosmosdb_sql_database.tag_database.name
-}
-
-output "CosmosDBTagsContainerName" {
-  value = azurerm_cosmosdb_sql_container.tag_container.name
 }

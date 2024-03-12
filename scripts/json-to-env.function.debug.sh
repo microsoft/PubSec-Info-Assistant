@@ -3,7 +3,9 @@
 
 #!/bin/bash
 set -e
-result=$(source ./scripts/load-env.sh)
+
+source ./scripts/load-env.sh > /dev/null 2>&1
+
 if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1

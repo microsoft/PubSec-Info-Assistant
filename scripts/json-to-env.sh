@@ -3,7 +3,9 @@
 
 #!/bin/bash
 set -e
-result=$(source ./scripts/load-env.sh)
+
+source ./scripts/load-env.sh > /dev/null 2>&1
+
 echo "# Generated environment variables from terraform output"
 
 jq -r  '

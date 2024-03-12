@@ -262,7 +262,7 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     blob_client = blob_service_client.get_blob_client(blob=path)
     blob_properties = blob_client.get_blob_properties()
     tags = blob_properties.metadata.get("tags")
-    if tags != '':
+    if tags != '' and tags is not None:
         if isinstance(tags, str):
             tags_list = [unquote(tag.strip()) for tag in tags.split(",")]
         else:

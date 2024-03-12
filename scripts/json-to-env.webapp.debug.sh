@@ -3,7 +3,7 @@
 
 #!/bin/bash
 set -e
-source ./scripts/load-env.sh
+result=$(source ./scripts/load-env.sh)
 
 jq -r  '
     [
@@ -174,10 +174,7 @@ jq -r  '
     echo "CHAT_WARNING_BANNER_TEXT='$CHAT_WARNING_BANNER_TEXT'"
     echo "APPLICATION_TITLE='$APPLICATION_TITLE'"
 
-if [ -n "${IN_AUTOMATION}" ]
-then
-    AZURE_ENVIRONMENT=$(jq -r '.AZURE_ENVIRONMENT.value' inf_output.json)
-    
+if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi

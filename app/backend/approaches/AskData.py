@@ -61,17 +61,13 @@ st.set_page_config(page_title='🔗 Ask the Data App')
 st.title('📈 Ask the Data App')
 uploaded_file = st.file_uploader('Upload a CSV file', type=['csv'])
 
-# Function to save charts
+
 def save_chart(query):
     q_s = ' If any charts or graphs or plots were created save them localy and include the save file names in your response.'
     query += ' . '+ q_s
     return query
 
-# def save_chart(query, folder_path):
-#     q_s = f' If any charts or graphs or plots were created, save them locally in the folder {folder_path} and include the save file names in your response.'
-#     query += ' . '+ q_s
-#     return query
-        
+   
        
 # Function to chat with CSV
 

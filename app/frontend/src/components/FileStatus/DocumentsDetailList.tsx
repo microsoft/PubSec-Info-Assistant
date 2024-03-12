@@ -23,7 +23,7 @@ import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from
 import { StatusContent } from "../StatusContent/StatusContent";
 import { Delete24Regular,
     Send24Regular,
-    ArrowClockwise24Filled
+    ArrowClockwise24Regular
     } from "@fluentui/react-icons";
 
 export interface IDocument {

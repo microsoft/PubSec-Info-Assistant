@@ -1,5 +1,7 @@
-#! /bin/bash
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 
+#! /bin/bash
 set -e
 
 # Colours for stdout

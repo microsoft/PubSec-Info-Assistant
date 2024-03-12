@@ -3,7 +3,9 @@
 
 #!/bin/bash
 set -e
-result=$(source ./scripts/load-env.sh)
+
+source ./scripts/load-env.sh > /dev/null 2>&1
+
 echo "# Generated environment variables from terraform output"
 
 jq -r  '
@@ -134,7 +136,7 @@ jq -r  '
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
 
 if [ -n "${IN_AUTOMATION}" ]; then
-    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ $AZURE_ENVIRONMENT == "AzureUSGovernment" ]]; then
         az cloud set --name AZUReUSGovernment > /dev/null 2>&1
     fi
 

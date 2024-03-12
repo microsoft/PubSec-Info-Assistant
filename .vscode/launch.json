@@ -4,7 +4,27 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+
+        {
+            "name": "Python: Streamlit App Start",
+            "type": "python",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "MathTutor.py",
+                "--server.address",
+                "0.0.0.0"
+                ,"--server.port",
+                "8501"
+            ],
+            "cwd": "${workspaceFolder}/app/backend/approaches",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",
+            "preLaunchTask": "pip_install"
+            
+        },
         {
             "name": "Python: WebApp backend",
             "type": "python",

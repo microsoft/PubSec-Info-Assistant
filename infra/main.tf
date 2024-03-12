@@ -342,13 +342,12 @@ module "sharepoint" {
   resource_group_id                   = azurerm_resource_group.rg.id
   subscription_id                     = data.azurerm_client_config.current.subscription_id
   storage_account_name                = module.storage.name
-  key_vault_id                        = module.kvModule.keyVaultId 
+  storage_access_key                  = module.storage.storage_account_access_key
   random_string                       = random_string.random.result
   tags                                = local.tags
 
   depends_on = [
-    module.storage,
-    module.kvModule
+    module.storage
   ]
 }
 

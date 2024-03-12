@@ -27,11 +27,6 @@ resource "azurerm_resource_group_template_deployment" "sharepoint_logicapp" {
   deployment_mode     = "Incremental"
 }
 
-data "azurerm_key_vault_secret" "storage_access_key" {
-  name         = "AZURE-BLOB-STORAGE-KEY"
-  key_vault_id = var.key_vault_id
-}
-
 resource "azapi_resource" "blob_connector" {
   type = "Microsoft.Web/connections@2016-06-01" # Use the appropriate API version
   name = "azureblob"
@@ -46,7 +41,7 @@ resource "azapi_resource" "blob_connector" {
       }
       parameterValues = {
         accountName = var.storage_account_name
-        accessKey = data.azurerm_key_vault_secret.storage_access_key.value
+        accessKey = var.storage_access_key
       }
     }
   })

@@ -3,8 +3,9 @@ variable "storage_account_name" {
   type = string
 }
 
-variable "key_vault_id" {
+variable "storage_access_key" {
   type = string
+  sensitive = true
 }
 
 variable "resource_group_name" {

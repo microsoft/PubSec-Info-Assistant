@@ -54,13 +54,10 @@ resource "azurerm_cognitive_deployment" "deployment" {
   }
 }
 
-resource "azurerm_private_dns_zone_group" "privateDnsZoneName" {
+resource "azurerm_private_dns_zone" "dns-zone" {
   count               = var.useExistingAOAIService ? 0 : var.is_secure_mode ? 1 : 0
   name                = "${var.name}-private-dns-zone-group"
   resource_group_name = var.resourceGroupName
-  private_dns_zone_ids = [
-    azurerm_private_dns_zone.pr_dns_zone.id
-  ]
 }
 
 resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {

@@ -262,7 +262,7 @@ module "enrichmentApp" {
     COSMOSDB_TAGS_CONTAINER_NAME           = module.cosmosdb.CosmosDBTagsContainerName
     MAX_EMBEDDING_REQUEUE_COUNT            = 5
     EMBEDDING_REQUEUE_BACKOFF              = 60
-    AZURE_OPENAI_SERVICE                   = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_SERVICE                   = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
     AZURE_SEARCH_INDEX                     = var.searchIndexName
     AZURE_SEARCH_SERVICE                   = module.searchServices.name
@@ -306,9 +306,9 @@ module "backend" {
     AZURE_BLOB_STORAGE_ENDPOINT           = module.storage.primary_endpoints
     AZURE_BLOB_STORAGE_CONTAINER          = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER   = var.uploadContainerName
-    AZURE_OPENAI_SERVICE                  = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_SERVICE                  = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
     AZURE_OPENAI_RESOURCE_GROUP           = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-    AZURE_OPENAI_ENDPOINT                 = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_ENDPOINT                 = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices[0].endpoint
     AZURE_OPENAI_AUTHORITY_HOST           = var.azure_openai_authority_host
     AZURE_ENDPOINTS_MANAGEMENT_API        = var.azure_endpoints_management_api
     AZURE_SEARCH_INDEX                    = var.searchIndexName
@@ -388,13 +388,14 @@ module "openaiServices" {
 
 module "formrecognizer" {
   source              = "./core/ai/docintelligence"
+  // count  = var.is_secure_mode ? 1 : 0
+
   name                = "infoasst-fr-${random_string.random.result}"
   location            = var.location
   tags                = local.tags
   customSubDomainName = "infoasst-fr-${random_string.random.result}"
   resourceGroupName   = azurerm_resource_group.rg.name
   keyVaultId          = module.kvModule.keyVaultId
-
 
 }
 

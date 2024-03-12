@@ -4,7 +4,7 @@ output "AZURE_LOCATION" {
 }
 
 output "AZURE_OPENAI_SERVICE" {
-  value = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+  value = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
 }
 
 output "AZURE_SEARCH_INDEX" {
@@ -40,7 +40,7 @@ output "BACKEND_URI" {
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.web_app_name 
+  value = module.backend.web_app_name
 }
 
 output "RESOURCE_GROUP_NAME" {
@@ -163,8 +163,8 @@ output "CHAT_WARNING_BANNER_TEXT" {
   value = var.chatWarningBannerText
 }
 
-output "AZURE_OPENAI_ENDPOINT"  {
-  value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
+output "AZURE_OPENAI_ENDPOINT" {
+  value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices[0].endpoint
 }
 
 output "AZURE_ENVIRONMENT" {

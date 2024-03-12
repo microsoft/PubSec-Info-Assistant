@@ -1,448 +1,592 @@
 {
-    "definition": {
-        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-        "actions": {
-            "Init_SharepointFileList": {
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "SharepointFileList",
-                            "type": "array",
-                            "value": []
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "Set_Accepted_File_Types": [
-                        "SUCCEEDED"
-                    ]
-                },
-                "type": "InitializeVariable"
-            },
-            "JsonConfig(temp)": {
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "jsonConfig",
-                            "type": "object",
-                            "value": {
-                                "SharepointEntryFolder": "/Shared Documents",
-                                "SharepointSite": "https://wwpubsec.sharepoint.com/sites/SharepointTest"
-                            }
-                        }
-                    ]
-                },
-                "runAfter": {},
-                "type": "InitializeVariable"
-            },
-            "Set_Accepted_File_Types": {
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "AcceptedFileTypes",
-                            "type": "array",
-                            "value": [
-                                "pdf",
-                                "docx",
-                                "html",
-                                "htm",
-                                "csv",
-                                "md",
-                                "pptx",
-                                "txt",
-                                "json",
-                                "xlsx",
-                                "xml",
-                                "eml",
-                                "msg"
-                            ]
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "Set_Loop_Index": [
-                        "SUCCEEDED"
-                    ]
-                },
-                "type": "InitializeVariable"
-            },
-            "Set_Index": {
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "FolderIndex",
-                            "type": "integer",
-                            "value": 1
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "Setup_Array": [
-                        "SUCCEEDED"
-                    ]
-                },
-                "type": "InitializeVariable"
-            },
-            "Set_Loop_Index": {
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "LoopIndex",
-                            "type": "integer",
-                            "value": 0
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "Set_Index": [
-                        "SUCCEEDED"
-                    ]
-                },
-                "type": "InitializeVariable"
-            },
-            "Setup_Array": {
-                "inputs": {
-                    "variables": [
-                        {
-                            "name": "UncrawledFolders",
-                            "type": "array",
-                            "value": [
-                                "@variables('jsonconfig')['SharepointEntryFolder']"
-                            ]
-                        }
-                    ]
-                },
-                "runAfter": {
-                    "JsonConfig(temp)": [
-                        "SUCCEEDED"
-                    ]
-                },
-                "type": "InitializeVariable"
-            },
-            "Until": {
-                "actions": {
-                    "For_each": {
-                        "actions": {
-                            "Append_to_array_variable_1": {
-                                "inputs": {
-                                    "name": "UncrawledFolders",
-                                    "value": "@items('For_each')?['Path']"
-                                },
-                                "runAfter": {
-                                    "Get_file_content_1": [
-                                        "FAILED",
-                                        "SKIPPED"
-                                    ]
-                                },
-                                "type": "AppendToArrayVariable"
-                            },
-                            "Get_file_content_1": {
-                                "inputs": {
-                                    "host": {
-                                        "connection": {
-                                            "referenceName": "sharepointonline"
-                                        }
-                                    },
-                                    "method": "get",
-                                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent(variables('jsonconfig')['SharepointSite']))}/files/@{encodeURIComponent(items('For_each')?['Id'])}/content",
-                                    "queries": {
-                                        "inferContentType": true
-                                    }
-                                },
-                                "type": "ApiConnection"
-                            },
-                            "Increment_variable": {
-                                "inputs": {
-                                    "name": "FolderIndex",
-                                    "value": 1
-                                },
-                                "runAfter": {
-                                    "Append_to_array_variable_1": [
-                                        "SUCCEEDED"
-                                    ]
-                                },
-                                "type": "IncrementVariable"
-                            },
-                            "Is_Accepted_File_Type": {
-                                "actions": {
-                                    "DoesItExist": {
-                                        "actions": {
-                                            "Create_blob_(V2)_1": {
-                                                "inputs": {
-                                                    "body": "@body('Get_file_content_1')",
-                                                    "headers": {
-                                                        "ReadFileMetadataFromServer": true
-                                                    },
-                                                    "host": {
-                                                        "connection": {
-                                                            "referenceName": "azureblob"
-                                                        }
-                                                    },
-                                                    "method": "post",
-                                                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files",
-                                                    "queries": {
-                                                        "folderPath": "/upload",
-                                                        "name": "@items('For_each')?['Path']",
-                                                        "queryParametersSingleEncoded": true
-                                                    }
-                                                },
-                                                "runAfter": {
-                                                    "Delete_blob_(V2)": [
-                                                        "SUCCEEDED",
-                                                        "FAILED",
-                                                        "SKIPPED"
-                                                    ]
-                                                },
-                                                "runtimeConfiguration": {
-                                                    "contentTransfer": {
-                                                        "transferMode": "Chunked"
-                                                    }
-                                                },
-                                                "type": "ApiConnection"
-                                            },
-                                            "Delete_blob_(V2)": {
-                                                "inputs": {
-                                                    "headers": {
-                                                        "SkipDeleteIfFileNotFoundOnServer": false
-                                                    },
-                                                    "host": {
-                                                        "connection": {
-                                                            "referenceName": "azureblob"
-                                                        }
-                                                    },
-                                                    "method": "delete",
-                                                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(concat('upload', items('For_each')?['Path'])))}"
-                                                },
-                                                "type": "ApiConnection"
-                                            }
-                                        },
-                                        "else": {
-                                            "actions": {}
-                                        },
-                                        "expression": {
-                                            "or": [
-                                                {
-                                                    "equals": [
-                                                        "@if(equals(body('Get_Blob_Metadata_(V2)')?['LastModified'], null), true, false)",
-                                                        true
-                                                    ]
-                                                },
-                                                {
-                                                    "equals": [
-                                                        "@greater(ticks(items('For_each')?['LastModified']),ticks(body('Get_Blob_Metadata_(V2)')?['LastModified']))",
-                                                        true
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        "runAfter": {
-                                            "Get_Blob_Metadata_(V2)": [
-                                                "SUCCEEDED",
-                                                "FAILED"
-                                            ]
-                                        },
-                                        "type": "If"
-                                    },
-                                    "Get_Blob_Metadata_(V2)": {
-                                        "inputs": {
-                                            "host": {
-                                                "connection": {
-                                                    "referenceName": "azureblob"
-                                                }
-                                            },
-                                            "method": "get",
-                                            "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(concat('upload', items('For_each')?['Path'])))}"
-                                        },
-                                        "runAfter": {
-                                            "Update_Sharepoint_File_List": [
-                                                "SUCCEEDED"
-                                            ]
-                                        },
-                                        "type": "ApiConnection"
-                                    },
-                                    "Update_Sharepoint_File_List": {
-                                        "inputs": {
-                                            "name": "SharepointFileList",
-                                            "value": "@items('For_each')?['Path']"
-                                        },
-                                        "type": "AppendToArrayVariable"
-                                    }
-                                },
-                                "else": {
-                                    "actions": {}
-                                },
-                                "expression": {
-                                    "and": [
-                                        {
-                                            "contains": [
-                                                "@variables('AcceptedFileTypes')",
-                                                "@last(split(items('For_each')?['Name'], '.'))"
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "runAfter": {
-                                    "Get_file_content_1": [
-                                        "SUCCEEDED"
-                                    ]
-                                },
-                                "type": "If"
-                            }
-                        },
-                        "foreach": "@body('List_folder')",
-                        "runAfter": {
-                            "List_folder": [
-                                "SUCCEEDED"
-                            ]
-                        },
-                        "type": "Foreach"
-                    },
-                    "Increment_Loop_index": {
-                        "inputs": {
-                            "name": "LoopIndex",
-                            "value": 1
-                        },
-                        "runAfter": {
-                            "IterateBlobList": [
-                                "SUCCEEDED",
-                                "FAILED",
-                                "SKIPPED",
-                                "TIMEDOUT"
-                            ]
-                        },
-                        "type": "IncrementVariable"
-                    },
-                    "IterateBlobList": {
-                        "actions": {
-                            "Condition": {
-                                "actions": {
-                                    "Delete_blob_(V2)_1": {
-                                        "inputs": {
-                                            "headers": {
-                                                "SkipDeleteIfFileNotFoundOnServer": false
-                                            },
-                                            "host": {
-                                                "connection": {
-                                                    "referenceName": "azureblob"
-                                                }
-                                            },
-                                            "method": "delete",
-                                            "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(items('IterateBlobList')?['Path']))}"
-                                        },
-                                        "type": "ApiConnection"
-                                    }
-                                },
-                                "else": {
-                                    "actions": {}
-                                },
-                                "expression": {
-                                    "and": [
-                                        {
-                                            "not": {
-                                                "contains": [
-                                                    "@variables('SharepointFileList')",
-                                                    "@concat('/', join(skip(split(items('IterateBlobList')?['Path'], '/'), 2), '/'))"
-                                                ]
-                                            }
-                                        },
-                                        {
-                                            "equals": [
-                                                "@items('IterateBlobList')?['IsFolder']",
-                                                false
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "type": "If"
-                            }
-                        },
-                        "foreach": "@body('Lists_blobs_(V2)')?['value']",
-                        "runAfter": {
-                            "Lists_blobs_(V2)": [
-                                "SUCCEEDED"
-                            ]
-                        },
-                        "type": "Foreach"
-                    },
-                    "List_folder": {
-                        "inputs": {
-                            "host": {
-                                "connection": {
-                                    "referenceName": "sharepointonline"
-                                }
-                            },
-                            "method": "get",
-                            "path": "/datasets/@{encodeURIComponent(encodeURIComponent(variables('jsonconfig')['SharepointSite']))}/folders/@{encodeURIComponent(encodeURIComponent(skip(variables('UncrawledFolders'),variables('LoopIndex'))[0]))}"
-                        },
-                        "metadata": {
-                            "%252fLists%252fTaxonomyHiddenList%252fItem": "/Lists/TaxonomyHiddenList/Item",
-                            "%252fShared%2bDocuments": "/Shared Documents",
-                            "%252fSitePages%252fForms": "/SitePages/Forms"
-                        },
-                        "runAfter": {
-                            "Reset_SharepointFileList": [
-                                "SUCCEEDED"
-                            ]
-                        },
-                        "type": "ApiConnection"
-                    },
-                    "Lists_blobs_(V2)": {
-                        "inputs": {
-                            "host": {
-                                "connection": {
-                                    "referenceName": "azureblob"
-                                }
-                            },
-                            "method": "get",
-                            "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/foldersV2/@{encodeURIComponent(encodeURIComponent('upload',substring(first(variables('SharepointFileList')), 0, lastIndexOf(first(variables('SharepointFileList')), '/'))))}",
-                            "queries": {
-                                "nextPageMarker": "",
-                                "useFlatListing": false
-                            }
-                        },
-                        "runAfter": {
-                            "For_each": [
-                                "SUCCEEDED",
-                                "TIMEDOUT",
-                                "SKIPPED",
-                                "FAILED"
-                            ]
-                        },
-                        "type": "ApiConnection"
-                    },
-                    "Reset_SharepointFileList": {
-                        "inputs": {
-                            "name": "SharepointFileList",
-                            "value": []
-                        },
-                        "type": "SetVariable"
-                    }
-                },
-                "expression": "@equals(equals(variables('Loopindex'),variables('FolderIndex')),true)",
-                "limit": {
-                    "count": 6,
-                    "timeout": "PT1H"
-                },
-                "runAfter": {
-                    "Init_SharepointFileList": [
-                        "SUCCEEDED"
-                    ]
-                },
-                "type": "Until"
-            }
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflow_name": {
+            "type": "string",
+            "defaultValue": "Sharepoint-LogicApp"
         },
-        "contentVersion": "1.0.0.0",
-        "outputs": {},
-        "triggers": {
-            "Recurrence": {
-                "recurrence": {
-                    "frequency": "Hour",
-                    "interval": 24,
-                    "timeZone": "Central Standard Time"
-                },
-                "type": "Recurrence"
-            }
+        "subscription_id": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "location": {
+            "defaultValue": "useast",
+            "type": "string"
+        },
+        "resource_group_name": {
+            "defaultValue": "infoasst-1-rg",
+            "type": "string"
         }
     },
-    "kind": "Stateful"
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2019-05-01",
+            "name": "[parameters('workflow_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "actions": {
+                        "For_each_1": {
+                            "actions": {
+                                "Increment_variable_1": {
+                                    "inputs": {
+                                        "name": "EntryFolderIndex",
+                                        "value": 1
+                                    },
+                                    "runAfter": {
+                                        "Until": [
+                                            "SUCCEEDED"
+                                        ]
+                                    },
+                                    "type": "IncrementVariable"
+                                },
+                                "Reset_Folder_Index": {
+                                    "inputs": {
+                                        "name": "FolderIndex",
+                                        "value": 1
+                                    },
+                                    "runAfter": {
+                                        "Reset_LoopIndex": [
+                                            "SUCCEEDED"
+                                        ]
+                                    },
+                                    "type": "SetVariable"
+                                },
+                                "Reset_LoopIndex": {
+                                    "inputs": {
+                                        "name": "LoopIndex",
+                                        "value": 0
+                                    },
+                                    "runAfter": {
+                                        "Reset_UncrawledFolders": [
+                                            "SUCCEEDED"
+                                        ]
+                                    },
+                                    "type": "SetVariable"
+                                },
+                                "Reset_UncrawledFolders": {
+                                    "inputs": {
+                                        "name": "UncrawledFolders",
+                                        "value": [
+                                            "@{body('Parse_JSON')?['SharepointEntryFolder'][variables('EntryFolderIndex')]}"
+                                        ]
+                                    },
+                                    "type": "SetVariable"
+                                },
+                                "Until": {
+                                    "actions": {
+                                        "For_each": {
+                                            "actions": {
+                                                "Append_to_array_variable_1": {
+                                                    "inputs": {
+                                                        "name": "UncrawledFolders",
+                                                        "value": "@items('For_each')?['Path']"
+                                                    },
+                                                    "runAfter": {
+                                                        "Get_file_content_1": [
+                                                            "FAILED",
+                                                            "SKIPPED"
+                                                        ]
+                                                    },
+                                                    "type": "AppendToArrayVariable"
+                                                },
+                                                "Get_file_content_1": {
+                                                    "inputs": {
+                                                        "host": {
+                                                            "connection": {
+                                                                "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                                                            }
+                                                        },
+                                                        "method": "get",
+                                                        "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_each_1')))}/files/@{encodeURIComponent(items('For_each')?['Id'])}/content",
+                                                        "queries": {
+                                                            "inferContentType": true
+                                                        }
+                                                    },
+                                                    "type": "ApiConnection"
+                                                },
+                                                "Increment_variable": {
+                                                    "inputs": {
+                                                        "name": "FolderIndex",
+                                                        "value": 1
+                                                    },
+                                                    "runAfter": {
+                                                        "Append_to_array_variable_1": [
+                                                            "SUCCEEDED"
+                                                        ]
+                                                    },
+                                                    "type": "IncrementVariable"
+                                                },
+                                                "Is_Accepted_File_Type": {
+                                                    "actions": {
+                                                        "DoesItExist": {
+                                                            "actions": {
+                                                                "Create_blob_(V2)_1": {
+                                                                    "inputs": {
+                                                                        "body": "@body('Get_file_content_1')",
+                                                                        "headers": {
+                                                                            "ReadFileMetadataFromServer": true
+                                                                        },
+                                                                        "host": {
+                                                                            "connection": {
+                                                                                "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                                                            }
+                                                                        },
+                                                                        "method": "post",
+                                                                        "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files",
+                                                                        "queries": {
+                                                                            "folderPath": "/upload",
+                                                                            "name": "@{concat('/', replace(items('For_each_1'), 'https://', ''))}@{items('For_each')?['Path']}",
+                                                                            "queryParametersSingleEncoded": true
+                                                                        }
+                                                                    },
+                                                                    "runtimeConfiguration": {
+                                                                        "contentTransfer": {
+                                                                            "transferMode": "Chunked"
+                                                                        }
+                                                                    },
+                                                                    "type": "ApiConnection"
+                                                                }
+                                                            },
+                                                            "else": {
+                                                                "actions": {}
+                                                            },
+                                                            "expression": {
+                                                                "or": [
+                                                                    {
+                                                                        "equals": [
+                                                                            "@if(equals(body('Get_Blob_Metadata_(V2)')?['LastModified'], null), true, false)",
+                                                                            true
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "equals": [
+                                                                            "@greater(ticks(items('For_each')?['LastModified']),ticks(body('Get_Blob_Metadata_(V2)')?['LastModified']))",
+                                                                            true
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            },
+                                                            "runAfter": {
+                                                                "Get_Blob_Metadata_(V2)": [
+                                                                    "SUCCEEDED",
+                                                                    "FAILED"
+                                                                ]
+                                                            },
+                                                            "type": "If"
+                                                        },
+                                                        "Get_Blob_Metadata_(V2)": {
+                                                            "inputs": {
+                                                                "host": {
+                                                                    "connection": {
+                                                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                                                    }
+                                                                },
+                                                                "method": "get",
+                                                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(concat('upload', '/', replace(items('For_each_1'), 'https://', ''), items('For_each')?['Path'])))}"
+                                                            },
+                                                            "runAfter": {
+                                                                "Update_Sharepoint_File_List": [
+                                                                    "SUCCEEDED"
+                                                                ]
+                                                            },
+                                                            "type": "ApiConnection"
+                                                        },
+                                                        "Update_Sharepoint_File_List": {
+                                                            "inputs": {
+                                                                "name": "SharepointFileList",
+                                                                "value": "@{concat('/', replace(items('For_each_1'), 'https://', ''))}@{items('For_each')?['Path']}"
+                                                            },
+                                                            "type": "AppendToArrayVariable"
+                                                        }
+                                                    },
+                                                    "else": {
+                                                        "actions": {}
+                                                    },
+                                                    "expression": {
+                                                        "and": [
+                                                            {
+                                                                "contains": [
+                                                                    "@variables('AcceptedFileTypes')",
+                                                                    "@last(split(items('For_each')?['Name'], '.'))"
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    "runAfter": {
+                                                        "Get_file_content_1": [
+                                                            "SUCCEEDED"
+                                                        ]
+                                                    },
+                                                    "type": "If"
+                                                }
+                                            },
+                                            "foreach": "@body('List_folder')",
+                                            "runAfter": {
+                                                "List_folder": [
+                                                    "SUCCEEDED"
+                                                ]
+                                            },
+                                            "type": "Foreach"
+                                        },
+                                        "Increment_Loop_index": {
+                                            "inputs": {
+                                                "name": "LoopIndex",
+                                                "value": 1
+                                            },
+                                            "runAfter": {
+                                                "IterateBlobList": [
+                                                    "SUCCEEDED",
+                                                    "FAILED",
+                                                    "SKIPPED",
+                                                    "TIMEDOUT"
+                                                ]
+                                            },
+                                            "type": "IncrementVariable"
+                                        },
+                                        "IterateBlobList": {
+                                            "actions": {
+                                                "Condition": {
+                                                    "actions": {
+                                                        "Delete_blob_(V2)_1": {
+                                                            "inputs": {
+                                                                "headers": {
+                                                                    "SkipDeleteIfFileNotFoundOnServer": false
+                                                                },
+                                                                "host": {
+                                                                    "connection": {
+                                                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                                                    }
+                                                                },
+                                                                "method": "delete",
+                                                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(items('IterateBlobList')?['Path']))}"
+                                                            },
+                                                            "type": "ApiConnection"
+                                                        }
+                                                    },
+                                                    "else": {
+                                                        "actions": {}
+                                                    },
+                                                    "expression": {
+                                                        "and": [
+                                                            {
+                                                                "not": {
+                                                                    "contains": [
+                                                                        "@variables('SharepointFileList')",
+                                                                        "@concat('/', join(skip(split(items('IterateBlobList')?['Path'], '/'), 2), '/'))"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            {
+                                                                "equals": [
+                                                                    "@items('IterateBlobList')?['IsFolder']",
+                                                                    false
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    "type": "If"
+                                                }
+                                            },
+                                            "foreach": "@body('Lists_blobs_(V2)')?['value']",
+                                            "runAfter": {
+                                                "Lists_blobs_(V2)": [
+                                                    "SUCCEEDED"
+                                                ]
+                                            },
+                                            "type": "Foreach"
+                                        },
+                                        "List_folder": {
+                                            "inputs": {
+                                                "host": {
+                                                    "connection": {
+                                                        "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                                                    }
+                                                },
+                                                "method": "get",
+                                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_each_1')))}/folders/@{encodeURIComponent(encodeURIComponent(skip(variables('UncrawledFolders'),variables('LoopIndex'))[0]))}"
+                                            },
+                                            "metadata": {
+                                                "%252fLists%252fTaxonomyHiddenList%252fItem": "/Lists/TaxonomyHiddenList/Item",
+                                                "%252fShared%2bDocuments": "/Shared Documents",
+                                                "%252fSitePages%252fForms": "/SitePages/Forms"
+                                            },
+                                            "runAfter": {
+                                                "Reset_SharepointFileList": [
+                                                    "SUCCEEDED"
+                                                ]
+                                            },
+                                            "type": "ApiConnection"
+                                        },
+                                        "Lists_blobs_(V2)": {
+                                            "inputs": {
+                                                "host": {
+                                                    "connection": {
+                                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                                    }
+                                                },
+                                                "method": "get",
+                                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/foldersV2/@{encodeURIComponent(encodeURIComponent('upload',substring(first(variables('SharepointFileList')), 0, lastIndexOf(first(variables('SharepointFileList')), '/'))))}",
+                                                "queries": {
+                                                    "nextPageMarker": "",
+                                                    "useFlatListing": false
+                                                }
+                                            },
+                                            "runAfter": {
+                                                "For_each": [
+                                                    "SUCCEEDED",
+                                                    "TIMEDOUT",
+                                                    "SKIPPED",
+                                                    "FAILED"
+                                                ]
+                                            },
+                                            "type": "ApiConnection"
+                                        },
+                                        "Reset_SharepointFileList": {
+                                            "inputs": {
+                                                "name": "SharepointFileList",
+                                                "value": []
+                                            },
+                                            "type": "SetVariable"
+                                        }
+                                    },
+                                    "expression": "@greaterOrEquals(variables('LoopIndex'),variables('FolderIndex'))",
+                                    "limit": {
+                                        "count": 12,
+                                        "timeout": "PT1H"
+                                    },
+                                    "runAfter": {
+                                        "Reset_Folder_Index": [
+                                            "SUCCEEDED"
+                                        ]
+                                    },
+                                    "type": "Until"
+                                }
+                            },
+                            "foreach": "@body('Parse_JSON')?['SharepointSite']",
+                            "runAfter": {
+                                "Init_SharepointFileList": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "runtimeConfiguration": {
+                                "concurrency": {
+                                    "repetitions": 1
+                                }
+                            },
+                            "type": "Foreach"
+                        },
+                        "Get_blob_content_(V2)": {
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent('/config/config.json'))}/content",
+                                "queries": {
+                                    "inferContentType": true
+                                }
+                            },
+                            "metadata": {
+                                "JTJmdXBsb2FkJTJmc2hhcmVwb2ludC1jb25maWcuanNvbg==": "/upload/sharepoint-config.json"
+                            },
+                            "runAfter": {},
+                            "type": "ApiConnection"
+                        },
+                        "Init_SharepointFileList": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "SharepointFileList",
+                                        "type": "array",
+                                        "value": []
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Setup_EntryFolderIndex": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Parse_JSON": {
+                            "inputs": {
+                                "content": "@base64ToString(outputs('Get_blob_content_(V2)')?['body']['$content'])\r\n",
+                                "schema": {
+                                    "properties": {
+                                        "AcceptedFileTypes": {
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        },
+                                        "SharepointEntryFolder": {
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        },
+                                        "SharepointSite": {
+                                            "items": {
+                                                "type": "string"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "runAfter": {
+                                "Get_blob_content_(V2)": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "ParseJson"
+                        },
+                        "Set_Accepted_File_Types": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "AcceptedFileTypes",
+                                        "type": "array",
+                                        "value": "@body('Parse_JSON')?['AcceptedFileTypes']"
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Set_Index": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "FolderIndex",
+                                        "type": "integer",
+                                        "value": 1
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Setup_Array": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Set_Loop_Index": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "LoopIndex",
+                                        "type": "integer",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Set_Index": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Setup_Array": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "UncrawledFolders",
+                                        "type": "array",
+                                        "value": [
+                                            "@body('Parse_JSON')?['SharepointEntryFolder']"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Set_Accepted_File_Types": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Setup_EntryFolderIndex": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "EntryFolderIndex",
+                                        "type": "integer",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Set_Loop_Index": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        }
+                    },
+                    "contentVersion": "1.0.0.0",
+                    "outputs": {},
+                    "triggers": {
+                        "Recurrence": {
+                            "recurrence": {
+                                "frequency": "Hour",
+                                "interval": 24,
+                                "timeZone": "Central Standard Time"
+                            },
+                            "runtimeConfiguration": {
+                                "concurrency": {
+                                    "runs": 1
+                                }
+                            },
+                            "type": "Recurrence"
+                        }
+                    }
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                        "azureblob": {
+                            "connectionId": "[variables('azurebobConnectionId')]",
+                            "connectionName": "[variables('azureBlobConnectionName')]",
+                            "Id": "[variables('azureBlobConnectionApiId')]"
+                        },
+                        "sharepointonline": {
+                            "connectionId": "[variables('sharepointOnlineConnectionId')]",
+                            "connectionName": "[variables('sharepointOnlineConnectionName')]",
+                            "Id": "[variables('sharepointOnlineConnectionApiId')]"
+                        }
+                    }
+                    }
+                }
+            }
+        }
+    ],
+    "variables": {
+        "azureBlobConnectionName": "azureblob",
+        "azurebobConnectionId": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/connections/azureblob')]",
+        "azureBlobConnectionApiId": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/azureblob')]",
+        "sharepointOnlineConnectionName": "sharepointonline",
+        "sharepointOnlineConnectionId": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/connections/sharepointonline')]",
+        "sharepointOnlineConnectionApiId": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/sharepointonline')]"
+        
+    }
 }

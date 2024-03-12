@@ -1,9 +1,3 @@
-#Required Packages and their versions for Langchain functionality to work
-
-# !pip install openai==0.27.0
-# !pip install langchain>=0.0.157
-# !pip install numexpr
-# !pip install langchain-experimental==0.0.49
 
 #Turn warnings off
 import warnings
@@ -272,14 +266,19 @@ with st.form('myform'):
     thoughts = st.form_submit_button('Show me how to solve it')
     answer = st.form_submit_button('Show me the answer')
     
-    if clues :
-        st.info(generate_response(question).split("Clues")[1][2:]) 
-      
-    if thoughts:
-        process_agent_scartch_pad(zero_shot_agent_math, question)
+    if question is not None and question != "":
+        with st.spinner(text="In progress..."):         
+    
+            if clues :
+                st.info(generate_response(question).split("Clues")[1][2:]) 
+            
+            if thoughts:
+                process_agent_scartch_pad(zero_shot_agent_math, question)
+                
+            if answer:
+                process_agent_response(zero_shot_agent_math, question)
         
-    if answer:
-        process_agent_response(zero_shot_agent_math, question)
+   
         
         
 

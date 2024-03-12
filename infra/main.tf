@@ -56,7 +56,7 @@ module "storage" {
   deleteRetentionPolicy = {
     days = 7
   }
-  containers            = ["content","website","upload","function","logs"]
+  containers            = ["content","config","website","upload","function","logs"]
   queueNames            = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
 }
 
@@ -338,6 +338,18 @@ module "functions" {
     module.cosmosdb,
     module.kvModule
   ]
+}
+
+module "sharepoint" {
+  source                              = "./core/sharepoint"
+  location                            = azurerm_resource_group.rg.location
+  resource_group_name                 = azurerm_resource_group.rg.name
+  resource_group_id                   = azurerm_resource_group.rg.id
+  subscription_id                     = data.azurerm_client_config.current.subscription_id
+  storage_account_name                = module.storage.name
+  key_vault_id                        = module.kvModule.keyVaultId 
+  random_string                       = random_string.random.result
+  tags                                = local.tags
 }
 
 module "video_indexer" {

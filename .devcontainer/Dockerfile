@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.10-bullseye
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bullseye
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -67,7 +67,7 @@ RUN curl -sSL -o /tmp/docker-downloads/tflint.zip https://github.com/wata727/tfl
 COPY ./scripts/azure-cli.sh /tmp/
 RUN /tmp/azure-cli.sh
 
-# Install dotnet 6 & Azure Functions Core Tools
+# Install Azure Functions Core Tools
 RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/microsoft.list \
     && echo "deb [arch=amd64] https://packages.microsoft.com/debian/$(lsb_release -rs | cut -d'.' -f 1)/prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list \
     && wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb \

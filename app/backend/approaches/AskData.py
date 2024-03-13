@@ -1,3 +1,7 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
 import streamlit as st
 import pandas as pd
 from langchain.chat_models import ChatOpenAI

@@ -86,23 +86,18 @@ class GPTDirectApproach(Approach):
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str
+        azure_openai_endpoint: str
     ):
         self.chatgpt_deployment = chatgpt_deployment
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         
-        if is_gov_cloud_deployment:
-            openai.api_base = 'https://' + oai_service_name + '.openai.azure.us/'
-        else:
-            openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'
-        
+        openai.api_base = azure_openai_endpoint
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 
         self.model_name = model_name
         self.model_version = model_version
-        self.is_gov_cloud_deployment = is_gov_cloud_deployment
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:

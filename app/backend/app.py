@@ -101,18 +101,6 @@ else:
     AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 openai.api_version = "2023-12-01-preview"
 
-authority = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
-
-# Used by the OpenAI SDK
-openai.api_type = "azure"
-if str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]):
-    authority = AzureAuthorityHosts.AZURE_GOVERNMENT
-    openai.api_base = f"https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.us"
-else:
-    openai.api_base = f"https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com"
-
-openai.api_version = "2023-06-01-preview"
-
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service
@@ -257,7 +245,7 @@ chat_approaches = {
                                 ENV["QUERY_TERM_LANGUAGE"],
                                 model_name,
                                 model_version,
-                                str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"])
+                                ENV["AZURE_OPENAI_ENDPOINT"]
     )
 }
 

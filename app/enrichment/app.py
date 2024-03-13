@@ -49,6 +49,7 @@ ENV = {
     "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
     "AZURE_OPENAI_SERVICE_KEY": None,
+    "AZURE_OPENAI_ENDPOINT": None,
     "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": None,
     "AZURE_SEARCH_INDEX": None,
     "AZURE_SEARCH_SERVICE_KEY": None,
@@ -57,8 +58,7 @@ ENV = {
     "TARGET_EMBEDDINGS_MODEL": None,
     "EMBEDDING_VECTOR_SIZE": None,
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
-    "AZURE_BLOB_STORAGE_ENDPOINT": None,
-    "IS_GOV_CLOUD_DEPLOYMENT": None
+    "AZURE_BLOB_STORAGE_ENDPOINT": None
 }
 
 for key, value in ENV.items():
@@ -70,11 +70,7 @@ for key, value in ENV.items():
     
 search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
     
-if ENV["IS_GOV_CLOUD_DEPLOYMENT"]:
-    openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.us/"
-else:
-    openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
-
+openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
 openai.api_type = "azure"
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
 openai.api_version = "2023-12-01-preview"

@@ -76,7 +76,8 @@ ENV = {
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true"   
+    "ENABLE_BING_SAFE_SEARCH": "true" ,
+    "LOCAL_IP":'127.0.0.1'  
 }
 
 for key, value in ENV.items():

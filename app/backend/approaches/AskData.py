@@ -1,3 +1,7 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+
 import streamlit as st
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
@@ -17,7 +21,6 @@ from dotenv import load_dotenv
 if 'show_images' not in st.session_state:
     st.session_state.show_images = False
 
-
 #--------------------------------------------------------------------------
 #variables needed for testing
 OPENAI_API_TYPE = "azure"
@@ -27,7 +30,6 @@ OPENAI_API_KEY = " "
 OPENAI_DEPLOYMENT_NAME = "gpt-4"
 MODEL_NAME = "gpt-4"
 
-
 os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
 os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
 os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
@@ -36,7 +38,6 @@ os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
 
 load_dotenv()
-#_________________________________________________________________________
 
 #Environment variables when integrated into the app
 #_________________________________________________________________________
@@ -55,23 +56,22 @@ load_dotenv()
 # 
 #______________________________________________________________________________________
 
+
+
+
 # Page title
 
 st.set_page_config(page_title='🔗 Ask the Data App')
 st.title('📈 Ask the Data App')
 uploaded_file = st.file_uploader('Upload a CSV file', type=['csv'])
 
-# Function to save charts
+
 def save_chart(query):
     q_s = ' If any charts or graphs or plots were created save them localy and include the save file names in your response.'
     query += ' . '+ q_s
     return query
 
-# def save_chart(query, folder_path):
-#     q_s = f' If any charts or graphs or plots were created, save them locally in the folder {folder_path} and include the save file names in your response.'
-#     query += ' . '+ q_s
-#     return query
-        
+ 
        
 # Function to chat with CSV
 
@@ -88,7 +88,8 @@ def chat_with_csv(df):
                         openai_api_version=OPENAI_API_VERSION,                        
                         deployment_name=OPENAI_DEPLOYMENT_NAME), df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS,save_charts=True)
         
-
+   
+    
     with st.form('myform'):
         if query_text == 'Other':
             user_question = st.text_input('Ask a question about your CSV:','')
@@ -104,12 +105,15 @@ def chat_with_csv(df):
        
 
         if user_question is not None and user_question != "":
+            
             with st.spinner(text="In progress..."):
                 if analysis:
                     process_agent_scartch_pad(pdagent, user_question)
         
                 if answer:
                     process_agent_response(pdagent, user_question)
+             
+           
                     
         imgs_png = glob.glob('*.png')
         imgs_jpg = glob.glob('*.jpg')

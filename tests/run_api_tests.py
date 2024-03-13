@@ -46,7 +46,7 @@ def main(enrichment_service_endpoint, azure_websites_domain):
         # Define the base URL for the API
         base_url = ""
 
-        base_url = f"https://{enrichment_service_endpoint}.${azure_websites_domain}/models"
+        base_url = f"https://{enrichment_service_endpoint}.{azure_websites_domain}/models"
 
         #Run requests and check responses
         response_data = get_models(base_url)

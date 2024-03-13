@@ -114,12 +114,6 @@ statusLog = StatusLog(
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
     ENV["COSMOSDB_LOG_CONTAINER_NAME"]
 )
-tagsHelper = TagsHelper(
-    ENV["COSMOSDB_URL"],
-    ENV["COSMOSDB_KEY"],
-    ENV["COSMOSDB_LOG_DATABASE_NAME"],
-    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
-)
 
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 # openai.api_type = "azure_ad"

@@ -132,7 +132,12 @@ jq -r --arg secrets "$secrets" '
         {
             "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
             "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
-        }
+        },
+        {
+            "path": "AZURE_TENANT_ID",
+            "env_var": "AZURE_TENANT_ID"
+        },
+
     ] 
         as $env_vars_to_extract
         |

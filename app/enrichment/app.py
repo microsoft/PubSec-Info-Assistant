@@ -29,6 +29,7 @@ from sentence_transformers import SentenceTransformer
 from shared_code.utilities_helper import UtilitiesHelper
 from shared_code.status_log import State, StatusClassification, StatusLog
 
+
 # === ENV Setup ===
 
 ENV = {
@@ -72,7 +73,7 @@ search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
 openai.api_type = "azure"
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
-openai.api_version = "2023-06-01-preview"
+openai.api_version = "2023-12-01-preview"
 
 class AzOAIEmbedding(object):
     """A wrapper for a Azure OpenAI Embedding model"""
@@ -261,7 +262,7 @@ def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     blob_client = blob_service_client.get_blob_client(blob=path)
     blob_properties = blob_client.get_blob_properties()
     tags = blob_properties.metadata.get("tags")
-    if tags is not None:
+    if tags != '':
         if isinstance(tags, str):
             tags_list = [unquote(tag.strip()) for tag in tags.split(",")]
         else:

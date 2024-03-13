@@ -50,12 +50,13 @@ class ChatReadRetrieveReadBingCompare(Approach):
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str,
         target_embedding_model: str,
-        enrichment_appservice_name: str,
+        enrichment_appservice_url: str,
         target_translation_language: str,
         enrichment_endpoint:str,
-        enrichment_key:str
+        enrichment_key:str,
+        azure_ai_translation_domain: str,
+        use_semantic_reranker: bool
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -73,10 +74,11 @@ class ChatReadRetrieveReadBingCompare(Approach):
         self.enrichment_key=enrichment_key
         self.oai_service_name = oai_service_name
         self.oai_service_key = oai_service_key
-        self.is_gov_cloud_deployment = is_gov_cloud_deployment
         self.model_name = model_name
         self.model_version = model_version
-        self.enrichment_appservice_name = enrichment_appservice_name
+        self.enrichment_appservice_url = enrichment_appservice_url
+        self.azure_ai_translation_domain = azure_ai_translation_domain
+        self.use_semantic_reranker = use_semantic_reranker
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
         """
@@ -103,12 +105,13 @@ class ChatReadRetrieveReadBingCompare(Approach):
                                     self.query_term_language,
                                     self.model_name,
                                     self.model_version,
-                                    self.is_gov_cloud_deployment,
                                     self.escaped_target_model,
-                                    self.enrichment_appservice_name,
+                                    self.enrichment_appservice_url,
                                     self.target_translation_language,
                                     self.enrichment_endpoint,
-                                    self.enrichment_key
+                                    self.enrichment_key,
+                                    self.azure_ai_translation_domain,
+                                    self.use_semantic_reranker
                                 )
         rrr_response = await chat_rrr_approach.run(history, overrides)
 

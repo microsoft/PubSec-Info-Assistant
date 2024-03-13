@@ -17,14 +17,14 @@ import { DetailsList,
     DefaultButton, 
     Panel,
     PanelType} from "@fluentui/react";
- import { Resizable, ResizableBox } from "react-resizable";
 import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 import { StatusContent } from "../StatusContent/StatusContent";
-import Draggable from "react-draggable";
-// import Resizable from "re-resizable";
-// import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { Delete24Regular,
+    Send24Regular,
+    ArrowClockwise24Regular
+    } from "@fluentui/react-icons";
 
 export interface IDocument {
     key: string;
@@ -50,9 +50,10 @@ export interface IDocument {
 interface Props {
     items: IDocument[];
     onFilesSorted?: (items: IDocument[]) => void;
+    onRefresh: () => void; 
 }
 
-export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
+export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) => {
     const itemsRef = useRef(items);
 
     const onColumnClick = (ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
@@ -224,19 +225,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
     const [stateDialogVisible, setStateDialogVisible] = useState(false);
     const [stateDialogContent, setStateDialogContent] = useState<React.ReactNode>(null);
     const scrollableContentRef = useRef<HTMLDivElement>(null);
-    
-    // const onStateColumnClick = async (item: IDocument) => {
-    //     try {
-    //         //const text = await getTextForState(item);
-    //         // const text = item.status_updates[0].status;
-    //         const text = item.status_updates.map(update => update.status).join("\n");       
-    //         setStateDialogContent(text);
-    //         setStateDialogVisible(true);
-    //     } catch (error) {
-    //         console.error("Error on state column click:", error);
-    //         // Handle error here, perhaps show an error message to the user
-    //     }
-    // };
+
     const refreshProp = (item: any) => {
         setValue(item);
       };
@@ -310,9 +299,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             onColumnClick: onColumnClick,
             data: 'string',
             onRender: (item: IDocument) => (
-                <TooltipHost content={`${item.state} `}>
-                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer', color:'blue', textDecoration:'underline' }}>
-                        {item.state}
+                <TooltipHost content={`${item.state_description} `}>
+                    <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
+                        {item.state_description}
                     </span>
                     {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
                 </TooltipHost>
@@ -342,13 +331,11 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             fieldName: 'tags',
             minWidth: 70,
             maxWidth: 90,
-            isRowHeader: true,
             isResizable: true,
             sortAscendingAriaLabel: 'Sorted A to Z',
             sortDescendingAriaLabel: 'Sorted Z to A',
             onColumnClick: onColumnClick,
             data: 'string',
-
             isPadded: true,
         },
         {
@@ -409,6 +396,20 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
 
     return (
         <div>
+            <div className={styles.buttonsContainer}>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={onRefresh} aria-label=" Refresh">
+                    <ArrowClockwise24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Refresh</span>
+                </div>        
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleDeleteClick} aria-label=" Delete">
+                    <Delete24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Delete</span>
+                </div>
+                <div className={`${styles.refresharea} ${styles.divSpacing}`} onClick={handleResubmitClick} aria-label=" Resubmit">
+                    <Send24Regular className={styles.refreshicon} />
+                    <span className={`${styles.refreshtext} ${styles.centeredText}`}>Resubmit</span>
+                </div>
+            </div>
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
             <DetailsList
                 items={itemList}
@@ -423,8 +424,8 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                 onItemInvoked={onItemInvoked}
             />
             <span className={styles.footer}>{"(" + items.length as string + ") records."}</span>
-            <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
-            <Button text="Resubmit" onClick={handleResubmitClick} />
+            {/* <Button text="Delete" onClick={handleDeleteClick} style={{ marginRight: '10px' }} />
+            <Button text="Resubmit" onClick={handleResubmitClick} /> */}
             {/* Dialog for delete confirmation */}
             <Dialog
                 hidden={!isDeleteDialogVisible}
@@ -465,8 +466,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
             </Dialog>
             <div>
                 <Notification message={notification.message} />
-            </div>
-            
+            </div>            
                 <Panel
                     headerText="Status Log"
                     isOpen={stateDialogVisible}
@@ -481,26 +481,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted}: Props) => {
                     <StatusContent item={value} />
                     </div>
                 </Panel>
-                
-            {/* <Dialog
-                hidden={!stateDialogVisible}
-                onDismiss={() => setStateDialogVisible(false)}
-                dialogContentProps={{
-                    type: DialogType.normal,
-                    title: 'State Details',
-                    closeButtonAriaLabel: 'Close',
-                }}
-                modalProps={{
-                    styles: dialogStyles,
-                }}
-            >
-                <div className="scrollableDialogContent" ref={scrollableContentRef}>
-                    {stateDialogContent}
-                </div>
-                <DialogFooter>
-                    <PrimaryButton onClick={() => setStateDialogVisible(false)} text="OK" />
-                </DialogFooter>
-            </Dialog> */}
         </div>
     );
 }

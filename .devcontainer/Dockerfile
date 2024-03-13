@@ -48,6 +48,21 @@ RUN /tmp/docker-client.sh $USERNAME
 RUN git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt --depth=1 \
     && echo "if [ -f \"$HOME/.bash-git-prompt/gitprompt.sh\" ]; then GIT_PROMPT_ONLY_IN_REPO=1 && source $HOME/.bash-git-prompt/gitprompt.sh; fi" >> "/home/$USERNAME/.bashrc"
 
+# terraform + tflint
+ARG TERRAFORM_VERSION=1.3.7
+ARG TFLINT_VERSION=0.44.1
+RUN mkdir -p /tmp/docker-downloads \
+    && curl -sSL -o /tmp/docker-downloads/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+    && unzip /tmp/docker-downloads/terraform.zip \
+    && mv terraform /usr/local/bin \
+    && rm /tmp/docker-downloads/terraform.zip \
+    && echo "alias tf=terraform" >> "/home/$USERNAME/.bashrc"
+
+RUN curl -sSL -o /tmp/docker-downloads/tflint.zip https://github.com/wata727/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip \
+    && unzip /tmp/docker-downloads/tflint.zip \
+    && mv tflint /usr/local/bin \
+    && rm /tmp/docker-downloads/tflint.zip
+
 # azure-cli
 COPY ./scripts/azure-cli.sh /tmp/
 RUN /tmp/azure-cli.sh

@@ -70,3 +70,35 @@
   max-width: 400px;  /* Adjust the width as needed */
   overflow-y: auto;  /* This enables vertical scrolling */
 }
+
+.buttonsContainer {
+  display: flex;
+  align-items: center; /* Align items vertically in the center */
+  justify-content: flex-start; /* Align items to the start (left) of the container */
+}
+
+.refresharea {
+  display: flex;
+  align-items: center; /* Vertically center the text with the icon */
+  justify-content: center; /* Horizontally center the text and the icon */
+  background-color: transparent; /* Transparent background */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  color: #606060; /* Mid-dark grey text */
+  padding-right: 20px; /* Add 10px padding on the right side */
+  padding-top: 10px; /* Add 20px padding on the top */
+}
+
+.divSpacing {
+  margin: 0px; /* Adjust as needed */
+}
+
+.centeredText {
+  text-align: left;
+}
+
+.refreshtext {
+  font-size: 0.8em; /* Smaller text size, adjust as needed */
+}
+
+.refreshicon {
+  fill: #606060; /* Mid-dark grey for SVG icons */}

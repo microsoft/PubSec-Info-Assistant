@@ -121,7 +121,7 @@ def main(mytimer: func.TimerRequest) -> None:
             deleted_content_blobs = delete_content_blobs(blob_service_client, blob)
             logging.info("%s content blobs deleted.", str(len(deleted_content_blobs)))
             delete_search_entries(deleted_content_blobs)
-            tags_helper.delete_doc(blob)
+            status_log.delete_doc(blob)
 
             # for doc in deleted_blobs:
             doc_base = os.path.basename(blob)

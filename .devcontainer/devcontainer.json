@@ -70,5 +70,33 @@
 			]
 		}
 	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"ms-azuretools.vscode-docker",
+		"ms-toolsai.jupyter",
+		"humao.rest-client",
+		"ms-dotnettools.csharp",
+		"ms-vsliveshare.vsliveshare-pack",
+		"ms-vscode.powershell",
+		"DavidAnson.vscode-markdownlint",
+		"redhat.vscode-yaml",
+		"ms-azure-devops.azure-pipelines",
+		"k--kato.docomment",
+		"hediet.vscode-drawio",
+		"msazurermtools.azurerm-vscode-tools",
+    	"ms-azuretools.vscode-azurestorage",
+		"GitHub.copilot",
+		"BelkacemBerras.spellcheck",
+		"ms-azuretools.vscode-azureresourcegroups",
+		"ms-azuretools.vscode-azurefunctions",
+		"ms-python.python",
+		"ms-python.pylint",
+		"HashiCorp.terraform",
+		"IronGeek.vscode-env"
+	],
+
 	"remoteUser": "vscode"
 }

@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
+from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
+from approaches.chatbingsearchcompare import ChatBingSearchCompare
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
@@ -24,6 +26,7 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
+from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -39,8 +42,11 @@ ENV = {
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
     "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_INDEX": "gptkbindex",
+    "USE_SEMANTIC_RERANKER": "true",
     "AZURE_OPENAI_SERVICE": "myopenai",
     "AZURE_OPENAI_RESOURCE_GROUP": "",
+    "AZURE_OPENAI_ENDPOINT": "",
+    "AZURE_OPENAI_AUTHORITY_HOST": "AzureCloud",
     "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "gpt-35-turbo-16k",
     "AZURE_OPENAI_CHATGPT_MODEL_NAME": "",
     "AZURE_OPENAI_CHATGPT_MODEL_VERSION": "",
@@ -50,7 +56,7 @@ ENV = {
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
     "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_SUBSCRIPTION_ID": None,
-    "IS_GOV_CLOUD_DEPLOYMENT": "false",
+    "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
     "CHAT_WARNING_BANNER_TEXT": "",
     "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
     "KB_FIELDS_CONTENT": "content",
@@ -63,11 +69,14 @@ ENV = {
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "QUERY_TERM_LANGUAGE": "English",
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
-    "ENRICHMENT_APPSERVICE_NAME": "enrichment",
+    "ENRICHMENT_APPSERVICE_URL": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
     "ENRICHMENT_ENDPOINT": None,
     "ENRICHMENT_KEY": None,
-    "AZURE_MANAGEMENT_URL": None
+    "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
+    "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
+    "BING_SEARCH_KEY": "",
+    "ENABLE_BING_SAFE_SEARCH": "true"   
 }
 
 for key, value in ENV.items():
@@ -83,7 +92,14 @@ log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
 
-# embedding_service_suffix = "xyoek"
+# Used by the OpenAI SDK
+openai.api_type = "azure"
+openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
+if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+openai.api_version = "2023-12-01-preview"
 
 authority = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 
@@ -101,11 +117,17 @@ openai.api_version = "2023-06-01-preview"
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
-azure_credential = DefaultAzureCredential(authority=authority)
+azure_credential = DefaultAzureCredential(authority=AUTHORITY)
 azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
+    ENV["COSMOSDB_URL"],
+    ENV["COSMOSDB_KEY"],
+    ENV["COSMOSDB_LOG_DATABASE_NAME"],
+    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
+)
+tagsHelper = TagsHelper(
     ENV["COSMOSDB_URL"],
     ENV["COSMOSDB_KEY"],
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
@@ -132,20 +154,20 @@ blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAI
 model_name = ''
 model_version = ''
 
-ENV["IS_GOV_CLOUD_DEPLOYMENT"] == "True"
+# Set up OpenAI management client
 
-# Python issue Logged > https://github.com/Azure/azure-sdk-for-python/issues/34337
-# Once fixed, this If statement can be removed. 
-if (str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"])):
+## Temp fix for issue https://github.com/Azure/azure-sdk-for-python/issues/34337.
+## Remove this if/else once the issue is fixed in the SDK.
+if "azure.us" in ENV["AZURE_OPENAI_ENDPOINT"]:
     model_name = ENV["AZURE_OPENAI_CHATGPT_MODEL_NAME"]
     model_version = ENV["AZURE_OPENAI_CHATGPT_MODEL_VERSION"]
     embedding_model_name = ENV["AZURE_OPENAI_EMBEDDINGS_MODEL_NAME"]
     embedding_model_version = ENV["AZURE_OPENAI_EMBEDDINGS_VERSION"]
 else:
-    # Set up OpenAI management client
     openai_mgmt_client = CognitiveServicesManagementClient(
         credential=azure_credential,
-        subscription_id=ENV["AZURE_SUBSCRIPTION_ID"])
+        subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
+        base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
 
     deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
@@ -170,6 +192,44 @@ else:
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
                                     search_client,
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
+                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["KB_FIELDS_SOURCEFILE"],
+                                    ENV["KB_FIELDS_CONTENT"],
+                                    ENV["KB_FIELDS_PAGENUMBER"],
+                                    ENV["KB_FIELDS_CHUNKFILE"],
+                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
+                                    blob_client,
+                                    ENV["QUERY_TERM_LANGUAGE"],
+                                    model_name,
+                                    model_version,
+                                    ENV["TARGET_EMBEDDINGS_MODEL"],
+                                    ENV["ENRICHMENT_APPSERVICE_URL"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["ENRICHMENT_ENDPOINT"],
+                                    ENV["ENRICHMENT_KEY"],
+                                    ENV["AZURE_AI_TRANSLATION_DOMAIN"],
+                                    str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
+                                ),
+    Approaches.ChatBingSearch: ChatBingSearch(
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["BING_SEARCH_ENDPOINT"],
+                                    ENV["BING_SEARCH_KEY"],
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
+    ),
+    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+                                    model_name,
+                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
+                                    ENV["BING_SEARCH_ENDPOINT"],
+                                    ENV["BING_SEARCH_KEY"],
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
+    ),
+    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+                                    search_client,
                                     ENV["AZURE_OPENAI_SERVICE"],
                                     ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
@@ -182,12 +242,13 @@ chat_approaches = {
                                     ENV["QUERY_TERM_LANGUAGE"],
                                     model_name,
                                     model_version,
-                                    str_to_bool.get(ENV["IS_GOV_CLOUD_DEPLOYMENT"]),
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
-                                    ENV["ENRICHMENT_APPSERVICE_NAME"],
+                                    ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["ENRICHMENT_ENDPOINT"],
-                                    ENV["ENRICHMENT_KEY"]
+                                    ENV["ENRICHMENT_KEY"],
+                                    ENV["AZURE_AI_TRANSLATION_DOMAIN"],
+                                    str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
     Approaches.GPTDirect: GPTDirectApproach(
                                 ENV["AZURE_OPENAI_SERVICE"],
@@ -235,7 +296,7 @@ async def chat(request: Request):
         if not impl:
             return {"error": "unknown approach"}, 400
         r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
-
+       
         # To fix citation bug,below code is added.aparmar
         return {
                 "data_points": r["data_points"],
@@ -302,9 +363,9 @@ async def get_all_upload_status(request: Request):
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=tagsHelper._url, credential=tagsHelper._key)
-        database = cosmos_client.get_database_client(tagsHelper._database_name)
-        container = database.get_container_client(tagsHelper._container_name)
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)
+        database = cosmos_client.get_database_client(statusLog._database_name)
+        container = database.get_container_client(statusLog._container_name)
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
         items = list(container.query_items(
             query=query_string,

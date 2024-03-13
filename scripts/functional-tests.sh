@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 set -e
 
@@ -36,4 +39,4 @@ python run_tests.py \
 # Rest API functional test
 python run_api_tests.py \
     --enrichment_service_endpoint "${ENRICHMENT_APPSERVICE_NAME}" \
-    --is_gov_deployment "${IS_USGOV_DEPLOYMENT}"
+    --azure_websites_domain "${TF_VAR_azure_websites_domain}"

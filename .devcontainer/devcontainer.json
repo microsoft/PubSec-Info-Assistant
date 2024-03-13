@@ -73,7 +73,8 @@
 		"ms-azuretools.vscode-azureresourcegroups",
 		"ms-azuretools.vscode-azurefunctions",
 		"ms-python.python",
-		"ms-python.pylint"
+		"ms-python.pylint",
+		"HashiCorp.terraform"
 	],
 
 	"remoteUser": "vscode"

@@ -70,6 +70,7 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
                 prompt_template_suffix: options.overrides?.promptTemplateSuffix,
                 exclude_category: options.overrides?.excludeCategory,
                 suggest_followup_questions: options.overrides?.suggestFollowupQuestions,
+                byPassRAG: options.overrides?.byPassRAG,
                 user_persona: options.overrides?.userPersona,
                 system_persona: options.overrides?.systemPersona,
                 ai_persona: options.overrides?.aiPersona,

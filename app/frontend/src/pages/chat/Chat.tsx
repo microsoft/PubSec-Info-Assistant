@@ -21,6 +21,7 @@ import { InfoButton } from "../../components/InfoButton";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
+import { ApproachesButtonGroup } from "../../components/ApproachesButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
@@ -46,6 +47,7 @@ const Chat = () => {
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
+    const [useBypassRAG, setUseByPassRAG] = useState<boolean>(false);
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
@@ -53,10 +55,16 @@ const Chat = () => {
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
     const [responseLength, setResponseLength] = useState<number>(2048);
+
     // Setting responseTemp to 0.6 by default, this will effect the default display of the ResponseTempButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseTempButtonGroup.tsx file.
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
+
+    // Setting Approaches to 2 by default, this will effect the default display of the ApproachesButtonGroup below.
+    // It must match a valid value of one of the buttons in the ApproachesButtonGroup.tsx file.
+    // If you update the default value here, you must also update the default value in the onApproachChange method.
+    const [approach, setApproach] = useState<number>(Approaches.ReadRetrieveRead);
 
     const lastQuestionRef = useRef<string>("");
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -236,6 +244,40 @@ const Chat = () => {
         // the or value here needs to match the default value assigned to responseLength above.
         setResponseTemp(_ev.target.value as number || 0.6)
     };
+
+    const onApproachChange = (_ev: any) => {
+        for (let node of _ev.target.parentNode.childNodes) {
+            if (node.value == _ev.target.value) {
+                switch (node.value) {
+                    case Approaches.ReadRetrieveRead:
+                        node.className = `${rlbgstyles.buttonleftactive}`;
+                        break;
+                    case Approaches.GPTDirect:
+                        node.className = `${rlbgstyles.buttonrightactive}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }                
+            }
+            else {
+                switch (node.value) {
+                    case Approaches.ReadRetrieveRead:
+                        node.className = `${rlbgstyles.buttonleft}`;
+                        break;
+                    case Approaches.GPTDirect:
+                        node.className = `${rlbgstyles.buttonright}`;
+                        break;
+                    default:
+                        //do nothing
+                        break;
+                }
+            }
+        }
+        // the or value here needs to match the default value assigned to responseLength above.
+        setApproach(_ev.target.value as number || Approaches.ReadRetrieveRead)
+    };
+
 
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 

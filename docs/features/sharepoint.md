@@ -10,7 +10,7 @@ A new logic app has been created to ingest sharepoint documents into a blob cont
 In order to access your files in Sharepoint, you will have to login via Entra with the user that has access to these sharepoint files. We recommend creating a new user to do this.
 
 #### Document Support
-This ingestion process is only for **documents supported by our current pipeline**, the current officially supported file types are; pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg. This ingestion process does **NOT** include lists or information found on pages in your sharepoint site. It is only for documents.
+This ingestion process is only for **documents supported by our current pipeline**, the current officially supported file types can be found here [Features](/docs/features.md).  This ingestion process does **NOT** include lists or information found on pages in your sharepoint site. It is only for documents.
 
 #### Files are Stored in Blob Storage
 Your sharepoint files will be stored in the blob storage created by Information Assistant, they are not going directly into AI Search. **There will be a copy of all your sharepoint files you are ingesting in blob storage.**
@@ -24,10 +24,6 @@ This is a comma delimited list of sharepoint site(s) you wish to ingest. **It sh
 #### Sharepoint Folders
 
 This is a comma delimited list of sharepoint folder(s) you wish to be your entry point for the ingestion. **It shares a one-to-one relationship with the sharepoint sites variable.** If you have one sharepoint folder, you need one sharepoint site and vice versa. It will crawl this folder and then automatically crawl any folders beneath it. The sharepoint site root is typically /Shared Documents
-
-#### Accepted File Types
-
-The sharepoint ingestion uses the same ingestion pipeline as Information Assistant to process the files obtained from sharepoint. The default values provided are those that have official support; pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg
 
 ## Usage Instructions
 

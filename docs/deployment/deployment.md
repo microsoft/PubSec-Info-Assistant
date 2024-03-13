@@ -71,9 +71,7 @@ ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By de
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 ENABLE_BING_SAFE_SEARCH | No | Defaults to `true` If you are using the Bing Search API, you can set the following values to enable safe search.
-SHAREPOINT_SITES | No | Delimited comma list of sharepoint sites you wish you ingest, this shares a 1:1 relationship with **SHAREPOINT_FOLDERS** Information on setting up Sharepoint Ingestion can be found here [Sharepoint Feature](/docs/features/sharepoint.md)
-SHAREPOINT_FOLDERS | No | Delimited comma list of sharepoint folders you wish to be the starting point of ingestion and crawl down from. This shares a 1:1 relationship with **SHAREPOINT_SITES**
-ACCEPTED_FILE_TYPES | No | Delimited comma list of accepted file types for sharepoint ingestion configuration. It is not recommended you change this from the default value unless you are an advanced user.
+SHAREPOINT_SITES and SHAREPOINT_FOLDERS | No | Delimited comma list of sharepoint sites and folders you wish you ingest, these share a 1:1 relationship. For each entry in SHAREPOINT_SITES, you must have ONE entry in SHAREPOINT_FOLDERS. i.e. `SHAREPOINT_SITES=site1,site2` then `SHAREPOINT_FOLDERS=folder1forsite1,folder2forsite2` Information on setting up Sharepoint Ingestion can be found here [Sharepoint Feature](/docs/features/sharepoint.md)
 
 ## Log into Azure using the Azure CLI
 
@@ -144,6 +142,18 @@ functional-tests             Run functional tests to check the processing pipeli
 If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](/docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure.
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
+
+## Authorizing Sharepoint
+
+1. Go to your resource group in the [Azure Portal](https://portal.azure.com/), select the "sharepointonline" API Connection resource.
+2. Click "Edit API Connection" in the menu on the left side of your screen.
+3. Click "Authorize" and login with the user that has access to the sharepoint sites you put in your environment file. It is **strongly** recommended that you have created a new user for this purpose.
+4. After you've done that **click Save**, if you do not click save, you will **NOT** be authorized.
+5. Once you're authorized, you may manually run the logic app (see below) or wait 24 hours for it to automatically run.
+
+More information about Sharepoint can be found here [Sharepoint Feature](/docs/features/sharepoint.md)
+
+**NOTICE:** You do not need to do this step if you are not using the Sharepoint for Information Assistant
 
 ## Find your deployment URL
 

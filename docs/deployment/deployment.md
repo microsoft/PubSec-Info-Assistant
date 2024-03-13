@@ -71,6 +71,9 @@ ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By de
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 ENABLE_BING_SAFE_SEARCH | No | Defaults to `true` If you are using the Bing Search API, you can set the following values to enable safe search.
+SHAREPOINT_SITES | No | Delimited comma list of sharepoint sites you wish you ingest, this shares a 1:1 relationship with **SHAREPOINT_FOLDERS** Information on setting up Sharepoint Ingestion can be found here [Sharepoint Feature](/docs/features/sharepoint.md)
+SHAREPOINT_FOLDERS | No | Delimited comma list of sharepoint folders you wish to be the starting point of ingestion and crawl down from. This shares a 1:1 relationship with **SHAREPOINT_SITES**
+ACCEPTED_FILE_TYPES | No | Delimited comma list of accepted file types for sharepoint ingestion configuration. It is not recommended you change this from the default value unless you are an advanced user.
 
 ## Log into Azure using the Azure CLI
 

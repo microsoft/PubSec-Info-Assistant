@@ -136,8 +136,7 @@ jq -r --arg secrets "$secrets" '
         {
             "path": "AZURE_TENANT_ID",
             "env_var": "AZURE_TENANT_ID"
-        },
-
+        }
     ] 
         as $env_vars_to_extract
         |

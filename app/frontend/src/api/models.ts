@@ -124,7 +124,10 @@ export const enum FileState {
     DELETED = "DELETED"    
 }
 
-
+export type GetStreamlitURIResponse = {
+    LOCAL_IP: string;
+    error?: string;
+};
 export type GetInfoResponse = {
     AZURE_OPENAI_SERVICE: string;
     AZURE_OPENAI_CHATGPT_DEPLOYMENT: string;

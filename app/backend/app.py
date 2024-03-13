@@ -217,7 +217,8 @@ chat_approaches = {
 }
 
 #run streamlit app
-#subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", "0.0.0.0", "--server.port=8051"])
+ip_ad = ENV["LOCAL_IP"]
+subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ip_ad, "--server.port=8051"])
 
 # Create API
 app = FastAPI(
@@ -265,6 +266,23 @@ async def chat(request: Request):
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.get("/getstreamlitip")
+async def get_streamlit_ip():
+    """
+        Get the IP address of the Streamlit app.
+
+        Returns:
+            dict: A dictionary containing various information data for the app.
+                - "LOCAL_IP": IP address of the Streamlit app.
+
+    """
+    
+    response = {
+    "LOCAL_IP": ENV["LOCAL_IP"],
+    }
+    return response
+    
 
 @app.get("/getblobclienturl")
 async def get_blob_client_url():

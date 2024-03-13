@@ -14,7 +14,7 @@ source "${DIR}/environments/infrastructure.env"
 if [ -n "${IN_AUTOMATION}" ]
 then
 
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
         az cloud set --name AzureUSGovernment 
     fi
 

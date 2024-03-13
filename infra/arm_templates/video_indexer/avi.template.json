@@ -1,0 +1,68 @@
+{
+    "$schema": "${arm_template_schema_mgmt_api}/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+         "name": {
+            "type": "string",
+            "metadata" : {
+                "description" : "The name of the AVAM resource"
+            },
+            "defaultValue": "avam-account"
+        },
+        "managedIdentityId": {
+            "type": "string",
+            "metadata" : {
+                "description" : "The managed identity used to grant access to the Azure Storage account"
+            },
+            "defaultValue": ""
+        },
+        "storageServicesResourceId": {
+            "type": "string",
+            "metadata" : {
+                "description" : "The Storage Account Id for storing uploaded videos. The Account needs to be created prior to the creation of this template"
+            },
+            "defaultValue" : ""
+        },
+        "tags": {
+            "type": "object",
+            "metadata" : {
+                "description" : "Arm Template Tags"
+            },
+            "defaultValue": {}
+        },
+        "apiVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "Video indexer api version"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.VideoIndexer/accounts",
+            "apiVersion": "[parameters('apiVersion')]",
+            "name": "[parameters('name')]",
+            
+            "location": "[resourceGroup().location]",
+            "tags": "[parameters('tags')]",
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[parameters('managedIdentityId')]": {}
+                }
+            },
+            "properties": {
+                "storageServices": {
+                    "resourceId": "[parameters('storageServicesResourceId')]",
+                    "userAssignedIdentity": "[parameters('managedIdentityId')]"
+                  }
+            }
+        }
+    ],
+    "outputs": {
+        "avam_id": {
+            "value": "[reference(resourceId('Microsoft.VideoIndexer/accounts',parameters('name'))).accountId]",
+            "type": "string"
+        }
+    }
+}

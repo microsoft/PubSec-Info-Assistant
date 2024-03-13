@@ -12,8 +12,6 @@ from typing import List
 import base64
 import requests
 import random
-from urllib.parse import unquote
-from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
@@ -73,7 +71,7 @@ search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 openai.api_base = "https://" + ENV["AZURE_OPENAI_SERVICE"] + ".openai.azure.com/"
 openai.api_type = "azure"
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
-openai.api_version = "2023-06-01-preview"
+openai.api_version = "2023-12-01-preview"
 
 class AzOAIEmbedding(object):
     """A wrapper for a Azure OpenAI Embedding model"""
@@ -255,24 +253,6 @@ def index_sections(chunks):
     succeeded = sum([1 for r in results if r.succeeded])
     log.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
 
-def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
-    """ Gets the tags from the blob metadata and uploads them to cosmos db"""
-    file_name, file_extension, file_directory = utilities_helper.get_filename_and_extension(blob_path)
-    path = file_directory + file_name + file_extension
-    blob_client = blob_service_client.get_blob_client(blob=path)
-    blob_properties = blob_client.get_blob_properties()
-    tags = blob_properties.metadata.get("tags")
-    if tags != '':
-        if isinstance(tags, str):
-            tags_list = [unquote(tag.strip()) for tag in tags.split(",")]
-        else:
-            tags_list = [unquote(tag.strip()) for tag in tags]
-    else:
-        tags_list = []
-    # Write the tags to cosmos db
-    statusLog.update_document_tags(blob_path, tags_list)
-    return tags_list
-
 @app.on_event("startup") 
 def startup_event():
     poll_thread = threading.Thread(target=poll_queue_thread)
@@ -314,11 +294,6 @@ def poll_queue() -> None:
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
         blob_path = message_json["blob_name"]
-        
-        # write tags to cosmos db once per file/message
-        blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
-        upload_container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-        tag_list = get_tags_and_upload_to_cosmos(upload_container_client, blob_path)
 
         try:  
             statusLog.upsert_document(blob_path, f'Embeddings process started with model {target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
@@ -366,11 +341,6 @@ def poll_queue() -> None:
                     # create embedding
                     embedding = embed_texts(target_embeddings_model, [text])
                     embedding_data = embedding['data']      
-                    
-                # ****************************************************************************************************************************
-                # this only needs to be done once per file
-                # tag_list = get_tags_and_upload_to_cosmos(blob_service_client, chunk_dict["file_name"])
-                # ****************************************************************************************************************************
 
                 # Prepare the index schema based representation of the chunk with the embedding
                 index_chunk = {}

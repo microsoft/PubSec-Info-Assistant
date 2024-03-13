@@ -40,13 +40,12 @@ If you have chosen to enable authentication and authorization for your deploymen
 Once deployed, you can find the URL of your installation by:
 
 1) Browse to your new Resource Group at https://portal.azure.com and locate the "App Service"
-![Location of App Service in Portal](../docs/images/deployment_app_service_location.jpg)
+![Location of App Service in Portal](./docs/images/deployment_app_service_location.jpg)
 
 2) After clicking on the App Service, you will see the "Default domain" listed. This is the link to your installation.
-![Default Domain of App Service in Portal](../docs/images/deployment_default_domain.jpg)
+![Default Domain of App Service in Portal](./docs/images/deployment_default_domain.jpg)
 
 
 ## Next steps
 
 At this point deployment is complete. Please go to the [Using the IA Accelerator for the first time](../README.md#using-ia-accelerator-for-the-first-time) section and complete the following steps.
-

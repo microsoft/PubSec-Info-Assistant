@@ -57,10 +57,6 @@ Notice the 1:1 relationship between the sites and folders. Each site has **ONLY 
 
 *The logic app moves onto the next file in the queue*
 
-**Can I change the accepted file types**
-
-*It's not recommended or officially supported, but you may change them if you think our Unstructured.io pipeline will support it*
-
 **I've deleted a file in sharepoint**
 
 *The logic app looks for changes every time it runs. It will be deleted from the blob storage and Information Assistant on the next run*

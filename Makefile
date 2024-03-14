@@ -53,6 +53,11 @@ check-subscription:
 take-dir-ownership:
 	@sudo chown -R vscode .
 
+terraform-remote-backend:
+	@mv ./infrastructure/backend.tf.ci ./infrastructure/backend.tf
+
+infrastructure-remote-backend: terraform-remote-backend infrastructure
+
 destroy-inf: check-subscription
 	@./scripts/inf-destroy.sh
 

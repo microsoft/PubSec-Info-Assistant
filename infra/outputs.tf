@@ -114,10 +114,6 @@ output "ENABLE_DEV_CODE" {
   value = var.enableDevCode
 }
 
-output "AZURE_TENANT_ID" {
-  value = var.tenantId
-}
-
 output "AZURE_SUBSCRIPTION_ID" {
   value = var.subscriptionId
 }
@@ -188,4 +184,8 @@ output "AZURE_AI_TRANSLATION_DOMAIN" {
 
 output "AZURE_AI_TEXT_ANALYTICS_DOMAIN" {
   value = var.azure_ai_text_analytics_domain
+}
+
+output "AZURE_ARM_MANAGEMENT_API" {
+  value = var.azure_arm_management_api
 }

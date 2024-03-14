@@ -26,3 +26,25 @@ data "azurerm_search_service" "search" {
   name                = azurerm_search_service.search.name
   resource_group_name = var.resourceGroupName
 }
+
+resource "azurerm_private_endpoint" "private_endpoint" {
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = var.subnet_id
+  custom_network_interface_name = "'${var.name}-network-interface'"
+
+  private_service_connection {
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_search_service.search.id
+    is_manual_connection           = false
+
+  }
+}
+
+resource "azurerm_private_dns_zone" "searchServiceDnsZone" {
+  name                = "${var.name}-private-dns-zone-group"
+  resource_group_name = var.resourceGroupName
+}
+
+

@@ -41,3 +41,13 @@ variable "keyVaultId" {
 variable "azure_search_domain" {
   type = string  
 }
+
+variable "subnet_id" {
+  type = string
+  default = ""
+}
+
+variable "privateDnsZoneName" {
+  type = string
+  default = ""
+}

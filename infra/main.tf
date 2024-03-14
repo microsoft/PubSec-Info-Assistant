@@ -1,3 +1,4 @@
+// 
 locals {
   tags           = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles    = jsondecode(file("${path.module}/azure_roles.json"))
@@ -265,10 +266,10 @@ module "enrichmentApp" {
     AZURE_OPENAI_SERVICE                   = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
     AZURE_SEARCH_INDEX                     = var.searchIndexName
-    AZURE_SEARCH_SERVICE                   = module.searchServices.name
+    AZURE_SEARCH_SERVICE                   = module.searchServices[0].name
     TARGET_EMBEDDINGS_MODEL                = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     EMBEDDING_VECTOR_SIZE                  = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
-    AZURE_SEARCH_SERVICE_ENDPOINT          = module.searchServices.endpoint
+    AZURE_SEARCH_SERVICE_ENDPOINT          = module.searchServices[0].endpoint
     WEBSITES_CONTAINER_START_TIME_LIMIT    = 600
   }
   depends_on = [module.kvModule]
@@ -276,7 +277,7 @@ module "enrichmentApp" {
 
 # // The application frontend
 module "backend" {
-  source = "./core/host/webapp"
+  source    = "./core/host/webapp"
   name      = var.backendServiceName != "" ? var.backendServiceName : "infoasst-web-${random_string.random.result}"
   plan_name = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
   sku = {
@@ -312,8 +313,8 @@ module "backend" {
     AZURE_OPENAI_AUTHORITY_HOST           = var.azure_openai_authority_host
     AZURE_ENDPOINTS_MANAGEMENT_API        = var.azure_endpoints_management_api
     AZURE_SEARCH_INDEX                    = var.searchIndexName
-    AZURE_SEARCH_SERVICE                  = module.searchServices.name
-    AZURE_SEARCH_SERVICE_ENDPOINT         = module.searchServices.endpoint
+    AZURE_SEARCH_SERVICE                  = var.is_secure_mode ? module.searchServices[0].name : null
+    AZURE_SEARCH_SERVICE_ENDPOINT         = var.is_secure_mode ? module.searchServices[0].endpoint :null
     AZURE_OPENAI_CHATGPT_DEPLOYMENT       = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
     AZURE_OPENAI_CHATGPT_MODEL_NAME       = var.chatGptModelName
     AZURE_OPENAI_CHATGPT_MODEL_VERSION    = var.chatGptModelVersion
@@ -335,7 +336,7 @@ module "backend" {
     CHAT_WARNING_BANNER_TEXT              = var.chatWarningBannerText
     TARGET_EMBEDDINGS_MODEL               = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     ENRICHMENT_APPSERVICE_URL             = module.enrichmentApp.uri
-    ENRICHMENT_ENDPOINT                   = module.cognitiveServices.cognitiveServiceEndpoint
+    ENRICHMENT_ENDPOINT                   = module.cognitiveServices[0].cognitiveServiceEndpoint
     APPLICATION_TITLE                     = var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN           = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                 = var.use_semantic_reranker
@@ -344,6 +345,8 @@ module "backend" {
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
   depends_on  = [module.kvModule]
 }
+
+// Create the Azure OpenAI Service and Model deployments
 
 module "openaiServices" {
   source = "./core/ai/openaiservices"
@@ -386,9 +389,11 @@ module "openaiServices" {
   ]
 }
 
+// Create the AI Document Intelligence Service
+
 module "formrecognizer" {
-  source              = "./core/ai/docintelligence"
-  // count  = var.is_secure_mode ? 1 : 0
+  source = "./core/ai/docintelligence"
+  count  = var.is_secure_mode ? 1 : 0
 
   name                = "infoasst-fr-${random_string.random.result}"
   location            = var.location
@@ -396,20 +401,31 @@ module "formrecognizer" {
   customSubDomainName = "infoasst-fr-${random_string.random.result}"
   resourceGroupName   = azurerm_resource_group.rg.name
   keyVaultId          = module.kvModule.keyVaultId
+  subnet_id           = module.network[0].snetAzureAi_id
+  privateDnsZoneName  = module.privateDnsZoneAzureAi[0].privateDnsZoneName
 
 }
 
+// Create the AI Services for Text Enrichment
+
 module "cognitiveServices" {
   source            = "./core/ai/cogServices"
+  count  = var.is_secure_mode ? 1 : 0
+
   name              = "infoasst-enrichment-cog-${random_string.random.result}"
   location          = var.location
   tags              = local.tags
   keyVaultId        = module.kvModule.keyVaultId
   resourceGroupName = azurerm_resource_group.rg.name
+  subnet_id           = module.network[0].snetAzureAi_id
+  privateDnsZoneName  = module.privateDnsZoneAzureAi[0].privateDnsZoneName
 }
+
+// Create the Azure Search Service
 
 module "searchServices" {
   source = "./core/search"
+  count  = var.is_secure_mode ? 1 : 0
 
   name     = var.searchServicesName != "" ? var.searchServicesName : "infoasst-search-${random_string.random.result}"
   location = var.location
@@ -420,9 +436,11 @@ module "searchServices" {
   resourceGroupName   = azurerm_resource_group.rg.name
   keyVaultId          = module.kvModule.keyVaultId
   azure_search_domain = var.azure_search_domain
+  subnet_id           = module.network[0].snetAzureAi_id
+  privateDnsZoneName  = module.privateDnsZoneAzureAi[0].privateDnsZoneName
 }
 
-
+// Create the CosmosDB Service
 
 module "cosmosdb" {
   source = "./core/db"
@@ -439,7 +457,8 @@ module "cosmosdb" {
 }
 
 
-# // Function App 
+// Create Function App 
+
 module "functions" {
   source = "./core/host/functions"
 
@@ -468,7 +487,7 @@ module "functions" {
   blobStorageAccountOutputContainerName = var.contentContainerName
   blobStorageAccountUploadContainerName = var.uploadContainerName
   blobStorageAccountLogContainerName    = var.functionLogsContainerName
-  formRecognizerEndpoint                = module.formrecognizer.formRecognizerAccountEndpoint
+  formRecognizerEndpoint                = module.formrecognizer[0].formRecognizerAccountEndpoint
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
   CosmosDBLogContainerName              = module.cosmosdb.CosmosDBLogContainerName
@@ -491,16 +510,16 @@ module "functions" {
   submitRequeueHideSeconds              = var.submitRequeueHideSeconds
   pollingBackoff                        = var.pollingBackoff
   maxReadAttempts                       = var.maxReadAttempts
-  enrichmentEndpoint                    = module.cognitiveServices.cognitiveServiceEndpoint
-  enrichmentName                        = module.cognitiveServices.cognitiveServicerAccountName
+  enrichmentEndpoint                    = module.cognitiveServices[0].cognitiveServiceEndpoint
+  enrichmentName                        = module.cognitiveServices[0].cognitiveServicerAccountName
   enrichmentLocation                    = var.location
   targetTranslationLanguage             = var.targetTranslationLanguage
   maxEnrichmentRequeueCount             = var.maxEnrichmentRequeueCount
   enrichmentBackoff                     = var.enrichmentBackoff
   enableDevCode                         = var.enableDevCode
   EMBEDDINGS_QUEUE                      = var.embeddingsQueue
-  azureSearchIndex                      = var.searchIndexName
-  azureSearchServiceEndpoint            = module.searchServices.endpoint
+  azureSearchIndex                      = var.searchIndexName 
+  azureSearchServiceEndpoint            = var.is_secure_mode ? module.searchServices[0].endpoint : null
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
   azure_ai_translation_domain           = var.azure_ai_translation_domain

@@ -12,11 +12,11 @@ output "AZURE_SEARCH_INDEX" {
 }
 
 output "AZURE_SEARCH_SERVICE" {
-  value = module.searchServices.name
+  value = module.searchServices[0].name
 }
 
 output "AZURE_SEARCH_SERVICE_ENDPOINT" {
-  value = module.searchServices.endpoint
+  value = module.searchServices[0].endpoint
 }
 
 output "AZURE_STORAGE_ACCOUNT" {
@@ -80,7 +80,7 @@ output "AZURE_COSMOSDB_TAGS_CONTAINER_NAME" {
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.formrecognizer.formRecognizerAccountEndpoint
+  value = module.formrecognizer[0].formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -104,11 +104,11 @@ output "TARGET_PAGES" {
 }
 
 output "ENRICHMENT_ENDPOINT" {
-  value = module.cognitiveServices.cognitiveServiceEndpoint
+  value = module.cognitiveServices[0].cognitiveServiceEndpoint
 }
 
 output "ENRICHMENT_NAME" {
-  value = module.cognitiveServices.cognitiveServicerAccountName
+  value = module.cognitiveServices[0].cognitiveServicerAccountName
 }
 
 output "TARGET_TRANSLATION_LANGUAGE" {

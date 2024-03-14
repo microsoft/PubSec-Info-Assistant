@@ -49,6 +49,9 @@ if [ -n "${IN_AUTOMATION}" ]; then
   export TF_VAR_aadMgmtClientSecret=$aadMgmtAppSecret
 fi
 
+# Create our application configuration file before starting infrastructure
+${DIR}/configuration-create.sh
+
 # Initialise Terraform with the correct path
 ${DIR}/terraform-init.sh "$DIR/../infra/"
 

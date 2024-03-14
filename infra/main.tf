@@ -2,6 +2,7 @@ locals {
   tags            = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles     = jsondecode(file("${path.module}/azure_roles.json"))
   selected_roles  = ["CognitiveServicesOpenAIUser", "StorageBlobDataReader", "StorageBlobDataContributor", "SearchIndexDataReader", "SearchIndexDataContributor"]
+  backend_name    = var.backendServiceName != "" ? var.backendServiceName : "infoasst-web-${random_string.random.result}"
 }
 
 data "azurerm_client_config" "current" {}
@@ -176,6 +177,7 @@ module "backend" {
     BING_SEARCH_ENDPOINT                    = var.azure_environment == "AzureCloud" ? module.bingSearch[0].endpoint : ""
     BING_SEARCH_KEY                         = var.azure_environment == "AzureCloud" ? module.bingSearch[0].key : ""
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
+    STREAMLIT_HOST_URI                      = "https://${local.backend_name}.${var.azure_websites_domain}"
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id

@@ -78,7 +78,7 @@ ENV = {
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
     "ENABLE_BING_SAFE_SEARCH": "true" ,
-    "LOCAL_IP":'127.0.0.1'  
+    "STREAMLIT_HOST_URI":'127.0.0.1'  
 }
 
 for key, value in ENV.items():
@@ -246,8 +246,7 @@ chat_approaches = {
 }
 
 #run streamlit app
-ip_ad = ENV["LOCAL_IP"]
-subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ip_ad, "--server.port=8051"])
+subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ENV["STREAMLIT_HOST_URI"], "--server.port=8051"])
 
 # Create API
 app = FastAPI(
@@ -308,7 +307,7 @@ async def get_streamlit_ip():
     """
     
     response = {
-    "LOCAL_IP": ENV["LOCAL_IP"],
+    "STREAMLIT_HOST_URI": ENV["STREAMLIT_HOST_URI"],
     }
     return response
     

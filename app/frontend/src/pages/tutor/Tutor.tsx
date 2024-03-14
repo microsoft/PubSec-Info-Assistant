@@ -21,7 +21,7 @@ const Tutor = () => {
     useEffect(() => {
         fetchStreamlitURI();
     }, []);
-    const StreamlitURIf = StreamlitURI?.LOCAL_IP;
+    const StreamlitURIf = StreamlitURI?.STREAMLIT_HOST_URI;
 return (
     <div style={{ height: '100vh' }}>
         <iframe src={`http://${StreamlitURIf}:8051`} title="My Streamlit App" style={{ width: '100%', height: '100%' }} />

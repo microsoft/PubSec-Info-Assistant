@@ -126,7 +126,7 @@ export const enum FileState {
 }
 
 export type GetStreamlitURIResponse = {
-    LOCAL_IP: string;
+    STREAMLIT_HOST_URI: string;
     error?: string;
 };
 export type GetInfoResponse = {

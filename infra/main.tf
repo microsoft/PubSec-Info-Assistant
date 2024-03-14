@@ -146,7 +146,7 @@ module "backend" {
     AZURE_OPENAI_RESOURCE_GROUP             = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
     AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
     AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
-    AZURE_ARM_MANAGEMENT_API          = var.azure_arm_management_api
+    AZURE_ARM_MANAGEMENT_API                = var.azure_arm_management_api
     AZURE_SEARCH_INDEX                      = var.searchIndexName
     AZURE_SEARCH_SERVICE                    = module.searchServices.name
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
@@ -162,9 +162,6 @@ module "backend" {
     COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
     QUERY_TERM_LANGUAGE                     = var.queryTermLanguage
-    AZURE_CLIENT_ID                         = module.entraObjects.azure_ad_mgmt_app_client_id 
-    AZURE_CLIENT_SECRET                     = module.entraObjects.azure_ad_mgmt_app_secret 
-    AZURE_TENANT_ID                         = var.tenantId
     AZURE_SUBSCRIPTION_ID                   = data.azurerm_client_config.current.subscription_id
     CHAT_WARNING_BANNER_TEXT                = var.chatWarningBannerText
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
@@ -441,9 +438,9 @@ module "aviRoleBackend" {
 # // MANAGEMENT SERVICE PRINCIPAL ROLES
 module "openAiRoleMgmt" {
   source = "./core/security/role"
-  # If running under automation, the principalId is the same as the webapp and this will result in a duplicate assignment.
-  # When not under automation, the principalId will be unique between the webapp and mgmt service principals. 
-  count = var.aadWebClientId == var.aadMgmtClientId ? 0 : 1
+  # If leveraging an existing Azure OpenAI service, only make this assignment if not under automation.
+  # When under automation and using an existing Azure OpenAI service, this will result in a duplicate assignment error.
+  count = var.useExistingAOAIService ? var.isInAutomation ? 0 : 1 : 1
   scope = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
   principalId     = module.entraObjects.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser

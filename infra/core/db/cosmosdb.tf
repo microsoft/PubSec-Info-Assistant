@@ -96,3 +96,25 @@ resource "azurerm_key_vault_secret" "search_service_key" {
   key_vault_id = var.keyVaultId
 }
 
+resource "azurerm_private_endpoint" "private_endpoint" {
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = var.subnet_id
+  custom_network_interface_name = "'${var.name}-network-interface'"
+
+  private_service_connection {
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_cosmosdb_account.cosmosdb_account.id
+    is_manual_connection           = false
+
+  }
+}
+
+resource "azurerm_private_dns_zone" "cosmosdbDnsZone" {
+  name                = "${var.name}-private-dns-zone-group"
+  resource_group_name = var.resourceGroupName
+
+}
+
+

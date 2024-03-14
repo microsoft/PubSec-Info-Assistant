@@ -256,11 +256,11 @@ module "enrichmentApp" {
     AZURE_BLOB_STORAGE_CONTAINER           = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER    = var.uploadContainerName
     AZURE_BLOB_STORAGE_ENDPOINT            = module.storage.primary_endpoints
-    COSMOSDB_URL                           = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_LOG_DATABASE_NAME             = module.cosmosdb.CosmosDBLogDatabaseName
-    COSMOSDB_LOG_CONTAINER_NAME            = module.cosmosdb.CosmosDBLogContainerName
-    COSMOSDB_TAGS_DATABASE_NAME            = module.cosmosdb.CosmosDBTagsDatabaseName
-    COSMOSDB_TAGS_CONTAINER_NAME           = module.cosmosdb.CosmosDBTagsContainerName
+    COSMOSDB_URL                           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBEndpointURL : null
+    COSMOSDB_LOG_DATABASE_NAME             = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogDatabaseName : null
+    COSMOSDB_LOG_CONTAINER_NAME            = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogContainerName : null
+    COSMOSDB_TAGS_DATABASE_NAME            = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsDatabaseName : null
+    COSMOSDB_TAGS_CONTAINER_NAME           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsContainerName : null
     MAX_EMBEDDING_REQUEUE_COUNT            = 5
     EMBEDDING_REQUEUE_BACKOFF              = 60
     AZURE_OPENAI_SERVICE                   = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
@@ -314,7 +314,7 @@ module "backend" {
     AZURE_ENDPOINTS_MANAGEMENT_API        = var.azure_endpoints_management_api
     AZURE_SEARCH_INDEX                    = var.searchIndexName
     AZURE_SEARCH_SERVICE                  = var.is_secure_mode ? module.searchServices[0].name : null
-    AZURE_SEARCH_SERVICE_ENDPOINT         = var.is_secure_mode ? module.searchServices[0].endpoint :null
+    AZURE_SEARCH_SERVICE_ENDPOINT         = var.is_secure_mode ? module.searchServices[0].endpoint : null
     AZURE_OPENAI_CHATGPT_DEPLOYMENT       = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
     AZURE_OPENAI_CHATGPT_MODEL_NAME       = var.chatGptModelName
     AZURE_OPENAI_CHATGPT_MODEL_VERSION    = var.chatGptModelVersion
@@ -323,11 +323,11 @@ module "backend" {
     AZURE_OPENAI_EMBEDDINGS_MODEL_NAME    = var.azureOpenAIEmbeddingsModelName
     AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION = var.azureOpenAIEmbeddingsModelVersion
     APPINSIGHTS_INSTRUMENTATIONKEY        = module.logging.applicationInsightsInstrumentationKey
-    COSMOSDB_URL                          = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_LOG_DATABASE_NAME            = module.cosmosdb.CosmosDBLogDatabaseName
-    COSMOSDB_LOG_CONTAINER_NAME           = module.cosmosdb.CosmosDBLogContainerName
-    COSMOSDB_TAGS_DATABASE_NAME           = module.cosmosdb.CosmosDBTagsDatabaseName
-    COSMOSDB_TAGS_CONTAINER_NAME          = module.cosmosdb.CosmosDBTagsContainerName
+    COSMOSDB_URL                          = var.is_secure_mode ? module.cosmosdb[0].CosmosDBEndpointURL : null
+    COSMOSDB_LOG_DATABASE_NAME            = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogDatabaseName : null
+    COSMOSDB_LOG_CONTAINER_NAME           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogContainerName : null
+    COSMOSDB_TAGS_DATABASE_NAME           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsDatabaseName : null
+    COSMOSDB_TAGS_CONTAINER_NAME          = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsContainerName : null
     QUERY_TERM_LANGUAGE                   = var.queryTermLanguage
     AZURE_CLIENT_ID                       = module.entraObjects.azure_ad_mgmt_app_client_id
     AZURE_CLIENT_SECRET                   = module.entraObjects.azure_ad_mgmt_app_secret
@@ -409,16 +409,16 @@ module "formrecognizer" {
 // Create the AI Services for Text Enrichment
 
 module "cognitiveServices" {
-  source            = "./core/ai/cogServices"
+  source = "./core/ai/cogServices"
   count  = var.is_secure_mode ? 1 : 0
 
-  name              = "infoasst-enrichment-cog-${random_string.random.result}"
-  location          = var.location
-  tags              = local.tags
-  keyVaultId        = module.kvModule.keyVaultId
-  resourceGroupName = azurerm_resource_group.rg.name
-  subnet_id           = module.network[0].snetAzureAi_id
-  privateDnsZoneName  = module.privateDnsZoneAzureAi[0].privateDnsZoneName
+  name               = "infoasst-enrichment-cog-${random_string.random.result}"
+  location           = var.location
+  tags               = local.tags
+  keyVaultId         = module.kvModule.keyVaultId
+  resourceGroupName  = azurerm_resource_group.rg.name
+  subnet_id          = module.network[0].snetAzureAi_id
+  privateDnsZoneName = module.privateDnsZoneAzureAi[0].privateDnsZoneName
 }
 
 // Create the Azure Search Service
@@ -444,16 +444,19 @@ module "searchServices" {
 
 module "cosmosdb" {
   source = "./core/db"
+  count  = var.is_secure_mode ? 1 : 0
 
-  name              = "infoasst-cosmos-${random_string.random.result}"
-  location          = var.location
-  tags              = local.tags
-  logDatabaseName   = "statusdb"
-  logContainerName  = "statuscontainer"
-  tagDatabaseName   = "tagdb"
-  tagContainerName  = "tagcontainer"
-  resourceGroupName = azurerm_resource_group.rg.name
-  keyVaultId        = module.kvModule.keyVaultId
+  name               = "infoasst-cosmos-${random_string.random.result}"
+  location           = var.location
+  tags               = local.tags
+  logDatabaseName    = "statusdb"
+  logContainerName   = "statuscontainer"
+  tagDatabaseName    = "tagdb"
+  tagContainerName   = "tagcontainer"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  keyVaultId         = module.kvModule.keyVaultId
+  subnet_id          = module.network[0].snetCosmosDb_id
+  privateDnsZoneName = module.privateDnsZoneAzureAi[0].privateDnsZoneName
 }
 
 
@@ -488,11 +491,11 @@ module "functions" {
   blobStorageAccountUploadContainerName = var.uploadContainerName
   blobStorageAccountLogContainerName    = var.functionLogsContainerName
   formRecognizerEndpoint                = module.formrecognizer[0].formRecognizerAccountEndpoint
-  CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
-  CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
-  CosmosDBLogContainerName              = module.cosmosdb.CosmosDBLogContainerName
-  CosmosDBTagsDatabaseName              = module.cosmosdb.CosmosDBTagsDatabaseName
-  CosmosDBTagsContainerName             = module.cosmosdb.CosmosDBTagsContainerName
+  CosmosDBEndpointURL                   = module.cosmosdb[0].CosmosDBEndpointURL
+  CosmosDBLogDatabaseName               = module.cosmosdb[0].CosmosDBLogDatabaseName
+  CosmosDBLogContainerName              = module.cosmosdb[0].CosmosDBLogContainerName
+  CosmosDBTagsDatabaseName              = module.cosmosdb[0].CosmosDBTagsDatabaseName
+  CosmosDBTagsContainerName             = module.cosmosdb[0].CosmosDBTagsContainerName
   chunkTargetSize                       = var.chunkTargetSize
   targetPages                           = var.targetPages
   formRecognizerApiVersion              = var.formRecognizerApiVersion
@@ -518,7 +521,7 @@ module "functions" {
   enrichmentBackoff                     = var.enrichmentBackoff
   enableDevCode                         = var.enableDevCode
   EMBEDDINGS_QUEUE                      = var.embeddingsQueue
-  azureSearchIndex                      = var.searchIndexName 
+  azureSearchIndex                      = var.searchIndexName
   azureSearchServiceEndpoint            = var.is_secure_mode ? module.searchServices[0].endpoint : null
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain

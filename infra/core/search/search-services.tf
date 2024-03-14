@@ -12,7 +12,7 @@ resource "azurerm_search_service" "search" {
   public_network_access_enabled = true
   replica_count                 = 1
   partition_count               = 1
-  semantic_search_sku           = var.semanticSearch 
+  semantic_search_sku           = var.semanticSearch
 }
 
 resource "azurerm_key_vault_secret" "search_service_key" {
@@ -45,6 +45,6 @@ resource "azurerm_private_endpoint" "private_endpoint" {
 resource "azurerm_private_dns_zone" "searchServiceDnsZone" {
   name                = "${var.name}-private-dns-zone-group"
   resource_group_name = var.resourceGroupName
-}
 
+}
 

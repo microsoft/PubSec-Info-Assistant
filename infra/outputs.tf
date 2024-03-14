@@ -60,23 +60,23 @@ output "AZURE_FUNCTION_APP_NAME" {
 }
 
 output "AZURE_COSMOSDB_URL" {
-  value = module.cosmosdb.CosmosDBEndpointURL
+  value = module.cosmosdb[0].CosmosDBEndpointURL
 }
 
 output "AZURE_COSMOSDB_LOG_DATABASE_NAME" {
-  value = module.cosmosdb.CosmosDBLogDatabaseName
+  value = module.cosmosdb[0].CosmosDBLogDatabaseName
 }
 
 output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
-  value = module.cosmosdb.CosmosDBLogContainerName
+  value = module.cosmosdb[0].CosmosDBLogContainerName
 }
 
 output "AZURE_COSMOSDB_TAGS_DATABASE_NAME" {
-  value = module.cosmosdb.CosmosDBTagsDatabaseName
+  value = module.cosmosdb[0].CosmosDBTagsDatabaseName
 }
 
 output "AZURE_COSMOSDB_TAGS_CONTAINER_NAME" {
-  value = module.cosmosdb.CosmosDBTagsContainerName
+  value = module.cosmosdb[0].CosmosDBTagsContainerName
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {

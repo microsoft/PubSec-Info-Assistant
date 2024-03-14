@@ -119,7 +119,7 @@ case $plan_exit_code in
 esac
 
 # Run verification checks when not in CI
-if [[ -z "${TF_IN_AUTOMATION}" ]];
+if [[ -z "${IN_AUTOMATION}" ]];
 then 
     # Save plan to txt file for easier verification
     printInfo "Saving plan to $DIR/$PLAN_NAME.tfplan.txt"

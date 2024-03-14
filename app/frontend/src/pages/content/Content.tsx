@@ -9,6 +9,7 @@ import { FilePicker } from "../../components/filepicker/file-picker";
 import { FileStatus } from "../../components/FileStatus/FileStatus";
 import { TagPickerInline } from "../../components/TagPicker/TagPicker"
 import { FolderPicker } from '../../components/FolderPicker/FolderPicker';
+import { ApproachesButtonGroup } from '../../components/ApproachesButtonGroup/ApproachesButtonGroup';
 
 import styles from "./Content.module.css";
 
@@ -21,6 +22,7 @@ export interface IButtonExampleProps {
 const Content = () => {
     const [selectedKey, setSelectedKey] = useState<string | undefined>(undefined);
     const [selectedTags, setSelectedTags] = useState<string[] | undefined>(undefined);
+    const [selectedApproach, setSelectedApproach] = useState<number | undefined>(undefined);
 
     const onSelectedKeyChanged = (selectedFolder: string[]) => {
         setSelectedKey(selectedFolder[0]);
@@ -28,6 +30,11 @@ const Content = () => {
 
     const onSelectedTagsChanged = (selectedTags: ITag[]) => {
         setSelectedTags(selectedTags.map((tag) => tag.name));
+    }
+
+    const onSelectedApproach = (approach: number) => {
+        setSelectedApproach(approach);
+        alert(approach)
     }
 
     const handleLinkClick = (item?: PivotItem) => {
@@ -47,6 +54,9 @@ const Content = () => {
                 <PivotItem headerText="Upload Status" aria-label="Upload Status Tab">
                     <FileStatus className=""/>
                 </PivotItem>
+                {/* <PivotItem headerText="Approach" aria-label="Approach Tab">
+                    <ApproachesButtonGroup className="" onClick={onSelectedApproach}/>
+                </PivotItem> */}
             </Pivot>
         </div>
     );

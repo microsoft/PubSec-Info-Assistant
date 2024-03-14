@@ -48,10 +48,15 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
     CLIENT_ID<br />CLIENT_SECRET<br />SERVICE_PRINCIPAL_ID | These are used for the deployment scripts to login to Azure. This is typically a service principal and will need Contributor and User Access Administrator roles.
     SUBSCRIPTION_ID | The ID of the subscription that should be deployed to.
     TENANT_ID | The ID of the tenant that should be deployed to.
-    AZURE_STORAGE_ACCOUNT<br/>AZURE_STORAGE_ACCOUNT_KEY | Bicep is used to create Infrastructure as Code. This is the storage account that the Bicep State is stored.
 	CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
     AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_GPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
     environment | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env`
+    TF_BACKEND_ACCESS_KEY | Terraform is used to create Infrastructure as Code. This is the key to the Terraform State in a Storage Account.
+    TF_BACKEND_CONTAINER | Terraform is used to create Infrastructure as Code. This is the container that the Terraform State is stored within a Storage Account.
+    TF_BACKEND_RESOURCE_GROUP | Terraform is used to create Infrastructure as Code. This is the resource group that the Terraform State is stored within a Storage Account.
+    TF_BACKEND_STORAGE_ACCOUNT | Terraform is used to create Infrastructure as Code. This is the storage account that the Terraform State is stored.
+    AD_MGMT_SERVICE_PRINCIPAL_ID<br />AD_MGMTAPP_CLIENT_ID<br />AD_MGMTAPP_CLIENT_SECRET | These are for an Azure AD App Registration and Enterprise Application that will be used to query details about the Azure OpenAI deployments you target. 
+    AD_WEBAPP_CLIENT_ID | This will be the Azure AD App Registration that will be used for authentication in the Azure App Service that host the Information Assistant Web Application
 
 2. **Save your pipeline:** After updating the variable, save your pipeline configuration.
 

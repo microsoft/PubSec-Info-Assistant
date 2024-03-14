@@ -147,7 +147,15 @@ jq -r  '
         {
             "path": "ENABLEE_BING_SAFE_SEARCH",
             "env_var": "ENABLE_BING_SAFE_SEARCH"
-        }        
+        },
+        {
+            "path": "AZURE_AI_TRANSLATION_DOMAIN",
+            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
+        },
+        {
+            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
+            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
+        }
     ]
         as $env_vars_to_extract
     |

@@ -45,7 +45,8 @@ You can view the status up files that have been uploaded to the system through t
 > ![Manage Content](/docs/images/manage-content-interface.png)
 > 1. Then click on the "Upload Status" tab.
 > ![Upload Status Link](/docs/images/view-upload-status-link.png)
-> 1. Select options and **Refresh** the view. The options defaults to *4 hours* Timespan and *All* File Status.
+> 1. At the top of the page you can filter your list of files by the folder they are in, the tags you applied during upload, or by the time frame of when they were uploaded from '4 hours' minimum to 'All' which will show all files. By clicking 'Refresh' after selecting your desired filters, the documents matching your criteria will be displayed. In the table of documents you can see the high level file state, a status detail message, the folder it is hosted in and the applied tags. If you wish to delete some files, select a file, multiple files or all files using the selection options on the left column of the table. Then click delete and confirm. You will then see a message in the bottom right of the screen indicating that this process can take up to 10 minutes, so refresh the screen and track progress.
+
 > ![Upload Status Options and Refresh Links](/docs/images/view-upload-status-options-and-refresh.png)
 
 ### Using sample data - optional

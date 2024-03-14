@@ -29,9 +29,10 @@ interface Props {
     allowFolderCreation?: boolean;
     onSelectedKeyChange: (selectedFolders: string[]) => void;
     preSelectedKeys?: string[];
+    hide?: boolean;
 }
 
-export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelectedKeys}: Props) => {
+export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelectedKeys, hide}: Props) => {
 
     const buttonId = useId('targetButton');
     const tooltipId = useId('folderpicker-tooltip');
@@ -191,7 +192,7 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
       };
 
     return (
-        <div className={styles.folderArea}>
+        <div className={hide? styles.hide : styles.folderArea}>
             <div className={styles.folderSelection}>
                 <ComboBox
                     multiSelect={allowNewFolders? false : true}

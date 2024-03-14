@@ -13,6 +13,7 @@ import openai
 from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
 from approaches.chatbingsearchcompare import ChatBingSearchCompare
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential, AzureAuthorityHosts
@@ -109,12 +110,6 @@ azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"]
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
-    ENV["COSMOSDB_URL"],
-    ENV["COSMOSDB_KEY"],
-    ENV["COSMOSDB_LOG_DATABASE_NAME"],
-    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
-)
-tagsHelper = TagsHelper(
     ENV["COSMOSDB_URL"],
     ENV["COSMOSDB_KEY"],
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
@@ -236,7 +231,16 @@ chat_approaches = {
                                     ENV["ENRICHMENT_KEY"],
                                     ENV["AZURE_AI_TRANSLATION_DOMAIN"],
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
-                                )
+                                ),
+    Approaches.GPTDirect: GPTDirectApproach(
+                                ENV["AZURE_OPENAI_SERVICE"],
+                                ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
+                                ENV["QUERY_TERM_LANGUAGE"],
+                                model_name,
+                                model_version,
+                                ENV["AZURE_OPENAI_ENDPOINT"]
+    )
 }
 
 

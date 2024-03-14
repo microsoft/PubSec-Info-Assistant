@@ -12,6 +12,8 @@ from azure.storage.blob import BlobServiceClient, generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
+from shared_code.utilities_helper import UtilitiesHelper
+from urllib.parse import unquote
 
 
 azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
@@ -28,18 +30,50 @@ max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
 azure_blob_content_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
+azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
+azure_blob_upload_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
+azure_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
 azure_search_service_index = os.environ["AZURE_SEARCH_INDEX"]
 azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
 
+
+
+
+
 function_name = "FileUploadedFunc"
+utilities_helper = UtilitiesHelper(
+    azure_blob_storage_account=azure_storage_account,
+    azure_blob_storage_endpoint=azure_blob_endpoint,
+    azure_blob_storage_key=azure_blob_key,
+)
+statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
+
+
+def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
+    """ Gets the tags from the blob metadata and uploads them to cosmos db"""
+    file_name, file_extension, file_directory = utilities_helper.get_filename_and_extension(blob_path)
+    path = file_directory + file_name + file_extension
+    blob_client = blob_service_client.get_blob_client(blob=path)
+    blob_properties = blob_client.get_blob_properties()
+    tags = blob_properties.metadata.get("tags")
+    if tags != '' and tags is not None:
+        if isinstance(tags, str):
+            tags_list = [unquote(tag.strip()) for tag in tags.split(",")]
+        else:
+            tags_list = [unquote(tag.strip()) for tag in tags]
+    else:
+        tags_list = []
+    # Write the tags to cosmos db
+    statusLog.update_document_tags(blob_path, tags_list)
+    return tags_list
+
 
 def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
 
     try:
         time.sleep(random.randint(1, 2))  # add a random delay
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
         statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
@@ -107,6 +141,11 @@ def main(myblob: func.InputStream):
             logging.debug("Succesfully deleted items from AI Search index.")
         else:
             logging.debug("No items to delete from AI Search index.")        
+            
+        # write tags to cosmos db once per file/message
+        blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
+        upload_container_client = blob_service_client.get_container_client(azure_blob_upload_container)
+        tag_list = get_tags_and_upload_to_cosmos(upload_container_client, myblob.name)
         
         # Queue message with a random backoff so as not to put the next function under unnecessary load
         queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name, message_encode_policy=TextBase64EncodePolicy())

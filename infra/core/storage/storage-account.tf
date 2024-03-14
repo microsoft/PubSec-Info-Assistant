@@ -1,3 +1,7 @@
+locals {
+  config_container_index = index(var.containers, "config")
+}
+
 
 resource "azurerm_storage_account" "storage" {
   name                     = var.name
@@ -53,6 +57,14 @@ resource "azurerm_key_vault_secret" "storage_key" {
   key_vault_id = var.keyVaultId
 }
 
+resource "azurerm_storage_blob" "config" {
+  name                   = "config.json"
+  storage_account_name   = azurerm_storage_account.storage.name
+  storage_container_name = azurerm_storage_container.container[local.config_container_index].name
+  type                   = "Block"
+  source                 = "sp_config/config.json"
+}
+
 output "name" {
   value = azurerm_storage_account.storage.name
 }
@@ -64,3 +76,9 @@ output "primary_endpoints" {
 output "id" {
   value = azurerm_storage_account.storage.id
 }
+
+output "storage_account_access_key" {
+  value     = azurerm_storage_account.storage.primary_access_key
+  sensitive = true
+}
+

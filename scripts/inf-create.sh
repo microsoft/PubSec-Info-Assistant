@@ -60,6 +60,9 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Create our application configuration file before starting infrastructure
+${DIR}/configuration-create.sh
+
 # Initialise Terraform with the correct path
 ${DIR}/terraform-init.sh "$DIR/../infra/"
 

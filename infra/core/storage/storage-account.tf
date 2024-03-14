@@ -62,7 +62,7 @@ resource "azurerm_storage_blob" "config" {
   storage_account_name   = azurerm_storage_account.storage.name
   storage_container_name = azurerm_storage_container.container[local.config_container_index].name
   type                   = "Block"
-  source                 = "config/config.json"
+  source                 = "sp_config/config.json"
 }
 
 output "name" {

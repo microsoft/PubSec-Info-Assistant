@@ -54,7 +54,7 @@ take-dir-ownership:
 	@sudo chown -R vscode .
 
 terraform-remote-backend:
-	@mv ./infra/backend.tf.ci ./infra/backend.tf
+	@./scripts/terraform-remote-backend.sh
 
 infrastructure-remote-backend: terraform-remote-backend infrastructure
 

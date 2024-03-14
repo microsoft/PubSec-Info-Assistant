@@ -7,10 +7,10 @@ export const enum Approaches {
     RetrieveThenRead = 0,
     ReadRetrieveRead = 1,
     ReadDecomposeAsk = 2,
+    GPTDirect = 3,
     BingSearch = 4,
     BingSearchCompare = 5,
     BingRRRCompare = 6
-
 }
 
 export type AskRequestOverrides = {
@@ -23,6 +23,7 @@ export type AskRequestOverrides = {
     promptTemplatePrefix?: string;
     promptTemplateSuffix?: string;
     suggestFollowupQuestions?: boolean;
+    byPassRAG?: boolean;
     userPersona?: string;
     systemPersona?: string;
     aiPersona?: string;

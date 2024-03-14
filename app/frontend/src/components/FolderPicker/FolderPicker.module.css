@@ -17,3 +17,7 @@
   .actionButton {
     width: 180px;
   }
+
+  .hide {
+    display: none;
+  }

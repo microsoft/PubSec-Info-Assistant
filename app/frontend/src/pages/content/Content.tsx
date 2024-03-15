@@ -13,7 +13,6 @@ import { SparkleFilled, DocumentPdfFilled, DocumentDataFilled, GlobePersonFilled
 import styles from "./Content.module.css";
 
 export interface IButtonExampleProps {
-    // These are set based on the toggles shown above the examples (not needed in real code)
     disabled?: boolean;
     checked?: boolean;
   }

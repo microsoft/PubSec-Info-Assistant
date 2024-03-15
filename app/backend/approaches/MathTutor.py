@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 #variables needed for testing
 OPENAI_API_TYPE = "azure"
 OPENAI_API_VERSION = "2023-06-01-preview"
-OPENAI_API_BASE = " "
-OPENAI_API_KEY = " "
+OPENAI_API_BASE = "https://aoai-inst-4.openai.azure.com/"
+OPENAI_API_KEY = "dd904904f5d945048b0f5f854e49a9af"
 OPENAI_DEPLOYMENT_NAME = "gpt-4"
 MODEL_NAME = "gpt-4"
 
@@ -149,26 +149,53 @@ zero_shot_agent_math = initialize_agent(
 
 
 # function to stream agent response 
-def process_agent_scartch_pad(agent_executor, question):
-    for chunk in agent_executor.stream({"input": question}):
+def process_agent_scartch_pad( question):
+    zero_shot_agent_math = initialize_agent(
+    agent="zero-shot-react-description",
+        tools=tools,
+    llm=model,
+    verbose=True,
+    max_iterations=10,
+    max_execution_time=120,
+    handle_parsing_errors=True,
+    return_intermediate_steps=True)
+    messages = []
+    for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
-                st.write(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
-                st.write(f'I am thinking...: {action.log}')
+                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
+                messages.append(f'I am thinking...: {action.log}')
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                st.write(f"Tool Result: `{step.observation}`")                               
+                messages.append(f"Tool Result: `{step.observation}`")                               
         elif "output" in chunk:
-            st.write(f'Final Output: {chunk["output"]}')
+            messages.append(f'Final Output: {chunk["output"]}')
         else:
             raise ValueError()
+    return messages
         
 #Function to stream final output       
-def process_agent_response(agent_executor, question):
-    for chunk in agent_executor.stream({"input": question}):
-        if "output" in chunk:
-            st.write(f'Final Output: {chunk["output"]}')
-            
+def process_agent_response( question):
+    zero_shot_agent_math = initialize_agent(
+    agent="zero-shot-react-description",
+        tools=tools,
+    llm=model,
+    verbose=True,
+    max_iterations=10,
+    max_execution_time=120,
+    handle_parsing_errors=True,
+    return_intermediate_steps=True)
+    stream = zero_shot_agent_math.stream({"input": question})
+    if stream:
+        for chunk in stream:
+            if "output" in chunk:
+                yield {"data": f'Final Output: {chunk["output"]}'}
+    else:
+        yield {"data": "No output"}
+    # for chunk in zero_shot_agent_math.stream({"input": question}):
+    #     if "output" in chunk:
+    #         yield {"data": f'Final Output: {chunk["output"]}'}
+
 #Function to process clues
 def generate_response(question):
     model = AzureChatOpenAI(
@@ -275,10 +302,10 @@ with st.form('myform'):
                 st.info(generate_response(question).split("Clues")[1][2:]) 
             
             if thoughts:
-                process_agent_scartch_pad(zero_shot_agent_math, question)
+                process_agent_scartch_pad(question)
                 
             if answer:
-                process_agent_response(zero_shot_agent_math, question)
+                process_agent_response(question)
         
    
         

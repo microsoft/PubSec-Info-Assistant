@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@fluentui/react-northstar": "^0.66.5",
     "dotenv": "^16.4.5"
   }
 }

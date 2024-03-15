@@ -53,41 +53,43 @@ const Content = () => {
                             </span>
                             <span className={styles.EmptyObjectivesList}>
                                 <span className={styles.EmptyObjectivesListItem}>
-                                    <DocumentPdfFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="PDF" />
-                                    <span className={styles.EmptyObjectivesListItemText}><b>PDF</b><br />
-                                    up to <a href="https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-layout?view=doc-intel-4.0.0#input-requirements">
-                                        2000 pages</a> can be processed per file
-                                    </span>
-                                </span>
-                                <span className={styles.EmptyObjectivesListItem}>
                                     <DocumentDataFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Data" />
                                     <span className={styles.EmptyObjectivesListItemText}><b>Data</b><br />
-                                        xml, json, csv, tsv, txt files can be processed
+                                        xml, json, csv, tsv, txt
                                     </span>
                                 </span>
                                 <span className={styles.EmptyObjectivesListItem}>
                                     <StoreMicrosoftFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Microsoft 365" />
                                     <span className={styles.EmptyObjectivesListItemText}><b>Productivity Software</b><br />
-                                        pptx, docx & xlsx files can be processed
+                                        pptx, docx & xlsx
+                                    </span>
+                                </span>
+                                <span className={styles.EmptyObjectivesListItem}>
+                                    <DocumentPdfFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="PDF" />
+                                    <span className={styles.EmptyObjectivesListItemText}><b>PDF</b><br />
+                                    For page count maximum check documentation  <a href="https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-layout?view=doc-intel-4.0.0#input-requirements">
+                                        here</a> 
                                     </span>
                                 </span>
                                 <span className={styles.EmptyObjectivesListItem}>
                                     <GlobePersonFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Web" />
                                     <span className={styles.EmptyObjectivesListItemText}><b>Web</b><br />
-                                        htm & html files can be processed if they are scraped and uploaded here
+                                        htm & html
                                     </span>
                                 </span>
                                 <span className={styles.EmptyObjectivesListItem}>
                                     <MailFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Email" />
                                     <span className={styles.EmptyObjectivesListItemText}><b>Email</b><br />
-                                        eml & msg files can be processed
+                                        eml & msg
                                     </span>
                                 </span>
                             </span>
                         </div>
-                        <FolderPicker allowFolderCreation={true} onSelectedKeyChange={onSelectedKeyChanged}/>
-                        <TagPickerInline allowNewTags={true} onSelectedTagsChange={onSelectedTagsChanged}/>
-                        <FilePicker folderPath={selectedKey || ""} tags={selectedTags || []}/>
+                        <div className={styles.EmptyObjectivesListItem}>
+                            <FolderPicker allowFolderCreation={true} onSelectedKeyChange={onSelectedKeyChanged}/>
+                            <TagPickerInline allowNewTags={true} onSelectedTagsChange={onSelectedTagsChanged}/>
+                            <FilePicker folderPath={selectedKey || ""} tags={selectedTags || []}/>
+                        </div>
                     </div>
                 </PivotItem>
                 <PivotItem headerText="Upload Status" aria-label="Upload Status Tab">

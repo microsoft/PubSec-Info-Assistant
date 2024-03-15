@@ -42,6 +42,12 @@ variable "requireWebsiteSecurityMembership" {
   type    = bool
   default = false
 }
+
+variable "enableBingSafeSearch" {
+  type    = bool
+  default = true
+}
+
 ////
 // variables that can vary based on the Azure environment being targeted
 ////
@@ -67,7 +73,7 @@ variable "azure_openai_authority_host" {
   type = string  
 }
 
-variable "azure_endpoints_management_api" {
+variable "azure_arm_management_api" {
   type        = string
 }
 

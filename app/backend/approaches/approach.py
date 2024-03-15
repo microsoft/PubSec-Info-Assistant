@@ -11,6 +11,9 @@ class Approaches(Enum):
     ReadRetrieveRead = 1
     ReadDecomposeAsk = 2
     GPTDirect = 3
+    ChatBingSearch = 4
+    ChatBingSearchCompare = 5
+    BingRRRCompare = 6
 
 class Approach:
     """
@@ -82,3 +85,6 @@ class Approach:
         encoding = tiktoken.get_encoding(encoding_name)
         num_tokens = len(encoding.encode(string))
         return num_tokens
+
+    
+   

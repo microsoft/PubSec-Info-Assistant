@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 
 ENV_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -32,3 +35,4 @@ export TF_VAR_enableDevCode=$ENABLE_DEV_CODE
 export TF_VAR_video_indexer_api_version=$VIDEO_INDEXER_API_VERSION
 export TF_VAR_azure_environment=$AZURE_ENVIRONMENT
 export TF_VAR_is_secure_mode=$SECURE_MODE
+export TF_VAR_enableBingSafeSearch=$ENABLE_BING_SAFE_SEARCH

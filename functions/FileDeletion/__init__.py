@@ -10,7 +10,6 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient
 from shared_code.status_log import State, StatusClassification, StatusLog
-from shared_code.tags_helper import TagsHelper
 
 blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 blob_storage_account_upload_container_name = os.environ[
@@ -22,8 +21,6 @@ azure_search_index = os.environ["AZURE_SEARCH_INDEX"]
 azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
-cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
-cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
@@ -31,11 +28,6 @@ status_log = StatusLog(cosmosdb_url,
                        cosmosdb_key,
                        cosmosdb_log_database_name,
                        cosmosdb_log_container_name)
-
-tags_helper = TagsHelper(cosmosdb_url,
-                         cosmosdb_key,
-                         cosmosdb_tags_database_name,
-                         cosmosdb_tags_container_name)
 
 def chunks(data, size):
     '''max number of blobs to delete in one request is 256, so this breaks
@@ -129,7 +121,7 @@ def main(mytimer: func.TimerRequest) -> None:
             deleted_content_blobs = delete_content_blobs(blob_service_client, blob)
             logging.info("%s content blobs deleted.", str(len(deleted_content_blobs)))
             delete_search_entries(deleted_content_blobs)
-            tags_helper.delete_doc(blob)
+            status_log.delete_doc(blob)
 
             # for doc in deleted_blobs:
             doc_base = os.path.basename(blob)

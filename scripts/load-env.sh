@@ -23,7 +23,7 @@ fi
 
 echo "Environment set: $ENVIRONMENT_NAME."
 
-if [[ -n $TF_IN_AUTOMATION ]]; then
+if [[ -n $IN_AUTOMATION ]]; then
 
     if [[ -z $BUILD_BUILDID ]]; then
         echo "Require BUILD_BUILDID to be set for CI builds"

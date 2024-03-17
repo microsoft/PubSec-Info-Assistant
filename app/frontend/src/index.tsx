@@ -12,6 +12,7 @@ import Layout from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
+import Home from "./pages/home/Home";
 
 initializeIcons();
 
@@ -20,7 +21,8 @@ export default function App() {
         <HashRouter>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Chat />} />
+                    <Route index element={<Home />} />
+                    <Route path="chat" element={<Chat />} />
                     <Route path="content" element={<Content />} />
                     <Route path="*" element={<NoPage />} />
                 </Route>

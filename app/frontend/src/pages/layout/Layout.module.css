@@ -81,6 +81,16 @@
     height: 20px;
 }
 
+.chatButton {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.modalchatpanel {
+    width: 50%;
+}
+
 .raibanner {
     display: flex;
     align-items: center;

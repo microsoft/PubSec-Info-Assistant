@@ -87,7 +87,7 @@
     right: 10px;
 }
 
-.modalchatpanel {
+.modalchatpanel > div:first-child {
     width: 50%;
 }
 

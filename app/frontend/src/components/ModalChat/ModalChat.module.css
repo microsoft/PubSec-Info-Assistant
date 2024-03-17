@@ -13,6 +13,11 @@
     display: flex;
     position: absolute;
     bottom: 30px;
+    width: 90%;
+}
+
+.root > div:first-child {
+    width: 50% !important;
 }
 
 .chatContainer {
@@ -86,7 +91,7 @@
 
 .chatMessageStream {
     flex-grow: 1;
-    max-height: 1024px;
+    max-height: 630px;
     max-width: 1028px;
     width: 100%;
     overflow-y: auto;

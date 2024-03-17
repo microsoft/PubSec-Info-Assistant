@@ -62,7 +62,7 @@ const Layout = () => {
                 className={styles.modalchatpanel}
                 onRenderFooterContent={() => <DefaultButton onClick={() => setIsInfoPanelOpen(false)}>Close</DefaultButton>}
                 isFooterAtBottom={true}                >
-                    <div>
+                    <div id="modalChatMain">
                         <ModalChat/>
                     </div>
             </Panel>

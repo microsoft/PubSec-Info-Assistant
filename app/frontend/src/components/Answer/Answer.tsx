@@ -15,6 +15,7 @@ import { RAIPanel } from "../RAIPanel";
 interface Props {
     answer: AskResponse;
     isSelected?: boolean;
+    isModal?: boolean;
     onCitationClicked: (filePath: string, sourcePath: string, pageNumber: string) => void;
     onThoughtProcessClicked: () => void;
     onSupportingContentClicked: () => void;
@@ -27,6 +28,7 @@ interface Props {
 export const Answer = ({
     answer,
     isSelected,
+    isModal,
     onCitationClicked,
     onThoughtProcessClicked,
     onSupportingContentClicked,
@@ -46,7 +48,7 @@ export const Answer = ({
                     <AnswerIcon />
                     <div>
                         <IconButton
-                            style={{ color: "black" }}
+                            style={isModal ? { visibility: "hidden" } : { color: "black" }}
                             iconProps={{ iconName: "Lightbulb" }}
                             title="Show thought process"
                             ariaLabel="Show thought process"
@@ -54,7 +56,8 @@ export const Answer = ({
                             disabled={!answer.thoughts}
                         />
                         <IconButton
-                            style={{ color: "black" }}
+                            id="clipboardIcon"
+                            style={isModal ? { visibility: "hidden" } : { color: "black" }}
                             iconProps={{ iconName: "ClipboardList" }}
                             title="Show supporting content"
                             ariaLabel="Show supporting content"
@@ -70,9 +73,9 @@ export const Answer = ({
             </Stack.Item>
 
             {!!parsedAnswer.citations.length && (
-                <Stack.Item>
+                <Stack.Item style={isModal ? { display: "none" } : {}}>
                     <Stack horizontal wrap tokens={{ childrenGap: 5 }}>
-                        <span className={styles.citationLearnMore}>Citations:</span>
+                        <span id="citations" className={styles.citationLearnMore}>Citations:</span>
                         {parsedAnswer.citations.map((x, i) => {
                             const path = getCitationFilePath(x);
                             return (

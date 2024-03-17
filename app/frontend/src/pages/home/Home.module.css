@@ -50,11 +50,18 @@
   }
 
   .contentArea {
-    width: 100%;
+    width: 90%;
     margin-top: 10px;
     align-content: center;
     font-size: 16pt;
     margin: 20px;
+  }
+
+  .contentArea img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 500px;
   }
 
   .topPivot {

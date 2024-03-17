@@ -52,8 +52,9 @@
   .contentArea {
     width: 100%;
     margin-top: 10px;
-    display: flex;
     align-content: center;
+    font-size: 16pt;
+    margin: 20px;
   }
 
   .topPivot {

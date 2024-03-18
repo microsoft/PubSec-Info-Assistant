@@ -127,6 +127,14 @@ variable "is_secure_mode" {
   default = false
 }
 
-variable "subnetResourceIdOutbound" {
+variable "subnet_id" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "private_dns_zone_name" {
   type = string
 }

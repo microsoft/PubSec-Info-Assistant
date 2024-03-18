@@ -79,7 +79,7 @@ resource "azurerm_linux_web_app" "app_service" {
   https_only                    = true
   tags                          = var.tags
   public_network_access_enabled = var.is_secure_mode ? false : true
-  virtual_network_subnet_id     = var.is_secure_mode ? var.subnetResourceIdOutbound : null
+  virtual_network_subnet_id     = var.is_secure_mode ? var.subnet_id : null
 
   site_config {
     application_stack {
@@ -165,7 +165,6 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
-
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   name                       = azurerm_linux_web_app.app_service.name
   target_resource_id         = azurerm_linux_web_app.app_service.id
@@ -189,4 +188,42 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   }
 }
 
+resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
+  count                         = var.is_secure_mode ? 1 : 0
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = var.subnet_id
+  custom_network_interface_name = "'${var.name}-network-interface'"
+  tags                          = var.tags
+
+  private_service_connection {
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_linux_web_app.app_service.id
+    is_manual_connection           = false
+  }
+
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
+}
+
+resource "azurerm_private_dns_a_record" "backendPrivateDnsARecord" {
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "${azurerm_linux_web_app.app_service.name}"
+  zone_name          = "${var.private_dns_zone_name}"
+  resource_group_name = var.resourceGroupName
+  ttl                = 300
+  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_ip_address]
+}
+
+resource "azurerm_private_dns_a_record" "backendScmPrivateDnsARecord" {
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "${azurerm_linux_web_app.app_service.name}.scm"
+  zone_name          = "${var.private_dns_zone_name}"
+  resource_group_name = var.resourceGroupName
+  ttl                = 300
+  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_ip_address]
+}
 

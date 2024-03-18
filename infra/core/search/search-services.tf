@@ -9,7 +9,7 @@ resource "azurerm_search_service" "search" {
     type = "SystemAssigned"
   }
 
-  public_network_access_enabled = true
+  public_network_access_enabled = var.is_secure_mode ? false : true
   replica_count                 = 1
   partition_count               = 1
   semantic_search_sku           = var.semanticSearch

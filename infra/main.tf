@@ -319,7 +319,9 @@ module "backend" {
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
   is_secure_mode                      = var.is_secure_mode
-  subnetResourceIdOutbound            = module.network[0].snetAppOutbound_id
+  subnet_id                           = module.network[0].snetAppOutbound_id
+  private_dns_zone_ids                = [module.privateDnsZoneApp[0].privateDnsZoneResourceId]
+  private_dns_zone_name               = module.privateDnsZoneApp[0].privateDnsZoneName
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString

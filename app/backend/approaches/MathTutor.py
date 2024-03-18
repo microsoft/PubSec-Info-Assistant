@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 #Turn warnings off
+from st_pages import Page, show_pages, add_page_title
 import warnings
 warnings.filterwarnings('ignore')
 import os
@@ -288,6 +289,14 @@ hide_menu_style = """
         </style>
         """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
+
+show_pages(
+    [
+        Page("approaches/MathTutor.py", "Math Tutor", "🏠"),
+        Page("approaches/AskData.py", "Csv Uploader", ":books:"),
+    ]
+)
+
 
 with st.form('myform'):
     question = st.text_input('Enter question:', '')

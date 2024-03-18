@@ -63,6 +63,21 @@ load_dotenv()
 
 st.set_page_config(page_title='🔗 Ask the Data App')
 st.title('📈 Ask the Data App')
+st.markdown(
+    r"""
+    <style>
+    .stDeployButton {
+            visibility: hidden;
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
+hide_menu_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        </style>
+        """
+st.markdown(hide_menu_style, unsafe_allow_html=True)
 uploaded_file = st.file_uploader('Upload a CSV file', type=['csv'])
 
 

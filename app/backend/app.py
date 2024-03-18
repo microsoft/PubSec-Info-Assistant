@@ -253,6 +253,7 @@ chat_approaches = {
 #run streamlit app
 #print("URI: " + ENV["STREAMLIT_HOST_URI"])
 #subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", "127.0.0.1", "--server.port=8051"])
+subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ENV["STREAMLIT_HOST_URI"], "--server.port=8080"])
 
 # Create API
 app = FastAPI(

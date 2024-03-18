@@ -6,6 +6,7 @@ import { animated, useSpring } from "@react-spring/web";
 
 import styles from "./Answer.module.css";
 import { AnswerIcon } from "./AnswerIcon";
+import { Approaches } from "../../api";
 
 export const AnswerLoading = () => {
     const animatedStyles = useSpring({
@@ -16,7 +17,7 @@ export const AnswerLoading = () => {
     return (
         <animated.div style={{ ...animatedStyles }}>
             <Stack className={styles.answerContainer} verticalAlign="space-between">
-                <AnswerIcon />
+                <AnswerIcon approach={Approaches.GPTDirect}/>
                 <Stack.Item grow>
                     <p className={styles.answerText}>
                         Generating answer

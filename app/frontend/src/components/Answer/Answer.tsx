@@ -2,12 +2,13 @@
 // Licensed under the MIT license.
 
 import { useMemo } from "react";
-import { Stack, IconButton, Icon } from "@fluentui/react";
+import { Stack, IconButton } from "@fluentui/react";
+import { ShieldCheckmark20Regular } from '@fluentui/react-icons';
 import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
 
-import { AskResponse, getCitationFilePath } from "../../api";
+import { Approaches, AskResponse, getCitationFilePath } from "../../api";
 import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { RAIPanel } from "../RAIPanel";
@@ -17,9 +18,9 @@ interface Props {
     isSelected?: boolean;
     onCitationClicked: (filePath: string, sourcePath: string, pageNumber: string) => void;
     onThoughtProcessClicked: () => void;
-    onBingSearchClicked: () => void;
+    onWebSearchClicked: () => void;
     onRagSearchClicked: () => void;
-    onBingCompareClicked: () => void;
+    onWebCompareClicked: () => void;
     onRagCompareClicked: () => void;
     onSupportingContentClicked: () => void;
     onFollowupQuestionClicked?: (question: string) => void;
@@ -33,9 +34,9 @@ export const Answer = ({
     isSelected,
     onCitationClicked,
     onThoughtProcessClicked,
-    onBingSearchClicked,
+    onWebSearchClicked,
     onRagSearchClicked,
-    onBingCompareClicked,
+    onWebCompareClicked,
     onRagCompareClicked,
     onSupportingContentClicked,
     onFollowupQuestionClicked,
@@ -43,15 +44,18 @@ export const Answer = ({
     onAdjustClick,
     onRegenerateClick
 }: Props) => {
-    const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.source, answer.citation_lookup, onCitationClicked), [answer]);
+    const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.citation_lookup, onCitationClicked), [answer]);
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
     return (
-        <Stack className={`${answer.comparative ? styles.comparativeAnswerContainer : (answer.source === 'bing' ? styles.bingAnswerContainer : styles.answerContainer)} ${isSelected && styles.selected}`} verticalAlign="space-between">
+        <Stack className={`${answer.approach == Approaches.ReadRetrieveRead ? styles.answerContainerWork : 
+                            answer.approach == Approaches.ChatWebRetrieveRead ? styles.answerContainerWeb :
+                            answer.approach == Approaches.CompareWorkWithWeb || answer.approach == Approaches.CompareWebWithWork ? styles.answerContainerCompare :
+                            styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
             <Stack.Item>
                 <Stack horizontal horizontalAlign="space-between">
-                    <AnswerIcon source={answer.source} />
+                    <AnswerIcon approach={answer.approach} />
                     <div>
                         <IconButton
                             style={{ color: "black" }}
@@ -61,7 +65,7 @@ export const Answer = ({
                             onClick={() => onThoughtProcessClicked()}
                             disabled={!answer.thoughts}
                         />
-                        {answer.source !== 'bing' && !answer.comparative &&
+                        {answer.approach == Approaches.ReadRetrieveRead &&
                             <IconButton
                                 style={{ color: "black" }}
                                 iconProps={{ iconName: "ClipboardList" }}
@@ -76,9 +80,9 @@ export const Answer = ({
             </Stack.Item>
 
             <Stack.Item grow>
-                {answer.source === 'bing' &&
-                    <div className={styles.warningText}>
-                        ****Warning: This response is from the internet using Bing****
+                {(answer.approach == Approaches.ChatWebRetrieveRead || answer.approach == Approaches.CompareWorkWithWeb) &&
+                    <div className={styles.protectedBanner}>
+                        <ShieldCheckmark20Regular></ShieldCheckmark20Regular>Your personal and company data are protected
                     </div>
                 }
                 <div className={styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div>
@@ -91,15 +95,23 @@ export const Answer = ({
                         {parsedAnswer.citations.map((x, i) => {
                             const path = getCitationFilePath(x);
                             return (
-                                <a key={i} className={styles.citation} title={x} onClick={() => onCitationClicked(path, (parsedAnswer.sourceFiles as any)[x], (parsedAnswer.pageNumbers as any)[x])}>
+                                (parsedAnswer.approach == Approaches.ChatWebRetrieveRead || parsedAnswer.approach == Approaches.CompareWorkWithWeb) ? 
+                                    <a key={i} className={parsedAnswer.approach == Approaches.ChatWebRetrieveRead ? styles.citationWeb : styles.citationCompare} 
+                                    title={x} href={'https://'+ x} target="_blank" rel="noopener noreferrer">
                                     {`${++i}. ${x}`}
+                                    </a>
+                                 : 
+                                 <a key={i} className={parsedAnswer.approach == Approaches.ReadRetrieveRead ? styles.citationWork : styles.citationCompare} 
+                                 title={x} onClick={() => onCitationClicked(path, (parsedAnswer.sourceFiles as any)[x], (parsedAnswer.pageNumbers as any)[x])}>
+                                 {`${++i}. ${x}`}
                                 </a>
                             );
                         })}
                     </Stack>
                 </Stack.Item>
+                
             )}
-
+            
             {!!parsedAnswer.followupQuestions.length && showFollowupQuestions && onFollowupQuestionClicked && (
                 <Stack.Item>
                     <Stack horizontal wrap className={`${!!parsedAnswer.citations.length ? styles.followupQuestionsList : ""}`} tokens={{ childrenGap: 6 }}>
@@ -114,8 +126,11 @@ export const Answer = ({
                     </Stack>
                 </Stack.Item>
             )}
+            <Stack.Item>
+                <div className={styles.raiwarning}>AI-generated content may be incorrect</div>
+            </Stack.Item>
             <Stack.Item align="center">
-                <RAIPanel source={answer.source} comparative={answer.comparative} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onBingSearchClicked={onBingSearchClicked} onBingCompareClicked={onBingCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
+                <RAIPanel approach={answer.approach} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onWebSearchClicked={onWebSearchClicked} onWebCompareClicked={onWebCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
             </Stack.Item>
         </Stack>
     );

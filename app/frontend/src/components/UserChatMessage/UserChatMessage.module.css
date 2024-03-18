@@ -9,10 +9,30 @@
     margin-left: auto;
 }
 
-.message {
+.messagework {
     padding: 20px;
-    background: #e8ebfa;
+    background: linear-gradient(130deg, #2870EA 20%, #1B4AEF 77.5%);
     border-radius: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
     outline: transparent solid 1px;
+}
+
+.messageweb {
+    padding: 20px;
+    background: linear-gradient(130deg, #39b468 20%, #188d45 77.5%);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: transparent solid 1px;
+}
+
+.messagecompare {
+    padding: 20px;
+    background: linear-gradient(130deg, #d68436 20%, #ce7b2e 77.5%);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: transparent solid 1px;
+}
+
+.userMessage {
+    color: white;
 }

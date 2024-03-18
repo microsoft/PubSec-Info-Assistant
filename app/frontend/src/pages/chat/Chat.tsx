@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator, Icon } from "@fluentui/react";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator } from "@fluentui/react";
 import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
 import { ITag } from '@fluentui/react/lib/Pickers';
 
@@ -21,36 +21,18 @@ import { InfoButton } from "../../components/InfoButton";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
-import { ApproachesButtonGroup } from "../../components/ApproachesButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
-import { ToggleContext } from '../../components/Title/Toggle';
 import React from "react";
 
 const Chat = () => {
-    const { toggle } = React.useContext(ToggleContext);
-    React.useEffect(() => {
-        if (toggle === 'Work') {
-         clearChat();
-         setWebWorkspace(false);
-        }else {
-         clearChat();
-         setWebWorkspace(true);
-        }
-    }, [toggle]);
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
-    const [promptTemplate, setPromptTemplate] = useState<string>("");
     const [retrieveCount, setRetrieveCount] = useState<number>(5);
-    const [useSemanticRanker, setUseSemanticRanker] = useState<boolean>(true);
-    const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
-    const [excludeCategory, setExcludeCategory] = useState<string>("");
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
-    const [useBypassRAG, setUseByPassRAG] = useState<boolean>(false);
     const [userPersona, setUserPersona] = useState<string>("analyst");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
-    const [aiPersona, setAiPersona] = useState<string>("");
     // Setting responseLength to 2048 by default, this will effect the default display of the ResponseLengthButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
@@ -61,17 +43,13 @@ const Chat = () => {
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
-    // Setting Approaches to 2 by default, this will effect the default display of the ApproachesButtonGroup below.
-    // It must match a valid value of one of the buttons in the ApproachesButtonGroup.tsx file.
-    // If you update the default value here, you must also update the default value in the onApproachChange method.
-    const [approach, setApproach] = useState<number>(Approaches.ReadRetrieveRead);
+    const [defaultApproach, setApproach] = useState<number>(Approaches.ReadRetrieveRead);
+    const [activeApproach, setActiveApproach] = useState<number>(Approaches.ReadRetrieveRead);
 
     const lastQuestionRef = useRef<string>("");
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [isBingPrompt, setBingPrompt] = useState<boolean>(false);
-    const [isWebWorkspace, setWebWorkspace] = useState<boolean>(false);
     const [error, setError] = useState<unknown>();
 
     const [activeCitation, setActiveCitation] = useState<string>();
@@ -84,8 +62,9 @@ const Chat = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
 
-    const makeApiRequest = async (question: string, compare: boolean) => {
+    const makeApiRequest = async (question: string, approach: Approaches) => {
         lastQuestionRef.current = question;
+        setActiveApproach(approach);
 
         error && setError(undefined);
         setIsLoading(true);
@@ -96,17 +75,17 @@ const Chat = () => {
             const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
             const request: ChatRequest = {
                 history: [...history, { user: question, bot: undefined }],
-                approach: compare ? Approaches.BingRRRCompare :Approaches.ReadRetrieveRead,
+                approach: approach,
                 overrides: {
-                    promptTemplate: promptTemplate.length === 0 ? undefined : promptTemplate,
-                    excludeCategory: excludeCategory.length === 0 ? undefined : excludeCategory,
+                    promptTemplate: undefined,
+                    excludeCategory: undefined,
                     top: retrieveCount,
-                    semanticRanker: useSemanticRanker,
-                    semanticCaptions: useSemanticCaptions,
+                    semanticRanker: true,
+                    semanticCaptions: false,
                     suggestFollowupQuestions: useSuggestFollowupQuestions,
                     userPersona: userPersona,
                     systemPersona: systemPersona,
-                    aiPersona: aiPersona,
+                    aiPersona: "",
                     responseLength: responseLength,
                     responseTemp: responseTemp,
                     selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
@@ -114,48 +93,12 @@ const Chat = () => {
                 }
             };
             const result = await chatApi(request);
-            result.source = "chat";
-            result.comparative = compare;
+            result.approach = approach;
             setAnswers([...answers, [question, result]]);
         } catch (e) {
             setError(e);
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const makeBingRequest = async (question: string, compare: boolean) => {
-        lastQuestionRef.current = question;
-
-        error && setError(undefined);
-        setIsLoading(true);
-        setBingPrompt(true);
-        setActiveCitation(undefined);
-        setActiveAnalysisPanelTab(undefined);
-
-        try {
-            const history: ChatTurn[] = answers.map(a => ({ user: a[0], bot: a[1].answer }));
-            const request: ChatRequest = {
-                history: [...history, { user: question, bot: undefined }],
-                approach: compare ? Approaches.BingSearchCompare :Approaches.BingSearch,
-                overrides: {
-                    suggestFollowupQuestions: useSuggestFollowupQuestions,
-                    userPersona: userPersona,
-                    systemPersona: systemPersona,
-                    aiPersona: aiPersona,
-                    responseLength: responseLength,
-                    responseTemp: responseTemp
-                }
-            };
-            const result = await chatApi(request);
-            result.source = "bing";
-            result.comparative = compare;
-            setAnswers([...answers, [question, result]]);
-        } catch (e) {
-            setError(e);
-        } finally {
-            setIsLoading(false);
-            setBingPrompt(false);
         }
     };
 
@@ -298,7 +241,7 @@ const Chat = () => {
     };
 
     const onExampleClicked = (example: string) => {
-        isWebWorkspace ? makeBingRequest(example, false) : makeApiRequest(example, false);
+        makeApiRequest(example, defaultApproach);
     };
 
     const onShowCitation = (citation: string, citationSourceFile: string, citationSourceFilePageNumber: string, index: number) => {
@@ -389,7 +332,7 @@ const Chat = () => {
                                 <div key={index}>
                                     <UserChatMessage
                                         message={answer[0]}
-                                        iconName={answer[1].source === "bing" ? "BingLogo" : undefined}
+                                        approach={answer[1].approach}
                                     />
                                     <div className={styles.chatMessageGpt}>
                                         <Answer
@@ -399,14 +342,14 @@ const Chat = () => {
                                             onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
                                             onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab, index)}
                                             onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
-                                            onFollowupQuestionClicked={q => answer[1].source === "bing" ? makeBingRequest(q, false) : makeApiRequest(q, false)}
+                                            onFollowupQuestionClicked={q => makeApiRequest(q, answer[1].approach)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                                            onRegenerateClick={() => answer[1].source === "bing" ? makeBingRequest(answers[index][0], false) : makeApiRequest(answers[index][0], false)}
-                                            onBingSearchClicked={() => makeBingRequest(answers[index][0], false)}
-                                            onBingCompareClicked={() => makeBingRequest(answers[index][0], true)}
-                                            onRagCompareClicked={() => makeApiRequest(answers[index][0], true)}
-                                            onRagSearchClicked={() => makeApiRequest(answers[index][0], false)}
+                                            onRegenerateClick={() => makeApiRequest(answers[index][0], answer[1].approach)}
+                                            onWebSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ChatWebRetrieveRead)}
+                                            onWebCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWorkWithWeb)}
+                                            onRagCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWebWithWork)}
+                                            onRagSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ReadRetrieveRead)}
                                         />
                                     </div>
                                 </div>
@@ -415,7 +358,7 @@ const Chat = () => {
                                 <>
                                     <UserChatMessage
                                         message={lastQuestionRef.current}
-                                        iconName={isBingPrompt ? "BingLogo" : undefined}
+                                        approach={activeApproach}
                                     />
                                     <div className={styles.chatMessageGptMinWidth}>
                                         <AnswerLoading />
@@ -424,9 +367,9 @@ const Chat = () => {
                             )}
                             {error ? (
                                 <>
-                                    <UserChatMessage message={lastQuestionRef.current} />
+                                    <UserChatMessage message={lastQuestionRef.current} approach={activeApproach}/>
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, false)} />
+                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach)} />
                                     </div>
                                 </>
                             ) : null}
@@ -439,12 +382,12 @@ const Chat = () => {
                             clearOnSend
                             placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
                             disabled={isLoading}
-                            onSend={question => isWebWorkspace ? makeBingRequest(question, false) : makeApiRequest(question, false)}
+                            onSend={question => makeApiRequest(question, defaultApproach)}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
                             onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
                             showClearChat={true}
                             onClearClick={clearChat}
-                            onRegenerateClick={() => isWebWorkspace ? makeBingRequest(lastQuestionRef.current, false) : makeApiRequest(lastQuestionRef.current, false)}
+                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current, defaultApproach)}
                         />
                     </div>
                 </div>

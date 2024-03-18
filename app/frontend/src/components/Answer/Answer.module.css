@@ -9,20 +9,28 @@
     outline: transparent solid 1px;
 }
 
-.bingAnswerContainer {
+.answerContainerWork {
     padding: 20px;
-    background: rgb(180, 199, 221);
+    background: rgb(249, 249, 249);
     border-radius: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-    outline: transparent solid 1px;
+    outline: #1B4AEF solid 1px;
 }
 
-.comparativeAnswerContainer {
+.answerContainerWeb {
     padding: 20px;
-    background: rgb(183, 199, 188);
+    background: rgb(249, 249, 249);
     border-radius: 8px;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
-    outline: transparent solid 1px;
+    outline: #188d45 solid 1px;
+}
+
+.answerContainerCompare {
+    padding: 20px;
+    background: rgb(249, 249, 249);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: #ce7b2e solid 1px;
 }
 
 .warningText {
@@ -32,8 +40,31 @@
     text-align: center;
 }
 
-.answerLogo {
-    font-size: 28px;
+.answerLogoWeb {
+    font-size: 22px;
+    color: #188d45;
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoWork {
+    font-size: 22px;
+    color: #1B4AEF;
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoCompare {
+    font-size: 22px;
+    color: #ce7b2e;
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
 }
 
 .answerText {
@@ -55,7 +86,7 @@
     line-height: 24px;
 }
 
-.citation {
+.citationWork {
     font-weight: 500;
     line-height: 24px;
     text-align: center;
@@ -67,7 +98,39 @@
     cursor: pointer;
 }
 
-.citation:hover {
+.citationWork:hover {
+    text-decoration: underline;
+}
+
+.citationWeb {
+    font-weight: 500;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    padding: 0px 8px;
+    background: #d1fad8;
+    color: #123bb6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.citationWeb:hover {
+    text-decoration: underline;
+}
+
+.citationCompare {
+    font-weight: 500;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    padding: 0px 8px;
+    background: #fae3d1;
+    color: #123bb6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.citationCompare:hover {
     text-decoration: underline;
 }
 
@@ -148,4 +211,17 @@ sup {
 .loadingdots::after {
     content: "";
     animation: loading 1s infinite;
+}
+
+.raiwarning {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(133, 133, 133);
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }

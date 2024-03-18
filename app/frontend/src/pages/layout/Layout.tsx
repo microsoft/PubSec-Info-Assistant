@@ -12,16 +12,6 @@ import React from "react";
 import Switch from 'react-switch';
 
 const Layout = () => {
-    // const { toggle, setToggle } = React.useContext(ToggleContext);
-
-    // const handleToggle = () => {
-    //     setToggle(prevToggle => prevToggle === 'Work' ? 'Web' : 'Work');
-    // };
-    const { toggle, setToggle } = React.useContext(ToggleContext);
-
-    const handleToggle = () => {
-        setToggle((prevToggle) => (prevToggle === 'Work' ? 'Web' : 'Work'));
-    };
         return (
             <div className={styles.layout}>
                 <header className={styles.header} role={"banner"}>
@@ -47,25 +37,6 @@ const Layout = () => {
                         </nav>
                     </div>
                 </header>
-                <div className={styles.raibanner}>
-                    <div></div>
-                    <div className={styles.centered}>
-                        <span className={styles.raiwarning}>AI-generated content may be incorrect</span>
-                    </div>
-                    <div className={styles.right}>
-                        <Switch
-                            onChange={handleToggle}
-                            checked={toggle === 'Web'}
-                            uncheckedIcon={false}
-                            checkedIcon={false}
-                            onColor="#86d3ff"
-                            offColor="#ccc"
-                        />
-                        <label onClick={handleToggle} style={{ marginLeft: '10px', cursor: 'pointer' }}>
-                            {toggle === 'Work' ? 'Switch to Web' : 'Switch to Work'}
-                        </label>
-                    </div>
-                </div>
 
                 <Outlet />
 

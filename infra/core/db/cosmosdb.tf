@@ -79,7 +79,7 @@ resource "azurerm_key_vault_secret" "search_service_key" {
 
 resource "azurerm_private_endpoint" "cosmosPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
-  name                          = "${var.name}-private-endpoint[0]"
+  name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
   subnet_id                     = var.subnetResourceId
@@ -87,7 +87,7 @@ resource "azurerm_private_endpoint" "cosmosPrivateEndpoint" {
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_private_endpoint.cosmosPrivateEndpoint[count.index].id
+    private_connection_resource_id = azurerm_cosmosdb_account.cosmosdb_account.id
     is_manual_connection           = false
 
   }

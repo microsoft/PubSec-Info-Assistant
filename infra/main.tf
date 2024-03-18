@@ -257,7 +257,7 @@ module "enrichmentApp" {
   kind                                = "linux"
   reserved                            = true
   resourceGroupName                   = azurerm_resource_group.rg.name
-  storageAccountId                    = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${var.is_secure_mode ? module.storage[0].name : null}/services/queue/queues/${var.embeddingsQueue}"
+  storageAccountId                    = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
   scmDoBuildDuringDeployment          = true
   managedIdentity                     = true
   logAnalyticsWorkspaceResourceId     = module.logging.logAnalyticsId
@@ -504,8 +504,8 @@ module "functions" {
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
-  blobStorageAccountName                = module.storage[0].name
-  blobStorageAccountEndpoint            = module.storage[0].primary_endpoints
+  blobStorageAccountName                = module.storage.name
+  blobStorageAccountEndpoint            = module.storage.primary_endpoints
   blobStorageAccountOutputContainerName = var.contentContainerName
   blobStorageAccountUploadContainerName = var.uploadContainerName 
   blobStorageAccountLogContainerName    = var.functionLogsContainerName 
@@ -530,8 +530,8 @@ module "functions" {
   submitRequeueHideSeconds              = var.submitRequeueHideSeconds
   pollingBackoff                        = var.pollingBackoff
   maxReadAttempts                       = var.maxReadAttempts
-  enrichmentEndpoint                    = module.cognitiveServices[0].cognitiveServiceEndpoint
-  enrichmentName                        = module.cognitiveServices[0].cognitiveServicerAccountName
+  enrichmentEndpoint                    = module.cognitiveServices.cognitiveServiceEndpoint
+  enrichmentName                        = module.cognitiveServices.cognitiveServicerAccountName
   enrichmentLocation                    = var.location
   targetTranslationLanguage             = var.targetTranslationLanguage
   maxEnrichmentRequeueCount             = var.maxEnrichmentRequeueCount
@@ -539,7 +539,7 @@ module "functions" {
   enableDevCode                         = var.enableDevCode
   EMBEDDINGS_QUEUE                      = var.embeddingsQueue
   azureSearchIndex                      = var.searchIndexName
-  azureSearchServiceEndpoint            = var.is_secure_mode ? module.searchServices[0].endpoint : null
+  azureSearchServiceEndpoint            = module.searchServices.endpoint
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
   azure_ai_translation_domain           = var.azure_ai_translation_domain
@@ -691,13 +691,13 @@ module "kvModule" {
 }
 
 module "bingSearch" {
-  count                         = var.azure_environment == "AzureCloud" ? 1 : 0
-  source                        = "./core/ai/bingSearch"
-  name                          = "infoasst-bing-${random_string.random.result}"
-  resourceGroupName             = azurerm_resource_group.rg.name
-  tags                          = local.tags
-  sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+count                         = var.azure_environment == "AzureCloud" ? 1 : 0
+source                        = "./core/ai/bingSearch"
+name                          = "infoasst-bing-${random_string.random.result}"
+resourceGroupName             = azurerm_resource_group.rg.name
+tags                          = local.tags
+ sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
+arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

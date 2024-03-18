@@ -29,15 +29,15 @@ data "azurerm_search_service" "search" {
 
 resource "azurerm_private_endpoint" "searchPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
-  name                          = "${var.name}-private-endpoint[0]"
+  name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = var.subnet_id
+  subnet_id                     = var.subnetResourceId
   custom_network_interface_name = "'${var.name}-network-interface'"
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_private_endpoint.searchPrivateEndpoint[count.index].id
+    private_connection_resource_id = azurerm_search_service.search.id
     is_manual_connection           = false
 
   }

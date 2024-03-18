@@ -1,4 +1,4 @@
-resource "azurerm_cognitive_account" "account" {
+resource "azurerm_cognitive_account" "openaiAccount" {
   count               = var.useExistingAOAIService ? 0 : 1
   name                = var.name
   location            = var.location
@@ -16,16 +16,16 @@ resource "azurerm_cognitive_account" "account" {
 
 
     virtual_network_rules {
-      subnet_id = var.subnet_id
+      subnet_id = var.subnetResourceId
     }
   }
 
   tags = var.tags
 }
 
-resource "azurerm_private_endpoint" "private_endpoint" {
+resource "azurerm_private_endpoint" "openaiPrivateEndpoint" {
   count               = var.useExistingAOAIService ? 0 : var.is_secure_mode ? 1 : 0
-  name                = "private-endpoint-${azurerm_cognitive_account.account.name}"
+  name                = "${var.name}-private-endpoint"                 //"private-endpoint-${azurerm_cognitive_account.openaiAccount[0].name}"
   location            = var.location
   resource_group_name = var.resourceGroupName
   subnet_id           = var.subnetResourceId
@@ -33,7 +33,7 @@ resource "azurerm_private_endpoint" "private_endpoint" {
   private_service_connection {
     name                           = "cognitiveAccount"
     is_manual_connection           = false
-    private_connection_resource_id = azurerm_private_endpoint.private_endpoint[count.index].id
+    private_connection_resource_id = azurerm_cognitive_account.openaiAccount[count.index].id
 
   }
 
@@ -47,7 +47,7 @@ resource "azurerm_private_endpoint" "private_endpoint" {
 resource "azurerm_cognitive_deployment" "deployment" {
   count                = var.useExistingAOAIService ? 0 : length(var.deployments)
   name                 = var.deployments[count.index].name
-  cognitive_account_id = azurerm_cognitive_account.account[0].id
+  cognitive_account_id = azurerm_cognitive_account.openaiAccount[0].id
   rai_policy_name      = var.deployments[count.index].rai_policy_name
   model {
     format  = "OpenAI"
@@ -62,6 +62,6 @@ resource "azurerm_cognitive_deployment" "deployment" {
 
 resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {
   name         = "AZURE-OPENAI-SERVICE-KEY"
-  value        = var.useExistingAOAIService ? var.openaiServiceKey : azurerm_cognitive_account.account[0].primary_access_key
+  value        = var.useExistingAOAIService ? var.openaiServiceKey : azurerm_cognitive_account.openaiAccount[0].primary_access_key
   key_vault_id = var.keyVaultId
 }

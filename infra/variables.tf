@@ -48,6 +48,31 @@ variable "enableBingSafeSearch" {
   default = true
 }
 
+variable "enableWebChat" {
+  type    = bool
+  default = true
+}
+
+variable "enableUngroundedChat" {
+  type    = bool
+  default = false
+}
+
+variable "enableMathTutor" {
+  type    = bool
+  default = true
+}
+
+variable "enableCsvAgent" {
+  type    = bool
+  default = true
+}
+
+variable "enableSharePointConnector" {
+  type    = bool
+  default = false
+}
+
 ////
 // variables that can vary based on the Azure environment being targeted
 ////

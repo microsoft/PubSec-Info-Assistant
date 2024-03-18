@@ -167,11 +167,11 @@ output "AZURE_ENVIRONMENT" {
 }
 
 output "BING_SEARCH_ENDPOINT" {
-  value = var.azure_environment == "AzureCloud" ? module.bingSearch[0].endpoint : ""
+  value = var.enableWebChat ? module.bingSearch[0].endpoint : ""
 }
 
 output "BING_SEARCH_KEY" {
-  value = var.azure_environment == "AzureCloud" ? module.bingSearch[0].key : ""
+  value = var.enableWebChat ? module.bingSearch[0].key : ""
 }
 
 output "ENABLE_BING_SAFE_SEARCH" {

@@ -57,7 +57,7 @@ module "storage" {
   deleteRetentionPolicy = {
     days = 7
   }
-  containers            = ["content","website","upload","function","logs"]
+  containers            = ["content","website","upload","function","logs","config"]
   queueNames            = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
 }
 
@@ -171,10 +171,14 @@ module "backend" {
     APPLICATION_TITLE                       = var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
-    BING_SEARCH_ENDPOINT                    = var.azure_environment == "AzureCloud" ? module.bingSearch[0].endpoint : ""
-    BING_SEARCH_KEY                         = var.azure_environment == "AzureCloud" ? module.bingSearch[0].key : ""
+    BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
+    BING_SEARCH_KEY                         = var.enableWebChat ? module.bingSearch[0].key : ""
+    ENABLE_WEB_CHAT                         = var.enableWebChat
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
     STREAMLIT_HOST_URI                      = "https://${local.backend_name}.${var.azure_websites_domain}"
+    ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
+    ENABLE_MATH_TUTOR                       = var.enableMathTutor
+    ENABLE_CSV_AGENT                        = var.enableCsvAgent
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -261,7 +265,7 @@ module "cosmosdb" {
   logDatabaseName   = "statusdb"
   logContainerName  = "statuscontainer"
   resourceGroupName = azurerm_resource_group.rg.name
-  keyVaultId        = module.kvModule.keyVaultId 
+  keyVaultId        = module.kvModule.keyVaultId  
 }
 
 
@@ -332,6 +336,23 @@ module "functions" {
     module.storage,
     module.cosmosdb,
     module.kvModule
+  ]
+}
+
+module "sharepoint" {
+  count                               = var.enableSharePointConnector ? 1 : 0
+  source                              = "./core/sharepoint"
+  location                            = azurerm_resource_group.rg.location
+  resource_group_name                 = azurerm_resource_group.rg.name
+  resource_group_id                   = azurerm_resource_group.rg.id
+  subscription_id                     = data.azurerm_client_config.current.subscription_id
+  storage_account_name                = module.storage.name
+  storage_access_key                  = module.storage.storage_account_access_key
+  random_string                       = random_string.random.result
+  tags                                = local.tags
+
+  depends_on = [
+    module.storage
   ]
 }
 
@@ -457,7 +478,7 @@ module "kvModule" {
 }
 
 module "bingSearch" {
-  count                         = var.azure_environment == "AzureCloud" ? 1 : 0
+  count                         = var.enableWebChat ? 1 : 0
   source                        = "./core/ai/bingSearch"
   name                          = "infoasst-bing-${random_string.random.result}"
   resourceGroupName             = azurerm_resource_group.rg.name

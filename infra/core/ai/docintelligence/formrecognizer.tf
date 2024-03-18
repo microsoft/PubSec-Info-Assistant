@@ -16,9 +16,9 @@ resource "azurerm_key_vault_secret" "docIntelligenceKey" {
 }
 
 
-resource "azurerm_private_endpoint" "private_endpoint" {
+resource "azurerm_private_endpoint" "formPrivateEndpoint" {
   count               = var.is_secure_mode ? 1 : 0
-  name                = "${var.name}-private-endpoint"
+  name                = "${var.name}-private-endpoint[0]"
   location            = var.location
   resource_group_name = var.resourceGroupName
   subnet_id           = var.subnet_id
@@ -26,13 +26,13 @@ resource "azurerm_private_endpoint" "private_endpoint" {
   private_service_connection {
     name                           = "cognitiveAccount"
     is_manual_connection           = false
-    private_connection_resource_id = azurerm_private_endpoint.private_endpoint[0].id
+    private_connection_resource_id = azurerm_private_endpoint.formPrivateEndpoint[0].id
 
   }
-}
 
-resource "azurerm_private_dns_zone" "dns-zone" {
-  count               = var.is_secure_mode ? 1 : 0
-  name                = "${var.name}-private-dns-zone-group"
-  resource_group_name = var.resourceGroupName
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+    
+  }
 }

@@ -81,8 +81,10 @@ variable "subnet_id" {
   default = ""
 }
 
-variable "privateDnsZoneName" {
-  type = string
-  default = ""
+variable "private_dns_zone_ids" {
+  type = set(string)
 }
 
+variable "subnetResourceId" {
+  type = string
+}

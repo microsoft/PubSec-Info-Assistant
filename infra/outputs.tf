@@ -20,11 +20,11 @@ output "AZURE_SEARCH_SERVICE_ENDPOINT" {
 }
 
 output "AZURE_STORAGE_ACCOUNT" {
-  value = module.storage.name
+  value = module.storage[0].name
 }
 
 output "AZURE_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage[0].primary_endpoints
 }
 
 output "AZURE_STORAGE_CONTAINER" {
@@ -128,7 +128,7 @@ output "AZURE_SUBSCRIPTION_ID" {
 }
 
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage[0].primary_endpoints
 }
 
 output "EMBEDDING_VECTOR_SIZE" {

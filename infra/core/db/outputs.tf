@@ -17,3 +17,7 @@ output "CosmosDBTagsDatabaseName" {
 output "CosmosDBTagsContainerName" {
   value = azurerm_cosmosdb_sql_container.tag_container.name
 }
+
+output "privateEndpointId" {
+  value = var.is_secure_mode ? azurerm_private_endpoint.cosmosPrivateEndpoint[0].id : null
+}

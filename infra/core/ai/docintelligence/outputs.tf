@@ -5,3 +5,7 @@ output "formRecognizerAccountName" {
 output "formRecognizerAccountEndpoint" {
   value = azurerm_cognitive_account.formRecognizerAccount.endpoint
 }
+
+output "privateEndpointId" {
+  value = var.is_secure_mode ? azurerm_private_endpoint.formPrivateEndpoint[0].id : null
+}

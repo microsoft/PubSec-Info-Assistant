@@ -27,8 +27,9 @@ data "azurerm_search_service" "search" {
   resource_group_name = var.resourceGroupName
 }
 
-resource "azurerm_private_endpoint" "private_endpoint" {
-  name                          = "${var.name}-private-endpoint"
+resource "azurerm_private_endpoint" "searchPrivateEndpoint" {
+  count                         = var.is_secure_mode ? 1 : 0
+  name                          = "${var.name}-private-endpoint[0]"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
   subnet_id                     = var.subnet_id
@@ -36,15 +37,15 @@ resource "azurerm_private_endpoint" "private_endpoint" {
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_search_service.search.id
+    private_connection_resource_id = azurerm_private_endpoint.searchPrivateEndpoint[count.index].id
     is_manual_connection           = false
 
   }
+
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
 }
 
-resource "azurerm_private_dns_zone" "searchServiceDnsZone" {
-  name                = "${var.name}-private-dns-zone-group"
-  resource_group_name = var.resourceGroupName
-
-}
 

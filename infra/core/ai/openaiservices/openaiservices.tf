@@ -28,12 +28,18 @@ resource "azurerm_private_endpoint" "private_endpoint" {
   name                = "private-endpoint-${azurerm_cognitive_account.account[0].name}"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.subnet_id
+  subnet_id           = var.subnetResourceId
 
   private_service_connection {
     name                           = "cognitiveAccount"
     is_manual_connection           = false
     private_connection_resource_id = azurerm_private_endpoint.private_endpoint[count.index].id
+
+  }
+
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
 
   }
 }
@@ -52,12 +58,6 @@ resource "azurerm_cognitive_deployment" "deployment" {
     type     = "Standard"
     capacity = var.deployments[count.index].sku_capacity
   }
-}
-
-resource "azurerm_private_dns_zone" "dns-zone" {
-  count               = var.useExistingAOAIService ? 0 : var.is_secure_mode ? 1 : 0
-  name                = "${var.name}-private-dns-zone-group"
-  resource_group_name = var.resourceGroupName
 }
 
 resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 set -e
 
@@ -54,7 +57,7 @@ trap finish EXIT
 
 
 
-if [ -n "${TF_IN_AUTOMATION}" ]
+if [ -n "${IN_AUTOMATION}" ]
 then
     terraform init -backend-config="resource_group_name=$TF_BACKEND_RESOURCE_GROUP" \
         -backend-config="storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT" \

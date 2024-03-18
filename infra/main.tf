@@ -209,7 +209,7 @@ module "logging" {
 
 module "storage" {
   source = "./core/storage"
-  count  = var.is_secure_mode ? 1 : 0
+  is_secure_mode       = var.is_secure_mode
 
   name                  = var.storageAccountName != "" ? var.storageAccountName : "infoasststore${random_string.random.result}"
   location              = var.location
@@ -222,8 +222,8 @@ module "storage" {
   deleteRetentionPolicy = {
     days = 7
   }
-  containers       = ["content", "website", "upload", "function", "logs"]
-  queueNames       = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
+  containers            = ["content","website","upload","function","logs","config"]
+  queueNames            = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
   subnetResourceId = module.network[0].snetStorageAccount_id
   private_dns_zone_ids = [
     module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
@@ -258,28 +258,27 @@ module "enrichmentApp" {
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
   appSettings = {
-    EMBEDDINGS_QUEUE                       = var.embeddingsQueue
-    LOG_LEVEL                              = "DEBUG"
-    DEQUEUE_MESSAGE_BATCH_SIZE             = 1
-    AZURE_BLOB_STORAGE_ACCOUNT             = var.is_secure_mode ? module.storage[0].name : null
-    AZURE_BLOB_STORAGE_CONTAINER           = var.contentContainerName
-    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER    = var.uploadContainerName
-    AZURE_BLOB_STORAGE_ENDPOINT            = var.is_secure_mode ? module.storage[0].primary_endpoints : null
-    COSMOSDB_URL                           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBEndpointURL : null
-    COSMOSDB_LOG_DATABASE_NAME             = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogDatabaseName : null
-    COSMOSDB_LOG_CONTAINER_NAME            = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogContainerName : null
-    COSMOSDB_TAGS_DATABASE_NAME            = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsDatabaseName : null
-    COSMOSDB_TAGS_CONTAINER_NAME           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsContainerName : null
-    MAX_EMBEDDING_REQUEUE_COUNT            = 5
-    EMBEDDING_REQUEUE_BACKOFF              = 60
-    AZURE_OPENAI_SERVICE                   = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
-    AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
-    AZURE_SEARCH_INDEX                     = var.searchIndexName
-    AZURE_SEARCH_SERVICE                   = module.searchServices[0].name
-    TARGET_EMBEDDINGS_MODEL                = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    EMBEDDING_VECTOR_SIZE                  = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
-    AZURE_SEARCH_SERVICE_ENDPOINT          = module.searchServices[0].endpoint
-    WEBSITES_CONTAINER_START_TIME_LIMIT    = 600
+    EMBEDDINGS_QUEUE                        = var.embeddingsQueue
+    LOG_LEVEL                               = "DEBUG"
+    DEQUEUE_MESSAGE_BATCH_SIZE              = 1
+    AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
+    AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
+    MAX_EMBEDDING_REQUEUE_COUNT             = 5
+    EMBEDDING_REQUEUE_BACKOFF               = 60
+    AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME  = var.azureOpenAIEmbeddingDeploymentName
+    AZURE_SEARCH_INDEX                      = var.searchIndexName
+    AZURE_SEARCH_SERVICE                    = module.searchServices.name
+    TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    EMBEDDING_VECTOR_SIZE                   = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
+    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    WEBSITES_CONTAINER_START_TIME_LIMIT     = 600
   }
   depends_on = [module.kvModule]
 }
@@ -311,44 +310,42 @@ module "backend" {
   tenantId                            = var.tenantId
 
   appSettings = {
-    APPLICATIONINSIGHTS_CONNECTION_STRING = module.logging.applicationInsightsConnectionString
-    AZURE_BLOB_STORAGE_ACCOUNT            = var.is_secure_mode ? module.storage[0].name : null
-    AZURE_BLOB_STORAGE_ENDPOINT           = var.is_secure_mode ? module.storage[0].name : null.primary_endpoints
-    AZURE_BLOB_STORAGE_CONTAINER          = var.contentContainerName
-    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER   = var.uploadContainerName
-    AZURE_OPENAI_SERVICE                  = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
-    AZURE_OPENAI_RESOURCE_GROUP           = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-    AZURE_OPENAI_ENDPOINT                 = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices[0].endpoint
-    AZURE_OPENAI_AUTHORITY_HOST           = var.azure_openai_authority_host
-    AZURE_ENDPOINTS_MANAGEMENT_API        = var.azure_endpoints_management_api
-    AZURE_SEARCH_INDEX                    = var.searchIndexName
-    AZURE_SEARCH_SERVICE                  = var.is_secure_mode ? module.searchServices[0].name : null
-    AZURE_SEARCH_SERVICE_ENDPOINT         = var.is_secure_mode ? module.searchServices[0].endpoint : null
-    AZURE_OPENAI_CHATGPT_DEPLOYMENT       = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-    AZURE_OPENAI_CHATGPT_MODEL_NAME       = var.chatGptModelName
-    AZURE_OPENAI_CHATGPT_MODEL_VERSION    = var.chatGptModelVersion
-    USE_AZURE_OPENAI_EMBEDDINGS           = var.useAzureOpenAIEmbeddings
-    EMBEDDING_DEPLOYMENT_NAME             = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
-    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME    = var.azureOpenAIEmbeddingsModelName
-    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION = var.azureOpenAIEmbeddingsModelVersion
-    APPINSIGHTS_INSTRUMENTATIONKEY        = module.logging.applicationInsightsInstrumentationKey
-    COSMOSDB_URL                          = var.is_secure_mode ? module.cosmosdb[0].CosmosDBEndpointURL : null
-    COSMOSDB_LOG_DATABASE_NAME            = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogDatabaseName : null
-    COSMOSDB_LOG_CONTAINER_NAME           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBLogContainerName : null
-    COSMOSDB_TAGS_DATABASE_NAME           = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsDatabaseName : null
-    COSMOSDB_TAGS_CONTAINER_NAME          = var.is_secure_mode ? module.cosmosdb[0].CosmosDBTagsContainerName : null
-    QUERY_TERM_LANGUAGE                   = var.queryTermLanguage
-    AZURE_CLIENT_ID                       = module.entraObjects.azure_ad_mgmt_app_client_id
-    AZURE_CLIENT_SECRET                   = module.entraObjects.azure_ad_mgmt_app_secret
-    AZURE_TENANT_ID                       = var.tenantId
-    AZURE_SUBSCRIPTION_ID                 = data.azurerm_client_config.current.subscription_id
-    CHAT_WARNING_BANNER_TEXT              = var.chatWarningBannerText
-    TARGET_EMBEDDINGS_MODEL               = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    ENRICHMENT_APPSERVICE_URL             = module.enrichmentApp.uri
-    ENRICHMENT_ENDPOINT                   = module.cognitiveServices[0].cognitiveServiceEndpoint
-    APPLICATION_TITLE                     = var.applicationtitle
-    AZURE_AI_TRANSLATION_DOMAIN           = var.azure_ai_translation_domain
-    USE_SEMANTIC_RERANKER                 = var.use_semantic_reranker
+    APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
+    AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
+    AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_RESOURCE_GROUP             = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
+    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
+    AZURE_ARM_MANAGEMENT_API                = var.azure_arm_management_api
+    AZURE_SEARCH_INDEX                      = var.searchIndexName
+    AZURE_SEARCH_SERVICE                    = module.searchServices.name
+    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT         = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
+    AZURE_OPENAI_CHATGPT_MODEL_NAME         = var.chatGptModelName
+    AZURE_OPENAI_CHATGPT_MODEL_VERSION      = var.chatGptModelVersion
+    USE_AZURE_OPENAI_EMBEDDINGS             = var.useAzureOpenAIEmbeddings
+    EMBEDDING_DEPLOYMENT_NAME               = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME      = var.azureOpenAIEmbeddingsModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION   = var.azureOpenAIEmbeddingsModelVersion
+    APPINSIGHTS_INSTRUMENTATIONKEY          = module.logging.applicationInsightsInstrumentationKey
+    COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
+    QUERY_TERM_LANGUAGE                     = var.queryTermLanguage
+    AZURE_SUBSCRIPTION_ID                   = data.azurerm_client_config.current.subscription_id
+    CHAT_WARNING_BANNER_TEXT                = var.chatWarningBannerText
+    TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    ENRICHMENT_APPSERVICE_URL               = module.enrichmentApp.uri
+    ENRICHMENT_ENDPOINT                     = module.cognitiveServices.cognitiveServiceEndpoint
+    APPLICATION_TITLE                       = var.applicationtitle
+    AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
+    USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
+    BING_SEARCH_ENDPOINT                    = var.azure_environment == "AzureCloud" ? module.bingSearch[0].endpoint : ""
+    BING_SEARCH_KEY                         = var.azure_environment == "AzureCloud" ? module.bingSearch[0].key : ""
+    ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -359,7 +356,7 @@ module "backend" {
 
 module "openaiServices" {
   source = "./core/ai/openaiservices"
-  count  = var.is_secure_mode ? 1 : 0
+  is_secure_mode       = var.is_secure_mode
 
   name                   = var.openAIServiceName != "" ? var.openAIServiceName : "infoasst-aoai-${random_string.random.result}"
   location               = var.location
@@ -402,8 +399,7 @@ module "openaiServices" {
 
 module "formrecognizer" {
   source = "./core/ai/docintelligence"
-  count  = var.is_secure_mode ? 1 : 0
-
+  is_secure_mode       = var.is_secure_mode
   name                 = "infoasst-fr-${random_string.random.result}"
   location             = var.location
   tags                 = local.tags
@@ -419,7 +415,7 @@ module "formrecognizer" {
 
 module "cognitiveServices" {
   source = "./core/ai/cogServices"
-  count  = var.is_secure_mode ? 1 : 0
+  is_secure_mode       = var.is_secure_mode
 
   name                 = "infoasst-enrichment-cog-${random_string.random.result}"
   location             = var.location
@@ -434,34 +430,34 @@ module "cognitiveServices" {
 
 module "searchServices" {
   source = "./core/search"
-  count  = var.is_secure_mode ? 1 : 0
+  is_secure_mode       = var.is_secure_mode
 
   name     = var.searchServicesName != "" ? var.searchServicesName : "infoasst-search-${random_string.random.result}"
   location = var.location
   tags     = local.tags
   # aad_auth_failure_mode = "http401WithBearerChallenge"
   # sku_name = var.searchServicesSkuName
-  semanticSearch       = "free"
+  semanticSearch = var.use_semantic_reranker ? "free" : null
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
   azure_search_domain  = var.azure_search_domain
   subnetResourceId     = module.network[0].snetAzureAi_id
   private_dns_zone_ids = [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId]
+  
+
 }
 
 // Create the CosmosDB Service
 
 module "cosmosdb" {
   source = "./core/db"
-  count  = var.is_secure_mode ? 1 : 0
+  is_secure_mode       = var.is_secure_mode
 
   name                 = "infoasst-cosmos-${random_string.random.result}"
   location             = var.location
   tags                 = local.tags
   logDatabaseName      = "statusdb"
   logContainerName     = "statuscontainer"
-  tagDatabaseName      = "tagdb"
-  tagContainerName     = "tagcontainer"
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
   subnetResourceId     = module.network[0].snetCosmosDb_id
@@ -497,14 +493,12 @@ module "functions" {
   blobStorageAccountName                = module.storage[0].name
   blobStorageAccountEndpoint            = module.storage[0].primary_endpoints
   blobStorageAccountOutputContainerName = var.contentContainerName
-  blobStorageAccountUploadContainerName = var.uploadContainerName
-  blobStorageAccountLogContainerName    = var.functionLogsContainerName
-  formRecognizerEndpoint                = module.formrecognizer[0].formRecognizerAccountEndpoint
-  CosmosDBEndpointURL                   = module.cosmosdb[0].CosmosDBEndpointURL
-  CosmosDBLogDatabaseName               = module.cosmosdb[0].CosmosDBLogDatabaseName
-  CosmosDBLogContainerName              = module.cosmosdb[0].CosmosDBLogContainerName
-  CosmosDBTagsDatabaseName              = module.cosmosdb[0].CosmosDBTagsDatabaseName
-  CosmosDBTagsContainerName             = module.cosmosdb[0].CosmosDBTagsContainerName
+  blobStorageAccountUploadContainerName = var.uploadContainerName 
+  blobStorageAccountLogContainerName    = var.functionLogsContainerName 
+  formRecognizerEndpoint                = module.formrecognizer.formRecognizerAccountEndpoint
+  CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
+  CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
+  CosmosDBLogContainerName              = module.cosmosdb.CosmosDBLogContainerName
   chunkTargetSize                       = var.chunkTargetSize
   targetPages                           = var.targetPages
   formRecognizerApiVersion              = var.formRecognizerApiVersion
@@ -543,7 +537,21 @@ module "functions" {
   ]
 }
 
-// Create the Video Indexer Service
+module "sharepoint" {
+  source                              = "./core/sharepoint"
+  location                            = azurerm_resource_group.rg.location
+  resource_group_name                 = azurerm_resource_group.rg.name
+  resource_group_id                   = azurerm_resource_group.rg.id
+  subscription_id                     = data.azurerm_client_config.current.subscription_id
+  storage_account_name                = module.storage.name
+  storage_access_key                  = module.storage.storage_account_access_key
+  random_string                       = random_string.random.result
+  tags                                = local.tags
+
+  depends_on = [
+    module.storage
+  ]
+}
 
 module "video_indexer" {
   source = "./core/videoindexer"
@@ -636,11 +644,11 @@ module "aviRoleBackend" {
 # // MANAGEMENT SERVICE PRINCIPAL ROLES
 module "openAiRoleMgmt" {
   source = "./core/security/role"
-  # If running under automation, the principalId is the same as the webapp and this will result in a duplicate assignment.
-  # When not under automation, the principalId will be unique between the webapp and mgmt service principals. 
-  count            = var.aadWebClientId == var.aadMgmtClientId ? 0 : 1
-  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId      = module.entraObjects.azure_ad_mgmt_sp_id
+  # If leveraging an existing Azure OpenAI service, only make this assignment if not under automation.
+  # When under automation and using an existing Azure OpenAI service, this will result in a duplicate assignment error.
+  count = var.useExistingAOAIService ? var.isInAutomation ? 0 : 1 : 1
+  scope = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId     = module.entraObjects.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -668,6 +676,16 @@ module "kvModule" {
   tags              = local.tags
 }
 
+module "bingSearch" {
+  count                         = var.azure_environment == "AzureCloud" ? 1 : 0
+  source                        = "./core/ai/bingSearch"
+  name                          = "infoasst-bing-${random_string.random.result}"
+  resourceGroupName             = azurerm_resource_group.rg.name
+  tags                          = local.tags
+  sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+}
+
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource "azurerm_resource_group_template_deployment" "customer_attribution" {
   count               = var.cuaEnabled ? 1 : 0
@@ -682,4 +700,3 @@ resource "azurerm_resource_group_template_deployment" "customer_attribution" {
 }
 TEMPLATE
 }
-

@@ -123,16 +123,6 @@ variable "CosmosDBLogContainerName" {
   type        = string
 }
 
-variable "CosmosDBTagsDatabaseName" {
-  description = "CosmosDB Tags Database Name"
-  type        = string
-}
-
-variable "CosmosDBTagsContainerName" {
-  description = "CosmosDB Tags Container Name"
-  type        = string
-}
-
 variable "pdfSubmitQueue" {
   description = "Name of the submit queue for PDF files"
   type        = string

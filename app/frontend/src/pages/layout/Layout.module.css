@@ -82,14 +82,24 @@
 }
 
 .raibanner {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
     align-items: center;
-    justify-content: space-around;
     background-color: rgb(242, 242, 242);
     height: fit-content;
     -webkit-box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
     box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
     opacity: 25.0;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+}
+
+.right {
+    display: flex;
+    justify-content: center;
 }
 
 .raiwarning {
@@ -101,3 +111,5 @@
     padding-bottom: 6px;
     white-space: pre-line;
 }
+
+

@@ -50,16 +50,6 @@ variable "logContainerName" {
   type        = string
 }
 
-variable "tagDatabaseName" {
-  description = "The name for the tag database"
-  type        = string
-}
-
-variable "tagContainerName" {
-  description = "The name for the tag container"
-  type        = string
-}
-
 variable "autoscaleMaxThroughput" {
   description = "Maximum autoscale throughput for the container"
   type        = number

@@ -4,11 +4,10 @@
 #!/bin/bash
 set -e
 
-if [ -n "${IN_AUTOMATION}" ]
-then
-    AZURE_ENVIRONMENT=$(jq -r '.AZURE_ENVIRONMENT.value' inf_output.json)
-    
-    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
+source ./scripts/load-env.sh > /dev/null 2>&1
+
+if [ -n "${IN_AUTOMATION}" ]; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ $AZURE_ENVIRONMENT == "AzureUSGovernment" ]]; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi
 
@@ -87,14 +86,6 @@ jq -r --arg secrets "$secrets" '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "AZURE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "AZURE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
             "path": "AzureWebJobsStorage",
             "env_var": "AzureWebJobsStorage"
         },
@@ -133,6 +124,14 @@ jq -r --arg secrets "$secrets" '
         {
             "path": "DEPLOYMENT_KEYVAULT_NAME",
             "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+        },
+        {
+            "path": "AZURE_AI_TRANSLATION_DOMAIN",
+            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
+        },
+        {
+            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
+            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
         }
     ] 
         as $env_vars_to_extract

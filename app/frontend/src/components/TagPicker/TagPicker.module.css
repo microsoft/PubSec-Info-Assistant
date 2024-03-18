@@ -27,3 +27,7 @@
     text-align: left;
     height: 90px;
  }  
+
+ .hide {
+    display: none;
+}

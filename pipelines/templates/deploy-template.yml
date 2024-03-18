@@ -55,7 +55,7 @@ steps:
   - template: make-command.yml
     parameters:
       displayName: 'Deploy Infrastructure'
-      makeCommand: 'infrastructure'
+      makeCommand: 'infrastructure-remote-backend'
 
   - template: make-command.yml
     parameters:

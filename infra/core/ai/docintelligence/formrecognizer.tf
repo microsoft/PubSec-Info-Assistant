@@ -18,7 +18,7 @@ resource "azurerm_key_vault_secret" "docIntelligenceKey" {
 
 resource "azurerm_private_endpoint" "formPrivateEndpoint" {
   count               = var.is_secure_mode ? 1 : 0
-  name                = "${var.name}-private-endpoint[0]"
+  name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
   subnet_id           = var.subnet_id

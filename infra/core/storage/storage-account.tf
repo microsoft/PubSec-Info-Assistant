@@ -1,3 +1,7 @@
+locals {
+  config_container_index = index(var.containers, "config")
+}
+
 
 // Create a storage account
 resource "azurerm_storage_account" "storage" {
@@ -106,3 +110,10 @@ resource "azurerm_private_endpoint" "queuePrivateEndpoint" {
 }
 
 
+resource "azurerm_storage_blob" "config" {
+  name                   = "config.json"
+  storage_account_name   = azurerm_storage_account.storage.name
+  storage_container_name = azurerm_storage_container.container[local.config_container_index].name
+  type                   = "Block"
+  source                 = "sp_config/config.json"
+}

@@ -3,7 +3,8 @@
 
 #!/bin/bash
 set -e
-source ./scripts/load-env.sh
+
+source ./scripts/load-env.sh > /dev/null 2>&1
 
 jq -r  '
     [
@@ -76,22 +77,6 @@ jq -r  '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "AZURE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "AZURE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
-            "path": "AZURE_CLIENT_ID",
-            "env_var": "AZURE_CLIENT_ID"
-        },
-        {
-            "path": "AZURE_TENANT_ID",
-            "env_var": "AZURE_TENANT_ID"
-        },
-        {
             "path": "AZURE_SUBSCRIPTION_ID",
             "env_var": "AZURE_SUBSCRIPTION_ID"
         },
@@ -124,8 +109,8 @@ jq -r  '
             "env_var": "USE_AZURE_OPENAI_EMBEDDINGS"
         },
         {
-            "path": "ENRICHMENT_APPSERVICE_NAME",
-            "env_var": "ENRICHMENT_APPSERVICE_NAME"
+            "path": "ENRICHMENT_APPSERVICE_URL",
+            "env_var": "ENRICHMENT_APPSERVICE_URL"
         },
         {
             "path": "DEPLOYMENT_KEYVAULT_NAME",
@@ -142,6 +127,30 @@ jq -r  '
         {
             "path": "AZURE_OPENAI_ENDPOINT",
             "env_var": "AZURE_OPENAI_ENDPOINT"
+        },
+        {
+            "path": "BING_SEARCH_ENDPOINT",
+            "env_var": "BING_SEARCH_ENDPOINT"
+        },
+        {
+            "path": "BING_SEARCH_KEY",
+            "env_var": "BING_SEARCH_KEY"
+        },
+        {
+            "path": "ENABLEE_BING_SAFE_SEARCH",
+            "env_var": "ENABLE_BING_SAFE_SEARCH"
+        },
+        {
+            "path": "AZURE_AI_TRANSLATION_DOMAIN",
+            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
+        },
+        {
+            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
+            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
+        },
+        {
+            "path": "AZURE_ARM_MANAGEMENT_API",
+            "env_var": "AZURE_ARM_MANAGEMENT_API"
         }
     ]
         as $env_vars_to_extract
@@ -164,17 +173,18 @@ jq -r  '
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
 
     echo "EMBEDDINGS_QUEUE='embeddings-queue'"
-    echo "DEQUEUE_MESSAGE_BATCH_SIZE=1"
-    echo "MAX_EMBEDDING_REQUEUE_COUNT=5"
-    echo "EMBEDDING_REQUEUE_BACKOFF=60"
     echo "CHAT_WARNING_BANNER_TEXT='$CHAT_WARNING_BANNER_TEXT'"
     echo "APPLICATION_TITLE='$APPLICATION_TITLE'"
+    echo "AZURE_OPENAI_AUTHORITY_HOST='$TF_VAR_azure_openai_authority_host'"
+    echo "AZURE_OPENAI_CHATGPT_MODEL_NAME='$AZURE_OPENAI_CHATGPT_MODEL_NAME'"
+    echo "AZURE_OPENAI_CHATGPT_MODEL_VERSION='$AZURE_OPENAI_CHATGPT_MODEL_VERSION'"
+    echo "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME='$AZURE_OPENAI_EMBEDDINGS_MODEL_NAME'"
+    echo "AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION='$AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION'"
+    echo "ENABLE_BING_SAFE_SEARCH=$ENABLE_BING_SAFE_SEARCH"
+    echo "QUERY_TERM_LANGUAGE='$PROMPT_QUERYTERM_LANGUAGE'"
 
-if [ -n "${IN_AUTOMATION}" ]
-then
-    AZURE_ENVIRONMENT=$(jq -r '.AZURE_ENVIRONMENT.value' inf_output.json)
-    
-    if [ -n "${AZURE_ENVIRONMENT}" ] && $AZURE_ENVIRONMENT == "AzureUSGovernment"; then
+if [ -n "${IN_AUTOMATION}" ]; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi
 

@@ -5,11 +5,14 @@ Please see below sections for coverage of IA Accelerator features.
 * [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
 * [Prompt Engineering](/docs/features/features.md#prompt-engineering)
 * [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
+* [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
 * [Image Search](/docs/features/features.md#image-search)
 * [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
+* [Autonomous Reasoning with Agents (Preview)](/docs/features/features.md#autonomous-reasoning-with-agents)
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)
+* [Document Deletion](/docs/features/features.md#document-deletion)
 * [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
 
 ## Retrieval Augmented Generation (RAG)
@@ -57,6 +60,16 @@ We also log the status of the pre-processing in Azure Cosmos DB. View our [Statu
 
 Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](/docs/functions_flow.md)
 
+## Bing Search And Compare
+
+"Bing Search" and "Bing Compare." The former enables users to seamlessly perform Bing searches, with the retrieved results processed by the LLM and enriched with URL citations for more informative responses. 
+The latter, "Bing Compare," takes a grounded LLM response and performs a second Bing search, integrating citations from both sources for a comprehensive answer.
+
+Additionally, a "Switch to Web" button in the subtitle bar allows users to transition between "Work" and "Web" workspaces, directing prompts either to the grounded LLM with access to Bing-related functionalities or behaving as if the "Search Bing" button was pressed.
+ In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses. 
+ These features empower users to seamlessly access and validate information across various sources within the chat interface.
+ More information can be found in the [markdown here](/docs/features/bing_search.md)
+
 ## Image Search
 
 ### Text-Based Image Retrieval
@@ -72,6 +85,10 @@ When you upload images, data processing pipeline extractions captions and metada
 This accelerator employs Vector Hybrid Search which combines vector similarity with keyword matching to enhance search accuracy. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
 
 To learn more, please visit the [Cognitive Search](/docs/features/cognitive_search.md) feature page.
+
+## Autonomous Reasoning with Agents 
+
+We are rolling out the Math Agent and CSV Agent in a preview mode. The Math Tutor combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.The CSV Agent allows users to ask natural language questions about tabular data stored in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data. The key strength of Agents lies in their ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows.The Math Agent and CSV Agent are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
 
 ## Customization and Personalization
 

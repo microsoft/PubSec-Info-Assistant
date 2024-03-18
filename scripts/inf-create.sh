@@ -49,6 +49,17 @@ if [ -n "${IN_AUTOMATION}" ]; then
   export TF_VAR_aadMgmtClientSecret=$aadMgmtAppSecret
 fi
 
+if [ -n "${IN_AUTOMATION}" ]
+then
+
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ $AZURE_ENVIRONMENT == "AzureUSGovernment" ]]; then
+        az cloud set --name AzureUSGovernment 
+    fi
+
+    az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
+    az account set -s "$ARM_SUBSCRIPTION_ID"
+fi
+
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh
 

@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { Text } from "@fluentui/react";
-import { Chat12Regular } from "@fluentui/react-icons";
+import { Chat24Regular } from "@fluentui/react-icons";
 import styles from "./ChatButton.module.css";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 export const ChatButton = ({ className, onClick }: Props) => {
     return (
         <div className={`${styles.container} ${className ?? ""}`} onClick={onClick}>
-            <Chat12Regular />
+            <Chat24Regular />
             <Text>{"Chat"}</Text>
         </div>
     );

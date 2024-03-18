@@ -6,4 +6,6 @@
     align-items: center;
     gap: 6px;
     cursor: pointer;
+    padding: 10px;
+    background-color: aqua;
 }

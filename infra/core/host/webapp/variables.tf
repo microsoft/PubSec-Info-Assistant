@@ -121,3 +121,12 @@ variable "runtimeVersion" {
   type    = string
   default = "3.10"
 }
+
+variable "is_secure_mode" {
+  type = bool
+  default = false
+}
+
+variable "subnetResourceIdOutbound" {
+  type = string
+}

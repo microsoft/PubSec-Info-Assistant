@@ -59,19 +59,29 @@ module "network" {
 module "privateDnsZoneAzureOpenAi" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-azure-openai-privatedns"
+  name               = "privatelink.${var.azure_openai_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
 }
 
-module "privateDnsZoneAzureAi" {
+module "privateDnsZoneAzureAiTextAnalytics" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-azure-ai-privatedns"
+  name               = "privatelink.${var.azure_ai_text_analytics_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-azure-ai-vnetlink-${random_string.random.result}"
+  vnetLinkName       = "infoasst-azure-ai-ta-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network[0].vnet_id
+  tags               = local.tags
+}
+
+module "privateDnsZoneAzureAiTranslation" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.${var.azure_ai_translation_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-azure-ai-trans-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
 }
@@ -79,7 +89,7 @@ module "privateDnsZoneAzureAi" {
 module "privateDnsZoneApp" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-app-privatedns"
+  name               = "privatelink.${var.azure_websites_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-app-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -89,7 +99,7 @@ module "privateDnsZoneApp" {
 module "privateDnsZoneKeyVault" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-kv-privatedns"
+  name               = "privatelink.${var.azure_keyvault_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-kv-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -99,7 +109,7 @@ module "privateDnsZoneKeyVault" {
 module "privateDnsZoneStorageAccountBlob" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-storage-blob-privatedns"
+  name               = "privatelink.blob.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-blob-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -109,7 +119,7 @@ module "privateDnsZoneStorageAccountBlob" {
 module "privateDnsZoneStorageAccountQueue" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-storage-queue-privatedns"
+  name               = "privatelink.queue.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-queue-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -119,7 +129,7 @@ module "privateDnsZoneStorageAccountQueue" {
 module "privateDnsZoneSearchService" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-search-privatedns"
+  name               = "privatelink.${var.azure_search_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-search-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -129,7 +139,7 @@ module "privateDnsZoneSearchService" {
 module "privateDnsZoneCosmosDb" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-cosmos-privatedns"
+  name               = "privatelink.${var.cosmosdb_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-cosmos-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -139,7 +149,7 @@ module "privateDnsZoneCosmosDb" {
 module "privateDnsZoneAzureMonitor" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-monitor-privatedns"
+  name               = "privatelink.${var.azure_monitor_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-monitor-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -149,7 +159,7 @@ module "privateDnsZoneAzureMonitor" {
 module "privateDnsZoneOpsInsightOms" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-ops-insights-oms-privatedns"
+  name               = "privatelink.${var.azure_monitor_oms_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-ops-insights-oms-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -159,7 +169,7 @@ module "privateDnsZoneOpsInsightOms" {
 module "privateDnsZoneOpsInsightOds" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-ops-insights-ods-privatedns"
+  name               = "privatelink.${var.azure_monitor_ods_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-ops-insights-ods-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -169,7 +179,7 @@ module "privateDnsZoneOpsInsightOds" {
 module "privateDnsZoneAutomation" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "infoasst-ops-automation-privatedns"
+  name               = "privatelink.${var.azure_automation_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-ops-automation-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -308,6 +318,8 @@ module "backend" {
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
+  is_secure_mode                      = var.is_secure_mode
+  subnetResourceIdOutbound            = module.network[0].snetAppOutbound_id
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString

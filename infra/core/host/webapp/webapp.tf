@@ -72,30 +72,34 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 
 # Create the web app
 resource "azurerm_linux_web_app" "app_service" {
-  name                = var.name
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  service_plan_id = azurerm_service_plan.appServicePlan.id
-  https_only          = true
-  tags                = var.tags
+  name                          = var.name
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  service_plan_id               = azurerm_service_plan.appServicePlan.id
+  https_only                    = true
+  tags                          = var.tags
+  public_network_access_enabled = var.is_secure_mode ? false : true
+  virtual_network_subnet_id     = var.is_secure_mode ? var.subnetResourceIdOutbound : null
 
   site_config {
     application_stack {
       python_version = var.runtimeVersion
     }
+    detailed_error_logging_enabled = true
     always_on                      = var.alwaysOn
-    ftps_state                     = var.ftpsState
+    ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
     app_command_line               = var.appCommandLine
     health_check_path              = var.healthCheckPath
     cors {
       allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
+
   }
 
   identity {
     type = var.managedIdentity ? "SystemAssigned" : "None"
   }
- 
+  
   app_settings = merge(
     var.appSettings,
     {
@@ -120,6 +124,7 @@ resource "azurerm_linux_web_app" "app_service" {
         retention_in_mb   = 35
       }
     }
+    failed_request_tracing = true
   }
 
   auth_settings_v2 {
@@ -141,7 +146,6 @@ resource "azurerm_linux_web_app" "app_service" {
       token_store_enabled = false
     }
   }
-
 }
 
 data "azurerm_key_vault" "existing" {

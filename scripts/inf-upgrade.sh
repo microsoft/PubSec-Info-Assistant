@@ -27,8 +27,13 @@ echo "TF_VAR_resource_group_name: $TF_VAR_resource_group_name"
 echo "TF_VAR_environmentName: $TF_VAR_environmentName"
 
 # Import the existing resources into the Terraform state
-terraform import azurerm_resource_group.rg /subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name
+# terraform import azurerm_resource_group.rg /subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name
 
+#Storage
+cd core/storage
+export TF_VAR_keyVaultId="infoasst-kv-$TF_VAR_environmentName"
+export TF_VAR_name="infoasststor$TF_VAR_environmentName"
+terraform import azurerm_storage_account.storage /subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name
 
 
 

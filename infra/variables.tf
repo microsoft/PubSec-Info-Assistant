@@ -58,7 +58,7 @@ variable "azure_environment" {
 }
 
 variable "azure_websites_domain" {
-  type        = string
+  type = string
 }
 
 variable "azure_portal_domain" {
@@ -70,11 +70,11 @@ variable "azure_openai_domain" {
 }
 
 variable "azure_openai_authority_host" {
-  type = string  
+  type = string
 }
 
 variable "azure_arm_management_api" {
-  type        = string
+  type = string
 }
 
 variable "azure_ai_translation_domain" {
@@ -82,6 +82,10 @@ variable "azure_ai_translation_domain" {
 }
 
 variable "azure_ai_text_analytics_domain" {
+  type = string
+}
+
+variable "azure_ai_form_recognizer_domain" {
   type = string
 }
 
@@ -154,7 +158,7 @@ variable "aadMgmtClientSecret" {
 }
 
 variable "aadMgmtServicePrincipalId" {
-  type = string
+  type    = string
   default = ""
 }
 ////
@@ -180,7 +184,7 @@ variable "azureOpenAIServiceKey" {
 }
 
 variable "openAIServiceName" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -239,7 +243,7 @@ variable "openai_public_network_access_enabled" {
 // Variables that are used for the secure mode
 ////
 variable "is_secure_mode" {
-  type = bool
+  type    = bool
   default = false
 }
 ////
@@ -465,7 +469,7 @@ variable "applicationtitle" {
 }
 
 variable "video_indexer_api_version" {
-  type = string
+  type    = string
   default = "2024-01-01"
 }
 

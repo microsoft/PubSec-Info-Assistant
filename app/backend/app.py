@@ -84,9 +84,8 @@ ENV = {
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true" ,
-    "STREAMLIT_HOST_URI":'127.0.0.1'  
-}
+    "ENABLE_BING_SAFE_SEARCH": "true" 
+    }
 
 for key, value in ENV.items():
     new_value = os.getenv(key)
@@ -250,11 +249,6 @@ chat_approaches = {
     )
 }
 
-#run streamlit app
-#print("URI: " + ENV["STREAMLIT_HOST_URI"])
-#subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", "127.0.0.1", "--server.port=8051"])
-#subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ENV["STREAMLIT_HOST_URI"], "--server.port=8080"])
-
 # Create API
 app = FastAPI(
     title="IA Web API",
@@ -302,21 +296,7 @@ async def chat(request: Request):
         log.error(f"Error in chat:: {ex}")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
 
-@app.get("/getstreamlitip")
-async def get_streamlit_ip():
-    """
-        Get the IP address of the Streamlit app.
 
-        Returns:
-            dict: A dictionary containing various information data for the app.
-                - "LOCAL_IP": IP address of the Streamlit app.
-
-    """
-    
-    response = {
-    "STREAMLIT_HOST_URI": ENV["STREAMLIT_HOST_URI"],
-    }
-    return response
     
 
 @app.get("/getblobclienturl")

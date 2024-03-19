@@ -11,10 +11,10 @@ from dotenv import load_dotenv
 
 #--------------------------------------------------------------------------
 #variables needed for testing
-OPENAI_API_TYPE = "azure"
-OPENAI_API_VERSION = "2023-06-01-preview"
-OPENAI_API_BASE = "https://aoai-inst-4.openai.azure.com/"
-OPENAI_API_KEY = "dd904904f5d945048b0f5f854e49a9af"
+OPENAI_API_TYPE = " "
+OPENAI_API_VERSION = " "
+OPENAI_API_BASE = " "
+OPENAI_API_KEY = " "
 OPENAI_DEPLOYMENT_NAME = "gpt-4"
 MODEL_NAME = "gpt-4"
 
@@ -49,7 +49,6 @@ from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.agents import initialize_agent, load_tools
 from langchain.prompts import ChatPromptTemplate
-import streamlit as st
 
 
 model = AzureChatOpenAI(
@@ -271,51 +270,6 @@ Question: {question}
 """
 
 
-# Streamlit app component. To be converted when integrated into the app and UI
-
-st.set_page_config(page_title="Your Friendly Math Tutor")
-st.title("Your Friendly Math Tutor")
-st.markdown(
-    r"""
-    <style>
-    .stDeployButton {
-            visibility: hidden;
-        }
-    </style>
-    """, unsafe_allow_html=True
-)
-hide_menu_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        </style>
-        """
-st.markdown(hide_menu_style, unsafe_allow_html=True)
-
-# show_pages(
-#     [
-#         Page("approaches/MathTutor.py", "Math Tutor", "🏠"),
-#         Page("approaches/AskData.py", "Csv Uploader", ":books:"),
-#     ]
-# )
-
-
-with st.form('myform'):
-    question = st.text_input('Enter question:', '')
-    clues = st.form_submit_button('Give me clues')
-    thoughts = st.form_submit_button('Show me how to solve it')
-    answer = st.form_submit_button('Show me the answer')
-    
-    if question is not None and question != "":
-        with st.spinner(text="In progress..."):         
-    
-            if clues :
-                st.info(generate_response(question).split("Clues")[1][2:]) 
-            
-            if thoughts:
-                process_agent_scartch_pad(question)
-                
-            if answer:
-                process_agent_response(question)
         
    
         

@@ -6,12 +6,11 @@ import React from 'react';
 import { Button, ButtonGroup } from "react-bootstrap";
 
 import { Accordion, AccordionContent, AccordionTitle } from '@fluentui/react-northstar';
-import { getStreamlitURI, GetStreamlitURIResponse, getHint, processAgentResponse, getSolve} from "../../api";
+import {getHint, processAgentResponse, getSolve} from "../../api";
 import { useEffect, useState } from "react";
 import styles from './Tutor.module.css';
 
 const Tutor = () => {
-    const [StreamlitURI, setStreamlitURI] = useState<GetStreamlitURIResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const [mathProblem, setMathProblem] = useState('');
     const [output, setOutput] = useState<string | null>(null);
@@ -29,18 +28,6 @@ const Tutor = () => {
         console.log(problem);
         setLoading(false);
     };
-
-    async function fetchStreamlitURI() {
-        console.log("Streamlit URI 1");
-        try {
-            const fetchedStreamlitURI = await getStreamlitURI();
-            setStreamlitURI(fetchedStreamlitURI);
-            console.log("Streamlit URI 2", fetchedStreamlitURI)
-        } catch (error) {
-            // Handle the error here
-            console.log(error);
-        }
-    }
     async function hinter(question: string) {
         try {
             setOutput(null);
@@ -84,13 +71,6 @@ const Tutor = () => {
         //     console.log(event.data);
         //     setOutput(event.data);
     };
-
-
-    useEffect(() => {
-        fetchStreamlitURI();
-    }, []);
-    const StreamlitURIf = (StreamlitURI?.STREAMLIT_HOST_URI ?? '') + ':8051';
-    console.log("Streamlit URI 3", StreamlitURIf)
 return (
     <div>
     <h1 className={styles.title}>Your Friendly Math Tutor</h1>

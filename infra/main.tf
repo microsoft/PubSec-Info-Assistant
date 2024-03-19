@@ -175,7 +175,6 @@ module "backend" {
     BING_SEARCH_KEY                         = var.enableWebChat ? module.bingSearch[0].key : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
-    STREAMLIT_HOST_URI                      = "https://${local.backend_name}.${var.azure_websites_domain}"
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
     ENABLE_MATH_TUTOR                       = var.enableMathTutor
     ENABLE_CSV_AGENT                        = var.enableCsvAgent

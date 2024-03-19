@@ -9,10 +9,6 @@ source ./scripts/load-env.sh > /dev/null 2>&1
 jq -r  '
     [
         {
-            "path": "STREAMLIT_HOST_URI",
-            "env_var": "STREAMLIT_HOST_URI"
-        },
-        {
             "path": "AZURE_LOCATION",
             "env_var": "LOCATION"
         },

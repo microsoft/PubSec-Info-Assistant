@@ -16,7 +16,6 @@ import { AskRequest,
     GetTagsResponse,
     DeleteItemRequest,
     ResubmitItemRequest,
-    GetStreamlitURIResponse
     } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
@@ -317,22 +316,6 @@ export async function logStatus(status_log_entry: StatusLogEntry): Promise<Statu
 
     var results: StatusLogResponse = {status: parsedResponse.status};
     return results;
-}
-
-export async function getStreamlitURI(): Promise<GetStreamlitURIResponse> {
-    const response = await fetch("/getstreamlitip", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-    const parsedResponse: GetStreamlitURIResponse = await response.json();
-    if (response.status > 299 || !response.ok) {
-        console.log(response);
-        throw Error(parsedResponse.error || "Unknown error");
-    }
-    console.log(parsedResponse);
-    return parsedResponse;
 }
 
 export async function getInfoData(): Promise<GetInfoResponse> {

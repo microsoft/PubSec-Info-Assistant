@@ -1,6 +1,3 @@
-output "STREAMLIT_HOST_URI" {
-  value = "https://${local.backend_name}.${var.azure_websites_domain}"
-}
 
 output "AZURE_LOCATION" {
   value = var.location

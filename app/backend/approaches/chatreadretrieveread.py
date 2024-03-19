@@ -33,6 +33,19 @@ class ChatReadRetrieveReadApproach(Approach):
     SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
     Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
+    
+    You are provided with two sentences, first line is the intent of user's previous request, second line is the user's current message.
+    You must generate the intent of the current message.
+    You must divide the intent of the current message into multiple specific single search intents. The single intents should not include greeting.
+    Each single intent should have as less overlap with other single_intents as possible.
+    If you cannot understand the single intent of the current message, you must use the latest message as the single intent.
+    You don't need to include the previous intent in your response when user shift to a new topic.
+
+    #Very important instruction
+    When the user's current query shifts to a new topic, your response must change to the corresponding new topic.
+    You must generate all single intents for the current message. If no single intent is generated, you must generate an empty list of single intents like [].
+    You must keep the current message intent in the same language as user's input current query.
+    - You must keep the single intents in the same language as user's input current query.
    
     Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
     Never cite the source content using the examples provided in this paragraph that start with info.

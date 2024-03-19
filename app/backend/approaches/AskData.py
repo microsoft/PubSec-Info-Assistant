@@ -20,9 +20,10 @@ from dotenv import load_dotenv
 # Initialize session state
 if 'show_images' not in st.session_state:
     st.session_state.show_images = False
+    
 
 #--------------------------------------------------------------------------
-#variables needed for testing
+# variables needed for testing
 OPENAI_API_TYPE = "azure"
 OPENAI_API_VERSION = "2023-06-01-preview"
 OPENAI_API_BASE = " "

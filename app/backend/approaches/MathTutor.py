@@ -15,7 +15,7 @@ OPENAI_API_TYPE = " "
 OPENAI_API_VERSION = " "
 OPENAI_API_BASE = " "
 OPENAI_API_KEY = " "
-OPENAI_DEPLOYMENT_NAME = "gpt-4"
+OPENAI_DEPLOYMENT_NAME = " "
 MODEL_NAME = "gpt-4"
 
 os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
@@ -148,7 +148,7 @@ zero_shot_agent_math = initialize_agent(
 
 
 # function to stream agent response 
-def process_agent_scartch_pad( question):
+def process_agent_scratch_pad( question):
     zero_shot_agent_math = initialize_agent(
     agent="zero-shot-react-description",
         tools=tools,

@@ -107,7 +107,7 @@ def chat_with_csv(df):
             
     #         with st.spinner(text="In progress..."):
     #             if analysis:
-    #                 process_agent_scartch_pad(pdagent, user_question)
+    #                 process_agent_scratch_pad(pdagent, user_question)
         
     #             if answer:
     #                 process_agent_response(pdagent, user_question)
@@ -124,7 +124,7 @@ def chat_with_csv(df):
          
            
 # function to stream agent response 
-def process_agent_scartch_pad(agent_executor, question):
+def process_agent_scratch_pad(agent_executor, question):
     for chunk in agent_executor.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:

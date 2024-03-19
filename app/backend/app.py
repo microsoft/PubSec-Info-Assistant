@@ -30,7 +30,7 @@ from azure.storage.blob import (
 )
 from approaches.MathTutor import(
     generate_response,
-    process_agent_scartch_pad,
+    process_agent_scratch_pad,
     process_agent_response
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
@@ -652,7 +652,7 @@ async def getSolve(question: Optional[str] = None):
         raise HTTPException(status_code=400, detail="Question is required")
 
     try:
-        results = process_agent_scartch_pad(question)
+        results = process_agent_scratch_pad(question)
     except Exception as ex:
         log.exception("Exception in /getHint")
         raise HTTPException(status_code=500, detail=str(ex)) from ex

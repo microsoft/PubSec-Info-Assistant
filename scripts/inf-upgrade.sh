@@ -62,27 +62,71 @@ fi
 
 
 # Import the existing resources into the Terraform state
+resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
+
 
 # Resource Group
 echo
 echo -e "\e[1;32m Resource Group \e[0m"
-resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
+
+providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
+import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
+
+# Entra
+echo
+echo -e "\e[1;32m Entra \e[0m"
+
+
+
+
+
 
 # Storage
 # echo
 # echo -e "\e[1;32m Storage \e[0m"
 # export TF_VAR_keyVaultId="infoasst-kv-$random_text"
-# export TF_VAR_name="infoasststore$random_text"
-# resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
-# import_resource_if_needed "module.storage.azurerm_storage_account.storage" "$resourceId"
+export TF_VAR_name="infoasststore$random_text"
+
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
+# import_resource_if_needed "module.storage.azurerm_storage_account.storage" "$resourceId$providers"
+
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/upload"
+# import_resource_if_needed "module.storage.azurerm_storage_container.container[0]" "$resourceId$providers"
+
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/upload"
+# import_resource_if_needed "module.storage.azurerm_storage_blob.container[0]" "$resourceId$providers"
+
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/upload/blobs/config.json"
+# import_resource_if_needed "module.storage.azurerm_storage_blob.config" "$resourceId$providers"
+
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/queueServices/default/queues/embeddings-queue"
+# import_resource_if_needed "module.storage.azurerm_storage_blob.config[0]" "$resourceId$providers"
+
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/queueServices/default/queues/embeddings-queue"
+# import_resource_if_needed "module.storage.azurerm_storage_blob.config[0]" "$resourceId$providers"
+
+# providers="/providers/Microsoft.KeyVault/vaults/infoasst-kv-$random_text/secrets/BLOB-CONNECTION-STRING"
+# import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$resourceId$providers"
+
+# providers="/providers/Microsoft.KeyVault/vaults/infoasst-kv-$random_text/secrets/AZURE-BLOB-STORAGE-KEY"
+# import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_key" "$resourceId$providers"
 
 
+# # Key vault
+# echo
+# echo -e "\e[1;32m Key vault \e[0m"
+# export TF_VAR_keyVaultId="infoasst-kv-$random_text"
+# export TF_VAR_name="infoasst-cosmos-$random_text"
 
+# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name"
+# import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account" "$resourceId$providers"
 
+# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb"
+# import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database" "$resourceId$providers"
 
+# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/tagdb"
+# import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database" "$resourceId$providers"
 
-
-
-# # STUFF
-# #terraform import module.storage.azurerm_storage_account.storage /subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name
+# providers="/providers/Microsoft.KeyVault/vaults/infoasst-kv-$random_text/secrets/COSMOSDB-KEY"
+# import_resource_if_needed "module.cosmosdb.azurerm_key_vault_secret.search_service_key" "$resourceId$providers"

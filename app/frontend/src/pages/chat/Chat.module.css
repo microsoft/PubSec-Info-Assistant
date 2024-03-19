@@ -8,6 +8,13 @@
     margin-top: 20px;
 }
 
+.subHeader {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
 .chatRoot {
     flex: 1;
     display: flex;
@@ -31,9 +38,16 @@
     padding-top: 10px;
 }
 
+.chatEmptyStateHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
 .chatEmptyStateTitle {
-    font-size: 4rem;
-    font-weight: 600;
+    font-size: 3rem;
+    font-weight: 500;
     margin-top: 0;
     margin-bottom: 10px;
 }
@@ -42,16 +56,16 @@
     padding-left: 160px;
     padding-right: 160px;
     text-align: center;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .chatEmptyObjectivesList {
     text-align: center;
-    font-size: 14px;
+    font-size: 12px;
     display: flex;
     flex-direction: row;
-    padding-bottom: 50px;
-    padding-top: 30px;
+    padding-bottom: 40px;
+    padding-top: 24px;
 }
 
 .chatEmptyObjectivesListItem {
@@ -62,8 +76,8 @@
 }
 
 .chatEmptyObjectivesListItemText {
-    padding-right: 10px;
-    padding-left: 10px;
+    padding-right: 6px;
+    padding-left: 6px;
 }
 
 .chatEmptyStateSubtitle {
@@ -147,4 +161,37 @@
 
 .hide {
     display: none;
+}
+
+.defaultApproachWebOption {
+    font-size: 18px;
+    font-weight: 600;
+    color: #188d45;
+    padding-right: 10px;
+}
+
+.defaultApproachWorkOption {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1B4AEF;
+    padding-left: 10px;
+}
+
+.defaultApproachSwitch {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.chatInputWarningMessage{
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(133, 133, 133);
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }

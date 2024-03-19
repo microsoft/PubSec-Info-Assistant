@@ -8,7 +8,7 @@ import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
 
-import { Approaches, AskResponse, getCitationFilePath } from "../../api";
+import { Approaches, AskResponse, getCitationFilePath, ChatMode } from "../../api";
 import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { RAIPanel } from "../RAIPanel";
@@ -27,6 +27,7 @@ interface Props {
     showFollowupQuestions?: boolean;
     onAdjustClick?: () => void;
     onRegenerateClick?: () => void;
+    chatMode: ChatMode;
 }
 
 export const Answer = ({
@@ -42,7 +43,8 @@ export const Answer = ({
     onFollowupQuestionClicked,
     showFollowupQuestions,
     onAdjustClick,
-    onRegenerateClick
+    onRegenerateClick,
+    chatMode
 }: Props) => {
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.citation_lookup, onCitationClicked), [answer]);
 
@@ -52,19 +54,22 @@ export const Answer = ({
         <Stack className={`${answer.approach == Approaches.ReadRetrieveRead ? styles.answerContainerWork : 
                             answer.approach == Approaches.ChatWebRetrieveRead ? styles.answerContainerWeb :
                             answer.approach == Approaches.CompareWorkWithWeb || answer.approach == Approaches.CompareWebWithWork ? styles.answerContainerCompare :
+                            answer.approach == Approaches.GPTDirect ? styles.answerContainerUngrounded :
                             styles.answerContainer} ${isSelected && styles.selected}`} verticalAlign="space-between">
             <Stack.Item>
                 <Stack horizontal horizontalAlign="space-between">
                     <AnswerIcon approach={answer.approach} />
                     <div>
-                        <IconButton
-                            style={{ color: "black" }}
-                            iconProps={{ iconName: "Lightbulb" }}
-                            title="Show thought process"
-                            ariaLabel="Show thought process"
-                            onClick={() => onThoughtProcessClicked()}
-                            disabled={!answer.thoughts}
-                        />
+                        {answer.approach != Approaches.GPTDirect && 
+                            <IconButton
+                                style={{ color: "black" }}
+                                iconProps={{ iconName: "Lightbulb" }}
+                                title="Show thought process"
+                                ariaLabel="Show thought process"
+                                onClick={() => onThoughtProcessClicked()}
+                                disabled={!answer.thoughts}
+                            />
+                        }
                         {answer.approach == Approaches.ReadRetrieveRead &&
                             <IconButton
                                 style={{ color: "black" }}
@@ -85,7 +90,7 @@ export const Answer = ({
                         <ShieldCheckmark20Regular></ShieldCheckmark20Regular>Your personal and company data are protected
                     </div>
                 }
-                <div className={styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div>
+                <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div>
             </Stack.Item>
 
             {!!parsedAnswer.citations.length && (
@@ -130,7 +135,7 @@ export const Answer = ({
                 <div className={styles.raiwarning}>AI-generated content may be incorrect</div>
             </Stack.Item>
             <Stack.Item align="center">
-                <RAIPanel approach={answer.approach} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onWebSearchClicked={onWebSearchClicked} onWebCompareClicked={onWebCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
+                <RAIPanel approach={answer.approach} chatMode={chatMode} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onWebSearchClicked={onWebSearchClicked} onWebCompareClicked={onWebCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
             </Stack.Item>
         </Stack>
     );

@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { string } from "prop-types";
+export const enum ChatMode {
+    WorkOnly = 0,
+    WorkPlusWeb = 1,
+    Ungrounded = 2
+}
 
 export const enum Approaches {
     RetrieveThenRead = 0,

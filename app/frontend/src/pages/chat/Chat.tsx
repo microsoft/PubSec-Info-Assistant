@@ -2,15 +2,16 @@
 // Licensed under the MIT license.
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator } from "@fluentui/react";
-import { SparkleFilled, ClockFilled, TargetArrowFilled, OptionsFilled, SearchInfoFilled, PersonStarFilled, TextBulletListSquareSparkleFilled } from "@fluentui/react-icons";
+import { Checkbox, Panel, DefaultButton, TextField, SpinButton, Separator, Toggle, Label } from "@fluentui/react";
+import Switch from 'react-switch';
+import { GlobeFilled, BuildingMultipleFilled, AddFilled, ChatSparkleFilled } from "@fluentui/react-icons";
 import { ITag } from '@fluentui/react/lib/Pickers';
 
 import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
-import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn } from "../../api";
+import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, ChatMode } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { ExampleList } from "../../components/Example";
@@ -21,6 +22,7 @@ import { InfoButton } from "../../components/InfoButton";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { ResponseLengthButtonGroup } from "../../components/ResponseLengthButtonGroup";
 import { ResponseTempButtonGroup } from "../../components/ResponseTempButtonGroup";
+import { ChatModeButtonGroup } from "../../components/ChatModeButtonGroup";
 import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
@@ -43,7 +45,8 @@ const Chat = () => {
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
-    const [defaultApproach, setApproach] = useState<number>(Approaches.ReadRetrieveRead);
+    const [activeChatMode, setChatMode] = useState<ChatMode>(ChatMode.WorkOnly);
+    const [defaultApproach, setDefaultApproach] = useState<number>(Approaches.ReadRetrieveRead);
     const [activeApproach, setActiveApproach] = useState<number>(Approaches.ReadRetrieveRead);
 
     const lastQuestionRef = useRef<string>("");
@@ -188,39 +191,25 @@ const Chat = () => {
         setResponseTemp(_ev.target.value as number || 0.6)
     };
 
-    const onApproachChange = (_ev: any) => {
-        for (let node of _ev.target.parentNode.childNodes) {
-            if (node.value == _ev.target.value) {
-                switch (node.value) {
-                    case Approaches.ReadRetrieveRead:
-                        node.className = `${rlbgstyles.buttonleftactive}`;
-                        break;
-                    case Approaches.GPTDirect:
-                        node.className = `${rlbgstyles.buttonrightactive}`;
-                        break;
-                    default:
-                        //do nothing
-                        break;
-                }                
-            }
-            else {
-                switch (node.value) {
-                    case Approaches.ReadRetrieveRead:
-                        node.className = `${rlbgstyles.buttonleft}`;
-                        break;
-                    case Approaches.GPTDirect:
-                        node.className = `${rlbgstyles.buttonright}`;
-                        break;
-                    default:
-                        //do nothing
-                        break;
-                }
-            }
-        }
-        // the or value here needs to match the default value assigned to responseLength above.
-        setApproach(_ev.target.value as number || Approaches.ReadRetrieveRead)
-    };
+    const onChatModeChange = (_ev: any) => {
+        const chatMode = _ev.target.value as ChatMode || ChatMode.WorkOnly;
+        setChatMode(chatMode);
+        if (chatMode == ChatMode.WorkOnly)
+                setDefaultApproach(Approaches.ReadRetrieveRead);
+                setActiveApproach(Approaches.ReadRetrieveRead);
+        if (chatMode == ChatMode.WorkPlusWeb)
+            if (defaultApproach == Approaches.GPTDirect) 
+                setDefaultApproach(Approaches.ReadRetrieveRead)
+                setActiveApproach(Approaches.ReadRetrieveRead);
+        if (chatMode == ChatMode.Ungrounded)
+            setDefaultApproach(Approaches.GPTDirect)
+            setActiveApproach(Approaches.GPTDirect);
+        clearChat();
+    }
 
+    const handleToggle = () => {
+        defaultApproach == Approaches.ReadRetrieveRead ? setDefaultApproach(Approaches.ChatWebRetrieveRead) : setDefaultApproach(Approaches.ReadRetrieveRead);
+    }
 
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 
@@ -277,54 +266,49 @@ const Chat = () => {
 
     return (
         <div className={styles.container}>
-            <div className={styles.commandsContainer}>
-                <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
-                <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />
-                <InfoButton className={styles.commandButton} onClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)} />
+            <div className={styles.subHeader}>
+                <ChatModeButtonGroup className="" defaultValue={activeChatMode} onClick={onChatModeChange} /> 
+                <div className={styles.commandsContainer}>
+                    <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
+                    <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />
+                    <InfoButton className={styles.commandButton} onClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)} />
+                </div>
             </div>
             <div className={styles.chatRoot}>
                 <div className={styles.chatContainer}>
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
-                            <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your private data</h1>
+                            {activeChatMode == ChatMode.WorkOnly ? 
+                                <div>
+                                    <div className={styles.chatEmptyStateHeader}> 
+                                        <BuildingMultipleFilled fontSize={"100px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Chat with your Work Data logo" />
+                                        </div>
+                                    <h1 className={styles.chatEmptyStateTitle}>Chat with your work data</h1>
+                                </div>
+                            : activeChatMode == ChatMode.WorkPlusWeb ?
+                                <div>
+                                    <div className={styles.chatEmptyStateHeader}> 
+                                        <BuildingMultipleFilled fontSize={"80px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Chat with your Work and Web Data logo" /><AddFilled fontSize={"50px"} primaryFill={"rgba(0, 0, 0, 0.7)"} aria-hidden="true" aria-label=""/><GlobeFilled fontSize={"80px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="" />
+                                    </div>
+                                    <h1 className={styles.chatEmptyStateTitle}>Chat with your work and web data</h1>
+                                </div>
+                            : //else Ungrounded
+                                <div>
+                                    <div className={styles.chatEmptyStateHeader}> 
+                                        <ChatSparkleFilled fontSize={"80px"} primaryFill={"rgba(0, 0, 0, 0.35)"} aria-hidden="true" aria-label="Chat logo" />
+                                    </div>
+                                    <h1 className={styles.chatEmptyStateTitle}>Chat directly with a LLM</h1>
+                                </div>
+                            }
                             <span className={styles.chatEmptyObjectives}>
-                                The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components
-                                to enable you to <b>Chat</b> (Have a conversation) with your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
+                                <i>Information Assistant uses AI. Check for mistakes.   </i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a>
                             </span>
-                            <span className={styles.chatEmptyObjectivesList}>
-                                <span className={styles.chatEmptyObjectivesListItem}>
-                                    <ClockFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Clock icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Current: Based on the latest "up to date" information in your private data</span>
-                                </span>
-                                <span className={styles.chatEmptyObjectivesListItem}>
-                                    <TargetArrowFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Target icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Relevant: Responses should leverage your private data</span>
-                                </span>
-                                <span className={styles.chatEmptyObjectivesListItem}>
-                                    <OptionsFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Options icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Controlled: You can use the <b>Adjust</b> feature to control the response parameters</span>
-                                </span>
-                                <span className={styles.chatEmptyObjectivesListItem}>
-                                    <SearchInfoFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Search Info icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Referenced: Responses should include specific citations</span>
-                                </span>
-                                <span className={styles.chatEmptyObjectivesListItem}>
-                                    <PersonStarFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Person Star icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Personalized: Responses should be tailored to your personal settings you <b>Adjust</b> to</span>
-                                </span>
-                                <span className={styles.chatEmptyObjectivesListItem}>
-                                    <TextBulletListSquareSparkleFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Text Bullet List Square Sparkle icon" />
-                                    <span className={styles.chatEmptyObjectivesListItemText}>Explainable: Each response should include details on the <b>Thought Process</b> that was used</span>
-                                </span>
-                            </span>
-                            <span className={styles.chatEmptyObjectives}>
-                                <i>Though the Accelerator is focused on the key areas above, human oversight to confirm accuracy is crucial.
-                                    All responses from the system must be verified with the citations provided.
-                                    The responses are only as accurate as the data provided.</i>
-                            </span>
-                            <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
-                            <ExampleList onExampleClicked={onExampleClicked} />
+                            {activeChatMode != ChatMode.Ungrounded &&
+                                <div>
+                                    <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
+                                    <ExampleList onExampleClicked={onExampleClicked} />
+                                </div>
+                            }
                         </div>
                     ) : (
                         <div className={styles.chatMessageStream}>
@@ -350,6 +334,7 @@ const Chat = () => {
                                             onWebCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWorkWithWeb)}
                                             onRagCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWebWithWork)}
                                             onRagSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ReadRetrieveRead)}
+                                            chatMode={activeChatMode}
                                         />
                                     </div>
                                 </div>
@@ -361,7 +346,7 @@ const Chat = () => {
                                         approach={activeApproach}
                                     />
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerLoading />
+                                        <AnswerLoading approach={activeApproach}/>
                                     </div>
                                 </>
                             )}
@@ -376,8 +361,17 @@ const Chat = () => {
                             <div ref={chatMessageStreamEnd} />
                         </div>
                     )}
-
+                    
                     <div className={styles.chatInput}>
+                        {activeChatMode == ChatMode.WorkPlusWeb && (
+                            <div className={styles.chatInputWarningMessage}> 
+                                {defaultApproach == Approaches.ReadRetrieveRead && 
+                                    <div>Questions will be answered by default from Work <BuildingMultipleFilled fontSize={"20px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Work Data" /></div>}
+                                {defaultApproach == Approaches.ChatWebRetrieveRead && 
+                                    <div>Questions will be answered by default from Web <GlobeFilled fontSize={"20px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="Web Data" /></div>
+                                }
+                            </div> 
+                        )}
                         <QuestionInput
                             clearOnSend
                             placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
@@ -414,27 +408,47 @@ const Chat = () => {
                     onRenderFooterContent={() => <DefaultButton onClick={() => setIsConfigPanelOpen(false)}>Close</DefaultButton>}
                     isFooterAtBottom={true}
                 >
-                    <SpinButton
-                        className={styles.chatSettingsSeparator}
-                        label="Retrieve this many documents from search:"
-                        min={1}
-                        max={50}
-                        defaultValue={retrieveCount.toString()}
-                        onChange={onRetrieveCountChange}
-                    />
-                    <Checkbox
-                        className={styles.chatSettingsSeparator}
-                        checked={useSuggestFollowupQuestions}
-                        label="Suggest follow-up questions"
-                        onChange={onUseSuggestFollowupQuestionsChange}
-                    />
+                    {activeChatMode == ChatMode.WorkPlusWeb &&
+                        <div>
+                            <Label>Use this datasource to answer Questions by default:</Label>
+                            <div className={styles.defaultApproachSwitch}>
+                                <div className={styles.defaultApproachWebOption} onClick={handleToggle}>Web</div>
+                                <Switch onChange={handleToggle} checked={defaultApproach == Approaches.ReadRetrieveRead} uncheckedIcon={true} checkedIcon={true} onColor="#1B4AEF" offColor="#188d45"/>
+                                <div className={styles.defaultApproachWorkOption} onClick={handleToggle}>Work</div>
+                            </div>
+                        </div>
+                    }
+                    {activeChatMode != ChatMode.Ungrounded &&
+                        <SpinButton
+                            className={styles.chatSettingsSeparator}
+                            label="Retrieve this many documents from search:"
+                            min={1}
+                            max={50}
+                            defaultValue={retrieveCount.toString()}
+                            onChange={onRetrieveCountChange}
+                        />
+                    }
+                    {activeChatMode != ChatMode.Ungrounded &&
+                        <Checkbox
+                            className={styles.chatSettingsSeparator}
+                            checked={useSuggestFollowupQuestions}
+                            label="Suggest follow-up questions"
+                            onChange={onUseSuggestFollowupQuestionsChange}
+                        />
+                    }
                     <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
                     <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
                     <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength} />
-                    <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp} />
-                    <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
-                    <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders} />
-                    <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags} />
+                    {activeChatMode != ChatMode.Ungrounded &&
+                        <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp} />
+                    }
+                    {activeChatMode != ChatMode.Ungrounded &&
+                        <div>
+                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders} />
+                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags} />
+                        </div>
+                    }
                 </Panel>
 
                 <Panel

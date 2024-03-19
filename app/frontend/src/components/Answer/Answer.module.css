@@ -33,6 +33,12 @@
     outline: #ce7b2e solid 1px;
 }
 
+.answerContainerUngrounded {
+    padding: 20px;
+    background: transparent;
+    outline: transparent;
+}
+
 .warningText {
     color: rgb(182, 91, 114);
     font-weight: bold;
@@ -67,6 +73,23 @@
     align-items: center;
 }
 
+.answerLogoUngrounded {
+    font-size: 22px;
+    color: rgba(0, 0, 0, 1);
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoUngroundedText {
+    padding-left: 10px;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 700;
+    font-variation-settings: unset;
+}
+
 .answerText {
     font-size: 16px;
     font-weight: 400;
@@ -74,6 +97,16 @@
     padding-top: 16px;
     padding-bottom: 16px;
     white-space: pre-line;
+}
+
+.answerTextUngrounded {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    white-space: pre-line;
+    padding-left: 36px;
 }
 
 .selected {

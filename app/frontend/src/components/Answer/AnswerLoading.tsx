@@ -8,7 +8,11 @@ import styles from "./Answer.module.css";
 import { AnswerIcon } from "./AnswerIcon";
 import { Approaches } from "../../api";
 
-export const AnswerLoading = () => {
+interface AnswerLoadingProps {
+    approach: Approaches;
+}
+
+export const AnswerLoading: React.FC<AnswerLoadingProps> = ({ approach }) => {
     const animatedStyles = useSpring({
         from: { opacity: 0 },
         to: { opacity: 1 }
@@ -16,10 +20,10 @@ export const AnswerLoading = () => {
 
     return (
         <animated.div style={{ ...animatedStyles }}>
-            <Stack className={styles.answerContainer} verticalAlign="space-between">
-                <AnswerIcon approach={Approaches.GPTDirect}/>
+            <Stack className={approach == Approaches.GPTDirect ? styles.answerContainerUngrounded : styles.answerContainer} verticalAlign="space-between">
+                <AnswerIcon approach={approach}/>
                 <Stack.Item grow>
-                    <p className={styles.answerText}>
+                    <p className={approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText}>
                         Generating answer
                         <span className={styles.loadingdots} />
                     </p>

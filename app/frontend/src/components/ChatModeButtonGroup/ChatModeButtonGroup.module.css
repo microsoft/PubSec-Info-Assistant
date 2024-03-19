@@ -1,0 +1,174 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.container {
+    cursor: pointer;
+}
+
+.disabled {
+    opacity: 0.4;
+}
+
+.buttonGroup {
+    display: inline-flex;
+    opacity: 1;
+    transition-property: opacity, inset-inline-start;
+    transition-timing-function: linear;
+    flex-direction: row;
+    width: fit-content;
+    border-radius: 40px;
+    border: 1px solid rgba(0, 0, 0, .04);
+    background: #ddd;
+    justify-content: space-between;
+    vertical-align: middle;
+    padding: 2px;
+    gap: 2px;
+    cursor: pointer;
+    margin: 2px 6px 2px 2px;
+    position: relative;
+    align-items: center;
+}
+
+.buttonleft {
+    padding-inline-end: 10px;
+    display: flex;
+    padding: 6px 0;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #444;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+    font-family: inherit;
+    line-height: 24px;
+    width: fit-content;
+    height: 24px;
+    padding-inline: 12px;
+    pointer-events: auto;
+    text-decoration: none;
+    min-width: 46px;
+    border: transparent;
+    background: transparent;
+  }
+  
+  .buttonleftactive {
+    padding-inline: 12px !important;    
+    display: flex;
+    padding: 6px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #111;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 24px;
+    width: fit-content;
+    height: 24px;
+    padding-inline: 12px;
+    pointer-events: none;
+    text-decoration: none;
+    min-width: 46px;
+    background: #fff;
+    box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,.13), 0 0.3px 0.9px 0 rgba(0,0,0,.1);
+    border-radius: 40px;
+    border: transparent;
+  }
+
+  .buttonright {
+    padding-inline-end: 10px;
+    display: flex;
+    padding: 6px 0;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #444;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+    font-family: inherit;
+    line-height: 24px;
+    width: fit-content;
+    height: 24px;
+    padding-inline: 12px;
+    pointer-events: auto;
+    text-decoration: none;
+    min-width: 46px;
+    border: transparent;
+    background: transparent;
+  }
+
+  .buttonrightactive {
+    padding-inline: 12px !important;    
+    display: flex;
+    padding: 6px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #111;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 24px;
+    width: fit-content;
+    height: 24px;
+    padding-inline: 12px;
+    pointer-events: none;
+    text-decoration: none;
+    min-width: 46px;
+    background: #fff;
+    box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,.13), 0 0.3px 0.9px 0 rgba(0,0,0,.1);
+    border-radius: 40px;
+    border: transparent;
+  }
+
+  .buttonmiddle {
+    padding-inline-end: 10px;
+    display: flex;
+    padding: 6px 0;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #444;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 400;
+    font-family: inherit;
+    line-height: 24px;
+    width: fit-content;
+    height: 24px;
+    padding-inline: 12px;
+    pointer-events: auto;
+    text-decoration: none;
+    min-width: 46px;
+    border: transparent;
+    background: transparent;
+  }
+
+  .buttonmiddleactive {
+    padding-inline: 12px !important;    
+    display: flex;
+    padding: 6px;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    color: #111;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 24px;
+    width: fit-content;
+    height: 24px;
+    padding-inline: 12px;
+    pointer-events: none;
+    text-decoration: none;
+    min-width: 46px;
+    background: #fff;
+    box-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,.13), 0 0.3px 0.9px 0 rgba(0,0,0,.1);
+    border-radius: 40px;
+    border: transparent;
+  }

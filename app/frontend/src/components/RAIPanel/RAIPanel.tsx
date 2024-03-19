@@ -5,10 +5,11 @@ import { Options16Filled, ArrowSync16Filled, Briefcase16Filled, Globe16Filled } 
 
 import styles from "./RAIPanel.module.css";
 import { Icon } from "@fluentui/react";
-import { Approaches } from "../../api";
+import { Approaches, ChatMode } from "../../api";
 
 interface Props {
     approach?: Approaches;
+    chatMode?: ChatMode;
     onAdjustClick?: () => void;
     onRegenerateClick?: () => void;
     onWebSearchClicked?: () => void;
@@ -17,7 +18,7 @@ interface Props {
     onRagCompareClicked?: () => void;
 }
 
-export const RAIPanel = ({approach, onAdjustClick, onRegenerateClick, onWebSearchClicked, onRagSearchClicked, onWebCompareClicked, onRagCompareClicked }: Props) => {
+export const RAIPanel = ({approach, chatMode, onAdjustClick, onRegenerateClick, onWebSearchClicked, onRagSearchClicked, onWebCompareClicked, onRagCompareClicked }: Props) => {
     return (
         <div className={styles.adjustInputContainer}>
             <div className={styles.adjustInput} onClick={onAdjustClick}>
@@ -28,7 +29,7 @@ export const RAIPanel = ({approach, onAdjustClick, onRegenerateClick, onWebSearc
                 <ArrowSync16Filled primaryFill="rgba(133, 133, 133, 1)" />
                 <span className={styles.adjustInputText}>Regenerate</span>
             </div>
-            {approach == Approaches.ChatWebRetrieveRead &&
+            {(approach == Approaches.ChatWebRetrieveRead && chatMode == ChatMode.WorkPlusWeb) &&
                     <>
                         <div className={styles.adjustInput} onClick={onRagSearchClicked}>
                             <Briefcase16Filled primaryFill="rgba(133, 133, 133, 1)" />
@@ -40,7 +41,7 @@ export const RAIPanel = ({approach, onAdjustClick, onRegenerateClick, onWebSearc
                         </div>
                     </>
             }
-            {approach == Approaches.ReadRetrieveRead &&
+            {(approach == Approaches.ReadRetrieveRead && chatMode == ChatMode.WorkPlusWeb) &&
                     <>
                         <div className={styles.adjustInput} onClick={onWebSearchClicked}>
                             <Globe16Filled primaryFill="rgba(133, 133, 133, 1)" />

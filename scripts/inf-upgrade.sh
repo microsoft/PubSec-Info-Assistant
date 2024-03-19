@@ -6,7 +6,7 @@ set -e
 
 figlet Upgrade
 
-# Reusable functions
+# function to issue the import statement if the resource is not managed by Terraform
 import_resource_if_needed() {
     local module_path=$1
     local resource_id=$2
@@ -15,17 +15,15 @@ import_resource_if_needed() {
       # The RG is not managed by Terraform
       echo "Deployment $TF_VAR_environmentName is not managed by Terraform. Importing $module_path"
       echo "Importing $module_path"
-      terraform import -state="terraform.tfstate.d/${TF_VAR_environmentName}/terraform.tfstate" "$module_path" "$resource_id"
+      terraform import $module_path $resource_id
     elif terraform state list | grep -q "$module_path"; then
       # the module is already managed by terraform
       echo "Resource $module_path is already managed by Terraform"
     else  
       # the module is not managed by terraform
       echo "Importing $module_path"
-      #terraform import -state="terraform.tfstate.d/${TF_VAR_environmentName}/terraform.tfstate" "$module_path" "$resource_id"
-      echo "TF_VAR_environmentName: $TF_VAR_environmentName"
-      echo "module_path: $module_path"
-      echo "resource_id: $resource_id"
+      #terraform import -state="terraform.tfstate.d/${TF_VAR_environmentName}/terraform.tfstate$module_path" "$resource_id"
+      terraform import $module_path $resource_id
     fi
 }
 
@@ -39,9 +37,9 @@ pushd "$DIR/../infra" > /dev/null
 echo "Current Folder: $(basename "$(pwd)")"
 echo "state file: terraform.tfstate.d/${TF_VAR_environmentName}/terraform.tfstate"
 # Initialise Terraform with the correct path and clean up prior tries
-${DIR}/terraform-init.sh "$DIR/../infra/"
-[ -f ".terraform.lock.hcl" ] && rm ".terraform.lock.hcl"
-[ -f "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate" ] && rm -r "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate"
+# ${DIR}/terraform-init.sh "$DIR/../infra/"
+# [ -f ".terraform.lock.hcl" ] && rm ".terraform.lock.hcl"
+# [ -f "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate" ] && rm -r "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate"
 terraform init -upgrade
 
 echo
@@ -68,10 +66,11 @@ resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resourc
 # Resource Group
 echo
 echo -e "\e[1;32m Resource Group \e[0m"
+
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
 
-providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
-import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
+# providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
+# import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
 
 # Entra
 echo

@@ -20,9 +20,12 @@ echo "state file: terraform.tfstate.d/${TF_VAR_environmentName}/terraform.tfstat
 [ -f "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate" ] && rm -r "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate"
 terraform init -upgrade
 
-echo "TF_VAR_subscriptionId: $TF_VAR_subscriptionId"
-echo "TF_VAR_resource_group_name: $TF_VAR_resource_group_name"
-echo "TF_VAR_environmentName: $TF_VAR_environmentName"
+echo
+for var in "${!TF_VAR_@}"; do
+    echo "\$TF_VAR_${var#TF_VAR_} = ${!var}"
+done
+echo
+
 
 # # Import the existing resources into the Terraform state
 #terraform import azurerm_resource_group.rg /subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name

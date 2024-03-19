@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 from typing import Optional
-from sse_starlette.sse import EventSourceResponse
-from starlette.responses import StreamingResponse
+#from sse_starlette.sse import EventSourceResponse
+#from starlette.responses import StreamingResponse
 import logging
 import os
 import json
@@ -253,7 +253,7 @@ chat_approaches = {
 #run streamlit app
 #print("URI: " + ENV["STREAMLIT_HOST_URI"])
 #subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", "127.0.0.1", "--server.port=8051"])
-subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ENV["STREAMLIT_HOST_URI"], "--server.port=8080"])
+#subprocess.Popen(["streamlit", "run", "./approaches/MathTutor.py", "--server.address", ENV["STREAMLIT_HOST_URI"], "--server.port=8080"])
 
 # Create API
 app = FastAPI(
@@ -695,21 +695,26 @@ async def stream_agent_response(question: str):
     Raises:
         HTTPException: If an error occurs while processing the question.
     """
+    # try:
+    #     def event_stream():
+    #         data_generator = iter(process_agent_response(question))
+    #         while True:
+    #             try:
+    #                 chunk = next(data_generator)
+    #                 yield chunk
+    #             except StopIteration:
+    #                 yield "data: keep-alive\n\n"
+    #                 time.sleep(5)
+    #     return StreamingResponse(event_stream(), media_type="text/event-stream")
+    if question is None:
+        raise HTTPException(status_code=400, detail="Question is required")
+
     try:
-        def event_stream():
-            data_generator = iter(process_agent_response(question))
-            while True:
-                try:
-                    chunk = next(data_generator)
-                    yield chunk
-                except StopIteration:
-                    yield "data: keep-alive\n\n"
-                    time.sleep(5)
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
-    
+        results = process_agent_response(question)
     except Exception as e:
         print(f"Error processing agent response: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    return results
 
 @app.post("/retryFile")
 async def retryFile(request: Request):

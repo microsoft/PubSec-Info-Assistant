@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 #Turn warnings off
-from st_pages import Page, show_pages, add_page_title
+#from st_pages import Page, show_pages, add_page_title
 import warnings
 warnings.filterwarnings('ignore')
 import os
@@ -100,7 +100,6 @@ tools = [PythagorasTool()]
 #________________________________________
 
 #2.tool to calculate the area of a circle
-from langchain.tools import BaseTool
 from math import pi
 
   
@@ -187,12 +186,14 @@ def process_agent_response( question):
     handle_parsing_errors=True,
     return_intermediate_steps=True)
     stream = zero_shot_agent_math.stream({"input": question})
+    output = "No output"
     if stream:
         for chunk in stream:
             if "output" in chunk:
-                yield {"data": f'Final Output: {chunk["output"]}'}
+                output =    f'Final Output: {chunk["output"]}'
     else:
-        yield {"data": "No output"}
+        return {"data": "No output"}
+    return output
     # for chunk in zero_shot_agent_math.stream({"input": question}):
     #     if "output" in chunk:
     #         yield {"data": f'Final Output: {chunk["output"]}'}
@@ -290,12 +291,12 @@ hide_menu_style = """
         """
 st.markdown(hide_menu_style, unsafe_allow_html=True)
 
-show_pages(
-    [
-        Page("approaches/MathTutor.py", "Math Tutor", "🏠"),
-        Page("approaches/AskData.py", "Csv Uploader", ":books:"),
-    ]
-)
+# show_pages(
+#     [
+#         Page("approaches/MathTutor.py", "Math Tutor", "🏠"),
+#         Page("approaches/AskData.py", "Csv Uploader", ":books:"),
+#     ]
+# )
 
 
 with st.form('myform'):

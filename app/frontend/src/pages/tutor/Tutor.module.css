@@ -1,6 +1,57 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
 
+   .title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold; /* Makes the title bold */
+}
+   .selectedButton {
+    color: #FF8C00 !important; /* Dark orange text */
+    border-color: #FF8C00 !important; /* Dark orange border */
+}
+.inputLabel {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+.inputField {
+    background-color: #f0f0f0a6; /* Lighter grey */
+    border: none; /* Removes border */
+    margin-bottom: 10px; /* Same as button margin bottom */
+    width: 100%;
+    box-sizing: border-box;
+}
+.centeredContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    padding: 20px;
+    margin: auto;
+    width: 50%; /* Adjust as needed */
+    
+}
+.formClass {
+    width: 100%;
+}
+.buttonContainer {
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px; /* Rounds the corners of the buttons */
+    width: auto;
+    align-items: flex-start;
+}
+
+.buttonContainer button {
+    margin-bottom: 10px; 
+    color: grey;
+    background-color: transparent;
+    width: auto; /* Makes the button as wide as its content */
+    white-space: nowrap; /* Removes background color */
+    /* Optional: Adds some space between the buttons */
+}
 .container {
     flex: 1;
     display: flex;

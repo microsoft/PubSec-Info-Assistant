@@ -280,10 +280,20 @@ export async function getSolve(question: string): Promise<String[]> {
     return parsedResponse;
 }
 
-export async function processAgentResponse(question: string): Promise<EventSource> {
-    const response = new EventSource(`/process_agent_response?question=${encodeURIComponent(question)}`);
+export async function processAgentResponse(question: string): Promise<String> {
+    const response = await fetch(`/process_agent_response?question=${encodeURIComponent(question)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
     
-    return response;
+    const parsedResponse: String = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;    
 }
 
 export async function logStatus(status_log_entry: StatusLogEntry): Promise<StatusLogResponse> {

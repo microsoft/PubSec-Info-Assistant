@@ -11,19 +11,21 @@ from dotenv import load_dotenv
 
 #--------------------------------------------------------------------------
 #variables needed for testing
-OPENAI_API_TYPE = " "
-OPENAI_API_VERSION = " "
+OPENAI_API_TYPE = "azure"
+OPENAI_API_VERSION = "2023-06-01-preview"
 OPENAI_API_BASE = " "
 OPENAI_API_KEY = " "
 OPENAI_DEPLOYMENT_NAME = " "
 MODEL_NAME = "gpt-4"
+AZURE_OPENAI_ENDPOINT = ' '
+AZURE_OPENAI_SERVICE_KEY = ' '
 
 os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
 os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
-os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
-os.environ["AZURE_OPENAI_ENDPOINT"] = OPENAI_API_BASE
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
-os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
+#os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
+#os.environ["AZURE_OPENAI_ENDPOINT"] = AZURE_OPENAI_ENDPOINT
+#os.environ["AZURE_OPENAI_SERVICE_KEY"] = AZURE_OPENAI_SERVICE_KEY
+#os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
 
 load_dotenv()
 
@@ -33,11 +35,11 @@ load_dotenv()
 # # Access environment variables
 # azure_openai_service_key = os.getenv("AZURE_OPENAI_SERVICE_KEY")
 # azure_openai_service = os.getenv("AZURE_OPENAI_SERVICE")
-# azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
 # openai.api_key = azure_openai_service_key
 # openai.api_base = f"https://{azure_openai_service}.openai.azure.com/"
-# deployment_name = azure_openai_chatgpt_deployment
+deployment_name = azure_openai_chatgpt_deployment
 
 # openai.api_type = "azure"
 # openai.api_version = "2023-06-01-preview"
@@ -53,7 +55,7 @@ from langchain.prompts import ChatPromptTemplate
 
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)      
+    deployment_name=azure_openai_chatgpt_deployment)      
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools

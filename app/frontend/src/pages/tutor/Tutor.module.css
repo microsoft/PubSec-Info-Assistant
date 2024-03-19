@@ -4,6 +4,10 @@
     align-items: flex-start !important;
     margin-top: 5% !important; /* Sets the top margin to 10% */
 }
+h2 {
+    font-size: 1.1rem !important;
+    font-weight: bold;
+}
    .title {
     text-align: center;
     margin-bottom: 20px;

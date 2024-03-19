@@ -3,9 +3,7 @@
 
 import React from 'react';
 //import { Button } from '@fluentui/react';
-import { Button, ButtonGroup } from "react-bootstrap";
-
-import { Accordion, AccordionContent, AccordionTitle } from '@fluentui/react-northstar';
+import { Accordion, Card, Button } from 'react-bootstrap';
 import {getHint, processAgentResponse, getSolve} from "../../api";
 import { useEffect, useState } from "react";
 import styles from './Tutor.module.css';
@@ -115,10 +113,18 @@ return (
         </div>
         </form>
         {loading && <div className="spinner">Loading...</div>}
-        <Accordion>
-            {output && <AccordionTitle content="Math Tutor Response"/>}
-            {output && <AccordionContent>{output}</AccordionContent>}
-        </Accordion>
+        {output && 
+                <Accordion defaultActiveKey="0">
+                    
+                    <h2>
+                        Math Tutor Response:
+                    </h2>
+                    <Accordion.Collapse eventKey="0">
+                        <p>{output}</p>
+                    </Accordion.Collapse>
+                    
+                </Accordion>
+            }
     </div>
     </div>
 )

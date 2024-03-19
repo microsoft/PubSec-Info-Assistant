@@ -1,6 +1,9 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
-
+   h1 {
+    align-items: flex-start !important;
+    margin-top: 5% !important; /* Sets the top margin to 10% */
+}
    .title {
     text-align: center;
     margin-bottom: 20px;
@@ -16,11 +19,13 @@
     margin-bottom: 5px;
 }
 .inputField {
-    background-color: #f0f0f0a6; /* Lighter grey */
+    background-color: #cbcbcba6; /* Lighter grey */
     border: none; /* Removes border */
     margin-bottom: 10px; /* Same as button margin bottom */
     width: 100%;
     box-sizing: border-box;
+    border-radius: 10px;
+    padding: 10px;
 }
 .centeredContainer {
     display: flex;

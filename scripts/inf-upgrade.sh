@@ -53,7 +53,7 @@ file_path=".state/$TF_VAR_environmentName/random.txt"
 if [ -f "$file_path" ]; then
     random_text=$(<"$file_path")
     random_text=$(echo "$random_text" | tr '[:upper:]' '[:lower:]')
-    echo "rendom text suffix: $random_text"
+    echo "random text suffix: $random_text"
 else
     echo "Error: File '$TF_VAR_environmentName' not found."
 fi
@@ -81,12 +81,26 @@ echo -e "\e[1;32m Storage \e[0m"
 export TF_VAR_keyVaultId="infoasst-kv-$random_text"
 export TF_VAR_name="infoasststore$random_text"
 
+
+echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
 import_resource_if_needed "module.storage.azurerm_storage_account.storage" "$resourceId$providers"
-providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/upload"
-echo "zztop ***************: module.storage.azurerm_storage_container.container[1]" "$resourceId$providers"
-import_resource_if_needed "module.storage.azurerm_storage_container.container[1]" "$resourceId$providers"
-providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/content"
+
+url="https://$TF_VAR_name.blob.core.windows.net/upload"
+# terraform import module.storage.azurerm_storage_container.container[0] https://infoasststored51xg.blob.core.windows.net/upload
+import_resource_if_needed "module.storage.azurerm_storage_container.container[0]" "$url"
+
+
+
+
+
+
+
+
+
+
+# import_resource_if_needed "module.storage.azurerm_storage_container.container[1]" "$resourceId$providers"
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/content"
 # import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
 # providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/function"
 # import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"

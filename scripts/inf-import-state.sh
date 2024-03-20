@@ -71,9 +71,8 @@ echo
 figlet "Resource Group"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
-# providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
-# import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
-
+providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
+import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
 
 
 # Entra 
@@ -81,12 +80,11 @@ echo
 figlet "Entra"
 
 
-
 # Storage 
 echo
 figlet "Storage"
-export TF_VAR_keyVaultId="infoasst-kv-$random_text"
 export TF_VAR_name="infoasststore$random_text"
+export TF_VAR_keyVaultId="infoasst-kv-$random_text"
 
 echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
@@ -118,47 +116,26 @@ import_resource_if_needed "module.storage.azurerm_storage_queue.queue[5]" "$url"
 url="https://$TF_VAR_name..queue.core.windows.net/embeddings-queue"
 import_resource_if_needed "module.storage.azurerm_storage_queue.queue[6]" "$url"
 
+# keyvault secret "azurerm_key_vault_secret" "search_service_key"
+# keyvault secret "azurerm_key_vault_secret" "storage_key"
+# "https://infoasst-kv-adraa.vault.azure.net/secrets/BLOB-CONNECTION-STRING/3690be9dd0004a71a45ae4d5b09ffd68"
+#  "https://example-keyvault.vault.azure.net/secrets/example/fdf067c93bbb4b22bff4d8b7a9a56217"
 
 
 
+# Cosmos DB 
+echo
+figlet "Cosmos DB"
+export TF_VAR_name="infoasst-cosmos-$random_text"
 
+echo "TF_VAR_name: " $TF_VAR_name
+providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name"
+import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account" "$resourceId$providers"
 
+providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb"
+import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database" "$resourceId$providers"
 
+providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb/containers/statuscontainer"
+import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container" "$resourceId$providers"
 
-# # import_resource_if_needed "module.storage.azurerm_storage_container.container[1]" "$resourceId$providers"
-# # providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/content"
-# # import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-# # providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/function"
-# # import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-# # providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/logs"
-# # import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-# # providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/website"
-# # import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-
-
-
-
-# # providers="/providers/Microsoft.KeyVault/vaults/infoasst-kv-$random_text/secrets/BLOB-CONNECTION-STRING"
-# # import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$resourceId$providers"
-
-# # providers="/providers/Microsoft.KeyVault/vaults/infoasst-kv-$random_text/secrets/AZURE-BLOB-STORAGE-KEY"
-# # import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_key" "$resourceId$providers"
-
-
-# # # Key vault
-# # echo
-# # echo -e "\e[1;32m Key vault \e[0m"
-# # export TF_VAR_keyVaultId="infoasst-kv-$random_text"
-# # export TF_VAR_name="infoasst-cosmos-$random_text"
-
-# # providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name"
-# # import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account" "$resourceId$providers"
-
-# # providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb"
-# # import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database" "$resourceId$providers"
-
-# # providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/tagdb"
-# # import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database" "$resourceId$providers"
-
-# # providers="/providers/Microsoft.KeyVault/vaults/infoasst-kv-$random_text/secrets/COSMOSDB-KEY"
-# # import_resource_if_needed "module.cosmosdb.azurerm_key_vault_secret.search_service_key" "$resourceId$providers"
+# keyvault secret "azurerm_key_vault_secret" "search_service_key"

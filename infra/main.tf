@@ -1,4 +1,4 @@
-// 
+// Initialize Terraform configuration
 locals {
   tags           = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles    = jsondecode(file("${path.module}/azure_roles.json"))
@@ -60,6 +60,16 @@ module "privateDnsZoneAzureOpenAi" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
   name               = "privatelink.${var.azure_openai_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network[0].vnet_id
+  tags               = local.tags
+}
+
+module "privateDnsZoneAzureAiFormRecognizer" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.${var.azure_ai_form_recognizer_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
@@ -218,8 +228,8 @@ module "logging" {
 // Create the storage account
 
 module "storage" {
-  source = "./core/storage"
-  is_secure_mode       = var.is_secure_mode
+  source         = "./core/storage"
+  is_secure_mode = var.is_secure_mode
 
   name                  = var.storageAccountName != "" ? var.storageAccountName : "infoasststore${random_string.random.result}"
   location              = var.location
@@ -232,8 +242,8 @@ module "storage" {
   deleteRetentionPolicy = {
     days = 7
   }
-  containers            = ["content","website","upload","function","logs","config"]
-  queueNames            = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
+  containers       = ["content", "website", "upload", "function", "logs", "config"]
+  queueNames       = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
   subnetResourceId = module.network[0].snetStorageAccount_id
   private_dns_zone_ids = [
     module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
@@ -257,7 +267,7 @@ module "enrichmentApp" {
   kind                                = "linux"
   reserved                            = true
   resourceGroupName                   = azurerm_resource_group.rg.name
-  storageAccountId                    = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${var.is_secure_mode ? module.storage[0].name : null}/services/queue/queues/${var.embeddingsQueue}"
+  storageAccountId                    = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
   scmDoBuildDuringDeployment          = true
   managedIdentity                     = true
   logAnalyticsWorkspaceResourceId     = module.logging.logAnalyticsId
@@ -268,27 +278,27 @@ module "enrichmentApp" {
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
   appSettings = {
-    EMBEDDINGS_QUEUE                        = var.embeddingsQueue
-    LOG_LEVEL                               = "DEBUG"
-    DEQUEUE_MESSAGE_BATCH_SIZE              = 1
-    AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
-    AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
-    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
-    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
-    COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
-    COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
-    MAX_EMBEDDING_REQUEUE_COUNT             = 5
-    EMBEDDING_REQUEUE_BACKOFF               = 60
-    AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
-    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
-    AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME  = var.azureOpenAIEmbeddingDeploymentName
-    AZURE_SEARCH_INDEX                      = var.searchIndexName
-    AZURE_SEARCH_SERVICE                    = module.searchServices.name
-    TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    EMBEDDING_VECTOR_SIZE                   = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
-    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
-    WEBSITES_CONTAINER_START_TIME_LIMIT     = 600
+    EMBEDDINGS_QUEUE                       = var.embeddingsQueue
+    LOG_LEVEL                              = "DEBUG"
+    DEQUEUE_MESSAGE_BATCH_SIZE             = 1
+    AZURE_BLOB_STORAGE_ACCOUNT             = module.storage.name
+    AZURE_BLOB_STORAGE_CONTAINER           = var.contentContainerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER    = var.uploadContainerName
+    AZURE_BLOB_STORAGE_ENDPOINT            = module.storage.primary_endpoints
+    COSMOSDB_URL                           = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_LOG_DATABASE_NAME             = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME            = module.cosmosdb.CosmosDBLogContainerName
+    MAX_EMBEDDING_REQUEUE_COUNT            = 5
+    EMBEDDING_REQUEUE_BACKOFF              = 60
+    AZURE_OPENAI_SERVICE                   = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_ENDPOINT                  = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME = var.azureOpenAIEmbeddingDeploymentName
+    AZURE_SEARCH_INDEX                     = var.searchIndexName
+    AZURE_SEARCH_SERVICE                   = module.searchServices.name
+    TARGET_EMBEDDINGS_MODEL                = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    EMBEDDING_VECTOR_SIZE                  = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
+    AZURE_SEARCH_SERVICE_ENDPOINT          = module.searchServices.endpoint
+    WEBSITES_CONTAINER_START_TIME_LIMIT    = 600
   }
   depends_on = [module.kvModule]
 }
@@ -373,8 +383,8 @@ module "backend" {
 // Create the Azure OpenAI Service and Model deployments
 
 module "openaiServices" {
-  source = "./core/ai/openaiservices"
-  is_secure_mode       = var.is_secure_mode
+  source         = "./core/ai/openaiservices"
+  is_secure_mode = var.is_secure_mode
 
   name                   = var.openAIServiceName != "" ? var.openAIServiceName : "infoasst-aoai-${random_string.random.result}"
   location               = var.location
@@ -416,7 +426,7 @@ module "openaiServices" {
 // Create the AI Document Intelligence Service
 
 module "formrecognizer" {
-  source = "./core/ai/docintelligence"
+  source               = "./core/ai/docintelligence"
   is_secure_mode       = var.is_secure_mode
   name                 = "infoasst-fr-${random_string.random.result}"
   location             = var.location
@@ -425,51 +435,53 @@ module "formrecognizer" {
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
   subnetResourceId     = module.network[0].snetAzureAi_id
-  private_dns_zone_ids = [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId]
+  private_dns_zone_ids = [module.privateDnsZoneAzureAiFormRecognizer[0].privateDnsZoneResourceId]
 
 }
 
 // Create the AI Services for Text Enrichment
 
 module "cognitiveServices" {
-  source = "./core/ai/cogServices"
-  is_secure_mode       = var.is_secure_mode
+  source         = "./core/ai/cogServices"
+  is_secure_mode = var.is_secure_mode
 
-  name                 = "infoasst-enrichment-cog-${random_string.random.result}"
-  location             = var.location
-  tags                 = local.tags
-  keyVaultId           = module.kvModule.keyVaultId
-  resourceGroupName    = azurerm_resource_group.rg.name
-  subnetResourceId     = module.network[0].snetAzureAi_id
-  private_dns_zone_ids = [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId]
+  name              = "infoasst-enrichment-cog-${random_string.random.result}"
+  location          = var.location
+  tags              = local.tags
+  keyVaultId        = module.kvModule.keyVaultId
+  resourceGroupName = azurerm_resource_group.rg.name
+  subnetResourceId  = module.network[0].snetAzureAi_id
+  private_dns_zone_ids = [
+    module.privateDnsZoneAzureAiTextAnalytics[0].privateDnsZoneResourceId,
+    module.privateDnsZoneAzureAiTranslation[0].privateDnsZoneResourceId
+  ]
 }
 
 // Create the Azure Search Service
 
 module "searchServices" {
-  source = "./core/search"
-  is_secure_mode       = var.is_secure_mode
+  source         = "./core/search"
+  is_secure_mode = var.is_secure_mode
 
   name     = var.searchServicesName != "" ? var.searchServicesName : "infoasst-search-${random_string.random.result}"
   location = var.location
   tags     = local.tags
   # aad_auth_failure_mode = "http401WithBearerChallenge"
   # sku_name = var.searchServicesSkuName
-  semanticSearch = var.use_semantic_reranker ? "free" : null
+  semanticSearch       = var.use_semantic_reranker ? "free" : null
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
   azure_search_domain  = var.azure_search_domain
   subnetResourceId     = module.network[0].snetAzureAi_id
   private_dns_zone_ids = [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId]
-  
 
 }
 
 // Create the CosmosDB Service
 
 module "cosmosdb" {
-  source = "./core/db"
-  is_secure_mode       = var.is_secure_mode
+  source         = "./core/db"
+  is_secure_mode = var.is_secure_mode
 
   name                 = "infoasst-cosmos-${random_string.random.result}"
   location             = var.location
@@ -507,11 +519,11 @@ module "functions" {
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
-  blobStorageAccountName                = module.storage[0].name
-  blobStorageAccountEndpoint            = module.storage[0].primary_endpoints
+  blobStorageAccountName                = module.storage.name
+  blobStorageAccountEndpoint            = module.storage.primary_endpoints
   blobStorageAccountOutputContainerName = var.contentContainerName
-  blobStorageAccountUploadContainerName = var.uploadContainerName 
-  blobStorageAccountLogContainerName    = var.functionLogsContainerName 
+  blobStorageAccountUploadContainerName = var.uploadContainerName
+  blobStorageAccountLogContainerName    = var.functionLogsContainerName
   formRecognizerEndpoint                = module.formrecognizer.formRecognizerAccountEndpoint
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
@@ -533,8 +545,8 @@ module "functions" {
   submitRequeueHideSeconds              = var.submitRequeueHideSeconds
   pollingBackoff                        = var.pollingBackoff
   maxReadAttempts                       = var.maxReadAttempts
-  enrichmentEndpoint                    = module.cognitiveServices[0].cognitiveServiceEndpoint
-  enrichmentName                        = module.cognitiveServices[0].cognitiveServicerAccountName
+  enrichmentEndpoint                    = module.cognitiveServices.cognitiveServiceEndpoint
+  enrichmentName                        = module.cognitiveServices.cognitiveServicerAccountName
   enrichmentLocation                    = var.location
   targetTranslationLanguage             = var.targetTranslationLanguage
   maxEnrichmentRequeueCount             = var.maxEnrichmentRequeueCount
@@ -542,7 +554,7 @@ module "functions" {
   enableDevCode                         = var.enableDevCode
   EMBEDDINGS_QUEUE                      = var.embeddingsQueue
   azureSearchIndex                      = var.searchIndexName
-  azureSearchServiceEndpoint            = var.is_secure_mode ? module.searchServices[0].endpoint : null
+  azureSearchServiceEndpoint            = module.searchServices.endpoint
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
   azure_ai_translation_domain           = var.azure_ai_translation_domain
@@ -582,8 +594,6 @@ module "video_indexer" {
   azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
   arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
   video_indexer_api_version           = var.video_indexer_api_version
-  subnet_id                           = module.network[0].snetAzureAi_id
-  privateDnsZoneName                  = module.privateDnsZoneAzureAi[0].privateDnsZoneName
 }
 
 // USER ROLES
@@ -664,9 +674,9 @@ module "openAiRoleMgmt" {
   source = "./core/security/role"
   # If leveraging an existing Azure OpenAI service, only make this assignment if not under automation.
   # When under automation and using an existing Azure OpenAI service, this will result in a duplicate assignment error.
-  count = var.useExistingAOAIService ? var.isInAutomation ? 0 : 1 : 1
-  scope = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId     = module.entraObjects.azure_ad_mgmt_sp_id
+  count            = var.useExistingAOAIService ? var.isInAutomation ? 0 : 1 : 1
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.entraObjects.azure_ad_mgmt_sp_id
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id

@@ -21,12 +21,12 @@ resource "azurerm_private_endpoint" "formPrivateEndpoint" {
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.subnet_id
+  subnet_id           = var.subnetResourceId
 
   private_service_connection {
     name                           = "cognitiveAccount"
     is_manual_connection           = false
-    private_connection_resource_id = azurerm_private_endpoint.formPrivateEndpoint[0].id
+    private_connection_resource_id = azurerm_cognitive_account.formRecognizerAccount.id
 
   }
 

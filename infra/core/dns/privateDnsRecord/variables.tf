@@ -22,3 +22,7 @@ variable "reusePrivateDnsZone" {
   type    = bool
   default = false
 }
+variable "resourceGroupName" {
+  type    = string
+  default = ""
+}

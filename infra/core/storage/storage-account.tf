@@ -65,15 +65,15 @@ resource "azurerm_key_vault_secret" "storage_key" {
 
 resource "azurerm_private_endpoint" "blobPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
-  name                          = "${var.name}-private-endpoint-blob[0]"
+  name                          = "${var.name}-private-endpoint-blob"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = var.subnet_id
+  subnet_id                     = var.subnetResourceId
   custom_network_interface_name = "'${var.name}-network-interface'"
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_private_endpoint.blobPrivateEndpoint[count.index].id
+    private_connection_resource_id = azurerm_storage_account.storage.id
     is_manual_connection           = false
 
   }
@@ -90,15 +90,15 @@ resource "azurerm_private_endpoint" "blobPrivateEndpoint" {
 
 resource "azurerm_private_endpoint" "queuePrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
-  name                          = "${var.name}-private-endpoint-queue[0]"
+  name                          = "${var.name}-private-endpoint-queue"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = var.subnet_id
+  subnet_id                     = var.subnetResourceId
   custom_network_interface_name = "'${var.name}-network-interface'"
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_private_endpoint.queuePrivateEndpoint[count.index].id
+    private_connection_resource_id = azurerm_storage_account.storage.id
     is_manual_connection           = false
 
   }

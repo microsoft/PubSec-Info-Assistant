@@ -18,24 +18,17 @@ Your SharePoint files will be stored in the blob storage created by Information 
 
 ### New Local Dev Variables
 
-#### SharePoint Sites
-
-This is a comma delimited list of SharePoint site(s) you wish to ingest. **It shares a one-to-one relationship with the SharePoint folders variable.** If you have one SharePoint site, you need one SharePoint folder and vice versa. You may list the same site twice if you wish to more granular control over what is being crawled in SharePoint.
-
-#### SharePoint Folders
-
-This is a comma delimited list of SharePoint folder(s) you wish to be your entry point for the ingestion. **It shares a one-to-one relationship with the SharePoint sites variable.** If you have one SharePoint folder, you need one SharePoint site and vice versa. It will crawl this folder and then automatically crawl any folders beneath it. The SharePoint site root is typically /Shared Documents
+#### SHAREPOINT_TO_SYNC
+This is a single quoted JSON Array of Objects within the env file. For every new line, you have to have a backslash. You do NOT need new lines, but they improve readability for multiple sharepointsites
+```JSON
+export SHAREPOINT_TO_SYNC='[\
+    { "url": "https://yoursharepoint.com", "folder": "Shared Documents"},\
+    { "url": "https://yoursharepoint.com", "folder": "Shared Documents"}]'
+```
 
 ## Usage Instructions
 
-1. Fill in the SharePoint_sites, SharePoint_folders variables in your environment file. An example of that might look like this
-
-`export SHAREPOINT_SITES="https://wwpubsec.SharePoint.com/sites/SharePointTest, https://wwpubsec.SharePoint.com/sites/SharePointTest"`
-
-`export SHAREPOINT_FOLDERS="/Shared Documents/Example1, /Shared Documents/Example2"`
-
-Notice the 1:1 relationship between the sites and folders. Each site has **ONLY ONE** folder.
-
+1. Fill in the SHAREPOINT_TO_SYNC variable in the env file, example can be found above
 2. Deploy Information Assistant like normal
 3. Once your deployment is complete, you'll need to login with a user that has access to the SharePoint sites you listed above. It is **strongly** recommended that you have created a new user for this purpose.
 4. Go to your resource group in the [Azure Portal](https://portal.azure.com/), select the "sharepointonline" API Connection resource.

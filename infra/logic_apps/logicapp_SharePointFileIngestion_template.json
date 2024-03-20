@@ -76,78 +76,36 @@
             "properties": {
                 "definition": {
                     "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "parameters": {
-                        "$connections": {
-                            "defaultValue": {},
-                            "type": "Object"
-                        }
-                    },
                     "actions": {
-                        "For_each_1": {
+                        "For_Each_SharepointSite": {
                             "actions": {
-                                "Increment_variable_1": {
-                                    "inputs": {
-                                        "name": "EntryFolderIndex",
-                                        "value": 1
-                                    },
-                                    "runAfter": {
-                                        "Until": [
-                                            "SUCCEEDED"
-                                        ]
-                                    },
-                                    "type": "IncrementVariable"
-                                },
-                                "Reset_Folder_Index": {
-                                    "inputs": {
-                                        "name": "FolderIndex",
-                                        "value": 1
-                                    },
-                                    "runAfter": {
-                                        "Reset_LoopIndex": [
-                                            "SUCCEEDED"
-                                        ]
-                                    },
-                                    "type": "SetVariable"
-                                },
-                                "Reset_LoopIndex": {
-                                    "inputs": {
-                                        "name": "LoopIndex",
-                                        "value": 0
-                                    },
-                                    "runAfter": {
-                                        "Reset_UncrawledFolders": [
-                                            "SUCCEEDED"
-                                        ]
-                                    },
-                                    "type": "SetVariable"
-                                },
                                 "Reset_UncrawledFolders": {
                                     "inputs": {
                                         "name": "UncrawledFolders",
                                         "value": [
-                                            "@{body('Parse_JSON')?['SharepointEntryFolder'][variables('EntryFolderIndex')]}"
+                                            "@items('For_Each_SharepointSite')['folder']"
                                         ]
                                     },
                                     "type": "SetVariable"
                                 },
                                 "Until": {
                                     "actions": {
-                                        "For_each": {
+                                        "For_each_FileFolder": {
                                             "actions": {
-                                                "Append_to_array_variable_1": {
+                                                "Append_folder_to_Uncrawled_Folders": {
                                                     "inputs": {
                                                         "name": "UncrawledFolders",
-                                                        "value": "@items('For_each')?['Path']"
+                                                        "value": "@items('For_each_FileFolder')?['Path']"
                                                     },
                                                     "runAfter": {
-                                                        "Get_file_content_1": [
-                                                            "FAILED",
-                                                            "SKIPPED"
+                                                        "Get_file_content": [
+                                                            "SKIPPED",
+                                                            "FAILED"
                                                         ]
                                                     },
                                                     "type": "AppendToArrayVariable"
                                                 },
-                                                "Get_file_content_1": {
+                                                "Get_file_content": {
                                                     "inputs": {
                                                         "host": {
                                                             "connection": {
@@ -155,32 +113,20 @@
                                                             }
                                                         },
                                                         "method": "get",
-                                                        "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_each_1')))}/files/@{encodeURIComponent(items('For_each')?['Id'])}/content",
+                                                        "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_Each_SharepointSite')['url']))}/files/@{encodeURIComponent(items('For_each_FileFolder')?['Id'])}/content",
                                                         "queries": {
                                                             "inferContentType": true
                                                         }
                                                     },
                                                     "type": "ApiConnection"
                                                 },
-                                                "Increment_variable": {
-                                                    "inputs": {
-                                                        "name": "FolderIndex",
-                                                        "value": 1
-                                                    },
-                                                    "runAfter": {
-                                                        "Append_to_array_variable_1": [
-                                                            "SUCCEEDED"
-                                                        ]
-                                                    },
-                                                    "type": "IncrementVariable"
-                                                },
                                                 "Is_Accepted_File_Type": {
                                                     "actions": {
-                                                        "DoesItExist": {
+                                                        "Does_it_Exist_And_is_it_old": {
                                                             "actions": {
-                                                                "Create_blob_(V2)_1": {
+                                                                "Create_blob_(V2)": {
                                                                     "inputs": {
-                                                                        "body": "@body('Get_file_content_1')",
+                                                                        "body": "@body('Get_file_content')",
                                                                         "headers": {
                                                                             "ReadFileMetadataFromServer": true
                                                                         },
@@ -193,7 +139,7 @@
                                                                         "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files",
                                                                         "queries": {
                                                                             "folderPath": "/upload",
-                                                                            "name": "@{concat('/', replace(items('For_each_1'), 'https://', ''))}@{items('For_each')?['Path']}",
+                                                                            "name": "@{concat('/', replace(items('For_Each_SharepointSite')['url'], 'https://', ''))}@{items('For_each_FileFolder')?['Path']}",
                                                                             "queryParametersSingleEncoded": true
                                                                         }
                                                                     },
@@ -218,7 +164,7 @@
                                                                     },
                                                                     {
                                                                         "equals": [
-                                                                            "@greater(ticks(items('For_each')?['LastModified']),ticks(body('Get_Blob_Metadata_(V2)')?['LastModified']))",
+                                                                            "@greater(ticks(items('For_each_FileFolder')?['LastModified']),ticks(body('Get_Blob_Metadata_(V2)')?['LastModified']))",
                                                                             true
                                                                         ]
                                                                     }
@@ -240,19 +186,19 @@
                                                                     }
                                                                 },
                                                                 "method": "get",
-                                                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(concat('upload', '/', replace(items('For_each_1'), 'https://', ''), items('For_each')?['Path'])))}"
+                                                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent(concat('upload', '/', replace(items('For_Each_SharepointSite')['url'], 'https://', ''), items('For_each_FileFolder')?['Path'])))}"
                                                             },
                                                             "runAfter": {
-                                                                "Update_Sharepoint_File_List": [
+                                                                "Update_SharepointFileList": [
                                                                     "SUCCEEDED"
                                                                 ]
                                                             },
                                                             "type": "ApiConnection"
                                                         },
-                                                        "Update_Sharepoint_File_List": {
+                                                        "Update_SharepointFileList": {
                                                             "inputs": {
                                                                 "name": "SharepointFileList",
-                                                                "value": "@{concat('/', replace(items('For_each_1'), 'https://', ''))}@{items('For_each')?['Path']}"
+                                                                "value": "@{concat('/', replace(items('For_Each_SharepointSite')['url'], 'https://', ''))}@{items('For_each_FileFolder')?['Path']}"
                                                             },
                                                             "type": "AppendToArrayVariable"
                                                         }
@@ -264,14 +210,14 @@
                                                         "and": [
                                                             {
                                                                 "contains": [
-                                                                    "@variables('AcceptedFileTypes')",
-                                                                    "@last(split(items('For_each')?['Name'], '.'))"
+                                                                    "@body('Parse_JSON')?['AcceptedFileTypes']",
+                                                                    "@last(split(items('For_each_FileFolder')?['Name'], '.'))"
                                                                 ]
                                                             }
                                                         ]
                                                     },
                                                     "runAfter": {
-                                                        "Get_file_content_1": [
+                                                        "Get_file_content": [
                                                             "SUCCEEDED"
                                                         ]
                                                     },
@@ -286,26 +232,11 @@
                                             },
                                             "type": "Foreach"
                                         },
-                                        "Increment_Loop_index": {
-                                            "inputs": {
-                                                "name": "LoopIndex",
-                                                "value": 1
-                                            },
-                                            "runAfter": {
-                                                "IterateBlobList": [
-                                                    "SUCCEEDED",
-                                                    "FAILED",
-                                                    "SKIPPED",
-                                                    "TIMEDOUT"
-                                                ]
-                                            },
-                                            "type": "IncrementVariable"
-                                        },
                                         "IterateBlobList": {
                                             "actions": {
-                                                "Condition": {
+                                                "Condition_2": {
                                                     "actions": {
-                                                        "Delete_blob_(V2)_1": {
+                                                        "Delete_blob_(V2)": {
                                                             "inputs": {
                                                                 "headers": {
                                                                     "SkipDeleteIfFileNotFoundOnServer": false
@@ -361,12 +292,7 @@
                                                     }
                                                 },
                                                 "method": "get",
-                                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_each_1')))}/folders/@{encodeURIComponent(encodeURIComponent(skip(variables('UncrawledFolders'),variables('LoopIndex'))[0]))}"
-                                            },
-                                            "metadata": {
-                                                "%252fLists%252fTaxonomyHiddenList%252fItem": "/Lists/TaxonomyHiddenList/Item",
-                                                "%252fShared%2bDocuments": "/Shared Documents",
-                                                "%252fSitePages%252fForms": "/SitePages/Forms"
+                                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_Each_SharepointSite')['url']))}/folders/@{encodeURIComponent(encodeURIComponent(variables('UncrawledFolders')[int(iterationIndexes('Until'))]))}"
                                             },
                                             "runAfter": {
                                                 "Reset_SharepointFileList": [
@@ -390,11 +316,8 @@
                                                 }
                                             },
                                             "runAfter": {
-                                                "For_each": [
-                                                    "SUCCEEDED",
-                                                    "TIMEDOUT",
-                                                    "SKIPPED",
-                                                    "FAILED"
+                                                "For_each_FileFolder": [
+                                                    "SUCCEEDED"
                                                 ]
                                             },
                                             "type": "ApiConnection"
@@ -405,31 +328,41 @@
                                                 "value": []
                                             },
                                             "type": "SetVariable"
+                                        },
+                                        "Set_variable": {
+                                            "inputs": {
+                                                "name": "Loop Index",
+                                                "value": "@int(iterationIndexes('Until'))"
+                                            },
+                                            "runAfter": {
+                                                "IterateBlobList": [
+                                                    "SUCCEEDED",
+                                                    "TIMEDOUT",
+                                                    "SKIPPED",
+                                                    "FAILED"
+                                                ]
+                                            },
+                                            "type": "SetVariable"
                                         }
                                     },
-                                    "expression": "@greaterOrEquals(variables('LoopIndex'),variables('FolderIndex'))",
+                                    "expression": "@greaterOrEquals(add(variables('Loop Index'),1),length(variables('UncrawledFolders')))",
                                     "limit": {
-                                        "count": 12,
+                                        "count": 60,
                                         "timeout": "PT1H"
                                     },
                                     "runAfter": {
-                                        "Reset_Folder_Index": [
+                                        "Reset_UncrawledFolders": [
                                             "SUCCEEDED"
                                         ]
                                     },
                                     "type": "Until"
                                 }
                             },
-                            "foreach": "@body('Parse_JSON')?['SharepointSite']",
+                            "foreach": "@body('Parse_JSON')?['SharepointSites']",
                             "runAfter": {
-                                "Init_SharepointFileList": [
+                                "Init_Loop_Index": [
                                     "SUCCEEDED"
                                 ]
-                            },
-                            "runtimeConfiguration": {
-                                "concurrency": {
-                                    "repetitions": 1
-                                }
                             },
                             "type": "Foreach"
                         },
@@ -441,16 +374,33 @@
                                     }
                                 },
                                 "method": "get",
-                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent('/config/config.json'))}/content",
+                                "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/files/@{encodeURIComponent(encodeURIComponent('JTJmY29uZmlnJTJmY29uZmlnLmpzb24='))}/content",
                                 "queries": {
                                     "inferContentType": true
                                 }
                             },
                             "metadata": {
-                                "JTJmdXBsb2FkJTJmc2hhcmVwb2ludC1jb25maWcuanNvbg==": "/upload/sharepoint-config.json"
+                                "JTJmY29uZmlnJTJmY29uZmlnLmpzb24=": "/config/config.json"
                             },
                             "runAfter": {},
                             "type": "ApiConnection"
+                        },
+                        "Init_Loop_Index": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "Loop Index",
+                                        "type": "integer",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Init_SharepointFileList": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
                         },
                         "Init_SharepointFileList": {
                             "inputs": {
@@ -463,7 +413,24 @@
                                 ]
                             },
                             "runAfter": {
-                                "Setup_EntryFolderIndex": [
+                                "Init_UncrawledFolders": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Init_UncrawledFolders": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "UncrawledFolders",
+                                        "type": "array",
+                                        "value": []
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Parse_JSON": [
                                     "SUCCEEDED"
                                 ]
                             },
@@ -471,7 +438,7 @@
                         },
                         "Parse_JSON": {
                             "inputs": {
-                                "content": "@base64ToString(outputs('Get_blob_content_(V2)')?['body']['$content'])\r\n",
+                                "content": "@base64ToString(outputs('Get_blob_content_(V2)')?['body']['$content'])",
                                 "schema": {
                                     "properties": {
                                         "AcceptedFileTypes": {
@@ -480,15 +447,21 @@
                                             },
                                             "type": "array"
                                         },
-                                        "SharepointEntryFolder": {
+                                        "SharepointSites": {
                                             "items": {
-                                                "type": "string"
-                                            },
-                                            "type": "array"
-                                        },
-                                        "SharepointSite": {
-                                            "items": {
-                                                "type": "string"
+                                                "properties": {
+                                                    "folder": {
+                                                        "type": "string"
+                                                    },
+                                                    "url": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "url",
+                                                    "folder"
+                                                ],
+                                                "type": "object"
                                             },
                                             "type": "array"
                                         }
@@ -502,93 +475,6 @@
                                 ]
                             },
                             "type": "ParseJson"
-                        },
-                        "Set_Accepted_File_Types": {
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "AcceptedFileTypes",
-                                        "type": "array",
-                                        "value": "@body('Parse_JSON')?['AcceptedFileTypes']"
-                                    }
-                                ]
-                            },
-                            "runAfter": {
-                                "Parse_JSON": [
-                                    "SUCCEEDED"
-                                ]
-                            },
-                            "type": "InitializeVariable"
-                        },
-                        "Set_Index": {
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "FolderIndex",
-                                        "type": "integer",
-                                        "value": 1
-                                    }
-                                ]
-                            },
-                            "runAfter": {
-                                "Setup_Array": [
-                                    "SUCCEEDED"
-                                ]
-                            },
-                            "type": "InitializeVariable"
-                        },
-                        "Set_Loop_Index": {
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "LoopIndex",
-                                        "type": "integer",
-                                        "value": 0
-                                    }
-                                ]
-                            },
-                            "runAfter": {
-                                "Set_Index": [
-                                    "SUCCEEDED"
-                                ]
-                            },
-                            "type": "InitializeVariable"
-                        },
-                        "Setup_Array": {
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "UncrawledFolders",
-                                        "type": "array",
-                                        "value": [
-                                            "@body('Parse_JSON')?['SharepointEntryFolder']"
-                                        ]
-                                    }
-                                ]
-                            },
-                            "runAfter": {
-                                "Set_Accepted_File_Types": [
-                                    "SUCCEEDED"
-                                ]
-                            },
-                            "type": "InitializeVariable"
-                        },
-                        "Setup_EntryFolderIndex": {
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "EntryFolderIndex",
-                                        "type": "integer",
-                                        "value": 0
-                                    }
-                                ]
-                            },
-                            "runAfter": {
-                                "Set_Loop_Index": [
-                                    "SUCCEEDED"
-                                ]
-                            },
-                            "type": "InitializeVariable"
                         }
                     },
                     "contentVersion": "1.0.0.0",
@@ -597,8 +483,7 @@
                         "Recurrence": {
                             "recurrence": {
                                 "frequency": "Hour",
-                                "interval": 24,
-                                "timeZone": "Central Standard Time"
+                                "interval": 24
                             },
                             "runtimeConfiguration": {
                                 "concurrency": {

@@ -71,7 +71,7 @@ ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By de
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 ENABLE_BING_SAFE_SEARCH | No | Defaults to `true` If you are using the Bing Search API, you can set the following values to enable safe search.
-SHAREPOINT_SITES</br>SHAREPOINT_FOLDERS | No | Comma separated list of SharePoint sites and folders you wish you ingest, these share a 1:1 relationship. For each entry in SHAREPOINT_SITES, you must have ONE entry in SHAREPOINT_FOLDERS. i.e. `SHAREPOINT_SITES=site1,site2` then `SHAREPOINT_FOLDERS=folder1forsite1,folder2forsite2` Information on setting up SharePoint Ingestion can be found here [SharePoint Feature](/docs/features/sharepoint.md)
+SHAREPOINT_TO_SYNC | No | This is a JSON Array of Objects for Sharepoint Sites and their entryfolders. The app will crawl down from the folder specified for each site. Specifying "/Shared Documents" will crawl all the documents in your sharepoint. `[{"url": "https://SharePoint.com/", "folder": "/Shared Documents"}]` Information on setting up SharePoint Ingestion can be found here [SharePoint Feature](/docs/features/sharepoint.md)
 
 ## Log into Azure using the Azure CLI
 

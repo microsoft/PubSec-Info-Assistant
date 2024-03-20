@@ -4,13 +4,17 @@
 #!/bin/bash
 
 set -e
+set -x
 
 figlet Create Configuration File
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FILEPATH="$DIR/../infra/sp_config/config.json"
 ACCEPTED_FILE_TYPES="pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg"
-mkdir -p $DIR/../infra/sp_config
+SHAREPOINT_TO_SYNC='[
+    { "url": "https://wwpubsec.sharepoint.com/sites/SharepointTest", "folder": "/Shared Documents/Microsoft"},
+    { "url": "https://wwpubsec.sharepoint.com/sites/SharepointTest", "folder": "/Shared Documents/EduMaterial"}
+]'
 
 # $1 is FILEPATH
 # $2 is the key
@@ -52,10 +56,13 @@ echo "{" > $FILEPATH
 write_array_block $FILEPATH "AcceptedFileTypes" "ACCEPTED_FILE_TYPES"
 echo "," >> $FILEPATH
 
-write_array_block $FILEPATH "SharepointSite" "SHAREPOINT_SITES"
-echo "," >> $FILEPATH
+echo -e -n "\"SharepointSites\": " >> $FILEPATH
+echo $SHAREPOINT_TO_SYNC >> $FILEPATH
 
-write_array_block $FILEPATH "SharepointEntryFolder" "SHAREPOINT_FOLDERS"
+#write_array_block $FILEPATH "SharepointSite" "SHAREPOINT_SITES"
+#echo "," >> $FILEPATH
+
+#write_array_block $FILEPATH "SharepointEntryFolder" "SHAREPOINT_FOLDERS"
 
 
 echo -e "\n}" >> $FILEPATH

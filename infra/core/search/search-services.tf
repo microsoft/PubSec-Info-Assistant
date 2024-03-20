@@ -21,17 +21,6 @@ resource "azurerm_key_vault_secret" "search_service_key" {
   key_vault_id = var.keyVaultId
 }
 
-output "id" {
-  value = azurerm_search_service.search.id
-}
-
-output "endpoint" {
-  value = "https://${azurerm_search_service.search.name}.${var.azure_search_domain}/"
-}
-
-output "name" {
-  value = azurerm_search_service.search.name
-}
 
 data "azurerm_search_service" "search" {
   name                = azurerm_search_service.search.name

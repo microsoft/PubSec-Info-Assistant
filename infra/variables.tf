@@ -231,6 +231,15 @@ variable "embeddingsDeploymentCapacity" {
 }
 ////
 
+////
+// Variables that are used for the secure mode
+////
+variable "is_secure_mode" {
+  type = bool
+  default = false
+}
+////
+
 variable "formRecognizerSkuName" {
   type    = string
   default = "S0"

@@ -121,3 +121,9 @@ variable "runtimeVersion" {
   type    = string
   default = "3.10"
 }
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}

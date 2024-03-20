@@ -33,14 +33,4 @@ resource "azurerm_key_vault_secret" "spClientKeySecret" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
-output "keyVaultName" {
-  value = azurerm_key_vault.kv.name
-}
 
-output "keyVaultId" {
-  value = azurerm_key_vault.kv.id
-}
-
-output "keyVaultUri" {
-  value = azurerm_key_vault.kv.vault_uri
-}

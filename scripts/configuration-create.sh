@@ -4,7 +4,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 figlet Create Configuration File
 

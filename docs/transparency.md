@@ -112,7 +112,7 @@ This system is primarily tuned for accuracy of response based on the data provid
 ## System behavior: External Web-based RAG
 
 ### Overview
-This system is implemented with [Bing Web Search for LLMs API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) and Azure OpenAI service. The system allows the end user to ask questions in natural language via the Azure OpenAI service, and grounds the answer via responses to the question from Bing Web Search. This allows end users to "have a conversation" with data from recent information found on the public Internet. The system cites the web sites from which it generates answers, allowing the end user to verify the results for accuracy.
+This system is implemented with [Bing Web Search for LLMs API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) and Azure OpenAI service. The system allows the end user to ask questions in natural language via the Azure OpenAI service, and grounds the answer via responses to the question from Bing Web Search. This allows end users to "have a conversation" with data from recent information found on the public Internet. The system cites the web sites from which it generates answers, allowing the end user to verify the results for accuracy. This system does not use Bing "Answers" which are curated facts available through the Bing web interface and potentially other non-LLM APIs. 
 
 This system behavior is similar to Copilot in Bing. We suggest reviewing their [Transparency Note](https://support.microsoft.com/en-us/topic/copilot-in-bing-our-approach-to-responsible-ai-45b5eae8-7466-43e1-ae98-b48f8ff8fd44) as well when considering if you want to deploy this solution for your end users. From their Transparency Note you can read about what the Copilot in Bing team has done from a Responsible AI perspective, and what you may want to consider doing to help improve the safety of your solution.
 
@@ -190,18 +190,18 @@ As features in this accelerator may be turned on/off at deployment time, it does
 
 ### Age Appropriateness/Exposure to Minors
 
-This accelerator contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology systems available today are unable to mitigate all potential harms and meet all legal limitations. This accelerator does not address these concerns.
+This accelerator contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology **systems available at the time of this writing are unable to mitigate all potential harms and meet all legal limitations. This accelerator does not address these concerns.**
 
 **Great care MUST BE taken to evaluate your solution, especially when applying to minors.**
 
 Current known limitations with respect to minors:
 * Bing Safe Search is limited to filtering Adult Content in text and image form
 * Content Safety features may be enabled but are not comprehensive enough to limit all potential harms related to self harm, hate speech, racism, terrorism and violence
-* Content Safety does not support some regional legal reuqirements including ability to limit religious content and content related to sexual oreintation 
+* Content Safety does not support some regional legal requirements including ability to limit religious content and content related to sexual oreintation 
 * Age-adaptive prompting is not implemented in this accelerator
 * This accelerator does not have age awareness
 * This accelerator does not utilize, collect or store guardian consent
-* This accelerator does not store user interaction history in any form; neither queries nor responses are stored
+* This accelerator does not store user interaction history in any form including user identifiers, queries or responses
 * This accelerator may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
 
 
@@ -233,11 +233,11 @@ This software is not intended for real-time data usage. This is a batch-processi
 
 ### Request Throttling
 
-The Azure OpenAI API may be subject to throttling. As such this accelerator may have performance limitations and should not be placed into a mission-critical operation at the time of this writing. 
+The Azure OpenAI API may be subject to throttling. As such this accelerator may have performance limitations and should not be placed into a mission-critical operation without confirmed provisioned throughput (PTU). 
 
-# System performance
+# System performance - Grounded experiences
 
-The central part of IA Accelerator (the system) is to produce answers to questions with the data provided by the end user (grounded). This relies on several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
+The central part of IA Accelerator (the system) is to produce answers to questions with the data provided, either by the end user or web results (grounded). This relies on several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
 - documents with the answers available to the system
 - submitted documents having been successfully processed
 - input questions with sufficient detail to identify the best source documents available
@@ -251,6 +251,8 @@ False Negative | The user asks a question and the system does not find any docum
 True Negative | The user asks a question and the system does not find any document available to answer and there was no document available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited. The system responds that it is unable to answer the question.
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. False Positive outcomes may be mitigated by human review of citations.
+
+During web-grounded interactions, human oversight is required to verify the vailidity of the source data; web content should not be inately trusted. 
 
 **NOTE:** Due to generative AI's capability to fabricate, end users should always leverage citations to verify results.
 

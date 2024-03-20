@@ -156,6 +156,14 @@ variable "azure_monitor_ods_domain" {
 variable "azure_automation_domain" {
   type = string
 }
+
+variable "azure_ai_document_intelligence_domain" {
+  type = string
+}
+
+variable "azure_ai_videoindexer_domain" {
+  type = string
+}
 ////
 
 ////

@@ -215,7 +215,7 @@ resource "azurerm_private_dns_a_record" "backendPrivateDnsARecord" {
   zone_name          = "${var.private_dns_zone_name}"
   resource_group_name = var.resourceGroupName
   ttl                = 300
-  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_ip_address]
+  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_service_connection[0].private_ip_address]
 }
 
 resource "azurerm_private_dns_a_record" "backendScmPrivateDnsARecord" {
@@ -224,6 +224,6 @@ resource "azurerm_private_dns_a_record" "backendScmPrivateDnsARecord" {
   zone_name          = "${var.private_dns_zone_name}"
   resource_group_name = var.resourceGroupName
   ttl                = 300
-  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_ip_address]
+  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_service_connection[0].private_ip_address]
 }
 

@@ -96,6 +96,26 @@ module "privateDnsZoneAzureAiTranslation" {
   tags               = local.tags
 }
 
+module "privateDnsZoneAzureAiDocIntel" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.${var.azure_ai_document_intelligence_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network[0].vnet_id
+  tags               = local.tags
+}
+
+module "privateDnsZoneAzureAIVideoIndexer" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.${var.azure_ai_videoindexer_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-azure-ai-video-indexer-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network[0].vnet_id
+  tags               = local.tags
+}
+
 module "privateDnsZoneApp" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
@@ -594,6 +614,8 @@ module "video_indexer" {
   azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
   arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
   video_indexer_api_version           = var.video_indexer_api_version
+  subnet_id                           = module.network[0].snetAzureAi_id
+  privateDnsZoneName                  = module.privateDnsZoneAzureAIVideoIndexer[0].privateDnsZoneName
 }
 
 // USER ROLES

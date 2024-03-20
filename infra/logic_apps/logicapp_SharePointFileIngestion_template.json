@@ -85,6 +85,18 @@
                     "actions": {
                         "For_Each_SharepointSite": {
                             "actions": {
+                                "Reset_FolderIndex": {
+                                    "inputs": {
+                                        "name": "FolderIndex",
+                                        "value": 0
+                                    },
+                                    "runAfter": {
+                                        "Reset_UncrawledFolders": [
+                                            "SUCCEEDED"
+                                        ]
+                                    },
+                                    "type": "SetVariable"
+                                },
                                 "Reset_UncrawledFolders": {
                                     "inputs": {
                                         "name": "UncrawledFolders",
@@ -125,6 +137,18 @@
                                                         }
                                                     },
                                                     "type": "ApiConnection"
+                                                },
+                                                "Increment_variable": {
+                                                    "inputs": {
+                                                        "name": "FolderIndex",
+                                                        "value": 1
+                                                    },
+                                                    "runAfter": {
+                                                        "Append_folder_to_Uncrawled_Folders": [
+                                                            "SUCCEEDED"
+                                                        ]
+                                                    },
+                                                    "type": "IncrementVariable"
                                                 },
                                                 "Is_Accepted_File_Type": {
                                                     "actions": {
@@ -298,10 +322,10 @@
                                                     }
                                                 },
                                                 "method": "get",
-                                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_Each_SharepointSite')['url']))}/folders/@{encodeURIComponent(encodeURIComponent(variables('UncrawledFolders')[int(iterationIndexes('Until'))]))}"
+                                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(items('For_Each_SharepointSite')['url']))}/folders/@{encodeURIComponent(encodeURIComponent(variables('UncrawledFolders')[variables('FolderIndex')]))}"
                                             },
                                             "runAfter": {
-                                                "Reset_SharepointFileList": [
+                                                "Set_LoopIndex": [
                                                     "SUCCEEDED"
                                                 ]
                                             },
@@ -335,29 +359,26 @@
                                             },
                                             "type": "SetVariable"
                                         },
-                                        "Set_variable": {
+                                        "Set_LoopIndex": {
                                             "inputs": {
                                                 "name": "Loop Index",
                                                 "value": "@int(iterationIndexes('Until'))"
                                             },
                                             "runAfter": {
-                                                "IterateBlobList": [
-                                                    "SUCCEEDED",
-                                                    "TIMEDOUT",
-                                                    "SKIPPED",
-                                                    "FAILED"
+                                                "Reset_SharepointFileList": [
+                                                    "SUCCEEDED"
                                                 ]
                                             },
                                             "type": "SetVariable"
                                         }
                                     },
-                                    "expression": "@greaterOrEquals(add(variables('Loop Index'),1),length(variables('UncrawledFolders')))",
+                                    "expression": "@greaterOrEquals(variables('Loop Index'),variables('FolderIndex'))",
                                     "limit": {
                                         "count": 60,
                                         "timeout": "PT1H"
                                     },
                                     "runAfter": {
-                                        "Reset_UncrawledFolders": [
+                                        "Reset_FolderIndex": [
                                             "SUCCEEDED"
                                         ]
                                     },
@@ -366,9 +387,14 @@
                             },
                             "foreach": "@body('Parse_JSON')?['SharepointSites']",
                             "runAfter": {
-                                "Init_Loop_Index": [
+                                "Init_FolderIndex": [
                                     "SUCCEEDED"
                                 ]
+                            },
+                            "runtimeConfiguration": {
+                                "concurrency": {
+                                    "repetitions": 1
+                                }
                             },
                             "type": "Foreach"
                         },
@@ -390,6 +416,23 @@
                             },
                             "runAfter": {},
                             "type": "ApiConnection"
+                        },
+                        "Init_FolderIndex": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "FolderIndex",
+                                        "type": "integer",
+                                        "value": 0
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "Init_Loop_Index": [
+                                    "SUCCEEDED"
+                                ]
+                            },
+                            "type": "InitializeVariable"
                         },
                         "Init_Loop_Index": {
                             "inputs": {

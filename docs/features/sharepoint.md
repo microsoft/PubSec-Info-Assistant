@@ -20,10 +20,11 @@ Your SharePoint files will be stored in the blob storage created by Information 
 
 #### SHAREPOINT_TO_SYNC
 This is a single quoted JSON Array of Objects within the env file. With the keys "url" and "folder" for each sharepoint site to ingest.
+The forward slash at the beginning of a folder is **required**
 ```JSON
 export SHAREPOINT_TO_SYNC='[
-    { "url": "https://yoursharepoint.com", "folder": "Shared Documents"},
-    { "url": "https://yoursharepoint.com", "folder": "Shared Documents"}
+    { "url": "https://yoursharepoint.com", "folder": "/Shared Documents"},
+    { "url": "https://yoursharepoint.com", "folder": "/Shared Documents"}
     ]'
 ```
 

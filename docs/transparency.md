@@ -45,7 +45,9 @@ Microsoft’s Transparency Notes are part of a broader effort at Microsoft to pu
 
 ## Introduction
 
-The IA Accelerator is a system built on top of Azure OpenAI service, Cognitive Search and other Azure services. IA Accelerator is an implementation of the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
+The IA Accelerator is a system built on top of Azure OpenAI service, Azure AI Search and other Azure services. This system showcases capabilites possible with the emerging technologies related to Generative AI and how they may be applied for specific functionality. This accelerator has been designed with Public Sector applications in mind, but has been found to be applicable to additional industries and applications. The user should be aware that Microsoft has evaluated this accelerator for a limited set of use cases. Use cases outside of those which have been evaluated need to be considered and evaluated by those using this accelerator for their intended use cases. 
+
+At its core, the IA Accelerator is an implementation of the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the accelerator is referencing.
 
 The system aims to provide the functionality mentioned above while also focusing on the following key areas:
 
@@ -67,6 +69,8 @@ The system aims to provide the functionality mentioned above while also focusing
 
 **NOTE:** Though we are focusing on the key areas above, **human oversight to confirm accuracy is critical. All responses from the system must be verified with the citations provided**. The responses are only as accurate as the data provided.
 
+The 1.1 release of the IA Accelerator introduces new technologies and use cases on top of the original scope which are covered in this updated Transparency Note. Become familiar with these new use cases and understand their responsible application to your intended use cases before proceeding.
+
 ## Key Terms
 
 Terminology | Definition
@@ -80,14 +84,18 @@ Terminology | Definition
 [Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering) | "A concept in artificial intelligence, particularly natural language processing. In prompt engineering, the description of the task that the AI is supposed to accomplish is embedded in the input, e.g. as a question, instead of it being explicitly given. Prompt engineering typically works by converting one or more tasks to a prompt-based dataset and training a language model with what has been called "prompt-based learning" or just "prompt learning"."
 [RAG](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) | Retrieval Augmented Generation; a pattern where data is retrieved (such as from a search system) and sent to Generative AI with a prompt to provide specific data to answer a question. 
 [Semantic Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) | "A collection of query-related capabilities that bring semantic relevance and language understanding to textual search results."
-[Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant. 
+[Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant.
+[Vector Search](https://learn.microsoft.com/en-us/azure/search/vector-search-overview) | "Vector search is an approach in information retrieval that stores numeric representations of content for search scenarios. Because the content is numeric rather than plain text, the search engine matches on vectors that are the most similar to the query, with no requirement for matching on exact terms."
 
 # Capabilities
 **NOTE:** This project is developed with an agile methodology. As such, features and capabilities are subject to change, and may change faster than the documentation. Those deploying this project should review approved pull requests to understand changes which have been committed since the update of the documentation.
-## System behavior
+
+## System behavior: Internal Document-based RAG
 
 ### Overview
 This system is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
+
+The system differentiates the internally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded. 
 
 By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.**
 
@@ -101,15 +109,61 @@ This system is primarily tuned for accuracy of response based on the data provid
 
 **NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
 
-## Use cases
+## System behavior: External Web-based RAG
 
-### Intended uses
+### Overview
+This system is implemented with [Bing Web Search for LLMs API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) and Azure OpenAI service. The system allows the end user to ask questions in natural language via the Azure OpenAI service, and grounds the answer via responses to the question from Bing Web Search. This allows end users to "have a conversation" with data from recent information found on the public Internet. The system cites the web sites from which it generates answers, allowing the end user to verify the results for accuracy.
+
+This system behavior is similar to Copilot in Bing. We suggest reviewing their [Transparency Note](https://support.microsoft.com/en-us/topic/copilot-in-bing-our-approach-to-responsible-ai-45b5eae8-7466-43e1-ae98-b48f8ff8fd44) as well when considering if you want to deploy this solution for your end users. From their Transparency Note you can read about what the Copilot in Bing team has done from a Responsible AI perspective, and what you may want to consider doing to help improve the safety of your solution.
+
+The system differentiates the externally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded. 
+
+Due to the nature of the content available on the public Internet, it is likely that most questions will have one or more responses and that those responses will change over time. This is especially important for web-based results which are subject to real-time changes due to current events. **The relevance and accuracy of the answers to the questions asked will need to be evaluated at all times by the end user.**
+
+### Data Preparation
+
+The system receives and process top responses from Bing Web Search each time a question is asked; the system does NOT cache response for reuse. Due to the nature of the public Internet and continuous search indexing by the Bing service, it should be expected that answers to questions will change over time as new, potentially more relevant or updated results are returned from the Bing Web Search service.
+
+
+### Content Controls
+The [Bing Web Search for LLM API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) supports the Bing "Safe Search" content filtering features, which can be configured for the system at deployment time. The feature currently supports three settings {Off, Moderate, Strict} which **apply ONLY to Adult content**. At the time of this writing there is no ability within the Bing Web Search API to filter or restrict content further. This fact should be considered when evaluating your specific use case, especially if considering exposure to minors. **Microsoft does not believe that the current controls on Bing Web Search are sufficient for minors**.
+
+## System behavior: Compare Internally- to Externally-grounded RAG
+
+### Overview
+This system is implemented by composing the [internally-grounded](#system-behavior-internal-document-based-rag) and [externally-grounded](#system-behavior-external-web-based-rag) features to answer a question, then compare the answers via a prompt made to the LLM. To implement this feature, the system makes separate calls to both features (internal and external), then creates a prompt to compare the answers. This answer is displayed to the end user.
+
+The system differentiates the compared answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded.
+
+As this system makes new calls to these services each time they are invoked, it is important to note that the answers to the same question may change over time based on new data being indexed or changes in search relevance. This is especially important for web-based results which are subject to real-time changes due to current events. **The relevance and accuracy of the answers to the questions asked will need to be evaluated at all times by the end user.**
+
+### Data Preparation
+
+The system receives responses from the internal document set, and the external web-based results. 
+
+### Prompt Engineering
+
+This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
+
+**NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
+
+
+### Prompt Engineering
+
+This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
+
+**NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
+
+# Use cases
+
+## Intended uses
 
 This system is intended for the purpose of enabling ChatGPT capabilities with data provided by the end user. This system leverages prompt engineering to limit the creativity of the OpenAI model(s) and citations to help the end user determine when answers are factual. This system uses private search and is not intended as a replacement for a comprehensive internet-based search engine such as OpenAI-enabled Bing search; this system will not provide up-to-date search results from the Internet. This system is not intended to provide creative responses which are not backed in data available to the system (i.e. generation of papers, images or answering questions in an ungrounded manner ).
 
 ### Considerations when choosing a use case
 
 **Avoid using IA Accelerator for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
+
 
 # Limitations of IA Accelerator
 

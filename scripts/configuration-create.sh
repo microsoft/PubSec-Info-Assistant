@@ -10,6 +10,7 @@ figlet Create Configuration File
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FILEPATH="$DIR/../infra/sp_config/config.json"
 ACCEPTED_FILE_TYPES="pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg"
+mkdir -p $DIR/../infra/sp_config
 
 # $1 is FILEPATH
 # $2 is the key

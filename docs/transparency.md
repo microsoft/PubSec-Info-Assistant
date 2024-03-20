@@ -139,17 +139,12 @@ As this system makes new calls to these services each time they are invoked, it 
 
 ### Data Preparation
 
+**XXXXXXXXXXXXXXXXXXXXX**
 The system receives responses from the internal document set, and the external web-based results. 
 
 ### Prompt Engineering
 
-This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
-
-**NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
-
-
-### Prompt Engineering
-
+**XXXXXXXXXXXXXXXXXX**
 This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
 
 **NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 

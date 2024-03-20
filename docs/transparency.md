@@ -93,7 +93,7 @@ Terminology | Definition
 ## System behavior: Internal Document-based RAG
 
 ### Overview
-This system is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
+This system is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats either via direct upload or via integration with SharePoint connector. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
 
 The system differentiates the internally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded. 
 
@@ -147,7 +147,33 @@ The system receives responses from the internal document set, and the external w
 **XXXXXXXXXXXXXXXXXX**
 This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
 
-**NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided. 
+**NOTE:** Fabrications may not always be preventable via prompt engineering. End users must always validate results with citations provided.
+
+## System behavior: Ungrounded Chat
+
+### Overview
+This system leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios.
+
+Though users may ask questions in the ungrounded experience, ungrounded responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount. Ungrounded responses will NOT have citations avaiable for verification.
+
+The system differentiates the ungrounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish that the answer is ungrounded.
+
+### Data Preparation
+
+The system does no data preparation for ungrounded chat conversations. 
+
+### Prompt Engineering
+
+There is no propmt engineering provided by the systems for this capability. **Fabrications are likely.** 
+
+
+## XXXXXXXXXXXXXXXXXX
+
+Math Tutor
+
+CSV math
+
+Sharepoint
 
 # Use cases
 

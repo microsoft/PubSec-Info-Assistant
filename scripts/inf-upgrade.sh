@@ -13,17 +13,19 @@ import_resource_if_needed() {
 
     if [ ! -f "terraform.tfstate.d/$TF_VAR_environmentName/terraform.tfstate" ]; then
       # The RG is not managed by Terraform
+      figlet "RG not managed by Terraform"
       echo "Deployment $TF_VAR_environmentName is not managed by Terraform. Importing $module_path"
       echo "Importing $module_path"
       terraform import "$module_path" "$resource_id"
     elif terraform state list | grep -q "$module_path"; then
+      figlet "Managed by Terraform"
       # the module is already managed by terraform
       echo "Resource $module_path is already managed by Terraform"
     else  
       # the module is not managed by terraform
+      figlet "Not managed by Terraform"
       echo "Importing $module_path"
       terraform import "$module_path" "$resource_id"
-
 
     fi
 }
@@ -82,15 +84,16 @@ export TF_VAR_name="infoasststore$random_text"
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
 import_resource_if_needed "module.storage.azurerm_storage_account.storage" "$resourceId$providers"
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/upload"
-import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
+echo "zztop ***************: module.storage.azurerm_storage_container.container[1]" "$resourceId$providers"
+import_resource_if_needed "module.storage.azurerm_storage_container.container[1]" "$resourceId$providers"
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/content"
-import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/function"
-import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/logs"
-import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
-providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/website"
-import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
+# import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/function"
+# import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/logs"
+# import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
+# providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name/blobServices/default/containers/website"
+# import_resource_if_needed "module.storage.azurerm_storage_container.container" "$resourceId$providers"
 
 
 

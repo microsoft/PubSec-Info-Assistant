@@ -4,7 +4,7 @@
 #!/bin/bash
 set -e
 
-figlet Upgrade
+figlet Import Terraform State
 
 # escape special chars in a string
 escape_string() {

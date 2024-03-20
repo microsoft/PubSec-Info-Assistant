@@ -13,8 +13,6 @@ A secure Information Assistant deployment should be enabled for production envir
 * Storage Accounts with private endpoints for each sub-resource
 * VNET integration for App Services and Functions
 
-The secure deployment option for Information Assistant is not supported when using an existing Azure OpenAI service instance in your subscription. Do not enable the secure deployment option if you have set USE_EXISTING_AOAI to "true" in your local.env file.
-
 ## Architecture
 
 The following diagram shows a high-level view of the architecture.
@@ -59,3 +57,8 @@ To enable a Secure Deployment, update your local.env file as described below:
 ```
    export SECURE_MODE=true
 ```
+## Additional Considerations for Secure Deployment
+
+The secure deployment option for Information Assistant is not supported when using an existing Azure OpenAI service instance in your subscription. Do not enable the secure deployment option if you have set USE_EXISTING_AOAI to "true" in your local.env file.
+
+The secure deployment defines vNet and subnet IP Addresses along with the corresponding CIDR. Check the vNet IP Address range and CIDR in the network module of the main.tf file in the infra folder and update the vNet or subnet IP Addresses or CIDR to avoid conflicts with your existing network(s).

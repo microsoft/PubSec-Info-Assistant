@@ -1,5 +1,5 @@
 # Enable Secure Deployment
- 
+
 ## Overview
 
 A secure Information Assistant deployment should be enabled for production environments and should be considered for government clients or any client requiring additional levels of security. A secure deployment includes:
@@ -13,9 +13,9 @@ A secure Information Assistant deployment should be enabled for production envir
 * Storage Accounts with private endpoints for each sub-resource
 * VNET integration for App Services and Functions
 
-## Azure OpenAI service
-
 The secure deployment option for Information Assistant is not supported when using an existing Azure OpenAI service instance in your subscription. Do not enable the secure deployment option if you have set USE_EXISTING_AOAI to "true" in your local.env file.
+
+## Architecture
 
 The following diagram shows a high-level view of the architecture.
 
@@ -23,7 +23,7 @@ The following diagram shows a high-level view of the architecture.
 
 The Information Assistant secure deployment option assumes clients have established secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure.
 
-A more detailed architecuture diagram is available: 
+A more detailed architecuture diagram is available:
 
 [Secure deployment - Detailed Architecture](../images/secure-deployment-detailed-architecture.png)
 
@@ -31,14 +31,13 @@ If you do not have a secure communication channel between your enterprise and th
 
 More information on [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support)
 
-
 Detailed information on how to [create and manage a VPN Gateway is available at learn.microsoft.com](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal)
 
 After setting up a VPN Gateway, [configure the Azure VPN Client on your local machine](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-client)
 
+### Secure deployment - Architecture recommendation
+
 For scenarios beyond a simple demonstration consider [Azure Front Door](https://learn.microsoft.com/en-us/azure/frontdoor/)
-
-
 
 ## Front end
 
@@ -49,9 +48,7 @@ The following diagram shows the end user's interaction with Information Assistan
 * Azure AI Search to discovery content from uploaded files
 * Cosmos database to view the status of uploaded files
 
-
 [Secure Deploy - Front End Architecture](../images/secure-deployment-front-end-architecture.png)
-
 
 ## How to Enable a Secure Deployment
 
@@ -59,8 +56,6 @@ To enable a Secure Deployment, update your local.env file as described below:
 
 1. Navigate to your `local.env` and set SECURE_MODE to true
 
-   ```
-
+```
    export SECURE_MODE=true
-
-
+```

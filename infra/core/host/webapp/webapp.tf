@@ -85,7 +85,6 @@ resource "azurerm_linux_web_app" "app_service" {
     application_stack {
       python_version = var.runtimeVersion
     }
-    detailed_error_logging_enabled = true
     always_on                      = var.alwaysOn
     ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
     app_command_line               = var.appCommandLine

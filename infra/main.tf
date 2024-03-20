@@ -262,14 +262,11 @@ module "storage" {
   deleteRetentionPolicy = {
     days = 7
   }
-  containers       = ["content", "website", "upload", "function", "logs", "config"]
-  queueNames       = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
-  subnetResourceId = module.network[0].snetStorageAccount_id
-  private_dns_zone_ids = [
-    module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
-    module.privateDnsZoneStorageAccountQueue[0].privateDnsZoneResourceId
-  ]
-
+  containers            = ["content", "website", "upload", "function", "logs", "config"]
+  queueNames            = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
+  subnetResourceId      = var.is_secure_mode ? module.network[0].snetStorageAccount_id : null
+  private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
+                                                module.privateDnsZoneStorageAccountQueue[0].privateDnsZoneResourceId] : null
 }
 
 module "enrichmentApp" {
@@ -349,9 +346,9 @@ module "backend" {
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
   is_secure_mode                      = var.is_secure_mode
-  subnet_id                           = module.network[0].snetAppOutbound_id
-  private_dns_zone_ids                = [module.privateDnsZoneApp[0].privateDnsZoneResourceId]
-  private_dns_zone_name               = module.privateDnsZoneApp[0].privateDnsZoneName
+  subnet_id                           = var.is_secure_mode ? module.network[0].snetAppOutbound_id : null
+  private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
+  private_dns_zone_name               = var.is_secure_mode ? module.privateDnsZoneApp[0].privateDnsZoneName : null
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
@@ -413,8 +410,8 @@ module "openaiServices" {
   keyVaultId             = module.kvModule.keyVaultId
   openaiServiceKey       = var.azureOpenAIServiceKey
   useExistingAOAIService = var.useExistingAOAIService
-  subnetResourceId       = module.network[0].snetAzureAi_id
-  private_dns_zone_ids   = [module.privateDnsZoneAzureOpenAi[0].privateDnsZoneResourceId]
+  subnetResourceId       = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  private_dns_zone_ids   = var.is_secure_mode ? [module.privateDnsZoneAzureOpenAi[0].privateDnsZoneResourceId] : null
 
   deployments = [
     {
@@ -454,8 +451,8 @@ module "formrecognizer" {
   customSubDomainName  = "infoasst-fr-${random_string.random.result}"
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
-  subnetResourceId     = module.network[0].snetAzureAi_id
-  private_dns_zone_ids = [module.privateDnsZoneAzureAiFormRecognizer[0].privateDnsZoneResourceId]
+  subnetResourceId     = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneAzureAiFormRecognizer[0].privateDnsZoneResourceId] : null
 
 }
 
@@ -470,11 +467,9 @@ module "cognitiveServices" {
   tags              = local.tags
   keyVaultId        = module.kvModule.keyVaultId
   resourceGroupName = azurerm_resource_group.rg.name
-  subnetResourceId  = module.network[0].snetAzureAi_id
-  private_dns_zone_ids = [
-    module.privateDnsZoneAzureAiTextAnalytics[0].privateDnsZoneResourceId,
-    module.privateDnsZoneAzureAiTranslation[0].privateDnsZoneResourceId
-  ]
+  subnetResourceId  = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneAzureAiTextAnalytics[0].privateDnsZoneResourceId,
+                                                module.privateDnsZoneAzureAiTranslation[0].privateDnsZoneResourceId] : null
 }
 
 // Create the Azure Search Service
@@ -492,8 +487,8 @@ module "searchServices" {
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
   azure_search_domain  = var.azure_search_domain
-  subnetResourceId     = module.network[0].snetAzureAi_id
-  private_dns_zone_ids = [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId]
+  subnetResourceId     = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId] : null
 
 }
 
@@ -510,8 +505,8 @@ module "cosmosdb" {
   logContainerName     = "statuscontainer"
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
-  subnetResourceId     = module.network[0].snetCosmosDb_id
-  private_dns_zone_ids = [module.privateDnsZoneCosmosDb[0].privateDnsZoneResourceId]
+  subnetResourceId     = var.is_secure_mode ? module.network[0].snetCosmosDb_id : null
+  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneCosmosDb[0].privateDnsZoneResourceId] : null
 }
 
 // Create Function App 
@@ -614,8 +609,8 @@ module "video_indexer" {
   azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
   arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
   video_indexer_api_version           = var.video_indexer_api_version
-  subnet_id                           = module.network[0].snetAzureAi_id
-  privateDnsZoneName                  = module.privateDnsZoneAzureAIVideoIndexer[0].privateDnsZoneName
+  subnet_id                           = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  privateDnsZoneName                  = var.is_secure_mode ? module.privateDnsZoneAzureAIVideoIndexer[0].privateDnsZoneName : null
 }
 
 // USER ROLES

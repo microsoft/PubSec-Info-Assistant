@@ -42,11 +42,11 @@ For scenarios beyond a simple demonstration consider [Azure Front Door](https://
 
 ## Front end
 
-The following diagram shows the end user's interaction with Information Assistant and the Information Assistant's front end application's orchestration of the user's workflow. The Front end uses VNET integration to connect to the private network. Private DNS zones are then used by the Front end application to connect with the appropriate service such as:
+The following diagram shows the end user's interaction with Information Assistant and the Information Assistant's front-end application's orchestration of the user's workflow. The front-end uses VNET integration to connect to the private network. Private DNS zones are used by the front-end application to connect with the appropriate services such as:
 
 * Azure Storage Account, blob storage to upload files
 * Azure OpenAI to submit prompts
-* Azure AI search to discovery content from uploaded files
+* Azure AI Search to discovery content from uploaded files
 * Cosmos database to view the status of uploaded files
 
 

@@ -2,7 +2,6 @@ locals {
   tags            = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles     = jsondecode(file("${path.module}/azure_roles.json"))
   selected_roles  = ["CognitiveServicesOpenAIUser", "StorageBlobDataReader", "StorageBlobDataContributor", "SearchIndexDataReader", "SearchIndexDataContributor"]
-  backend_name    = var.backendServiceName != "" ? var.backendServiceName : "infoasst-web-${random_string.random.result}"
 }
 
 data "azurerm_client_config" "current" {}

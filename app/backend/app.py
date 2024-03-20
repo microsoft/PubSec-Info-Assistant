@@ -6,7 +6,6 @@ from typing import Optional
 import logging
 import os
 import json
-import subprocess
 import urllib.parse
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles

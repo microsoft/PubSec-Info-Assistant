@@ -14,8 +14,7 @@ import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
 import { ToggleContext } from './components/Title/Toggle';
 import Tutor from "./pages/tutor/Tutor";
-
-initializeIcons();
+import { Csv } from "./pages/csv/csv";
 
 export default function App() {
     const [toggle, setToggle] = React.useState('Work');
@@ -28,6 +27,7 @@ export default function App() {
                         <Route path="content" element={<Content />} />
                         <Route path="*" element={<NoPage />} />
                         <Route path="tutor" element={<Tutor />} />
+                        <Route path="csv" element={<Csv folderPath={""} tags={[]} />} />
                 </Route>
                 </Routes>
             </HashRouter>

@@ -48,6 +48,11 @@ const Layout = () => {
                                     Math Tutor
                                 </NavLink>
                             </li>
+                            <li className={styles.headerNavLeftMargin}>
+                                <NavLink to="/csv" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                                    Csv Analyzer
+                                </NavLink>
+                            </li>
                         </ul>
                         </nav>
                     </div>

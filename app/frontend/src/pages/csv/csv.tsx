@@ -1,147 +1,159 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import React from 'react';
-//import { Button } from '@fluentui/react';
-import { Button, ButtonGroup } from "react-bootstrap";
+import { BlobServiceClient } from "@azure/storage-blob";
+import classNames from "classnames";
+import { nanoid } from "nanoid";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DropZone } from "./drop-zone"
+import styles from "./file-picker.module.css";
+import { FilesList } from "./files-list";
+import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
+import cstyle from "./csv.module.css" 
 
-import { Accordion, AccordionContent, AccordionTitle } from '@fluentui/react-northstar';
-import { getStreamlitURI, GetStreamlitURIResponse, getHint, processAgentResponse, getSolve} from "../../api";
-import { useEffect, useState } from "react";
-import styles from './csv.module.css';
+interface Props {
+  folderPath: string;
+  tags: string[];
+}
 
-const Tutor = () => {
-    const [StreamlitURI, setStreamlitURI] = useState<GetStreamlitURIResponse | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [mathProblem, setMathProblem] = useState('');
-    const [output, setOutput] = useState<string | null>(null);
-    const [selectedButton, setSelectedButton] = useState<string | null>(null);
+const Csv = ({folderPath, tags}: Props) => {
+  const [files, setFiles] = useState<any>([]);
+  const [progress, setProgress] = useState(0);
+  const [uploadStarted, setUploadStarted] = useState(false);
+  const folderName = folderPath;
+  const tagList = tags;
 
+  // handler called when files are selected via the Dropzone component
+  const handleOnChange = useCallback((files: any) => {
 
-    const handleInput = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setLoading(true);
-        userInput(mathProblem);
-    };
+    let filesArray = Array.from(files);
 
-    const userInput = (problem: string) => {
-        // Process the user's math problem here
-        console.log(problem);
-        setLoading(false);
-    };
+    filesArray = filesArray.map((file) => ({
+      id: nanoid(),
+      file
+  }));
+    setFiles(filesArray as any);
+    setProgress(0);
+    setUploadStarted(false);
+}, []);
 
-    async function fetchStreamlitURI() {
-        console.log("Streamlit URI 1");
-        try {
-            const fetchedStreamlitURI = await getStreamlitURI();
-            setStreamlitURI(fetchedStreamlitURI);
-            console.log("Streamlit URI 2", fetchedStreamlitURI)
-        } catch (error) {
-            // Handle the error here
-            console.log(error);
+  // handle for removing files form the files list view
+  const handleClearFile = useCallback((id: any) => {
+    setFiles((prev: any) => prev.filter((file: any) => file.id !== id));
+  }, []);
+
+  // whether to show the progress bar or not
+  const canShowProgress = useMemo(() => files.length > 0, [files.length]);
+
+  // execute the upload operation
+  const handleUpload = useCallback(async () => {
+    try {
+      const data = new FormData();
+      console.log("files", files);
+      setUploadStarted(true);
+
+      // create an instance of the BlobServiceClient
+      const blobClientUrl = await getBlobClientUrl();
+      const blobServiceClient = new BlobServiceClient(blobClientUrl);
+
+      const containerClient = blobServiceClient.getContainerClient("upload");
+      var counter = 1;
+      files.forEach(async (indexedFile: any) => {
+        // add each file into Azure Blob Storage
+        var file = indexedFile.file as File;
+        var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
+        const blobClient = containerClient.getBlockBlobClient(filePath);
+        // set mimetype as determined from browser with file upload control
+        const options = {
+          blobHTTPHeaders: { blobContentType: file.type },
+          metadata: { tags: tagList.map(encodeURIComponent).join(",") }
+        };
+
+        // upload file
+        blobClient.uploadData(file, options);
+        //write status to log
+        var logEntry: StatusLogEntry = {
+          path: "upload/"+filePath,
+          status: "File uploaded from browser to Azure Blob Storage",
+          status_classification: StatusLogClassification.Info,
+          state: StatusLogState.Uploaded
         }
+        await logStatus(logEntry);
+
+        setProgress((counter/files.length) * 100);
+        counter++;
+      });
+
+      setUploadStarted(false);
+    } catch (error) {
+      console.log(error);
     }
-    async function hinter(question: string) {
-        try {
-            setOutput(null);
-            setLoading(true);
-            const hint: String = await getHint(question);
-            setLoading(false);
-            setOutput(hint.toString());
-            console.log(hint);
-        } catch (error) {
-            console.log(error);
-        }
-        
+  }, [files.length]);
+
+  // set progress to zero when there are no files
+  useEffect(() => {
+    if (files.length < 1) {
+      setProgress(0);
     }
-    async function solver(question: string) {
-        setLoading(true);
-        setOutput(null);
-        try {
-            const solve = await getSolve(question);
-            let outputString = '';
-            solve.forEach((item) => {
-                outputString += item + '\n';
-                console.log(item);
-            });
-            setOutput(outputString);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-        
+  }, [files.length]);
+
+  // set uploadStarted to false when the upload is complete
+  useEffect(() => {
+    if (progress === 100) {
+      setUploadStarted(false);
     }
+  }, [progress]);
+
+  const uploadComplete = useMemo(() => progress === 100, [progress]);
+
+  return (
+    <div className={cstyle.centeredContainer}>
+      <p>Upload a CSV file</p>
     
-    async function getAnswer(question: string) {
-        setOutput(null);
-        setLoading(true);
-        const result = await processAgentResponse(question);
-        setLoading(false);
-        setOutput(result.toString());
-        // const eventSource = await processAgentResponse(question);
-        // eventSource.onmessage = function(event) {
-        //     console.log(event.data);
-        //     setOutput(event.data);
-    };
+    <div className={styles.wrapper}>
+      
+      {/* canvas */}
+      <div className={styles.canvas_wrapper}>
+        <DropZone onChange={handleOnChange} accept={files} />
+      </div>
 
-
-    useEffect(() => {
-        fetchStreamlitURI();
-    }, []);
-    const StreamlitURIf = (StreamlitURI?.STREAMLIT_HOST_URI ?? '') + ':8051';
-    console.log("Streamlit URI 3", StreamlitURIf)
-return (
-    <div>
-    <h1 className={styles.title}>Your Friendly Math Tutor</h1>
-    <div className={styles.centeredContainer}>
-        <form className={styles.formClass} onSubmit={handleInput}>
-            <p className={styles.inputLabel}>Enter question:</p>
-            <input
-                className={styles.inputField}
-                type="text"
-                value={mathProblem}
-                onChange={(e) => setMathProblem(e.target.value)}
-                placeholder="Enter question:"
-            />
-            <div className={styles.buttonContainer}>
-            <Button variant="secondary"
-                className={selectedButton === 'button1' ? styles.selectedButton : ''}
-                onClick={() => {
-                    setSelectedButton('button1');
-                    hinter(mathProblem);
-                }}
-            >
-                Give me clues
-            </Button>
-            <Button variant="secondary"
-                className={selectedButton === 'button2' ? styles.selectedButton : ''}
-                onClick={() => {
-                    setSelectedButton('button2');
-                    solver(mathProblem);
-                }}
-            >
-                Show me how to solve it
-            </Button>
-            <Button variant="secondary"
-                className={selectedButton === 'button3' ? styles.selectedButton : ''}
-                onClick={() => {
-                    setSelectedButton("button3");
-                    getAnswer(mathProblem);
-                }}
-            >
-                Show me the answer
-            </Button>
+      {/* files listing */}
+      {files.length ? (
+        <div className={styles.files_list_wrapper}>
+          <FilesList
+            files={files}
+            onClear={handleClearFile}
+            uploadComplete={uploadComplete}
+          />
         </div>
-        </form>
-        {loading && <div className="spinner">Loading...</div>}
-        <Accordion>
-            {output && <AccordionTitle content="Math Tutor Response"/>}
-            {output && <AccordionContent>{output}</AccordionContent>}
-        </Accordion>
+      ) : null}
+
+      {/* progress bar */}
+      {canShowProgress ? (
+        <div className={styles.files_list_progress_wrapper}>
+          <progress value={progress} max={100} style={{ width: "100%" }} />
+        </div>
+      ) : null}
+
+      {/* upload button */}
+      {files.length ? (
+        <button
+          onClick={handleUpload}
+          className={classNames(
+            styles.upload_button,
+            uploadComplete || uploadStarted ? styles.disabled : ""
+          )}
+          aria-label="upload files"
+        >
+          {`Upload ${files.length} Files`}
+        </button>
+      ) : null}
     </div>
+    <div>
+      <p>Select an example query:</p>
+      </div>
     </div>
-)
+  );
 };
 
-export default Tutor; // Export the 'Chat' component
+export { Csv };

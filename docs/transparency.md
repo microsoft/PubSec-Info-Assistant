@@ -164,7 +164,7 @@ The system does no data preparation for ungrounded chat conversations.
 
 ### Prompt Engineering
 
-There is no propmt engineering provided by the systems for this capability. **Fabrications are likely.** 
+There is minimal propmt engineering provided by the system for this capability. **Fabrications are likely.** 
 
 
 ## XXXXXXXXXXXXXXXXXX
@@ -179,11 +179,30 @@ Sharepoint
 
 ## Intended uses
 
-This system is intended for the purpose of enabling ChatGPT capabilities with data provided by the end user. This system leverages prompt engineering to limit the creativity of the OpenAI model(s) and citations to help the end user determine when answers are factual. This system uses private search and is not intended as a replacement for a comprehensive internet-based search engine such as OpenAI-enabled Bing search; this system will not provide up-to-date search results from the Internet. This system is not intended to provide creative responses which are not backed in data available to the system (i.e. generation of papers, images or answering questions in an ungrounded manner ).
+This system is intended for the purpose of exploring LLM capabilities across several data sources (internal and exteral) and engagement methods. Engagement methods range from heavily controlled to completely uncontrolled, sometimes leveraging prompt engineering to limit the creativity of the model(s) and citations to help the end user determine when answers are factual, while other times being minimally controlling (ungrounded responses). As such, much care has been taken to build the system with best practices in mind as a means to help the end user understand what it happening when they see responses from the system. 
 
-### Considerations when choosing a use case
+As features in this accelerator may be turned on/off at deployment time, it does allow customizability for the design of the system which will be presented to the end user. Additionally this accelerator leverages many core product features such as Bing Web Search API for LLMs and Content Safety (filtering) to allow varying levels of control in the system which can not be accounted for in this Transparency Note. It is imperative to consider your specific use case when combining features, along with the resources available in the [Responsible AI guideance](#learn-more-about-responsible-ai) as you prepare your individual solution. 
 
+## Considerations when choosing a use case
+
+### Identity Applications
 **Avoid using IA Accelerator for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
+
+### Age Appropriateness/Exposure to Minors
+
+This accelerator contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology systems available today are unable to mitigate all potential harms and meet all legal limitations. This accelerator does not address these concerns.
+
+**Great care MUST BE taken to evaluate your solution, especially when applying to minors.**
+
+Current known limitations with respect to minors:
+* Bing Safe Search is limited to filtering Adult Content in text and image form
+* Content Safety features may be enabled but are not comprehensive enough to limit all potential harms related to self harm, hate speech, racism, terrorism and violence
+* Content Safety does not support some regional legal reuqirements including ability to limit religious content and content related to sexual oreintation 
+* Age-adaptive prompting is not implemented in this accelerator
+* This accelerator does not have age awareness
+* This accelerator does not utilize, collect or store guardian consent
+* This accelerator does not store user interaction history in any form; neither queries nor responses are stored
+* This accelerator may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
 
 
 # Limitations of IA Accelerator

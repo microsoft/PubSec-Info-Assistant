@@ -27,3 +27,13 @@ variable "arm_template_schema_mgmt_api" {
 variable "video_indexer_api_version" {
   type = string
 }
+
+variable "subnet_id" {
+  type = string
+  default = ""
+}
+
+variable "privateDnsZoneName" {
+  type = string
+  default = ""
+}

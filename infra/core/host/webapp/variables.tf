@@ -127,3 +127,15 @@ variable "is_secure_mode" {
   type        = bool
   default     = false
 }
+
+variable "subnet_id" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "private_dns_zone_name" {
+  type = string
+}

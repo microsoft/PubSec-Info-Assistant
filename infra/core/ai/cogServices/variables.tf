@@ -4,7 +4,7 @@ variable "name" {
 
 variable "location" {
   type    = string
-  default = "" 
+  default = ""
 }
 
 variable "tags" {
@@ -41,6 +41,28 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "keyVaultId" { 
+variable "keyVaultId" {
   type = string
+}
+
+variable "is_secure_mode" {
+  type    = bool
+  default = false
+}
+
+variable "subnet_id" {
+  type    = string
+  default = ""
+}
+
+variable "dnsZoneName" {
+  type    = string
+  default = ""
+}
+
+variable "subnetResourceId" {
+  type = string
+}
+variable "private_dns_zone_ids" {
+  type = set(string)
 }

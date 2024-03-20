@@ -128,6 +128,30 @@ variable "arm_template_schema_mgmt_api" {
   default     = "https://schema.management.azure.com"
   description = "The URI root for ARM template Management API. Defaults to value for 'AzureCloud'"
 }
+
+variable "azure_keyvault_domain" {
+  type = string
+}
+
+variable "cosmosdb_domain" {
+  type = string
+}
+
+variable "azure_monitor_domain" {
+  type = string
+}
+
+variable "azure_monitor_oms_domain" {
+  type = string
+}
+
+variable "azure_monitor_ods_domain" {
+  type = string
+}
+
+variable "azure_automation_domain" {
+  type = string
+}
 ////
 
 ////
@@ -228,6 +252,11 @@ variable "sentenceTransformerEmbeddingVectorSize" {
 variable "embeddingsDeploymentCapacity" {
   type    = number
   default = 240
+}
+
+variable "openai_public_network_access_enabled" {
+  type    = string
+  default = "Enabled"
 }
 ////
 

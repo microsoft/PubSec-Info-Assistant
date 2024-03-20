@@ -1,19 +1,19 @@
 variable "name" {
-  type    = string
+  type = string
 }
 
 variable "vnetLinkName" {
-  type    = string
+  type = string
 }
 
 variable "virtual_network_id" {
-  type    = string
+  type = string
 }
 
 variable "resourceGroupName" {
-  type    = string
+  type = string
 }
 
 variable "tags" {
-  type    = map(string)
+  type = map(string)
 }

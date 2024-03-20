@@ -22,9 +22,26 @@ variable "kind" {
   default = "OpenAI"
 }
 
-variable "publicNetworkAccess" {
-  type    = string
-  default = "Enabled"
+variable "public_network_access_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "outbound_network_access_restricted" {
+  type    = bool
+  default = false
+}
+
+variable "network_acls_default_action" {
+  type        = string
+  description = "The Default Action to use when no rules match from ip_rules / virtual_network_rules. Possible values are Allow and Deny."
+  default     = "Deny"
+}
+
+variable "network_acls_ip_rules" {
+  type        = list(string)
+  description = "One or more IP Addresses, or CIDR Blocks which should be able to access the Cognitive Account."
+  default     = []
 }
 
 variable "sku" {
@@ -53,4 +70,21 @@ variable "useExistingAOAIService" {
 variable "openaiServiceKey" {
   description = "The OpenAI service key"
   type        = string
+}
+variable "is_secure_mode" {
+  type = bool
+  default = false
+}
+
+variable "subnet_id" {
+  type = string
+  default = ""
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "subnetResourceId" {
+  type = string
 }

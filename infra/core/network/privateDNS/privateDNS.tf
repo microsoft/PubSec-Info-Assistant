@@ -11,3 +11,4 @@ resource "azurerm_private_dns_zone_virtual_network_link" "pr_dns_vnet_link" {
   virtual_network_id    = var.virtual_network_id
   tags                  = var.tags
 }
+

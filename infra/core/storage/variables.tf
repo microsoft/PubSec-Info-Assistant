@@ -3,62 +3,62 @@ variable "name" {
 }
 
 variable "location" {
-  type = string
+  type    = string
   default = "Your_Resource_Group_Location"
 }
 
 variable "tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
 variable "accessTier" {
-  type = string
+  type    = string
   default = "Hot"
 }
 
 variable "allowBlobPublicAccess" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "allowCrossTenantReplication" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "allowSharedKeyAccess" {
-  type = bool
+  type    = bool
   default = true
 }
 
 variable "defaultToOAuthAuthentication" {
-  type = bool
+  type    = bool
   default = false
 }
 
 variable "deleteRetentionPolicy" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
 variable "dnsEndpointType" {
-  type = string
+  type    = string
   default = "Standard"
 }
 
 variable "kind" {
-  type = string
+  type    = string
   default = "StorageV2"
 }
 
 variable "minimumTlsVersion" {
-  type = string
+  type    = string
   default = "TLS1_2"
 }
 
 variable "publicNetworkAccess" {
-  type = string
+  type    = string
   default = "Disabled"
 }
 
@@ -72,12 +72,12 @@ variable "sku" {
 }
 
 variable "containers" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "queueNames" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
@@ -86,6 +86,30 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "keyVaultId" { 
+variable "keyVaultId" {
   type = string
 }
+
+
+variable "is_secure_mode" {
+  type    = bool
+  default = false
+}
+
+variable "subnet_id" {
+  type    = string
+  default = ""
+}
+
+variable "privateDnsZoneName" {
+  type    = string
+  default = ""
+}
+
+variable "subnetResourceId" {
+  type = string
+}
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+

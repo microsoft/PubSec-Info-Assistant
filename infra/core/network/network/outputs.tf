@@ -61,3 +61,4 @@ output "snetEnrichmentInbound_id" {
 output "snetEnrichmentOutbound_id" {
   value = azurerm_subnet.enrichmentOutbound.id
 }
+

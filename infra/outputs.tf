@@ -4,7 +4,7 @@ output "AZURE_LOCATION" {
 }
 
 output "AZURE_OPENAI_SERVICE" {
-  value = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+  value = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices[0].name
 }
 
 output "AZURE_SEARCH_INDEX" {
@@ -12,19 +12,19 @@ output "AZURE_SEARCH_INDEX" {
 }
 
 output "AZURE_SEARCH_SERVICE" {
-  value = module.searchServices.name
+  value = module.searchServices[0].name
 }
 
 output "AZURE_SEARCH_SERVICE_ENDPOINT" {
-  value = module.searchServices.endpoint
+  value = module.searchServices[0].endpoint
 }
 
 output "AZURE_STORAGE_ACCOUNT" {
-  value = module.storage.name
+  value = module.storage[0].name
 }
 
 output "AZURE_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage[0].primary_endpoints
 }
 
 output "AZURE_STORAGE_CONTAINER" {
@@ -40,7 +40,7 @@ output "BACKEND_URI" {
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.web_app_name 
+  value = module.backend.web_app_name
 }
 
 output "RESOURCE_GROUP_NAME" {
@@ -60,19 +60,19 @@ output "AZURE_FUNCTION_APP_NAME" {
 }
 
 output "AZURE_COSMOSDB_URL" {
-  value = module.cosmosdb.CosmosDBEndpointURL
+  value = module.cosmosdb[0].CosmosDBEndpointURL
 }
 
 output "AZURE_COSMOSDB_LOG_DATABASE_NAME" {
-  value = module.cosmosdb.CosmosDBLogDatabaseName
+  value = module.cosmosdb[0].CosmosDBLogDatabaseName
 }
 
 output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
-  value = module.cosmosdb.CosmosDBLogContainerName
+  value = module.cosmosdb[0].CosmosDBLogContainerName
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.formrecognizer.formRecognizerAccountEndpoint
+  value = module.formrecognizer[0].formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -96,11 +96,11 @@ output "TARGET_PAGES" {
 }
 
 output "ENRICHMENT_ENDPOINT" {
-  value = module.cognitiveServices.cognitiveServiceEndpoint
+  value = module.cognitiveServices[0].cognitiveServiceEndpoint
 }
 
 output "ENRICHMENT_NAME" {
-  value = module.cognitiveServices.cognitiveServicerAccountName
+  value = module.cognitiveServices[0].cognitiveServicerAccountName
 }
 
 output "TARGET_TRANSLATION_LANGUAGE" {
@@ -116,7 +116,7 @@ output "AZURE_SUBSCRIPTION_ID" {
 }
 
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage[0].primary_endpoints
 }
 
 output "EMBEDDING_VECTOR_SIZE" {
@@ -155,8 +155,8 @@ output "CHAT_WARNING_BANNER_TEXT" {
   value = var.chatWarningBannerText
 }
 
-output "AZURE_OPENAI_ENDPOINT"  {
-  value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
+output "AZURE_OPENAI_ENDPOINT" {
+  value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices[0].endpoint
 }
 
 output "AZURE_ENVIRONMENT" {

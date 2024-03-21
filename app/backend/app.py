@@ -12,9 +12,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
-from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
-from approaches.chatbingsearchcompare import ChatBingSearchCompare
+from approaches.comparewebwithwork import CompareWebWithWork
+from approaches.compareworkwithweb import CompareWorkWithWeb
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -33,7 +34,6 @@ from approaches.MathTutor import(
     process_agent_response
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
-from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -199,7 +199,7 @@ chat_approaches = {
                                     ENV["AZURE_AI_TRANSLATION_DOMAIN"],
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
-    Approaches.ChatBingSearch: ChatBingSearch(
+    Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -207,7 +207,7 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+    Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -215,9 +215,9 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+    Approaches.CompareWebWithWork: CompareWebWithWork(
                                     search_client,
-                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
                                     ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],

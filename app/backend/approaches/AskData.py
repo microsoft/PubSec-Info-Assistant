@@ -77,7 +77,6 @@ def save_chart(query):
 def chat_with_csv(df):
     
     st.header('Output')
-    df = pd.read_csv(uploaded_file)
     with st.expander('See DataFrame'):
        st.write(df)
    
@@ -148,7 +147,6 @@ def process_agent_response(agent_executor, question):
 # App logic
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file,encoding='unicode_escape')
-    # df = pd.read_csv(uploaded_file)
     question_list = [
         'How many rows are there?',
         'What is the data type of each column?',

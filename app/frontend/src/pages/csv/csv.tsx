@@ -22,8 +22,27 @@ const Csv = ({folderPath, tags}: Props) => {
   const [uploadStarted, setUploadStarted] = useState(false);
   const folderName = folderPath;
   const tagList = tags;
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [output, setOutput] = useState('');
+  const [selectedQuery, setSelectedQuery] = useState('');
+
+
+  const handleAnalysis = () => {
+    // Handle the analysis here
+  };
+  
+  const handleAnswer = () => {
+    // Handle the answer here
+  };
 
   // handler called when files are selected via the Dropzone component
+
+  const handleQueryChange = (event: { target: { value: any; }; }) => {
+    const query = event.target.value;
+    setSelectedQuery(query);
+    // Handle the selected query here
+  };
+  
   const handleOnChange = useCallback((files: any) => {
 
     let filesArray = Array.from(files);
@@ -51,26 +70,18 @@ const Csv = ({folderPath, tags}: Props) => {
       const data = new FormData();
       console.log("files", files);
       setUploadStarted(true);
+      
 
-      // create an instance of the BlobServiceClient
-      const blobClientUrl = await getBlobClientUrl();
-      const blobServiceClient = new BlobServiceClient(blobClientUrl);
-
-      const containerClient = blobServiceClient.getContainerClient("upload");
       var counter = 1;
       files.forEach(async (indexedFile: any) => {
-        // add each file into Azure Blob Storage
         var file = indexedFile.file as File;
         var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
-        const blobClient = containerClient.getBlockBlobClient(filePath);
         // set mimetype as determined from browser with file upload control
         const options = {
           blobHTTPHeaders: { blobContentType: file.type },
           metadata: { tags: tagList.map(encodeURIComponent).join(",") }
         };
 
-        // upload file
-        blobClient.uploadData(file, options);
         //write status to log
         var logEntry: StatusLogEntry = {
           path: "upload/"+filePath,
@@ -106,7 +117,7 @@ const Csv = ({folderPath, tags}: Props) => {
 
   const uploadComplete = useMemo(() => progress === 100, [progress]);
 
-  return (
+  return (<div>
     <div className={cstyle.centeredContainer}>
       <p>Upload a CSV file</p>
     
@@ -151,8 +162,38 @@ const Csv = ({folderPath, tags}: Props) => {
     </div>
     <div>
       <p>Select an example query:</p>
+      <select onChange={handleQueryChange}>
+        <option value="rows">How many rows are there?</option>
+        <option value="dataType">What is the data type of each column?</option>
+        <option value="summaryStats">What are the summary statistics for categorical data?</option>
+        <option value="other">Other</option>
+    </select>
+  {selectedQuery === 'other' && (
+    <div className={cstyle.centeredContainer}>
+    <p>Ask a question about your CSV:</p>
+      <input type="text" placeholder="Enter your query" />
       </div>
+      
+    )}
+      </div>
+      
+      
     </div>
+    <h1>Ouput</h1>
+    <div className={cstyle.centeredContainer}>
+      
+    </div>
+  <div className={cstyle.centeredContainer}>
+    <button onClick={handleAnalysis}>Here is my analysis</button>
+    <button onClick={handleAnswer}>Show me the answer</button>
+</div>
+{ output && (
+      <div>
+        
+        <p>{output}</p>
+      </div>
+    )}
+</div>
   );
 };
 

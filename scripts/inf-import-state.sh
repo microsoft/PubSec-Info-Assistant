@@ -78,42 +78,63 @@ echo
 figlet "Main"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
-# providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
-# import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
-
-
-
-
-
 providers="/providers/Microsoft.Resources/deployments/pid-"
-
-echo "atribution: ""$resourceId$providers"
-# import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
-
-
-terraform import "azurerm_resource_group_template_deployment.customer_attribution" "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-605/providers/Microsoft.Resources/deployments/pid-"
+echo "resourceId providers: "$resourceId$providers
+ import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
+#terraform import "azurerm_resource_group_template_deployment.customer_attribution" "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-605/providers/Microsoft.Resources/deployments/pid-"
 # terraform import azurerm_resource_group_template_deployment.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Resources/deployments/template1
+
 
 # Entra 
 echo
 figlet "Entra"
-appName="infoasst-web-$random_text"
 webAccessApp_name="infoasst_web_access_$random_text"
-
 webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
-import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
+echo "webapp access id: " $webAccessApp_id
+# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
+# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/e93c45a0-ebbb-4b1e-bc5e-23d60be73e33"
+import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/284da0e8-995c-4b2f-8003-389e5ea2b0e4"
 
+appName="infoasst-web-$random_text"
 service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
 echo "service_principal_id: " $service_principal_id
 import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp" $service_principal_id
 
 
 
+# Key Vault
+echo
+figlet "Key Vault"
+keyVaultId="infoasst-kv-$random_text"
+echo "key vault name: " keyVaultId
+providers="/providers/Microsoft.KeyVault/vaults/keyVaultId"
+import_resource_if_needed "module.kvModule.azurerm_key_vault.kv" "$resourceId$providers"
+secret_id=$(get_secret "AZURE-CLIENT-SECRET")
+import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$secret_id"
+
+
+# Functions
+echo
+figlet "Functions"
+appServicePlanName="infoasst-func-asp-$random_text"
+providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
+import_resource_if_needed "module.functions.azurerm_service_plan.funcServicePlan" "$resourceId$providers"
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+import_resource_if_needed "module.functions.azurerm_monitor_autoscale_setting.scaleout" "$resourceId$providers"
+appName="infoasst-func-$random_text"
+providers="/providers/Microsoft.Web/sites/$appName"
+import_resource_if_needed "module.functions.azurerm_linux_function_app.function_app" "$resourceId$providers"
+keyVaultId="infoasst-kv-$random_text"
+objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+import_resource_if_needed "module.functions.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
 
 
 
-# Keyvault id as it is used in multiple areas
-TF_VAR_keyVaultId="infoasst-kv-$random_text"
+# Web App
+echo
+figlet "Web App"
+
 
 
 # Storage 

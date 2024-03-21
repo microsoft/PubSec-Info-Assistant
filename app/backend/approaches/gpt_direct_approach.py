@@ -34,21 +34,15 @@ class GPTDirectApproach(Approach):
     USER = "user"
     ASSISTANT = "assistant"
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
-        User persona is {userPersona} 
-        Your goal is to provide accurate and relevant answers based on the facts. Make sure to avoid making assumptions or adding personal opinions.
-        
-        Emphasize the use of facts.
-        
-        Here is how you should answer every question:
-        -Please respond with relevant information from the data in the response.    
+    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps users interact with a Large Language Model. {response_length_prompt}
+        User persona is {userPersona}. You are having a conversation with a user and you need to provide a response.    
         
         {follow_up_questions_prompt}
         {injected_prompt}
         
         """
     follow_up_questions_prompt_content = """
-        Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
+        Generate three very brief follow-up questions that the user would likely ask next about their previous chat context. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
         Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
         """
     
@@ -105,33 +99,7 @@ class GPTDirectApproach(Approach):
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
-        user_q = 'Generate search query for: ' + history[-1]["user"]
-
-        query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
-
-        # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
-        messages = self.get_messages_from_history(
-            query_prompt,
-            self.model_name,
-            history,
-            user_q,
-            self.query_prompt_few_shots,
-            self.chatgpt_token_limit - len(user_q)
-            )
-
-        chat_completion = openai.ChatCompletion.create(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
-            messages=messages,
-            temperature=0.0,
-            max_tokens=32,
-            n=1)
-
-        generated_query = chat_completion.choices[0].message.content
-        #if we fail to generate a query, return the last user question
-        if generated_query.strip() == "0":
-            generated_query = history[-1]["user"]
-
+        user_q = 'Generate response for: ' + history[-1]["user"]
 
         #Generate the follow up prompt to be sent to the GPT model
         follow_up_questions_prompt = (
@@ -140,39 +108,16 @@ class GPTDirectApproach(Approach):
             else ""
         )
 
-        # Allow client to replace the entire prompt, or to inject into the existing prompt using >>>
-        prompt_override = overrides.get("prompt_template")
-
-        if prompt_override is None:
-            system_message = self.system_message_chat_conversation.format(
-                injected_prompt="",
-                follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_response_length_prompt_text(
-                    response_length
-                ),
-                userPersona=user_persona,
-                systemPersona=system_persona,
-            )
-        elif prompt_override.startswith(">>>"):
-            system_message = self.system_message_chat_conversation.format(
-                injected_prompt=prompt_override[3:] + "\n ",
-                follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_response_length_prompt_text(
-                    response_length
-                ),
-                userPersona=user_persona,
-                systemPersona=system_persona,
-            )
-        else:
-            system_message = self.system_message_chat_conversation.format(
-                follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_response_length_prompt_text(
-                    response_length
-                ),
-                userPersona=user_persona,
-                systemPersona=system_persona,
-            )
-
+        system_message = self.system_message_chat_conversation.format(
+            injected_prompt="",
+            follow_up_questions_prompt=follow_up_questions_prompt,
+            response_length_prompt=self.get_response_length_prompt_text(
+                response_length
+            ),
+            userPersona=user_persona,
+            systemPersona=system_persona,
+        )
+    
         #Generate a contextual and content-specific answer using the search results and chat history.
         #Added conditional block to use different system messages for different models.
         messages = self.get_messages_from_history(
@@ -198,7 +143,7 @@ class GPTDirectApproach(Approach):
         return {
             "data_points": [],
             "answer": f"{urllib.parse.unquote(chat_completion.choices[0].message.content)}",
-            "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+            "thoughts": f"Searched for:<br>{user_q}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": {}
         }
     

@@ -14,13 +14,13 @@ from azure.storage.blob import (
 )
 from core.modelhelper import get_token_limit
 
-class ChatReadRetrieveReadBingCompare(Approach):
+class CompareWebWithWork(Approach):
     """
-    Approach for comparing and contrasting answers from internal data and Bing Chat.
+    Approach for comparing and contrasting generative response answers based on web search results vs. based on work search results.
     """
 
     COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona}. User persona is {userPersona}.
-    Compare and contrast the answers provided below from two sources of data. The first source is internal data indexed using a RAG pattern while the second source is from Bing Chat.
+    Compare and contrast the answers provided below from two sources of data. The first source is Web where data is retrieved from an internet search while the second source is Work where internal data indexed using a RAG pattern.
     Only explain the differences between the two sources and nothing else. Do not provide personal opinions or assumptions.
     Only answer in the language {query_term_language}.
     If you cannot find answer in below sources, respond with I am not sure. Do not provide personal opinions or assumptions.
@@ -29,8 +29,8 @@ class ChatReadRetrieveReadBingCompare(Approach):
     """
 
     COMPARATIVE_RESPONSE_PROMPT_FEW_SHOTS = [
-        {"role": Approach.USER ,'content': 'I am looking for comparative information in the Bing Search Response and want to compare against the Internal Documents'},
-        {'role': Approach.ASSISTANT, 'content': 'user is looking to compare information in Bing Search Response against Internal Documents.'}
+        {"role": Approach.USER ,'content': 'I am looking for comparative information on an answer based on Web search results and want to compare against an answer based on Work internal documents'},
+        {'role': Approach.ASSISTANT, 'content': 'User is looking to compare an answer based on Web search results against an answer based on Work internal documents.'}
     ]
 
     citations = {}
@@ -82,7 +82,7 @@ class ChatReadRetrieveReadBingCompare(Approach):
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
         """
-        Runs the approach to compare and contrast answers from internal data and Bing Chat.
+        Runs the approach to compare and contrast answers from internal data and Web Search results.
 
         Args:
             history (Sequence[dict[str, str]]): The conversation history.
@@ -118,13 +118,13 @@ class ChatReadRetrieveReadBingCompare(Approach):
         self.citations = rrr_response.get("citation_lookup")
 
         user_query = history[-1].get("user")
-        bing_answer = history[0].get("bot")
+        web_answer = history[0].get("bot")
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
-        bing_compare_query = user_query + "Internal Documents:\n" + rrr_response.get("answer") + "\n\n" + " Bing Search Response:\n" + bing_answer + "\n\n"
+        bing_compare_query = user_query + " Web search resutls:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + rrr_response.get("answer") + "\n\n"
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(

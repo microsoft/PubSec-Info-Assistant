@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { renderToStaticMarkup } from "react-dom/server";
-import { getCitationFilePath } from "../../api";
+import { getCitationFilePath, Approaches } from "../../api";
 
 type HtmlParsedAnswer = {
     answerHtml: string;
@@ -10,6 +10,7 @@ type HtmlParsedAnswer = {
     sourceFiles: Record<string, string>;
     pageNumbers: Record<string, number>;
     followupQuestions: string[];
+    approach: Approaches;
 };
 
 type CitationLookup = Record<string, {
@@ -18,7 +19,7 @@ type CitationLookup = Record<string, {
     page_number: string;
 }>;
 
-export function parseAnswerToHtml(answer: string, source: string, citation_lookup: CitationLookup, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
+export function parseAnswerToHtml(answer: string, approach: Approaches, citation_lookup: CitationLookup, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
     const citations: string[] = [];
     // const sourceFiles: {} = {};
     const sourceFiles: Record<string, string> = {};
@@ -53,12 +54,11 @@ export function parseAnswerToHtml(answer: string, source: string, citation_looku
                 return "";
             }
             else {
-                let isBing = source === "bing";
                 let citationIndex: number;
                 let citationShortName: string
                 // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
                 // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
-                if (isBing){
+                if (approach == Approaches.ChatWebRetrieveRead || approach == Approaches.CompareWorkWithWeb) {
                     citationShortName = new URL(citation.citation).hostname;
                 }else{
                     citationShortName = (citation_lookup)[part].citation.split("/").slice(4).join("/");
@@ -85,7 +85,7 @@ export function parseAnswerToHtml(answer: string, source: string, citation_looku
                         pageNumbers[citationShortName] = NaN;
                     }
                 }
-                if (isBing) {
+                if (approach == Approaches.ChatWebRetrieveRead || approach == Approaches.CompareWorkWithWeb) {
                     return renderToStaticMarkup(
                         <a className="supContainer" title={citationShortName} href={citation.citation} target="_blank" rel="noopener noreferrer">
                             <sup>{citationIndex}</sup>
@@ -111,6 +111,7 @@ export function parseAnswerToHtml(answer: string, source: string, citation_looku
         citations,
         sourceFiles,
         pageNumbers,
-        followupQuestions
+        followupQuestions,
+        approach
     };
 }

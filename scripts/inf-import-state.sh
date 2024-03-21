@@ -78,9 +78,21 @@ echo
 figlet "Main"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
-providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
-import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
+# providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
+# import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
 
+
+
+
+
+providers="/providers/Microsoft.Resources/deployments/pid-"
+
+echo "atribution: ""$resourceId$providers"
+# import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
+
+
+terraform import "azurerm_resource_group_template_deployment.customer_attribution" "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-605/providers/Microsoft.Resources/deployments/pid-"
+# terraform import azurerm_resource_group_template_deployment.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Resources/deployments/template1
 
 # Entra 
 echo
@@ -91,13 +103,10 @@ webAccessApp_name="infoasst_web_access_$random_text"
 webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
 import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
 
-
-
-
-
 service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
 echo "service_principal_id: " $service_principal_id
 import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp" $service_principal_id
+
 
 
 

@@ -36,7 +36,8 @@ import_resource_if_needed() {
 
 get_secret() {
     local secret_name=$1
-    local secret_id=$(az keyvault secret show --name $secret_name --vault-name $TF_VAR_keyVaultId --query id -o tsv)
+    keyVaultId="infoasst-kv-$random_text"
+    local secret_id=$(az keyvault secret show --name $secret_name --vault-name $keyVaultId --query id -o tsv)
     echo $secret_id
 }
 
@@ -80,9 +81,7 @@ resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resourc
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-"
 echo "resourceId providers: "$resourceId$providers
- import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution" "$resourceId$providers"
-#terraform import "azurerm_resource_group_template_deployment.customer_attribution" "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-605/providers/Microsoft.Resources/deployments/pid-"
-# terraform import azurerm_resource_group_template_deployment.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Resources/deployments/template1
+import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers"
 
 
 # Entra 
@@ -90,24 +89,17 @@ echo
 figlet "Entra"
 webAccessApp_name="infoasst_web_access_$random_text"
 webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
-echo "webapp access id: " $webAccessApp_id
-# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
-# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/e93c45a0-ebbb-4b1e-bc5e-23d60be73e33"
-import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/284da0e8-995c-4b2f-8003-389e5ea2b0e4"
-
+import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_id"
 appName="infoasst-web-$random_text"
 service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
-echo "service_principal_id: " $service_principal_id
-import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp" $service_principal_id
-
+import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
 
 
 # Key Vault
 echo
 figlet "Key Vault"
 keyVaultId="infoasst-kv-$random_text"
-echo "key vault name: " keyVaultId
-providers="/providers/Microsoft.KeyVault/vaults/keyVaultId"
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId"
 import_resource_if_needed "module.kvModule.azurerm_key_vault.kv" "$resourceId$providers"
 secret_id=$(get_secret "AZURE-CLIENT-SECRET")
 import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$secret_id"
@@ -134,6 +126,41 @@ import_resource_if_needed "module.functions.azurerm_key_vault_access_policy.poli
 # Web App
 echo
 figlet "Web App"
+appServicePlanName="infoasst-asp-$random_text"
+providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
+import_resource_if_needed "module.backend.azurerm_service_plan.appServicePlan" "$resourceId$providers"
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+import_resource_if_needed "module.backend.azurerm_monitor_autoscale_setting.scaleout" "$resourceId$providers"
+appName="infoasst-web-$random_text"
+providers="/providers/Microsoft.Web/sites/$appName"
+import_resource_if_needed "module.backend.azurerm_linux_web_app.app_service" "$resourceId$providers"
+keyVaultId="infoasst-kv-$random_text"
+objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+import_resource_if_needed "module.backend.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
+providers="/providers/Microsoft.Web/sites/$appName|$appName"
+import_resource_if_needed "module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs" "$resourceId$providers"
+
+
+# Enrichment App
+echo
+figlet "Enrichment App"
+appServicePlanName="infoasst-enrichmentasp-$random_text"
+providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
+import_resource_if_needed "module.enrichmentApp.azurerm_service_plan.appServicePlan" "$resourceId$providers"
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+import_resource_if_needed "module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout" "$resourceId$providers"
+appName="infoasst-enrichmentweb-$random_text"
+providers="/providers/Microsoft.Web/sites/$appName"
+import_resource_if_needed "module.enrichmentApp.azurerm_linux_web_app.app_service" "$resourceId$providers"
+keyVaultId="infoasst-kv-$random_text"
+objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+import_resource_if_needed "module.enrichmentApp.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
+providers="/providers/Microsoft.Web/sites/$appName|example"
+echo "providers: " $providers
+import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
+
 
 
 
@@ -141,7 +168,6 @@ figlet "Web App"
 echo
 figlet "Storage"
 TF_VAR_name="infoasststore$random_text"
-echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
 import_resource_if_needed "module.storage.azurerm_storage_account.storage" "$resourceId$providers"
 
@@ -181,7 +207,6 @@ import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_conne
 echo
 figlet "Cosmos DB"
 TF_VAR_name="infoasst-cosmos-$random_text"
-echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name"
 import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account" "$resourceId$providers"
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb"
@@ -196,7 +221,6 @@ import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_conne
 echo
 figlet "Search Service"
 TF_VAR_name="infoasst-search-$random_text"
-echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.Search/searchServices/$TF_VAR_name"
 import_resource_if_needed "module.searchServices.azurerm_search_service.search" "$resourceId$providers"
 secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")

@@ -46,7 +46,7 @@ deployment_name = azure_openai_chatgpt_deployment
 # 
 #______________________________________________________________________________________
 
-
+OPENAI_DEPLOYMENT_NAME =  azure_openai_chatgpt_deployment
 from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.agents import initialize_agent, load_tools
@@ -55,7 +55,7 @@ from langchain.prompts import ChatPromptTemplate
 
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=azure_openai_chatgpt_deployment)      
+    deployment_name=OPENAI_DEPLOYMENT_NAME)      
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools

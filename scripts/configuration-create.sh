@@ -52,10 +52,13 @@ echo "{" > $FILEPATH
 write_array_block $FILEPATH "AcceptedFileTypes" "ACCEPTED_FILE_TYPES"
 echo "," >> $FILEPATH
 
-write_array_block $FILEPATH "SharepointSite" "SHAREPOINT_SITES"
-echo "," >> $FILEPATH
+echo -e -n "\"SharepointSites\": " >> $FILEPATH
+echo $SHAREPOINT_TO_SYNC >> $FILEPATH
 
-write_array_block $FILEPATH "SharepointEntryFolder" "SHAREPOINT_FOLDERS"
+#write_array_block $FILEPATH "SharepointSite" "SHAREPOINT_SITES"
+#echo "," >> $FILEPATH
+
+#write_array_block $FILEPATH "SharepointEntryFolder" "SHAREPOINT_FOLDERS"
 
 
 echo -e "\n}" >> $FILEPATH

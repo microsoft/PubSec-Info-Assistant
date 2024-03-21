@@ -9,6 +9,7 @@ Please see below sections for coverage of IA Accelerator optional features.
 * [Build pipeline for Sandbox](#build-pipeline-for-sandbox)
 * [Customer Usage Attribution](#customer-usage-attribution)
 * [Sovereign Region Deployment](#sovereign-region-deployment)
+* [Secure Deployment](#secure-deployment)
 * [Configure REST API access](#configure-rest-api-access)
 * [Customize Autoscale and App Service SKU's](#customize-autoscale)
 

@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 #Turn warnings off
+#from st_pages import Page, show_pages, add_page_title
 import warnings
 warnings.filterwarnings('ignore')
 import os
@@ -14,15 +15,17 @@ OPENAI_API_TYPE = "azure"
 OPENAI_API_VERSION = "2023-06-01-preview"
 OPENAI_API_BASE = " "
 OPENAI_API_KEY = " "
-OPENAI_DEPLOYMENT_NAME = "gpt-4"
-MODEL_NAME = "gpt-4"
+OPENAI_DEPLOYMENT_NAME = " "
+MODEL_NAME = " "
+AZURE_OPENAI_ENDPOINT = ' '
+AZURE_OPENAI_SERVICE_KEY = ' '
 
 os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
 os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
-os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
-os.environ["AZURE_OPENAI_ENDPOINT"] = OPENAI_API_BASE
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
-os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
+#os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
+#os.environ["AZURE_OPENAI_ENDPOINT"] = AZURE_OPENAI_ENDPOINT
+#os.environ["AZURE_OPENAI_SERVICE_KEY"] = AZURE_OPENAI_SERVICE_KEY
+#os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
 
 load_dotenv()
 
@@ -32,11 +35,11 @@ load_dotenv()
 # # Access environment variables
 # azure_openai_service_key = os.getenv("AZURE_OPENAI_SERVICE_KEY")
 # azure_openai_service = os.getenv("AZURE_OPENAI_SERVICE")
-# azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
 # openai.api_key = azure_openai_service_key
 # openai.api_base = f"https://{azure_openai_service}.openai.azure.com/"
-# deployment_name = azure_openai_chatgpt_deployment
+deployment_name = azure_openai_chatgpt_deployment
 
 # openai.api_type = "azure"
 # openai.api_version = "2023-06-01-preview"
@@ -48,12 +51,11 @@ from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.agents import initialize_agent, load_tools
 from langchain.prompts import ChatPromptTemplate
-import streamlit as st
 
 
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)      
+    deployment_name=azure_openai_chatgpt_deployment)      
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools
@@ -99,7 +101,6 @@ tools = [PythagorasTool()]
 #________________________________________
 
 #2.tool to calculate the area of a circle
-from langchain.tools import BaseTool
 from math import pi
 
   
@@ -149,26 +150,55 @@ zero_shot_agent_math = initialize_agent(
 
 
 # function to stream agent response 
-def process_agent_scartch_pad(agent_executor, question):
-    for chunk in agent_executor.stream({"input": question}):
+def process_agent_scratch_pad( question):
+    zero_shot_agent_math = initialize_agent(
+    agent="zero-shot-react-description",
+        tools=tools,
+    llm=model,
+    verbose=True,
+    max_iterations=10,
+    max_execution_time=120,
+    handle_parsing_errors=True,
+    return_intermediate_steps=True)
+    messages = []
+    for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
-                st.write(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
-                st.write(f'I am thinking...: {action.log}')
+                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
+                messages.append(f'I am thinking...: {action.log}')
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                st.write(f"Tool Result: `{step.observation}`")                               
+                messages.append(f"Tool Result: `{step.observation}`")                               
         elif "output" in chunk:
-            st.write(f'Final Output: {chunk["output"]}')
+            messages.append(f'Final Output: {chunk["output"]}')
         else:
             raise ValueError()
+    return messages
         
 #Function to stream final output       
-def process_agent_response(agent_executor, question):
-    for chunk in agent_executor.stream({"input": question}):
-        if "output" in chunk:
-            st.write(f'Final Output: {chunk["output"]}')
-            
+def process_agent_response( question):
+    zero_shot_agent_math = initialize_agent(
+    agent="zero-shot-react-description",
+        tools=tools,
+    llm=model,
+    verbose=True,
+    max_iterations=10,
+    max_execution_time=120,
+    handle_parsing_errors=True,
+    return_intermediate_steps=True)
+    stream = zero_shot_agent_math.stream({"input": question})
+    output = "No output"
+    if stream:
+        for chunk in stream:
+            if "output" in chunk:
+                output =    f'Final Output: {chunk["output"]}'
+    else:
+        return {"data": "No output"}
+    return output
+    # for chunk in zero_shot_agent_math.stream({"input": question}):
+    #     if "output" in chunk:
+    #         yield {"data": f'Final Output: {chunk["output"]}'}
+
 #Function to process clues
 def generate_response(question):
     model = AzureChatOpenAI(
@@ -242,28 +272,6 @@ Question: {question}
 """
 
 
-# Streamlit app component. To be converted when integrated into the app and UI
-
-st.set_page_config(page_title="Your Friendly Math Tutor")
-st.title("Your Friendly Math Tutor")
-
-with st.form('myform'):
-    question = st.text_input('Enter question:', '')
-    clues = st.form_submit_button('Give me clues')
-    thoughts = st.form_submit_button('Show me how to solve it')
-    answer = st.form_submit_button('Show me the answer')
-    
-    if question is not None and question != "":
-        with st.spinner(text="In progress..."):         
-    
-            if clues :
-                st.info(generate_response(question).split("Clues")[1][2:]) 
-            
-            if thoughts:
-                process_agent_scartch_pad(zero_shot_agent_math, question)
-                
-            if answer:
-                process_agent_response(zero_shot_agent_math, question)
         
    
         

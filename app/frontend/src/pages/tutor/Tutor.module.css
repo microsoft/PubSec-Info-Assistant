@@ -1,18 +1,71 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
+   h1 {
+    align-items: flex-start !important;
+    margin-top: 5% !important; /* Sets the top margin to 10% */
+}
+h2 {
+    font-size: 1.1rem !important;
+    font-weight: bold;
+}
+   .title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold; /* Makes the title bold */
+}
+   .selectedButton {
+    color: #FF8C00 !important; /* Dark orange text */
+    border-color: #FF8C00 !important; /* Dark orange border */
+}
+.inputLabel {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+.inputField {
+    background-color: #cbcbcba6; /* Lighter grey */
+    border: none; /* Removes border */
+    margin-bottom: 10px; /* Same as button margin bottom */
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 10px;
+    padding: 10px;
+}
+.centeredContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    padding: 20px;
+    margin: auto;
+    width: 50%; /* Adjust as needed */
+    
+}
+.formClass {
+    width: 100%;
+}
+.buttonContainer {
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px; /* Rounds the corners of the buttons */
+    width: auto;
+    align-items: flex-start;
+}
 
+.buttonContainer button {
+    margin-bottom: 10px; 
+    color: grey;
+    background-color: transparent;
+    width: auto; /* Makes the button as wide as its content */
+    white-space: nowrap; /* Removes background color */
+    /* Optional: Adds some space between the buttons */
+}
 .container {
     flex: 1;
     display: flex;
     flex-direction: column;
     margin-top: 20px;
-}
-
-.subHeader {
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 10px;
-    justify-content: space-between;
 }
 
 .chatRoot {
@@ -38,16 +91,9 @@
     padding-top: 10px;
 }
 
-.chatEmptyStateHeader {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-
 .chatEmptyStateTitle {
-    font-size: 3rem;
-    font-weight: 500;
+    font-size: 4rem;
+    font-weight: 600;
     margin-top: 0;
     margin-bottom: 10px;
 }
@@ -56,16 +102,16 @@
     padding-left: 160px;
     padding-right: 160px;
     text-align: center;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .chatEmptyObjectivesList {
     text-align: center;
-    font-size: 12px;
+    font-size: 14px;
     display: flex;
     flex-direction: row;
-    padding-bottom: 40px;
-    padding-top: 24px;
+    padding-bottom: 50px;
+    padding-top: 30px;
 }
 
 .chatEmptyObjectivesListItem {
@@ -76,8 +122,8 @@
 }
 
 .chatEmptyObjectivesListItemText {
-    padding-right: 6px;
-    padding-left: 6px;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 .chatEmptyStateSubtitle {
@@ -157,41 +203,4 @@
 .commandButton {
     margin-right: 20px;
     margin-bottom: 20px;
-}
-
-.hide {
-    display: none;
-}
-
-.defaultApproachWebOption {
-    font-size: 18px;
-    font-weight: 600;
-    color: #188d45;
-    padding-right: 10px;
-}
-
-.defaultApproachWorkOption {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1B4AEF;
-    padding-left: 10px;
-}
-
-.defaultApproachSwitch {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.chatInputWarningMessage{
-    font-size: 12px;
-    font-weight: 400;
-    color: rgb(133, 133, 133);
-    line-height: 22px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    white-space: pre-line;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
 }

@@ -13,6 +13,7 @@ import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
 import { ToggleContext } from './components/Title/Toggle';
+import Tutor from "./pages/tutor/Tutor";
 
 initializeIcons();
 
@@ -26,7 +27,8 @@ export default function App() {
                         <Route index element={<Chat />} />
                         <Route path="content" element={<Content />} />
                         <Route path="*" element={<NoPage />} />
-                    </Route>
+                        <Route path="tutor" element={<Tutor />} />
+                </Route>
                 </Routes>
             </HashRouter>
         </ToggleContext.Provider>    

@@ -15,7 +15,7 @@ import { AskRequest,
     ApplicationTitle, 
     GetTagsResponse,
     DeleteItemRequest,
-    ResubmitItemRequest
+    ResubmitItemRequest,
     } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
@@ -247,6 +247,52 @@ export async function retryFile(filePath: string): Promise<boolean> {
     }
 
     return true;
+}
+export async function getHint(question: string): Promise<String> {
+    const response = await fetch(`/getHint?question=${encodeURIComponent(question)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+export async function getSolve(question: string): Promise<String[]> {
+    const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String[] = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+
+export async function processAgentResponse(question: string): Promise<String> {
+    const response = await fetch(`/process_agent_response?question=${encodeURIComponent(question)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;    
 }
 
 export async function logStatus(status_log_entry: StatusLogEntry): Promise<StatusLogResponse> {

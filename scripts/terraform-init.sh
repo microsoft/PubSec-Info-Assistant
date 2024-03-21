@@ -59,11 +59,20 @@ trap finish EXIT
 
 if [ -n "${IN_AUTOMATION}" ]
 then
-    terraform init -backend-config="resource_group_name=$TF_BACKEND_RESOURCE_GROUP" \
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then
+        terraform init -backend-config="resource_group_name=$TF_BACKEND_RESOURCE_GROUP" \
+        -backend-config="storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT" \
+        -backend-config="container_name=$TF_BACKEND_CONTAINER" \
+        -backend-config="access_key=$TF_BACKEND_ACCESS_KEY" \
+        -backend-config="key=$TF_BACKEND_STATE_KEY" \
+        -backend-config="environment=usgovernment"
+    else
+        terraform init -backend-config="resource_group_name=$TF_BACKEND_RESOURCE_GROUP" \
         -backend-config="storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT" \
         -backend-config="container_name=$TF_BACKEND_CONTAINER" \
         -backend-config="access_key=$TF_BACKEND_ACCESS_KEY" \
         -backend-config="key=$TF_BACKEND_STATE_KEY"
+    fi
 else
     terraform init -upgrade
 fi

@@ -13,7 +13,7 @@ from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 
-class ChatBingSearch(Approach):
+class ChatWebRetrieveRead(Approach):
     """Class to help perform RAG based on Bing Search and ChatGPT."""
 
     SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions. {response_length_prompt}

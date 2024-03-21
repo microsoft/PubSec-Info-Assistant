@@ -1,18 +1,21 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
-
+from typing import Optional
+#from sse_starlette.sse import EventSourceResponse
+#from starlette.responses import StreamingResponse
 import logging
 import os
 import json
 import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 import openai
-from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
-from approaches.chatbingsearchcompare import ChatBingSearchCompare
+from approaches.comparewebwithwork import CompareWebWithWork
+from approaches.compareworkwithweb import CompareWorkWithWeb
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -25,8 +28,12 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
+from approaches.MathTutor import(
+    generate_response,
+    process_agent_scratch_pad,
+    process_agent_response
+)
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
-from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -76,8 +83,8 @@ ENV = {
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true"   
-}
+    "ENABLE_BING_SAFE_SEARCH": "true" 
+    }
 
 for key, value in ENV.items():
     new_value = os.getenv(key)
@@ -192,7 +199,7 @@ chat_approaches = {
                                     ENV["AZURE_AI_TRANSLATION_DOMAIN"],
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
-    Approaches.ChatBingSearch: ChatBingSearch(
+    Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -200,7 +207,7 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+    Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -208,9 +215,9 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+    Approaches.CompareWebWithWork: CompareWebWithWork(
                                     search_client,
-                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
                                     ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
@@ -240,7 +247,6 @@ chat_approaches = {
                                 ENV["AZURE_OPENAI_ENDPOINT"]
     )
 }
-
 
 # Create API
 app = FastAPI(
@@ -288,6 +294,9 @@ async def chat(request: Request):
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+
+    
 
 @app.get("/getblobclienturl")
 async def get_blob_client_url():
@@ -615,6 +624,75 @@ async def get_all_tags():
     except Exception as ex:
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return results
+
+@app.get("/getHint")
+async def getHint(question: Optional[str] = None):
+    """
+    Get the hint for a question
+
+    Returns:
+        str: A string containing the hint
+    """
+    if question is None:
+        raise HTTPException(status_code=400, detail="Question is required")
+
+    try:
+        results = generate_response(question).split("Clues")[1][2:]
+    except Exception as ex:
+        log.exception("Exception in /getHint")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return results
+
+@app.get("/getSolve")
+async def getSolve(question: Optional[str] = None):
+   
+    if question is None:
+        raise HTTPException(status_code=400, detail="Question is required")
+
+    try:
+        results = process_agent_scratch_pad(question)
+    except Exception as ex:
+        log.exception("Exception in /getHint")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return results
+
+@app.get("/process_agent_response")
+async def stream_agent_response(question: str):
+    """
+    Stream the response of the agent for a given question.
+
+    This endpoint uses Server-Sent Events (SSE) to stream the response of the agent. 
+    It calls the `process_agent_response` function which yields chunks of data as they become available.
+
+    Args:
+        question (str): The question to be processed by the agent.
+
+    Yields:
+        dict: A dictionary containing a chunk of the agent's response.
+
+    Raises:
+        HTTPException: If an error occurs while processing the question.
+    """
+    # try:
+    #     def event_stream():
+    #         data_generator = iter(process_agent_response(question))
+    #         while True:
+    #             try:
+    #                 chunk = next(data_generator)
+    #                 yield chunk
+    #             except StopIteration:
+    #                 yield "data: keep-alive\n\n"
+    #                 time.sleep(5)
+    #     return StreamingResponse(event_stream(), media_type="text/event-stream")
+    if question is None:
+        raise HTTPException(status_code=400, detail="Question is required")
+
+    try:
+        results = process_agent_response(question)
+    except Exception as e:
+        print(f"Error processing agent response: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     return results
 
 @app.post("/retryFile")

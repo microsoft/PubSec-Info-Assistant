@@ -9,14 +9,14 @@ import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
-import cstyle from "./csv.module.css" 
+import cstyle from "./tda.module.css" 
 
 interface Props {
   folderPath: string;
   tags: string[];
 }
 
-const Csv = ({folderPath, tags}: Props) => {
+const Tda = ({folderPath, tags}: Props) => {
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
@@ -181,7 +181,12 @@ const Csv = ({folderPath, tags}: Props) => {
     </div>
     <h1>Ouput</h1>
     <div className={cstyle.centeredContainer}>
-      
+    <details>
+  <summary>See Dataframe</summary>
+  <div>
+    {/* Display the dataframe here */}
+  </div>
+</details>
     </div>
   <div className={cstyle.centeredContainer}>
     <button onClick={handleAnalysis}>Here is my analysis</button>
@@ -197,4 +202,4 @@ const Csv = ({folderPath, tags}: Props) => {
   );
 };
 
-export { Csv };
+export { Tda };

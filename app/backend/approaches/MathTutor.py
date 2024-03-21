@@ -200,10 +200,7 @@ def process_agent_response( question):
     #         yield {"data": f'Final Output: {chunk["output"]}'}
 
 #Function to process clues
-def generate_response(question):
-    model = AzureChatOpenAI(
-        openai_api_version=OPENAI_API_VERSION ,
-        deployment_name=OPENAI_DEPLOYMENT_NAME)   
+def generate_response(question):  
     prompt_template = ChatPromptTemplate.from_template(template=prompt)
     messages = prompt_template.format_messages(
     question=question

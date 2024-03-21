@@ -34,6 +34,13 @@ import_resource_if_needed() {
 }
 
 
+get_secret() {
+    local secret_name=$1
+    local secret_id=$(az keyvault secret show --name $secret_name --vault-name $TF_VAR_keyVaultId --query id -o tsv)
+    echo $secret_id
+}
+
+
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
@@ -66,9 +73,9 @@ fi
 # Import the existing resources into the Terraform state
 # ***********************************************************
 
-# Resource Group
+# Main
 echo
-figlet "Resource Group"
+figlet "Main"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-$random_text"
@@ -78,14 +85,32 @@ import_resource_if_needed "azurerm_resource_group_template_deployment.customer_a
 # Entra 
 echo
 figlet "Entra"
+appName="infoasst-web-$random_text"
+webAccessApp_name="infoasst_web_access_$random_text"
+
+webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
+import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
+
+
+
+
+
+service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
+echo "service_principal_id: " $service_principal_id
+import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp" $service_principal_id
+
+
+
+
+
+# Keyvault id as it is used in multiple areas
+TF_VAR_keyVaultId="infoasst-kv-$random_text"
 
 
 # Storage 
 echo
 figlet "Storage"
-export TF_VAR_name="infoasststore$random_text"
-export TF_VAR_keyVaultId="infoasst-kv-$random_text"
-
+TF_VAR_name="infoasststore$random_text"
 echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.Storage/storageAccounts/$TF_VAR_name"
 import_resource_if_needed "module.storage.azurerm_storage_account.storage" "$resourceId$providers"
@@ -100,8 +125,8 @@ url="https://$TF_VAR_name.blob.core.windows.net/function"
 import_resource_if_needed "module.storage.azurerm_storage_container.container[3]" "$url"
 url="https://$TF_VAR_name.blob.core.windows.net/logs"
 import_resource_if_needed "module.storage.azurerm_storage_container.container[4]" "$url"
-
 url="https://$TF_VAR_name..queue.core.windows.net/pdf-submit-queue"
+
 import_resource_if_needed "module.storage.azurerm_storage_queue.queue[0]" "$url"
 url="https://$TF_VAR_name..queue.core.windows.net/pdf-polling-queue"
 import_resource_if_needed "module.storage.azurerm_storage_queue.queue[1]" "$url"
@@ -116,26 +141,33 @@ import_resource_if_needed "module.storage.azurerm_storage_queue.queue[5]" "$url"
 url="https://$TF_VAR_name..queue.core.windows.net/embeddings-queue"
 import_resource_if_needed "module.storage.azurerm_storage_queue.queue[6]" "$url"
 
-# keyvault secret "azurerm_key_vault_secret" "search_service_key"
-# keyvault secret "azurerm_key_vault_secret" "storage_key"
-# "https://infoasst-kv-adraa.vault.azure.net/secrets/BLOB-CONNECTION-STRING/3690be9dd0004a71a45ae4d5b09ffd68"
-#  "https://example-keyvault.vault.azure.net/secrets/example/fdf067c93bbb4b22bff4d8b7a9a56217"
-
+secret_id=$(get_secret "BLOB-CONNECTION-STRING")
+import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$secret_id"
+secret_id=$(get_secret "AZURE-BLOB-STORAGE-KEY")
+import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$secret_id"
 
 
 # Cosmos DB 
 echo
 figlet "Cosmos DB"
-export TF_VAR_name="infoasst-cosmos-$random_text"
-
+TF_VAR_name="infoasst-cosmos-$random_text"
 echo "TF_VAR_name: " $TF_VAR_name
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name"
 import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account" "$resourceId$providers"
-
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb"
 import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database" "$resourceId$providers"
-
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$TF_VAR_name/sqlDatabases/statusdb/containers/statuscontainer"
 import_resource_if_needed "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container" "$resourceId$providers"
+secret_id=$(get_secret "COSMOSDB-KEY")
+import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_connection_string" "$secret_id"
 
-# keyvault secret "azurerm_key_vault_secret" "search_service_key"
+
+# Search Service
+echo
+figlet "Search Service"
+TF_VAR_name="infoasst-search-$random_text"
+echo "TF_VAR_name: " $TF_VAR_name
+providers="/providers/Microsoft.Search/searchServices/$TF_VAR_name"
+import_resource_if_needed "module.searchServices.azurerm_search_service.search" "$resourceId$providers"
+secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
+import_resource_if_needed "module.searchServices.azurerm_key_vault_secret.search_service_key" "$secret_id"

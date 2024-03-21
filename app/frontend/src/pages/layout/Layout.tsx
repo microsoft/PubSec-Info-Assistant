@@ -33,7 +33,12 @@ const Layout = () => {
                                         Manage Content
                                     </NavLink>
                                 </li>
-                            </ul>
+                                <li className={styles.headerNavLeftMargin}>
+                                <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                                    Math Tutor
+                                </NavLink>
+                            </li>
+                        </ul>
                         </nav>
                     </div>
                 </header>

@@ -80,7 +80,6 @@ figlet "Main"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-"
-echo "resourceId providers: "$resourceId$providers
 import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers"
 
 
@@ -88,11 +87,53 @@ import_resource_if_needed "azurerm_resource_group_template_deployment.customer_a
 echo
 figlet "Entra"
 webAccessApp_name="infoasst_web_access_$random_text"
-webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
-import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_id"
+
+webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].objectId" --all | jq -r '.[0]')
+import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_objectId"
+
 appName="infoasst-web-$random_text"
 service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
 import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
+
+webAccessApp_name="infoasst_mgmt_access_$random_text"
+webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
+import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
+
+# resource "azuread_application_password" "aad_mgmt_app_password" {
+# This resource does not support importing. ***********************
+# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_password
+
+# This resource is part of 1.1 deployment and so does not need to be imported
+# resource "azuread_service_principal" "aad_mgmt_sp" {
+
+
+
+
+
+# echo
+# figlet "Entra"
+
+# webAccessApp_name="infoasst_web_access_$random_text"
+# webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
+# echo "webAccessApp_id: /applications/$webAccessApp_id"
+# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
+# appName="infoasst-web-$random_text"
+# service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
+# import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
+
+# webAccessApp_name="infoasst_mgmt_access_$random_text"
+# webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
+# echo "webAccessApp_id: /applications/$webAccessApp_id"
+# import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
+
+
+
+
+
+
+
+
+
 
 
 # Key Vault

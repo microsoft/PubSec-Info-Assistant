@@ -1,6 +1,12 @@
 {
   "dependencies": {
     "@fluentui/react-northstar": "^0.66.5",
-    "dotenv": "^16.4.5"
+    "dataframe-js": "^1.4.4",
+    "dotenv": "^16.4.5",
+    "papaparse": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/dataframe-js": "^1.4.3",
+    "@types/papaparse": "^5.3.14"
   }
 }

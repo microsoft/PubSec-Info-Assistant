@@ -2,14 +2,17 @@
 // Licensed under the MIT license.
 
 import { BlobServiceClient } from "@azure/storage-blob";
+import { DetailsList, DetailsListLayoutMode, IColumn } from '@fluentui/react';
 import classNames from "classnames";
 import { nanoid } from "nanoid";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
-import cstyle from "./tda.module.css" 
+import cstyle from "./Tda.module.css" 
+import Papa from "papaparse";
+import { DataFrame } from "dataframe-js";
 
 interface Props {
   folderPath: string;
@@ -25,13 +28,18 @@ const Tda = ({folderPath, tags}: Props) => {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [output, setOutput] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
+  const [dataFrame, setDataFrame] = useState<object[]>([]);
 
 
   const handleAnalysis = () => {
+
+    
+
     // Handle the analysis here
   };
   
   const handleAnswer = () => {
+
     // Handle the answer here
   };
 
@@ -44,17 +52,19 @@ const Tda = ({folderPath, tags}: Props) => {
   };
   
   const handleOnChange = useCallback((files: any) => {
-
     let filesArray = Array.from(files);
-
-    filesArray = filesArray.map((file) => ({
+  
+    filesArray = filesArray.filter((file: any) => file.type === 'text/csv');
+  
+    filesArray = filesArray.map((file: any) => ({
       id: nanoid(),
       file
-  }));
+    }));
+  
     setFiles(filesArray as any);
     setProgress(0);
     setUploadStarted(false);
-}, []);
+  }, []);
 
   // handle for removing files form the files list view
   const handleClearFile = useCallback((id: any) => {
@@ -70,36 +80,27 @@ const Tda = ({folderPath, tags}: Props) => {
       const data = new FormData();
       console.log("files", files);
       setUploadStarted(true);
-      
-
+  
       var counter = 1;
       files.forEach(async (indexedFile: any) => {
         var file = indexedFile.file as File;
-        var filePath = (folderName == "") ? file.name : folderName + "/" + file.name;
-        // set mimetype as determined from browser with file upload control
-        const options = {
-          blobHTTPHeaders: { blobContentType: file.type },
-          metadata: { tags: tagList.map(encodeURIComponent).join(",") }
-        };
 
-        //write status to log
-        var logEntry: StatusLogEntry = {
-          path: "upload/"+filePath,
-          status: "File uploaded from browser to Azure Blob Storage",
-          status_classification: StatusLogClassification.Info,
-          state: StatusLogState.Uploaded
-        }
-        await logStatus(logEntry);
-
-        setProgress((counter/files.length) * 100);
-        counter++;
+        Papa.parse(file, {
+          header: true,
+          dynamicTyping: true,
+          complete: function(results) {
+            console.log("Finished:", results.data);
+            // Here, results.data is your dataframe
+            // You can set it in your state like this:
+            setFileUploaded(true);
+            setDataFrame(results.data as object[]);
+          }
+        });
       });
-
-      setUploadStarted(false);
     } catch (error) {
-      console.log(error);
+      console.error("Error uploading files: ", error);
     }
-  }, [files.length]);
+  }, [files]);
 
   // set progress to zero when there are no files
   useEffect(() => {
@@ -114,6 +115,28 @@ const Tda = ({folderPath, tags}: Props) => {
       setUploadStarted(false);
     }
   }, [progress]);
+
+  const columns: IColumn[] = [
+    {
+      key: 'index',
+      name: '',
+      fieldName: 'index',
+      minWidth: 50,
+      maxWidth: 200,
+      isResizable: true,
+    },
+    // Add more columns dynamically based on the dataFrame
+    ...Object.keys(dataFrame[0] || {}).map((key) => ({
+      key,
+      name: key,
+      fieldName: key,
+      minWidth: 100,
+      maxWidth: 200,
+      isResizable: true,
+    })),
+  ];
+  
+  const items = dataFrame.map((row, index) => ({ index, ...row }));
 
   const uploadComplete = useMemo(() => progress === 100, [progress]);
 
@@ -162,7 +185,7 @@ const Tda = ({folderPath, tags}: Props) => {
     </div>
     <div>
       <p>Select an example query:</p>
-      <select onChange={handleQueryChange}>
+      <select onChange={handleQueryChange} style={{ width: "100%" }}>
         <option value="rows">How many rows are there?</option>
         <option value="dataType">What is the data type of each column?</option>
         <option value="summaryStats">What are the summary statistics for categorical data?</option>
@@ -183,8 +206,16 @@ const Tda = ({folderPath, tags}: Props) => {
     <div className={cstyle.centeredContainer}>
     <details>
   <summary>See Dataframe</summary>
-  <div>
-    {/* Display the dataframe here */}
+  <div style={{ width: '500px', height: '500px', overflow: 'auto' }}>
+  <DetailsList
+  items={items}
+  columns={columns}
+  setKey="set"
+  layoutMode={DetailsListLayoutMode.justified}
+  selectionPreservedOnEmptyClick={true}
+  ariaLabelForSelectionColumn="Toggle selection"
+  ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+/>
   </div>
 </details>
     </div>
@@ -194,7 +225,7 @@ const Tda = ({folderPath, tags}: Props) => {
 </div>
 { output && (
       <div>
-        
+        <h2>Tabular Data Assistant Response:</h2>
         <p>{output}</p>
       </div>
     )}

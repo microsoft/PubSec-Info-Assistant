@@ -1,9 +1,30 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
    
+   .table-container {
+    overflow-x: auto;
+    overflow-y: auto; /* Add a horizontal scrollbar if necessary */
+  }
+  
+  .table-container table {
+    width: 100%; /* Make the table take up the full width of its container */
+    table-layout: fixed; /* Make the table layout fixed */
+  }
+  
+  .table-container th,
+  .table-container td {
+    text-align: left; /* Align the text to the left */
+    padding: 8px; /* Add some padding */
+    font-size: 0.6em !important; /* Make the text smaller */
+  }
+  
+  .table-container th {
+    background-color: #f2f2f2; /* Add a background color to the header cells */
+  }
    h1 {
     align-items: flex-start !important;
     margin-top: 5% !important; /* Sets the top margin to 10% */
+    margin: auto;
 }
    .title {
     text-align: center;

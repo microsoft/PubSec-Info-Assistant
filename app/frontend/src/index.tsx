@@ -14,7 +14,7 @@ import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
 import { ToggleContext } from './components/Title/Toggle';
 import Tutor from "./pages/tutor/Tutor";
-import { Tda } from "./pages/tda/tda";
+import { Tda } from "./pages/tda/Tda";
 
 export default function App() {
     const [toggle, setToggle] = React.useState('Work');

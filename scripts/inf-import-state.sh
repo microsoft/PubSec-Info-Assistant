@@ -66,7 +66,13 @@ if [ -f "$file_path" ]; then
     random_text=$(echo "$random_text" | tr '[:upper:]' '[:lower:]')
     echo "random text suffix: $random_text"
 else
-    echo "Error: File '$TF_VAR_environmentName' not found."
+    # If the random text suffix is not found in random.txt, prompt the user for input
+    echo
+    echo -e "\033[1;33mPlease enter the random text suffix used in the names of your azure services:\033[0m"
+    read user_input
+    echo
+    # Assign the input to a variable
+    random_text=$user_input
 fi
 
 
@@ -83,23 +89,95 @@ providers="/providers/Microsoft.Resources/deployments/pid-"
 import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers"
 
 
-# Entra 
+# # Entra 
+# echo
+# figlet "Entra"
+# webAccessApp_name="infoasst_web_access_$random_text"
+# webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].objectId" --all | jq -r '.[0]')
+# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_objectId"
+# figlet 1
+# appName="infoasst-web-$random_text"
+# service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
+# import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
+# figlet 2
+# webAccessApp_name="infoasst_mgmt_access_$random_text"
+# webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
+# import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
+# figlet 3
+
+
+
+# OpenAI Services
 echo
-figlet "Entra"
-webAccessApp_name="infoasst_web_access_$random_text"
-webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].objectId" --all | jq -r '.[0]')
-import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_objectId"
-appName="infoasst-web-$random_text"
-service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
-import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
-webAccessApp_name="infoasst_mgmt_access_$random_text"
-webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
-import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
-# resource "azuread_application_password" "aad_mgmt_app_password" {
-# This resource does not support importing. ***********************
-# https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_password
-# This resource is part of 1.1 deployment and so does not need to be imported
-# resource "azuread_service_principal" "aad_mgmt_sp" {
+figlet "OpenAI Services"
+name="infoasst-aoai-$random_text"
+# only import if the service exists in the RG
+serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
+if [[ $serviceExists == $name ]]; then
+    providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+    import_resource_if_needed "module.openaiServices.azurerm_cognitive_account.account" "$resourceId$providers"
+
+    # providers="/providers/Microsoft.CognitiveServices/accounts/$account1/deployments/$deployment1"
+    # import_resource_if_needed "module.openaiServices.azurerm_cognitive_deployment.deployment" "$resourceId$providers"
+    # /providers/Microsoft.CognitiveServices/accounts/account1/deployments/deployment1
+
+    # $TF_VAR_chatGptDeploymentName 
+    # $TF_VAR_azureOpenAIEmbeddingDeploymentNam
+
+else
+    echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
+fi
+
+
+# Monitor
+echo
+figlet "Monitor"
+name="infoasst-lw--$random_text"
+workbook_name=$(az resource list --resource-group infoasst-geearl-837 --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
+providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
+import_resource_if_needed "module.azMonitor.azurerm_application_insights_workbook.example" "$resourceId$providers"
+
+
+
+# Video Indexer
+echo
+figlet "Video Indexer"
+name="infoasststoremedia$random_text"
+providers="/providers/Microsoft.Storage/storageAccounts/$name"
+import_resource_if_needed "module.video_indexer.azurerm_storage_account.media_storage" "$resourceId$providers"
+name="infoasst-ua-ident-$random_text"
+providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
+import_resource_if_needed "module.video_indexer.azurerm_user_assigned_identity.vi" "$resourceId$providers"
+
+
+
+
+
+
+
+
+
+
+
+# Form Recognizer
+echo
+figlet "Form Recognizer"
+name="infoasst-fr-$random_text"
+providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+import_resource_if_needed "module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" "$resourceId$providers"
+secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
+import_resource_if_needed "module.cognitiveServices.azurerm_key_vault_secret.search_service_key" "$secret_id"
+
+
+
+# Cognitive Services 
+echo
+figlet "Cognitive Services"
+name="infoasst-enrichment-cog-$random_text"
+providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+import_resource_if_needed "module.cognitiveServices.azurerm_cognitive_account.cognitiveService" "$resourceId$providers"
+secret_id=$(get_secret "ENRICHMENT-KEY")
+import_resource_if_needed "module.cognitiveServices.azurerm_key_vault_secret.search_service_key" "$secret_id"
 
 
 # Logging
@@ -113,6 +191,8 @@ providers="/providers/Microsoft.Insights/components/$name"
 import_resource_if_needed "module.logging.azurerm_application_insights.applicationInsights" "$resourceId$providers"
 
 
+
+
 # User Roles
 echo
 figlet "User Roles"
@@ -120,14 +200,35 @@ figlet "User Roles"
 output=$(az role assignment list \
   --subscription $TF_VAR_subscriptionId \
   --resource-group $TF_VAR_resource_group_name \
-  --query "[].{roleDefinitionName: roleDefinitionName, id: id}" \
+  --query "[].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
   --output json)
+
+# list of roleDefinitionNames to associate with this module
+selected_roles=("CognitiveServicesOpenAIUser" "StorageBlobDataReader" "StorageBlobDataContributor" "SearchIndexDataReader" "SearchIndexDataContributor")
+
+# Retrive the principal id used to identify which roles are matched to this module
+# roles are assigned elswhere in the code, and have an assigned principal id
+# in the user roles module, the porinipal id of the user doing teh deployment is used
+# to work around this identify the principals used in the other modules and
+# and filter role assignments from here that do not match these id's
+principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
+principalId2=$(az ad sp list --display-name infoasst-func-$random_text --query "[].id" --output tsv)
+
 # Loop through each role assignment in the output and import
 echo "$output" | jq -c '.[]' | while read -r line; do
     # Extract 'roleDefinitionName' and 'id' from the output
     roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
     roleId=$(echo $line | jq -r '.id')
-    import_resource_if_needed "module.userRoles[\"$roleDefinitionName\"].azurerm_role_assignment.role" "$roleId"
+    rolePrincipalId=$(echo $line | jq -r '.principalId')
+    # Check if this principal id is in the list of excluded principals
+    # if not, then import this item
+    if [ "$rolePrincipalId" != "$principalId1" ] && [ "$rolePrincipalId" != "$principalId2" ]; then
+        # Check if the roleDefinitionName is in the list of selected roles
+        # Use pattern matching after removing spaces from roleDefinitionName
+        if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
+            import_resource_if_needed "module.userRoles[\"$roleDefinitionName\"].azurerm_role_assignment.role" "$roleId"
+        fi
+    fi  
 done
 
 

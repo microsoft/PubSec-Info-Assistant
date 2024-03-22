@@ -116,20 +116,19 @@ import_resource_if_needed "module.logging.azurerm_application_insights.applicati
 # User Roles
 echo
 figlet "User Roles"
-# Get the list of unique role ids
-roleIds=$(az role assignment list --scope /subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-835 | jq -r '.[].id' | sort | uniq)
-# Import each item
-for roleId in $roleIds
-do
-  echo $roleId
-  import_resource_if_needed "module.userRoles.azurerm_role_assignment.role" "$roleId"
+# Retrieve each role assignment from azure
+output=$(az role assignment list \
+  --subscription $TF_VAR_subscriptionId \
+  --resource-group $TF_VAR_resource_group_name \
+  --query "[].{roleDefinitionName: roleDefinitionName, id: id}" \
+  --output json)
+# Loop through each role assignment in the output and import
+echo "$output" | jq -c '.[]' | while read -r line; do
+    # Extract 'roleDefinitionName' and 'id' from the output
+    roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
+    roleId=$(echo $line | jq -r '.id')
+    import_resource_if_needed "module.userRoles[\"$roleDefinitionName\"].azurerm_role_assignment.role" "$roleId"
 done
-
-
-
-providers/Microsoft.Authorization/roleAssignments/04d48703-051f-d71e-8c3a-eb8274ec8ca9
-
-
 
 
 # Key Vault

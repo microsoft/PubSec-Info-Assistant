@@ -67,8 +67,8 @@ module "enrichmentApp" {
   location                                  = var.location 
   tags                                      = local.tags
   sku = {
-    size                                    = "P1v3"
-    tier                                    = "PremiumV3"
+    size                                    = var.enrichmentAppServiceSkuSize
+    tier                                    = var.enrichmentAppServiceSkuTier
     capacity                                = 3
   }
   kind                                      = "linux"
@@ -116,8 +116,8 @@ module "backend" {
   name                                = var.backendServiceName != "" ? var.backendServiceName : "infoasst-web-${random_string.random.result}"
   plan_name                           = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
   sku = {
-    tier                              = "Standard"
-    size                              = "S1" 
+    tier                              = var.appServiceSkuTier
+    size                              = var.appServiceSkuSize
     capacity                          = 1
   }
   kind                                = "linux"
@@ -276,16 +276,13 @@ module "functions" {
   tags                                  = local.tags
   keyVaultUri                           = module.kvModule.keyVaultUri
   keyVaultName                          = module.kvModule.keyVaultName 
-
-  plan_name     = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
-
-  sku = {
-    size = "S2"
-    tier = "Standard"
-    capacity = 2
+  plan_name                             = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
+  sku                                   = {
+    size                                = var.functionsAppSkuSize
+    tier                                = var.functionsAppSkuTier
+    capacity                            = 2
   }
-  kind     = "linux"
-
+  kind                                  = "linux"
   runtime                               = "python"
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString

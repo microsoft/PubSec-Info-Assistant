@@ -138,7 +138,6 @@ providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
 import_resource_if_needed "module.azMonitor.azurerm_application_insights_workbook.example" "$resourceId$providers"
 
 
-
 # Video Indexer
 echo
 figlet "Video Indexer"
@@ -148,6 +147,42 @@ import_resource_if_needed "module.video_indexer.azurerm_storage_account.media_st
 name="infoasst-ua-ident-$random_text"
 providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
 import_resource_if_needed "module.video_indexer.azurerm_user_assigned_identity.vi" "$resourceId$providers"
+
+# Retrive the principal id used to identify which roles are matched to this module
+# roles are assigned elswhere in the code, and have an assigned principal id
+# in the user roles module, the porinipal id of the user doing the deployment is used
+# to work around this identify the principals used in the other modules and
+# and filter role assignments from here that do not match these id's
+principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
+
+# Loop through each role assignment in the output and import
+echo "$output" | jq -c '.[]' | while read -r line; do
+    # Extract 'roleDefinitionName' and 'id' from the output
+    roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
+    roleId=$(echo $line | jq -r '.id')
+    rolePrincipalId=$(echo $line | jq -r '.principalId')
+    # Check if this principal id is in the list of excluded principals
+    # if not, then import this item
+    if [ "$rolePrincipalId" = "$principalId1" ]; then
+        # Check if the roleDefinitionName is in the list of selected roles
+        # Use pattern matching after removing spaces from roleDefinitionName
+        echo "zztop"
+        if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
+            echo "joydivision"
+            import_resource_if_needed "module.video_indexer[\"$roleDefinitionName\"].azurerm_role_assignment.role" "$roleId"
+        fi
+    fi  
+done
+
+
+
+
+
+
+
+
+
+
 
 
 

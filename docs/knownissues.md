@@ -9,7 +9,8 @@ Error: This subscription cannot create CognitiveServices until you agree to Resp
 
 ```
 
-**Solution** : Manually create a "Azure AI services" in your Azure Subscription and Accept "Responsible AI Notice"
+### Solution
+Manually create a "Azure AI services" in your Azure Subscription and Accept "Responsible AI Notice"
 
 1. In the Azure portal, navigate to the “Create a resource” page and search for “Azure AI Services”
 2. Select “Azure AI services” from the list of results and click “Create”
@@ -57,7 +58,10 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ## Errors due to throttling or overloading Form Recognizer
 
-Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable. These values surface as configuration settings in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
+Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable. 
+
+### Solution
+These values surface as configuration settings in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
 
 ```
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
@@ -91,7 +95,7 @@ param maxReadAttempts string
 InvalidTemplateDeployment - The template deployment 'infoasst-myworkspace' is not valid according to the validation procedure. The tracking id is 'XXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX'. See inner errors for details.
 InsufficientQuota - The specified capacity '1' of account deployment is bigger than available capacity '0' for UsageName 'Tokens Per Minute (thousands) - GPT-35-Turbo'.
 ```
-###Solution
+### Solution
 
 This means that you have exceeded the quota assigned to your deployment for the GPT-35-Turbo model.The quota is the maximum number of tokens per minute (thousands) that you can use with this model. You can check your current quota and usage in the Azure portal. To increase the quota [learn more](https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits)
 
@@ -152,6 +156,7 @@ make: *** [Makefile:18: infrastructure] Error 1
 ### Solution
 
 You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+
 ## Error: 
 
 If you encounter an error similar to the one below that indicates your device must be managed.
@@ -169,6 +174,7 @@ make: *** [Makefile:18: infrastructure] Error 1
 ### Solution
 
 You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+
 ## Error: 
 
 If you encounter an error similar to the one below that indicates your device must be managed.
@@ -186,3 +192,36 @@ make: *** [Makefile:18: infrastructure] Error 1
 ### Solution
 
 You will need to open your GitHub Codespaces in VSCode on your managed device. Please read more about opening your [GitHub Codespaces using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+
+## Error: This region has quota of 0 \<skuType\> cores for your subscription
+
+You receive the following error message during `make deploy`
+```bash
+{"ErrorEntity":{"ExtendedCode":"52039","MessageTemplate":"{0}. Try selecting different region or SKU.","Parameters":["This region has quota of 0 PremiumV3 cores for your subscription"],"Code":"Unauthorized","Message":"This region has quota of 0 PremiumV3 cores for your subscription. Try selecting different region or SKU."}}],"Innererror":null}
+```
+
+### Solution
+#### Option 1 : Request a quota increase in your subscription and region
+To submit a quota increase do the following:
+>1. Log into the Azure Portal
+>2. Navigate to your target subscription
+>3. Select the **Usage + Quotas** tab on the left
+>4. On the **Usage + Quotas** blade, change the filter for ***Provider: Compute*** to ***Provider: App Services**
+>5. Find the SKU and region you desire and use the **Edit** or **Submit Service Request** button to request a change. 
+
+#### Option 2 : Use Terraform parameters to select a new SKU size
+We have made variable available in the terraform scripts to allow you to override the SKU size and tier for the following:
+- Backend App Service Plan: This plan hosts the Information Assistant web site
+- Enrichment App Service Plan: This plan hosts the services that provide Azure OpenAI embeddings support
+- Functions App Service Plan: This plan hosts the functions that process files on upload to extract, chunk, and index the files.
+
+You can add the following parameters to your local.env file to override the default values. 
+
+```bash
+export TF_VAR_functionsAppSkuSize="S2"
+export TF_VAR_functionsAppSkuTier="Standard"
+export TF_VAR_appServiceSkuSize="S1"
+export TF_VAR_appServiceSkuTier="Standard"
+export TF_VAR_enrichmentAppServiceSkuSize="P1v3"
+export TF_VAR_enrichmentAppServiceSkuTier="PremiumV3"
+```

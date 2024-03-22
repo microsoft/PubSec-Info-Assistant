@@ -87,51 +87,47 @@ import_resource_if_needed "azurerm_resource_group_template_deployment.customer_a
 echo
 figlet "Entra"
 webAccessApp_name="infoasst_web_access_$random_text"
-
 webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].objectId" --all | jq -r '.[0]')
 import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_objectId"
-
 appName="infoasst-web-$random_text"
 service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
 import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
-
 webAccessApp_name="infoasst_mgmt_access_$random_text"
 webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
 import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
-
 # resource "azuread_application_password" "aad_mgmt_app_password" {
 # This resource does not support importing. ***********************
 # https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application_password
-
 # This resource is part of 1.1 deployment and so does not need to be imported
 # resource "azuread_service_principal" "aad_mgmt_sp" {
 
 
+# Logging
+echo
+figlet "Logging"
+name="infoasst-la-$random_text"
+providers="/providers/Microsoft.OperationalInsights/workspaces/$name"
+import_resource_if_needed "module.logging.azurerm_log_analytics_workspace.logAnalytics" "$resourceId$providers"
+name="infoasst-ai-$random_text"
+providers="/providers/Microsoft.Insights/components/$name"
+import_resource_if_needed "module.logging.azurerm_application_insights.applicationInsights" "$resourceId$providers"
+
+
+# User Roles
+echo
+figlet "User Roles"
+# Get the list of unique role ids
+roleIds=$(az role assignment list --scope /subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-835 | jq -r '.[].id' | sort | uniq)
+# Import each item
+for roleId in $roleIds
+do
+  echo $roleId
+  import_resource_if_needed "module.userRoles.azurerm_role_assignment.role" "$roleId"
+done
 
 
 
-# echo
-# figlet "Entra"
-
-# webAccessApp_name="infoasst_web_access_$random_text"
-# webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
-# echo "webAccessApp_id: /applications/$webAccessApp_id"
-# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app" "/applications/$webAccessApp_id"
-# appName="infoasst-web-$random_text"
-# service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
-# import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
-
-# webAccessApp_name="infoasst_mgmt_access_$random_text"
-# webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].appId" --all | jq -r '.[0]')
-# echo "webAccessApp_id: /applications/$webAccessApp_id"
-# import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
-
-
-
-
-
-
-
+providers/Microsoft.Authorization/roleAssignments/04d48703-051f-d71e-8c3a-eb8274ec8ca9
 
 
 
@@ -161,7 +157,6 @@ keyVaultId="infoasst-kv-$random_text"
 objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
 import_resource_if_needed "module.functions.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
-
 
 
 # Web App
@@ -199,10 +194,7 @@ objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
 import_resource_if_needed "module.enrichmentApp.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
 providers="/providers/Microsoft.Web/sites/$appName|example"
-echo "providers: " $providers
 import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
-
-
 
 
 # Storage 
@@ -266,3 +258,4 @@ providers="/providers/Microsoft.Search/searchServices/$TF_VAR_name"
 import_resource_if_needed "module.searchServices.azurerm_search_service.search" "$resourceId$providers"
 secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
 import_resource_if_needed "module.searchServices.azurerm_key_vault_secret.search_service_key" "$secret_id"
+

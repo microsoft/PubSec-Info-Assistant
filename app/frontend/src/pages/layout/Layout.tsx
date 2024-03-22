@@ -45,7 +45,7 @@ const Layout = () => {
                                 </li>
                                 <li className={styles.headerNavLeftMargin}>
                                 <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Math Tutor
+                                    Math Assistant
                                 </NavLink>
                             </li>
                             <li className={styles.headerNavLeftMargin}>

@@ -65,4 +65,4 @@ functional-tests: extract-env ## Run functional tests to check the processing pi
 	@./scripts/functional-tests.sh	
 
 import-state: check-subscription ## Upgrade the infrastructure to current version
-	-@./scripts/inf-import-state.sh
+	@./scripts/inf-import-state.sh

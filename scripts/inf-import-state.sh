@@ -78,7 +78,7 @@ fi
 # ***********************************************************
 # Import the existing resources into the Terraform state
 # ***********************************************************
-
+error_messages=()
 
 # Main
 echo
@@ -86,7 +86,7 @@ figlet "Main"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 import_resource_if_needed "azurerm_resource_group.rg" "$resourceId" 
 providers="/providers/Microsoft.Resources/deployments/pid-"
-import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers"
+import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers" || error_messages+=("NOT IMPORTED STATE: azurerm_resource_group_template_deployment.customer_attribution[0]")
 
 
 # Entra 
@@ -131,19 +131,24 @@ echo
 figlet "Monitor"
 name="infoasst-lw--$random_text"
 workbook_name=$(az resource list --resource-group infoasst-geearl-837 --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
-providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
-import_resource_if_needed "module.azMonitor.azurerm_application_insights_workbook.example" "$resourceId$providers"
+# providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
+# import_resource_if_needed "module.azMonitor.azurerm_application_insights_workbook.example" "$resourceId$providers"
 
 
 # Video Indexer
 echo
 figlet "Video Indexer"
-name="infoasststoremedia$random_text"
-providers="/providers/Microsoft.Storage/storageAccounts/$name"
-import_resource_if_needed "module.video_indexer.azurerm_storage_account.media_storage" "$resourceId$providers"
-name="infoasst-ua-ident-$random_text"
-providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-import_resource_if_needed "module.video_indexer.azurerm_user_assigned_identity.vi" "$resourceId$providers"
+# Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
+# changes in the service in azure. Uncomment below if required
+
+# name="infoasststoremedia$random_text"
+# providers="/providers/Microsoft.Storage/storageAccounts/$name"
+# import_resource_if_needed "module.video_indexer.azurerm_storage_account.media_storage" "$resourceId$providers"
+# name="infoasst-ua-ident-$random_text"
+# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
+# import_resource_if_needed "module.video_indexer.azurerm_user_assigned_identity.vi" "$resourceId$providers"''
+
+
 
 # Retrive the principal id used to identify which roles are matched to this module
 # roles are assigned elswhere in the code, and have an assigned principal id
@@ -257,11 +262,13 @@ import_resource_if_needed "module.storage.azurerm_key_vault_secret.storage_conne
 # Functions
 echo
 figlet "Functions"
-appServicePlanName="infoasst-func-asp-$random_text"
+appServicePlanName="infoasst-func-asp-$random_text-Autoscale"
 providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
 import_resource_if_needed "module.functions.azurerm_service_plan.funcServicePlan" "$resourceId$providers"
 providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
 import_resource_if_needed "module.functions.azurerm_monitor_autoscale_setting.scaleout" "$resourceId$providers"
+
+
 appName="infoasst-func-$random_text"
 providers="/providers/Microsoft.Web/sites/$appName"
 import_resource_if_needed "module.functions.azurerm_linux_function_app.function_app" "$resourceId$providers"
@@ -277,8 +284,8 @@ figlet "Web App"
 appServicePlanName="infoasst-asp-$random_text"
 providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
 import_resource_if_needed "module.backend.azurerm_service_plan.appServicePlan" "$resourceId$providers"
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-import_resource_if_needed "module.backend.azurerm_monitor_autoscale_setting.scaleout" "$resourceId$providers"
+
+
 appName="infoasst-web-$random_text"
 providers="/providers/Microsoft.Web/sites/$appName"
 import_resource_if_needed "module.backend.azurerm_linux_web_app.app_service" "$resourceId$providers"
@@ -286,8 +293,8 @@ keyVaultId="infoasst-kv-$random_text"
 objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
 import_resource_if_needed "module.backend.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
-providers="/providers/Microsoft.Web/sites/$appName|$appName"
-import_resource_if_needed "module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs" "$resourceId$providers"
+# providers="/providers/Microsoft.Web/sites/$appName|$appName"
+# import_resource_if_needed "module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs" "$resourceId$providers"
 
 
 # Enrichment App
@@ -305,8 +312,8 @@ keyVaultId="infoasst-kv-$random_text"
 objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
 import_resource_if_needed "module.enrichmentApp.azurerm_key_vault_access_policy.policy" "$resourceId$providers"
-providers="/providers/Microsoft.Web/sites/$appName|example"
-import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
+# providers="/providers/Microsoft.Web/sites/$appName|example"
+# import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
 
 
 # Storage 
@@ -371,3 +378,4 @@ import_resource_if_needed "module.searchServices.azurerm_search_service.search" 
 secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
 import_resource_if_needed "module.searchServices.azurerm_key_vault_secret.search_service_key" "$secret_id"
 
+figlet "Done"

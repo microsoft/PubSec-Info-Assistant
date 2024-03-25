@@ -285,8 +285,6 @@ import_resource_if_needed "$module_path" "$resourceId$providers"
 providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
 module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
 appName="infoasst-func-$random_text"
 providers="/providers/Microsoft.Web/sites/$appName"
 module_path="module.functions.azurerm_linux_function_app.function_app"

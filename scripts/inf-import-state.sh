@@ -168,30 +168,9 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     fi  
 done
 
-name="infoasst-ua-ident-$random_text"
-providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-import_resource_if_needed "module.video_indexer.azurerm_resource_group_template_deployment.vi" "$resourceId$providers"
-
-
-providers/Microsoft.Resources/deployments/avi-1b570f1f3cf66a1f0e9fce566ae1bc40",
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# name="infoasst-ua-ident-$random_text"
+# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
+# import_resource_if_needed "module.video_indexer.azurerm_resource_group_template_deployment.vi" "$resourceId$providers"
 
 
 # Form Recognizer

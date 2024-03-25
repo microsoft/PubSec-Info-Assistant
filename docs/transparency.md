@@ -2,7 +2,7 @@
 <!-- TOC ignore:true -->
 # Transparency Note: Information Assistant (IA)
 
-Updated 21 Mar 2024
+Updated 25 Mar 2024
 
 <!-- TOC ignore:true -->
 ## Table of Contents
@@ -31,8 +31,8 @@ Updated 21 Mar 2024
         - [Prompt Engineering](#prompt-engineering)
     - [System behavior: PREVIEW - Autonomous Agents](#system-behavior-preview---autonomous-agents)
         - [Overview](#overview)
-        - [Math Tutor](#math-tutor)
-        - [Tabular Math Operations](#tabular-math-operations)
+        - [Math Assistant](#math-assistant)
+        - [Tabular Data Assistant](#tabular-data-assistant)
 - [Intended uses](#intended-uses)
     - [Considerations when choosing a use case](#considerations-when-choosing-a-use-case)
         - [Identity Applications](#identity-applications)
@@ -151,7 +151,7 @@ Due to the nature of the content available on the public Internet, it is likely 
 The system receives and process top responses from Bing Web Search each time a question is asked; the system does NOT cache response for reuse. Due to the nature of the public Internet and continuous search indexing by the Bing service, it should be expected that answers to questions will change over time as new, potentially more relevant or updated results are returned from the Bing Web Search service.
 
 ### Content Controls
-The [Bing Web Search for LLM API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) supports the Bing "Safe Search" content filtering features, which can be configured for the system at deployment time. The feature currently supports three settings {Off, Moderate, Strict} which **apply ONLY to Adult content**. At the time of this writing there is no ability within the Bing Web Search API to filter or restrict content further. This fact should be considered when evaluating your specific use case, especially if considering exposure to minors. **Microsoft does not believe that the current controls on Bing Web Search alone are sufficient for minors**.
+The [Bing Web Search for LLM API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) supports the Bing "Safe Search" content filtering features, which can be configured for the system at deployment time. The feature currently supports three settings {Off, Moderate, Strict} which **apply ONLY to Adult content**. At the time of this writing there is no ability within the Bing Web Search API to filter or restrict content further. This fact should be considered when evaluating your specific use case. **Microsoft does not believe that the current content controls on Bing Web Search are sufficient for minors; this capability SHOULD NOT be exposed to minors at this time**.
 
 ## System behavior: Compare Internally- to Externally-grounded RAG
 
@@ -177,9 +177,11 @@ This capability leverages the individual prompts for internally-grounded and ext
 ### Overview
 This capability leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios.
 
-Though users may ask questions in the ungrounded experience, ungrounded responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount. Ungrounded responses will NOT have citations avaiable for verification.
+As users may ask questions in the ungrounded experience, ungrounded responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount. Ungrounded responses will NOT have citations avaiable for verification.
 
 The system differentiates the ungrounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish that the answer is ungrounded.
+
+**Microsoft does not believe that current content controls on LLMs are sufficient for exposure to minors; this capability SHOULD NOT be exposed to minors at this time**.
 
 ### Data Preparation
 
@@ -187,20 +189,20 @@ The system does no data preparation for ungrounded chat conversations.
 
 ### Prompt Engineering
 
-There is minimal propmt engineering provided by the system for this capability. **Fabrications are likely.** 
+There is minimal propmt engineering provided by the system for this capability. **Fabrications are highly likely.**
 
 ## System behavior: PREVIEW - Autonomous Agents
 
 ### Overview
-These capabilities (CSV Processing and Math Tutor) generate responses by using an LLM as a reasoning engine. The key strength lies in agent's ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows. This approach allows for a dynamic and adaptive response generation process. 
+These capabilities include tabular data processing and a math assistant which generate responses by using an LLM as a reasoning engine. The key strength lies in agent's ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows. This approach allows for a dynamic and adaptive response generation process.
 
-These Agents are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future releases, we plan to work to enhance the safety and robustness of these autonomous reasoning capabilities. Specific information on our preview agents can be found in [Autonomous Agents](/docs/features/features.md#autonomous-reasoning-with-agents).
+These agents are being **released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning**, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future releases, we plan to work to enhance the safety and robustness of these autonomous reasoning capabilities. Specific information on our preview agents can be found in [Autonomous Agents](/docs/features/features.md#autonomous-reasoning-with-agents).
 
 **Usage of these features MUST BE carefully evaluated.**
 
-### Math Tutor
+### Math Assistant
 
-This capability leverages the LangChain technology to enable LLMs to assist with math questions. This is an experimental feature which is primarily intended for younger audiences. Care MUST BE taken with building a solution targetd to minors. Please see the section below that discusses [age appropriatness](#age-appropriatenessexposure-to-minors).
+This capability leverages the LangChain technology to enable LLMs to assist with math questions. This is an experimental feature which is primarily intended for younger audiences. **Care MUST BE taken with building a solution targeted to minors. Please see the section below that discusses [age appropriatness](#age-appropriatenessexposure-to-minors)**.
 
 This capability presents several potential real harms to students in particular which should be mitigated if used in an education setting. At a minimum, this system may have the following harms:
 1) Incorrect Answers - This capability may generate incorrect answers which may have follow-on impact on a student's grades. Establishing a system verification process would be critical for use in an education setting.
@@ -209,9 +211,9 @@ This capability presents several potential real harms to students in particular 
 
 Note that there are several potential security concerns with LangChain and the ability for agents to enable unintended consequences. Usage of this feature should be carefully evaluated.
 
-### Tabular Math Operations
+### Tabular Data Assistant
 
-This capability leverages the LangChain technology to enable LLMs to assist with tabular math questions. This is an experimental feature which may provide incorrect answers, or partial answers if data is not available at the time of calculation. This feature is not a replacement for dedicated tabular data processing tools. 
+This capability leverages the LangChain technology to enable LLMs to assist with tabular data processing questions. This is an experimental feature which may provide incorrect answers, or partial answers if data is not available at the time of calculation. This feature is not a replacement for dedicated tabular data processing tools.
 
 Note that there are several potential security concerns with LangChain and the ability for agents to enable unintended consequences. Usage of this feature should be carefully evaluated.
 
@@ -228,9 +230,9 @@ As features in this accelerator may be turned on/off at deployment time, it allo
 
 ### Age Appropriateness/Exposure to Minors
 
-This accelerator contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology **systems available at the time of this writing are unable to mitigate all potential harms and meet all legal limitations. This accelerator does not address these concerns.**
+This accelerator contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to Generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology **systems available at the time of this writing are unable to mitigate all potential harms and meet all legal limitations. This accelerator does not address these concerns.**
 
-**Great care MUST BE taken to evaluate your solution, especially when applying to minors.**
+**At this time, these capabilities SHOULD NOT be targeted to minors.** The capabilities in this accelerator should only be targeted to adult users.
 
 Current known limitations with respect to minors:
 * Bing Safe Search is limited to filtering Adult Content in text and image form
@@ -241,7 +243,6 @@ Current known limitations with respect to minors:
 * This accelerator does not utilize, collect or store guardian consent
 * This accelerator does not store user interaction history in any form including user identifiers, queries or responses
 * This accelerator may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
-
 
 # Limitations of IA Accelerator
 

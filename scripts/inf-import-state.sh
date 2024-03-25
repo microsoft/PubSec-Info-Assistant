@@ -89,22 +89,19 @@ providers="/providers/Microsoft.Resources/deployments/pid-"
 import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers"
 
 
-# # Entra 
-# echo
-# figlet "Entra"
-# webAccessApp_name="infoasst_web_access_$random_text"
-# webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].objectId" --all | jq -r '.[0]')
-# import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_objectId"
-# figlet 1
-# appName="infoasst-web-$random_text"
-# service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
-# import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
-# figlet 2
-# webAccessApp_name="infoasst_mgmt_access_$random_text"
-# webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
-# import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
-# figlet 3
-
+# Entra 
+echo
+figlet "Entra"
+webAccessApp_name="infoasst_web_access_$random_text"
+# webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].application_id" --all | jq -r '.[0]')
+webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
+import_resource_if_needed "module.entraObjects.azuread_application.aad_web_app[0]" "/applications/$webAccessApp_objectId"
+appName="infoasst-web-$random_text"
+service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
+import_resource_if_needed "module.entraObjects.azuread_service_principal.aad_web_sp[0]" $service_principal_id
+webAccessApp_name="infoasst_mgmt_access_$random_text"
+webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
+import_resource_if_needed "module.entraObjects.azuread_application.aad_mgmt_app[0]" "/applications/$webAccessApp_id"
 
 
 # OpenAI Services
@@ -154,7 +151,6 @@ import_resource_if_needed "module.video_indexer.azurerm_user_assigned_identity.v
 # to work around this identify the principals used in the other modules and
 # and filter role assignments from here that do not match these id's
 principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
-
 # Loop through each role assignment in the output and import
 echo "$output" | jq -c '.[]' | while read -r line; do
     # Extract 'roleDefinitionName' and 'id' from the output
@@ -166,14 +162,18 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     if [ "$rolePrincipalId" = "$principalId1" ]; then
         # Check if the roleDefinitionName is in the list of selected roles
         # Use pattern matching after removing spaces from roleDefinitionName
-        echo "zztop"
         if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
-            echo "joydivision"
             import_resource_if_needed "module.video_indexer[\"$roleDefinitionName\"].azurerm_role_assignment.role" "$roleId"
         fi
     fi  
 done
 
+name="infoasst-ua-ident-$random_text"
+providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
+import_resource_if_needed "module.video_indexer.azurerm_resource_group_template_deployment.vi" "$resourceId$providers"
+
+
+providers/Microsoft.Resources/deployments/avi-1b570f1f3cf66a1f0e9fce566ae1bc40",
 
 
 
@@ -202,7 +202,6 @@ providers="/providers/Microsoft.CognitiveServices/accounts/$name"
 import_resource_if_needed "module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" "$resourceId$providers"
 secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
 import_resource_if_needed "module.cognitiveServices.azurerm_key_vault_secret.search_service_key" "$secret_id"
-
 
 
 # Cognitive Services 
@@ -247,7 +246,6 @@ selected_roles=("CognitiveServicesOpenAIUser" "StorageBlobDataReader" "StorageBl
 # to work around this identify the principals used in the other modules and
 # and filter role assignments from here that do not match these id's
 principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
-principalId2=$(az ad sp list --display-name infoasst-func-$random_text --query "[].id" --output tsv)
 
 # Loop through each role assignment in the output and import
 echo "$output" | jq -c '.[]' | while read -r line; do
@@ -257,7 +255,7 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     rolePrincipalId=$(echo $line | jq -r '.principalId')
     # Check if this principal id is in the list of excluded principals
     # if not, then import this item
-    if [ "$rolePrincipalId" != "$principalId1" ] && [ "$rolePrincipalId" != "$principalId2" ]; then
+    if [ "$rolePrincipalId" != "$principalId1" ]; then
         # Check if the roleDefinitionName is in the list of selected roles
         # Use pattern matching after removing spaces from roleDefinitionName
         if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then

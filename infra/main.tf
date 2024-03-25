@@ -287,9 +287,9 @@ module "enrichmentApp" {
   location  = var.location
   tags      = local.tags
   sku = {
-    size     = "P1v3"
-    tier     = "PremiumV3"
-    capacity = 3
+    size                                    = var.enrichmentAppServiceSkuSize
+    tier                                    = var.enrichmentAppServiceSkuTier
+    capacity                                = 3
   }
   kind                                = "linux"
   reserved                            = true
@@ -337,9 +337,9 @@ module "webapp" {
   name      = var.webappServiceName != "" ? var.webappServiceName : "infoasst-web-${random_string.random.result}"
   plan_name = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
   sku = {
-    tier     = "Standard"
-    size     = "S1"
-    capacity = 1
+    tier                              = var.appServiceSkuTier
+    size                              = var.appServiceSkuSize
+    capacity                          = 1
   }
   kind                                = "linux"
   resourceGroupName                   = azurerm_resource_group.rg.name
@@ -362,46 +362,47 @@ module "webapp" {
   private_dns_zone_name               = var.is_secure_mode ? module.privateDnsZoneApp[0].privateDnsZoneName : null
 
   appSettings = {
-    APPLICATIONINSIGHTS_CONNECTION_STRING = module.logging.applicationInsightsConnectionString
-    AZURE_BLOB_STORAGE_ACCOUNT            = module.storage.name
-    AZURE_BLOB_STORAGE_ENDPOINT           = module.storage.primary_endpoints
-    AZURE_BLOB_STORAGE_CONTAINER          = var.contentContainerName
-    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER   = var.uploadContainerName
-    AZURE_OPENAI_SERVICE                  = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
-    AZURE_OPENAI_RESOURCE_GROUP           = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
-    AZURE_OPENAI_ENDPOINT                 = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
-    AZURE_OPENAI_AUTHORITY_HOST           = var.azure_openai_authority_host
-    AZURE_ARM_MANAGEMENT_API              = var.azure_arm_management_api
-    AZURE_SEARCH_INDEX                    = var.searchIndexName
-    AZURE_SEARCH_SERVICE                  = module.searchServices.name
-    AZURE_SEARCH_SERVICE_ENDPOINT         = module.searchServices.endpoint
-    AZURE_OPENAI_CHATGPT_DEPLOYMENT       = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-    AZURE_OPENAI_CHATGPT_MODEL_NAME       = var.chatGptModelName
-    AZURE_OPENAI_CHATGPT_MODEL_VERSION    = var.chatGptModelVersion
-    USE_AZURE_OPENAI_EMBEDDINGS           = var.useAzureOpenAIEmbeddings
-    EMBEDDING_DEPLOYMENT_NAME             = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
-    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME    = var.azureOpenAIEmbeddingsModelName
-    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION = var.azureOpenAIEmbeddingsModelVersion
-    APPINSIGHTS_INSTRUMENTATIONKEY        = module.logging.applicationInsightsInstrumentationKey
-    COSMOSDB_URL                          = module.cosmosdb.CosmosDBEndpointURL
-    COSMOSDB_LOG_DATABASE_NAME            = module.cosmosdb.CosmosDBLogDatabaseName
-    COSMOSDB_LOG_CONTAINER_NAME           = module.cosmosdb.CosmosDBLogContainerName
-    QUERY_TERM_LANGUAGE                   = var.queryTermLanguage
-    AZURE_SUBSCRIPTION_ID                 = data.azurerm_client_config.current.subscription_id
-    CHAT_WARNING_BANNER_TEXT              = var.chatWarningBannerText
-    TARGET_EMBEDDINGS_MODEL               = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
-    ENRICHMENT_APPSERVICE_URL             = module.enrichmentApp.uri
-    ENRICHMENT_ENDPOINT                   = module.cognitiveServices.cognitiveServiceEndpoint
-    APPLICATION_TITLE                     = var.applicationtitle
-    AZURE_AI_TRANSLATION_DOMAIN           = var.azure_ai_translation_domain
-    USE_SEMANTIC_RERANKER                 = var.use_semantic_reranker
-    BING_SEARCH_ENDPOINT                  = var.enableWebChat ? module.bingSearch[0].endpoint : ""
-    BING_SEARCH_KEY                       = var.enableWebChat ? module.bingSearch[0].key : ""
-    ENABLE_WEB_CHAT                       = var.enableWebChat
-    ENABLE_BING_SAFE_SEARCH               = var.enableBingSafeSearch
-    ENABLE_UNGROUNDED_CHAT                = var.enableUngroundedChat
-    ENABLE_MATH_TUTOR                     = var.enableMathTutor
-    ENABLE_CSV_AGENT                      = var.enableCsvAgent
+    APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
+    AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
+    AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
+    AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    AZURE_OPENAI_RESOURCE_GROUP             = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
+    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
+    AZURE_ARM_MANAGEMENT_API                = var.azure_arm_management_api
+    AZURE_SEARCH_INDEX                      = var.searchIndexName
+    AZURE_SEARCH_SERVICE                    = module.searchServices.name
+    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_OPENAI_CHATGPT_DEPLOYMENT         = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
+    AZURE_OPENAI_CHATGPT_MODEL_NAME         = var.chatGptModelName
+    AZURE_OPENAI_CHATGPT_MODEL_VERSION      = var.chatGptModelVersion
+    USE_AZURE_OPENAI_EMBEDDINGS             = var.useAzureOpenAIEmbeddings
+    EMBEDDING_DEPLOYMENT_NAME               = var.useAzureOpenAIEmbeddings ? var.azureOpenAIEmbeddingDeploymentName : var.sentenceTransformersModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_NAME      = var.azureOpenAIEmbeddingsModelName
+    AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION   = var.azureOpenAIEmbeddingsModelVersion
+    APPINSIGHTS_INSTRUMENTATIONKEY          = module.logging.applicationInsightsInstrumentationKey
+    COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
+    COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
+    COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
+    QUERY_TERM_LANGUAGE                     = var.queryTermLanguage
+    AZURE_SUBSCRIPTION_ID                   = data.azurerm_client_config.current.subscription_id
+    CHAT_WARNING_BANNER_TEXT                = var.chatWarningBannerText
+    TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
+    ENRICHMENT_APPSERVICE_URL               = module.enrichmentApp.uri
+    ENRICHMENT_ENDPOINT                     = module.cognitiveServices.cognitiveServiceEndpoint
+    APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
+    AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
+    USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
+    BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
+    BING_SEARCH_KEY                         = var.enableWebChat ? module.bingSearch[0].key : ""
+    ENABLE_WEB_CHAT                         = var.enableWebChat
+    ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
+    ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
+    ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
+    ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
+    ENABLE_MULTIMEDIA                       = var.enableMultimedia
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -525,22 +526,18 @@ module "cosmosdb" {
 module "functions" {
   source = "./core/host/functions"
 
-  name         = var.functionsAppName != "" ? var.functionsAppName : "infoasst-func-${random_string.random.result}"
-  location     = var.location
-  tags         = local.tags
-  keyVaultUri  = module.kvModule.keyVaultUri
-  keyVaultName = module.kvModule.keyVaultName
-
-
-  plan_name = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
-
-  sku = {
-    size     = "S2"
-    tier     = "Standard"
-    capacity = 2
+  name                                  = var.functionsAppName != "" ? var.functionsAppName : "infoasst-func-${random_string.random.result}"
+  location                              = var.location
+  tags                                  = local.tags
+  keyVaultUri                           = module.kvModule.keyVaultUri
+  keyVaultName                          = module.kvModule.keyVaultName 
+  plan_name                             = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
+  sku                                   = {
+    size                                = var.functionsAppSkuSize
+    tier                                = var.functionsAppSkuTier
+    capacity                            = 2
   }
-  kind = "linux"
-
+  kind                                  = "linux"
   runtime                               = "python"
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
@@ -614,8 +611,8 @@ module "sharepoint" {
 // Create the Azure AI Video Indexer
 
 module "video_indexer" {
-  source = "./core/videoindexer"
-
+  count                               = var.enableMultimedia ? 1 : 0
+  source                              = "./core/videoindexer"
   location                            = azurerm_resource_group.rg.location
   resource_group_name                 = azurerm_resource_group.rg.name
   subscription_id                     = data.azurerm_client_config.current.subscription_id
@@ -695,13 +692,14 @@ module "storageRoleFunc" {
 }
 
 module "aviRoleBackend" {
-  source           = "./core/security/role"
-  scope            = module.video_indexer.vi_id
-  principalId      = module.webapp.identityPrincipalId
-  roleDefinitionId = local.azure_roles.Contributor
-  principalType    = "ServicePrincipal"
-  subscriptionId   = data.azurerm_client_config.current.subscription_id
-  resourceGroupId  = azurerm_resource_group.rg.id
+  source            = "./core/security/role"
+  count             = var.enableMultimedia ? 1 : 0
+  scope             = module.video_indexer[0].vi_id
+  principalId       = module.backend.identityPrincipalId
+  roleDefinitionId  = local.azure_roles.Contributor
+  principalType     = "ServicePrincipal"
+  subscriptionId    = data.azurerm_client_config.current.subscription_id
+  resourceGroupId   = azurerm_resource_group.rg.id 
 }
 
 // Create Management Security roles

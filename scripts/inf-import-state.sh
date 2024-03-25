@@ -136,7 +136,7 @@ fi
 echo
 figlet "Monitor"
 name="infoasst-lw--$random_text"
-workbook_name=$(az resource list --resource-group infoasst-geearl-837 --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
+workbook_name=$(az resource list --resource-group $TF_VAR_resource_group_name --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
 providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
 module_path="module.azMonitor.azurerm_application_insights_workbook.example"
 import_resource_if_needed $module_path "$resourceId$providers"

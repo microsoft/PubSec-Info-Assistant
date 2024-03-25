@@ -58,12 +58,12 @@ variable "enableUngroundedChat" {
   default = false
 }
 
-variable "enableMathTutor" {
+variable "enableMathAssitant" {
   type    = bool
   default = true
 }
 
-variable "enableCsvAgent" {
+variable "enableTabularDataAssistant" {
   type    = bool
   default = true
 }
@@ -73,6 +73,11 @@ variable "enableSharePointConnector" {
   default = false
 }
 
+variable "enableMultimedia" {
+  type    = bool
+  default = false
+  
+}
 ////
 // variables that can vary based on the Azure environment being targeted
 ////

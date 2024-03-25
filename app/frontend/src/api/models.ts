@@ -202,3 +202,12 @@ export type GetTagsResponse = {
     tags: string;
     error?: string;
 }
+
+export type GetFeatureFlagsResponse = {
+    ENABLE_WEB_CHAT: boolean;
+    ENABLE_UNGROUNDED_CHAT: boolean;
+    ENABLE_MATH_ASSISTANT: boolean;
+    ENABLE_TABULAR_DATA_ASSISTANT: boolean;
+    ENABLE_MULTIMEDIA: boolean;
+    error?: string;
+}

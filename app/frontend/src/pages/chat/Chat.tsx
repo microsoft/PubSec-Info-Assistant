@@ -11,7 +11,7 @@ import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
-import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, ChatMode } from "../../api";
+import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, ChatMode, getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { ExampleList } from "../../components/Example";
@@ -48,6 +48,7 @@ const Chat = () => {
     const [activeChatMode, setChatMode] = useState<ChatMode>(ChatMode.WorkOnly);
     const [defaultApproach, setDefaultApproach] = useState<number>(Approaches.ReadRetrieveRead);
     const [activeApproach, setActiveApproach] = useState<number>(Approaches.ReadRetrieveRead);
+    const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | undefined>(undefined);
 
     const lastQuestionRef = useRef<string>("");
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
@@ -64,6 +65,16 @@ const Chat = () => {
 
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
+
+    async function fetchFeatureFlags() {
+        try {
+            const fetchedFeatureFlags = await getFeatureFlags();
+            setFeatureFlags(fetchedFeatureFlags);
+        } catch (error) {
+            // Handle the error here
+            console.log(error);
+        }
+    }
 
     const makeApiRequest = async (question: string, approach: Approaches) => {
         lastQuestionRef.current = question;
@@ -211,6 +222,7 @@ const Chat = () => {
         defaultApproach == Approaches.ReadRetrieveRead ? setDefaultApproach(Approaches.ChatWebRetrieveRead) : setDefaultApproach(Approaches.ReadRetrieveRead);
     }
 
+    useEffect(() => {fetchFeatureFlags()}, []);
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 
     const onRetrieveCountChange = (_ev?: React.SyntheticEvent<HTMLElement, Event>, newValue?: string) => {
@@ -267,7 +279,7 @@ const Chat = () => {
     return (
         <div className={styles.container}>
             <div className={styles.subHeader}>
-                <ChatModeButtonGroup className="" defaultValue={activeChatMode} onClick={onChatModeChange} /> 
+                <ChatModeButtonGroup className="" defaultValue={activeChatMode} onClick={onChatModeChange} featureFlags={featureFlags} /> 
                 <div className={styles.commandsContainer}>
                     <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                     <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />

@@ -311,7 +311,7 @@ variable "applicationInsightsName" {
   default = ""
 }
 
-variable "backendServiceName" {
+variable "webappServiceName" {
   type    = string
   default = ""
 }

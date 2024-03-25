@@ -1,20 +1,24 @@
+//Create the Network Security Group
+
 resource "azurerm_network_security_group" "nsg" {
   name                = var.nsg_name
   location            = var.location
   resource_group_name = var.resourceGroupName
-  tags = var.tags
+  tags                = var.tags
 }
+
+//Create the Virtual Network
 
 resource "azurerm_virtual_network" "vnet" {
   name                = var.vnet_name
   location            = var.location
   resource_group_name = var.resourceGroupName
   address_space       = [var.vnetIpAddressCIDR]
-  
+
   subnet {
     name           = "apiManagement"
     address_prefix = var.snetApiManagementCIDR
-    
+
     security_group = azurerm_network_security_group.nsg.id
   }
   subnet {
@@ -75,7 +79,7 @@ resource "azurerm_subnet" "azureMonitor" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAzureMonitorCIDR]
-  
+
 }
 
 resource "azurerm_subnet" "apiManagement" {
@@ -94,7 +98,7 @@ resource "azurerm_subnet" "apiManagement" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "apiManagement_snet_to_nsg" {
-  subnet_id = azurerm_subnet.apiManagement.id
+  subnet_id                 = azurerm_subnet.apiManagement.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -106,7 +110,7 @@ resource "azurerm_subnet" "storageAccount" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "storageAccount_snet_to_nsg" {
-  subnet_id = azurerm_subnet.storageAccount.id
+  subnet_id                 = azurerm_subnet.storageAccount.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -118,7 +122,7 @@ resource "azurerm_subnet" "cosmosDb" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "cosmosDb_snet_to_nsg" {
-  subnet_id = azurerm_subnet.cosmosDb.id
+  subnet_id                 = azurerm_subnet.cosmosDb.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -130,7 +134,7 @@ resource "azurerm_subnet" "azureAi" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "azureAi_snet_to_nsg" {
-  subnet_id = azurerm_subnet.azureAi.id
+  subnet_id                 = azurerm_subnet.azureAi.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -142,7 +146,7 @@ resource "azurerm_subnet" "keyVault" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "keyVault_snet_to_nsg" {
-  subnet_id = azurerm_subnet.keyVault.id
+  subnet_id                 = azurerm_subnet.keyVault.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -154,7 +158,7 @@ resource "azurerm_subnet" "appInbound" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "appInbound_snet_to_nsg" {
-  subnet_id = azurerm_subnet.appInbound.id
+  subnet_id                 = azurerm_subnet.appInbound.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -163,7 +167,7 @@ resource "azurerm_subnet" "appOutbound" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAppOutboundCIDR]
-  service_endpoints = ["Microsoft.Storage"]
+  service_endpoints    = ["Microsoft.Storage"]
   delegation {
     name = "Microsoft.Web/serverFarms"
     service_delegation {
@@ -174,7 +178,7 @@ resource "azurerm_subnet" "appOutbound" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "appOutbound_snet_to_nsg" {
-  subnet_id = azurerm_subnet.appOutbound.id
+  subnet_id                 = azurerm_subnet.appOutbound.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -186,7 +190,7 @@ resource "azurerm_subnet" "functionInbound" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "functionInbound_snet_to_nsg" {
-  subnet_id = azurerm_subnet.functionInbound.id
+  subnet_id                 = azurerm_subnet.functionInbound.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -195,7 +199,7 @@ resource "azurerm_subnet" "functionOutbound" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetFunctionOutboundCIDR]
-  service_endpoints = ["Microsoft.Storage"]
+  service_endpoints    = ["Microsoft.Storage"]
   delegation {
     name = "Microsoft.Web/serverFarms"
     service_delegation {
@@ -206,7 +210,7 @@ resource "azurerm_subnet" "functionOutbound" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "functionOutbound_snet_to_nsg" {
-  subnet_id = azurerm_subnet.functionOutbound.id
+  subnet_id                 = azurerm_subnet.functionOutbound.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -218,7 +222,7 @@ resource "azurerm_subnet" "enrichmentInbound" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "enrichmentInbound_snet_to_nsg" {
-  subnet_id = azurerm_subnet.enrichmentInbound.id
+  subnet_id                 = azurerm_subnet.enrichmentInbound.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -227,7 +231,7 @@ resource "azurerm_subnet" "enrichmentOutbound" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetEnrichmentOutboundCIDR]
-  service_endpoints = ["Microsoft.Storage"]
+  service_endpoints    = ["Microsoft.Storage"]
   delegation {
     name = "Microsoft.Web/serverFarms"
     service_delegation {
@@ -238,6 +242,6 @@ resource "azurerm_subnet" "enrichmentOutbound" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "enrichmentOutbound_snet_to_nsg" {
-  subnet_id = azurerm_subnet.enrichmentOutbound.id
+  subnet_id                 = azurerm_subnet.enrichmentOutbound.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }

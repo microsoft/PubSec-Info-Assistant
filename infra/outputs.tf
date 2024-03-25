@@ -36,11 +36,11 @@ output "AZURE_STORAGE_UPLOAD_CONTAINER" {
 }
 
 output "BACKEND_URI" {
-  value = module.backend.uri
+  value = module.webapp.uri
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.web_app_name
+  value = module.webapp.web_app_name
 }
 
 output "RESOURCE_GROUP_NAME" {
@@ -72,7 +72,7 @@ output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.formrecognizer.formRecognizerAccountEndpoint
+  value = module.aiDocIntelligence.formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {

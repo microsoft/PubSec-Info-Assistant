@@ -30,7 +30,6 @@ import_resource_if_needed() {
       echo -e "\e[34mResource $module_path is not managed by Terraform. Importing $module_path\e[0m"
       terraform import "$module_path" "$resource_id"
     fi
-
 }
 
 
@@ -80,11 +79,12 @@ fi
 # Import the existing resources into the Terraform state
 # ***********************************************************
 
+
 # Main
 echo
 figlet "Main"
 resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
-import_resource_if_needed "azurerm_resource_group.rg" "$resourceId"
+import_resource_if_needed "azurerm_resource_group.rg" "$resourceId" 
 providers="/providers/Microsoft.Resources/deployments/pid-"
 import_resource_if_needed "azurerm_resource_group_template_deployment.customer_attribution[0]" "$resourceId$providers"
 

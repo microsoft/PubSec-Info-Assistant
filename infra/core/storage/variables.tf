@@ -121,3 +121,7 @@ variable "azure_environment" {
 variable "subscription_id" {
   type = string
 }
+
+variable "arm_template_schema_mgmt_api" {
+  type        = string
+}

@@ -217,6 +217,7 @@ module "storage" {
   allowBlobPublicAccess = false
   publicNetworkAccess   = true
   resourceGroupName     = azurerm_resource_group.rg.name
+  arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
   keyVaultId            = module.kvModule.keyVaultId
   deleteRetentionPolicy = {
     days                = 7

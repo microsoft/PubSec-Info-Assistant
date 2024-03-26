@@ -1,0 +1,43 @@
+{
+    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "queueName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('storageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2018-07-01",
+            "location": "[parameters('location')]"
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2023-01-01",
+            "name": "[concat(parameters('storageAccountName'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+            "apiVersion": "2023-01-01",
+            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('queueName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/queueServices', parameters('storageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        }
+    ]
+}

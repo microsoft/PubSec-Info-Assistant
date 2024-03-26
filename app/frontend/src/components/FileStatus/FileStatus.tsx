@@ -29,7 +29,7 @@ const dropdownTimespanOptions = [
 const dropdownFileStateOptions = [
     { key: 'FileStates', text: 'File States', itemType: DropdownMenuItemType.Header },
     { key: FileState.All, text: 'All' },
-    { key: FileState.Complete, text: 'Completed' },
+    { key: FileState.Complete, text: 'Complete' },
     { key: FileState.Error, text: 'Error' },
     { key: FileState.Processing, text: 'Processing' },
     { key: FileState.Indexing, text: 'Indexing' },

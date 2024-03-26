@@ -83,7 +83,12 @@ ENV = {
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true" 
+    "ENABLE_BING_SAFE_SEARCH": "true",
+    "ENABLE_WEB_CHAT": "false",
+    "ENABLE_UNGROUNDED_CHAT": "false",
+    "ENABLE_MATH_ASSISTANT": "false",
+    "ENABLE_TABULAR_DATA_ASSISTANT": "false",
+    "ENABLE_MULTIMEDIA": "false"
     }
 
 for key, value in ENV.items():
@@ -532,7 +537,6 @@ async def logstatus(request: Request):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     raise HTTPException(status_code=200, detail="Success")
 
-# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.get("/getInfoData")
 async def get_info_data():
     """
@@ -567,7 +571,7 @@ async def get_info_data():
     }
     return response
 
-# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
+
 @app.get("/getWarningBanner")
 async def get_warning_banner():
     """Get the warning banner text"""
@@ -726,6 +730,27 @@ async def retryFile(request: Request):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return {"status": 200}
 
+@app.get("/getFeatureFlags")
+async def get_feature_flags():
+    """
+    Get the feature flag settings for the app.
+
+    Returns:
+        dict: A dictionary containing various feature flags for the app.
+            - "ENABLE_WEB_CHAT": Flag indicating whether web chat is enabled.
+            - "ENABLE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
+            - "ENABLE_MATH_ASSISTANT": Flag indicating whether the math assistant is enabled.
+            - "ENABLE_TABULAR_DATA_ASSISTANT": Flag indicating whether the tabular data assistant is enabled.
+            - "ENABLE_MULTIMEDIA": Flag indicating whether multimedia is enabled.
+    """
+    response = {
+        "ENABLE_WEB_CHAT": str_to_bool.get(ENV["ENABLE_WEB_CHAT"]),
+        "ENABLE_UNGROUNDED_CHAT": str_to_bool.get(ENV["ENABLE_UNGROUNDED_CHAT"]),
+        "ENABLE_MATH_ASSISTANT": str_to_bool.get(ENV["ENABLE_MATH_ASSISTANT"]),
+        "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
+        "ENABLE_MULTIMEDIA": str_to_bool.get(ENV["ENABLE_MULTIMEDIA"]),
+    }
+    return response
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

@@ -67,8 +67,8 @@ module "enrichmentApp" {
   location                                  = var.location 
   tags                                      = local.tags
   sku = {
-    size                                    = "P1v3"
-    tier                                    = "PremiumV3"
+    size                                    = var.enrichmentAppServiceSkuSize
+    tier                                    = var.enrichmentAppServiceSkuTier
     capacity                                = 3
   }
   kind                                      = "linux"
@@ -116,8 +116,8 @@ module "backend" {
   name                                = var.backendServiceName != "" ? var.backendServiceName : "infoasst-web-${random_string.random.result}"
   plan_name                           = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
   sku = {
-    tier                              = "Standard"
-    size                              = "S1" 
+    tier                              = var.appServiceSkuTier
+    size                              = var.appServiceSkuSize
     capacity                          = 1
   }
   kind                                = "linux"
@@ -175,8 +175,9 @@ module "backend" {
     ENABLE_WEB_CHAT                         = var.enableWebChat
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
-    ENABLE_MATH_TUTOR                       = var.enableMathTutor
-    ENABLE_CSV_AGENT                        = var.enableCsvAgent
+    ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
+    ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
+    ENABLE_MULTIMEDIA                       = var.enableMultimedia
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -276,16 +277,13 @@ module "functions" {
   tags                                  = local.tags
   keyVaultUri                           = module.kvModule.keyVaultUri
   keyVaultName                          = module.kvModule.keyVaultName 
-
-  plan_name     = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
-
-  sku = {
-    size = "S2"
-    tier = "Standard"
-    capacity = 2
+  plan_name                             = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
+  sku                                   = {
+    size                                = var.functionsAppSkuSize
+    tier                                = var.functionsAppSkuTier
+    capacity                            = 2
   }
-  kind     = "linux"
-
+  kind                                  = "linux"
   runtime                               = "python"
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
@@ -355,6 +353,7 @@ module "sharepoint" {
 }
 
 module "video_indexer" {
+  count                               = var.enableMultimedia ? 1 : 0
   source                              = "./core/videoindexer"
   location                            = azurerm_resource_group.rg.location
   resource_group_name                 = azurerm_resource_group.rg.name
@@ -430,14 +429,14 @@ module "storageRoleFunc" {
 }
 
 module "aviRoleBackend" {
-  source = "./core/security/role"
-
-  scope           = module.video_indexer.vi_id
-  principalId     = module.backend.identityPrincipalId
-  roleDefinitionId = local.azure_roles.Contributor
-  principalType   = "ServicePrincipal"
-  subscriptionId  = data.azurerm_client_config.current.subscription_id
-  resourceGroupId = azurerm_resource_group.rg.id 
+  source            = "./core/security/role"
+  count             = var.enableMultimedia ? 1 : 0
+  scope             = module.video_indexer[0].vi_id
+  principalId       = module.backend.identityPrincipalId
+  roleDefinitionId  = local.azure_roles.Contributor
+  principalType     = "ServicePrincipal"
+  subscriptionId    = data.azurerm_client_config.current.subscription_id
+  resourceGroupId   = azurerm_resource_group.rg.id 
 }
 
 # // MANAGEMENT SERVICE PRINCIPAL ROLES

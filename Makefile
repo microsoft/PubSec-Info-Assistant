@@ -66,3 +66,5 @@ functional-tests: extract-env ## Run functional tests to check the processing pi
 
 import-state: check-subscription ## Upgrade the infrastructure to current version
 	@./scripts/inf-import-state.sh
+run-migration: ## Migrate from bicep to terraform
+	python ./scripts/merge-databases.py

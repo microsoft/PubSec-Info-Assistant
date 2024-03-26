@@ -16,6 +16,7 @@ import { AskRequest,
     GetTagsResponse,
     DeleteItemRequest,
     ResubmitItemRequest,
+    GetFeatureFlagsResponse,
     } from "./models";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
@@ -401,4 +402,20 @@ export async function getAllTags(): Promise<GetTagsResponse> {
     }
     var results: GetTagsResponse = {tags: parsedResponse};
     return results;
+}
+
+export async function getFeatureFlags(): Promise<GetFeatureFlagsResponse> {
+    const response = await fetch("/getFeatureFlags", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: GetFeatureFlagsResponse = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
 }

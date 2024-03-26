@@ -43,23 +43,22 @@ module "network" {
   location                   = var.location
   tags                       = local.tags
   resourceGroupName          = azurerm_resource_group.rg.name
-  vnetIpAddressCIDR          = "10.0.0.0/21"
-  snetAzureMonitorCIDR       = "10.0.0.64/26"
-  snetApiManagementCIDR      = "10.0.0.128/26"
-  snetStorageAccountCIDR     = "10.0.1.0/26"
-  snetCosmosDbCIDR           = "10.0.1.64/26"
-  snetAzureAiCIDR            = "10.0.1.128/26"
-  snetKeyVaultCIDR           = "10.0.1.192/26"
-  snetAppInboundCIDR         = "10.0.2.0/26"
-  snetAppOutboundCIDR        = "10.0.2.128/26"
-  snetFunctionInboundCIDR    = "10.0.3.0/26"
-  snetFunctionOutboundCIDR   = "10.0.3.128/26"
-  snetEnrichmentInboundCIDR  = "10.0.4.0/26"
-  snetEnrichmentOutboundCIDR = "10.0.4.128/26"
-  snetSearchServiceCIDR      = "10.0.5.0/26"
-  snetAzureVideoIndexerCIDR  = "10.0.5.128/26"
-  snetBingServiceCIDR        = "10.0.6.0/26"
-  snetAzureOpenAICIDR        = "10.0.6.128/26"
+  vnetIpAddressCIDR          = var.virtual_network_CIDR
+  snetAzureMonitorCIDR       = var.azure_monitor_CIDR
+  snetStorageAccountCIDR     = var.storage_account_CIDR
+  snetCosmosDbCIDR           = var.cosmos_db_CIDR
+  snetAzureAiCIDR            = var.azure_ai_CIDR
+  snetKeyVaultCIDR           = var.key_vault_CIDR
+  snetAppInboundCIDR         = var.webapp_inbound_CIDR
+  snetAppOutboundCIDR        = var.webapp_outbound_CIDR
+  snetFunctionInboundCIDR    = var.functions_inbound_CIDR
+  snetFunctionOutboundCIDR   = var.functions_outbound_CIDR
+  snetEnrichmentInboundCIDR  = var.enrichment_app_inbound_CIDR
+  snetEnrichmentOutboundCIDR = var.enrichment_app_outbound_CIDR
+  snetSearchServiceCIDR      = var.search_service_CIDR
+  snetAzureVideoIndexerCIDR  = var.azure_video_indexer_CIDR
+  snetBingServiceCIDR        = var.bing_service_CIDR
+  snetAzureOpenAICIDR        = var.azure_openAI_CIDR
 }
 
 // Create the Private DNS Zones for all the services

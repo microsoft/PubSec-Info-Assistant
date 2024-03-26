@@ -26,10 +26,6 @@ variable "snetAzureMonitorCIDR" {
   type    = string
 }
 
-variable "snetApiManagementCIDR" {
-  type    = string
-}
-
 variable "snetStorageAccountCIDR" {
   type    = string
 }

@@ -292,6 +292,86 @@ variable "is_secure_mode" {
   type    = bool
   default = false
 }
+
+variable "virtual_network_CIDR" {
+  type    = string
+  default = "10.0.0.0/21"
+}
+
+variable "azure_monitor_CIDR" {
+  type    = string
+  default = "10.0.0.64/26"
+}
+
+variable "storage_account_CIDR" {
+  type    = string
+  default = "10.0.1.0/26"
+}
+
+variable "cosmos_db_CIDR" {
+  type    = string
+  default = "10.0.1.64/26"
+}
+
+variable "azure_ai_CIDR" {
+  type    = string
+  default = "10.0.1.128/26"
+}
+
+variable "key_vault_CIDR" {
+  type    = string
+  default = "10.0.1.192/26"
+}
+
+variable "webapp_inbound_CIDR" {
+  type    = string
+  default = "10.0.2.0/26"
+}
+
+variable "webapp_outbound_CIDR" {
+  type    = string
+  default = "10.0.2.128/26"
+}
+
+variable "functions_inbound_CIDR" {
+  type    = string
+  default = "10.0.3.0/26"
+}
+
+variable "functions_outbound_CIDR" {
+  type    = string
+  default = "10.0.3.128/26"
+}
+
+variable "enrichment_app_inbound_CIDR" {
+  type    = string
+  default = "10.0.4.0/26"
+}
+
+variable "enrichment_app_outbound_CIDR" {
+  type    = string
+  default = "10.0.4.128/26"
+}
+
+variable "search_service_CIDR" {
+  type    = string
+  default = "10.0.5.0/26"
+}
+
+variable "azure_video_indexer_CIDR" {
+  type    = string
+  default = "10.0.5.128/26"
+}
+
+variable "bing_service_CIDR" {
+  type    = string
+  default = "10.0.6.0/26"
+}
+
+variable "azure_openAI_CIDR" {
+  type    = string
+  default = "10.0.6.128/26"
+}
 ////
 
 variable "formRecognizerSkuName" {

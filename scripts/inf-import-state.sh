@@ -141,7 +141,6 @@ else
 fi
 
 
-
 # Monitor
 echo
 figlet "Monitor"
@@ -190,10 +189,6 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     fi  
 done
 
-# name="infoasst-ua-ident-$random_text"
-# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-# import_resource_if_needed "module.video_indexer.azurerm_resource_group_template_deployment.vi" "$resourceId$providers"
-
 
 # Form Recognizer
 echo
@@ -230,8 +225,6 @@ name="infoasst-ai-$random_text"
 providers="/providers/Microsoft.Insights/components/$name"
 module_path="module.logging.azurerm_application_insights.applicationInsights"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
 
 
 # User Roles
@@ -429,7 +422,6 @@ figlet "Output Log"
 echo
 echo -e "\e[34mBelow are the services now managed by terraform:\e[0m"
 printf "\033[32m%s\033[0m\n" "$(terraform state list)"
-
 
 echo
 if [ ${#error_messages[@]} -ne 0 ]; then

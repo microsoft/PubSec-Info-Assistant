@@ -4,7 +4,61 @@
 #!/bin/bash
 set -e
 
+
+# ***********************************************************
+# Guidance to a user
+# ***********************************************************
+
+# Clear the screen
+clear
+
+# Function to change text color to yellow
+set_yellow_text() {
+    tput setaf 3  # Set text color to yellow
+}
+
+# Function to reset text color
+reset_text_color() {
+    tput sgr0  # Reset text color
+}
+
 figlet Import Terraform State
+
+# Set text color to yellow
+set_yellow_text
+
+# Display the notice
+echo "IMPORTANT NOTICE:"
+echo "Please read the following terms carefully. You must accept the terms to proceed."
+echo
+echo "This script will import the existing resources into the Terraform state."
+echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
+echo "of the accelerator while maintaining your existing resources and processed data."
+echo
+echo "If you have modified the infrastructure base this process will fail."
+echo "The simplest approach to deploy the latest version would be to perform"
+echo "a new deployment on a new resource group and reprocess your data"
+
+
+# Reset text color for input prompt
+reset_text_color
+echo
+echo "Do you accept these terms? (yes/no)"
+
+# Wait for the user's input
+while true; do
+    read -rp "Type 'yes' to accept: " answer
+    case $answer in
+        [Yy]* ) break;;
+        [Nn]* ) echo "You did not accept the terms. Exiting."; exit 1;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+# Continue with the script after acceptance
+echo "You have accepted the terms. Proceeding with the script..."
+# Your script's logic goes here
+
 
 # escape special chars in a string
 escape_string() {
@@ -41,6 +95,7 @@ get_secret() {
 }
 
 
+
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
@@ -73,6 +128,7 @@ else
     # Assign the input to a variable
     random_text=$user_input
 fi
+
 
 
 # ***********************************************************

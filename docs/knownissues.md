@@ -1,8 +1,8 @@
 # Known Issues
 
-Here are some commonly encountered issues when deploying the PS Info Assistant Accelerator.
+Here are some commonly encountered issues when deploying the WWPS Information Assistant accelerator.
 
-## This subscription cannot create AzureIAServices until you agree to Responsible AI terms for this resource
+## This subscription cannot create AzureAIServices until you agree to Responsible AI terms for this resource
 
 ```bash
 Error: This subscription cannot create CognitiveServices until you agree to Responsible AI terms for this resource. You can agree to Responsible AI terms by creating a resource through the Azure Portal then trying again. For more detail go to https://aka.ms/csrainotice"}]
@@ -21,13 +21,12 @@ Manually create a "Azure AI services" in your Azure Subscription and Accept "Res
 
 ***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
-***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
 ---
 
 ## Error "Your administrator has configured the application infoasst_web_access_xxxxx to block users..."
 
-By default Info Assistant deploys the webapp to require users to be a member of an Azure Active Directory Enterprise Application to access the website. If a user is not a member of the AAD EA they will receive this error:
+By default Information Assistant deploys the webapp to require users to be a member of an Azure Active Directory Enterprise Application to access the website. If a user is not a member of the AAD EA they will receive this error:
 
 ![image.png](images/known_Issues_web_app_authentication.png)
 
@@ -129,9 +128,9 @@ To resolve, carefully check your local.env file for any missing but required val
 
 ### Solution
 
-This was a problem with early deployments of 1.0. The root of this is table processing. If a table is greater than our target token count for a chunk, this is not respected meaning tables are not chunked, but treated as units. We now split tables by chunk size and repeat the table header rows in each chunk.
+This was a problem with early deployments of Information Assistant 1.0. The root cause of this error is table processing. If a table is greater than our target token count for a chunk, this is not respected meaning tables are not chunked, but treated as units. We now split tables by chunk size and repeat the table header rows in each chunk.
 
-This issue was resolved in a hotfix to the main branch of 1.0, so please upgrade to version 1.0 or later.
+This issue was resolved in a hotfix to the main branch of Information Assistant 1.0, so please upgrade to version 1.0 or later.
 
 ## Error
 

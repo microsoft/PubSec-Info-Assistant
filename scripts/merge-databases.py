@@ -30,7 +30,7 @@ credential = DefaultAzureCredential()
 
 
 # *************************************************************************
-# Read required values from infra_output.json & new key vault
+# Read required values from infra_output.json & key vault
 print("Reading values from infra_output.json")
 with open('infra_output.json', 'r') as file:
     inf_output = json.load(file)
@@ -39,8 +39,8 @@ cosmosdb_url = inf_output['properties']['outputs']['azurE_COSMOSDB_URL']['value'
 key_vault_name = inf_output['properties']['outputs']['deploymenT_KEYVAULT_NAME']['value']
 key_vault_url = "https://" + key_vault_name + ".vault.azure.net/"
 
-client = SecretClient(vault_url=key_vault_url, credential=credential) 
-cosmosdb_key = client.get_secret('COSMOSDB-KEY') 
+sClient = SecretClient(vault_url=key_vault_url, credential=credential) 
+cosmosdb_key = sClient.get_secret('COSMOSDB-KEY') 
 # *************************************************************************
 
 
@@ -51,17 +51,17 @@ client = CosmosClient(cosmosdb_url, cosmosdb_key.value)
 
 try:
     # Get old status docs
-    database = client.get_database_client('statusdb')
-    container = database.get_container_client('statuscontainer')
-    old_status_items = list(container.query_items(
+    status_database = client.get_database_client('statusdb')
+    status_container = status_database.get_container_client('statuscontainer')
+    old_status_items = list(status_container.query_items(
         query="SELECT * FROM c",
         enable_cross_partition_query=True
     ))
     
     # Get old tags docs
-    database = client.get_database_client('tagdb')
-    container = database.get_container_client('tagcontainer')
-    old_tags_items = list(container.query_items(
+    tags_database = client.get_database_client('tagdb')
+    tags_container = tags_database.get_container_client('tagcontainer')
+    old_tags_items = list(tags_container.query_items(
         query="SELECT * FROM c",
         enable_cross_partition_query=True
     ))
@@ -76,10 +76,8 @@ try:
             item['migration_log'] = [f'Migrated tags & status from {cosmosdb_url} old tags container to status container']
         
     # Write merged json documents to statuscontainer
-    database_new = client.get_database_client('statusdb')
-    container_new = database_new.get_container_client('statuscontainer')
     for item in old_status_items:
-        container_new.upsert_item(item)
+        status_container.upsert_item(item)
     
     print(f'Successfully migrated {len(old_status_items)} items')
 except exceptions.CosmosHttpResponseError as e:

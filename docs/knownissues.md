@@ -58,10 +58,10 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ## Errors due to throttling or overloading Form Recognizer
 
-Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable. 
+Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
 
 ### Solution
-These values surface as configuration settings in the Azure function and can be revised there, or they can be updated at deployment in function.bicep, or they can be updated in the file local.settings.json which is used when debugging a function in VS Code. These values are as follows...
+These values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. These values are as follows...
 
 ```
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
@@ -111,24 +111,17 @@ Deploy Azure OpenAI Service only in the supported regions. Review the local.env 
 
 ## Error: jq parse error: Expected value before ','
 
-If you see a jq parse error while doing deployments, it means one of the makefile scripts to extract environment variables is failing to find a value it expects to be there. The files related would be the main.parameters.json file which is the variables from bicep output from the infrastructure create. The other would be the env file used during build and deploy time
+If you see a jq parse error while running a deployment, it means one of the makefile scripts that extract environment variables is failing to find a value it expects. Carefully review the inf_output.json file and your local.env file used during build and deploy time
 
 ### Solution:
-To resolve carefully check your deployment .env file for any missing but required values. There are rare times when ARM has issues and output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` and/or ```make extract-env``` command so that the bicep outputs can be written again
+To resolve, carefully check your local.env file for any missing but required values. There are rare times output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` command to regenerate the inf_output.json file the Makefile script parses for variables.
 
 ## Error: Creation of new Media Service accounts are not allowed as the resource has been deprecated
 
 ### Solution:
-Media Services is scheduled for 30th June 2024. This is the [guide](https://learn.microsoft.com/en-us/azure/media-services/latest/azure-media-services-retirement). On deeper investigation Video Indexer, which is the service we use that sits on top of Media Services, will switch away from this before the end date....
+Information Assistant uses Azure AI Video Indexer (VI) which depended on Azure Media Services (AMS). AMS is scheduled for retirement on June 30 2024. As part of retirement planning, steps to transition away from the current VI account AMS dependency have been published. Please refer to this [guide](https://learn.microsoft.com/en-us/azure/media-services/latest/azure-media-services-retirement) for additional details.
 
-```
-Is Azure Video Indexer being retired?
-No, Azure Video Indexer isn't part of the Media Services retirement. Although Video Indexer currently relies on a Media Services account as part of its workflow, this dependency will be eliminated before Media Services is retired on June 30, 2024. See the following for more [impact of Media Services retirement for Video Indexer](https://aka.ms/vi-ams-retirement-announcement)
-```
-
-As of today, Video Indexer still requires a Media Services service to be created, and so we can't remove it from bicep deployment. We will need to assess closer to the date if VI is working without the service and we can then remove the dependency.
-
-The error is interesting as it seems to indicate the media service cannot be created. This is not the case, it does work in regions where VI and Media Services are available. I have updated this to an enhancement and we will add a ticket to the board to action this when VI can be deployed without this supporting service.
+VI isn't part of the Azure Media Services (AMS) retirement. Previously, Video Indexer relied on AMS for encoding, packaging, and streaming. This dependency was removed following this [guide](https://learn.microsoft.com/en-us/azure/azure-video-indexer/azure-video-indexer-ams-retirement-guide) which provides guidance on linking an Azure Storage account to the VI account.
 
 ## Error: Token limit often exceeded with PDF files
 

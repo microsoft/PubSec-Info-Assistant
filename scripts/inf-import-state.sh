@@ -39,7 +39,6 @@ echo "If you have modified the infrastructure base this process will fail."
 echo "The simplest approach to deploy the latest version would be to perform"
 echo "a new deployment on a new resource group and reprocess your data"
 
-
 # Reset text color for input prompt
 reset_text_color
 echo

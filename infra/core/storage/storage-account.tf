@@ -61,7 +61,7 @@ resource "azurerm_resource_group_template_deployment" "container" {
   template_content        = data.template_file.container.template
   # The filemd5 forces this to run when the file is changed
   # this ensures the keys are up-to-date
-  name            = "cont-${var.containers[count.index]}-${filemd5(local.container_arm_file_path)}"
+  name            = "${var.containers[count.index]}-${filemd5(local.container_arm_file_path)}"
   deployment_mode = "Incremental"
 }
 
@@ -78,7 +78,7 @@ resource "azurerm_resource_group_template_deployment" "queue" {
   template_content        = data.template_file.queue.template
   # The filemd5 forces this to run when the file is changed
   # this ensures the keys are up-to-date
-  name            = "contianer-${var.queueNames[count.index]}-${filemd5(local.queue_arm_file_path)}"
+  name            = "${var.queueNames[count.index]}-${filemd5(local.queue_arm_file_path)}"
   deployment_mode = "Incremental"
 }
 

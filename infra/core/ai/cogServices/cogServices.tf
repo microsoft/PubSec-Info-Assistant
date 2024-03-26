@@ -1,10 +1,11 @@
 resource "azurerm_cognitive_account" "cognitiveService" {
-  name                = var.name
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  kind                = "CognitiveServices"
-  sku_name            = var.sku["name"]
-  tags                = var.tags
+  name                  = var.name
+  location              = var.location
+  resource_group_name   = var.resourceGroupName
+  kind                  = "CognitiveServices"
+  sku_name              = var.sku["name"]
+  tags                  = var.tags
+  custom_subdomain_name = var.name
 }
 
 resource "azurerm_key_vault_secret" "search_service_key" {
@@ -23,10 +24,10 @@ resource "azurerm_private_endpoint" "accountPrivateEndpoint" {
 
 
   private_service_connection {
-    name                            = "${var.name}-private-link-service-connection"
-    private_connection_resource_id  = azurerm_cognitive_account.cognitiveService.id
-    is_manual_connection            = false
-    subresource_names               = ["account"]
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_cognitive_account.cognitiveService.id
+    is_manual_connection           = false
+    subresource_names              = ["account"]
   }
 
   private_dns_zone_group {

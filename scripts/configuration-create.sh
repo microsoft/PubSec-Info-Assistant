@@ -55,10 +55,10 @@ echo "," >> $FILEPATH
 echo -e -n "\"SharepointSites\": " >> $FILEPATH
 echo $SHAREPOINT_TO_SYNC >> $FILEPATH
 
-#write_array_block $FILEPATH "SharepointSite" "SHAREPOINT_SITES"
-#echo "," >> $FILEPATH
-
-#write_array_block $FILEPATH "SharepointEntryFolder" "SHAREPOINT_FOLDERS"
+# Variable is blank, empty array to avoid errors
+if [[ -z $SHAREPOINT_TO_SYNC ]]; then
+    echo "[]" >> $FILEPATH
+fi
 
 
 echo -e "\n}" >> $FILEPATH

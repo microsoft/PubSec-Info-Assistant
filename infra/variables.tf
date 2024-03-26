@@ -169,6 +169,14 @@ variable "azure_ai_document_intelligence_domain" {
 variable "azure_ai_videoindexer_domain" {
   type = string
 }
+
+variable "azure_bing_search_domain" {
+  type = string
+}
+
+variable "azure_ai_private_link_domain" {
+  type = string
+}
 ////
 
 ////

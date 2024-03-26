@@ -1,5 +1,4 @@
 // Initialize Terraform configuration
-
 locals {
   tags           = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles    = jsondecode(file("${path.module}/azure_roles.json"))
@@ -12,7 +11,7 @@ resource "random_string" "random" {
   length  = 5
   special = false
   upper   = false
-  numeric = false
+  number  = false
 }
 
 // Organize resources in a resource group
@@ -22,6 +21,7 @@ resource "azurerm_resource_group" "rg" {
   tags     = local.tags
 }
 
+# Create Azure AD App Registrations and Service Principals
 module "entraObjects" {
   source                           = "./core/aad"
   isInAutomation                   = var.isInAutomation
@@ -34,8 +34,7 @@ module "entraObjects" {
   aadMgmtClientSecret              = var.aadMgmtClientSecret
 }
 
-// Create the Virtual Network, Subnet and Network Security Group
-
+// Create the Virtual Network, Subnets, and Network Security Group
 module "network" {
   source                     = "./core/network/network"
   count                      = var.is_secure_mode ? 1 : 0
@@ -57,11 +56,13 @@ module "network" {
   snetFunctionOutboundCIDR   = "10.0.3.128/26"
   snetEnrichmentInboundCIDR  = "10.0.4.0/26"
   snetEnrichmentOutboundCIDR = "10.0.4.128/26"
+  snetSearchServiceCIDR      = "10.0.5.0/26"
+  snetAzureVideoIndexerCIDR  = "10.0.5.128/26"
+  snetBingServiceCIDR        = "10.0.6.0/26"
+  snetAzureOpenAICIDR        = "10.0.6.128/26"
 }
 
-
 // Create the Private DNS Zones for all the services
-
 module "privateDnsZoneAzureOpenAi" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
@@ -72,42 +73,12 @@ module "privateDnsZoneAzureOpenAi" {
   tags               = local.tags
 }
 
-module "privateDnsZoneAzureAiFormRecognizer" {
+module "privateDnsZoneAzureAi" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_ai_form_recognizer_domain}"
+  name               = "privatelink.${var.azure_ai_private_link_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network[0].vnet_id
-  tags               = local.tags
-}
-
-module "privateDnsZoneAzureAiTextAnalytics" {
-  source             = "./core/network/privateDNS"
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_ai_text_analytics_domain}"
-  resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-azure-ai-ta-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network[0].vnet_id
-  tags               = local.tags
-}
-
-module "privateDnsZoneAzureAiTranslation" {
-  source             = "./core/network/privateDNS"
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_ai_translation_domain}"
-  resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-azure-ai-trans-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network[0].vnet_id
-  tags               = local.tags
-}
-
-module "privateDnsZoneAzureAiDocIntel" {
-  source             = "./core/network/privateDNS"
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_ai_document_intelligence_domain}"
-  resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
+  vnetLinkName       = "infoasst-azure-ai-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
 }
@@ -152,6 +123,26 @@ module "privateDnsZoneStorageAccountBlob" {
   tags               = local.tags
 }
 
+module "privateDnsZoneStorageAccountFile" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.file.${var.azure_storage_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-storage-file-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network[0].vnet_id
+  tags               = local.tags
+}
+
+module "privateDnsZoneStorageAccountTable" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.table.${var.azure_storage_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-storage-table-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network[0].vnet_id
+  tags               = local.tags
+}
+
 module "privateDnsZoneStorageAccountQueue" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
@@ -182,103 +173,64 @@ module "privateDnsZoneCosmosDb" {
   tags               = local.tags
 }
 
-module "privateDnsZoneAzureMonitor" {
+module "privateDnsZoneBingSearch" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_monitor_domain}"
+  name               = "privatelink.${var.azure_bing_search_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-monitor-vnetlink-${random_string.random.result}"
+  vnetLinkName       = "infoasst-bingsearch-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
 }
 
-module "privateDnsZoneOpsInsightOms" {
-  source             = "./core/network/privateDNS"
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_monitor_oms_domain}"
-  resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-ops-insights-oms-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network[0].vnet_id
-  tags               = local.tags
-}
-
-module "privateDnsZoneOpsInsightOds" {
-  source             = "./core/network/privateDNS"
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_monitor_ods_domain}"
-  resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-ops-insights-ods-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network[0].vnet_id
-  tags               = local.tags
-}
-
-module "privateDnsZoneAutomation" {
-  source             = "./core/network/privateDNS"
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "privatelink.${var.azure_automation_domain}"
-  resourceGroupName  = azurerm_resource_group.rg.name
-  vnetLinkName       = "infoasst-ops-automation-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network[0].vnet_id
-  tags               = local.tags
-}
-
-// Create the Private Link Scope for Azure Monitor - Metrics, Logs, Alerts
-
-module "privateLinkScope" {
-  source                                = "./core/network/privateLinkScope"
-  count                                 = var.is_secure_mode ? 1 : 0
-  name                                  = "infoasst-apls-${random_string.random.result}"
-  resourceGroupName                     = azurerm_resource_group.rg.name
-  location                              = var.location
-  tags                                  = local.tags
-  subnetResourceId                      = module.network[0].snetAzureMonitor_id
-  workspaceId                           = module.logging.logAnalyticsId
-  appInsightsId                         = module.logging.applicationInsightsId
-  privateDnsZoneResourceIdMonitor       = module.privateDnsZoneAzureMonitor[0].privateDnsZoneResourceId
-  privateDnsZoneResourceIdOpsInsightOms = module.privateDnsZoneOpsInsightOms[0].privateDnsZoneResourceId
-  privateDnsZoneResourceIdOpsInsightOds = module.privateDnsZoneOpsInsightOds[0].privateDnsZoneResourceId
-  privateDnsZoneResourceIdAutomation    = module.privateDnsZoneAutomation[0].privateDnsZoneResourceId
-  privateDnsZoneResourceIdBlob          = module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId
-  groupId                               = "azuremonitor"
-}
-
+// Create the Azure Log Analytics and Application Insights
 module "logging" {
   source = "./core/logging/loganalytics"
+  logAnalyticsName                      = var.logAnalyticsName != "" ? var.logAnalyticsName : "infoasst-la-${random_string.random.result}"
+  applicationInsightsName               = var.applicationInsightsName != "" ? var.applicationInsightsName : "infoasst-ai-${random_string.random.result}"
+  location                              = var.location
+  tags                                  = local.tags
+  skuName                               = "PerGB2018"
+  resourceGroupName                     = azurerm_resource_group.rg.name
+  is_secure_mode                        = var.is_secure_mode
+  privateLinkScopeName                  = "infoasst-ampls-${random_string.random.result}"
+  vnetName                              = var.is_secure_mode ? module.network[0].vnet_name : ""
+  privateDnsZoneNameMonitor             = "privatelink.${var.azure_monitor_domain}"
+  privateDnsZoneNameOms                 = "privatelink.${var.azure_monitor_oms_domain}"
+  privateDnSZoneNameOds                 = "privatelink.${var.azure_monitor_ods_domain}"
+  privateDnsZoneNameAutomation          = "privatelink.${var.azure_automation_domain}"
+  privateDnsZoneResourceIdBlob          = var.is_secure_mode ? module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId : null
+  privateDnsZoneNameBlob                = var.is_secure_mode ? module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneName : null
+  groupId                               = "azuremonitor"
 
-  logAnalyticsName        = var.logAnalyticsName != "" ? var.logAnalyticsName : "infoasst-la-${random_string.random.result}"
-  applicationInsightsName = var.applicationInsightsName != "" ? var.applicationInsightsName : "infoasst-ai-${random_string.random.result}"
-  location                = var.location
-  tags                    = local.tags
-  skuName                 = "PerGB2018"
-  resourceGroupName       = azurerm_resource_group.rg.name
 }
 
 // Create the storage account
-
 module "storage" {
-  source         = "./core/storage"
-  is_secure_mode = var.is_secure_mode
-
+  source                = "./core/storage"
+  is_secure_mode        = var.is_secure_mode
   name                  = var.storageAccountName != "" ? var.storageAccountName : "infoasststore${random_string.random.result}"
   location              = var.location
   tags                  = local.tags
+  subscription_id       = data.azurerm_client_config.current.subscription_id
   accessTier            = "Hot"
   allowBlobPublicAccess = false
   publicNetworkAccess   = true
   resourceGroupName     = azurerm_resource_group.rg.name
   keyVaultId            = module.kvModule.keyVaultId
   deleteRetentionPolicy = {
-    days = 7
+    days                = 7
   }
-  containers       = ["content", "website", "upload", "function", "logs", "config"]
-  queueNames       = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
-  subnetResourceId = var.is_secure_mode ? module.network[0].snetStorageAccount_id : null
-  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
-  module.privateDnsZoneStorageAccountQueue[0].privateDnsZoneResourceId] : null
+  containers            = ["content", "website", "upload", "function", "logs", "config"]
+  queueNames            = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
+  subnetResourceId      = var.is_secure_mode ? module.network[0].snetStorageAccount_id : null
+  private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
+                                        module.privateDnsZoneStorageAccountFile[0].privateDnsZoneResourceId,
+                                        module.privateDnsZoneStorageAccountTable[0].privateDnsZoneResourceId,
+                                        module.privateDnsZoneStorageAccountQueue[0].privateDnsZoneResourceId] : null
 }
 
 // Create the Enrichment Application
-
 module "enrichmentApp" {
   source = "./core/host/enrichmentapp"
 
@@ -331,11 +283,10 @@ module "enrichmentApp" {
 }
 
 // Create the Web App
-
 module "webapp" {
-  source    = "./core/host/webapp"
-  name      = var.webappServiceName != "" ? var.webappServiceName : "infoasst-web-${random_string.random.result}"
-  plan_name = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
+  source                              = "./core/host/webapp"
+  name                                = var.webappServiceName != "" ? var.webappServiceName : "infoasst-web-${random_string.random.result}"
+  plan_name                           = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
   sku = {
     tier                              = var.appServiceSkuTier
     size                              = var.appServiceSkuSize
@@ -410,11 +361,9 @@ module "webapp" {
 }
 
 // Create the Azure OpenAI Service and Model deployments
-
 module "openaiServices" {
-  source         = "./core/ai/openaiservices"
-  is_secure_mode = var.is_secure_mode
-
+  source                 = "./core/ai/openaiservices"
+  is_secure_mode         = var.is_secure_mode
   name                   = var.openAIServiceName != "" ? var.openAIServiceName : "infoasst-aoai-${random_string.random.result}"
   location               = var.location
   tags                   = local.tags
@@ -427,22 +376,22 @@ module "openaiServices" {
 
   deployments = [
     {
-      name = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-      model = {
-        format  = "OpenAI"
-        name    = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
-        version = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
+      name               = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
+      model              = {
+        format           = "OpenAI"
+        name             = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
+        version          = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
       }
-      sku_name        = "Standard"
-      sku_capacity    = var.chatGptDeploymentCapacity
-      rai_policy_name = "Microsoft.Default"
+      sku_name           = "Standard"
+      sku_capacity       = var.chatGptDeploymentCapacity
+      rai_policy_name    = "Microsoft.Default"
     },
     {
-      name = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : "text-embedding-ada-002"
-      model = {
-        format  = "OpenAI"
-        name    = var.azureOpenAIEmbeddingsModelName != "" ? var.azureOpenAIEmbeddingsModelName : "text-embedding-ada-002"
-        version = "2"
+      name               = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : "text-embedding-ada-002"
+      model              = {
+        format           = "OpenAI"
+        name             = var.azureOpenAIEmbeddingsModelName != "" ? var.azureOpenAIEmbeddingsModelName : "text-embedding-ada-002"
+        version          = "2"
       }
       sku_name        = "Standard"
       sku_capacity    = var.embeddingsDeploymentCapacity
@@ -453,7 +402,6 @@ module "openaiServices" {
 
 
 // Create the AI Document Intelligence Service
-
 module "aiDocIntelligence" {
   source               = "./core/ai/docintelligence"
   is_secure_mode       = var.is_secure_mode
@@ -464,52 +412,42 @@ module "aiDocIntelligence" {
   resourceGroupName    = azurerm_resource_group.rg.name
   keyVaultId           = module.kvModule.keyVaultId
   subnetResourceId     = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
-  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneAzureAiFormRecognizer[0].privateDnsZoneResourceId] : null
+  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId] : null
 
 }
 
 // Create the AI Services for Text Enrichment
-
 module "cognitiveServices" {
-  source         = "./core/ai/cogServices"
-  is_secure_mode = var.is_secure_mode
-
-  name              = "infoasst-enrichment-cog-${random_string.random.result}"
-  location          = var.location
-  tags              = local.tags
-  keyVaultId        = module.kvModule.keyVaultId
-  resourceGroupName = azurerm_resource_group.rg.name
-  subnetResourceId  = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
-  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneAzureAiTextAnalytics[0].privateDnsZoneResourceId,
-  module.privateDnsZoneAzureAiTranslation[0].privateDnsZoneResourceId] : null
+  source                = "./core/ai/cogServices"
+  is_secure_mode        = var.is_secure_mode
+  name                  = "infoasst-enrichment-cog-${random_string.random.result}"
+  location              = var.location
+  tags                  = local.tags
+  keyVaultId            = module.kvModule.keyVaultId
+  resourceGroupName     = azurerm_resource_group.rg.name
+  subnetResourceId      = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId] : null
 }
 
 // Create the Azure Search Service
-
 module "searchServices" {
-  source         = "./core/search"
-  is_secure_mode = var.is_secure_mode
-
-  name     = var.searchServicesName != "" ? var.searchServicesName : "infoasst-search-${random_string.random.result}"
-  location = var.location
-  tags     = local.tags
-  # aad_auth_failure_mode = "http401WithBearerChallenge"
-  # sku_name = var.searchServicesSkuName
-  semanticSearch       = var.use_semantic_reranker ? "free" : null
-  resourceGroupName    = azurerm_resource_group.rg.name
-  keyVaultId           = module.kvModule.keyVaultId
-  azure_search_domain  = var.azure_search_domain
-  subnetResourceId     = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
-  private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId] : null
-
+  source                = "./core/search"
+  is_secure_mode        = var.is_secure_mode
+  name                  = var.searchServicesName != "" ? var.searchServicesName : "infoasst-search-${random_string.random.result}"
+  location              = var.location
+  tags                  = local.tags
+  semanticSearch        = var.use_semantic_reranker ? "free" : null
+  resourceGroupName     = azurerm_resource_group.rg.name
+  keyVaultId            = module.kvModule.keyVaultId
+  azure_search_domain   = var.azure_search_domain
+  subnetResourceId      = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
+  private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId] : null
 }
 
 // Create the CosmosDB Service
-
 module "cosmosdb" {
-  source         = "./core/db"
-  is_secure_mode = var.is_secure_mode
-
+  source               = "./core/db"
+  is_secure_mode       = var.is_secure_mode
   name                 = "infoasst-cosmos-${random_string.random.result}"
   location             = var.location
   tags                 = local.tags
@@ -522,7 +460,6 @@ module "cosmosdb" {
 }
 
 // Create Function App 
-
 module "functions" {
   source = "./core/host/functions"
 
@@ -590,7 +527,6 @@ module "functions" {
 }
 
 // Create the SharePoint Connector logic app
-
 module "sharepoint" {
   count                = var.enableSharePointConnector ? 1 : 0
   source               = "./core/sharepoint"
@@ -609,7 +545,6 @@ module "sharepoint" {
 }
 
 // Create the Azure AI Video Indexer
-
 module "video_indexer" {
   count                               = var.enableMultimedia ? 1 : 0
   source                              = "./core/videoindexer"
@@ -625,7 +560,29 @@ module "video_indexer" {
   privateDnsZoneName                  = var.is_secure_mode ? module.privateDnsZoneAzureAIVideoIndexer[0].privateDnsZoneName : null
 }
 
+// Create the Azure Key Vault
+module "kvModule" {
+  source            = "./core/security/keyvault"
+  name              = "infoasst-kv-${random_string.random.result}"
+  location          = var.location
+  kvAccessObjectId  = data.azurerm_client_config.current.object_id
+  spClientSecret    = module.entraObjects.azure_ad_mgmt_app_secret
+  subscriptionId    = var.subscriptionId
+  resourceGroupId   = azurerm_resource_group.rg.id
+  resourceGroupName = azurerm_resource_group.rg.name
+  tags              = local.tags
+}
 
+// Create the Bing v7 Search Service
+module "bingSearch" {
+  count                        = var.enableWebChat ? 1 : 0
+  source                       = "./core/ai/bingSearch"
+  name                         = "infoasst-bing-${random_string.random.result}"
+  resourceGroupName            = azurerm_resource_group.rg.name
+  tags                         = local.tags
+  sku                          = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
+  arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
+}
 
 // Create User Security roles
 module "userRoles" {
@@ -691,11 +648,11 @@ module "storageRoleFunc" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "aviRoleBackend" {
+module "aviRoleWebapp" {
   source            = "./core/security/role"
   count             = var.enableMultimedia ? 1 : 0
   scope             = module.video_indexer[0].vi_id
-  principalId       = module.backend.identityPrincipalId
+  principalId       = module.webapp.identityPrincipalId
   roleDefinitionId  = local.azure_roles.Contributor
   principalType     = "ServicePrincipal"
   subscriptionId    = data.azurerm_client_config.current.subscription_id
@@ -717,41 +674,14 @@ module "openAiRoleMgmt" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-// Create the Azure Monitor
-
-module "azMonitor" {
-  source            = "./core/logging/monitor"
+// Create the Azure Workbook for monitoring
+module "azWorkbook" {
+  source            = "./core/logging/workbook"
   logAnalyticsName  = module.logging.logAnalyticsName
   location          = var.location
   logWorkbookName   = "infoasst-lw-${random_string.random.result}"
   resourceGroupName = azurerm_resource_group.rg.name
   componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
-}
-
-// Create the Azure Key Vault
-
-module "kvModule" {
-  source            = "./core/security/keyvault"
-  name              = "infoasst-kv-${random_string.random.result}"
-  location          = var.location
-  kvAccessObjectId  = data.azurerm_client_config.current.object_id
-  spClientSecret    = module.entraObjects.azure_ad_mgmt_app_secret
-  subscriptionId    = var.subscriptionId
-  resourceGroupId   = azurerm_resource_group.rg.id
-  resourceGroupName = azurerm_resource_group.rg.name
-  tags              = local.tags
-}
-
-// Create the Bing v7 Search Service
-
-module "bingSearch" {
-  count                        = var.enableWebChat ? 1 : 0
-  source                       = "./core/ai/bingSearch"
-  name                         = "infoasst-bing-${random_string.random.result}"
-  resourceGroupName            = azurerm_resource_group.rg.name
-  tags                         = local.tags
-  sku                          = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
-  arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
 }
 
 // Create the customer attribution tag for the resource group

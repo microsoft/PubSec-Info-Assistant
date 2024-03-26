@@ -49,8 +49,8 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prom
     && echo "if [ -f \"$HOME/.bash-git-prompt/gitprompt.sh\" ]; then GIT_PROMPT_ONLY_IN_REPO=1 && source $HOME/.bash-git-prompt/gitprompt.sh; fi" >> "/home/$USERNAME/.bashrc"
 
 # terraform + tflint
-ARG TERRAFORM_VERSION=1.3.7
-ARG TFLINT_VERSION=0.44.1
+ARG TERRAFORM_VERSION=1.7.5
+ARG TFLINT_VERSION=0.50.3
 RUN mkdir -p /tmp/docker-downloads \
     && curl -sSL -o /tmp/docker-downloads/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
     && unzip /tmp/docker-downloads/terraform.zip \

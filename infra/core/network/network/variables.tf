@@ -69,3 +69,19 @@ variable "snetEnrichmentInboundCIDR" {
 variable "snetEnrichmentOutboundCIDR" {
   type    = string
 }
+
+variable "snetSearchServiceCIDR" {
+  type    = string
+}
+
+variable "snetAzureVideoIndexerCIDR" {
+  type    = string
+}
+
+variable "snetBingServiceCIDR" {
+  type    = string
+}
+
+variable "snetAzureOpenAICIDR" {
+  type    = string
+}

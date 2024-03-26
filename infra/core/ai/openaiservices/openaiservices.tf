@@ -31,10 +31,10 @@ resource "azurerm_private_endpoint" "openaiPrivateEndpoint" {
   subnet_id           = var.subnetResourceId
 
   private_service_connection {
-    name                           = "cognitiveAccount"
-    is_manual_connection           = false
-    private_connection_resource_id = azurerm_cognitive_account.openaiAccount[count.index].id
-
+    name                            = "cognitiveAccount"
+    is_manual_connection            = false
+    private_connection_resource_id  = azurerm_cognitive_account.openaiAccount[count.index].id
+    subresource_names               = ["account"]
   }
 
   private_dns_zone_group {

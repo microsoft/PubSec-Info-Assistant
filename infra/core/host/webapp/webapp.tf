@@ -193,13 +193,14 @@ resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
   location                      = var.location
   resource_group_name           = var.resourceGroupName
   subnet_id                     = var.subnet_id
-  custom_network_interface_name = "'${var.name}-network-interface'"
+  custom_network_interface_name = "infoasstwebappnic"
   tags                          = var.tags
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
     private_connection_resource_id = azurerm_linux_web_app.app_service.id
     is_manual_connection           = false
+    subresource_names               = ["sites"]
   }
 
   private_dns_zone_group {

@@ -19,15 +19,14 @@ resource "azurerm_private_endpoint" "accountPrivateEndpoint" {
   location                      = var.location
   resource_group_name           = var.resourceGroupName
   subnet_id                     = var.subnetResourceId
-  custom_network_interface_name = "'${var.name}-network-interface'"
+  custom_network_interface_name = "infoasstazureainic"
 
 
   private_service_connection {
-    name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_cognitive_account.cognitiveService.id
-
-    is_manual_connection = false
-
+    name                            = "${var.name}-private-link-service-connection"
+    private_connection_resource_id  = azurerm_cognitive_account.cognitiveService.id
+    is_manual_connection            = false
+    subresource_names               = ["account"]
   }
 
   private_dns_zone_group {

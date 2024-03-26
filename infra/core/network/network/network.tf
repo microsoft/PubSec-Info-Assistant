@@ -14,91 +14,20 @@ resource "azurerm_virtual_network" "vnet" {
   location            = var.location
   resource_group_name = var.resourceGroupName
   address_space       = [var.vnetIpAddressCIDR]
-
-  subnet {
-    name           = "apiManagement"
-    address_prefix = var.snetApiManagementCIDR
-
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "storageAccount"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "cosmosDb"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "azureAi"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "keyVault"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "appInbound"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "appOutbound"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "functionInbound"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "functionOutbound"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "enrichmentInbound"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
-  subnet {
-    name           = "enrichmentOutbound"
-    address_prefix = "10.0.2.0/24"
-    security_group = azurerm_network_security_group.nsg.id
-  }
   tags = var.tags
 }
 
-resource "azurerm_subnet" "azureMonitor" {
-  name                 = "azureMonitor"
+resource "azurerm_subnet" "ampls" {
+  name                 = "ampls"
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAzureMonitorCIDR]
-
+  private_endpoint_network_policies_enabled = true
+  private_link_service_network_policies_enabled = true
 }
 
-resource "azurerm_subnet" "apiManagement" {
-  name                 = "apiManagement"
-  resource_group_name  = var.resourceGroupName
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetApiManagementCIDR]
-
-  service_endpoints = [
-    "Microsoft.Storage",
-    "Microsoft.Sql",
-    "Microsoft.EventHub",
-    "Microsoft.ServiceBus",
-    "Microsoft.Web"
-  ]
-}
-
-resource "azurerm_subnet_network_security_group_association" "apiManagement_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.apiManagement.id
+resource "azurerm_subnet_network_security_group_association" "ampls_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.ampls.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
@@ -131,6 +60,7 @@ resource "azurerm_subnet" "azureAi" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAzureAiCIDR]
+  service_endpoints    = ["Microsoft.CognitiveServices"]
 }
 
 resource "azurerm_subnet_network_security_group_association" "azureAi_snet_to_nsg" {
@@ -167,14 +97,7 @@ resource "azurerm_subnet" "appOutbound" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAppOutboundCIDR]
-  service_endpoints    = ["Microsoft.Storage"]
-  delegation {
-    name = "Microsoft.Web/serverFarms"
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
+  private_endpoint_network_policies_enabled = true
 }
 
 resource "azurerm_subnet_network_security_group_association" "appOutbound_snet_to_nsg" {
@@ -243,5 +166,54 @@ resource "azurerm_subnet" "enrichmentOutbound" {
 
 resource "azurerm_subnet_network_security_group_association" "enrichmentOutbound_snet_to_nsg" {
   subnet_id                 = azurerm_subnet.enrichmentOutbound.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_subnet" "videoIndexer" {
+  name                 = "videoIndexer"
+  resource_group_name  = var.resourceGroupName
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.snetAzureVideoIndexerCIDR]
+}
+
+resource "azurerm_subnet_network_security_group_association" "videoIndexer_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.videoIndexer.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_subnet" "aiSearch" {
+  name                 = "aiSearch"
+  resource_group_name  = var.resourceGroupName
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.snetSearchServiceCIDR]
+}
+
+resource "azurerm_subnet_network_security_group_association" "aiSearch_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.aiSearch.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_subnet" "bingSearch" {
+  name                 = "bingSearch"
+  resource_group_name  = var.resourceGroupName
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.snetBingServiceCIDR]
+}
+
+resource "azurerm_subnet_network_security_group_association" "bingSearch_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.bingSearch.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+resource "azurerm_subnet" "azureOpenAI" {
+  name                 = "azureOpenAI"
+  resource_group_name  = var.resourceGroupName
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.snetAzureOpenAICIDR]
+  service_endpoints    = ["Microsoft.CognitiveServices"]
+}
+
+resource "azurerm_subnet_network_security_group_association" "azureOpenAI_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.azureOpenAI.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }

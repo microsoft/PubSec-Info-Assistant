@@ -83,18 +83,18 @@ resource "azurerm_private_endpoint" "cosmosPrivateEndpoint" {
   location                      = var.location
   resource_group_name           = var.resourceGroupName
   subnet_id                     = var.subnetResourceId
-  custom_network_interface_name = "'${var.name}-network-interface'"
+  custom_network_interface_name = "infoasstcosmosnic"
 
   private_service_connection {
     name                           = "${var.name}-private-link-service-connection"
     private_connection_resource_id = azurerm_cosmosdb_account.cosmosdb_account.id
     is_manual_connection           = false
-
+    subresource_names              = ["SQL"]
+    
   }
   private_dns_zone_group {
     name                 = "${var.name}PrivateDnsZoneGroup"
     private_dns_zone_ids = var.private_dns_zone_ids
-
   }
 
 

@@ -27,7 +27,7 @@ resource "azurerm_private_endpoint" "formPrivateEndpoint" {
     name                           = "cognitiveAccount"
     is_manual_connection           = false
     private_connection_resource_id = azurerm_cognitive_account.formRecognizerAccount.id
-
+    subresource_names               = ["account"]
   }
 
   private_dns_zone_group {

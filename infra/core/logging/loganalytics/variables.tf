@@ -35,3 +35,44 @@ variable "componentResource" {
   type        = string
   default     = ""
 }
+
+variable "is_secure_mode" {
+  type    = bool
+  default = false
+}
+
+variable "vnetName" {
+  type = string
+}
+
+variable "privateDnsZoneNameMonitor" {
+  type = string
+}
+
+variable "privateDnsZoneNameOms" {
+  type = string
+}
+
+variable "privateDnSZoneNameOds" {
+  type = string
+}
+
+variable "privateDnsZoneNameAutomation" {
+  type = string
+}
+
+variable "privateDnsZoneResourceIdBlob" {
+  type = string
+}
+
+variable "privateDnsZoneNameBlob" {
+  type = string
+}
+
+variable "groupId" {
+  type = string
+}
+
+variable "privateLinkScopeName" {
+  type    = string
+}

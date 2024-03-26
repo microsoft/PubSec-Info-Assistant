@@ -14,12 +14,8 @@ output "vnet_id" {
   value = azurerm_virtual_network.vnet.id
 }
 
-output "snetAzureMonitor_id" {
-  value = azurerm_subnet.azureMonitor.id
-}
-
-output "snetApiManagement_id" {
-  value = azurerm_subnet.apiManagement.id
+output "snetAmpls_id" {
+  value = azurerm_subnet.ampls.id
 }
 
 output "snetStorageAccount_id" {
@@ -62,3 +58,18 @@ output "snetEnrichmentOutbound_id" {
   value = azurerm_subnet.enrichmentOutbound.id
 }
 
+output "snetSearch_id" {
+  value = azurerm_subnet.aiSearch.id
+}
+
+output "snetAzureVideoIndexer_id" {
+  value = azurerm_subnet.videoIndexer.id
+}
+
+output "snetBingSearch_id" {
+  value = azurerm_subnet.bingSearch.id
+}
+
+output "snetAzureOpenAI_id" {
+  value = azurerm_subnet.azureOpenAI.id
+}

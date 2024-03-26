@@ -95,10 +95,11 @@ try:
     # Write merged json documents to the new cosmos database
     client = CosmosClient(cosmosdb_url_new, credential=cosmosdb_key_new.value)
     database_new = client.get_database_client('statusdb')
-    container_new = database_new.get_container_client('statuscontainer')                  #   <---  change this before PR *********************************
+    container_new = database_new.get_container_client('statuscontainer')
     for item in old_status_items:
         container_new.upsert_item(item)
     
+    print(f'Successfully migrated {len(old_status_items)} items')
 except exceptions.CosmosHttpResponseError as e:
     print(f'An error occurred: {e}')
     

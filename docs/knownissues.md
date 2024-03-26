@@ -61,7 +61,7 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 Occasionally you will hit a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later, or an internal error returned by AI Document Intelligence in the FileFormRecPollingPDF function, which indicates the service has hit internal capacity issues. Both of these situations will occur under heavy load, but the accelerator is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
 
 ### Solution
-These values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. These values are as follows...
+The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. These values are as follows...
 
 ```
 @description('The maximum number of seconds  between uploading a file and submitting it to FR')
@@ -97,7 +97,7 @@ InsufficientQuota - The specified capacity '1' of account deployment is bigger t
 ```
 ### Solution
 
-This means that you have exceeded the quota assigned to your deployment for the GPT-35-Turbo model.The quota is the maximum number of tokens per minute (thousands) that you can use with this model. You can check your current quota and usage in the Azure portal. To increase the quota [learn more](https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits)
+This means that you have exceeded the quota assigned to your deployment for the GPT or embeddings model.The quota is the maximum number of tokens per minute (thousands) that you can use with this model. You can check your current quota and usage in the Azure portal. To increase the quota review [learn more](https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits)
 
 ---
 

@@ -64,30 +64,30 @@ Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF whic
 
 The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. These values are as follows...
 
-```text
-@description('The maximum number of seconds  between uploading a file and submitting it to FR')
-param maxSecondsHideOnUpload string
+```bash
+"MAX_SECONDS_HIDE_ON_UPLOAD": "30",
+// Description: The maximum number of seconds between uploading a file and submitting it to FR
 
-@description('The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capacity limitations')
-param maxSubmitRequeueCount string
+"MAX_SUBMIT_REQUEUE_COUNT": "10",
+// Description: The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capacity imitations
 
-@description('the number of seconds that a message sleeps before we try to poll for FR completion')
-param pollQueueSubmitBackoff string
+"POLL_QUEUE_SUBMIT_BACKOFF": "60",
+// Description: The number of seconds that a message sleeps before we try to poll for FR completion
 
-@description('The number of seconds a message sleeps before trying to resubmit due to throttling request from FR')
-param pdfSubmitQueueBackoff string
+"PDF_SUBMIT_QUEUE_BACKOFF": "60",
+// Description: The number of seconds a message sleeps before trying to resubmit due to throttling request from FR
 
-@description('max times we will retry the submission due to throttling or internal errors in FR')
-param maxPollingRequeueCount string
+"MAX_POLLING_REQUEUE_COUNT": "10",
+// Description: Max times to retry the submission due to throttling or internal errors in FR
 
-@description('number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error')
-param submitRequeueHideSeconds string
+"SUBMIT_REQUEUE_HIDE_SECONDS": "1200",
+// Description: The number of seconds to delay before resubmitting a doc to FR when it reported an internal error
 
-@description('The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is the default value that escalates exponentially')
-param pollingBackoff string
+"POLLING_BACKOFF": "30",
+// Description: The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is the default value that escalates exponentially
 
-@description('The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response')
-param maxReadAttempts string
+ "MAX_READ_ATTEMPTS": "5",
+ // Description: The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response
 ```
 
 ---

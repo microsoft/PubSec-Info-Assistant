@@ -187,13 +187,10 @@ def process_agent_response( question):
     handle_parsing_errors=True,
     return_intermediate_steps=True)
     stream = zero_shot_agent_math.stream({"input": question})
-    output = "No output"
     if stream:
         for chunk in stream:
             if "output" in chunk:
                 output =    f'Final Output: {chunk["output"]}'
-    else:
-        return {"data": "No output"}
     return output
     # for chunk in zero_shot_agent_math.stream({"input": question}):
     #     if "output" in chunk:

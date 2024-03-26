@@ -279,6 +279,68 @@ export async function getSolve(question: string): Promise<String[]> {
     return parsedResponse;
 }
 
+export async function getCharts(): Promise<String[]> {
+    const response = await fetch(`/getCharts?`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String[] = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+
+export async function getCsvAnalysis(question: string): Promise<String[]> {
+    const response = await fetch(`/getCsvAnalysis?question=${encodeURIComponent(question)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String[] = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+export async function postCsv(file: File): Promise<String> {
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const response = await fetch('/postCsv', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+export async function processCsvAgentResponse(question: string): Promise<String> {
+    const response = await fetch(`/process_csv_agent_response?question=${encodeURIComponent(question)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;    
+}
 export async function processAgentResponse(question: string): Promise<String> {
     const response = await fetch(`/process_agent_response?question=${encodeURIComponent(question)}`, {
         method: "GET",

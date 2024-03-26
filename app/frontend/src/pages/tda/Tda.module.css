@@ -1,9 +1,12 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
    
+   .mydetailslist:hover {
+    overflow: scroll;
+  }
    .table-container {
-    overflow-x: auto;
-    overflow-y: auto; /* Add a horizontal scrollbar if necessary */
+    overflow-x: scroll;
+    overflow-y: scroll; /* Add a horizontal scrollbar if necessary */
   }
   
   .table-container table {
@@ -24,7 +27,7 @@
    h1 {
     align-items: flex-start !important;
     margin-top: 5% !important; /* Sets the top margin to 10% */
-    margin: auto;
+    margin-left: 20% !important; /* Sets the left margin to 20% */
 }
    .title {
     text-align: center;
@@ -57,7 +60,8 @@
     border-radius: 10px;
     padding: 20px;
     margin: auto;
-    width: 50%; /* Adjust as needed */
+    margin-top: 5%;
+    width: 60%; /* Adjust as needed */
     
 }
 .formClass {

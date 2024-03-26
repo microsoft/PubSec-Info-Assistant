@@ -80,6 +80,13 @@ fi
 # ***********************************************************
 error_messages=()
 
+# Random String
+echo
+figlet "Random String"
+module_path="random_string.random" 
+import_resource_if_needed $module_path $random_text
+
+
 # Main
 echo
 figlet "Main"
@@ -116,41 +123,18 @@ name="infoasst-aoai-$random_text"
 # only import if the service exists in the RG
 serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
 if [[ $serviceExists == $name ]]; then
-    # providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-    # module_path="module.openaiServices.azurerm_cognitive_account.account"
-    # import_resource_if_needed $module_path "$resourceId$providers"
-    # providers="/providers/Microsoft.CognitiveServices/accounts/$account1/deployments/$TF_VAR_chatGptDeploymentName"
-    # module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
-    # import_resource_if_needed "module.openaiServices.azurerm_cognitive_deployment.deployment" "$resourceId$providers"
-    # secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
-    # module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
-    # import_resource_if_needed "$module_path" "$secret_id"
-
 
     providers="/providers/Microsoft.CognitiveServices/accounts/$name"
     module_path="module.openaiServices.azurerm_cognitive_account.account"
-    echo "module_path: $module_path"
-    echo "resourceId providers": $resourceId$providers
     import_resource_if_needed $module_path "$resourceId$providers"
 
-    # echo "module_path: $module_path"
-    # echo "resourceId$providers": $resourceId$providers
-    # import_resource_if_needed $module_path "$resourceId$providers"
-
-
     providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
-    echo "module_path: $module_path"
-    echo "resourceId providers": $resourceId$providers
     module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
- 
-
     import_resource_if_needed "$module_path" "$resourceId$providers"
 
     secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
     module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
     import_resource_if_needed "$module_path" "$secret_id"
-
-
 
 else
     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"

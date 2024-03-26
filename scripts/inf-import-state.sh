@@ -129,24 +129,33 @@ if [[ $serviceExists == $name ]]; then
 
     providers="/providers/Microsoft.CognitiveServices/accounts/$name"
     module_path="module.openaiServices.azurerm_cognitive_account.account"
+    echo "module_path: $module_path"
+    echo "resourceId providers": $resourceId$providers
     import_resource_if_needed $module_path "$resourceId$providers"
 
     # echo "module_path: $module_path"
     # echo "resourceId$providers": $resourceId$providers
     # import_resource_if_needed $module_path "$resourceId$providers"
 
+
     providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
+    echo "module_path: $module_path"
+    echo "resourceId providers": $resourceId$providers
     module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
+ 
+
     import_resource_if_needed "$module_path" "$resourceId$providers"
 
     secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
     module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
     import_resource_if_needed "$module_path" "$secret_id"
 
+    //exit 0
 
 else
     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
 fi
+
 
 
 # Monitor

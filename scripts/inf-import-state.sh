@@ -150,7 +150,7 @@ if [[ $serviceExists == $name ]]; then
     module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
     import_resource_if_needed "$module_path" "$secret_id"
 
-    //exit 0
+
 
 else
     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"

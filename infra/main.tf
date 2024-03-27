@@ -483,6 +483,7 @@ module "bingSearch" {
   tags                          = local.tags
   sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  keyVaultId                    = module.kvModule.keyVaultId
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

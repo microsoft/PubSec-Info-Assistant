@@ -24,3 +24,9 @@ resource "azurerm_resource_group_template_deployment" "bing_search" {
   name            = "bingsearch-${filemd5(local.arm_file_path)}"
   deployment_mode = "Incremental"
 }
+
+resource "azurerm_key_vault_secret" "search_service_key" {
+  name         = "BINGSEARCH-KEY"
+  value        = azurerm_resource_group_template_deployment.bing_search.primary_key
+  key_vault_id = var.keyVaultId
+}

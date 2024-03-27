@@ -16,7 +16,11 @@ variable "sku" {
   type = string
 }
 
-
 variable "arm_template_schema_mgmt_api" {
   type = string
+}
+
+variable "keyVaultId" { 
+  type = string
+  sensitive   = true
 }

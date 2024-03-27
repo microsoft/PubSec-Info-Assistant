@@ -153,7 +153,7 @@ resource "azurerm_linux_function_app" "function_app" {
     EMBEDDINGS_QUEUE = var.EMBEDDINGS_QUEUE
     AZURE_SEARCH_SERVICE_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)"
     COSMOSDB_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
-    BINGSEARCH_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BINGSEARCH-KEY)"
+    BING_SEARCH_KEY = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BINGSEARCH-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX = var.azureSearchIndex
     AZURE_AI_TRANSLATION_DOMAIN = var.azure_ai_translation_domain

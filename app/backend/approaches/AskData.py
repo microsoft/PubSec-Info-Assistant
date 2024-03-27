@@ -130,13 +130,14 @@ def process_agent_scratch_pad( question):
                 messages.append(f'\nI am thinking...: {action.log}\n')
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                if step.observation:
-                    if is_base64(step.observation):
-                        print("step.observation is a base64 string")
-                        agent_imgs.append(step.observation)
-                    else:
-                        print("step.observation is not a base64 string")
-                        messages.append(f"Tool Result: `{step.observation}`\n")                               
+                if isinstance(step.observation, str):
+                    if step.observation:
+                        if is_base64(step.observation):
+                            print("step.observation is a base64 string")
+                            agent_imgs.append(step.observation)
+                        else:
+                            print("step.observation is not a base64 string")
+                            messages.append(f"Tool Result: `{step.observation}`\n")                               
         elif "output" in chunk:
             output = f'Final Output: {chunk["output"]}'
             pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'

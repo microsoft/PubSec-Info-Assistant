@@ -1,5 +1,9 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
+
+   .mathh1 {
+    margin-left: 0;
+}
    h1 {
     align-items: flex-start !important;
     margin-top: 5% !important; /* Sets the top margin to 10% */
@@ -12,6 +16,7 @@ h2 {
     text-align: center;
     margin-bottom: 20px;
     font-weight: bold; /* Makes the title bold */
+    margin-left: 0 !important;
 }
    .selectedButton {
     color: #FF8C00 !important; /* Dark orange text */
@@ -59,7 +64,7 @@ h2 {
     background-color: transparent;
     width: auto; /* Makes the button as wide as its content */
     white-space: nowrap; /* Removes background color */
-    /* Optional: Adds some space between the buttons */
+    /* Optional: Adds some space between the buttons */ 
 }
 .container {
     flex: 1;

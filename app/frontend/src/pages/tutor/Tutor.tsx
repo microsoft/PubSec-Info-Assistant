@@ -117,7 +117,7 @@ return (
         {output && 
                 <Accordion defaultActiveKey="0">
                     
-                    <h2>
+                    <h2 >
                         Math Tutor Response:
                     </h2>
                     <Accordion.Collapse eventKey="0">

@@ -40,7 +40,7 @@ azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 # openai.api_key = azure_openai_service_key
 # openai.api_base = f"https://{azure_openai_service}.openai.azure.com/"
 deployment_name = azure_openai_chatgpt_deployment
-
+OPENAI_DEPLOYMENT_NAME = deployment_name
 # openai.api_type = "azure"
 # openai.api_version = "2023-06-01-preview"
 # 
@@ -55,7 +55,7 @@ from langchain.prompts import ChatPromptTemplate
 
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=azure_openai_chatgpt_deployment)      
+    deployment_name=OPENAI_DEPLOYMENT_NAME)      
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools

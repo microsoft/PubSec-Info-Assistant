@@ -12,7 +12,7 @@ import pandas as pd
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
 from approaches.chatbingsearchcompare import ChatBingSearchCompare
@@ -732,6 +732,12 @@ async def getSolve(question: Optional[str] = None):
         log.exception("Exception in /getHint")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+
+@app.get("/stream")
+def stream_response(question: str):
+    return StreamingResponse(stream_agent_response(question), media_type="text/event-stream")
+
 
 @app.get("/getCharts")
 async def getCharts():

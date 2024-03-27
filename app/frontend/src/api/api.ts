@@ -263,6 +263,18 @@ export async function getHint(question: string): Promise<String> {
 
     return parsedResponse;
 }
+
+export function streamData(question: string, onMessage: (data: string) => void): EventSource {
+    const encodedQuestion = encodeURIComponent(question);
+    const eventSource = new EventSource(`/stream?question=${encodedQuestion}`);
+
+    eventSource.onmessage = (event) => {
+        onMessage(event.data);
+    };
+
+    return eventSource;
+}
+
 export async function getSolve(question: string): Promise<String[]> {
     const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
         method: "GET",

@@ -4,7 +4,7 @@
 import React from 'react';
 //import { Button } from '@fluentui/react';
 import { Accordion, Card, Button } from 'react-bootstrap';
-import {getHint, processAgentResponse, getSolve} from "../../api";
+import {getHint, processAgentResponse, getSolve, streamData} from "../../api";
 import { useEffect, useState } from "react";
 import styles from './Tutor.module.css';
 import ReactMarkdown from 'react-markdown';
@@ -70,6 +70,26 @@ const Tutor = () => {
         //     console.log(event.data);
         //     setOutput(event.data);
     };
+    const [eventSource, setEventSource] = useState<EventSource | null>(null);
+
+    const handleButton2Click = () => {
+      setSelectedButton('button2');
+      if (eventSource) {
+        eventSource.close();
+      }
+      const newEventSource = streamData(mathProblem, (data) => {
+        setOutput(data);
+      });
+      setEventSource(newEventSource);
+    };
+  
+    useEffect(() => {
+      return () => {
+        if (eventSource) {
+          eventSource.close();
+        }
+      };
+    }, [eventSource]);
 return (
     <div>
     <h1 className={styles.title}>Your Friendly Math Tutor</h1>
@@ -97,7 +117,8 @@ return (
                 className={selectedButton === 'button2' ? styles.selectedButton : ''}
                 onClick={() => {
                     setSelectedButton('button2');
-                    solver(mathProblem);
+                    // solver(mathProblem);
+                    handleButton2Click();
                 }}
             >
                 Show me how to solve it

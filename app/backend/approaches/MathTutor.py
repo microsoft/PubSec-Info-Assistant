@@ -55,7 +55,8 @@ from langchain.prompts import ChatPromptTemplate
 
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=azure_openai_chatgpt_deployment)      
+    deployment_name=azure_openai_chatgpt_deployment,
+    streaming=True)      
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools
@@ -146,7 +147,29 @@ zero_shot_agent_math = initialize_agent(
 # Prompt template for Zeroshot agent
 
 # print(zero_shot_agent_math.agent.llm_chain.prompt.template)
-
+async def stream_agent_response(question):
+    zero_shot_agent_math = initialize_agent(
+        agent="zero-shot-react-description",
+        tools=tools,
+        llm=model,
+        verbose=True,
+        max_iterations=10,
+        max_execution_time=120,
+        handle_parsing_errors=True,
+    )
+    stream = zero_shot_agent_math.stream({"input": question})
+    for chunk in stream:
+        if "output" in chunk:
+            yield {"data": f'Final Output: {chunk["output"]}'}
+        elif "actions" in chunk:
+            for action in chunk["actions"]:
+                yield {"data": f'Calling Tool: `{action.tool}` with input `{action.tool_input}`\n'}
+                yield {"data": f'I am thinking...: {action.log} \n'}
+        elif "steps" in chunk:
+            for step in chunk["steps"]:
+                yield {"data": f"Tool Result: `{step.observation}`\n"}
+        else:
+            raise ValueError()
 
 
 # function to stream agent response 

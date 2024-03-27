@@ -62,32 +62,20 @@ Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF whic
 
 ### Solution
 
-The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. These values are as follows...
+The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. The parameter names and values are as follows...
 
-```bash
-"MAX_SECONDS_HIDE_ON_UPLOAD": "30",
-// Description: The maximum number of seconds between uploading a file and submitting it to FR
+```text
+| Name                        | Value | Description                                                                                                               |
+|-----------------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
+| MAX_POLLING_REQUEUE_COUNT   | 10    | Max times to retry submission due to throttling or internal errors in FR                                                  |
+| MAX_READ_ATTEMPTS           | 5     | Number of times to retry reading a processed document from FR                                                             |
+| MAX_SECONDS_HIDE_ON_UPLOAD  | 30    | Max number of seconds between uploading a file and submitting it to FR                                                    |
+| MAX_SUBMIT_REQUEUE_COUNT    | 10    | Max number of times a file can be resubmitted to FR for throttling or capacity limitations                                |
+| PDF_SUBMIT_QUEUE_BACKOFF    | 60    | Number of seconds a message sleeps before resubmitting due to throttlng request from FR                                   |
+| POLL_QUEUE_SUBMIT_BACKOFF   | 60    | Number of seconds a message sleeps before we poll for FR completion                                                       |
+| POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to FR still processing a file. This value esalates exponentially |
+| SUBMIT_REQUEUE_HIDE_SECONDS | 1200  | Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error                       |
 
-"MAX_SUBMIT_REQUEUE_COUNT": "10",
-// Description: The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capacity imitations
-
-"POLL_QUEUE_SUBMIT_BACKOFF": "60",
-// Description: The number of seconds that a message sleeps before we try to poll for FR completion
-
-"PDF_SUBMIT_QUEUE_BACKOFF": "60",
-// Description: The number of seconds a message sleeps before trying to resubmit due to throttling request from FR
-
-"MAX_POLLING_REQUEUE_COUNT": "10",
-// Description: Max times to retry the submission due to throttling or internal errors in FR
-
-"SUBMIT_REQUEUE_HIDE_SECONDS": "1200",
-// Description: The number of seconds to delay before resubmitting a doc to FR when it reported an internal error
-
-"POLLING_BACKOFF": "30",
-// Description: The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is the default value that escalates exponentially
-
- "MAX_READ_ATTEMPTS": "5",
- // Description: The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response
 ```
 
 ---
@@ -116,6 +104,8 @@ InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in 
 
 Deploy Azure OpenAI Service only in the supported regions. Review the local.env file and update the location as per supported models and [region availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability)
 
+---
+
 ## Error: jq parse error: Expected value before ','
 
 If you see a jq parse error while running a deployment, it means one of the makefile scripts that extract environment variables is failing to find a value it expects. Carefully review the inf_output.json file and your local.env file used during build and deploy time
@@ -124,6 +114,8 @@ If you see a jq parse error while running a deployment, it means one of the make
 
 To resolve, carefully check your local.env file for any missing but required values. There are rare times output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` command to regenerate the inf_output.json file the Makefile scripts parse for variables.
 
+---
+
 ## Error: Token limit often exceeded with PDF files
 
 ### Solution
@@ -131,6 +123,8 @@ To resolve, carefully check your local.env file for any missing but required val
 This was a problem with early deployments of Information Assistant 1.0. The root cause of this error is table processing. If a table is greater than our target token count for a chunk, this is not respected meaning tables are not chunked, but treated as units. We now split tables by chunk size and repeat the table header rows in each chunk.
 
 This issue was resolved in a hotfix to the main branch of Information Assistant 1.0, so please upgrade to version 1.0 or later.
+
+---
 
 ## Error
 
@@ -149,6 +143,8 @@ make: *** [Makefile:18: infrastructure] Error 1
 ### Solution
 
 You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+
+---
 
 ## Error: This region has quota of 0 \<skuType\> cores for your subscription
 

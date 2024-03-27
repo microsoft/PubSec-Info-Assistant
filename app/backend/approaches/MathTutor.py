@@ -164,11 +164,11 @@ def process_agent_scratch_pad( question):
     for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
-                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
-                messages.append(f'I am thinking...: {action.log}')
+                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
+                messages.append(f'I am thinking...: {action.log} \n')
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                messages.append(f"Tool Result: `{step.observation}`")                               
+                messages.append(f"Tool Result: `{step.observation}`\n")                               
         elif "output" in chunk:
             messages.append(f'Final Output: {chunk["output"]}')
         else:

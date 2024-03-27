@@ -7,6 +7,7 @@ import { Accordion, Card, Button } from 'react-bootstrap';
 import {getHint, processAgentResponse, getSolve} from "../../api";
 import { useEffect, useState } from "react";
 import styles from './Tutor.module.css';
+import ReactMarkdown from 'react-markdown';
 
 const Tutor = () => {
     const [loading, setLoading] = useState(false);
@@ -120,7 +121,7 @@ return (
                         Math Tutor Response:
                     </h2>
                     <Accordion.Collapse eventKey="0">
-                        <p>{output}</p>
+                        <ReactMarkdown>{output}</ReactMarkdown>
                     </Accordion.Collapse>
                     
                 </Accordion>

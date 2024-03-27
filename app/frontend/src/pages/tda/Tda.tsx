@@ -13,6 +13,7 @@ import cstyle from "./Tda.module.css"
 import Papa from "papaparse";
 import { postCsv, processCsvAgentResponse, getCsvAnalysis, getCharts } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
+import ReactMarkdown from "react-markdown";
 
 
 interface Props {
@@ -48,14 +49,16 @@ const Tda = ({folderPath, tags}: Props) => {
   const handleAnalysis = async () => {
     setOutput('');
     try {
-        const query = setOtherQ(selectedQuery);
-        const solve = await getCsvAnalysis(query);
-        let outputString = '';
-        solve.forEach((item) => {
-            outputString += item + '\n';
-            console.log(item);
-        });
-        setOutput(outputString);
+      const query = setOtherQ(selectedQuery);
+      const solve = await getCsvAnalysis(query);
+      let outputString = '';
+      solve.forEach((item) => {
+          outputString += item + '\n';
+          console.log(item);
+      });
+      setOutput(outputString);
+      const charts = await getCharts();
+      setImages(charts.map((chart: String) => chart.toString()));
     } catch (error) {
         console.log(error);
     } finally {+
@@ -300,9 +303,9 @@ const Tda = ({folderPath, tags}: Props) => {
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
     { output && (
-      <div >
+      <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
-        <p>{output}</p>
+        <ReactMarkdown>{output}</ReactMarkdown>
         <p>Generated images</p>
         {base64Images.length > 0 ? (
       base64Images.map((base64Image, index) => (

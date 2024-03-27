@@ -62,7 +62,7 @@ Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF whic
 
 ### Solution
 
-The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. The parameter names and values are as follows...
+The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. The names and values are as follows...
 
 ```text
 | Name                        | Value | Description                                                                                                               |
@@ -76,6 +76,18 @@ The back off and retry parameter values are surfaced as configuration settings i
 | POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to FR still processing a file. This value esalates exponentially |
 | SUBMIT_REQUEUE_HIDE_SECONDS | 1200  | Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error                       |
 
+```
+
+These variables can also be updated prior to deployment by changing the following Terraform variables
+```text
+maxPollingRequeueCount
+maxReadAttempts
+maxSecondsHideOnUpload
+maxSubmitRequeueCount
+pdfSubmitQueueBackoff
+pollQueueSubmitBackoff
+pollingBackoff
+submitRequeueHideSeconds
 ```
 
 ---

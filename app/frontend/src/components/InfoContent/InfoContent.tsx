@@ -5,7 +5,8 @@ import React, { useEffect, useState } from "react";
 import { Text } from "@fluentui/react";
 import { Label } from '@fluentui/react/lib/Label';
 import { Separator } from '@fluentui/react/lib/Separator';
-import { getInfoData, GetInfoResponse } from "../../api";
+import { getInfoData, GetInfoResponse  } from "../../api";
+import appVersionInfo from '../../../version.json';
 
 interface Props {
     className?: string;
@@ -31,6 +32,8 @@ export const InfoContent = ({ className }: Props) => {
 
     return (
         <div>
+            <Separator>Build and Version</Separator>
+            <Text>{appVersionInfo?.version}, {appVersionInfo?.buildNumber}</Text>
             <Separator>Azure OpenAI</Separator>
             <Label>Instance</Label><Text>{infoData?.AZURE_OPENAI_SERVICE}</Text>
             <Label>GPT Deployment Name</Label><Text>{infoData?.AZURE_OPENAI_CHATGPT_DEPLOYMENT}</Text>

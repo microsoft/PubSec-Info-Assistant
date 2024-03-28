@@ -25,7 +25,7 @@ resource "azurerm_resource_group_template_deployment" "bing_search" {
   deployment_mode = "Incremental"
 }
 
-resource "azurerm_key_vault_secret" "search_service_key" {
+resource "azurerm_key_vault_secret" "bing_search_key" {
   name         = "BINGSEARCH-KEY"
   value        = jsondecode(azurerm_resource_group_template_deployment.bing_search.output_content).key1.value
   key_vault_id = var.keyVaultId

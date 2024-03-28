@@ -231,24 +231,6 @@ export async function getTags(): Promise<string[]> {
 }
 
 
-export async function retryFile(filePath: string): Promise<boolean> {
-    const response = await fetch("/retryFile", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            filePath: filePath
-            })
-        });
-    
-    const parsedResponse: String = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
-    }
-
-    return true;
-}
 export async function getHint(question: string): Promise<String> {
     const response = await fetch(`/getHint?question=${encodeURIComponent(question)}`, {
         method: "GET",
@@ -264,6 +246,7 @@ export async function getHint(question: string): Promise<String> {
 
     return parsedResponse;
 }
+
 export async function getSolve(question: string): Promise<String[]> {
     const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
         method: "GET",

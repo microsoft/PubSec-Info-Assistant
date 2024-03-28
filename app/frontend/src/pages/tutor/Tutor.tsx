@@ -72,7 +72,7 @@ const Tutor = () => {
     };
 return (
     <div>
-    <h1 className={styles.title}>Your Friendly Math Tutor</h1>
+    <h1 className={styles.title}>Your Friendly Math Assistant</h1>
     <div className={styles.centeredContainer}>
         <form className={styles.formClass} onSubmit={handleInput}>
             <p className={styles.inputLabel}>Enter question:</p>
@@ -117,8 +117,8 @@ return (
         {output && 
                 <Accordion defaultActiveKey="0">
                     
-                    <h2 >
-                        Math Tutor Response:
+                    <h2>
+                        Math Assistant Response:
                     </h2>
                     <Accordion.Collapse eventKey="0">
                         <ReactMarkdown>{output}</ReactMarkdown>

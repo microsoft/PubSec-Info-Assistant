@@ -58,12 +58,12 @@ variable "enableUngroundedChat" {
   default = false
 }
 
-variable "enableMathTutor" {
+variable "enableMathAssitant" {
   type    = bool
   default = true
 }
 
-variable "enableCsvAgent" {
+variable "enableTabularDataAssistant" {
   type    = bool
   default = true
 }
@@ -73,6 +73,11 @@ variable "enableSharePointConnector" {
   default = false
 }
 
+variable "enableMultimedia" {
+  type    = bool
+  default = false
+  
+}
 ////
 // variables that can vary based on the Azure environment being targeted
 ////
@@ -236,19 +241,39 @@ variable "formRecognizerSkuName" {
   default = "S0"
 }
 
-variable "enrichmentSkuName" {
-  type    = string
-  default = "S0"
-}
-
 variable "appServicePlanName" {
   type    = string
   default = ""
 }
 
+variable "appServiceSkuSize" {
+  description = "The size of the app service plan for the IA website. Must match with the tier value in appServiceSkuTier."
+  type = string
+  default = "S1"
+}
+
+variable "appServiceSkuTier" {
+  description = "The tier of the app service plan for the IA website. Must match with the size value in appServiceSkuSize."
+  type = string
+  default = "Standard"
+  
+}
+
 variable "enrichmentAppServicePlanName" {
   type    = string
   default = ""
+}
+
+variable "enrichmentAppServiceSkuSize" {
+  description = "The size of the app service plan for the enrichment service. Must match with the tier value in enrichmentAppServiceSkuTier."
+  type = string
+  default = "P1v3"
+}
+
+variable "enrichmentAppServiceSkuTier" {
+  description = "The tier of the app service plan for the enrichment service. Must match with the size value in enrichmentAppServiceSkuSize."
+  type = string
+  default = "PremiumV3"
 }
 
 variable "logAnalyticsName" {
@@ -274,6 +299,18 @@ variable "enrichmentServiceName" {
 variable "functionsAppName" {
   type    = string
   default = ""
+}
+
+variable "functionsAppSkuSize" {
+  description = "The size of the app service plan for the functions app. Must match with the tier value in functionsAppSkuTier."
+  type = string
+  default = "S2"
+}
+
+variable "functionsAppSkuTier" {
+  description = "The tier of the app service plan for the functions app. Must match with the size value in functionsAppSkuSize."
+  type = string
+  default = "Standard"
 }
 
 variable "videoIndexerName" {

@@ -14,9 +14,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
 import openai
-from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
-from approaches.chatbingsearchcompare import ChatBingSearchCompare
+from approaches.comparewebwithwork import CompareWebWithWork
+from approaches.compareworkwithweb import CompareWorkWithWeb
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -42,7 +43,6 @@ from approaches.AskData import (
     getimgs
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
-from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -92,7 +92,12 @@ ENV = {
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true" 
+    "ENABLE_BING_SAFE_SEARCH": "true",
+    "ENABLE_WEB_CHAT": "false",
+    "ENABLE_UNGROUNDED_CHAT": "false",
+    "ENABLE_MATH_ASSISTANT": "false",
+    "ENABLE_TABULAR_DATA_ASSISTANT": "false",
+    "ENABLE_MULTIMEDIA": "false"
     }
 
 for key, value in ENV.items():
@@ -208,7 +213,7 @@ chat_approaches = {
                                     ENV["AZURE_AI_TRANSLATION_DOMAIN"],
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
-    Approaches.ChatBingSearch: ChatBingSearch(
+    Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -216,7 +221,7 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+    Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -224,9 +229,9 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+    Approaches.CompareWebWithWork: CompareWebWithWork(
                                     search_client,
-                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
                                     ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
@@ -541,7 +546,6 @@ async def logstatus(request: Request):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     raise HTTPException(status_code=200, detail="Success")
 
-# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.get("/getInfoData")
 async def get_info_data():
     """
@@ -576,7 +580,7 @@ async def get_info_data():
     }
     return response
 
-# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
+
 @app.get("/getWarningBanner")
 async def get_warning_banner():
     """Get the warning banner text"""
@@ -824,6 +828,27 @@ async def retryFile(request: Request):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return {"status": 200}
 
+@app.get("/getFeatureFlags")
+async def get_feature_flags():
+    """
+    Get the feature flag settings for the app.
+
+    Returns:
+        dict: A dictionary containing various feature flags for the app.
+            - "ENABLE_WEB_CHAT": Flag indicating whether web chat is enabled.
+            - "ENABLE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
+            - "ENABLE_MATH_ASSISTANT": Flag indicating whether the math assistant is enabled.
+            - "ENABLE_TABULAR_DATA_ASSISTANT": Flag indicating whether the tabular data assistant is enabled.
+            - "ENABLE_MULTIMEDIA": Flag indicating whether multimedia is enabled.
+    """
+    response = {
+        "ENABLE_WEB_CHAT": str_to_bool.get(ENV["ENABLE_WEB_CHAT"]),
+        "ENABLE_UNGROUNDED_CHAT": str_to_bool.get(ENV["ENABLE_UNGROUNDED_CHAT"]),
+        "ENABLE_MATH_ASSISTANT": str_to_bool.get(ENV["ENABLE_MATH_ASSISTANT"]),
+        "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
+        "ENABLE_MULTIMEDIA": str_to_bool.get(ENV["ENABLE_MULTIMEDIA"]),
+    }
+    return response
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

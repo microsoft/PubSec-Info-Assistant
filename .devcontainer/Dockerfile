@@ -94,3 +94,9 @@ RUN if [ -z "$TZ" ]; then TZ="Europe/London"; fi && sudo ln -snf /usr/share/zone
 # Install gettext-base so that we have envsubst
 RUN sudo apt-get update \
     && sudo apt-get -y install gettext-base
+
+# Install python packages for migration
+RUN pip install azure-cosmos
+RUN pip install pyfiglet
+RUN pip install azure-identity
+RUN pip install azure-keyvault-secrets

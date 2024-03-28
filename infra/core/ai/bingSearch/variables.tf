@@ -24,3 +24,7 @@ variable "keyVaultId" {
   type = string
   sensitive   = true
 }
+
+variable "enableWebChat" {
+  type = bool
+}

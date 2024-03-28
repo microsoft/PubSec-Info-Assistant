@@ -474,7 +474,7 @@ module "kvModule" {
 }
 
 module "bingSearch" {
-  count                         = var.enableWebChat ? 1 : 0
+  enableWebChat                 = var.enableWebChat
   source                        = "./core/ai/bingSearch"
   name                          = "infoasst-bing-${random_string.random.result}"
   resourceGroupName             = azurerm_resource_group.rg.name

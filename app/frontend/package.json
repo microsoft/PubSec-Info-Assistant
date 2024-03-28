@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@types/dompurify": "^2.4.0",
+    "@types/papaparse": "^5.3.14",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@types/react-resizable": "^3.0.7",

@@ -145,7 +145,7 @@ zero_shot_agent_math = initialize_agent(
 
 # Prompt template for Zeroshot agent
 
-# print(zero_shot_agent_math.agent.llm_chain.prompt.template)
+
 
 
 

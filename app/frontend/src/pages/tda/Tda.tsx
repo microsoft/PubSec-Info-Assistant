@@ -35,6 +35,7 @@ const Tda = ({folderPath, tags}: Props) => {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
+  
 
 
 
@@ -48,6 +49,7 @@ const Tda = ({folderPath, tags}: Props) => {
 
   const handleAnalysis = async () => {
     setOutput('');
+    setLoading(true);
     try {
       const query = setOtherQ(selectedQuery);
       const solve = await getCsvAnalysis(query);
@@ -56,6 +58,7 @@ const Tda = ({folderPath, tags}: Props) => {
           outputString += item + '\n';
           console.log(item);
       });
+      setLoading(false);
       setOutput(outputString);
       const charts = await getCharts();
       setImages(charts.map((chart: String) => chart.toString()));
@@ -72,9 +75,9 @@ const Tda = ({folderPath, tags}: Props) => {
   const handleAnswer = async () => {
       const query = setOtherQ(selectedQuery);
       setOutput('');
-      // setLoading(true);
+      setLoading(true);
       const result = await processCsvAgentResponse(query);
-      // setLoading(false);
+      setLoading(false);
       setOutput(result.toString());
       const charts = await getCharts();
       setImages(charts.map((chart: String) => chart.toString()));
@@ -304,6 +307,7 @@ const Tda = ({folderPath, tags}: Props) => {
     <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
+    {loading && <div className="spinner">Loading...</div>}
     { output && (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>

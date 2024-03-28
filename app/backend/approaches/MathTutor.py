@@ -3,6 +3,8 @@
 
 #Turn warnings off
 #from st_pages import Page, show_pages, add_page_title
+import asyncio
+import json
 import warnings
 warnings.filterwarnings('ignore')
 import os
@@ -40,7 +42,7 @@ azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 # openai.api_key = azure_openai_service_key
 # openai.api_base = f"https://{azure_openai_service}.openai.azure.com/"
 deployment_name = azure_openai_chatgpt_deployment
-
+OPENAI_DEPLOYMENT_NAME = deployment_name
 # openai.api_type = "azure"
 # openai.api_version = "2023-06-01-preview"
 # 
@@ -145,9 +147,11 @@ zero_shot_agent_math = initialize_agent(
     return_intermediate_steps=True)
 
 # Prompt template for Zeroshot agent
-
-# print(zero_shot_agent_math.agent.llm_chain.prompt.template)
-async def stream_agent_response(question):
+# async def stream_agent_responses(question):
+#     for i in range(10):
+#         yield f"data: {i}\n\n"
+#         await asyncio.sleep(1)
+async def stream_agent_responses(question):
     zero_shot_agent_math = initialize_agent(
         agent="zero-shot-react-description",
         tools=tools,
@@ -157,17 +161,18 @@ async def stream_agent_response(question):
         max_execution_time=120,
         handle_parsing_errors=True,
     )
-    stream = zero_shot_agent_math.stream({"input": question})
-    for chunk in stream:
-        if "output" in chunk:
-            yield {"data": f'Final Output: {chunk["output"]}'}
-        elif "actions" in chunk:
+    for chunk in zero_shot_agent_math.stream({"input": question}):
+        if "actions" in chunk:
             for action in chunk["actions"]:
-                yield {"data": f'Calling Tool: `{action.tool}` with input `{action.tool_input}`\n'}
-                yield {"data": f'I am thinking...: {action.log} \n'}
+                yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
+                yield f'data: I am thinking...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                yield {"data": f"Tool Result: `{step.observation}`\n"}
+                yield f'data: Tool Result: `{step.observation}` \n\n'
+        elif "output" in chunk:
+            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
+            yield output
+            raise StopAsyncIteration()
         else:
             raise ValueError()
 
@@ -176,7 +181,7 @@ async def stream_agent_response(question):
 def process_agent_scratch_pad( question):
     zero_shot_agent_math = initialize_agent(
     agent="zero-shot-react-description",
-        tools=tools,
+    tools=tools,
     llm=model,
     verbose=True,
     max_iterations=10,

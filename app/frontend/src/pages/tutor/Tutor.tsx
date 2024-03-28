@@ -12,7 +12,8 @@ import ReactMarkdown from 'react-markdown';
 const Tutor = () => {
     const [loading, setLoading] = useState(false);
     const [mathProblem, setMathProblem] = useState('');
-    const [output, setOutput] = useState<string | null>(null);
+    const [output, setOutput] = useState(['']);
+    //const [output, setOutput] = useState<string | null>("");
     const [selectedButton, setSelectedButton] = useState<string | null>(null);
 
 
@@ -29,42 +30,23 @@ const Tutor = () => {
     };
     async function hinter(question: string) {
         try {
-            setOutput(null);
+            setOutput(['']);
             setLoading(true);
             const hint: String = await getHint(question);
             setLoading(false);
-            setOutput(hint.toString());
+            setOutput([hint.toString()]);
             console.log(hint);
         } catch (error) {
             console.log(error);
         }
-        
-    }
-    async function solver(question: string) {
-        setLoading(true);
-        setOutput(null);
-        try {
-            const solve = await getSolve(question);
-            let outputString = '';
-            solve.forEach((item) => {
-                outputString += item + '\n';
-                console.log(item);
-            });
-            setOutput(outputString);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-        
     }
     
     async function getAnswer(question: string) {
-        setOutput(null);
+        setOutput(['']);
         setLoading(true);
         const result = await processAgentResponse(question);
         setLoading(false);
-        setOutput(result.toString());
+        setOutput([result.toString()]);
         // const eventSource = await processAgentResponse(question);
         // eventSource.onmessage = function(event) {
         //     console.log(event.data);
@@ -73,15 +55,16 @@ const Tutor = () => {
     const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
     const handleButton2Click = () => {
-      setSelectedButton('button2');
-      if (eventSource) {
-        eventSource.close();
-      }
-      const newEventSource = streamData(mathProblem, (data) => {
-        setOutput(data);
-      });
-      setEventSource(newEventSource);
-    };
+        setOutput(['']);
+        setSelectedButton('button2');
+        if (eventSource) {
+          eventSource.close();
+        }
+        const newEventSource = streamData(mathProblem, (data) => {
+          setOutput((prevOutput) => [...prevOutput, data]);
+        });
+        setEventSource(newEventSource);
+      };
   
     useEffect(() => {
       return () => {
@@ -135,16 +118,18 @@ return (
         </div>
         </form>
         {loading && <div className="spinner">Loading...</div>}
-        {output && 
-                <Accordion defaultActiveKey="0">
-                    
+        {output && output.join('') !== '' &&
+                <Accordion defaultActiveKey="0">                   
                     <h2>
                         Math Tutor Response:
                     </h2>
                     <Accordion.Collapse eventKey="0">
-                        <ReactMarkdown>{output}</ReactMarkdown>
-                    </Accordion.Collapse>
-                    
+                        <div>
+                        {output.map((item, index) => (
+                        <ReactMarkdown key={index} children={item} />
+                        ))}
+                    </div>
+                    </Accordion.Collapse>                    
                 </Accordion>
             }
     </div>

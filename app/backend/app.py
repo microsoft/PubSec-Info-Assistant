@@ -32,7 +32,8 @@ from azure.storage.blob import (
 from approaches.MathTutor import(
     generate_response,
     process_agent_scratch_pad,
-    process_agent_response
+    process_agent_response,
+    stream_agent_responses
 )
 from approaches.AskData import (
     save_df,
@@ -735,8 +736,8 @@ async def getSolve(question: Optional[str] = None):
 
 
 @app.get("/stream")
-def stream_response(question: str):
-    return StreamingResponse(stream_agent_response(question), media_type="text/event-stream")
+async def stream_response(question: str):
+    return StreamingResponse(stream_agent_responses(question), media_type="text/event-stream")
 
 
 @app.get("/getCharts")

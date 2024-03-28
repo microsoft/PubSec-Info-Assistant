@@ -146,13 +146,15 @@ const Tda = ({folderPath, tags}: Props) => {
             }
           }
         });
+        setProgress((counter/files.length) * 100);
+        counter++;
       });
     } catch (error) {
       console.error("Error uploading files: ", error);
     }
   }, [files]);
 
-  // set progress to zero when there are no files
+// set progress to zero when there are no files
   useEffect(() => {
     if (files.length < 1) {
       setProgress(0);

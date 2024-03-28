@@ -171,7 +171,6 @@ module "backend" {
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
     BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
-    BING_SEARCH_KEY                         = var.enableWebChat ? module.bingSearch[0].key : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
@@ -482,6 +481,7 @@ module "bingSearch" {
   tags                          = local.tags
   sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  keyVaultId                    = module.kvModule.keyVaultId
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

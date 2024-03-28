@@ -35,7 +35,7 @@ from approaches.MathTutor import(
     process_agent_scratch_pad,
     process_agent_response
 )
-from approaches.AskData import (
+from approaches.tabulardataassistant import (
     save_df,
     process_agent_response as csv_agent_response,
     process_agent_scratch_pad as csv_agent_scratch_pad,

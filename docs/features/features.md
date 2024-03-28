@@ -8,7 +8,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
 * [Image Search](/docs/features/features.md#image-search)
 * [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
-* [Autonomous Reasoning with Agents (Preview)](/docs/features/features.md#autonomous-reasoning-with-agents)
+* [Assistants (Preview)](/docs/features/features.md#autonomous-reasoning-with-agents)
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)
@@ -86,9 +86,9 @@ This accelerator employs Vector Hybrid Search which combines vector similarity w
 
 To learn more, please visit the [Cognitive Search](/docs/features/cognitive_search.md) feature page.
 
-## Autonomous Reasoning with Agents 
+## Autonomous Reasoning with Assistants (Agents)
 
-We are rolling out the Math Agent and CSV Agent in a preview mode. The Math Tutor combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.The CSV Agent allows users to ask natural language questions about tabular data stored in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data. The key strength of Agents lies in their ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows.The Math Agent and CSV Agent are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
+We are rolling out the Math Assistant and Tabular Data Assistant in a preview mode. The Math Assistant combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.The Tabular Data Assistants allows users to ask natural language questions about tabular data stored in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data. The key strength of Agents lies in their ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows.The Math Assistant and Tabular Data assistant are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
 
 ## Customization and Personalization
 

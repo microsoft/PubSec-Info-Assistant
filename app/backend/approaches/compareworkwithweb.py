@@ -26,10 +26,13 @@ class CompareWorkWithWeb(Approach):
     """
 
     COMPARATIVE_RESPONSE_PROMPT_FEW_SHOTS = [
-        {"role": Approach.USER ,'content': 'I am looking for comparative information on an answer based on Work internal documents and want to compare against an answer based on Web search results'},
-        {'role': Approach.ASSISTANT, 'content': 'User is looking to compare an answer based on Work internal documents against an answer based on Web search results.'}
+        {"role": Approach.USER ,'content': 'I am looking to compare and contrast answers obtained from both Work internal documents and Web search results'},
+        {'role': Approach.ASSISTANT, 'content': 'User wants to compare and contrast responses from both Work internal documents and Web search results.'},
+        {"role": Approach.USER, 'content': "Even if one of the sources doesn't provide a definite answer, I still want to compare and contrast the available information."},
+        {'role': Approach.ASSISTANT, 'content': "User emphasizes the importance of comparing and contrasting data even if one of the sources is uncertain about the answer."}
     ]
-
+    
+    
     citations = {}
 
     def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):

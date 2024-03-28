@@ -13,7 +13,7 @@ import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
 import Tutor from "./pages/tutor/Tutor";
-import Tda from "./pages/tda/Tda";
+import { Tda } from "./pages/tda/Tda";
 
 initializeIcons();
 
@@ -27,7 +27,7 @@ export default function App() {
                     <Route path="content" element={<Content />} />
                     <Route path="*" element={<NoPage />} />
                     <Route path="tutor" element={<Tutor />} />
-                    <Route path="tda" element={<Tda />} />
+                    <Route path="tda" element={<Tda folderPath={""} tags={[]} />} />
             </Route>
             </Routes>
         </HashRouter>    

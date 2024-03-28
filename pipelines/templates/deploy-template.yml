@@ -40,6 +40,12 @@ steps:
   displayName: Push latest dev container image to container registry
   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/vNext-Dev')))
 
+
+- template: make-command.yml
+  parameters:
+    displayName: 'Dev container take ownership of Directory'
+    makeCommand: 'take-dir-ownership'
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -55,12 +61,6 @@ steps:
       
       # Write the JSON string to version.json
       $versionJson | Out-File -FilePath '$(Build.SourcesDirectory)/app/frontend/version.json'
-
-
-- template: make-command.yml
-  parameters:
-    displayName: 'Dev container take ownership of Directory'
-    makeCommand: 'take-dir-ownership'
 
 - template: make-command.yml
   parameters:

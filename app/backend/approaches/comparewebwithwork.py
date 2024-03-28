@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+
 import re
 import urllib.parse
 from typing import Any, Sequence
@@ -29,10 +30,14 @@ class CompareWebWithWork(Approach):
     """
 
     COMPARATIVE_RESPONSE_PROMPT_FEW_SHOTS = [
-        {"role": Approach.USER ,'content': 'I am looking for comparative information on an answer based on Web search results and want to compare against an answer based on Work internal documents'},
-        {'role': Approach.ASSISTANT, 'content': 'User is looking to compare an answer based on Web search results against an answer based on Work internal documents.'}
+        # {"role": Approach.USER ,'content': 'I am looking for comparative information on an answer based on Web search results and want to compare against an answer based on Work internal documents'},
+        # {'role': Approach.ASSISTANT, 'content': 'User is looking to compare an answer based on Web search results against an answer based on Work internal documents.'}
+        {"role": Approach.USER, 'content': 'I am looking to compare and contrast answers obtained from both web search results and internal work documents.'},
+        {'role': Approach.ASSISTANT, 'content': 'User wants to compare and contrast responses from both web search results and internal work documents.'},
+        {"role": Approach.USER, 'content': "Even if one of the sources doesn't provide a definite answer, I still want to compare and contrast the available information."},
+        {'role': Approach.ASSISTANT, 'content': "User emphasizes the importance of comparing and contrasting data even if one of the sources is uncertain about the answer."}
     ]
-
+    
     citations = {}
     
     def __init__(
@@ -114,11 +119,12 @@ class CompareWebWithWork(Approach):
                                     self.use_semantic_reranker
                                 )
         rrr_response = await chat_rrr_approach.run(history, overrides)
+        
 
         self.citations = rrr_response.get("citation_lookup")
 
         user_query = history[-1].get("user")
-        web_answer = history[0].get("bot")
+        web_answer = history[1].get("bot")
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)

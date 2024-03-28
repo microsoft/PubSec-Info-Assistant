@@ -17,6 +17,7 @@
 
 from pyfiglet import Figlet
 import json
+import subprocess
 import os
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from azure.identity import DefaultAzureCredential
@@ -30,6 +31,30 @@ credential = DefaultAzureCredential()
 
 
 # *************************************************************************
+# Helper function for getting the appropriate Azure CLI Vault URL
+def get_keyvault_url(keyvault_name, resource_group=None):
+    # Construct the Azure CLI command
+    command = ["az", "keyvault", "show", "--name", keyvault_name]
+    if resource_group:
+        command.extend(["--resource-group", resource_group])
+
+    # Execute the command
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    # Check for errors
+    if result.returncode != 0:
+        print("Error executing command:", result.stderr)
+        return None
+
+    # Parse the JSON output
+    data = json.loads(result.stdout)
+
+    # Extract the KeyVault URL
+    vault_url = data.get("properties", {}).get("vaultUri")
+    return vault_url
+# *************************************************************************
+
+# *************************************************************************
 # Read required values from infra_output.json & key vault
 print("Reading values from infra_output.json")
 with open('infra_output.json', 'r') as file:
@@ -37,7 +62,7 @@ with open('infra_output.json', 'r') as file:
     
 cosmosdb_url = inf_output['properties']['outputs']['azurE_COSMOSDB_URL']['value']
 key_vault_name = inf_output['properties']['outputs']['deploymenT_KEYVAULT_NAME']['value']
-key_vault_url = "https://" + key_vault_name + ".vault.azure.net/"
+key_vault_url = get_keyvault_url(key_vault_name)
 
 sClient = SecretClient(vault_url=key_vault_url, credential=credential) 
 cosmosdb_key = sClient.get_secret('COSMOSDB-KEY') 

@@ -17,7 +17,6 @@ import { DetailsList,
     DefaultButton, 
     Panel,
     PanelType} from "@fluentui/react";
-import { retryFile } from "../../api";
 import styles from "./DocumentsDetailList.module.css";
 import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from "../../api";
 import { StatusContent } from "../StatusContent/StatusContent";
@@ -88,27 +87,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
     }
 
     const [itemList, setItems] = useState<IDocument[]>(items);
-    function retryErroredFile(item: IDocument): void {
-        retryFile(item.filePath)
-            .then(() => {
-                // Create a new array with the updated item
-                const updatedItems = itemList.map((i) => {
-                    if (i.key === item.key) {
-                        return {
-                            ...i,
-                            state: "Queued"
-                        };
-                    }
-                    return i;
-                });
-    
-                setItems(updatedItems); // Update the state with the new array
-                console.log("State updated, triggering re-render");
-            })
-            .catch((error) => {
-                console.error("Error retrying file:", error);
-            });
-    }
     
     // Initialize Selection with items
     useEffect(() => {
@@ -303,7 +281,6 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
                     <span onClick={() => onStateColumnClick(item)} style={{ cursor: 'pointer' }}>
                         {item.state}
                     </span>
-                    {item.state === 'Error' && <a href="javascript:void(0);" onClick={() => retryErroredFile(item)}> - Retry File</a>}
                 </TooltipHost>
             ), 
             isPadded: true,

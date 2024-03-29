@@ -43,18 +43,23 @@ class ChatWebRetrieveRead(Approach):
     If you cannot generate a search query, return just the number 0.
     """
     
+     
     QUERY_PROMPT_FEW_SHOTS = [
-        {'role' : Approach.USER, 'content' : 'What are the future plans for public transportation development?' },
-        {'role' : Approach.ASSISTANT, 'content' : 'Future plans for public transportation' },
-        {'role' : Approach.USER, 'content' : 'how much renewable energy was generated last year?' },
-        {'role' : Approach.ASSISTANT, 'content' : 'Renewable energy generation last year' }
-    ]
+    {'role': Approach.USER, 'content': 'Could you search the web for information on the latest advancements in artificial intelligence,citing the provided URLs.?'},
+    {'role': Approach.ASSISTANT, 'content': 'User wants to know about recent advancements in artificial intelligence,with citations from the provided URLs.'},
+    {'role': Approach.USER, 'content': 'can you search the web and provide information on impact of climate change on global agriculture,citing the content from the URLs provided. ?'},
+    {'role': Approach.ASSISTANT, 'content': 'User is seeking information about the effects of climate change on global agriculture,with citations from the content provided in the URLs.'}
+]
+       
 
     RESPONSE_PROMPT_FEW_SHOTS = [
         {"role": Approach.USER ,'content': 'I am looking for information in source urls and its snippets'},
-        {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source urls and its snippets.'}
+        {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source urls and its snippets.'},
+        {"role": Approach.USER, 'content': 'I need data extracted from the URLs and their corresponding snippets.'},
+        {'role': Approach.ASSISTANT, 'content': 'User requires data extracted from the URLs and their snippets.'}
     ]
-
+    
+ 
     citations = {}
     approach_class = ""
 

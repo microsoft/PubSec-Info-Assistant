@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+import base64
 import os
 import glob
 import warnings
@@ -162,6 +163,11 @@ def process_agent_scratch_pad( question):
             raise ValueError()
     return messages
         
+def is_base64out(s):
+    try:
+        return base64.b64encode(base64.b64decode(s)) == s
+    except Exception:
+        return False
 #Function to stream final output       
 def process_agent_response(question):
     global agent_imgs
@@ -169,10 +175,31 @@ def process_agent_response(question):
     if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
         question = save_chart(question)
     for chunk in pdagent.stream({"input": question}):
-        message = chunk["messages"] 
+        message = chunk["messages"]
         curr = message[0]
-        if "base64 string:" in curr.content and "output" not in chunk:
+        if (curr.content.startswith('(') and curr.content.endswith(')')):
+            # Check for multiple strings surrounded by parentheses and separated by commas
+            pattern = r'\(([^)]+)\)'
+            matches = re.findall(pattern, curr.content)
+            if matches:
+                print("curr.content contains multiple strings")
+                for match in matches:
+                    strings = match.split(',')
+                    for s in strings:
+                        if is_base64out(s.strip()):
+                            print("s is a base64 string")
+                            agent_imgs.append(s.strip())
+                        else:
+                            print("s is not a base64 string")
+            else:
+                if is_base64out(curr.content):
+                    print("curr.content is a base64 string")
+                    agent_imgs.append(curr.content)
+                else:
+                    print("curr.content is not a base64 string")
+        elif("base64 string:" in curr.content and "output" not in chunk) :
             base64_string = curr.content
+            
             match = re.search(r'base64 string:(.*?)end of base 64 string', base64_string)
             if match:
                 # Extract the base64 strings

@@ -474,7 +474,7 @@ module "kvModule" {
 }
 
 module "bingSearch" {
-  enableWebChat                 = var.enableWebChat
+  count                         = var.enableWebChat ? 1 : 0
   source                        = "./core/ai/bingSearch"
   name                          = "infoasst-bing-${random_string.random.result}"
   resourceGroupName             = azurerm_resource_group.rg.name
@@ -482,6 +482,7 @@ module "bingSearch" {
   sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   keyVaultId                    = module.kvModule.keyVaultId
+  enableWebChat                 = var.enableWebChat
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

@@ -26,5 +26,6 @@ variable "keyVaultId" {
 }
 
 variable "enableWebChat" {
-  type = bool
+  description = "A flag to enable or disable web chat."
+  type        = bool
 }

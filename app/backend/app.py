@@ -39,7 +39,6 @@ from approaches.tabulardataassistant import (
     save_df,
     process_agent_response as csv_agent_response,
     process_agent_scratch_pad as csv_agent_scratch_pad,
-    save_chart,
     getimgs
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel

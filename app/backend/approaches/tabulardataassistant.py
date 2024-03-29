@@ -69,7 +69,7 @@ agent_imgs = []
 
 
 def save_chart(query):
-    q_s = ' If any charts or graphs or plots were created save them as base 64 encoded bytestrings and start the base64 strings with "base64 string:" and end with "end of base 64 string", splitting them by using a comma and do not inclue the base64 string in the final output".'
+    q_s = ' If any charts or graphs or plots were created represent each as individual base64 encoded bytestrings and start the base64 strings with "base64 string:" and end with "end of base 64 string", splitting them by using a comma and do not inclue the base64 string in the final output".'
     query += ' . '+ q_s
     return query
 
@@ -81,7 +81,7 @@ def save_df(dff):
     pdagent = create_pandas_dataframe_agent(
             AzureChatOpenAI(
                         openai_api_version=OPENAI_API_VERSION,                        
-                        deployment_name=OPENAI_DEPLOYMENT_NAME), dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS,save_charts=True)
+                        deployment_name=OPENAI_DEPLOYMENT_NAME), dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
             
 
 def getimgs():
@@ -132,12 +132,27 @@ def process_agent_scratch_pad( question):
             for step in chunk["steps"]:
                 if isinstance(step.observation, str):
                     if step.observation:
-                        if is_base64(step.observation):
-                            print("step.observation is a base64 string")
-                            agent_imgs.append(step.observation)
+                        # Check for multiple strings surrounded by parentheses and separated by commas
+                        pattern = r'\(([^)]+)\)'
+                        matches = re.findall(pattern, step.observation)
+                        if matches:
+                            print("step.observation contains multiple strings")
+                            for match in matches:
+                                strings = match.split(',')
+                                for s in strings:
+                                    if is_base64(s.strip()):
+                                        print("s is a base64 string")
+                                        agent_imgs.append(s.strip())
+                                    else:
+                                        print("s is not a base64 string")
+                                        messages.append(f"Tool Result: `{s.strip()}`\n")
                         else:
-                            print("step.observation is not a base64 string")
-                            messages.append(f"Tool Result: `{step.observation}`\n")                               
+                            if is_base64(step.observation):
+                                print("step.observation is a base64 string")
+                                agent_imgs.append(step.observation)
+                            else:
+                                print("step.observation is not a base64 string")
+                                messages.append(f"Tool Result: `{step.observation}`\n")                             
         elif "output" in chunk:
             output = f'Final Output: {chunk["output"]}'
             pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'

@@ -85,7 +85,7 @@ const Tda = ({folderPath, tags}: Props) => {
       setLoading(true);
       const result = await processCsvAgentResponse(query);
       // setLoading(false);
-      setOutput(result.toString());
+      setOutput([result.toString()]);
       const charts = await getCharts();
       setImages(charts.map((chart: String) => chart.toString()));
       // const eventSource = await processAgentResponse(question);
@@ -315,7 +315,11 @@ const Tda = ({folderPath, tags}: Props) => {
     { output && (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
-        <ReactMarkdown>{output}</ReactMarkdown>
+        <div>
+          {output.map((item, index) => (
+            <ReactMarkdown key={index} children={item} />
+            ))}
+        </div>
         <p>Generated images</p>
         {base64Images.length > 0 ? (
       base64Images.map((base64Image, index) => (

@@ -106,12 +106,11 @@ def is_base64(s):
 
       
 # function to stream agent response 
-def process_agent_scratch_pad( question):
+async def process_agent_scratch_pad( question):
     global agent_imgs
     agent_imgs = []
     if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
         question = save_chart(question)
-    messages = []
     for chunk in pdagent.stream({"input": question}):
         # message = chunk["messages"] 
         # curr = message[0]

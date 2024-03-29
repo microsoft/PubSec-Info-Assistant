@@ -56,6 +56,7 @@ const Tutor = () => {
 
     const handleButton2Click = () => {
         setOutput(['']);
+        setLoading(true);
         setSelectedButton('button2');
         if (eventSource) {
           eventSource.close();

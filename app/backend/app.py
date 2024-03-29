@@ -739,6 +739,10 @@ async def getSolve(question: Optional[str] = None):
 async def stream_response(question: str):
     return StreamingResponse(stream_agent_responses(question), media_type="text/event-stream")
 
+@app.get("/csvstream")
+async def csv_stream_response(question: str):
+    return StreamingResponse(csv_agent_scratch_pad(question), media_type="text/event-stream")
+
 
 @app.get("/getCharts")
 async def getCharts():

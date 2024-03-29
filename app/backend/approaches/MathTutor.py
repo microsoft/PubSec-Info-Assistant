@@ -3,7 +3,6 @@
 
 #Turn warnings off
 #from st_pages import Page, show_pages, add_page_title
-import asyncio
 import json
 import warnings
 warnings.filterwarnings('ignore')

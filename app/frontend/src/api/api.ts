@@ -274,6 +274,16 @@ export function streamData(question: string, onMessage: (data: string) => void):
 
     return eventSource;
 }
+export function streamCsvData(question: string, onMessage: (data: string) => void): EventSource {
+    const encodedQuestion = encodeURIComponent(question);
+    const eventSource = new EventSource(`/csvstream?question=${encodedQuestion}`);
+
+    eventSource.onmessage = (event) => {
+        onMessage(event.data);
+    };
+
+    return eventSource;
+}
 
 export async function getSolve(question: string): Promise<String[]> {
     const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {

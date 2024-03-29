@@ -11,7 +11,7 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, getCharts } from "../../api";
+import { postCsv, processCsvAgentResponse, getCsvAnalysis, getCharts, streamCsvData } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 
@@ -28,7 +28,7 @@ const Tda = ({folderPath, tags}: Props) => {
   const folderName = folderPath;
   const tagList = tags;
   const [fileUploaded, setFileUploaded] = useState(false);
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState(['']);
   const [otherq, setOtherq] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('How many rows are there?');
   const [dataFrame, setDataFrame] = useState<object[]>([]);
@@ -46,17 +46,20 @@ const Tda = ({folderPath, tags}: Props) => {
     return selectedQuery;
   };
 
+  const [eventSource, setEventSource] = useState<EventSource | null>(null);
+
   const handleAnalysis = async () => {
-    setOutput('');
+    setOutput(['']);
+    setLoading(true);
     try {
       const query = setOtherQ(selectedQuery);
-      const solve = await getCsvAnalysis(query);
-      let outputString = '';
-      solve.forEach((item) => {
-          outputString += item + '\n';
-          console.log(item);
+      if (eventSource) {
+        eventSource.close();
+      }
+      const newEventSource = streamCsvData(query, (data) => {
+        setOutput((prevOutput) => [...prevOutput, data]);
       });
-      setOutput(outputString);
+      setEventSource(newEventSource);
       const charts = await getCharts();
       setImages(charts.map((chart: String) => chart.toString()));
     } catch (error) {
@@ -64,15 +67,22 @@ const Tda = ({folderPath, tags}: Props) => {
     } finally {+
         setLoading(false);
     }
-    
+  };
+  useEffect(() => {
+      return () => {
+        if (eventSource) {
+          eventSource.close();
+        }
+      };
+    }, [eventSource]);
 
     // Handle the analysis here
-  };
+  
   
   const handleAnswer = async () => {
       const query = setOtherQ(selectedQuery);
-      setOutput('');
-      // setLoading(true);
+      setOutput(['']);
+      setLoading(true);
       const result = await processCsvAgentResponse(query);
       // setLoading(false);
       setOutput(result.toString());

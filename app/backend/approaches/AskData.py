@@ -126,8 +126,8 @@ def process_agent_scratch_pad( question):
         #             agent_imgs.append(img)
         if "actions" in chunk:
             for action in chunk["actions"]:
-                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
-                messages.append(f'\nI am thinking...: {action.log}\n')
+                yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
+                yield f'data: I am thinking...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
                 if step.observation:
@@ -137,15 +137,15 @@ def process_agent_scratch_pad( question):
                             agent_imgs.append(step.observation)
                         else:
                             print("step.observation is not a base64 string")
-                            messages.append(f"Tool Result: `{step.observation}`\n")                               
+                            yield f'data: Tool Result: `{step.observation}` \n\n'                               
         elif "output" in chunk:
-            output = f'Final Output: {chunk["output"]}'
+            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
             pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'
             output = re.sub(pattern, '', output)
-            messages.append(output)
+            yield output
+            raise StopAsyncIteration()
         else:
             raise ValueError()
-    return messages
         
 #Function to stream final output       
 def process_agent_response(question):

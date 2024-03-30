@@ -27,32 +27,32 @@ figlet Import Terraform State
 # Set text color to yellow
 set_yellow_text
 
-# Display the notice
-echo "IMPORTANT NOTICE:"
-echo "Please read the following terms carefully. You must accept the terms to proceed."
-echo
-echo "This script will import the existing resources into the Terraform state."
-echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
-echo "of the accelerator while maintaining your existing resources and processed data."
-echo
-echo "If you have modified the infrastructure base this process will fail."
-echo "The simplest approach to deploy the latest version would be to perform"
-echo "a new deployment on a new resource group and reprocess your data"
+# # Display the notice
+# echo "IMPORTANT NOTICE:"
+# echo "Please read the following terms carefully. You must accept the terms to proceed."
+# echo
+# echo "This script will import the existing resources into the Terraform state."
+# echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
+# echo "of the accelerator while maintaining your existing resources and processed data."
+# echo
+# echo "If you have modified the infrastructure base this process will fail."
+# echo "The simplest approach to deploy the latest version would be to perform"
+# echo "a new deployment on a new resource group and reprocess your data"
 
-# Reset text color for input prompt
-reset_text_color
-echo
-echo "Do you accept these terms? (yes/no)"
+# # Reset text color for input prompt
+# reset_text_color
+# echo
+# echo "Do you accept these terms? (yes/no)"
 
-# Wait for the user's input
-while true; do
-    read -rp "Type 'yes' to accept: " answer
-    case $answer in
-        [Yy]* ) break;;
-        [Nn]* ) echo "You did not accept the terms. Exiting."; exit 1;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+# # Wait for the user's input
+# while true; do
+#     read -rp "Type 'yes' to accept: " answer
+#     case $answer in
+#         [Yy]* ) break;;
+#         [Nn]* ) echo "You did not accept the terms. Exiting."; exit 1;;
+#         * ) echo "Please answer yes or no.";;
+#     esac
+# done
 
 # Continue with the script after acceptance
 echo "You have accepted the terms. Proceeding with the script..."
@@ -134,6 +134,7 @@ fi
 # Import the existing resources into the Terraform state
 # ***********************************************************
 error_messages=()
+resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 
 # Random String
 echo
@@ -145,7 +146,6 @@ import_resource_if_needed $module_path $random_text
 # Main
 echo
 figlet "Main"
-resourceId="/subscriptions/$TF_VAR_subscriptionId/resourceGroups/$TF_VAR_resource_group_name"
 module_path="azurerm_resource_group.rg"
 import_resource_if_needed $module_path "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-"
@@ -171,29 +171,29 @@ module_path="module.entraObjects.azuread_application.aad_mgmt_app[0]"
 import_resource_if_needed $module_path "/applications/$webAccessApp_id"
 
 
-# OpenAI Services
-echo
-figlet "OpenAI Services"
-name="infoasst-aoai-$random_text"
-# only import if the service exists in the RG
-serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
-if [[ $serviceExists == $name ]]; then
+# # OpenAI Services
+# echo
+# figlet "OpenAI Services"
+# name="infoasst-aoai-$random_text"
+# # only import if the service exists in the RG
+# serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
+# if [[ $serviceExists == $name ]]; then
 
-    providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-    module_path="module.openaiServices.azurerm_cognitive_account.account"
-    import_resource_if_needed $module_path "$resourceId$providers"
+#     providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+#     module_path="module.openaiServices.azurerm_cognitive_account.account"
+#     import_resource_if_needed $module_path "$resourceId$providers"
 
-    providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
-    module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
-    import_resource_if_needed "$module_path" "$resourceId$providers"
+#     providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
+#     module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
+#     import_resource_if_needed "$module_path" "$resourceId$providers"
 
-    secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
-    module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
-    import_resource_if_needed "$module_path" "$secret_id"
+#     secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
+#     module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
+#     import_resource_if_needed "$module_path" "$secret_id"
 
-else
-    echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
-fi
+# else
+#     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
+# fi
 
 
 # Monitor
@@ -206,67 +206,67 @@ module_path="module.azMonitor.azurerm_application_insights_workbook.example"
 import_resource_if_needed $module_path "$resourceId$providers"
 
 
-# Video Indexer
-echo
-figlet "Video Indexer"
-# Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
-# changes in the service in azure.
-name="infoasststoremedia$random_text"
-providers="/providers/Microsoft.Storage/storageAccounts/$name"
-module_path="module.video_indexer.azurerm_storage_account.media_storage"
-import_resource_if_needed $module_path "$resourceId$providers"
-name="infoasst-ua-ident-$random_text"
-providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
-import_resource_if_needed $module_path "$resourceId$providers"
+# # Video Indexer
+# echo
+# figlet "Video Indexer"
+# # Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
+# # changes in the service in azure.
+# name="infoasststoremedia$random_text"
+# providers="/providers/Microsoft.Storage/storageAccounts/$name"
+# module_path="module.video_indexer.azurerm_storage_account.media_storage"
+# import_resource_if_needed $module_path "$resourceId$providers"
+# name="infoasst-ua-ident-$random_text"
+# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
+# module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
+# import_resource_if_needed $module_path "$resourceId$providers"
 
-# Retrive the principal id used to identify which roles are matched to this module
-# roles are assigned elswhere in the code, and have an assigned principal id
-# in the user roles module, the porinipal id of the user doing the deployment is used
-# to work around this identify the principals used in the other modules and
-# and filter role assignments from here that do not match these id's
-principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
-# Loop through each role assignment in the output and import
-echo "$output" | jq -c '.[]' | while read -r line; do
-    # Extract 'roleDefinitionName' and 'id' from the output
-    roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
-    roleId=$(echo $line | jq -r '.id')
-    rolePrincipalId=$(echo $line | jq -r '.principalId')
-    # Check if this principal id is in the list of excluded principals
-    # if not, then import this item
-    if [ "$rolePrincipalId" = "$principalId1" ]; then
-        # Check if the roleDefinitionName is in the list of selected roles
-        # Use pattern matching after removing spaces from roleDefinitionName
-        if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
-            module_path="module.video_indexer[\"$roleDefinitionName\"].azurerm_role_assignment.role"
-            import_resource_if_needed "$module_path" "$roleId"
-        fi
-    fi  
-done
-
-
-# Form Recognizer
-echo
-figlet "Form Recognizer"
-name="infoasst-fr-$random_text"
-providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-module_path="module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" 
-import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
-module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
-import_resource_if_needed "$module_path" "$secret_id"
+# # Retrive the principal id used to identify which roles are matched to this module
+# # roles are assigned elswhere in the code, and have an assigned principal id
+# # in the user roles module, the porinipal id of the user doing the deployment is used
+# # to work around this identify the principals used in the other modules and
+# # and filter role assignments from here that do not match these id's
+# principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
+# # Loop through each role assignment in the output and import
+# echo "$output" | jq -c '.[]' | while read -r line; do
+#     # Extract 'roleDefinitionName' and 'id' from the output
+#     roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
+#     roleId=$(echo $line | jq -r '.id')
+#     rolePrincipalId=$(echo $line | jq -r '.principalId')
+#     # Check if this principal id is in the list of excluded principals
+#     # if not, then import this item
+#     if [ "$rolePrincipalId" = "$principalId1" ]; then
+#         # Check if the roleDefinitionName is in the list of selected roles
+#         # Use pattern matching after removing spaces from roleDefinitionName
+#         if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
+#             module_path="module.video_indexer[\"$roleDefinitionName\"].azurerm_role_assignment.role"
+#             import_resource_if_needed "$module_path" "$roleId"
+#         fi
+#     fi  
+# done
 
 
-# Cognitive Services 
-echo
-figlet "Cognitive Services"
-name="infoasst-enrichment-cog-$random_text"
-providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-module_path="module.cognitiveServices.azurerm_cognitive_account.cognitiveService"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "ENRICHMENT-KEY")
-module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
-import_resource_if_needed "$module_path" "$secret_id"
+# # Form Recognizer
+# echo
+# figlet "Form Recognizer"
+# name="infoasst-fr-$random_text"
+# providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+# module_path="module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" 
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
+# module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
+# import_resource_if_needed "$module_path" "$secret_id"
+
+
+# # Cognitive Services 
+# echo
+# figlet "Cognitive Services"
+# name="infoasst-enrichment-cog-$random_text"
+# providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+# module_path="module.cognitiveServices.azurerm_cognitive_account.cognitiveService"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# secret_id=$(get_secret "ENRICHMENT-KEY")
+# module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
+# import_resource_if_needed "$module_path" "$secret_id"
 
 
 # Logging
@@ -333,68 +333,68 @@ module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
 import_resource_if_needed "$module_path" "$secret_id"
 
 
-# Functions
-echo
-figlet "Functions"
-appServicePlanName="infoasst-func-asp-$random_text-Autoscale"
-providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
-module_path="module.functions.azurerm_service_plan.funcServicePlan"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-appName="infoasst-func-$random_text"
-providers="/providers/Microsoft.Web/sites/$appName"
-module_path="module.functions.azurerm_linux_function_app.function_app"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-keyVaultId="infoasst-kv-$random_text"
-objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
-providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
-module_path="module.functions.azurerm_key_vault_access_policy.policy"
-import_resource_if_needed "$module_path" "$resourceId$providers"
+# # Functions
+# echo
+# figlet "Functions"
+# appServicePlanName="infoasst-func-asp-$random_text-Autoscale"
+# providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
+# module_path="module.functions.azurerm_service_plan.funcServicePlan"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+# module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# appName="infoasst-func-$random_text"
+# providers="/providers/Microsoft.Web/sites/$appName"
+# module_path="module.functions.azurerm_linux_function_app.function_app"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# keyVaultId="infoasst-kv-$random_text"
+# objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
+# providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+# module_path="module.functions.azurerm_key_vault_access_policy.policy"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
 
 
-# Web App
-echo
-figlet "Web App"
-appServicePlanName="infoasst-asp-$random_text"
-providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
-module_path="module.backend.azurerm_service_plan.appServicePlan"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-appName="infoasst-web-$random_text"
-providers="/providers/Microsoft.Web/sites/$appName"
-module_path="module.backend.azurerm_linux_web_app.app_service"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-keyVaultId="infoasst-kv-$random_text"
-objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
-providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
-module_path="module.backend.azurerm_key_vault_access_policy.policy"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.Web/sites/$appName|$appName"
-# import_resource_if_needed "module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs" "$resourceId$providers"
+# # Web App
+# echo
+# figlet "Web App"
+# appServicePlanName="infoasst-asp-$random_text"
+# providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
+# module_path="module.backend.azurerm_service_plan.appServicePlan"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# appName="infoasst-web-$random_text"
+# providers="/providers/Microsoft.Web/sites/$appName"
+# module_path="module.backend.azurerm_linux_web_app.app_service"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# keyVaultId="infoasst-kv-$random_text"
+# objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
+# providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+# module_path="module.backend.azurerm_key_vault_access_policy.policy"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# # providers="/providers/Microsoft.Web/sites/$appName|$appName"
+# # import_resource_if_needed "module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs" "$resourceId$providers"
 
 
-# Enrichment App
-echo
-figlet "Enrichment App"
-appServicePlanName="infoasst-enrichmentasp-$random_text"
-providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
-module_path="module.enrichmentApp.azurerm_service_plan.appServicePlan"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-module_path="module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout" 
-import_resource_if_needed "$module_path" "$resourceId$providers"
-appName="infoasst-enrichmentweb-$random_text"
-providers="/providers/Microsoft.Web/sites/$appName"
-module_path="module.enrichmentApp.azurerm_linux_web_app.app_service"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-keyVaultId="infoasst-kv-$random_text"
-objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
-providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
-module_path="module.enrichmentApp.azurerm_key_vault_access_policy.policy"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.Web/sites/$appName|example"
-# import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
+# # Enrichment App
+# echo
+# figlet "Enrichment App"
+# appServicePlanName="infoasst-enrichmentasp-$random_text"
+# providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
+# module_path="module.enrichmentApp.azurerm_service_plan.appServicePlan"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+# module_path="module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout" 
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# appName="infoasst-enrichmentweb-$random_text"
+# providers="/providers/Microsoft.Web/sites/$appName"
+# module_path="module.enrichmentApp.azurerm_linux_web_app.app_service"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# keyVaultId="infoasst-kv-$random_text"
+# objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
+# providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+# module_path="module.enrichmentApp.azurerm_key_vault_access_policy.policy"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# # providers="/providers/Microsoft.Web/sites/$appName|example"
+# # import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
 
 
 # Storage 
@@ -471,7 +471,7 @@ module_path="module.searchServices.azurerm_key_vault_secret.search_service_key"
 import_resource_if_needed "$module_path" "$secret_id"
 
 
-# Output log on no imported services
+# Output log on imported services
 echo
 figlet "Output Log"
 echo
@@ -488,6 +488,7 @@ if [ ${#error_messages[@]} -ne 0 ]; then
 else
     echo "All commands executed successfully."
 fi
+
 
 echo
 figlet "Done"

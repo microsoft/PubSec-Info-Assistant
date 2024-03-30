@@ -161,9 +161,17 @@ webAccessApp_name="infoasst_web_access_$random_text"
 webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
 module_path="module.entraObjects.azuread_application.aad_web_app[0]"
 import_resource_if_needed $module_path "/applications/$webAccessApp_objectId"
-appName="infoasst-web-$random_text"
+
+
+
+# ************ THIS DOESN'T EXIST - infoasst-web-ks5si
+# appName="infoasst-web-$random_text"
+appName="infoasst_web_access_$random_text"
 module_path="module.entraObjects.azuread_service_principal.aad_web_sp[0]"
 service_principal_id=$(az ad sp list --display-name "$appName" --query "[].id" | jq -r '.[0]')
+
+
+
 import_resource_if_needed $module_path $service_principal_id
 webAccessApp_name="infoasst_mgmt_access_$random_text"
 webAccessApp_id=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
@@ -196,14 +204,14 @@ import_resource_if_needed $module_path "/applications/$webAccessApp_id"
 # fi
 
 
-# Monitor
-echo
-figlet "Monitor"
-name="infoasst-lw--$random_text"
-workbook_name=$(az resource list --resource-group $TF_VAR_resource_group_name --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
-providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
-module_path="module.azMonitor.azurerm_application_insights_workbook.example"
-import_resource_if_needed $module_path "$resourceId$providers"
+# # Monitor
+# echo
+# figlet "Monitor"
+# name="infoasst-lw--$random_text"
+# workbook_name=$(az resource list --resource-group $TF_VAR_resource_group_name --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
+# providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
+# module_path="module.azMonitor.azurerm_application_insights_workbook.example"
+# import_resource_if_needed $module_path "$resourceId$providers"
 
 
 # # Video Indexer
@@ -441,34 +449,34 @@ module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
 import_resource_if_needed "$module_path" "$secret_id"
 
 
-# Cosmos DB 
-echo
-figlet "Cosmos DB"
-name="infoasst-cosmos-$random_text"
-providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name"
-module_path="module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb"
-module_path="module.cosmosdb.azurerm_cosmosdb_sql_database.log_database"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb/containers/statuscontainer"
-module_path="module.cosmosdb.azurerm_cosmosdb_sql_container.log_container"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "COSMOSDB-KEY")
-module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
-import_resource_if_needed "$module_path" "$secret_id"
+# # Cosmos DB 
+# echo
+# figlet "Cosmos DB"
+# name="infoasst-cosmos-$random_text"
+# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name"
+# module_path="module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb"
+# module_path="module.cosmosdb.azurerm_cosmosdb_sql_database.log_database"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb/containers/statuscontainer"
+# module_path="module.cosmosdb.azurerm_cosmosdb_sql_container.log_container"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# secret_id=$(get_secret "COSMOSDB-KEY")
+# module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
+# import_resource_if_needed "$module_path" "$secret_id"
 
 
-# Search Service
-echo
-figlet "Search Service"
-name="infoasst-search-$random_text"
-providers="/providers/Microsoft.Search/searchServices/$name"
-module_path="module.searchServices.azurerm_search_service.search" 
-import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
-module_path="module.searchServices.azurerm_key_vault_secret.search_service_key" 
-import_resource_if_needed "$module_path" "$secret_id"
+# # Search Service
+# echo
+# figlet "Search Service"
+# name="infoasst-search-$random_text"
+# providers="/providers/Microsoft.Search/searchServices/$name"
+# module_path="module.searchServices.azurerm_search_service.search" 
+# import_resource_if_needed "$module_path" "$resourceId$providers"
+# secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
+# module_path="module.searchServices.azurerm_key_vault_secret.search_service_key" 
+# import_resource_if_needed "$module_path" "$secret_id"
 
 
 # Output log on imported services

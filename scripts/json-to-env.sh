@@ -46,6 +46,14 @@ jq -r  '
             "env_var": "AZURE_WEBAPP_NAME"
         },
         {
+            "path": "backenD_VIEWER_URI",
+            "env_var": "AZURE_WEBAPP_VIEWER_URI"
+        },
+        {
+            "path": "backenD_VIEWER_NAME",
+            "env_var": "AZURE_WEBAPP_VIEWER_NAME"
+        },
+        {
             "path": "resourcE_GROUP_NAME",
             "env_var": "RESOURCE_GROUP_NAME"
         },

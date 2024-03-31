@@ -1,0 +1,113 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #f2f2f2;
+}
+
+.header {
+    background-color: #222222;
+    color: #f2f2f2;
+}
+
+.headerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-right: 12px;
+    margin-left: 12px;
+}
+
+.headerTitleContainer {
+    display: flex;
+    align-items: center;
+    margin-right: 40px;
+    color: #f2f2f2;
+    text-decoration: none;
+}
+
+.headerLogo {
+    height: 40px;
+}
+
+.headerTitle {
+    margin-left: 12px;
+    font-weight: 600;
+}
+
+.headerNavList {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+}
+
+.headerNavPageLink {
+    color: #f2f2f2;
+    text-decoration: none;
+    opacity: 0.75;
+
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 500ms;
+    transition-property: opacity;
+}
+
+.headerNavPageLink:hover {
+    opacity: 1;
+}
+
+.headerNavPageLinkActive {
+    color: #f2f2f2;
+    text-decoration: none;
+}
+
+.headerNavLeftMargin {
+    margin-left: 20px;
+}
+
+.headerRightText {
+    font-weight: normal;
+    margin-left: 40px;
+}
+
+.microsoftLogo {
+    height: 23px;
+    font-weight: 600;
+}
+
+.githubLogo {
+    height: 20px;
+}
+
+.chatButton {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+}
+
+.modalchatpanel > div:first-child {
+    width: 50%;
+}
+
+.raibanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-color: rgb(242, 242, 242);
+    height: fit-content;
+    -webkit-box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
+    box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
+    opacity: 25.0;
+}
+
+.raiwarning {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(133, 133, 133);
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+}

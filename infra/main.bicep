@@ -288,6 +288,64 @@ module backend 'core/host/appservice.bicep' = {
   ]
 }
 
+// The application frontend
+module backendViewer 'core/host/appservice.bicep' = {
+  name: 'web-viewer'
+  scope: rg
+  params: {
+    name: !empty(backendServiceName) ? backendServiceName : '${prefix}-${abbrs.webViewerSitesAppService}${randomString}'
+    location: location
+    tags: union(tags, { 'azd-service-name': 'backend' })
+    appServicePlanId: appServicePlan.outputs.id
+    runtimeName: 'python'
+    runtimeVersion: '3.10'
+    scmDoBuildDuringDeployment: true
+    managedIdentity: true
+    applicationInsightsName: logging.outputs.applicationInsightsName
+    logAnalyticsWorkspaceName: logging.outputs.logAnalyticsName
+    isGovCloudDeployment: isGovCloudDeployment
+    keyVaultName: kvModule.outputs.keyVaultName
+    appSettings: {
+      AZURE_BLOB_STORAGE_ACCOUNT: storage.outputs.name
+      AZURE_BLOB_STORAGE_ENDPOINT: storage.outputs.primaryEndpoints.blob
+      AZURE_BLOB_STORAGE_CONTAINER: containerName
+      AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
+      AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
+      AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : rg.name
+      AZURE_SEARCH_INDEX: searchIndexName
+      AZURE_SEARCH_SERVICE: searchServices.outputs.name
+      AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
+      AZURE_OPENAI_CHATGPT_DEPLOYMENT: !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
+      AZURE_OPENAI_CHATGPT_MODEL_NAME: chatGptModelName
+      AZURE_OPENAI_CHATGPT_MODEL_VERSION: chatGptModelVersion
+      USE_AZURE_OPENAI_EMBEDDINGS: useAzureOpenAIEmbeddings
+      EMBEDDING_DEPLOYMENT_NAME: useAzureOpenAIEmbeddings ? azureOpenAIEmbeddingDeploymentName : sentenceTransformersModelName
+      AZURE_OPENAI_EMBEDDINGS_MODEL_NAME: azureOpenAIEmbeddingsModelName
+      AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION: azureOpenAIEmbeddingsModelVersion
+      APPINSIGHTS_INSTRUMENTATIONKEY: logging.outputs.applicationInsightsInstrumentationKey
+      COSMOSDB_URL: cosmosdb.outputs.CosmosDBEndpointURL
+      COSMOSDB_LOG_DATABASE_NAME: cosmosdb.outputs.CosmosDBLogDatabaseName
+      COSMOSDB_LOG_CONTAINER_NAME: cosmosdb.outputs.CosmosDBLogContainerName
+      COSMOSDB_TAGS_DATABASE_NAME: cosmosdb.outputs.CosmosDBTagsDatabaseName
+      COSMOSDB_TAGS_CONTAINER_NAME: cosmosdb.outputs.CosmosDBTagsContainerName
+      QUERY_TERM_LANGUAGE: queryTermLanguage
+      AZURE_CLIENT_ID: aadMgmtClientId
+      AZURE_TENANT_ID: tenantId
+      AZURE_SUBSCRIPTION_ID: subscriptionId
+      IS_GOV_CLOUD_DEPLOYMENT: isGovCloudDeployment
+      CHAT_WARNING_BANNER_TEXT: chatWarningBannerText
+      TARGET_EMBEDDINGS_MODEL: useAzureOpenAIEmbeddings ? '${abbrs.openAIEmbeddingModel}${azureOpenAIEmbeddingDeploymentName}' : sentenceTransformersModelName
+      ENRICHMENT_APPSERVICE_NAME: enrichmentApp.outputs.name
+      APPLICATION_TITLE: applicationtitle
+      AZURE_MANAGEMENT_URL:aadMgmtUrl
+    }
+    aadClientId: aadWebClientId
+  }
+  dependsOn: [
+    kvModule
+  ]
+}
+
 module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
   name: 'openai'
   scope: rg
@@ -719,6 +777,8 @@ output AZURE_STORAGE_CONTAINER string = containerName
 output AZURE_STORAGE_UPLOAD_CONTAINER string = uploadContainerName
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
+output BACKEND_VIEWER_URI string = backendViewer.outputs.uri
+output BACKEND_VIEWER_NAME string = backendViewer.outputs.name
 output RESOURCE_GROUP_NAME string = rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup

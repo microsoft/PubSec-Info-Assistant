@@ -139,6 +139,7 @@
   "webServerFarms": "asp-",
   "funcServerFarms": "func-asp-",
   "webSitesAppService": "web-",
+  "webViewerSitesAppService": "web-viewer-",
   "webSitesAppServiceEnvironment": "ase-",
   "webSitesFunctions": "func-",
   "webStaticSites": "stapp-",

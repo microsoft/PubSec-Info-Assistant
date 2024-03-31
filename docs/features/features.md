@@ -8,7 +8,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
 * [Image Search](/docs/features/features.md#image-search)
 * [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
-* [Assistants (Preview)](/docs/features/features.md#autonomous-reasoning-with-agents)
+* [Assistants (Preview)](/docs/features/features.md#autonomous-reasoning-with-assistants-agents)
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)

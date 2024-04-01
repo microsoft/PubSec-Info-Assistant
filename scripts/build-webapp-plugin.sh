@@ -26,7 +26,7 @@ npm install
 npm run build
 
 # zip the webapp-viewer content from app/backend to the ./artifacts folders
-cd ../backend
+cd ../backend/plugin
 zip -q -r ${BINARIES_OUTPUT_PATH}/webapp-plugin.zip .
 cd $DIR
 echo "Successfully zipped webapp-plugin"

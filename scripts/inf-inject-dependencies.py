@@ -74,8 +74,8 @@ for state_resource in tf_imported_state['resources']:
 
    
 # Save the merged result
-with open('zztop.json', 'w') as f:
-# with open(state_file_path, 'w') as f:
+# with open('zztop.json', 'w') as f:
+with open(state_file_path, 'w') as f:
     json.dump(tf_imported_state, f, indent=2)
     
 # **********************************************************

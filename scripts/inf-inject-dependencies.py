@@ -60,46 +60,22 @@ with open(os.path.join(script_dir, 'tf-dependencies.json')) as f:
 
 with open(state_file_path) as f:
     tf_imported_state = json.load(f)
-    
-
-
-# # Iterate through each resource in the dependencies template
-# for template_resource in tf_dependencies_template:  # Directly iterate over the list
-#     for template_instance in template_resource.get('instances', []):
-#         # Find the matching resource and instance in the imported state
-#         for state_resource in tf_imported_state['resources']:
-#             if (template_resource['type'] == state_resource['type'] and
-#                 template_resource.get('module') == state_resource.get('module') and
-#                 template_resource['name'] == state_resource['name']):
-#                 for state_instance in state_resource.get('instances', []):
-#                     # if (state_instance['attributes'].get('display_name') == template_instance.get('attributes', {}).get('display_name') and
-#                     #     state_instance['attributes'].get('id') == template_instance.get('attributes', {}).get('id')):
-#                         # Merge dependencies
-#                         state_instance['dependencies'] = template_instance.get('dependencies', [])
-
-
 
 # Iterate through each resource in the dependencies template
-for template_resource in tf_dependencies_template:  # Directly iterate over the list
-    for template_instance in template_resource.get('instances', []):
-        # Find the matching resource and instance in the imported state
-        for state_resource in tf_imported_state['resources']:
-            if state_resource['type'] == "azurerm_role_assignment" and template_resource['type'] == "azurerm_role_assignment" :
-                if (template_resource['type'] == state_resource['type'] and
-                    template_resource['name'] == state_resource['name']):
-                    for state_instance in state_resource.get('instances', []):
- 
- 
-                          
-                        if state_resource['type'] == 'azurerm_role_assignment':
-                            print('hello')
+for state_resource in tf_imported_state['resources']:
+    for template_resource in tf_dependencies_template:  # Directly iterate over the list
+        if template_resource.get('type') == 'azurerm_role_assignment' and state_resource.get('type') == 'azurerm_role_assignment':
+            if (template_resource.get('type') == state_resource.get('type') and
+                template_resource.get('module') == state_resource.get('module') and
+                template_resource.get('name') == state_resource.get('name')):
+                
+                for state_instance in state_resource.get('instances', []):
+                    # Merge dependencies                              
+                    state_instance['dependencies'] = template_resource['instances'][0].get('dependencies', [])
 
-                        # Merge dependencies                              
-                        state_instance['dependencies'] = template_resource['instances'][0].get('dependencies', [])
-
-
+   
 # Save the merged result
-with open('merged_doc.json', 'w') as f:
+with open(state_file_path, 'w') as f:
     json.dump(tf_imported_state, f, indent=2)
     
 # **********************************************************

@@ -85,13 +85,18 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, citation
                         pageNumbers[citationShortName] = NaN;
                     }
                 }
-                if (approach == Approaches.ChatWebRetrieveRead || approach == Approaches.CompareWorkWithWeb) {
+                if (approach == Approaches.ChatWebRetrieveRead) {
                     return renderToStaticMarkup(
                         <a className="supContainer" title={citationShortName} href={citation.citation} target="_blank" rel="noopener noreferrer">
                             <sup>{citationIndex}</sup>
                         </a>
                     );
                 }
+
+                if (approach == Approaches.CompareWebWithWork || approach == Approaches.CompareWorkWithWeb) {
+                    return "";
+                }
+                
                 const path = getCitationFilePath(citation.citation);
                 const sourcePath = citation.source_path;
                 const pageNumber = citation.page_number;

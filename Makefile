@@ -9,10 +9,11 @@ help: ## Show this help
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%s\033[0m|%s\n", $$1, $$2}' \
         | column -t -s '|'
 
-deploy: build infrastructure extract-env deploy-enrichments deploy-search-indexes deploy-webapp deploy-webapp-viewer deploy-functions ## Deploy infrastructure and application code
+deploy: build infrastructure extract-env deploy-enrichments deploy-search-indexes deploy-webapp deploy-webapp-viewer build-webapp-plugin deploy-functions ## Deploy infrastructure and application code
  
 build-deploy-webapp: build extract-env deploy-webapp ##Build and Deploy the Webapp
 build-deploy-webapp-viewer: build extract-env deploy-webapp-viewer ##Build and Deploy the Webapp
+build-webapp-plugin: extract-env build-webapp-pluginjs ##Build and Deploy the Webapp
 build-deploy-enrichments: build extract-env deploy-enrichments ##Build and Deploy the Enrichment Webapp
 build-deploy-functions: build extract-env deploy-functions ##Build and Deploy the Functions
 
@@ -33,6 +34,9 @@ deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
 
 deploy-webapp-viewer: extract-env ## Deploys the web app code to Azure App Service
 	@./scripts/deploy-webapp-viewer.sh
+
+build-webapp-pluginjs: extract-env ## Deploys the web app code to Azure App Service
+	@./scripts/build-webapp-plugin.sh
 
 deploy-functions: extract-env ## Deploys the function code to Azure Function Host
 	@./scripts/deploy-functions.sh

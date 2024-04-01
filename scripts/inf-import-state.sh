@@ -497,6 +497,8 @@ else
     echo "All commands executed successfully."
 fi
 
-
 echo
 figlet "Done"
+
+
+

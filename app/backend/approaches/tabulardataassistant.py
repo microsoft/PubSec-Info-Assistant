@@ -105,12 +105,12 @@ def is_base64(s):
 
       
 # function to stream agent response 
-def process_agent_scratch_pad(question):
+def process_agent_scratch_pad(question, df):
     chat = AzureChatOpenAI(
                 openai_api_version=OPENAI_API_VERSION,
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
     
-    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
    
     global agent_imgs
     agent_imgs = []

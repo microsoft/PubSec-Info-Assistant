@@ -312,7 +312,18 @@ export async function postCsv(file: File): Promise<String> {
 }
 export async function getCsvAnalysis(question: string, file: File, retries: number = 3): Promise<String[]> {
     let lastError;
+    const formData = new FormData();
+    formData.append('csv', file);
 
+    const response = await fetch('/postCsv', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(`/getCsvAnalysis?question=${encodeURIComponent(question)}`, {
@@ -339,6 +350,18 @@ export async function getCsvAnalysis(question: string, file: File, retries: numb
 export async function processCsvAgentResponse(question: string, file: File, retries: number = 3): Promise<String> {
     let lastError;
 
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const response = await fetch('/postCsv', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
     for (let i = 0; i < retries; i++) {
         try {
             const response = await fetch(`/process_csv_agent_response?question=${encodeURIComponent(question)}`, {

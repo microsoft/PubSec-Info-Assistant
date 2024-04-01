@@ -114,6 +114,7 @@ log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
 
+dffinal = None
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
@@ -659,25 +660,27 @@ async def getHint(question: Optional[str] = None):
         log.exception("Exception in /getHint")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
 @app.post("/postCsv")
 async def postCsv(csv: UploadFile = File(...)):
     try:
-        # Read the file into a pandas DataFrame
+        global dffinal
+            # Read the file into a pandas DataFrame
         content = await csv.read()
         df = pd.read_csv(StringIO(content.decode('latin-1')))
 
-
+        dffinal = df
         # Process the DataFrame...
         save_df(df)
     except Exception as ex:
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
+            raise HTTPException(status_code=500, detail=str(ex)) from ex
+    
     
     #return {"filename": csv.filename}
 @app.get("/process_csv_agent_response")
 async def process_csv_agent_response(retries=3, delay=1, question: Optional[str] = None):
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
-
     for i in range(retries):
         try:
             results = csv_agent_response(question)
@@ -700,12 +703,14 @@ async def process_csv_agent_response(retries=3, delay=1, question: Optional[str]
 
 @app.get("/getCsvAnalysis")
 async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
+    global dffinal
     if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-    
+            raise HTTPException(status_code=400, detail="Question is required")
+        
     for i in range(retries):
         try:
-            results = csv_agent_scratch_pad(question)
+            save_df(dffinal)
+            results = csv_agent_scratch_pad(question, dffinal)
             return results
         except AttributeError as ex:
             log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")

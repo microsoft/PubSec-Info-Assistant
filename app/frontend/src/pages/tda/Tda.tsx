@@ -39,7 +39,9 @@ const Tda = ({folderPath, tags}: Props) => {
 
   
 
-
+  const setImages = (newBase64Strings: string[]) => {
+    setBase64Images(newBase64Strings);
+  };
 
 
   const setOtherQ = (selectedQuery: string) => {
@@ -102,6 +104,7 @@ const Tda = ({folderPath, tags}: Props) => {
   }, []);
 
   const handleAnswer = async () => {
+    let lastError;
     const retries: number = 3;
     for (let i = 0; i < retries; i++) {
       try {
@@ -257,9 +260,7 @@ if (dataFrame.length > 0) {
 
   const uploadComplete = useMemo(() => progress === 100, [progress]);
 
-  const setImages = (newBase64Strings: string[]) => {
-    setBase64Images(newBase64Strings);
-  };
+
   return (<div>
     <div className={cstyle.centeredContainer}>
       <p>Upload a CSV file</p>

@@ -88,9 +88,9 @@ Once completed, follow the [instructions for using IA Accelerator for the first 
 You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssist/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
 
 ## Dinno's Notes - 3 use cases (Additional steps for deployment)
-* Modal Chat on Info Assistant - pop-up chat fixed on the button of the page. No additional deployment steps.
-* External facing app (non-admin view) - Once you pull the latest changes, execute 'make deploy' again. Once done, open the app service webapp-viewer in the Azure portal(new app service different from the webapp). On the app service 'Authentication' menu - edit the restrict access to 'Allow unauthenticated access'. Note this normal takes 5-10mins to reflect.
-* Modal Chat plugin - this is using javascript as a plugin to any website. Need to update CORS setting in your viewer app svc. To do so, open Azure portal and the viewer app svc, on the menu select CORS and insert the domain you want to be able to access the viewer backend.
+* Modal Chat on Info Assistant - pop-up chat with fixed icon on the bottom of the page. Just need to pull latest and execute make deploy.
+* External facing info assistant (non-admin view) - The current info assistant by default has authentication on and manage content readily available, I tweak it a bit to remove authentication and remove the upload features. Once you pull the latest changes, execute 'make deploy'. Once done, open the app service webapp-viewer in the Azure portal(new app service different from the webapp). On the app service 'Authentication' menu - edit the restrict access to 'Allow unauthenticated access'. Note this normal takes 5-10mins to reflect.
+* Modal Chat plugin - this is as a plugin to any website. Just need to pull the latest and execute 'make build-webapp-plugin', fetch the compressed code in the artificat/build folder and copy and paste the code to your website. Additional steps to have your site be able to access the backend - you need to update CORS setting in your viewer app svc. To do so, open Azure portal and the viewer app svc, on the menu select CORS and insert the domain you want to be able to access the viewer backend.
 
 ## Responsible AI
 

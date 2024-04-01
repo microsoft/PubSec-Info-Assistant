@@ -117,6 +117,7 @@ const Tda = ({folderPath, tags}: Props) => {
           setOutput(result.toString());
           const charts = await getCharts();
           setImages(charts.map((chart: String) => chart.toString()));
+          return;
         }
         else {
           setOutput("no file file has been uploaded.")

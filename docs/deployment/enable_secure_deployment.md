@@ -3,7 +3,7 @@
 ## Overview
 
 > [!IMPORTANT]  
-> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure.
+> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Secure deployment is not supported when using existing Azure OpenAI Service.
 
 A secure deployment of Information Assistant should be considered when additional levels of infrastructure security are required. A secure deployment includes features to:
 
@@ -15,9 +15,13 @@ The secure deployment will add several new Azure resources and will likely requi
 
 ## Architecture
 
-Detailed architecture diagram:
+High level architecture diagram:
 
-![Secure deployment - Detailed Architecture](../images/secure-deployment-detailed-architecture.png)
+![Secure deployment - High level architecture](../images/secure-deploy-high-level-architecture.png)
+
+A more detailed architecture diagram illustrates component interaction:
+
+![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
 
 If you do not have a secure communication channel between your enterprise and the Azure cloud you could establish a Point to Site (P2S) Virtual Private Network (VPN) to enable access to the Information Assistant for demonstration purposes. This approach would require a VPN Gateway be added to the Information Assistant infrastructure.
 
@@ -33,14 +37,20 @@ For scenarios beyond a simple demonstration consider [Azure Front Door](https://
 
 ## Front end
 
-The following diagram shows the end user's interaction with Information Assistant and the Information Assistant's front-end application's orchestration of the user's workflow. The front-end uses VNET integration to connect to the private network. Private DNS zones are used by the front-end application to connect with the appropriate services such as:
+The following diagram shows the end user's interaction with Information Assistant and the subsequent front-end application's orchestration of the user's workflow. The front-end uses VNET integration to connect to the private network then uses private DNS zones are to connect to the appropriate services such as:
 
 * Azure Storage Account, blob storage to upload files
 * Azure OpenAI to submit prompts
 * Azure AI Search to discovery content from uploaded files
 * Cosmos database to view the status of uploaded files
 
-![Secure Deploy - Front End Architecture](../images/secure-deployment-front-end-architecture.png)
+![Secure Deploy - Front End Architecture](../images/secure-deploy-front-end-architecture.png)
+
+## Back end
+
+Back-end processing handles file upload, extraction, and enrichment leveraging AI Services as illustrated below:
+
+![Secure Deploy - Function Architecture](../images/secure-deploy-function-architecture.png)
 
 ## How to Enable a Secure Deployment
 

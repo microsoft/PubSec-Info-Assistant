@@ -67,12 +67,12 @@ steps:
 - script: |
     git config --global user.email "daylan.drummond@microsoft.com"
     git config --global user.name "Daylan Drummond"
-    git checkout "$(Build.SourceBranchName)"
+    branch_name=$(echo $(System.PullRequest.SourceBranch) | sed 's/refs\/heads\///') # Remove refs/heads/ prefix if present
+    git fetch
+    git checkout $branch_name
     git add "$(Build.SourcesDirectory)/app/frontend/version.json"
-    echo "$(Build.SourcesDirectory)/app/frontend/version.json"
     git commit -m "Add versioning file from pipeline"
-    echo "$(Build.SourceBranchName)"
-    git push origin "$(Build.SourceBranchName)"
+    git push origin $branch_name
   displayName: 'Commit and Push versioning file'
 
 - template: make-command.yml

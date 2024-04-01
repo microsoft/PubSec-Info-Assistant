@@ -90,7 +90,7 @@ You may choose to **[view the deployment and usage click-through guides](https:/
 ## Additonal deployment steps based on my changes
 * Modal Chat - no deployment changes
 * Frontend Viewer (non-admin view) - Once you pull the latest changes, execute 'make deploy' again. Once done, open the app service webapp-viewer in the Azure portal(new app service different from the webapp). On the app service 'Authentication' menu - edit the restrict access to 'Allow unauthenticated access'. Note this normal takes 5-10mins to reflect.
-* Modal Chat plugin - this is using javascript as a plugin. Need to change CORS to allow incoming request. TBD (Still undergoing testing)
+* Modal Chat plugin - this is using javascript as a plugin. Need to update CORS setting in your viewer app svc. To do so, open Azure portal and the viewer app svc, on the menu select CORS and insert the domain you want to be able to access the viewer backend.
 
 ## Responsible AI
 

@@ -64,6 +64,9 @@ steps:
       $versionJson | Out-File -FilePath '$(Build.SourcesDirectory)/app/frontend/version.json'
 
 
+- checkout: self
+  persistCredentials: true
+  
 - script: |
     git config --global user.email "daylan.drummond@microsoft.com"
     git config --global user.name "Daylan Drummond"

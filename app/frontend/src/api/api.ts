@@ -262,6 +262,21 @@ export async function getSolve(question: string): Promise<String[]> {
 
     return parsedResponse;
 }
+export async function refresh(): Promise<String[]> {
+    const response = await fetch(`/refresh?`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String[] = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
 
 export async function getCharts(): Promise<String[]> {
     const response = await fetch(`/getCharts?`, {
@@ -279,21 +294,6 @@ export async function getCharts(): Promise<String[]> {
     return parsedResponse;
 }
 
-export async function getCsvAnalysis(question: string): Promise<String[]> {
-    const response = await fetch(`/getCsvAnalysis?question=${encodeURIComponent(question)}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-    
-    const parsedResponse: String[] = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
-    }
-
-    return parsedResponse;
-}
 export async function postCsv(file: File): Promise<String> {
     const formData = new FormData();
     formData.append('csv', file);
@@ -310,21 +310,58 @@ export async function postCsv(file: File): Promise<String> {
 
     return parsedResponse;
 }
-export async function processCsvAgentResponse(question: string): Promise<String> {
-    const response = await fetch(`/process_csv_agent_response?question=${encodeURIComponent(question)}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
+export async function getCsvAnalysis(question: string, file: File, retries: number = 3): Promise<String[]> {
+    let lastError;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(`/getCsvAnalysis?question=${encodeURIComponent(question)}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const parsedResponse: String[] = await response.json();
+            if (response.status > 299 || !response.ok) {
+                throw Error("Unknown error");
+            }
+
+            return parsedResponse;
+        } catch (error) {
+            lastError = error;
         }
-    });
-    
-    const parsedResponse: String = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
     }
 
-    return parsedResponse;    
+    throw lastError;
 }
+
+export async function processCsvAgentResponse(question: string, file: File, retries: number = 3): Promise<String> {
+    let lastError;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(`/process_csv_agent_response?question=${encodeURIComponent(question)}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const parsedResponse: String = await response.json();
+            if (response.status > 299 || !response.ok) {
+                throw Error("Unknown error");
+            }
+
+            return parsedResponse;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError;
+}
+
 export async function processAgentResponse(question: string): Promise<String> {
     const response = await fetch(`/process_agent_response?question=${encodeURIComponent(question)}`, {
         method: "GET",

@@ -68,6 +68,10 @@ dffinal = None
 pdagent = None
 agent_imgs = []
 
+def refreshagent():
+    global pdagent
+    pdagent = None
+
 
 def save_chart(query):
     q_s = ' If any charts or graphs or plots were created represent each as individual base64 encoded bytestrings and start the base64 strings with "base64 string:" and end with "end of base 64 string", splitting them by using a comma and do not inclue the base64 string in the final output".'
@@ -76,14 +80,8 @@ def save_chart(query):
 
  
 def save_df(dff):
-    global pdagent
     global dffinal
-    dffinal = dff
-    pdagent = create_pandas_dataframe_agent(
-            AzureChatOpenAI(
-                        openai_api_version=OPENAI_API_VERSION,                        
-                        deployment_name=OPENAI_DEPLOYMENT_NAME), dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
-            
+    dffinal = dff      
 
 def getimgs():
     global agent_imgs
@@ -107,24 +105,19 @@ def is_base64(s):
 
       
 # function to stream agent response 
-def process_agent_scratch_pad( question):
+def process_agent_scratch_pad(question):
+    chat = AzureChatOpenAI(
+                openai_api_version=OPENAI_API_VERSION,
+                deployment_name=OPENAI_DEPLOYMENT_NAME)
+    
+    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+   
     global agent_imgs
     agent_imgs = []
     if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
         question = save_chart(question)
     messages = []
     for chunk in pdagent.stream({"input": question}):
-        # message = chunk["messages"] 
-        # curr = message[0]
-        # if "base64 string:" in curr.content and "output" not in chunk:
-        #     base64_string = curr.content
-        #     match = re.search(r'base64 string:(.*?)end of base 64 string', base64_string)
-        #     if match:
-        #         # Extract the base64 strings
-        #         base64_strings = match.group(1).strip().split(',')
-        #         # Set the agent_img global variable to the list of base64 strings
-        #         for img in base64_strings:
-        #             agent_imgs.append(img)
         if "actions" in chunk:
             for action in chunk["actions"]:
                 messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
@@ -158,6 +151,7 @@ def process_agent_scratch_pad( question):
             output = f'Final Output: {chunk["output"]}'
             pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'
             output = re.sub(pattern, '', output)
+            output = re.sub(r'string:[^\s]*', '', output)
             messages.append(output)
         else:
             raise ValueError()
@@ -170,6 +164,11 @@ def is_base64out(s):
         return False
 #Function to stream final output       
 def process_agent_response(question):
+    chat = AzureChatOpenAI(
+                openai_api_version=OPENAI_API_VERSION,                        
+                deployment_name=OPENAI_DEPLOYMENT_NAME)
+    
+    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
     global agent_imgs
     agent_imgs = []
     if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
@@ -211,6 +210,7 @@ def process_agent_response(question):
             output = f'Final Output: {chunk["output"]}'
             pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'
             output = re.sub(pattern, '', output)
+            output = re.sub(r'string:[^\s]*', '', output)
             
             # Remove the base64 strings from the output
             

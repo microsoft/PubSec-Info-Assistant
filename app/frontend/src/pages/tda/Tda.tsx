@@ -11,7 +11,7 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, getCharts } from "../../api";
+import { postCsv, processCsvAgentResponse, getCsvAnalysis, getCharts, refresh } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 
@@ -35,6 +35,8 @@ const Tda = ({folderPath, tags}: Props) => {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
+  const [fileu, setFile] = useState<File | null>(null);
+
   
 
 
@@ -48,45 +50,82 @@ const Tda = ({folderPath, tags}: Props) => {
   };
 
   const handleAnalysis = async () => {
+    const retries: number = 3;
     setOutput('');
     setLoading(true);
-    try {
-      const query = setOtherQ(selectedQuery);
-      const solve = await getCsvAnalysis(query);
-      let outputString = '';
-      solve.forEach((item) => {
-          outputString += item + '\n';
-          console.log(item);
-      });
-      setLoading(false);
-      setOutput(outputString);
-      const charts = await getCharts();
-      setImages(charts.map((chart: String) => chart.toString()));
-    } catch (error) {
-        console.log(error);
-    } finally {+
-        setLoading(false);
-    }
-    
-
-    // Handle the analysis here
-  };
+    let lastError;
   
-  const handleAnswer = async () => {
-      const query = setOtherQ(selectedQuery);
-      setOutput('');
-      setLoading(true);
-      const result = await processCsvAgentResponse(query);
-      setLoading(false);
-      setOutput(result.toString());
-      const charts = await getCharts();
-      setImages(charts.map((chart: String) => chart.toString()));
-      // const eventSource = await processAgentResponse(question);
-      // eventSource.onmessage = function(event) {
-      //     console.log(event.data);
-      //     setOutput(event.data);
+    for (let i = 0; i < retries; i++) {
+      try {
+        const query = setOtherQ(selectedQuery);
+        if (fileu) {
+          const solve = await getCsvAnalysis(query, fileu);
+          let outputString = '';
+          solve.forEach((item) => {
+            outputString += item + '\n';
+            console.log(item);
+          });
+          setLoading(false);
+          setOutput(outputString);
+          const charts = await getCharts();
+          setImages(charts.map((chart: String) => chart.toString()));
+          return;  // If everything is successful, return from the function
+        } else {
+          setOutput("no file has been uploaded.")
+          setLoading(false);
+          return;
+        }
+      } catch (error) {
+        lastError = error;
+      }
+    }
+  
+    // If the code reaches here, all retries have failed. Handle the error as needed.
+    console.error(lastError);
+    setLoading(false);
+    setOutput('An error occurred.');
+  };
 
-    // Handle the answer here
+  useEffect(() => {
+    const handleRefresh = async () => {
+      // Call your method here
+      await refresh();
+    };
+
+    handleRefresh();
+
+    // Cleanup function
+    return () => {
+      // This function will be called when the component unmounts
+      // You can call another method here if needed
+    };
+  }, []);
+
+  const handleAnswer = async () => {
+    const retries: number = 3;
+    for (let i = 0; i < retries; i++) {
+      try {
+        const query = setOtherQ(selectedQuery);
+        setOutput('');
+        setLoading(true);
+        if (fileu) {
+          const result = await processCsvAgentResponse(query, fileu);
+          setLoading(false);
+          setOutput(result.toString());
+          const charts = await getCharts();
+          setImages(charts.map((chart: String) => chart.toString()));
+        }
+        else {
+          setOutput("no file file has been uploaded.")
+          setLoading(false);
+        }
+    } catch (error) {
+    lastError = error;
+    }
+  // If the code reaches here, all retries have failed. Handle the error as needed.
+    console.error(lastError);
+    setLoading(false);
+    setOutput('An error occurred.');
   };
 
   // handler called when files are selected via the Dropzone component
@@ -123,37 +162,37 @@ const Tda = ({folderPath, tags}: Props) => {
   // execute the upload operation
   const handleUpload = useCallback(async () => {
     try {
+      setFile(null);
       const data = new FormData();
       console.log("files", files);
       setUploadStarted(true);
-  
-      var counter = 1;
-      files.forEach(async (indexedFile: any) => {
-        var file = indexedFile.file as File;
-
-        Papa.parse(file, {
-          header: true,
-          dynamicTyping: true,
-          complete: async function(results) {
-            data.append("file", file);
-            console.log("Finished:", results.data);
-            // Here, results.data is your dataframe
-            // You can set it in your state like this:
-            setFileUploaded(true);
-            setDataFrame(results.data as object[]);
-            try {
-              const response = await postCsv(file);
-              console.log('Response from server:', response);
-            } catch (error) {
-              console.error('Error posting CSV:', error);
-            }
-          }
-        });
-        setProgress((counter/files.length) * 100);
-        counter++;
+      files.forEach(async (indexedFile: any) => {  
+          var file = indexedFile.file as File;
+            Papa.parse(file, {
+              header: true,
+              dynamicTyping: true,
+              complete: async function(results) {
+                data.append("file", file);
+                console.log("Finished:", results.data);
+                // Here, results.data is your dataframe
+                // You can set it in your state like this:
+                setDataFrame(results.data as object[]);
+                try {               
+                  const response = await postCsv(file).then((response) => {
+                    setProgress(100);
+                    setFileUploaded(true);
+                    console.log('Response from server:', response);
+                  }).catch((error) => {console.log(error);}); 
+                  
+                } catch (error) {
+                  console.error('Error posting CSV:', error);
+                }
+              }
+            });
+            setFile(file)
       });
     } catch (error) {
-      console.error("Error uploading files: ", error);
+      console.error('Error uploading files: ', error);
     }
   }, [files]);
 
@@ -171,9 +210,15 @@ const Tda = ({folderPath, tags}: Props) => {
     }
   }, [progress]);
 
-  const indexLength = Math.max(...dataFrame.map((_, index) => String(index).length));
-
-
+  let indexLength = 0;
+if (dataFrame.length > 0) {
+  for (let i = 0; i < dataFrame.length; i++) {
+    const length = String(i).length;
+    if (length > indexLength) {
+      indexLength = length;
+    }
+  }
+}
  
 
   const columnLengths: { [key: string]: number } = dataFrame.reduce((lengths: { [key: string]: number }, row: Record<string, any>) => {

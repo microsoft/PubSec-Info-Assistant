@@ -459,12 +459,14 @@ async def resubmit_Items(request: Request):
         blob_data = blob_container.download_blob(path).readall()
         # Overwrite the blob with the modified data
         blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
-        statusLog.upsert_document(document_path=path,
+        # add the container to the path to avoid adding another doc in the status db
+        full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
+        statusLog.upsert_document(document_path=full_path,
                     status='Resubmitted to the processing pipeline',
                     status_classification=StatusClassification.INFO,
                     state=State.QUEUED,
                     fresh_start=False)
-        statusLog.save_document(document_path=path)   
+        statusLog.save_document(document_path=full_path)   
 
     except Exception as ex:
         log.exception("Exception in /delete_Items")
@@ -699,36 +701,6 @@ async def stream_agent_response(question: str):
         raise HTTPException(status_code=500, detail=str(e))
     return results
 
-@app.post("/retryFile")
-async def retryFile(request: Request):
-    """
-    Retries submission of a file
-
-    Returns:
-        dict: A dictionary containing the status of all tags
-    """
-    json_body = await request.json()
-    filePath = json_body.get("filePath")
-    
-    try:
-        file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
-        blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
-        if blob.exists():
-            raw_file = blob.download_blob().readall()
-            # Overwrite the existing blob with new data
-            blob.upload_blob(raw_file, overwrite=True) 
-
-            statusLog.upsert_document(document_path=filePath,
-                        status='Resubmitted to the processing pipeline',
-                        status_classification=StatusClassification.INFO,
-                        state=State.QUEUED,
-                        fresh_start=False)
-            statusLog.save_document(document_path=filePath)   
-
-    except Exception as ex:
-        logging.exception("Exception in /retryFile")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return {"status": 200}
 
 @app.get("/getFeatureFlags")
 async def get_feature_flags():

@@ -11,6 +11,7 @@ data "template_file" "workflow" {
 }
 
 resource "azurerm_resource_group_template_deployment" "bing_search" {
+  count               = var.enableWebChat ? 1 : 0
   resource_group_name = var.resourceGroupName
   parameters_content = jsonencode({
     "name"                      = { value = "${var.name}" },
@@ -23,4 +24,10 @@ resource "azurerm_resource_group_template_deployment" "bing_search" {
   # this ensures the keys are up-to-date
   name            = "bingsearch-${filemd5(local.arm_file_path)}"
   deployment_mode = "Incremental"
+}
+
+resource "azurerm_key_vault_secret" "bing_search_key" {
+  name         = "BINGSEARCH-KEY"
+  value        = var.enableWebChat ? jsondecode(azurerm_resource_group_template_deployment.bing_search[0].output_content).key1.value : ""
+  key_vault_id = var.keyVaultId
 }

@@ -50,6 +50,8 @@ for resource in data.get('resources', []):
 
 # Save the extracted data to a file
 template_path = os.path.abspath(os.path.join(script_dir, 'tf-dependencies.json'))
+
+print('writing template to:', template_path)
 with open(template_path, 'w') as outfile:
     json.dump(extracted_data, outfile, indent=4)
 

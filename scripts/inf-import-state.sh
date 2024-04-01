@@ -196,7 +196,7 @@ import_resource_if_needed $module_path "/applications/$webAccessApp_id"
 #     import_resource_if_needed "$module_path" "$resourceId$providers"
 
 #     secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
-#     module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
+#     module_path="module.cognitiveServices.azurerm_key_vault_secret.openaiServiceKeySecret"
 #     import_resource_if_needed "$module_path" "$secret_id"
 
 # else
@@ -261,7 +261,7 @@ import_resource_if_needed $module_path "/applications/$webAccessApp_id"
 # module_path="module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" 
 # import_resource_if_needed "$module_path" "$resourceId$providers"
 # secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
-# module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
+# module_path="module.cognitiveServices.azurerm_key_vault_secret.docIntelligenceKey"
 # import_resource_if_needed "$module_path" "$secret_id"
 
 
@@ -277,13 +277,9 @@ import_resource_if_needed $module_path "/applications/$webAccessApp_id"
 # import_resource_if_needed "$module_path" "$secret_id"
 
 
-# Logging
+# # Logging
 echo
 figlet "Logging"
-name="infoasst-la-$random_text"
-providers="/providers/Microsoft.OperationalInsights/workspaces/$name"
-module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
-import_resource_if_needed "$module_path" "$resourceId$providers"
 name="infoasst-ai-$random_text"
 providers="/providers/Microsoft.Insights/components/$name"
 module_path="module.logging.azurerm_application_insights.applicationInsights"
@@ -337,7 +333,7 @@ providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId"
 module_path="module.kvModule.azurerm_key_vault.kv"
 import_resource_if_needed "$module_path" "$resourceId$providers"
 secret_id=$(get_secret "AZURE-CLIENT-SECRET")
-module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
+module_path="module.kvModule.azurerm_key_vault_secret.spClientKeySecret"
 import_resource_if_needed "$module_path" "$secret_id"
 
 
@@ -445,38 +441,39 @@ secret_id=$(get_secret "BLOB-CONNECTION-STRING")
 module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
 import_resource_if_needed "$module_path" "$secret_id"
 secret_id=$(get_secret "AZURE-BLOB-STORAGE-KEY")
-module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
+module_path="module.storage.azurerm_key_vault_secret.storage_key"
 import_resource_if_needed "$module_path" "$secret_id"
 
 
-# # Cosmos DB 
-# echo
-# figlet "Cosmos DB"
-# name="infoasst-cosmos-$random_text"
-# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name"
-# module_path="module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account"
-# import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb"
-# module_path="module.cosmosdb.azurerm_cosmosdb_sql_database.log_database"
-# import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb/containers/statuscontainer"
-# module_path="module.cosmosdb.azurerm_cosmosdb_sql_container.log_container"
-# import_resource_if_needed "$module_path" "$resourceId$providers"
-# secret_id=$(get_secret "COSMOSDB-KEY")
-# module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
-# import_resource_if_needed "$module_path" "$secret_id"
+# Cosmos DB 
+echo
+figlet "Cosmos DB"
+name="infoasst-cosmos-$random_text"
+providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name"
+module_path="module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account"
+import_resource_if_needed "$module_path" "$resourceId$providers"
+providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb"
+module_path="module.cosmosdb.azurerm_cosmosdb_sql_database.log_database"
+import_resource_if_needed "$module_path" "$resourceId$providers"
+providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb/containers/statuscontainer"
+module_path="module.cosmosdb.azurerm_cosmosdb_sql_container.log_container"
+import_resource_if_needed "$module_path" "$resourceId$providers"
+secret_id=$(get_secret "COSMOSDB-KEY")
+module_path="module.storage.azurerm_key_vault_secret.cosmos_db_key"
+import_resource_if_needed "$module_path" "$secret_id"
 
 
-# # Search Service
-# echo
-# figlet "Search Service"
-# name="infoasst-search-$random_text"
-# providers="/providers/Microsoft.Search/searchServices/$name"
-# module_path="module.searchServices.azurerm_search_service.search" 
-# import_resource_if_needed "$module_path" "$resourceId$providers"
-# secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
-# module_path="module.searchServices.azurerm_key_vault_secret.search_service_key" 
-# import_resource_if_needed "$module_path" "$secret_id"
+
+# Search Service
+echo
+figlet "Search Service"
+name="infoasst-search-$random_text"
+providers="/providers/Microsoft.Search/searchServices/$name"
+module_path="module.searchServices.azurerm_search_service.search" 
+import_resource_if_needed "$module_path" "$resourceId$providers"
+secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
+module_path="module.searchServices.azurerm_key_vault_secret.search_service_key" 
+import_resource_if_needed "$module_path" "$secret_id"
 
 
 # Output log on imported services
@@ -499,6 +496,3 @@ fi
 
 echo
 figlet "Done"
-
-
-

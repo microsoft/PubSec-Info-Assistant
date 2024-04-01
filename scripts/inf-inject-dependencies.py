@@ -64,7 +64,6 @@ with open(state_file_path) as f:
 # Iterate through each resource in the dependencies template
 for state_resource in tf_imported_state['resources']:
     for template_resource in tf_dependencies_template:  # Directly iterate over the list
-        if template_resource.get('type') == 'azurerm_role_assignment' and state_resource.get('type') == 'azurerm_role_assignment':
             if (template_resource.get('type') == state_resource.get('type') and
                 template_resource.get('module') == state_resource.get('module') and
                 template_resource.get('name') == state_resource.get('name')):
@@ -75,7 +74,8 @@ for state_resource in tf_imported_state['resources']:
 
    
 # Save the merged result
-with open(state_file_path, 'w') as f:
+with open('zztop.json', 'w') as f:
+# with open(state_file_path, 'w') as f:
     json.dump(tf_imported_state, f, indent=2)
     
 # **********************************************************

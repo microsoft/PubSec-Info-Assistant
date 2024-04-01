@@ -122,8 +122,9 @@ const Tda = ({folderPath, tags}: Props) => {
           setOutput("no file file has been uploaded.")
           setLoading(false);
         }
-    } catch (error) {
-    lastError = error;
+      } catch (error) {
+        lastError = error;
+      }
     }
   // If the code reaches here, all retries have failed. Handle the error as needed.
     console.error(lastError);

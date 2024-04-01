@@ -79,7 +79,8 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
                 response_temp: options.overrides?.responseTemp,
                 selected_folders: options.overrides?.selectedFolders,
                 selected_tags: options.overrides?.selectedTags
-            }
+            },
+            citation_lookup: options.citation_lookup
         })
     });
 

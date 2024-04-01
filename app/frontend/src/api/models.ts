@@ -50,7 +50,7 @@ export type AskResponse = {
     approach: Approaches;
     // citation_lookup: {}
     // added this for citation bug. aparmar.
-    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    citation_lookup: CitationLookup;
     
     error?: string;
 };
@@ -60,10 +60,21 @@ export type ChatTurn = {
     bot?: string;
 };
 
+export type Citation = {
+    citation: string;
+    source_path: string;
+    page_number: string; // or number, if page_number is intended to be a numeric value
+  }
+  
+export type CitationLookup = {
+    [key: string]: Citation;
+  }
+
 export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
     overrides?: AskRequestOverrides;
+    citation_lookup: CitationLookup;
 };
 
 export type BlobClientUrlResponse = {

@@ -11,7 +11,7 @@ import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
 
-import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, ChatMode, getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
+import { chatApi, Approaches, AskResponse, ChatRequest, ChatTurn, ChatMode, getFeatureFlags, GetFeatureFlagsResponse, CitationLookup } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { ExampleList } from "../../components/Example";
@@ -66,6 +66,8 @@ const Chat = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: AskResponse][]>([]);
 
+    const [citationLookup, setCitationLookup] = useState<CitationLookup>({});
+
     async function fetchFeatureFlags() {
         try {
             const fetchedFeatureFlags = await getFeatureFlags();
@@ -104,10 +106,12 @@ const Chat = () => {
                     responseTemp: responseTemp,
                     selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
                     selectedTags: selectedTags.map(tag => tag.name).join(",")
-                }
+                },
+                citation_lookup: citationLookup
             };
             const result = await chatApi(request);
             result.approach = approach;
+            setCitationLookup(result.citation_lookup);
             setAnswers([...answers, [question, result]]);
         } catch (e) {
             setError(e);

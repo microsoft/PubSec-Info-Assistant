@@ -63,6 +63,16 @@ steps:
       # Write the JSON string to version.json
       $versionJson | Out-File -FilePath '$(Build.SourcesDirectory)/app/frontend/version.json'
 
+
+- script: |
+    git config --global user.email "daylan.drummond@microsoft.com"
+    git config --global user.name "Daylan Drummond"
+    git checkout $(Build.SourceBranchName)
+    git add $(Build.SourcesDirectory)/app/frontend/version.json
+    git commit -m "Add versioning file from pipeline"
+    git push origin $(Build.SourceBranchName)
+  displayName: 'Commit and Push versioning file'
+
 - template: make-command.yml
   parameters:
     displayName: 'Build'

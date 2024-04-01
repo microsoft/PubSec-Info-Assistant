@@ -87,6 +87,11 @@ Once completed, follow the [instructions for using IA Accelerator for the first 
 
 You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssist/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
 
+## Additonal deployment steps based on my changes
+* Modal Chat - no deployment changes
+* Frontend Viewer (non-admin view) - Once you pull the latest changes, execute 'make deploy' again. Once done, open the app service webapp-viewer in the Azure portal(new app service different from the webapp). On the app service 'Authentication' menu - edit the restrict access to 'Allow unauthenticated access'. Note this normal takes 5-10mins to reflect.
+* Modal Chat plugin - this is using javascript as a plugin. Need to change CORS to allow incoming request. TBD (Still undergoing testing)
+
 ## Responsible AI
 
 The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.

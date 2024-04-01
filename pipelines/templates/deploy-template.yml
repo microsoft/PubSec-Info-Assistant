@@ -67,10 +67,12 @@ steps:
 - script: |
     git config --global user.email "daylan.drummond@microsoft.com"
     git config --global user.name "Daylan Drummond"
-    git checkout $(Build.SourceBranchName)
-    git add $(Build.SourcesDirectory)/app/frontend/version.json
+    git checkout "$(Build.SourceBranchName)"
+    git add "$(Build.SourcesDirectory)/app/frontend/version.json"
+    echo "$(Build.SourcesDirectory)/app/frontend/version.json"
     git commit -m "Add versioning file from pipeline"
-    git push origin $(Build.SourceBranchName)
+    echo "$(Build.SourceBranchName)"
+    git push origin "$(Build.SourceBranchName)"
   displayName: 'Commit and Push versioning file'
 
 - template: make-command.yml

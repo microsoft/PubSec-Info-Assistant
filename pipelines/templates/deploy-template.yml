@@ -47,6 +47,7 @@ steps:
     makeCommand: 'take-dir-ownership'
 
 - task: PowerShell@2
+  displayName: 'Create version.json'
   inputs:
     targetType: 'inline'
     script: |

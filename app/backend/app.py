@@ -286,15 +286,20 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+        r = await impl.run(json_body.get("history", []), json_body.get("citation_lookup"), json_body.get("overrides", {}))
        
-        # To fix citation bug,below code is added.aparmar
-        return {
+        response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
                 "citation_lookup": r["citation_lookup"],
-            }
+        }
+
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            response["compare_citation_lookup"] = r["compare_citation_lookup"]
+
+        # To fix citation bug,below code is added.aparmar
+        return response
 
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")

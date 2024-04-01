@@ -38,8 +38,8 @@ class CompareWebWithWork(Approach):
         {'role': Approach.ASSISTANT, 'content': "User emphasizes the importance of comparing and contrasting data even if one of the sources is uncertain about the answer."}
     ]
     
-    citations = {}
-    
+    web_citations = {}
+
     def __init__(
         self,
         search_client: SearchClient,
@@ -85,7 +85,7 @@ class CompareWebWithWork(Approach):
         self.azure_ai_translation_domain = azure_ai_translation_domain
         self.use_semantic_reranker = use_semantic_reranker
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], citation_lookup: dict[str, Any], overrides: dict[str, Any]) -> Any:
         """
         Runs the approach to compare and contrast answers from internal data and Web Search results.
 
@@ -121,16 +121,16 @@ class CompareWebWithWork(Approach):
         rrr_response = await chat_rrr_approach.run(history, overrides)
         
 
-        self.citations = rrr_response.get("citation_lookup")
+        self.web_citations = rrr_response.get("citation_lookup")
 
         user_query = history[-1].get("user")
-        web_answer = history[1].get("bot")
+        web_answer = next((obj['bot'] for obj in history if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
-        bing_compare_query = user_query + " Web search resutls:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + rrr_response.get("answer") + "\n\n"
+        bing_compare_query = user_query + " Web search results:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + rrr_response.get("answer") + "\n\n"
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
@@ -155,14 +155,17 @@ class CompareWebWithWork(Approach):
         final_response = f"{urllib.parse.unquote(bing_compare_resp)}"
 
         # Step 4: Append web citations from the Bing Search approach
-        for idx, url in enumerate(self.citations.keys(), start=1):
+        for idx, url in enumerate(self.web_citations.keys(), start=1):
             final_response += f" [File{idx}]"
 
+        
         return {
             "data_points": None,
             "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "citation_lookup": self.web_citations,
+
+            "compare_citation_lookup": citation_lookup
         }
     
     async def make_chat_completion(self, messages) -> str:

@@ -49,7 +49,7 @@ steps:
     git fetch
     git checkout $branchName
     git add "$(Build.SourcesDirectory)/app/frontend/version.json"
-    git commit -m "Add versioning file from pipeline"
+    git commit -m "Add versioning file from pipeline [skip azp]"
     git push origin $branchName
   displayName: 'Commit and Push versioning file'
 

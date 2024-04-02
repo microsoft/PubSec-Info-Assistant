@@ -330,14 +330,10 @@ import_resource_if_needed "$module_path" "$resourceId$providers"
 secret_id=$(get_secret "AZURE-CLIENT-SECRET")
 module_path="module.kvModule.azurerm_key_vault_secret.spClientKeySecret"
 import_resource_if_needed "$module_path" "$secret_id"
-
 current_user_id=$(az ad signed-in-user show --query id -o tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$current_user_id"
 module_path="module.kvModule.azurerm_key_vault_access_policy.infoasst"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
-
 
 
 # Functions
@@ -355,8 +351,8 @@ providers="/providers/Microsoft.Web/sites/$appName"
 module_path="module.functions.azurerm_linux_function_app.function_app"
 import_resource_if_needed "$module_path" "$resourceId$providers"
 keyVaultId="infoasst-kv-$random_text"
-objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
-providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appName'].id | [0]" --all --output tsv)
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.functions.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
 
@@ -373,12 +369,13 @@ providers="/providers/Microsoft.Web/sites/$appName"
 module_path="module.backend.azurerm_linux_web_app.app_service"
 import_resource_if_needed "$module_path" "$resourceId$providers"
 keyVaultId="infoasst-kv-$random_text"
-objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
-providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appName'].id | [0]" --all --output tsv)
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.backend.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.Web/sites/$appName|$appName"
-# import_resource_if_needed "module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs" "$resourceId$providers"
+
+
+
 
 
 # Enrichment App
@@ -396,12 +393,10 @@ providers="/providers/Microsoft.Web/sites/$appName"
 module_path="module.enrichmentApp.azurerm_linux_web_app.app_service"
 import_resource_if_needed "$module_path" "$resourceId$providers"
 keyVaultId="infoasst-kv-$random_text"
-objectId=$(az keyvault show --name $keyVaultId --resource-group $TF_VAR_resource_group_name --query "properties.accessPolicies[0].objectId" --output tsv)
-providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$objectId"
+appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appName'].id | [0]" --all --output tsv)
+providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.enrichmentApp.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.Web/sites/$appName|example"
-# import_resource_if_needed "module.enrichmentApp.azurerm_monitor_diagnostic_setting.example" "$resourceId$providers"
 
 
 # Storage 

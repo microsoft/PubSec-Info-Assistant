@@ -85,12 +85,11 @@ def process_agent_scratch_pad(question, df):
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
     
     pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
-    messages = []
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
-                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
-                messages.append(f'\nI am thinking...: {action.log}\n')
+                yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
+                yield f'data: I am thinking...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
                 if isinstance(step.observation, str):
@@ -108,23 +107,23 @@ def process_agent_scratch_pad(question, df):
                                         agent_imgs.append(s.strip())
                                     else:
                                         print("s is not a base64 string")
-                                        messages.append(f"Tool Result: `{s.strip()}`\n")
+                                        yield f'data: Tool Result: `{step.observation}` \n\n'  
                         else:
                             if is_base64(step.observation):
                                 print("step.observation is a base64 string")
                                 agent_imgs.append(step.observation)
                             else:
                                 print("step.observation is not a base64 string")
-                                messages.append(f"Tool Result: `{step.observation}`\n")                             
+                                yield f'data: Tool Result: `{step.observation}` \n\n'                              
         elif "output" in chunk:
             output = f'Final Output: {chunk["output"]}'
             pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'
             output = re.sub(pattern, '', output)
             output = re.sub(r'string:[^\s]*', '', output)
-            messages.append(output)
+            yield output
+            raise StopAsyncIteration()
         else:
             raise ValueError()
-    return messages
         
 def is_base64out(s):
     try:

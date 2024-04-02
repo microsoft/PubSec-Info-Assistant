@@ -10,7 +10,7 @@ pr:
     exclude: [ master ]
   paths:
     exclude: 
-      - 'app/frontend/version.json'
+      - app/frontend/version.json
       - 'docs/*'
       - '*.md'
   drafts: false

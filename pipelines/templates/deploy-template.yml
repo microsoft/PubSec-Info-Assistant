@@ -14,46 +14,7 @@ steps:
 
 - checkout: self
   clean: true
-
-  - task: PowerShell@2
-  displayName: 'Create version.json'
-  inputs:
-    targetType: 'inline'
-    script: |
-      # Create a version.json file with the build number
-      $version = @{
-          version = "1.1"
-          buildNumber = "$(Build.BuildNumber)"
-      }
-      
-      # Convert the hashtable to a JSON string
-      $versionJson = $version | ConvertTo-Json
-      
-      # Write the JSON string to version.json
-      $versionJson | Out-File -FilePath '$(Build.SourcesDirectory)/app/frontend/version.json'
-
-
-- checkout: self
   persistCredentials: true
-  
-- script: |
-    git config --global user.email "daylan.drummond@microsoft.com"
-    git config --global user.name "Daylan Drummond"
-
-    # Determine if this is a PR build or a direct push
-    if [ "$(Build.Reason)" == "PullRequest" ]; then
-      # For PR builds, use the source branch of the PR
-      branchName=$(echo $(System.PullRequest.SourceBranch) | sed 's/refs\/heads\///')
-    else
-      # For direct pushes, use the checked out branch
-      branchName=$(Build.SourceBranch)
-      branchName=${branchName/refs\/heads\//}
-    fi
-
-    git add "$(Build.SourcesDirectory)/app/frontend/version.json"
-    git commit -m "Add versioning file from pipeline"
-    git push origin $branchName
-  displayName: 'Commit and Push versioning file'
 
 - bash: |
     docker login $(CONTAINER_REGISTRY_ADDRESS) -u $(CLIENT_ID) -p $(CLIENT_SECRET)
@@ -85,6 +46,42 @@ steps:
   parameters:
     displayName: 'Dev container take ownership of Directory'
     makeCommand: 'take-dir-ownership'
+
+  - task: PowerShell@2
+  displayName: 'Create version.json'
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Create a version.json file with the build number
+      $version = @{
+          version = "1.1"
+          buildNumber = "$(Build.BuildNumber)"
+      }
+      
+      # Convert the hashtable to a JSON string
+      $versionJson = $version | ConvertTo-Json
+      
+      # Write the JSON string to version.json
+      $versionJson | Out-File -FilePath '$(Build.SourcesDirectory)/app/frontend/version.json'
+  
+- script: |
+    git config --global user.email "daylan.drummond@microsoft.com"
+    git config --global user.name "Daylan Drummond"
+
+    # Determine if this is a PR build or a direct push
+    if [ "$(Build.Reason)" == "PullRequest" ]; then
+      # For PR builds, use the source branch of the PR
+      branchName=$(echo $(System.PullRequest.SourceBranch) | sed 's/refs\/heads\///')
+    else
+      # For direct pushes, use the checked out branch
+      branchName=$(Build.SourceBranch)
+      branchName=${branchName/refs\/heads\//}
+    fi
+
+    git add "$(Build.SourcesDirectory)/app/frontend/version.json"
+    git commit -m "Add versioning file from pipeline"
+    git push origin $branchName
+  displayName: 'Commit and Push versioning file'
 
 - template: make-command.yml
   parameters:

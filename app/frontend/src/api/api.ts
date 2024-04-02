@@ -278,21 +278,6 @@ export async function refresh(): Promise<String[]> {
     return parsedResponse;
 }
 
-export async function getCharts(): Promise<String[]> {
-    const response = await fetch(`/getCharts?`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-    
-    const parsedResponse: String[] = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
-    }
-
-    return parsedResponse;
-}
 
 export async function postCsv(file: File): Promise<String> {
     const formData = new FormData();

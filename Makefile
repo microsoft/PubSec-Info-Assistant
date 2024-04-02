@@ -63,3 +63,6 @@ destroy-inf: check-subscription
 
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
+
+run-migration: ## Migrate from bicep to terraform
+	python ./scripts/merge-databases.py

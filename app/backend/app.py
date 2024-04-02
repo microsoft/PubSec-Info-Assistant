@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 from io import StringIO
 from typing import Optional
+import asyncio
 #from sse_starlette.sse import EventSourceResponse
 #from starlette.responses import StreamingResponse
 import logging
@@ -14,9 +15,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
-from approaches.chatrrrbingcompare import ChatReadRetrieveReadBingCompare
-from approaches.chatbingsearchcompare import ChatBingSearchCompare
+from approaches.comparewebwithwork import CompareWebWithWork
+from approaches.compareworkwithweb import CompareWorkWithWeb
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
@@ -29,21 +31,20 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from approaches.MathTutor import(
+from approaches.mathassistant import(
     generate_response,
     process_agent_scratch_pad,
     process_agent_response,
     stream_agent_responses
 )
-from approaches.AskData import (
+from approaches.tabulardataassistant import (
+    refreshagent,
     save_df,
     process_agent_response as csv_agent_response,
     process_agent_scratch_pad as csv_agent_scratch_pad,
-    save_chart,
-    getimgs
+
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
-from approaches.chatbingsearch import ChatBingSearch
 from azure.cosmos import CosmosClient
 
 
@@ -93,7 +94,12 @@ ENV = {
     "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true" 
+    "ENABLE_BING_SAFE_SEARCH": "true",
+    "ENABLE_WEB_CHAT": "false",
+    "ENABLE_UNGROUNDED_CHAT": "false",
+    "ENABLE_MATH_ASSISTANT": "false",
+    "ENABLE_TABULAR_DATA_ASSISTANT": "false",
+    "ENABLE_MULTIMEDIA": "false"
     }
 
 for key, value in ENV.items():
@@ -109,6 +115,7 @@ log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
 
+dffinal = None
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
@@ -209,7 +216,7 @@ chat_approaches = {
                                     ENV["AZURE_AI_TRANSLATION_DOMAIN"],
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
-    Approaches.ChatBingSearch: ChatBingSearch(
+    Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -217,7 +224,7 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.ChatBingSearchCompare: ChatBingSearchCompare( 
+    Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -225,9 +232,9 @@ chat_approaches = {
                                     ENV["BING_SEARCH_KEY"],
                                     str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
     ),
-    Approaches.BingRRRCompare: ChatReadRetrieveReadBingCompare(
+    Approaches.CompareWebWithWork: CompareWebWithWork(
                                     search_client,
-                                    ENV["AZURE_OPENAI_SERVICE"],
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
                                     ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
@@ -464,12 +471,14 @@ async def resubmit_Items(request: Request):
         blob_data = blob_container.download_blob(path).readall()
         # Overwrite the blob with the modified data
         blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
-        statusLog.upsert_document(document_path=path,
+        # add the container to the path to avoid adding another doc in the status db
+        full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
+        statusLog.upsert_document(document_path=full_path,
                     status='Resubmitted to the processing pipeline',
                     status_classification=StatusClassification.INFO,
                     state=State.QUEUED,
                     fresh_start=False)
-        statusLog.save_document(document_path=path)   
+        statusLog.save_document(document_path=full_path)   
 
     except Exception as ex:
         log.exception("Exception in /delete_Items")
@@ -542,7 +551,6 @@ async def logstatus(request: Request):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     raise HTTPException(status_code=200, detail="Success")
 
-# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
 @app.get("/getInfoData")
 async def get_info_data():
     """
@@ -577,7 +585,7 @@ async def get_info_data():
     }
     return response
 
-# Return AZURE_OPENAI_CHATGPT_DEPLOYMENT
+
 @app.get("/getWarningBanner")
 async def get_warning_banner():
     """Get the warning banner text"""
@@ -653,73 +661,93 @@ async def getHint(question: Optional[str] = None):
         log.exception("Exception in /getHint")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
 @app.post("/postCsv")
 async def postCsv(csv: UploadFile = File(...)):
     try:
-        # Read the file into a pandas DataFrame
+        global dffinal
+            # Read the file into a pandas DataFrame
         content = await csv.read()
         df = pd.read_csv(StringIO(content.decode('latin-1')))
 
-
+        dffinal = df
         # Process the DataFrame...
         save_df(df)
     except Exception as ex:
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
+            raise HTTPException(status_code=500, detail=str(ex)) from ex
+    
     
     #return {"filename": csv.filename}
 @app.get("/process_csv_agent_response")
-async def process_csv_agent_response(question: str):
-    """
-    Stream the response of the agent for a given question.
-
-    This endpoint uses Server-Sent Events (SSE) to stream the response of the agent. 
-    It calls the `process_agent_response` function which yields chunks of data as they become available.
-
-    Args:
-        question (str): The question to be processed by the agent.
-
-    Yields:
-        dict: A dictionary containing a chunk of the agent's response.
-
-    Raises:
-        HTTPException: If an error occurs while processing the question.
-    """
-    # try:
-    #     def event_stream():
-    #         data_generator = iter(process_agent_response(question))
-    #         while True:
-    #             try:
-    #                 chunk = next(data_generator)
-    #                 yield chunk
-    #             except StopIteration:
-    #                 yield "data: keep-alive\n\n"
-    #                 time.sleep(5)
-    #     return StreamingResponse(event_stream(), media_type="text/event-stream")
+async def process_csv_agent_response(retries=3, delay=1, question: Optional[str] = None):
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
-
-    try:
-        results = csv_agent_response(question)
-    except Exception as e:
-        print(f"Error processing agent response: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-    return results
+    for i in range(retries):
+        try:
+            results = csv_agent_response(question)
+            return results
+        except AttributeError as ex:
+            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                if str(ex) == "'NoneType' object has no attribute 'stream'":
+                    return ["error: Csv has not been loaded"]
+                else:
+                    raise HTTPException(status_code=500, detail=str(ex)) from ex
+        except Exception as ex:
+            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 @app.get("/getCsvAnalysis")
-async def getCsvAnalysis(question: Optional[str] = None):
-   
+async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
+    global dffinal
     if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
+            raise HTTPException(status_code=400, detail="Question is required")
+        
+    for i in range(retries):
+        try:
+            save_df(dffinal)
+            results = csv_agent_scratch_pad(question, dffinal)
+            return results
+        except AttributeError as ex:
+            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                if str(ex) == "'NoneType' object has no attribute 'stream'":
+                    return ["error: Csv has not been loaded"]
+                else:
+                    raise HTTPException(status_code=500, detail=str(ex)) from ex
+        except Exception as ex:
+            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                raise HTTPException(status_code=500, detail=str(ex)) from ex
 
+@app.post("/refresh")
+async def refresh():
+    """
+    Refresh the agent's state.
+
+    This endpoint calls the `refresh` function to reset the agent's state.
+
+    Raises:
+        HTTPException: If an error occurs while refreshing the agent's state.
+
+    Returns:
+        dict: A dictionary containing the status of the agent's state.
+    """
     try:
-
-        results = csv_agent_scratch_pad(question)
+        refreshagent()
     except Exception as ex:
-        log.exception("Exception in /getCsvAnalysis")
+        log.exception("Exception in /refresh")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return results
-
-
+    return {"status": "success"}
 
 @app.get("/getSolve")
 async def getSolve(question: Optional[str] = None):
@@ -744,27 +772,6 @@ async def csv_stream_response(question: str):
     return StreamingResponse(csv_agent_scratch_pad(question), media_type="text/event-stream")
 
 
-@app.get("/getCharts")
-async def getCharts():
-    """
-    Retrieve the base64 encoded images generated by the agent.
-
-    This endpoint calls the `getimgs` function to retrieve the base64 encoded images 
-    generated by the agent in response to a previous question. The images are returned 
-    as a list of base64 strings.
-
-    Raises:
-        HTTPException: If an error occurs while retrieving the images.
-
-    Returns:
-        list: A list of base64 encoded strings representing the generated images.
-    """
-    try:
-        results = getimgs()
-    except Exception as ex:
-        log.exception("Exception in /getCharts")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return results
 
 @app.get("/process_agent_response")
 async def stream_agent_response(question: str):
@@ -804,37 +811,28 @@ async def stream_agent_response(question: str):
         raise HTTPException(status_code=500, detail=str(e))
     return results
 
-@app.post("/retryFile")
-async def retryFile(request: Request):
+
+@app.get("/getFeatureFlags")
+async def get_feature_flags():
     """
-    Retries submission of a file
+    Get the feature flag settings for the app.
 
     Returns:
-        dict: A dictionary containing the status of all tags
+        dict: A dictionary containing various feature flags for the app.
+            - "ENABLE_WEB_CHAT": Flag indicating whether web chat is enabled.
+            - "ENABLE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
+            - "ENABLE_MATH_ASSISTANT": Flag indicating whether the math assistant is enabled.
+            - "ENABLE_TABULAR_DATA_ASSISTANT": Flag indicating whether the tabular data assistant is enabled.
+            - "ENABLE_MULTIMEDIA": Flag indicating whether multimedia is enabled.
     """
-    json_body = await request.json()
-    filePath = json_body.get("filePath")
-    
-    try:
-        file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
-        blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
-        if blob.exists():
-            raw_file = blob.download_blob().readall()
-            # Overwrite the existing blob with new data
-            blob.upload_blob(raw_file, overwrite=True) 
-
-            statusLog.upsert_document(document_path=filePath,
-                        status='Resubmitted to the processing pipeline',
-                        status_classification=StatusClassification.INFO,
-                        state=State.QUEUED,
-                        fresh_start=False)
-            statusLog.save_document(document_path=filePath)   
-
-    except Exception as ex:
-        logging.exception("Exception in /retryFile")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return {"status": 200}
-
+    response = {
+        "ENABLE_WEB_CHAT": str_to_bool.get(ENV["ENABLE_WEB_CHAT"]),
+        "ENABLE_UNGROUNDED_CHAT": str_to_bool.get(ENV["ENABLE_UNGROUNDED_CHAT"]),
+        "ENABLE_MATH_ASSISTANT": str_to_bool.get(ENV["ENABLE_MATH_ASSISTANT"]),
+        "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
+        "ENABLE_MULTIMEDIA": str_to_bool.get(ENV["ENABLE_MULTIMEDIA"]),
+    }
+    return response
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

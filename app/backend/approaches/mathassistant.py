@@ -3,7 +3,6 @@
 
 #Turn warnings off
 #from st_pages import Page, show_pages, add_page_title
-import json
 import warnings
 warnings.filterwarnings('ignore')
 import os
@@ -23,31 +22,18 @@ AZURE_OPENAI_SERVICE_KEY = ' '
 
 os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
 os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
-#os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
-#os.environ["AZURE_OPENAI_ENDPOINT"] = AZURE_OPENAI_ENDPOINT
-#os.environ["AZURE_OPENAI_SERVICE_KEY"] = AZURE_OPENAI_SERVICE_KEY
-#os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
+
 
 load_dotenv()
 
-#Environment variables when integrated into the app
-#_________________________________________________________________________
 
-# # Access environment variables
-# azure_openai_service_key = os.getenv("AZURE_OPENAI_SERVICE_KEY")
-# azure_openai_service = os.getenv("AZURE_OPENAI_SERVICE")
 azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
-# openai.api_key = azure_openai_service_key
-# openai.api_base = f"https://{azure_openai_service}.openai.azure.com/"
 deployment_name = azure_openai_chatgpt_deployment
 OPENAI_DEPLOYMENT_NAME = deployment_name
-# openai.api_type = "azure"
-# openai.api_version = "2023-06-01-preview"
-# 
-#______________________________________________________________________________________
 
 
+OPENAI_DEPLOYMENT_NAME =  azure_openai_chatgpt_deployment
 from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
 from langchain.agents import initialize_agent, load_tools
@@ -56,8 +42,7 @@ from langchain.prompts import ChatPromptTemplate
 
 model = AzureChatOpenAI(
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=azure_openai_chatgpt_deployment,
-    streaming=True)      
+    deployment_name=OPENAI_DEPLOYMENT_NAME)      
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools
@@ -124,15 +109,7 @@ tools = [CircumferenceTool()]
 
 tools = load_tools(["llm-math"],  llm=model)
 
-#------------------------------------------------------------------------------------------------------------------------------------------
-# Langchain AzureOpenAI testing
 
-# message = HumanMessage(
-# content="Translate this sentence from English to French. I love programming.")
-# model([message])
-# print(message.content)
-
-#-----------------------------------------------------------------------------------------------------------------------------------------------
 
 # # Initialize the agent
 zero_shot_agent_math = initialize_agent(
@@ -146,47 +123,13 @@ zero_shot_agent_math = initialize_agent(
     return_intermediate_steps=True)
 
 # Prompt template for Zeroshot agent
-# async def stream_agent_responses(question):
-#     for i in range(10):
-#         yield f"data: {i}\n\n"
-#         await asyncio.sleep(1)
-async def stream_agent_responses(question):
-    zero_shot_agent_math = initialize_agent(
-        agent="zero-shot-react-description",
-        tools=tools,
-        llm=model,
-        verbose=True,
-        max_iterations=10,
-        max_execution_time=120,
-        handle_parsing_errors=True,
-    )
-    for chunk in zero_shot_agent_math.stream({"input": question}):
-        if "actions" in chunk:
-            for action in chunk["actions"]:
-                yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
-                yield f'data: I am thinking...: {action.log} \n\n'
-        elif "steps" in chunk:
-            for step in chunk["steps"]:
-                yield f'data: Tool Result: `{step.observation}` \n\n'
-        elif "output" in chunk:
-            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
-            yield output
-            raise StopAsyncIteration()
-        else:
-            raise ValueError()
+
+
+
 
 
 # function to stream agent response 
 def process_agent_scratch_pad( question):
-    zero_shot_agent_math = initialize_agent(
-    agent="zero-shot-react-description",
-    tools=tools,
-    llm=model,
-    verbose=True,
-    max_iterations=10,
-    max_execution_time=120,
-    handle_parsing_errors=True,
-    return_intermediate_steps=True)
     messages = []
     for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:
@@ -204,24 +147,13 @@ def process_agent_scratch_pad( question):
         
 #Function to stream final output       
 def process_agent_response( question):
-    zero_shot_agent_math = initialize_agent(
-    agent="zero-shot-react-description",
-        tools=tools,
-    llm=model,
-    verbose=True,
-    max_iterations=10,
-    max_execution_time=120,
-    handle_parsing_errors=True,
-    return_intermediate_steps=True)
     stream = zero_shot_agent_math.stream({"input": question})
     if stream:
         for chunk in stream:
             if "output" in chunk:
                 output =    f'Final Output: {chunk["output"]}'
     return output
-    # for chunk in zero_shot_agent_math.stream({"input": question}):
-    #     if "output" in chunk:
-    #         yield {"data": f'Final Output: {chunk["output"]}'}
+  
 
 #Function to process clues
 def generate_response(question):

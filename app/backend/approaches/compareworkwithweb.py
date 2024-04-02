@@ -5,19 +5,19 @@ import os
 from typing import Any, Sequence
 import urllib.parse
 import openai
-from approaches.chatbingsearch import ChatBingSearch
+from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
 
 
-class ChatBingSearchCompare(Approach):
+class CompareWorkWithWeb(Approach):
     """
-    Approach class for performing comparative analysis between Bing Search Response and Internal Documents.
+    Approach class for performing comparative analysis between Generative answer responses based on Bing search results vs. work internal document search results.
     """
 
     COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona}. User persona is {userPersona}.
-    Compare and contrast the answers provided below from two sources of data. The first source is internal data indexed using a RAG pattern while the second source is from Bing Chat.
+    Compare and contrast the answers provided below from two sources of data. The first source is Work where internal data is indexed using a RAG pattern while the second source Web where results are from an internet search.
     Only explain the differences between the two sources and nothing else. Do not provide personal opinions or assumptions.
     Only answer in the language {query_term_language}.
     If you cannot find answer in below sources, respond with I am not sure. Do not provide personal opinions or assumptions.
@@ -26,22 +26,28 @@ class ChatBingSearchCompare(Approach):
     """
 
     COMPARATIVE_RESPONSE_PROMPT_FEW_SHOTS = [
-        {"role": Approach.USER ,'content': 'I am looking for comparative information in the Bing Search Response and want to compare against the Internal Documents'},
-        {'role': Approach.ASSISTANT, 'content': 'user is looking to compare information in Bing Search Response against Internal Documents.'}
+        {"role": Approach.USER ,'content': 'I am looking to compare and contrast answers obtained from both Work internal documents and Web search results'},
+        {'role': Approach.ASSISTANT, 'content': 'User wants to compare and contrast responses from both Work internal documents and Web search results.'},
+        {"role": Approach.USER, 'content': "Even if one of the sources doesn't provide a definite answer, I still want to compare and contrast the available information."},
+        {'role': Approach.ASSISTANT, 'content': "User emphasizes the importance of comparing and contrasting data even if one of the sources is uncertain about the answer."}
     ]
-
+    
+    
     citations = {}
 
     def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
         """
-        Initializes the ChatBingSearchCompare approach.
+        Initializes the CompareWorkWithWeb approach.
 
         Args:
             model_name (str): The name of the model to be used for chat-based language model.
             chatgpt_deployment (str): The deployment ID of the chat-based language model.
             query_term_language (str): The language to be used for querying the data.
+            bing_search_endpoint (str): The endpoint for the Bing Search API.
+            bing_search_key (str): The API key for the Bing Search API.
+            bing_safe_search (bool): The flag to enable or disable safe search for the Bing Search API.
         """
-        self.name = "ChatBingSearchCompare"
+        self.name = "CompareWorkWithWeb"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
         self.query_term_language = query_term_language
@@ -62,7 +68,7 @@ class ChatBingSearchCompare(Approach):
             Any: The result of the comparative analysis.
         """
         # Step 1: Call bing Search Approach for a Bing LLM Response and Citations
-        chat_bing_search = ChatBingSearch(self.model_name, self.chatgpt_deployment, self.query_term_language, self.bing_search_endpoint, self.bing_search_key, self.bing_safe_search)
+        chat_bing_search = ChatWebRetrieveRead(self.model_name, self.chatgpt_deployment, self.query_term_language, self.bing_search_endpoint, self.bing_search_key, self.bing_safe_search)
         bing_search_response = await chat_bing_search.run(history, overrides)
         self.citations = bing_search_response.get("citation_lookup")
 
@@ -73,7 +79,7 @@ class ChatBingSearchCompare(Approach):
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
-        bing_compare_query = user_query + "Internal Documents:\n" + rag_answer + "\n\n" + " Bing Search Response:\n" + bing_search_response.get("answer") + "\n\n"
+        bing_compare_query = user_query + "Work internal documents:\n" + rag_answer + "\n\n" + " Web search results:\n" + bing_search_response.get("answer") + "\n\n"
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
@@ -93,9 +99,9 @@ class ChatBingSearchCompare(Approach):
         msg_to_display = '\n\n'.join([str(message) for message in messages])
 
         # Step 3: Final comparative analysis using OpenAI Chat Completion
-        bing_compare_resp = await self.make_chat_completion(messages)
+        compare_resp = await self.make_chat_completion(messages)
 
-        final_response = f"{urllib.parse.unquote(bing_compare_resp)}"
+        final_response = f"{urllib.parse.unquote(compare_resp)}"
 
         # Step 4: Append web citations from the Bing Search approach
         for idx, url in enumerate(self.citations.keys(), start=1):

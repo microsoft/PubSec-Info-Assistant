@@ -11,7 +11,7 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, getCharts, streamCsvData } from "../../api";
+import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh, streamCsvData } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 
@@ -35,8 +35,13 @@ const Tda = ({folderPath, tags}: Props) => {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
+  const [fileu, setFile] = useState<File | null>(null);
 
+  
 
+  const setImages = (newBase64Strings: string[]) => {
+    setBase64Images(newBase64Strings);
+  };
 
 
   const setOtherQ = (selectedQuery: string) => {
@@ -80,20 +85,31 @@ const Tda = ({folderPath, tags}: Props) => {
   
   
   const handleAnswer = async () => {
-      const query = setOtherQ(selectedQuery);
-      setOutput(['']);
-      setLoading(true);
-      const result = await processCsvAgentResponse(query);
-      // setLoading(false);
-      setOutput([result.toString()]);
-      const charts = await getCharts();
-      setImages(charts.map((chart: String) => chart.toString()));
-      // const eventSource = await processAgentResponse(question);
-      // eventSource.onmessage = function(event) {
-      //     console.log(event.data);
-      //     setOutput(event.data);
-
-    // Handle the answer here
+    let lastError;
+    const retries: number = 3;
+    for (let i = 0; i < retries; i++) {
+      try {
+        const query = setOtherQ(selectedQuery);
+        setOutput('');
+        setLoading(true);
+        if (fileu) {
+          const result = await processCsvAgentResponse(query, fileu);
+          setLoading(false);
+          setOutput(result.toString());
+          return;
+        }
+        else {
+          setOutput("no file file has been uploaded.")
+          setLoading(false);
+        }
+      } catch (error) {
+        lastError = error;
+      }
+    }
+  // If the code reaches here, all retries have failed. Handle the error as needed.
+    console.error(lastError);
+    setLoading(false);
+    setOutput('An error occurred.');
   };
 
   // handler called when files are selected via the Dropzone component
@@ -130,39 +146,41 @@ const Tda = ({folderPath, tags}: Props) => {
   // execute the upload operation
   const handleUpload = useCallback(async () => {
     try {
+      setFile(null);
       const data = new FormData();
       console.log("files", files);
       setUploadStarted(true);
-  
-      var counter = 1;
-      files.forEach(async (indexedFile: any) => {
-        var file = indexedFile.file as File;
-
-        Papa.parse(file, {
-          header: true,
-          dynamicTyping: true,
-          complete: async function(results) {
-            data.append("file", file);
-            console.log("Finished:", results.data);
-            // Here, results.data is your dataframe
-            // You can set it in your state like this:
-            setFileUploaded(true);
-            setDataFrame(results.data as object[]);
-            try {
-              const response = await postCsv(file);
-              console.log('Response from server:', response);
-            } catch (error) {
-              console.error('Error posting CSV:', error);
-            }
-          }
-        });
+      files.forEach(async (indexedFile: any) => {  
+          var file = indexedFile.file as File;
+            Papa.parse(file, {
+              header: true,
+              dynamicTyping: true,
+              complete: async function(results) {
+                data.append("file", file);
+                console.log("Finished:", results.data);
+                // Here, results.data is your dataframe
+                // You can set it in your state like this:
+                setDataFrame(results.data as object[]);
+                try {               
+                  const response = await postCsv(file).then((response) => {
+                    setProgress(100);
+                    setFileUploaded(true);
+                    console.log('Response from server:', response);
+                  }).catch((error) => {console.log(error);}); 
+                  
+                } catch (error) {
+                  console.error('Error posting CSV:', error);
+                }
+              }
+            });
+            setFile(file)
       });
     } catch (error) {
-      console.error("Error uploading files: ", error);
+      console.error('Error uploading files: ', error);
     }
   }, [files]);
 
-  // set progress to zero when there are no files
+// set progress to zero when there are no files
   useEffect(() => {
     if (files.length < 1) {
       setProgress(0);
@@ -176,9 +194,15 @@ const Tda = ({folderPath, tags}: Props) => {
     }
   }, [progress]);
 
-  const indexLength = Math.max(...dataFrame.map((_, index) => String(index).length));
-
-
+  let indexLength = 0;
+if (dataFrame.length > 0) {
+  for (let i = 0; i < dataFrame.length; i++) {
+    const length = String(i).length;
+    if (length > indexLength) {
+      indexLength = length;
+    }
+  }
+}
  
 
   const columnLengths: { [key: string]: number } = dataFrame.reduce((lengths: { [key: string]: number }, row: Record<string, any>) => {
@@ -217,9 +241,7 @@ const Tda = ({folderPath, tags}: Props) => {
 
   const uploadComplete = useMemo(() => progress === 100, [progress]);
 
-  const setImages = (newBase64Strings: string[]) => {
-    setBase64Images(newBase64Strings);
-  };
+
   return (<div>
     <div className={cstyle.centeredContainer}>
       <p>Upload a CSV file</p>
@@ -312,6 +334,7 @@ const Tda = ({folderPath, tags}: Props) => {
     <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
+    {loading && <div className="spinner">Loading...</div>}
     { output && (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
@@ -320,14 +343,6 @@ const Tda = ({folderPath, tags}: Props) => {
             <ReactMarkdown key={index} children={item} />
             ))}
         </div>
-        <p>Generated images</p>
-        {base64Images.length > 0 ? (
-      base64Images.map((base64Image, index) => (
-        <img style={{ width: '100%' }} key={index} src={`data:image/png;base64,${base64Image}`} alt={`Chart ${index}`} />
-      ))
-    ) : (
-      <p>No images generated</p>
-    )}
       </div>
     )}
 </div>

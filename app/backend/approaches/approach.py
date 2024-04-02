@@ -11,9 +11,9 @@ class Approaches(Enum):
     ReadRetrieveRead = 1
     ReadDecomposeAsk = 2
     GPTDirect = 3
-    ChatBingSearch = 4
-    ChatBingSearchCompare = 5
-    BingRRRCompare = 6
+    ChatWebRetrieveRead = 4
+    CompareWorkWithWeb = 5
+    CompareWebWithWork = 6
 
 class Approach:
     """

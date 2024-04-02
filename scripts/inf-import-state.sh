@@ -224,7 +224,7 @@ import_resource_if_needed $module_path "$resourceId$providers"
 
 # Retrive the principal id used to identify which roles are matched to this module
 # roles are assigned elswhere in the code, and have an assigned principal id
-# in the user roles module, the porinipal id of the user doing the deployment is used
+# in the user roles module, the principal id of the user doing the deployment is used
 # to work around this identify the principals used in the other modules and
 # and filter role assignments from here that do not match these id's
 principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)

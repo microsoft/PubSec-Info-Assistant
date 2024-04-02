@@ -120,11 +120,11 @@ class CompareWebWithWork(Approach):
                                 )
         rrr_response = await chat_rrr_approach.run(history, overrides)
         
-
+       
         self.citations = rrr_response.get("citation_lookup")
 
         user_query = history[-1].get("user")
-        web_answer = history[1].get("bot")
+        web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)

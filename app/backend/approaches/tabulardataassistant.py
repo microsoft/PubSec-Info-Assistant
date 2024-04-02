@@ -83,16 +83,16 @@ def save_df(dff):
     global dffinal
     dffinal = dff      
 
-def getimgs():
-    global agent_imgs
-    # Flatten the list of lists into a single list
-    cleaned_list = []
-    for img in agent_imgs:
-        cleaned = img.replace('base64 string:', '').replace('end of base 64 string', '')
-        cleaned_list.append(cleaned)
-    # Remove the start and end strings
+# def getimgs():
+#     global agent_imgs
+#     # Flatten the list of lists into a single list
+#     cleaned_list = []
+#     for img in agent_imgs:
+#         cleaned = img.replace('base64 string:', '').replace('end of base 64 string', '')
+#         cleaned_list.append(cleaned)
+#     # Remove the start and end strings
 
-    return cleaned_list
+#     return cleaned_list
 
 def is_base64(s):
     pattern = r'^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$'
@@ -112,10 +112,10 @@ def process_agent_scratch_pad(question, df):
     
     pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
    
-    global agent_imgs
-    agent_imgs = []
-    if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
-        question = save_chart(question)
+    # global agent_imgs
+    # agent_imgs = []
+    # if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
+    #     question = save_chart(question)
     messages = []
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
@@ -169,10 +169,10 @@ def process_agent_response(question):
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
     
     pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
-    global agent_imgs
-    agent_imgs = []
-    if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
-        question = save_chart(question)
+    # global agent_imgs
+    # agent_imgs = []
+    # if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
+    #     question = save_chart(question)
     for chunk in pdagent.stream({"input": question}):
         message = chunk["messages"]
         curr = message[0]

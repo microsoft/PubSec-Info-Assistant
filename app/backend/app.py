@@ -286,7 +286,11 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("history", []), json_body.get("citation_lookup"), json_body.get("overrides", {}))
+        
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            r = await impl.run(json_body.get("history", []), json_body.get("citation_lookup"), json_body.get("overrides", {}))
+        else:
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
        
         response = {
                 "data_points": r["data_points"],

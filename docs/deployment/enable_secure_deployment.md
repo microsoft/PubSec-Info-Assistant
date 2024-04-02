@@ -3,9 +3,9 @@
 ## Overview
 
 > [!IMPORTANT]  
-> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Secure deployment is not supported when using existing Azure OpenAI Service.
+> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication between your enterprise and Microsoft cloud services using private, dedicated links improving security and reliability. Note: Secure deployment is not supported when using existing Azure OpenAI Services.
 
-A secure deployment of the Information Assistant is essential when heightened levels of infrastructure security are necessary. It should be enabled for all production systems. Key features of a secure deployment include:
+A secure deployment of the Information Assistant is essential when heightened levels of infrastructure security are necessary. Secure mode should be enabled for all production systems. Key features of a secure deployment include:
 
 * __Disabling Public Network Access__: Restrict external access to safeguard sensitive data.
 * __Virtual Network Protection__: Shield your system within a secure virtual network.
@@ -20,11 +20,11 @@ High level architecture diagram:
 
 ![Secure deployment - High level architecture](../images/secure-deploy-high-level-architecture.png)
 
-A more detailed architecture diagram shows the Information Assistant deployment in a tenant, subscription and resource group illustrating component interaction:
+A more detailed architecture diagram shows the Information Assistant deployment in a single resource group within a subscription in your tenant and illustrates user interaction with underlying services:
 
 ![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
 
-IIf your enterprise lacks a secure communication channel between your on-premises environment and the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN). This will allow you to enable access to the Information Assistant for demonstration purposes. To implement this approach, you’ll need to add a VPN Gateway to the Information Assistant infrastructure.
+If your enterprise lacks a secure communication channel between your on-premises environment and the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN). This will allow you to enable access to the Information Assistant for demonstration purposes. To implement this approach, you’ll need to add a VPN Gateway to the Information Assistant infrastructure.
 
 More information on [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support)
 
@@ -38,14 +38,7 @@ For more complex scenarios, explore [Azure Front Door](https://learn.microsoft.c
 
 ## Front end
 
-The following diagram shows the end user's interaction with Information Assistant and the subsequent front-end application's orchestration of the user's workflow. The front-end uses VNET integration to connect to the private network then uses private DNS zones are to connect to the appropriate services such as:
-
-* Azure Storage Account, blob storage to upload files
-* Azure OpenAI to submit prompts
-* Azure AI Search to discovery content from uploaded files
-* Cosmos database to view the status of uploaded files
-
-The diagram below illustrates the end user’s interaction with the Information Assistant and the subsequent orchestration of their workflow by the front-end application. The front-end leverages VNET integration to connect to the private network and utilizes private DNS zones to establish connections with the following services:
+When secure mode is enabled a private network is created called a virtual network. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data. The diagram below shows an end user's interaction with Information Assistant and the subsequent front-end application's orchestration of the user's workflow. The front-end uses virtual network integration to connect to the private network and private DNS zones to connect to the appropriate services such as:
 
 * __Azure Storage Account (Blob Storage)__: Used for file uploads.
 * __Azure OpenAI__: Enables prompt submissions.
@@ -56,7 +49,7 @@ The diagram below illustrates the end user’s interaction with the Information 
 
 ## Back end
 
-Back-end processing takes care of private file uploads, document extraction and enrichment leveraging AI Services as illustrated in the following diagram:
+Back-end processing handles uploading your private data, document extraction and enrichment leveraging AI Services as illustrated in the following diagram:
 
 ![Secure Deploy - Function Architecture](../images/secure-deploy-function-architecture.png)
 
@@ -77,7 +70,7 @@ To enable a Secure Deployment, update your local.env file as described below:
 
 ## Additional Considerations for Secure Deployment
 
-The secure deployment defines vNet and subnet IP Addresses along with the corresponding CIDRs. The IP configurations are made available as Terraform parameters. If you need to update the vNet or subnet IP Addresses or Classess Inter-Domain Routing (CIDR) to avoid conflicts with your existing network(s), use the following variables in your `scripts/environments/local.env` file (*values shown are default values*)
+The secure deployment defines a virtual network and multiple subnets, one for each service improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classess Inter-Domain Routing (CIDR)s are made available as Terraform parameters. Update the virtual network IP Addresses or CIDRs to avoid conflicts with your existing network(s), using the following variables in your `scripts/environments/local.env` file (*values shown are default values*)
 
 ```bash
 export TF_VAR_virtual_network_CIDR="10.0.0.0/21"

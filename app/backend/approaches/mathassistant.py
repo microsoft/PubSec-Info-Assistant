@@ -22,29 +22,16 @@ AZURE_OPENAI_SERVICE_KEY = ' '
 
 os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
 os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
-#os.environ["OPENAI_API_BASE"] = OPENAI_API_BASE
-#os.environ["AZURE_OPENAI_ENDPOINT"] = AZURE_OPENAI_ENDPOINT
-#os.environ["AZURE_OPENAI_SERVICE_KEY"] = AZURE_OPENAI_SERVICE_KEY
-#os.environ["OPENAI_DEPLOYMENT_NAME"] = OPENAI_DEPLOYMENT_NAME
+
 
 load_dotenv()
 
-#Environment variables when integrated into the app
-#_________________________________________________________________________
 
-# # Access environment variables
-# azure_openai_service_key = os.getenv("AZURE_OPENAI_SERVICE_KEY")
-# azure_openai_service = os.getenv("AZURE_OPENAI_SERVICE")
 azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
-# openai.api_key = azure_openai_service_key
-# openai.api_base = f"https://{azure_openai_service}.openai.azure.com/"
 deployment_name = azure_openai_chatgpt_deployment
+OPENAI_DEPLOYMENT_NAME = deployment_name
 
-# openai.api_type = "azure"
-# openai.api_version = "2023-06-01-preview"
-# 
-#______________________________________________________________________________________
 
 OPENAI_DEPLOYMENT_NAME =  azure_openai_chatgpt_deployment
 from langchain.chat_models import AzureChatOpenAI
@@ -122,15 +109,7 @@ tools = [CircumferenceTool()]
 
 tools = load_tools(["llm-math"],  llm=model)
 
-#------------------------------------------------------------------------------------------------------------------------------------------
-# Langchain AzureOpenAI testing
 
-# message = HumanMessage(
-# content="Translate this sentence from English to French. I love programming.")
-# model([message])
-# print(message.content)
-
-#-----------------------------------------------------------------------------------------------------------------------------------------------
 
 # # Initialize the agent
 zero_shot_agent_math = initialize_agent(
@@ -145,7 +124,7 @@ zero_shot_agent_math = initialize_agent(
 
 # Prompt template for Zeroshot agent
 
-# print(zero_shot_agent_math.agent.llm_chain.prompt.template)
+
 
 
 
@@ -155,11 +134,11 @@ def process_agent_scratch_pad( question):
     for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
-                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
-                messages.append(f'I am thinking...: {action.log}')
+                messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
+                messages.append(f'I am thinking...: {action.log} \n')
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                messages.append(f"Tool Result: `{step.observation}`")                               
+                messages.append(f"Tool Result: `{step.observation}`\n")                               
         elif "output" in chunk:
             messages.append(f'Final Output: {chunk["output"]}')
         else:
@@ -169,7 +148,6 @@ def process_agent_scratch_pad( question):
 #Function to stream final output       
 def process_agent_response( question):
     stream = zero_shot_agent_math.stream({"input": question})
-    output = "No output"
     if stream:
         for chunk in stream:
             if "output" in chunk:

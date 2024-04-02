@@ -360,14 +360,14 @@ if (dataFrame.length > 0) {
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
         <ReactMarkdown>{output}</ReactMarkdown>
-        {/*<p>Generated images</p>
-        {base64Images.length > 0 ? (
+        <p>Generated images</p>
+        {/*{base64Images.length > 0 ? (
       base64Images.map((base64Image, index) => (
         <img style={{ width: '100%' }} key={index} src={`data:image/png;base64,${base64Image}`} alt={`Chart ${index}`} />
-      ))*/}
+      ))
     ) : (
       <p>No images generated</p>
-    )}
+    )}*/}
       </div>
     )}
 </div>

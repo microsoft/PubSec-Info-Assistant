@@ -319,7 +319,7 @@ echo "$output" | jq -c '.[]' | while read -r line; do
 done
 
 
-# IDentity Roles
+# System Identity Roles
 echo
 figlet "System Identity Roles"
 

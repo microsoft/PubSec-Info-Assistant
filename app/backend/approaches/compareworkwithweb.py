@@ -56,7 +56,7 @@ class CompareWorkWithWeb(Approach):
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], citation_lookup: dict[str, Any], overrides: dict[str, Any]) -> Any:
         """
         Runs the comparative analysis between Bing Search Response and Internal Documents.
 
@@ -111,7 +111,8 @@ class CompareWorkWithWeb(Approach):
             "data_points": None,
             "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "citation_lookup": self.citations,
+            "compare_citation_lookup": citation_lookup
         }
 
     async def make_chat_completion(self, messages):

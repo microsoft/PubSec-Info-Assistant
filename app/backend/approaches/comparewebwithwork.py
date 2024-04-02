@@ -124,7 +124,7 @@ class CompareWebWithWork(Approach):
         self.web_citations = rrr_response.get("citation_lookup")
 
         user_query = history[-1].get("user")
-        web_answer = next((obj['bot'] for obj in history if 'bot' in obj), None)
+        web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj))
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
@@ -164,7 +164,6 @@ class CompareWebWithWork(Approach):
             "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
             "citation_lookup": self.web_citations,
-
             "compare_citation_lookup": citation_lookup
         }
     

@@ -31,7 +31,7 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from approaches.MathTutor import(
+from approaches.mathassistant import(
     generate_response,
     process_agent_scratch_pad,
     process_agent_response

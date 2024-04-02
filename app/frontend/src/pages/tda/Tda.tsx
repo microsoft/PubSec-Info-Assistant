@@ -69,8 +69,6 @@ const Tda = ({folderPath, tags}: Props) => {
           });
           setLoading(false);
           setOutput(outputString);
-          // const charts = await getCharts();
-          // setImages(charts.map((chart: String) => chart.toString()));
           return;  // If everything is successful, return from the function
         } else {
           setOutput("no file has been uploaded.")
@@ -115,8 +113,6 @@ const Tda = ({folderPath, tags}: Props) => {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
           setOutput(result.toString());
-          // const charts = await getCharts();
-          // setImages(charts.map((chart: String) => chart.toString()));
           return;
         }
         else {
@@ -360,14 +356,6 @@ if (dataFrame.length > 0) {
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
         <ReactMarkdown>{output}</ReactMarkdown>
-        <p>Generated images</p>
-        {/*{base64Images.length > 0 ? (
-      base64Images.map((base64Image, index) => (
-        <img style={{ width: '100%' }} key={index} src={`data:image/png;base64,${base64Image}`} alt={`Chart ${index}`} />
-      ))
-    ) : (
-      <p>No images generated</p>
-    )}*/}
       </div>
     )}
 </div>

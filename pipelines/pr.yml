@@ -12,6 +12,7 @@ pr:
     exclude: 
       - docs/*
       - "*.md"
+      - "app/frontend/version.json"
   drafts: false
 
 stages:

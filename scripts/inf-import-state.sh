@@ -295,9 +295,9 @@ selected_roles=("CognitiveServicesOpenAIUser" "StorageBlobDataReader" "StorageBl
 
 # Retrieve the principal id used to identify which roles are matched to this module
 # roles are assigned elswhere in the code, and have an assigned principal id
-# in the user roles module, the porinipal id of the user doing teh deployment is used
+# in the user roles module, the principal id of the user doing the deployment is used
 # to work around this identify the principals used in the other modules and
-# and filter role assignments from here that do not match these id's
+# and filter role assignments from here so that do not match these id's
 principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
 
 # Loop through each role assignment in the output and import
@@ -317,6 +317,33 @@ echo "$output" | jq -c '.[]' | while read -r line; do
         fi
     fi  
 done
+
+
+# IDentity Roles
+echo
+figlet "System Identity Roles"
+
+
+/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Authorization/roleAssignments/00000000-0000-0000-0000-000000000000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Key Vault

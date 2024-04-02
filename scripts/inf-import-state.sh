@@ -27,32 +27,32 @@ figlet Import Terraform State
 # Set text color to yellow
 set_yellow_text
 
-# # Display the notice
-# echo "IMPORTANT NOTICE:"
-# echo "Please read the following terms carefully. You must accept the terms to proceed."
-# echo
-# echo "This script will import the existing resources into the Terraform state."
-# echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
-# echo "of the accelerator while maintaining your existing resources and processed data."
-# echo
-# echo "If you have modified the infrastructure base this process will fail."
-# echo "The simplest approach to deploy the latest version would be to perform"
-# echo "a new deployment on a new resource group and reprocess your data"
+# Display the notice
+echo "IMPORTANT NOTICE:"
+echo "Please read the following terms carefully. You must accept the terms to proceed."
+echo
+echo "This script will import the existing resources into the Terraform state."
+echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
+echo "of the accelerator while maintaining your existing resources and processed data."
+echo
+echo "If you have modified the infrastructure base this process will fail."
+echo "The simplest approach to deploy the latest version would be to perform"
+echo "a new deployment on a new resource group and reprocess your data"
 
-# # Reset text color for input prompt
-# reset_text_color
-# echo
-# echo "Do you accept these terms? (yes/no)"
+# Reset text color for input prompt
+reset_text_color
+echo
+echo "Do you accept these terms? (yes/no)"
 
-# # Wait for the user's input
-# while true; do
-#     read -rp "Type 'yes' to accept: " answer
-#     case $answer in
-#         [Yy]* ) break;;
-#         [Nn]* ) echo "You did not accept the terms. Exiting."; exit 1;;
-#         * ) echo "Please answer yes or no.";;
-#     esac
-# done
+# Wait for the user's input
+while true; do
+    read -rp "Type 'yes' to accept: " answer
+    case $answer in
+        [Yy]* ) break;;
+        [Nn]* ) echo "You did not accept the terms. Exiting."; exit 1;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
 
 # Continue with the script after acceptance
 echo "You have accepted the terms. Proceeding with the script..."
@@ -178,18 +178,10 @@ import_resource_if_needed $module_path "/applications/$webAccessApp_id"
 # "azuread_application_password" "aad_mgmt_app_password"
 # *************************************************************
 
-# sp_name="infoasst_mgmt_access_$random_text"
-# sp_id=$(az ad sp list --display-name $sp_name --query "[].appId" --output tsv)
-
-
-
-# module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
-# import_resource_if_needed $module_path "$sp_id"
-
-# exit 0
-
-
-
+sp_name="infoasst_mgmt_access_$random_text"
+sp_id=$(az ad sp list --display-name $sp_name --query "[].id" --output tsv)
+module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
+import_resource_if_needed $module_path "$sp_id"
 
 
 # OpenAI Services
@@ -215,16 +207,6 @@ if [[ $serviceExists == $name ]]; then
 else
     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
 fi
-
-
-# Monitor
-echo
-figlet "Monitor"
-name="infoasst-lw--$random_text"
-workbook_name=$(az resource list --resource-group $TF_VAR_resource_group_name --resource-type "Microsoft.Insights/workbooks" --query "[?type=='Microsoft.Insights/workbooks'].name | [0]" -o tsv)
-providers="/providers/Microsoft.Insights/workbooks/$workbook_name"
-module_path="module.azMonitor.azurerm_application_insights_workbook.example"
-import_resource_if_needed $module_path "$resourceId$providers"
 
 
 # Video Indexer
@@ -290,7 +272,7 @@ module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_ke
 import_resource_if_needed "$module_path" "$secret_id"
 
 
-# # Logging
+# Logging
 echo
 figlet "Logging"
 name="infoasst-ai-$random_text"
@@ -353,7 +335,7 @@ import_resource_if_needed "$module_path" "$secret_id"
 # Functions
 echo
 figlet "Functions"
-appServicePlanName="infoasst-func-asp-$random_text-Autoscale"
+appServicePlanName="infoasst-func-asp-$random_text"
 providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
 module_path="module.functions.azurerm_service_plan.funcServicePlan"
 import_resource_if_needed "$module_path" "$resourceId$providers"

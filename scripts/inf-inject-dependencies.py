@@ -6,16 +6,36 @@
 
 import json
 import os
-import sys
+from pyfiglet import Figlet
+
+f = Figlet()
+print(f.renderText('Inject Dependencies'))
+print()
+print('This script updates the imported terraform state file with required')
+print('values that are not suppported or possible with the terraform import command.')
+print()
+
+with open('infra_output.json', 'r') as file:
+    data = json.load(file)
+    rg_name = str(data['properties']['outputs']['resourcE_GROUP_NAME']['value'])
+    random_text = str(data['properties']['parameters']['randomString']['value'])   
+    print(f"random text suffix: {random_text}")
+    print(f"Resource Group Name: {rg_name}")  
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
-state_file_path = "../infra/terraform.tfstate.d/geearl-1973-v1.0/terraform.tfstate"
+workspace = rg_name.replace("infoasst-", "")
+state_file_path = f"../infra/terraform.tfstate.d/{workspace}/terraform.tfstate"
 state_file_path = os.path.abspath(os.path.join(script_dir, state_file_path))
-dependencide_file_path = script_dir
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+dependencies_file_path = "tf-dependencies.json"
+dependencies_file_path = os.path.abspath(os.path.join(script_dir, dependencies_file_path))
 
 
 # **********************************************************
 # Update the random text resource with required values
+
+print("Opening the state file... ", state_file_path)
 
 with open(state_file_path, 'r') as file:
     data = json.load(file)
@@ -80,7 +100,7 @@ with open(state_file_path, 'w') as f:
     
 # **********************************************************
 
-
+print('Done')
 
 #*************************************************************************************************
 # Below is a sample script to extract dependencies from the Terraform state file using jq

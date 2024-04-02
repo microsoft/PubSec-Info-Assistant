@@ -16,38 +16,7 @@ steps:
   clean: true
   persistCredentials: true
 
-- bash: |
-    docker login $(CONTAINER_REGISTRY_ADDRESS) -u $(CLIENT_ID) -p $(CLIENT_SECRET)
-    docker pull $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
-  displayName: Pull latest dev container from container registry for layer caching
-  continueOnError: true # for first build, no cache
-
-- bash: |
-    set -e
-    docker build '$(Build.SourcesDirectory)/.devcontainer' \
-      -t 'info-asst-devcontainer:$(Build.BuildId)' \
-      -t 'info-asst-devcontainer:latest' \
-      -f '$(Build.SourcesDirectory)/.devcontainer/Dockerfile' \
-      --cache-from $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest \
-      --build-arg BUILDKIT_INLINE_CACHE=1 \
-      --build-arg USER_UID=$(id -u) \
-      --build-arg USER_GID=$(id -g)
-  displayName: Build dev container Docker Image
-
-- bash: |
-    set -e
-    docker image tag info-asst-devcontainer:latest $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
-    docker image push $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
-  displayName: Push latest dev container image to container registry
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/vNext-Dev')))
-
-
-- template: make-command.yml
-  parameters:
-    displayName: 'Dev container take ownership of Directory'
-    makeCommand: 'take-dir-ownership'
-
-  - task: PowerShell@2
+- task: PowerShell@2
   displayName: 'Create version.json'
   inputs:
     targetType: 'inline'
@@ -82,6 +51,37 @@ steps:
     git commit -m "Add versioning file from pipeline"
     git push origin $branchName
   displayName: 'Commit and Push versioning file'
+
+- bash: |
+    docker login $(CONTAINER_REGISTRY_ADDRESS) -u $(CLIENT_ID) -p $(CLIENT_SECRET)
+    docker pull $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
+  displayName: Pull latest dev container from container registry for layer caching
+  continueOnError: true # for first build, no cache
+
+- bash: |
+    set -e
+    docker build '$(Build.SourcesDirectory)/.devcontainer' \
+      -t 'info-asst-devcontainer:$(Build.BuildId)' \
+      -t 'info-asst-devcontainer:latest' \
+      -f '$(Build.SourcesDirectory)/.devcontainer/Dockerfile' \
+      --cache-from $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      --build-arg USER_UID=$(id -u) \
+      --build-arg USER_GID=$(id -g)
+  displayName: Build dev container Docker Image
+
+- bash: |
+    set -e
+    docker image tag info-asst-devcontainer:latest $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
+    docker image push $(CONTAINER_REGISTRY_ADDRESS)/info-asst-devcontainer:latest
+  displayName: Push latest dev container image to container registry
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/vNext-Dev')))
+
+
+- template: make-command.yml
+  parameters:
+    displayName: 'Dev container take ownership of Directory'
+    makeCommand: 'take-dir-ownership'
 
 - template: make-command.yml
   parameters:

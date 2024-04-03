@@ -25,7 +25,7 @@ module "entraObjects" {
   isInAutomation                    = var.isInAutomation
   requireWebsiteSecurityMembership  = var.requireWebsiteSecurityMembership
   randomString                      = random_string.random.result
-  azure_websites_domain                      = var.azure_websites_domain
+  azure_websites_domain             = var.azure_websites_domain
   aadWebClientId                    = var.aadWebClientId
   aadMgmtClientId                   = var.aadMgmtClientId
   aadMgmtServicePrincipalId         = var.aadMgmtServicePrincipalId

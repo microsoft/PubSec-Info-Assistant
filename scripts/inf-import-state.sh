@@ -146,6 +146,20 @@ module_path="random_string.random"
 import_resource_if_needed $module_path $random_text
 
 
+# Logging
+echo
+figlet "Logging"
+name="infoasst-la-$random_text"
+providers="/providers/Microsoft.OperationalInsights/workspaces/$name"
+module_path="module.logging.azurerm_log_analytics_workspace.logAnalytics"
+import_resource_if_needed $module_path "$resourceId$providers"
+
+name="infoasst-ai-$random_text"
+providers="/providers/Microsoft.Insights/components/$name"
+module_path="module.logging.azurerm_application_insights.applicationInsights"
+import_resource_if_needed $module_path "$resourceId$providers"
+
+
 # OpenAI Services
 echo
 figlet "OpenAI Services"
@@ -488,7 +502,6 @@ import_resource_if_needed "$module_path" "$resourceId$providers"
 secret_id=$(get_secret "COSMOSDB-KEY")
 module_path="module.cosmosdb.azurerm_key_vault_secret.cosmos_db_key"
 import_resource_if_needed "$module_path" "$secret_id"
-
 
 
 # Search Service

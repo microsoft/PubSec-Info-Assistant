@@ -288,21 +288,18 @@ async def chat(request: Request):
             return {"error": "unknown approach"}, 400
         
         if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = await impl.run(json_body.get("history", []), json_body.get("citation_lookup"), json_body.get("overrides", {}))
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}))
         else:
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {})
        
         response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
-                "citation_lookup": r["citation_lookup"],
+                "work_citation_lookup": r["work_citation_lookup"],
+                "web_citation_lookup": r["web_citation_lookup"]
         }
 
-        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            response["compare_citation_lookup"] = r["compare_citation_lookup"]
-
-        # To fix citation bug,below code is added.aparmar
         return response
 
     except Exception as ex:

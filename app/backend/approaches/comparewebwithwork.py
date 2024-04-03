@@ -38,7 +38,7 @@ class CompareWebWithWork(Approach):
         {'role': Approach.ASSISTANT, 'content': "User emphasizes the importance of comparing and contrasting data even if one of the sources is uncertain about the answer."}
     ]
     
-    web_citations = {}
+    work_citations = {}
 
     def __init__(
         self,
@@ -85,7 +85,7 @@ class CompareWebWithWork(Approach):
         self.azure_ai_translation_domain = azure_ai_translation_domain
         self.use_semantic_reranker = use_semantic_reranker
 
-    async def run(self, history: Sequence[dict[str, str]], citation_lookup: dict[str, Any], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], web_citation_lookup: dict[str, Any]) -> Any:
         """
         Runs the approach to compare and contrast answers from internal data and Web Search results.
 
@@ -118,10 +118,10 @@ class CompareWebWithWork(Approach):
                                     self.azure_ai_translation_domain,
                                     self.use_semantic_reranker
                                 )
-        rrr_response = await chat_rrr_approach.run(history, overrides)
+        rrr_response = await chat_rrr_approach.run(history, overrides, {})
         
 
-        self.web_citations = rrr_response.get("citation_lookup")
+        self.work_citations = rrr_response.get("work_citation_lookup")
 
         user_query = history[-1].get("user")
         web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj))
@@ -155,7 +155,7 @@ class CompareWebWithWork(Approach):
         final_response = f"{urllib.parse.unquote(bing_compare_resp)}"
 
         # Step 4: Append web citations from the Bing Search approach
-        for idx, url in enumerate(self.web_citations.keys(), start=1):
+        for idx, url in enumerate(self.work_citations.keys(), start=1):
             final_response += f" [File{idx}]"
 
         
@@ -163,8 +163,8 @@ class CompareWebWithWork(Approach):
             "data_points": None,
             "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.web_citations,
-            "compare_citation_lookup": citation_lookup
+            "work_citation_lookup": self.work_citations,
+            "web_citation_lookup": web_citation_lookup
         }
     
     async def make_chat_completion(self, messages) -> str:

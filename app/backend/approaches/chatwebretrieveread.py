@@ -74,7 +74,7 @@ class ChatWebRetrieveRead(Approach):
         self.bing_safe_search = bing_safe_search
         
 
-    async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
         """
         Runs the approach to simulate experience with Bing Chat.
 
@@ -140,7 +140,8 @@ class ChatWebRetrieveRead(Approach):
             "data_points": None,
             "answer": f"{urllib.parse.unquote(resp)}",
             "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "work_citation_lookup": {},
+            "web_citation_lookup": self.citations
         }
     
 

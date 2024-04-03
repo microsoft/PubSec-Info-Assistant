@@ -425,6 +425,9 @@ appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appN
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.backend.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
+providers="/providers/Microsoft.Web/sites/$appName|$appName"
+module_path="module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs"
+import_resource_if_needed "$module_path" "$resourceId$providers"
 
 
 # Enrichment App
@@ -443,6 +446,11 @@ appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appN
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.enrichmentApp.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
+providers="/providers/Microsoft.Web/sites/$appName|$appName"
+module_path="module.backend.azurerm_monitor_diagnostic_setting.diagnostic_logs"
+import_resource_if_needed "$module_path" "$resourceId$providers"
+
+
 
 
 # Storage 

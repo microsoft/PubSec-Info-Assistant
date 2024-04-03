@@ -39,9 +39,6 @@ const Tda = ({folderPath, tags}: Props) => {
 
   
 
-  const setImages = (newBase64Strings: string[]) => {
-    setBase64Images(newBase64Strings);
-  };
 
 
   const setOtherQ = (selectedQuery: string) => {
@@ -61,12 +58,15 @@ const Tda = ({folderPath, tags}: Props) => {
       if (eventSource) {
         eventSource.close();
       }
-      const newEventSource = streamCsvData(query, (data) => {
+      if (fileu) {
+      const newEventSource = streamCsvData(query, fileu, (data) => {
         setOutput((prevOutput) => [...prevOutput, data]);
       });
       setEventSource(newEventSource);
-      const charts = await getCharts();
-      setImages(charts.map((chart: String) => chart.toString()));
+    } else {
+      setOutput(["no file file has been uploaded."])
+      setLoading(false);
+    }
     } catch (error) {
         console.log(error);
     } finally {+
@@ -90,16 +90,16 @@ const Tda = ({folderPath, tags}: Props) => {
     for (let i = 0; i < retries; i++) {
       try {
         const query = setOtherQ(selectedQuery);
-        setOutput('');
+        setOutput(['']);
         setLoading(true);
         if (fileu) {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
-          setOutput(result.toString());
+          setOutput([result.toString()]);
           return;
         }
         else {
-          setOutput("no file file has been uploaded.")
+          setOutput(["no file file has been uploaded."])
           setLoading(false);
         }
       } catch (error) {
@@ -109,7 +109,7 @@ const Tda = ({folderPath, tags}: Props) => {
   // If the code reaches here, all retries have failed. Handle the error as needed.
     console.error(lastError);
     setLoading(false);
-    setOutput('An error occurred.');
+    setOutput(['An error occurred.']);
   };
 
   // handler called when files are selected via the Dropzone component

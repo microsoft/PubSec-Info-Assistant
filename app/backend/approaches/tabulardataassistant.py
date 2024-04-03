@@ -121,7 +121,7 @@ def process_agent_scratch_pad(question, df):
             output = re.sub(pattern, '', output)
             output = re.sub(r'string:[^\s]*', '', output)
             yield output
-            raise StopAsyncIteration()
+            return
         else:
             raise ValueError()
         

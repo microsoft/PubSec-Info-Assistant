@@ -5,6 +5,7 @@ from typing import Optional
 import asyncio
 #from sse_starlette.sse import EventSourceResponse
 #from starlette.responses import StreamingResponse
+from starlette.responses import Response
 import logging
 import os
 import json
@@ -765,11 +766,18 @@ async def getSolve(question: Optional[str] = None):
 
 @app.get("/stream")
 async def stream_response(question: str):
-    return StreamingResponse(stream_agent_responses(question), media_type="text/event-stream")
+    try:
+        stream = stream_agent_responses(question)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 @app.get("/csvstream")
 async def csv_stream_response(question: str):
-    return StreamingResponse(csv_agent_scratch_pad(question), media_type="text/event-stream")
+    save_df(dffinal)
+    stream = csv_agent_scratch_pad(question, dffinal)
+    return StreamingResponse(stream, media_type="text/event-stream")
 
 
 

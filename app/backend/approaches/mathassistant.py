@@ -145,7 +145,8 @@ async def stream_agent_responses(question):
         elif "output" in chunk:
             output =   f'data: Final Output: `{chunk["output"]}`\n\n'
             yield output
-            raise StopAsyncIteration()
+            yield (f'data: Stream ended')
+            return
         else:
             raise ValueError()
 

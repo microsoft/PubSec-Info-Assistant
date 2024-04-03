@@ -62,7 +62,9 @@ const Tutor = () => {
           eventSource.close();
         }
         const newEventSource = streamData(mathProblem, (data) => {
-          setOutput((prevOutput) => [...prevOutput, data]);
+            setLoading(false);  
+            setOutput((prevOutput) => [...prevOutput, data]);
+
         });
         setEventSource(newEventSource);
       };

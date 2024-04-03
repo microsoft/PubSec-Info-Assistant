@@ -254,16 +254,25 @@ export function streamData(question: string, onMessage: (data: string) => void):
 
     eventSource.onmessage = (event) => {
         onMessage(event.data);
+
+        // Add your condition here
+        if (event.data.includes("Final Output")) {
+            eventSource.close();
+        }
     };
 
     return eventSource;
 }
-export function streamCsvData(question: string, onMessage: (data: string) => void): EventSource {
+export function streamCsvData(question: string, file: File, onMessage: (data: string) => void): EventSource {
+
     const encodedQuestion = encodeURIComponent(question);
     const eventSource = new EventSource(`/csvstream?question=${encodedQuestion}`);
 
     eventSource.onmessage = (event) => {
         onMessage(event.data);
+        if (event.data.includes("Final Output")) {
+            eventSource.close();
+        }
     };
 
     return eventSource;

@@ -207,11 +207,11 @@ import_resource_if_needed "$module_path" "$secret_id"
 
 # AZ Monitor
 # This is not deployed as part of 1.0, but in case ininital upgrade fails, we need to import it
-echo
-figlet "Az Monitor"
-providers="/providers/Microsoft.Insights/workbooks/85b3e8bb-fc93-40be-83f2-98f6bec18ba0"
-module_path="module.azMonitor.azurerm_application_insights_workbook.example"
-import_resource_if_needed $module_path "$resourceId$providers"
+# echo
+# figlet "Az Monitor"
+# providers="/providers/Microsoft.Insights/workbooks/85b3e8bb-fc93-40be-83f2-98f6bec18ba0"
+# module_path="module.azMonitor.azurerm_application_insights_workbook.example"
+# import_resource_if_needed $module_path "$resourceId$providers"
 
 
 
@@ -324,19 +324,19 @@ module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
 import_resource_if_needed $module_path "$sp_id"
 
 
-# Video Indexer
-echo
-figlet "Video Indexer"
-# Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
-# changes in the service in azure.
-name="infoasststoremedia$random_text"
-providers="/providers/Microsoft.Storage/storageAccounts/$name"
-module_path="module.video_indexer.azurerm_storage_account.media_storage"
-import_resource_if_needed $module_path "$resourceId$providers"
-name="infoasst-ua-ident-$random_text"
-providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
-import_resource_if_needed $module_path "$resourceId$providers"
+# # Video Indexer
+# echo
+# figlet "Video Indexer"
+# # Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
+# # changes in the service in azure.
+# name="infoasststoremedia$random_text"
+# providers="/providers/Microsoft.Storage/storageAccounts/$name"
+# module_path="module.video_indexer.azurerm_storage_account.media_storage"
+# import_resource_if_needed $module_path "$resourceId$providers"
+# name="infoasst-ua-ident-$random_text"
+# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
+# module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
+# import_resource_if_needed $module_path "$resourceId$providers"
 
 
 # Form Recognizer
@@ -424,9 +424,6 @@ keyVaultId="infoasst-kv-$random_text"
 appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appName'].id | [0]" --all --output tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.backend.azurerm_key_vault_access_policy.policy"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-module_path="module.backend.azurerm_monitor_autoscale_setting.scaleout" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
 
 

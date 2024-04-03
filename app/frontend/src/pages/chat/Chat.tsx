@@ -51,6 +51,8 @@ const Chat = () => {
     const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | undefined>(undefined);
 
     const lastQuestionRef = useRef<string>("");
+    const lastQuestionWorkCitationRef = useRef<{ [key: string]: { citation: string; source_path: string; page_number: string } }>({});
+    const lastQuestionWebCitiationRef = useRef<{ [key: string]: { citation: string; source_path: string; page_number: string } }>({});
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -76,8 +78,12 @@ const Chat = () => {
         }
     }
 
-    const makeApiRequest = async (question: string, approach: Approaches) => {
+    const makeApiRequest = async (question: string, approach: Approaches, 
+                                work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } },
+                                web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } }) => {
         lastQuestionRef.current = question;
+        lastQuestionWorkCitationRef.current = work_citation_lookup;
+        lastQuestionWebCitiationRef.current = web_citation_lookup;
         setActiveApproach(approach);
 
         error && setError(undefined);
@@ -104,7 +110,8 @@ const Chat = () => {
                     responseTemp: responseTemp,
                     selectedFolders: selectedFolders.includes("selectAll") ? "All" : selectedFolders.length == 0 ? "All" : selectedFolders.join(","),
                     selectedTags: selectedTags.map(tag => tag.name).join(",")
-                }
+                },
+                citation_lookup: approach == Approaches.CompareWebWithWork ? web_citation_lookup : approach == Approaches.CompareWorkWithWeb ? work_citation_lookup : {}
             };
             const result = await chatApi(request);
             result.approach = approach;
@@ -118,6 +125,8 @@ const Chat = () => {
 
     const clearChat = () => {
         lastQuestionRef.current = "";
+        lastQuestionWorkCitationRef.current = {};
+        lastQuestionWebCitiationRef.current = {};
         error && setError(undefined);
         setActiveCitation(undefined);
         setActiveAnalysisPanelTab(undefined);
@@ -242,7 +251,7 @@ const Chat = () => {
     };
 
     const onExampleClicked = (example: string) => {
-        makeApiRequest(example, defaultApproach);
+        makeApiRequest(example, defaultApproach, {}, {});
     };
 
     const onShowCitation = (citation: string, citationSourceFile: string, citationSourceFilePageNumber: string, index: number) => {
@@ -338,14 +347,14 @@ const Chat = () => {
                                             onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
                                             onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab, index)}
                                             onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
-                                            onFollowupQuestionClicked={q => makeApiRequest(q, answer[1].approach)}
+                                            onFollowupQuestionClicked={q => makeApiRequest(q, answer[1].approach, answer[1].work_citation_lookup, answer[1].web_citation_lookup)}
                                             showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
                                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                                            onRegenerateClick={() => makeApiRequest(answers[index][0], answer[1].approach)}
-                                            onWebSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ChatWebRetrieveRead)}
-                                            onWebCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWorkWithWeb)}
-                                            onRagCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWebWithWork)}
-                                            onRagSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ReadRetrieveRead)}
+                                            onRegenerateClick={() => makeApiRequest(answers[index][0], answer[1].approach, answer[1].work_citation_lookup, answer[1].web_citation_lookup)}
+                                            onWebSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ChatWebRetrieveRead, answer[1].work_citation_lookup, answer[1].web_citation_lookup)}
+                                            onWebCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWorkWithWeb, answer[1].work_citation_lookup, answer[1].web_citation_lookup)}
+                                            onRagCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWebWithWork, answer[1].work_citation_lookup, answer[1].web_citation_lookup)}
+                                            onRagSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ReadRetrieveRead, answer[1].work_citation_lookup, answer[1].web_citation_lookup)}
                                             chatMode={activeChatMode}
                                         />
                                     </div>
@@ -366,7 +375,7 @@ const Chat = () => {
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} approach={activeApproach}/>
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach)} />
+                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach, lastQuestionWorkCitationRef.current, lastQuestionWebCitiationRef.current)} />
                                     </div>
                                 </>
                             ) : null}
@@ -388,12 +397,12 @@ const Chat = () => {
                             clearOnSend
                             placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
                             disabled={isLoading}
-                            onSend={question => makeApiRequest(question, defaultApproach)}
+                            onSend={question => makeApiRequest(question, defaultApproach, {}, {})}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
                             onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
                             showClearChat={true}
                             onClearClick={clearChat}
-                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current, defaultApproach)}
+                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current, defaultApproach, {}, {})}
                         />
                     </div>
                 </div>

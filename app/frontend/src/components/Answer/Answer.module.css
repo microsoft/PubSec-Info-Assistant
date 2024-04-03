@@ -190,12 +190,21 @@
     cursor: pointer;
 }
 
-.supContainer {
+.supContainerWeb {
     text-decoration: none;
     cursor: pointer;
 }
 
-.supContainer:hover {
+.supContainerWeb:hover {
+    text-decoration: underline;
+}
+
+.supContainerWork {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.supContainerWork:hover {
     text-decoration: underline;
 }
 

@@ -51,6 +51,8 @@ export const Layout = () => {
                                 <li className={styles.headerNavLeftMargin}>
                                     <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
                                     Math Assistant
+                                    <br />  
+                                    (preview)
                                     </NavLink>
                                 </li>
                             }
@@ -58,7 +60,11 @@ export const Layout = () => {
                                 <li className={styles.headerNavLeftMargin}>
                                     <NavLink to="/tda" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
                                     Tabular Data Assistant
-                                    </NavLink>    
+                                    <br />  
+                                    (preview)
+                                    </NavLink>
+                                    
+                                      
                                 </li>
                             }
                     </ul>

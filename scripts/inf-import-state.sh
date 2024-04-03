@@ -39,7 +39,7 @@ echo "If you have modified the infrastructure base this process will fail."
 echo "The simplest approach to deploy the latest version would be to perform"
 echo "a new deployment on a new resource group and reprocess your data"
 
-# Reset text color for input prompt
+# Reset text color for input promptccc
 reset_text_color
 echo
 echo "Do you accept these terms? (yes/no)"
@@ -130,6 +130,9 @@ fi
 
 
 
+
+
+
 # ***********************************************************
 # Import the existing resources into the Terraform state
 # ***********************************************************
@@ -143,6 +146,105 @@ module_path="random_string.random"
 import_resource_if_needed $module_path $random_text
 
 
+
+# System identity, user and management Roles
+echo
+figlet "Roles"
+
+# Retrieve principal ids
+sp_infoasst_mgmt_access=$(az ad sp list --filter "displayName eq 'infoasst_mgmt_access_$random_text'" --query "[].appId" --output tsv)
+sp_infoasst_func=$(az ad sp list --filter "displayName eq 'infoasst-func-$random_text'" --query "[].id" --output tsv)
+sp_infoasst_enrichmentweb=$(az ad sp list --filter "displayName eq 'infoasst-enrichmentweb-$random_text'" --query "[].id" --output tsv)
+sp_infoasst_web=$(az ad sp list --filter "displayName eq 'infoasst-web-$random_text'" --query "[].id" --output tsv)
+echo "sp_infoasst_mgmt_access: $sp_infoasst_mgmt_access"
+echo "sp_infoasst-func: $sp_infoasst_func"
+echo "sp_infoasst-enrichmentweb: $sp_infoasst_enrichmentweb"
+echo "sp_infoasst-web-: $sp_infoasst_web"
+
+output=$(az role assignment list \
+  --subscription $TF_VAR_subscriptionId \
+  --resource-group $TF_VAR_resource_group_name \
+  --query "[].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
+  --output json)
+
+# Loop through each role assignment in the output and import
+echo "$output" | jq -c '.[]' | while read -r line; do
+    # Extract 'roleDefinitionName' and 'id' from the output
+    roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
+    roleId=$(echo $line | jq -r '.id')
+    rolePrincipalId=$(echo $line | jq -r '.principalId')
+
+    # echo
+    # echo "roleDefinitionName: $roleDefinitionName"
+    # echo "roleId: $roleId"
+    # echo "rolePrincipalId: $rolePrincipalId"
+    # echo "sp_infoasst_func: $sp_infoasst_func"
+    # echo
+
+    if [ "$sp_infoasst_web" == "$rolePrincipalId" ]; then
+        if [ "$roleDefinitionName" == "SearchIndexDataReader" ]; then
+            module_path="module.searchRoleBackend.azurerm_role_assignment.role"         
+
+        elif [ "$roleDefinitionName" == "CognitiveServicesOpenAIUser" ]; then
+            module_path="module.openAiRoleBackend.azurerm_role_assignment.role"        
+
+        elif [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then
+            module_path="module.storageRoleBackend.azurerm_role_assignment.role"   
+        
+        fi  
+
+    elif [ "$sp_infoasst_func" == "$rolePrincipalId" ];  then
+        if [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then
+            module_path="module.storageRoleFunc.azurerm_role_assignment.role"   
+        fi
+
+    # elif [ "$sp_infoasst_enrichmentweb" == "$rolePrincipalId" ]; then
+    #     if [ "$roleDefinitionName" == "AcrPull" ]; then
+    #         # no roles assigned to this service principal
+    #     fi
+
+    # elif [ "$sp_infoasst_mgmt_access" == "$rolePrincipalId" ]; then
+    #     # no roles assigned to this service principal
+        
+    else
+        # This is a user role
+        if [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then
+            module_path="module.userRoles[\"StorageBlobDataReader\"].azurerm_role_assignment.role"
+        
+        # elif [ "$roleDefinitionName" == "AcrPush" ]; then
+        #     # role not assigned here
+
+        elif [ "$roleDefinitionName" == "SearchIndexDataContributor" ]; then
+            module_path="module.userRoles[\"SearchIndexDataContributor\"].azurerm_role_assignment.role"        
+
+        elif [ "$roleDefinitionName" == "CognitiveServicesOpenAIUser" ]; then
+            module_path="module.userRoles[\"CognitiveServicesOpenAIUser\"].azurerm_role_assignment.role"
+
+        elif [ "$roleDefinitionName" == "SearchIndexDataReader" ]; then
+            module_path="module.userRoles[\"SearchIndexDataReader\"].azurerm_role_assignment.role"
+
+        elif [ "$roleDefinitionName" == "StorageBlobDataContributor" ]; then
+            module_path="module.userRoles[\"StorageBlobDataContributor\"].azurerm_role_assignment.role"
+
+        fi
+    
+    fi
+
+    echo "module_path: $module_path"    
+    import_resource_if_needed "$module_path" "$roleId"
+
+done
+
+
+
+exit 0
+
+
+
+
+
+
+
 # Main
 echo
 figlet "Main"
@@ -151,6 +253,7 @@ import_resource_if_needed $module_path "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-"
 module_path="azurerm_resource_group_template_deployment.customer_attribution[0]" 
 import_resource_if_needed $module_path "$resourceId$providers"
+
 
 
 # Entra 
@@ -222,30 +325,6 @@ providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
 module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
 import_resource_if_needed $module_path "$resourceId$providers"
 
-# Retrive the principal id used to identify which roles are matched to this module
-# roles are assigned elswhere in the code, and have an assigned principal id
-# in the user roles module, the principal id of the user doing the deployment is used
-# to work around this identify the principals used in the other modules and
-# and filter role assignments from here that do not match these id's
-principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
-# Loop through each role assignment in the output and import
-echo "$output" | jq -c '.[]' | while read -r line; do
-    # Extract 'roleDefinitionName' and 'id' from the output
-    roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
-    roleId=$(echo $line | jq -r '.id')
-    rolePrincipalId=$(echo $line | jq -r '.principalId')
-    # Check if this principal id is in the list of excluded principals
-    # if not, then import this item
-    if [ "$rolePrincipalId" = "$principalId1" ]; then
-        # Check if the roleDefinitionName is in the list of selected roles
-        # Use pattern matching after removing spaces from roleDefinitionName
-        if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
-            module_path="module.video_indexer[\"$roleDefinitionName\"].azurerm_role_assignment.role"
-            import_resource_if_needed "$module_path" "$roleId"
-        fi
-    fi  
-done
-
 
 # Form Recognizer
 echo
@@ -278,72 +357,6 @@ name="infoasst-ai-$random_text"
 providers="/providers/Microsoft.Insights/components/$name"
 module_path="module.logging.azurerm_application_insights.applicationInsights"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
-# User Roles
-echo
-figlet "User Roles"
-# Retrieve each role assignment from azure
-output=$(az role assignment list \
-  --subscription $TF_VAR_subscriptionId \
-  --resource-group $TF_VAR_resource_group_name \
-  --query "[].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
-  --output json)
-
-# list of roleDefinitionNames to associate with this module
-selected_roles=("CognitiveServicesOpenAIUser" "StorageBlobDataReader" "StorageBlobDataContributor" "SearchIndexDataReader" "SearchIndexDataContributor")
-
-# Retrieve the principal id used to identify which roles are matched to this module
-# roles are assigned elswhere in the code, and have an assigned principal id
-# in the user roles module, the principal id of the user doing the deployment is used
-# to work around this identify the principals used in the other modules and
-# and filter role assignments from here so that do not match these id's
-principalId1=$(az ad sp list --display-name infoasst-web-$random_text --query "[].id" --output tsv)
-
-# Loop through each role assignment in the output and import
-echo "$output" | jq -c '.[]' | while read -r line; do
-    # Extract 'roleDefinitionName' and 'id' from the output
-    roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
-    roleId=$(echo $line | jq -r '.id')
-    rolePrincipalId=$(echo $line | jq -r '.principalId')
-    # Check if this principal id is in the list of excluded principals
-    # if not, then import this item
-    if [ "$rolePrincipalId" != "$principalId1" ]; then
-        # Check if the roleDefinitionName is in the list of selected roles
-        # Use pattern matching after removing spaces from roleDefinitionName
-        if [[ " ${selected_roles[*]} " =~ " ${roleDefinitionName// /} " ]]; then
-            module_path="module.userRoles[\"$roleDefinitionName\"].azurerm_role_assignment.role"
-            import_resource_if_needed "$module_path" "$roleId"
-        fi
-    fi  
-done
-
-
-# System Identity Roles
-echo
-figlet "System Identity Roles"
-
-
-/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/group1/providers/Microsoft.Authorization/roleAssignments/00000000-0000-0000-0000-000000000000
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Key Vault

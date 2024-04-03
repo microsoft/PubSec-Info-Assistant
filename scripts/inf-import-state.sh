@@ -362,15 +362,6 @@ module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_ke
 import_resource_if_needed "$module_path" "$secret_id"
 
 
-# Logging
-echo
-figlet "Logging"
-name="infoasst-ai-$random_text"
-providers="/providers/Microsoft.Insights/components/$name"
-module_path="module.logging.azurerm_application_insights.applicationInsights"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
 # Key Vault
 echo
 figlet "Key Vault"

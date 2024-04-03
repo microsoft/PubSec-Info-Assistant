@@ -191,7 +191,6 @@ if [[ $serviceExists == $name ]]; then
     providers="/providers/Microsoft.CognitiveServices/accounts/$name"
     module_path="module.openaiServices.azurerm_cognitive_account.account"
     import_resource_if_needed $module_path "$resourceId$providers"
-
     providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
     module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
     import_resource_if_needed "$module_path" "$resourceId$providers"

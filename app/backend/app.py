@@ -1,15 +1,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+from io import StringIO
 from typing import Optional
+import asyncio
 #from sse_starlette.sse import EventSourceResponse
 #from starlette.responses import StreamingResponse
 import logging
 import os
 import json
 import urllib.parse
+import pandas as pd
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
@@ -28,10 +31,17 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from approaches.MathTutor import(
+from approaches.mathassistant import(
     generate_response,
     process_agent_scratch_pad,
     process_agent_response
+)
+from approaches.tabulardataassistant import (
+    refreshagent,
+    save_df,
+    process_agent_response as csv_agent_response,
+    process_agent_scratch_pad as csv_agent_scratch_pad,
+
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from azure.cosmos import CosmosClient
@@ -104,6 +114,7 @@ log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
 
+dffinal = None
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
@@ -650,6 +661,93 @@ async def getHint(question: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
+@app.post("/postCsv")
+async def postCsv(csv: UploadFile = File(...)):
+    try:
+        global dffinal
+            # Read the file into a pandas DataFrame
+        content = await csv.read()
+        df = pd.read_csv(StringIO(content.decode('latin-1')))
+
+        dffinal = df
+        # Process the DataFrame...
+        save_df(df)
+    except Exception as ex:
+            raise HTTPException(status_code=500, detail=str(ex)) from ex
+    
+    
+    #return {"filename": csv.filename}
+@app.get("/process_csv_agent_response")
+async def process_csv_agent_response(retries=3, delay=1, question: Optional[str] = None):
+    if question is None:
+        raise HTTPException(status_code=400, detail="Question is required")
+    for i in range(retries):
+        try:
+            results = csv_agent_response(question)
+            return results
+        except AttributeError as ex:
+            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                if str(ex) == "'NoneType' object has no attribute 'stream'":
+                    return ["error: Csv has not been loaded"]
+                else:
+                    raise HTTPException(status_code=500, detail=str(ex)) from ex
+        except Exception as ex:
+            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.get("/getCsvAnalysis")
+async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
+    global dffinal
+    if question is None:
+            raise HTTPException(status_code=400, detail="Question is required")
+        
+    for i in range(retries):
+        try:
+            save_df(dffinal)
+            results = csv_agent_scratch_pad(question, dffinal)
+            return results
+        except AttributeError as ex:
+            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                if str(ex) == "'NoneType' object has no attribute 'stream'":
+                    return ["error: Csv has not been loaded"]
+                else:
+                    raise HTTPException(status_code=500, detail=str(ex)) from ex
+        except Exception as ex:
+            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.post("/refresh")
+async def refresh():
+    """
+    Refresh the agent's state.
+
+    This endpoint calls the `refresh` function to reset the agent's state.
+
+    Raises:
+        HTTPException: If an error occurs while refreshing the agent's state.
+
+    Returns:
+        dict: A dictionary containing the status of the agent's state.
+    """
+    try:
+        refreshagent()
+    except Exception as ex:
+        log.exception("Exception in /refresh")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return {"status": "success"}
+
 @app.get("/getSolve")
 async def getSolve(question: Optional[str] = None):
    
@@ -662,6 +760,7 @@ async def getSolve(question: Optional[str] = None):
         log.exception("Exception in /getHint")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
 
 @app.get("/process_agent_response")
 async def stream_agent_response(question: str):

@@ -31,8 +31,9 @@ class ChatWebRetrieveRead(Approach):
     {follow_up_questions_prompt}   
     """
 
-    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-    Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
+    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """ALWAYS generate three very brief unordered follow-up questions surrounded by triple chevrons (<<<Are there exclusions for prescriptions?>>>) that the user would likely ask next about their agencies data. 
+    Surround each follow-up question with triple chevrons (<<<Are there exclusions for prescriptions?>>>). Try not to repeat questions that have already been asked.
+    Only generate follow-up questions and do not generate any text before or after the follow-up questions, such as 'Next Questions'
     """
 
     QUERY_PROMPT_TEMPLATE = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in Bing Search.

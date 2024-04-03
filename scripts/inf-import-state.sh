@@ -146,6 +146,30 @@ module_path="random_string.random"
 import_resource_if_needed $module_path $random_text
 
 
+# OpenAI Services
+echo
+figlet "OpenAI Services"
+name="infoasst-aoai-$random_text"
+# only import if the service exists in the RG
+serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
+if [[ $serviceExists == $name ]]; then
+
+    providers="/providers/Microsoft.CognitiveServices/accounts/$name"
+    module_path="module.openaiServices.azurerm_cognitive_account.account"
+    import_resource_if_needed $module_path "$resourceId$providers"
+
+    providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
+    module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
+    import_resource_if_needed "$module_path" "$resourceId$providers"
+
+else
+    echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
+fi
+secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
+module_path="module.openaiServices.azurerm_key_vault_secret.openaiServiceKeySecret"
+import_resource_if_needed "$module_path" "$secret_id"
+
+
 
 # System identity, user and management Roles
 echo
@@ -176,10 +200,9 @@ if [ "$TF_VAR_resource_group_name" != "$azure_openai_rg_name" ]; then
     principalId=$(echo "$output" | jq -r '.[0].principalId')
     roleDefinitionName=$(echo "$output" | jq -r '.[0].roleDefinitionName')
     module_path="module.openAiRoleMgmt[0].azurerm_role_assignment.role" 
-
-    echo "module_path: $module_path"
-    echo "id: $id"
     import_resource_if_needed "$module_path" "$id"
+fi
+
 
 # Retrieve the role assignments for the resource group
 output=$(az role assignment list \
@@ -187,6 +210,7 @@ output=$(az role assignment list \
   --resource-group $TF_VAR_resource_group_name \
   --query "[].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
   --output json)
+
 
 # Loop through each role assignment in the output and import
 echo "$output" | jq -c '.[]' | while read -r line; do
@@ -235,6 +259,7 @@ echo "$output" | jq -c '.[]' | while read -r line; do
 done
 
 
+
 # Main
 echo
 figlet "Main"
@@ -274,33 +299,6 @@ sp_name="infoasst_mgmt_access_$random_text"
 sp_id=$(az ad sp list --display-name $sp_name --query "[].id" --output tsv)
 module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
 import_resource_if_needed $module_path "$sp_id"
-
-
-# OpenAI Services
-echo
-figlet "OpenAI Services"
-name="infoasst-aoai-$random_text"
-# only import if the service exists in the RG
-serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
-if [[ $serviceExists == $name ]]; then
-
-    providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-    module_path="module.openaiServices.azurerm_cognitive_account.account"
-    import_resource_if_needed $module_path "$resourceId$providers"
-
-    providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
-    module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
-    import_resource_if_needed "$module_path" "$resourceId$providers"
-
-else
-    echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
-fi
-secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
-module_path="module.cognitiveServices.azurerm_key_vault_secret.openaiServiceKeySecret"
-import_resource_if_needed "$module_path" "$secret_id"
-
-echo "here we go"
-echo "$module_path" "$secret_id"
 
 
 # Video Indexer

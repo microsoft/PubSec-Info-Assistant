@@ -22,7 +22,7 @@ High level architecture diagram:
 
 A more detailed architecture diagram shows the Information Assistant deployment in a single resource group within a subscription in your tenant and illustrates user interaction with underlying services:
 
-![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
+![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-arch.png)
 
 If your enterprise lacks a secure communication channel between your on-premises environment and the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN). This will allow you to enable access to the Information Assistant for demonstration purposes. To implement this approach, you’ll need to add a VPN Gateway to the Information Assistant infrastructure.
 
@@ -45,13 +45,13 @@ When secure mode is enabled a private network is created called a virtual networ
 * __Azure AI Search__: Facilitates content discovery from uploaded files.
 * __Cosmos DB__: Provides visibility into the status of uploaded files.
 
-![Secure Deploy - Front End Architecture](../images/secure-deploy-front-end-architecture.png)
+![Secure Deploy - Front End Architecture](../images/secure-deploy-frontend-detail.png)
 
 ## Back end
 
 Back-end processing handles uploading your private data, document extraction and enrichment leveraging AI Services as illustrated in the following diagram:
 
-![Secure Deploy - Function Architecture](../images/secure-deploy-function-architecture.png)
+![Secure Deploy - Function Architecture](../images/secure-deploy-function-detail.png)
 
 ## How to Enable a Secure Deployment
 

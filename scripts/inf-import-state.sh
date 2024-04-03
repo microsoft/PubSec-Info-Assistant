@@ -156,11 +156,32 @@ sp_infoasst_mgmt_access=$(az ad sp list --filter "displayName eq 'infoasst_mgmt_
 sp_infoasst_func=$(az ad sp list --filter "displayName eq 'infoasst-func-$random_text'" --query "[].id" --output tsv)
 sp_infoasst_enrichmentweb=$(az ad sp list --filter "displayName eq 'infoasst-enrichmentweb-$random_text'" --query "[].id" --output tsv)
 sp_infoasst_web=$(az ad sp list --filter "displayName eq 'infoasst-web-$random_text'" --query "[].id" --output tsv)
-echo "sp_infoasst_mgmt_access: $sp_infoasst_mgmt_access"
-echo "sp_infoasst-func: $sp_infoasst_func"
-echo "sp_infoasst-enrichmentweb: $sp_infoasst_enrichmentweb"
-echo "sp_infoasst-web-: $sp_infoasst_web"
+# echo "sp_infoasst_mgmt_access: $sp_infoasst_mgmt_access"
+# echo "sp_infoasst-func: $sp_infoasst_func"
+# echo "sp_infoasst-enrichmentweb: $sp_infoasst_enrichmentweb"
+# echo "sp_infoasst-web-: $sp_infoasst_web"
 
+json_content=$(<../infra_output.json)
+azure_openai_rg_name=$(echo "$json_content" | jq -r '.properties.outputs.azurE_OPENAI_RESOURCE_GROUP.value')
+aad_mgmt_service_principal_id=$(echo "$json_content" | jq -r '.properties.parameters.aadMgmtServicePrincipalId.value')
+# Compare it with the environment variable and run the command if they are not equal
+if [ "$TF_VAR_resource_group_name" != "$azure_openai_rg_name" ]; then
+    output=$(az role assignment list \
+        --subscription "$TF_VAR_subscriptionId" \
+        --resource-group "$azure_openai_rg_name" \
+        --query "[?principalId == '$aad_mgmt_service_principal_id'].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
+        --output json)
+    # Extract values from the JSON array, assume first index only
+    id=$(echo "$output" | jq -r '.[0].id')
+    principalId=$(echo "$output" | jq -r '.[0].principalId')
+    roleDefinitionName=$(echo "$output" | jq -r '.[0].roleDefinitionName')
+    module_path="module.openAiRoleMgmt[0].azurerm_role_assignment.role" 
+
+    echo "module_path: $module_path"
+    echo "id: $id"
+    import_resource_if_needed "$module_path" "$id"
+
+# Retrieve the role assignments for the resource group
 output=$(az role assignment list \
   --subscription $TF_VAR_subscriptionId \
   --resource-group $TF_VAR_resource_group_name \
@@ -174,78 +195,44 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     roleId=$(echo $line | jq -r '.id')
     rolePrincipalId=$(echo $line | jq -r '.principalId')
     module_path=""
-
-    # echo
-    # echo "roleDefinitionName: $roleDefinitionName"
-    # echo "roleId: $roleId"
-    # echo "rolePrincipalId: $rolePrincipalId"
-    # echo "sp_infoasst_func: $sp_infoasst_func"
-    # echo
-
     if [ "$sp_infoasst_web" == "$rolePrincipalId" ]; then
         if [ "$roleDefinitionName" == "SearchIndexDataReader" ]; then
-            module_path="module.searchRoleBackend.azurerm_role_assignment.role"         
-
+            module_path="module.searchRoleBackend.azurerm_role_assignment.role" 
         elif [ "$roleDefinitionName" == "CognitiveServicesOpenAIUser" ]; then
-            module_path="module.openAiRoleBackend.azurerm_role_assignment.role"        
-
+            module_path="module.openAiRoleBackend.azurerm_role_assignment.role"  
         elif [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then
             module_path="module.storageRoleBackend.azurerm_role_assignment.role"   
-        
         fi  
-
     elif [ "$sp_infoasst_func" == "$rolePrincipalId" ];  then
         if [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then
             module_path="module.storageRoleFunc.azurerm_role_assignment.role"   
         fi
-
     # elif [ "$sp_infoasst_enrichmentweb" == "$rolePrincipalId" ]; then
     #     if [ "$roleDefinitionName" == "AcrPull" ]; then
     #         # no roles assigned to this service principal
     #     fi
-
     # elif [ "$sp_infoasst_mgmt_access" == "$rolePrincipalId" ]; then
     #     # no roles assigned to this service principal
-        
     else
         # This is a user role
         if [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then
             module_path="module.userRoles[\"StorageBlobDataReader\"].azurerm_role_assignment.role"
-        
         # elif [ "$roleDefinitionName" == "AcrPush" ]; then
         #     # role not assigned here
-
         elif [ "$roleDefinitionName" == "SearchIndexDataContributor" ]; then
-            module_path="module.userRoles[\"SearchIndexDataContributor\"].azurerm_role_assignment.role"        
-
+            module_path="module.userRoles[\"SearchIndexDataContributor\"].azurerm_role_assignment.role"  
         elif [ "$roleDefinitionName" == "CognitiveServicesOpenAIUser" ]; then
             module_path="module.userRoles[\"CognitiveServicesOpenAIUser\"].azurerm_role_assignment.role"
-
         elif [ "$roleDefinitionName" == "SearchIndexDataReader" ]; then
             module_path="module.userRoles[\"SearchIndexDataReader\"].azurerm_role_assignment.role"
-
         elif [ "$roleDefinitionName" == "StorageBlobDataContributor" ]; then
             module_path="module.userRoles[\"StorageBlobDataContributor\"].azurerm_role_assignment.role"
-
         fi
-    
     fi
-
-    if [ "$module_path]" != "" ]; then
-        echo "module_path: $module_path"    
+    if [ "$module_path" != "" ]; then
         import_resource_if_needed "$module_path" "$roleId"
     fi
-
 done
-
-
-
-exit 0
-
-
-
-
-
 
 
 # Main
@@ -256,7 +243,6 @@ import_resource_if_needed $module_path "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-"
 module_path="azurerm_resource_group_template_deployment.customer_attribution[0]" 
 import_resource_if_needed $module_path "$resourceId$providers"
-
 
 
 # Entra 
@@ -312,6 +298,9 @@ fi
 secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
 module_path="module.cognitiveServices.azurerm_key_vault_secret.openaiServiceKeySecret"
 import_resource_if_needed "$module_path" "$secret_id"
+
+echo "here we go"
+echo "$module_path" "$secret_id"
 
 
 # Video Indexer

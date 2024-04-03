@@ -173,6 +173,7 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     roleDefinitionName=$(echo $line | jq -r '.roleDefinitionName' | tr -d ' ')
     roleId=$(echo $line | jq -r '.id')
     rolePrincipalId=$(echo $line | jq -r '.principalId')
+    module_path=""
 
     # echo
     # echo "roleDefinitionName: $roleDefinitionName"
@@ -230,8 +231,10 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     
     fi
 
-    echo "module_path: $module_path"    
-    import_resource_if_needed "$module_path" "$roleId"
+    if [ "$module_path]" != "" ]; then
+        echo "module_path: $module_path"    
+        import_resource_if_needed "$module_path" "$roleId"
+    fi
 
 done
 

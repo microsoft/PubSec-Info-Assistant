@@ -73,13 +73,14 @@ class CompareWorkWithWeb(Approach):
         self.web_citations = bing_search_response.get("web_citation_lookup")
 
         user_query = history[-1].get("user")
-        rag_answer = history[0].get("bot")
+        rag_answer=next((obj['bot'] for obj in reversed(history) if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
         bing_compare_query = user_query + "Work internal documents:\n" + rag_answer + "\n\n" + " Web search results:\n" + bing_search_response.get("answer") + "\n\n"
+        
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(

@@ -122,9 +122,8 @@ class CompareWebWithWork(Approach):
         
 
         self.work_citations = rrr_response.get("work_citation_lookup")
-
         user_query = history[-1].get("user")
-        web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj))
+        web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)

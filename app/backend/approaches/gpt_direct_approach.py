@@ -94,7 +94,7 @@ class GPTDirectApproach(Approach):
         self.model_version = model_version
 
     # def run(self, history: list[dict], overrides: dict) -> any:
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
@@ -144,6 +144,7 @@ class GPTDirectApproach(Approach):
             "data_points": [],
             "answer": f"{urllib.parse.unquote(chat_completion.choices[0].message.content)}",
             "thoughts": f"Searched for:<br>{user_q}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": {}
+            "work_citation_lookup": {},
+            "web_citation_lookup": {}
         }
     

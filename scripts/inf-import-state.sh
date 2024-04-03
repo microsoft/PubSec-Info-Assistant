@@ -146,6 +146,44 @@ module_path="random_string.random"
 import_resource_if_needed $module_path $random_text
 
 
+# Main
+echo
+figlet "Main"
+module_path="azurerm_resource_group.rg"
+import_resource_if_needed $module_path "$resourceId"
+
+providers="/providers/Microsoft.Resources/deployments/pid-$TF_VAR_cuaId"
+module_path="azurerm_resource_group_template_deployment.customer_attribution" 
+import_resource_if_needed $module_path "$resourceId$providers"
+
+
+
+
+
+azurerm_resource_group_template_deployment.customer_attribution
+
+      "type": "azurerm_resource_group_template_deployment",
+      "name": "customer_attribution",
+
+
+
+
+echo "module_path: $module_path"
+echo "resourceId: $resourceId$providers"
+
+exit 0
+
+
+# Entra 
+echo
+figlet "Entra"
+webAccessApp_name="infoasst_web_access_$random_text"
+# webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].application_id" --all | jq -r '.[0]')
+webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
+module_path="module.entraObjects.azuread_application.aad_web_app[0]"
+import_resource_if_needed $module_path "/applications/$webAccessApp_objectId"
+
+
 # Logging
 echo
 figlet "Logging"
@@ -153,7 +191,6 @@ name="infoasst-la-$random_text"
 providers="/providers/Microsoft.OperationalInsights/workspaces/$name"
 module_path="module.logging.azurerm_log_analytics_workspace.logAnalytics"
 import_resource_if_needed $module_path "$resourceId$providers"
-
 name="infoasst-ai-$random_text"
 providers="/providers/Microsoft.Insights/components/$name"
 module_path="module.logging.azurerm_application_insights.applicationInsights"
@@ -182,6 +219,16 @@ fi
 secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
 module_path="module.openaiServices.azurerm_key_vault_secret.openaiServiceKeySecret"
 import_resource_if_needed "$module_path" "$secret_id"
+
+
+
+# AZ Monitor
+# This is not deployed as part of 1.0, but in case ininital upgrade fails, we need to import it
+echo
+figlet "Az Monitor"
+providers="/providers/Microsoft.Insights/workbooks/85b3e8bb-fc93-40be-83f2-98f6bec18ba0"
+module_path="module.azMonitor.azurerm_application_insights_workbook.example"
+import_resource_if_needed $module_path "$resourceId$providers"
 
 
 
@@ -271,27 +318,6 @@ echo "$output" | jq -c '.[]' | while read -r line; do
         import_resource_if_needed "$module_path" "$roleId"
     fi
 done
-
-
-
-# Main
-echo
-figlet "Main"
-module_path="azurerm_resource_group.rg"
-import_resource_if_needed $module_path "$resourceId"
-providers="/providers/Microsoft.Resources/deployments/pid-"
-module_path="azurerm_resource_group_template_deployment.customer_attribution[0]" 
-import_resource_if_needed $module_path "$resourceId$providers"
-
-
-# Entra 
-echo
-figlet "Entra"
-webAccessApp_name="infoasst_web_access_$random_text"
-# webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].application_id" --all | jq -r '.[0]')
-webAccessApp_objectId=$(az ad app list --filter "displayName eq '$webAccessApp_name'" --query "[].id" --all | jq -r '.[0]')
-module_path="module.entraObjects.azuread_application.aad_web_app[0]"
-import_resource_if_needed $module_path "/applications/$webAccessApp_objectId"
 
 # appName="infoasst-web-$random_text"
 appName="infoasst_web_access_$random_text"
@@ -386,9 +412,9 @@ appServicePlanName="infoasst-func-asp-$random_text"
 providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
 module_path="module.functions.azurerm_service_plan.funcServicePlan"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
-import_resource_if_needed "$module_path" "$resourceId$providers"
+# providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+# module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
+# import_resource_if_needed "$module_path" "$resourceId$providers"
 appName="infoasst-func-$random_text"
 providers="/providers/Microsoft.Web/sites/$appName"
 module_path="module.functions.azurerm_linux_function_app.function_app"
@@ -398,6 +424,14 @@ appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appN
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.functions.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
+
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
+import_resource_if_needed "$module_path" "$resourceId$providers"
+
+
+
+
 
 
 # Web App
@@ -417,6 +451,9 @@ providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.backend.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
 
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+module_path="module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout" 
+import_resource_if_needed "$module_path" "$resourceId$providers"
 
 
 

@@ -128,7 +128,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.model_version = model_version
         
     # def run(self, history: list[dict], overrides: dict) -> any:
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
 
         log = logging.getLogger("uvicorn")
         log.setLevel('DEBUG')
@@ -395,7 +395,8 @@ class ChatReadRetrieveReadApproach(Approach):
             "data_points": data_points,
             "answer": f"{urllib.parse.unquote(translated_response)}",
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": citation_lookup
+            "work_citation_lookup": citation_lookup,
+            "web_citation_lookup": {}
         }
 
     def detect_language(self, text: str) -> str:

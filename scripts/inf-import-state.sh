@@ -151,27 +151,10 @@ echo
 figlet "Main"
 module_path="azurerm_resource_group.rg"
 import_resource_if_needed $module_path "$resourceId"
-
 providers="/providers/Microsoft.Resources/deployments/pid-$TF_VAR_cuaId"
 module_path="azurerm_resource_group_template_deployment.customer_attribution" 
 import_resource_if_needed $module_path "$resourceId$providers"
-
-
-
-
-
-azurerm_resource_group_template_deployment.customer_attribution
-
-      "type": "azurerm_resource_group_template_deployment",
-      "name": "customer_attribution",
-
-
-
-
-echo "module_path: $module_path"
-echo "resourceId: $resourceId$providers"
-
-exit 0
+# terraform import azurerm_resource_group_template_deployment.customer_attribution "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-4221-v1.1/providers/Microsoft.Resources/deployments/pid-7a01ff74-15c2-4fec-9f14-63db7d3d6131"
 
 
 # Entra 
@@ -412,9 +395,6 @@ appServicePlanName="infoasst-func-asp-$random_text"
 providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
 module_path="module.functions.azurerm_service_plan.funcServicePlan"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-# providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-# module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
-# import_resource_if_needed "$module_path" "$resourceId$providers"
 appName="infoasst-func-$random_text"
 providers="/providers/Microsoft.Web/sites/$appName"
 module_path="module.functions.azurerm_linux_function_app.function_app"
@@ -424,14 +404,9 @@ appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appN
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.functions.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName-Autoscale"
 module_path="module.functions.azurerm_monitor_autoscale_setting.scaleout"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
-
-
 
 
 # Web App
@@ -450,12 +425,9 @@ appId=$(az ad sp list --display-name "$appName" --query "[?displayName == '$appN
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$appId"
 module_path="module.backend.azurerm_key_vault_access_policy.policy"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
 providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-module_path="module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout" 
+module_path="module.backend.azurerm_monitor_autoscale_setting.scaleout" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
-
-
 
 
 # Enrichment App
@@ -464,9 +436,6 @@ figlet "Enrichment App"
 appServicePlanName="infoasst-enrichmentasp-$random_text"
 providers="/providers/Microsoft.Web/serverFarms/$appServicePlanName"
 module_path="module.enrichmentApp.azurerm_service_plan.appServicePlan"
-import_resource_if_needed "$module_path" "$resourceId$providers"
-providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
-module_path="module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
 appName="infoasst-enrichmentweb-$random_text"
 providers="/providers/Microsoft.Web/sites/$appName"

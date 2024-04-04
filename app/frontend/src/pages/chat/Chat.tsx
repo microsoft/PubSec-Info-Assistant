@@ -253,8 +253,7 @@ const Chat = () => {
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
                             <h1 className={styles.chatEmptyStateTitle}>DSHS Service Manual</h1>
                             <span className={styles.chatEmptyObjectives}>
-                            This information assistant chatbot is to help staff find the answers they need regarding regulations, policies, guidelines and service manuals. 
-                            The Information Assistant attempts to provide responses that are:
+                            This information assistant chatbot is to help staff find the answers they need regarding regulations, policies, guidelines and service manuals. The Information Assistant attempts to provide responses that are:
                             </span>
                             <span className={styles.chatEmptyObjectivesList}>
                                 <span className={styles.chatEmptyObjectivesListItem}>

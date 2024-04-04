@@ -47,7 +47,8 @@ const Tda = ({folderPath, tags}: Props) => {
 
 const EXAMPLES: ExampleModel[] = [
     { text: "How many rows are there?", value: "rows" },
-    { text: "What is the data type of each column?", value: "dataType" },
+    { text: "What are the data types of each column?", value: "dataType" },
+    { text: "Are there any missing values in the dataset?", value: "missingValues" },
     { text: "What are the summary statistics for categorical data?", value: "summaryStats" }
 ];
 
@@ -293,12 +294,12 @@ if (dataFrame.length > 0) {
 
   return (<div className={cstyle.contentArea} >
     <div className={cstyle.App} >
-    <TableSearchFilled fontSize={"100px"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Supported File Types" />
+    <TableSearchFilled fontSize={"6rem"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Supported File Types" />
     <h1 className={cstyle.EmptyStateTitle}>
       Tabular Data Assistant
     </h1>
     <span className={styles.chatEmptyObjectives}>
-      <i className={cstyle.centertext}>Information Assistant uses AI. Check for mistakes.</i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a>
+      <i className={cstyle.centertext}>Information Assistant uses AI. Check for mistakes.</i> <a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer"> Transparency Note</a>
     </span>
     
     

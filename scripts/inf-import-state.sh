@@ -439,6 +439,9 @@ import_resource_if_needed "$module_path" "$resourceId$providers"
 providers="/providers/Microsoft.Web/sites/$appName|$appName"
 module_path="module.enrichmentApp.azurerm_monitor_diagnostic_setting.example"
 import_resource_if_needed "$module_path" "$resourceId$providers"
+providers="/providers/Microsoft.Insights/autoScaleSettings/$appServicePlanName"
+module_path="module.enrichmentApp.azurerm_monitor_autoscale_setting.scaleout"
+import_resource_if_needed "$module_path" "$resourceId$providers"
 
 
 # Storage 

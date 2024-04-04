@@ -97,7 +97,7 @@ const EXAMPLES: ExampleModel[] = [
     { text: "Determine the slope of the line passing through the points (2,5)(2,5) and (4,9)(4,9)", value: "Determine the slope of the line passing through the points (2,5)(2,5) and (4,9)(4,9)" },
     { text: "Calculate the result of (9+3)×4−7", value: "Calculate the result of (9+3)×4−7" },
     { text: "What's the answer for (4.5*2.1)^2.2?", value: "What's the answer for (4.5*2.1)^2.2?" },
-    { text: "The heights (in centimeters) of students in a class are recorded as follows: 160, 165, 170, 175, 180. Find the mean height of the students.", value: "The heights (in centimeters) of students in a class are recorded as follows: 160, 165, 170, 175, 180. Find the mean height of the students." }
+    { text: "Find the mean of the heights of students in centimeters: 160, 165, 170, 175, 180.", value: "The heights (in centimeters) of students in a class are recorded as follows: 160, 165, 170, 175, 180. Find the mean height of the students." }
 ];
 
 

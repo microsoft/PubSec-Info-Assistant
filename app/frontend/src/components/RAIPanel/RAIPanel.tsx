@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Options16Filled, ArrowSync16Filled, Briefcase16Filled, Globe16Filled } from "@fluentui/react-icons";
+import { Options16Filled, ArrowSync16Filled, Briefcase16Filled, Globe16Filled, BuildingMultipleFilled } from "@fluentui/react-icons";
 
 import styles from "./RAIPanel.module.css";
 import { Icon } from "@fluentui/react";
@@ -32,11 +32,11 @@ export const RAIPanel = ({approach, chatMode, onAdjustClick, onRegenerateClick, 
             {(approach == Approaches.ChatWebRetrieveRead && chatMode == ChatMode.WorkPlusWeb) &&
                     <>
                         <div className={styles.adjustInput} onClick={onRagSearchClicked}>
-                            <Briefcase16Filled primaryFill="rgba(133, 133, 133, 1)" />
+                            <BuildingMultipleFilled primaryFill="rgba(133, 133, 133, 1)" />
                             <span className={styles.adjustInputText}>Search Work</span>
                         </div>
                         <div className={styles.adjustInput} onClick={onRagCompareClicked}>
-                            <Briefcase16Filled primaryFill="rgba(133, 133, 133, 1)" />
+                            <BuildingMultipleFilled primaryFill="rgba(133, 133, 133, 1)" />
                             <span className={styles.adjustInputText}>Compare with Work</span>
                         </div>
                     </>

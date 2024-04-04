@@ -135,7 +135,7 @@ def process_agent_scratch_pad( question):
         if "actions" in chunk:
             for action in chunk["actions"]:
                 messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
-                messages.append(f'I am thinking...: {action.log} \n')
+                messages.append(f'Processing: {action.log} \n')
         elif "steps" in chunk:
             for step in chunk["steps"]:
                 messages.append(f"Tool Result: `{step.observation}`\n")                               

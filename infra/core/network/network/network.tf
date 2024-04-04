@@ -85,6 +85,14 @@ resource "azurerm_subnet" "appInbound" {
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAppInboundCIDR]
+
+  delegation {
+    name = "Microsoft.Web/serverFarms"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "appInbound_snet_to_nsg" {
@@ -98,6 +106,14 @@ resource "azurerm_subnet" "appOutbound" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetAppOutboundCIDR]
   private_endpoint_network_policies_enabled = true
+
+  delegation {
+    name = "Microsoft.Web/serverFarms"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "appOutbound_snet_to_nsg" {

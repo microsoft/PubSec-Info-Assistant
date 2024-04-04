@@ -1,7 +1,7 @@
 locals {
-  config_container_index = index(var.containers, "config")
+  config_container_index  = index(var.containers, "config")
   container_arm_file_path = "arm_templates/storage_container/container.template.json"
-  queue_arm_file_path = "arm_templates/storage_queue/queue.template.json"
+  queue_arm_file_path     = "arm_templates/storage_queue/queue.template.json"
 }
 
 
@@ -50,15 +50,15 @@ data "template_file" "queue" {
 }
 
 resource "azurerm_resource_group_template_deployment" "container" {
-  depends_on              = [azurerm_storage_account.storage]
-  count                   = length(var.containers)
-  resource_group_name     = var.resourceGroupName
-  parameters_content      = jsonencode({
-    "storageAccountName"  = { value = "${azurerm_storage_account.storage.name}" },
-    "location"            = { value = var.location },
-    "containerName"       = { value = var.containers[count.index] }
+  depends_on          = [azurerm_storage_account.storage]
+  count               = length(var.containers)
+  resource_group_name = var.resourceGroupName
+  parameters_content = jsonencode({
+    "storageAccountName" = { value = "${azurerm_storage_account.storage.name}" },
+    "location"           = { value = var.location },
+    "containerName"      = { value = var.containers[count.index] }
   })
-  template_content        = data.template_file.container.template
+  template_content = data.template_file.container.template
   # The filemd5 forces this to run when the file is changed
   # this ensures the keys are up-to-date
   name            = "${var.containers[count.index]}-${filemd5(local.container_arm_file_path)}"
@@ -67,15 +67,15 @@ resource "azurerm_resource_group_template_deployment" "container" {
 
 // Create a storage queue
 resource "azurerm_resource_group_template_deployment" "queue" {
-  depends_on              = [azurerm_storage_account.storage]
-  count                   = length(var.queueNames)
-  resource_group_name     = var.resourceGroupName
-  parameters_content      = jsonencode({
-    "storageAccountName"  = { value = "${azurerm_storage_account.storage.name}" },
-    "location"            = { value = var.location },
-    "queueName"           = { value = var.queueNames[count.index] }
+  depends_on          = [azurerm_storage_account.storage]
+  count               = length(var.queueNames)
+  resource_group_name = var.resourceGroupName
+  parameters_content = jsonencode({
+    "storageAccountName" = { value = "${azurerm_storage_account.storage.name}" },
+    "location"           = { value = var.location },
+    "queueName"          = { value = var.queueNames[count.index] }
   })
-  template_content        = data.template_file.queue.template
+  template_content = data.template_file.queue.template
   # The filemd5 forces this to run when the file is changed
   # this ensures the keys are up-to-date
   name            = "${var.queueNames[count.index]}-${filemd5(local.queue_arm_file_path)}"
@@ -184,6 +184,7 @@ resource "azurerm_private_endpoint" "queuePrivateEndpoint" {
 
 
 resource "azurerm_storage_blob" "config" {
+  count                  = var.is_secure_mode ? 0 : 1
   name                   = "config.json"
   storage_account_name   = azurerm_storage_account.storage.name
   storage_container_name = var.containers[local.config_container_index]

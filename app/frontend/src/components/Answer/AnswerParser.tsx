@@ -50,6 +50,8 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
             } else {
                 if (approach == Approaches.ReadRetrieveRead) {
                     const citation_lookup = work_citation_lookup;
+                    // LLM Sometimes refers to citations as "source"
+                    part = part.replace("source", "File");
                     // Odd parts are citations as the "FileX" moniker
                     const citation = citation_lookup[part];
                     if (!citation) {
@@ -100,6 +102,8 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                 }
                 if (approach == Approaches.ChatWebRetrieveRead) {
                     const citation_lookup = web_citation_lookup;
+                    // LLM Sometimes refers to citations as "source"
+                    part = part.replace("source", "url");
                     // Odd parts are citations as the "FileX" moniker
                     const citation = citation_lookup[part];
                     if (!citation) {

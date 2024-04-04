@@ -11,8 +11,12 @@ resource "azurerm_key_vault" "kv" {
   soft_delete_retention_days  = 7
   purge_protection_enabled    = true
 }
+
  
 resource "azurerm_key_vault_access_policy" "infoasst" {
+  depends_on  = [
+    azurerm_key_vault.kv
+  ]
   key_vault_id = azurerm_key_vault.kv.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = var.kvAccessObjectId
@@ -29,6 +33,10 @@ resource "azurerm_key_vault_access_policy" "infoasst" {
 }
 
 resource "azurerm_key_vault_secret" "spClientKeySecret" {
+  depends_on  = [
+    azurerm_key_vault_access_policy.infoasst,
+    azurerm_key_vault.kv
+  ]
   name         = "AZURE-CLIENT-SECRET"
   value        = var.spClientSecret
   key_vault_id = azurerm_key_vault.kv.id

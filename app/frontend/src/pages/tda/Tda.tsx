@@ -5,7 +5,7 @@ import { BlobServiceClient } from "@azure/storage-blob";
 import { CheckboxVisibility, DetailsList, DetailsListLayoutMode, IColumn, mergeStyles } from '@fluentui/react';
 import classNames from "classnames";
 import { nanoid } from "nanoid";
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
@@ -14,6 +14,9 @@ import Papa from "papaparse";
 import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh, streamCsvData } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
+import estyles from "../../components/Example/Example.module.css";
+import { Example } from "../../components/Example";
+import { DocumentDataFilled, SparkleFilled, TableSearchFilled } from "@fluentui/react-icons";
 
 
 interface Props {
@@ -30,19 +33,33 @@ const Tda = ({folderPath, tags}: Props) => {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [output, setOutput] = useState(['']);
   const [otherq, setOtherq] = useState('');
-  const [selectedQuery, setSelectedQuery] = useState('How many rows are there?');
+  const [selectedQuery, setSelectedQuery] = useState('');
   const [dataFrame, setDataFrame] = useState<object[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
   const [fileu, setFile] = useState<File | null>(null);
 
-  
+  type ExampleModel = {
+    text: string;
+    value: string;
+};
+
+const EXAMPLES: ExampleModel[] = [
+    { text: "How many rows are there?", value: "rows" },
+    { text: "What are the data types of each column?", value: "dataType" },
+    { text: "Are there any missing values in the dataset?", value: "missingValues" },
+    { text: "What are the summary statistics for categorical data?", value: "summaryStats" }
+];
+
+interface Props {
+    onExampleClicked: (value: string) => void;
+}
 
 
 
   const setOtherQ = (selectedQuery: string) => {
-    if (selectedQuery === "other") {
+    if (inputValue != "") {
       return inputValue;
     }
     return selectedQuery;
@@ -114,11 +131,10 @@ const Tda = ({folderPath, tags}: Props) => {
 
   // handler called when files are selected via the Dropzone component
 
-  const handleQueryChange = (event: { target: { value: any; }; }) => {
-    const query = event.target.value;
-    setSelectedQuery(query);
+  const handleQueryChange = (value: string) => {
+    setSelectedQuery(value);
     // Handle the selected query here
-  };
+};
   
   const handleOnChange = useCallback((files: any) => {
     let filesArray = Array.from(files);
@@ -194,6 +210,23 @@ const Tda = ({folderPath, tags}: Props) => {
     }
   }, [progress]);
 
+
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+      if (firstRender.current) {
+          // Skip the effect on the first render
+          firstRender.current = false;
+      } else {
+        if (fileu) {
+          handleAnswer();
+        }
+        else {
+          setOutput("no file file has been uploaded.")
+          setLoading(false);
+        }
+      }
+  }, [selectedQuery]);
   let indexLength = 0;
 if (dataFrame.length > 0) {
   for (let i = 0; i < dataFrame.length; i++) {
@@ -242,10 +275,26 @@ if (dataFrame.length > 0) {
   const uploadComplete = useMemo(() => progress === 100, [progress]);
 
 
-  return (<div>
-    <div className={cstyle.centeredContainer}>
-      <p>Upload a CSV file</p>
+  return (<div className={cstyle.contentArea} >
+    <div className={cstyle.App} >
+    <TableSearchFilled fontSize={"6rem"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Supported File Types" />
+    <h1 className={cstyle.EmptyStateTitle}>
+      Tabular Data Assistant
+    </h1>
+    <span className={styles.chatEmptyObjectives}>
+      <i className={cstyle.centertext}>Information Assistant uses AI. Check for mistakes.</i> <a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer"> Transparency Note</a>
+    </span>
     
+    
+    <div className={cstyle.centeredContainer}>
+    <h2 className={styles.EmptyStateTitle}>Supported file types</h2>
+
+
+    <DocumentDataFilled fontSize={"40px"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Data" />
+            <span className={cstyle.EmptyObjectivesListItemText}><b>Data</b><br />
+                csv
+            </span>
+    <br />
     <div className={styles.wrapper}>
       
       {/* canvas */}
@@ -285,16 +334,19 @@ if (dataFrame.length > 0) {
         </button>
       ) : null}
     </div>
-    <div>
-      <p>Select an example query:</p>
-      <select className={cstyle.inputField} onChange={handleQueryChange} style={{ width: "100%" }}>
-        <option value="rows">How many rows are there?</option>
-        <option value="dataType">What is the data type of each column?</option>
-        <option value="summaryStats">What are the summary statistics for categorical data?</option>
-        <option value="other">Other</option>
-    </select>
-  {selectedQuery === 'other' && (
+    
+    <p>Select an example query:</p>
     <div >
+        <ul className={estyles.examplesNavList}>
+            {EXAMPLES.map((x, i) => (
+                <li key={i}>
+                    <Example text={x.text} value={x.value} onClick={handleQueryChange} />
+                </li>
+            ))}
+        </ul>
+    <div >
+    
+    <br></br>
     <p>Ask a question about your CSV:</p>
     <input
       className={cstyle.inputField}
@@ -303,14 +355,24 @@ if (dataFrame.length > 0) {
       value={inputValue}
       onChange={(e) => setInputValue(e.target.value)}
     />
+     <div className={cstyle.buttonContainer}>
+    <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
+    <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
+    </div>
+    {loading && <div className="spinner">Loading...</div>}
+    { output !== '' && (
+      <div style={{width: '100%'}}>
+        <h2>Tabular Data Assistant Response:</h2>
+        <ReactMarkdown>{output}</ReactMarkdown>
+        <div className={cstyle.raiwarning}>AI-generated content may be incorrect</div>
       </div>
-      
     )}
+      </div>
       </div>
       
       
     </div>
-    <h1>Ouput</h1>
+    
     <div className={cstyle.centeredContainer}>
     <details style={{ width: '100%' }}>
   <summary>See Dataframe</summary>
@@ -329,10 +391,6 @@ if (dataFrame.length > 0) {
   </div>
 </details>
     </div>
-  <div className={cstyle.centeredContainer}>
-    <div className={cstyle.buttonContainer}>
-    <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
-    <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
     {loading && <div className="spinner">Loading...</div>}
     { output && (

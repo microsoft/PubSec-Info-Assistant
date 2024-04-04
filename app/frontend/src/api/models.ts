@@ -37,21 +37,13 @@ export type AskRequestOverrides = {
     selectedTags?: string;
 };
 
-export type AskRequest = {
-    question: string;
-    approach: Approaches;
-    overrides?: AskRequestOverrides;
-};
-
 export type AskResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
     approach: Approaches;
-    // citation_lookup: {}
-    // added this for citation bug. aparmar.
-    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
-    
+    work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
     error?: string;
 };
 
@@ -60,10 +52,17 @@ export type ChatTurn = {
     bot?: string;
 };
 
+export type Citation = {
+    citation: string;
+    source_path: string;
+    page_number: string; // or number, if page_number is intended to be a numeric value
+  }
+
 export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
     overrides?: AskRequestOverrides;
+    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
 };
 
 export type BlobClientUrlResponse = {

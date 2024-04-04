@@ -160,39 +160,30 @@ model_name = ''
 model_version = ''
 
 # Set up OpenAI management client
+openai_mgmt_client = CognitiveServicesManagementClient(
+    credential=azure_credential,
+    subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
+    base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
 
-## Temp fix for issue https://github.com/Azure/azure-sdk-for-python/issues/34337.
-## Remove this if/else once the issue is fixed in the SDK.
-if "azure.us" in ENV["AZURE_OPENAI_ENDPOINT"]:
-    model_name = ENV["AZURE_OPENAI_CHATGPT_MODEL_NAME"]
-    model_version = ENV["AZURE_OPENAI_CHATGPT_MODEL_VERSION"]
-    embedding_model_name = ENV["AZURE_OPENAI_EMBEDDINGS_MODEL_NAME"]
-    embedding_model_version = ENV["AZURE_OPENAI_EMBEDDINGS_VERSION"]
-else:
-    openai_mgmt_client = CognitiveServicesManagementClient(
-        credential=azure_credential,
-        subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
-        base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
+deployment = openai_mgmt_client.deployments.get(
+    resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
+    account_name=ENV["AZURE_OPENAI_SERVICE"],
+    deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
 
-    deployment = openai_mgmt_client.deployments.get(
+model_name = deployment.properties.model.name
+model_version = deployment.properties.model.version
+
+if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
+    embedding_deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
         account_name=ENV["AZURE_OPENAI_SERVICE"],
-        deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
+        deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
 
-    model_name = deployment.properties.model.name
-    model_version = deployment.properties.model.version
-
-    if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
-        embedding_deployment = openai_mgmt_client.deployments.get(
-            resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
-            account_name=ENV["AZURE_OPENAI_SERVICE"],
-            deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
-
-        embedding_model_name = embedding_deployment.properties.model.name
-        embedding_model_version = embedding_deployment.properties.model.version
-    else:
-        embedding_model_name = ""
-        embedding_model_version = ""
+    embedding_model_name = embedding_deployment.properties.model.name
+    embedding_model_version = embedding_deployment.properties.model.version
+else:
+    embedding_model_name = ""
+    embedding_model_version = ""
 
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
@@ -299,15 +290,21 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+        
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}))
+        else:
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {})
        
-        # To fix citation bug,below code is added.aparmar
-        return {
+        response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
-                "citation_lookup": r["citation_lookup"],
-            }
+                "work_citation_lookup": r["work_citation_lookup"],
+                "web_citation_lookup": r["web_citation_lookup"]
+        }
+
+        return response
 
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")

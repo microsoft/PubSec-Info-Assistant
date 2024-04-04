@@ -31,8 +31,9 @@ class ChatWebRetrieveRead(Approach):
     {follow_up_questions_prompt}   
     """
 
-    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-    Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
+    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """ALWAYS generate three very brief unordered follow-up questions surrounded by triple chevrons (<<<Are there exclusions for prescriptions?>>>) that the user would likely ask next about their agencies data. 
+    Surround each follow-up question with triple chevrons (<<<Are there exclusions for prescriptions?>>>). Try not to repeat questions that have already been asked.
+    Only generate follow-up questions and do not generate any text before or after the follow-up questions, such as 'Next Questions'
     """
 
     QUERY_PROMPT_TEMPLATE = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in Bing Search.
@@ -74,7 +75,7 @@ class ChatWebRetrieveRead(Approach):
         self.bing_safe_search = bing_safe_search
         
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
         """
         Runs the approach to simulate experience with Bing Chat.
 
@@ -140,7 +141,8 @@ class ChatWebRetrieveRead(Approach):
             "data_points": None,
             "answer": f"{urllib.parse.unquote(resp)}",
             "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "work_citation_lookup": {},
+            "web_citation_lookup": self.citations
         }
     
 

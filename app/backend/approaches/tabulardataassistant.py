@@ -90,7 +90,7 @@ def process_agent_scratch_pad(question, df):
         if "actions" in chunk:
             for action in chunk["actions"]:
                 messages.append(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\n")
-                messages.append(f'\nI am thinking...: {action.log}\n')
+                messages.append(f'\nProcessing...: {action.log}\n')
         elif "steps" in chunk:
             for step in chunk["steps"]:
                 if isinstance(step.observation, str):

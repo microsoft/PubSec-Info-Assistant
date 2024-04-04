@@ -11,9 +11,10 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How is strengthening student data privacy accomplished?", value: "How is strengthening student data privacy accomplished?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "What are some flavors of Breyers?", value: "What are some flavors of Breyers?" }
+    { text: "How do I create a tickler in the CAREweb system?", value: "How do I create a tickler in the CAREweb system?" },
+    { text: "Where can I find RMT or Electronic Signature resources?", value: "Where can I find RMT or Electronic Signature resources?" },
+    { text: "How do I add a guardian in PDS?", value: "How do I add a guardian in PDS?" },
+    { text: "What training is required for CRMs?", value: "What training is required for CRMs?" }
 ];
 
 interface Props {

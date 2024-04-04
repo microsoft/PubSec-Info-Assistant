@@ -251,10 +251,10 @@ const Chat = () => {
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your private data</h1>
+                            <h1 className={styles.chatEmptyStateTitle}>DSHS Service Manual</h1>
                             <span className={styles.chatEmptyObjectives}>
-                                The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components 
-                                to enable you to <b>Chat</b> (Have a conversation) with your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
+                            This information assistant chatbot is to help staff find the answers they need regarding regulations, policies, guidelines and service manuals. 
+                            The Information Assistant attempts to provide responses that are:
                             </span>
                             <span className={styles.chatEmptyObjectivesList}>
                                 <span className={styles.chatEmptyObjectivesListItem}>
@@ -334,7 +334,7 @@ const Chat = () => {
                     <div className={styles.chatInput}>
                         <QuestionInput
                             clearOnSend
-                            placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
+                            placeholder="Type a new question"
                             disabled={isLoading}
                             onSend={question => makeApiRequest(question)}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}

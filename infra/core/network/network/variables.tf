@@ -2,6 +2,10 @@ variable "nsg_name" {
   type    = string
 }
 
+variable "ddos_name" {
+  type    = string
+}
+
 variable "vnet_name" {
   type    = string
 }

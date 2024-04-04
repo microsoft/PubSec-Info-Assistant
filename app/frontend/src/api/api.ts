@@ -245,6 +245,21 @@ export async function refresh(): Promise<String[]> {
     return parsedResponse;
 }
 
+export async function getTempImages(): Promise<string[]> {
+    const response = await fetch(`/getTempImages`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: { images: string[] } = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+    const imgs = parsedResponse.images;
+    return imgs;
+}
 
 export async function postCsv(file: File): Promise<String> {
     const formData = new FormData();

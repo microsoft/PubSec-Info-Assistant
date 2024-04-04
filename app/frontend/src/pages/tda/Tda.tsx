@@ -11,7 +11,7 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh } from "../../api";
+import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh, getTempImages } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 import estyles from "../../components/Example/Example.module.css";
@@ -39,6 +39,8 @@ const Tda = ({folderPath, tags}: Props) => {
   const [inputValue, setInputValue] = useState("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
   const [fileu, setFile] = useState<File | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+
 
   type ExampleModel = {
     text: string;
@@ -56,11 +58,13 @@ interface Props {
     onExampleClicked: (value: string) => void;
 }
 
-  const setImages = (newBase64Strings: string[]) => {
-    setBase64Images(newBase64Strings);
-  };
-
-
+const fetchImages = async () => {
+  console.log('fetchImages called');
+  const tempImages = await getTempImages();
+  console.log('tempImages:', tempImages);
+  setImages(tempImages);
+  console.log('images:', images);
+};
   const setOtherQ = (selectedQuery: string) => {
     if (inputValue != "") {
       return inputValue;
@@ -86,6 +90,7 @@ interface Props {
           });
           setLoading(false);
           setOutput(outputString);
+          fetchImages();
           return;  // If everything is successful, return from the function
         } else {
           setOutput("no file has been uploaded.")
@@ -130,7 +135,9 @@ interface Props {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
           setOutput(result.toString());
+          fetchImages();
           return;
+
         }
         else {
           setOutput("no file file has been uploaded.")
@@ -381,7 +388,23 @@ if (dataFrame.length > 0) {
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
         <ReactMarkdown>{output}</ReactMarkdown>
+        <h2>Generated Images:</h2>
+        <div>
+          {images.length > 0 ? (
+            images.map((image, index) => (
+              <img 
+                key={index} 
+                src={`data:image/png;base64,${image}`} 
+                alt={`Temp Image ${index}`} 
+                style={{maxWidth: '100%'}} 
+              />
+            ))
+          ) : (
+            <p>No images generated</p>
+          )}
+        </div>
         <div className={cstyle.raiwarning}>AI-generated content may be incorrect</div>
+
       </div>
     )}
       </div>

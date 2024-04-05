@@ -33,7 +33,7 @@ export const InfoContent = ({ className }: Props) => {
     return (
         <div>
             <Separator>Build and Version</Separator>
-            <Text>{appVersionInfo?.version}, {appVersionInfo?.buildNumber}</Text>
+            <Text>{appVersionInfo?.version}</Text>
             <Separator>Azure OpenAI</Separator>
             <Label>Instance</Label><Text>{infoData?.AZURE_OPENAI_SERVICE}</Text>
             <Label>GPT Deployment Name</Label><Text>{infoData?.AZURE_OPENAI_CHATGPT_DEPLOYMENT}</Text>

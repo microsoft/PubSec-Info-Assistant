@@ -33,7 +33,7 @@ class CompareWorkWithWeb(Approach):
     ]
     
     
-    citations = {}
+    web_citations = {}
 
     def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
         """
@@ -56,7 +56,7 @@ class CompareWorkWithWeb(Approach):
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], work_citation_lookup: dict[str, Any]) -> Any:
         """
         Runs the comparative analysis between Bing Search Response and Internal Documents.
 
@@ -69,17 +69,18 @@ class CompareWorkWithWeb(Approach):
         """
         # Step 1: Call bing Search Approach for a Bing LLM Response and Citations
         chat_bing_search = ChatWebRetrieveRead(self.model_name, self.chatgpt_deployment, self.query_term_language, self.bing_search_endpoint, self.bing_search_key, self.bing_safe_search)
-        bing_search_response = await chat_bing_search.run(history, overrides)
-        self.citations = bing_search_response.get("citation_lookup")
+        bing_search_response = await chat_bing_search.run(history, overrides, {})
+        self.web_citations = bing_search_response.get("web_citation_lookup")
 
         user_query = history[-1].get("user")
-        rag_answer = history[0].get("bot")
+        rag_answer=next((obj['bot'] for obj in reversed(history) if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
         bing_compare_query = user_query + "Work internal documents:\n" + rag_answer + "\n\n" + " Web search results:\n" + bing_search_response.get("answer") + "\n\n"
+        
 
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
@@ -104,14 +105,15 @@ class CompareWorkWithWeb(Approach):
         final_response = f"{urllib.parse.unquote(compare_resp)}"
 
         # Step 4: Append web citations from the Bing Search approach
-        for idx, url in enumerate(self.citations.keys(), start=1):
+        for idx, url in enumerate(self.web_citations.keys(), start=1):
             final_response += f" [url{idx}]"
 
         return {
             "data_points": None,
             "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "work_citation_lookup": work_citation_lookup,
+            "web_citation_lookup": self.web_citations
         }
 
     async def make_chat_completion(self, messages):

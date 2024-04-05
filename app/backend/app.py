@@ -43,6 +43,7 @@ from approaches.tabulardataassistant import (
     save_df,
     process_agent_response as csv_agent_response,
     process_agent_scratch_pad as csv_agent_scratch_pad,
+    get_images_in_temp
 
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
@@ -299,15 +300,21 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+        
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}))
+        else:
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {})
        
-        # To fix citation bug,below code is added.aparmar
-        return {
+        response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
-                "citation_lookup": r["citation_lookup"],
-            }
+                "work_citation_lookup": r["work_citation_lookup"],
+                "web_citation_lookup": r["web_citation_lookup"]
+        }
+
+        return response
 
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
@@ -644,6 +651,16 @@ async def get_all_tags():
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+@app.get("/getTempImages")
+async def get_temp_images():
+    """Get the images in the temp directory
+
+    Returns:
+        list: A list of image data in the temp directory.
+    """
+    images = get_images_in_temp()
+    return {"images": images}
 
 @app.get("/getHint")
 async def getHint(question: Optional[str] = None):

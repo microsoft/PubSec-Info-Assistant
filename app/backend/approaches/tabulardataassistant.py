@@ -4,6 +4,8 @@
 import base64
 import os
 import glob
+from PIL import Image
+import io
 import warnings
 import re
 import pandas as pd
@@ -13,13 +15,11 @@ from langchain.agents.agent_types import AgentType
 from langchain.chat_models import AzureChatOpenAI
 from langchain.agents import load_tools
 import matplotlib.pyplot as plt
-
+import tempfile
 warnings.filterwarnings('ignore')
 from dotenv import load_dotenv
 
-# Initialize session state
-# if 'show_images' not in st.session_state:
-#     st.session_state.show_images = False
+
 
 #--------------------------------------------------------------------------
 #variables needed for testing
@@ -59,22 +59,35 @@ agent_imgs = []
 def refreshagent():
     global pdagent
     pdagent = None
+def get_image_data(image_path):
+    with Image.open(image_path) as img:
+        img_byte_arr = io.BytesIO()
+        img.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+        img_base64 = base64.b64encode(img_byte_arr)
+    return img_base64.decode('utf-8')
 
+def save_chart(query):
+    temp_dir = tempfile.gettempdir()
+    q_s = f' If any charts or graphs or plots were created save them in the {temp_dir} directory".'
+    query += ' . '+ q_s
+    return query
 
+def get_images_in_temp():
+    temp_dir = tempfile.gettempdir()
+    image_files = glob.glob(os.path.join(temp_dir, '*.[pjJ][npNP][gG]*'))
+    image_data = [get_image_data(file) for file in image_files]
 
+    # Delete the files after reading them
+    for file in image_files:
+        os.remove(file)
+        
+    return image_data
  
 def save_df(dff):
     global dffinal
     dffinal = dff      
 
-
-def is_base64(s):
-    pattern = r'^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$'
-    if s.startswith('base64 string:') and s.endswith('end of base 64 string'):
-        return True
-    elif bool(re.fullmatch(pattern, s)):
-        return True
-    return False
 
 
       
@@ -83,8 +96,9 @@ def process_agent_scratch_pad(question, df):
     chat = AzureChatOpenAI(
                 openai_api_version=OPENAI_API_VERSION,
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
-    
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+    if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
+        question = save_chart(question)
+    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, save_charts=True)
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
@@ -92,92 +106,26 @@ def process_agent_scratch_pad(question, df):
                 yield f'data: I am thinking...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                if isinstance(step.observation, str):
-                    if step.observation:
-                        # Check for multiple strings surrounded by parentheses and separated by commas
-                        pattern = r'\(([^)]+)\)'
-                        matches = re.findall(pattern, step.observation)
-                        if matches:
-                            print("step.observation contains multiple strings")
-                            for match in matches:
-                                strings = match.split(',')
-                                for s in strings:
-                                    if is_base64(s.strip()):
-                                        print("s is a base64 string")
-                                        agent_imgs.append(s.strip())
-                                    else:
-                                        print("s is not a base64 string")
-                                        yield f'data: Tool Result: `{step.observation}` \n\n'  
-                        else:
-                            if is_base64(step.observation):
-                                print("step.observation is a base64 string")
-                                agent_imgs.append(step.observation)
-                            else:
-                                print("step.observation is not a base64 string")
-                                yield f'data: Tool Result: `{step.observation}` \n\n'                              
+                yield f"Tool Result: `{step.observation}`\n"                                            
         elif "output" in chunk:
             output = f'Final Output: {chunk["output"]}'
-            pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'
-            output = re.sub(pattern, '', output)
-            output = re.sub(r'string:[^\s]*', '', output)
             yield output
             return
         else:
             raise ValueError()
-        
-def is_base64out(s):
-    try:
-        return base64.b64encode(base64.b64decode(s)) == s
-    except Exception:
-        return False
+
 #Function to stream final output       
 def process_agent_response(question):
+    if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
+        question = save_chart(question)
     chat = AzureChatOpenAI(
                 openai_api_version=OPENAI_API_VERSION,                        
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
     
-    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, save_charts=True)
     for chunk in pdagent.stream({"input": question}):
-        message = chunk["messages"]
-        curr = message[0]
-        if (curr.content.startswith('(') and curr.content.endswith(')')):
-            # Check for multiple strings surrounded by parentheses and separated by commas
-            pattern = r'\(([^)]+)\)'
-            matches = re.findall(pattern, curr.content)
-            if matches:
-                print("curr.content contains multiple strings")
-                for match in matches:
-                    strings = match.split(',')
-                    for s in strings:
-                        if is_base64out(s.strip()):
-                            print("s is a base64 string")
-                            agent_imgs.append(s.strip())
-                        else:
-                            print("s is not a base64 string")
-            else:
-                if is_base64out(curr.content):
-                    print("curr.content is a base64 string")
-                    agent_imgs.append(curr.content)
-                else:
-                    print("curr.content is not a base64 string")
-        elif("base64 string:" in curr.content and "output" not in chunk) :
-            base64_string = curr.content
-            
-            match = re.search(r'base64 string:(.*?)end of base 64 string', base64_string)
-            if match:
-                # Extract the base64 strings
-                base64_strings = match.group(1).strip().split(',')
-                # Set the agent_img global variable to the list of base64 strings
-                for img in base64_strings:
-                    agent_imgs.append(img)
-        elif "output" in chunk:
+        if "output" in chunk:
             output = f'Final Output: {chunk["output"]}'
-            pattern = r'data:image\/[a-zA-Z]*;base64,[^\s]*'
-            output = re.sub(pattern, '', output)
-            output = re.sub(r'string:[^\s]*', '', output)
-            
-            # Remove the base64 strings from the output
-            
             return output
 
     

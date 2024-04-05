@@ -1,6 +1,41 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
-   
+   .chatEmptyStateTitle {
+    font-size: 3rem;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+   .centertext {
+    text-align: center !important;
+}
+   .App {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 600px;
+  }
+  .contentArea {
+    width: 100%;
+    margin-top: 10px;
+    /* display: flex; */
+    align-content: center;
+  }
+  .raiwarning {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(133, 133, 133);
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
    .mydetailslist:hover {
     overflow: scroll;
   }
@@ -26,8 +61,7 @@
   }
    h1 {
     align-items: flex-start !important;
-    margin-top: 5% !important; /* Sets the top margin to 10% */
-    margin-left: 20% !important; /* Sets the left margin to 20% */
+    margin-top: 0 !important;
 }
    .title {
     text-align: center;
@@ -55,13 +89,14 @@
 .centeredContainer {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Aligns items to the left */
+    align-items: center !important; /* Aligns items to the left */
     border: 1px solid lightgrey;
     border-radius: 10px;
     padding: 20px;
     margin: auto;
     margin-top: 5%;
-    width: 60%; /* Adjust as needed */
+    width: 70%; /* Adjust as needed */
+    text-align: left !important;
     
 }
 .formClass {

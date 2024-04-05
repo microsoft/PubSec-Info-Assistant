@@ -8,10 +8,7 @@ export default defineConfig({
     build: {
         outDir: "../backend/static",
         emptyOutDir: true,
-        sourcemap: true,
-        rollupOptions: {
-            external: ['@azure/storage-blob']
-          }
+        sourcemap: true
     },
     server: {
         proxy: {

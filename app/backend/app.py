@@ -793,8 +793,15 @@ async def stream_response(question: str):
 @app.get("/csvstream")
 async def csv_stream_response(question: str):
     save_df(dffinal)
-    stream = csv_agent_scratch_pad(question, dffinal)
-    return StreamingResponse(stream, media_type="text/event-stream")
+    
+
+    try:
+        stream = csv_agent_scratch_pad(question, dffinal)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
 
 
 

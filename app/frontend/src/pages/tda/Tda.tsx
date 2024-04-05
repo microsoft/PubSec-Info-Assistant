@@ -47,10 +47,10 @@ const Tda = ({folderPath, tags}: Props) => {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How many rows are there?", value: "rows" },
-    { text: "What are the data types of each column?", value: "dataType" },
-    { text: "Are there any missing values in the dataset?", value: "missingValues" },
-    { text: "What are the summary statistics for categorical data?", value: "summaryStats" }
+    { text: "How many rows are there?", value: "How many rows are there?" },
+    { text: "What are the data types of each column?", value: "What are the data types of each column?" },
+    { text: "Are there any missing values in the dataset?", value: "Are there any missing values in the dataset?" },
+    { text: "What are the summary statistics for categorical data?", value: "What are the summary statistics for categorical data?" }
 ];
 
 interface Props {
@@ -73,30 +73,37 @@ const fetchImages = async () => {
 
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
 
-  const handleAnalysis = async () => {
+  const handleAnalysis = () => {
+    setImages([])
     setOutput(['']);
     setLoading(true);
-    try {
-      const query = setOtherQ(selectedQuery);
-      if (eventSource) {
-        eventSource.close();
-      }
-      if (fileu) {
-      setLoading(false);
-      const newEventSource = streamCsvData(query, fileu, (data) => {
-        setOutput((prevOutput) => [...prevOutput, data]);
-      });
-      setEventSource(newEventSource);
-      fetchImages();
-    } else {
-      setOutput(["no file file has been uploaded."])
-      setLoading(false);
-    }
-    } catch (error) {
+    setTimeout(() => {
+      try {
+        const query = setOtherQ(selectedQuery);
+        if (eventSource) {
+          eventSource.close();
+        }
+        if (fileu) {
+          const newEventSource = streamCsvData(query, fileu, (data, complete) => {
+            setOutput((prevOutput) => {
+              setLoading(false);
+              return [...prevOutput, data];
+            });
+            if (complete) {
+              fetchImages();
+            }
+          });
+          setEventSource(newEventSource);
+          
+        } else {
+          setOutput(["no file file has been uploaded."])
+          setLoading(false);
+        }
+      } catch (error) {
         console.log(error);
-    } finally {+
         setLoading(false);
-    }
+      }
+    }, 0);
   };
   useEffect(() => {
       return () => {
@@ -114,13 +121,15 @@ const fetchImages = async () => {
     const retries: number = 3;
     for (let i = 0; i < retries; i++) {
       try {
+        setImages([])
         const query = setOtherQ(selectedQuery);
         setOutput(['']);
         setLoading(true);
         if (fileu) {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
-          setOutput([result.toString()]);
+          setOutput(["",result.toString()]);
+          fetchImages();
           return;
 
         }
@@ -141,6 +150,7 @@ const fetchImages = async () => {
   // handler called when files are selected via the Dropzone component
 
   const handleQueryChange = (value: string) => {
+    setInputValue(value);
     setSelectedQuery(value);
     // Handle the selected query here
 };
@@ -231,7 +241,7 @@ const fetchImages = async () => {
           handleAnswer();
         }
         else {
-          setOutput(["no file file has been uploaded."])
+          setOutput(["","no file file has been uploaded."])
           setLoading(false);
         }
       }
@@ -369,7 +379,7 @@ if (dataFrame.length > 0) {
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
     {loading && <div className="spinner">Loading...</div>}
-    { output  && (
+    { output && output.length > 1 && (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
         <div>

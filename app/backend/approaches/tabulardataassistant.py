@@ -103,13 +103,14 @@ def process_agent_scratch_pad(question, df):
         if "actions" in chunk:
             for action in chunk["actions"]:
                 yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
-                yield f'data: I am thinking...: {action.log} \n\n'
+                yield f'data: Processing...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
-                yield f"Tool Result: `{step.observation}`\n"                                            
+                yield f'data: Tool Result: `{step.observation}` \n\n'
         elif "output" in chunk:
-            output = f'Final Output: {chunk["output"]}'
+            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
             yield output
+            yield (f'data: Stream ended')
             return
         else:
             raise ValueError()

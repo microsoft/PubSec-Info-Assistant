@@ -230,16 +230,17 @@ export function streamData(question: string, onMessage: (data: string) => void):
 
     return eventSource;
 }
-export function streamCsvData(question: string, file: File, onMessage: (data: string) => void): EventSource {
+export function streamCsvData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): EventSource {
 
     const encodedQuestion = encodeURIComponent(question);
     const eventSource = new EventSource(`/csvstream?question=${encodedQuestion}`);
-
     eventSource.onmessage = (event) => {
-        onMessage(event.data);
+        let complete = false;
         if (event.data.includes("Final Output")) {
             eventSource.close();
+            complete = true;
         }
+        onMessage(event.data, complete);
     };
 
     return eventSource;

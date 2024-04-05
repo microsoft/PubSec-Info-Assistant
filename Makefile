@@ -66,3 +66,6 @@ functional-tests: extract-env ## Run functional tests to check the processing pi
 
 run-migration: ## Migrate from bicep to terraform
 	python ./scripts/merge-databases.py
+
+repoint: ## Repoint functions, webapp and enrichment app to old rg cosmos, storage and search
+	@./scripts/repoint.sh

@@ -675,7 +675,7 @@ async def postCsv(csv: UploadFile = File(...)):
     
     #return {"filename": csv.filename}
 @app.get("/process_csv_agent_response")
-async def process_csv_agent_response(retries=3, delay=1, question: Optional[str] = None):
+async def process_csv_agent_response(retries=3, delay=1000, question: Optional[str] = None):
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
     for i in range(retries):
@@ -754,7 +754,7 @@ async def getSolve(question: Optional[str] = None):
     try:
         results = process_agent_scratch_pad(question)
     except Exception as ex:
-        log.exception("Exception in /getHint")
+        log.exception("Exception in /getSolve")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 

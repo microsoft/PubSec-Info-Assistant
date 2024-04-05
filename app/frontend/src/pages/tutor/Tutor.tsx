@@ -37,54 +37,64 @@ const Tutor = () => {
         console.log(problem);
         setLoading(false);
     };
-    async function hinter(question: string) {
-        try {
-            setOutput(null);
-            setLoading(true);
-            const hint: String = await getHint(question);
-            setLoading(false);
-            setOutput(hint.toString());
-            console.log(hint);
-        } catch (error) {
-            console.log(error);
+
+    function delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function retryAsyncFn<T>(
+        asyncFn: () => Promise<T>, // The async function to retry
+        retries: number = 3, // Number of retry attempts
+        delayMs: number = 1000 // Delay between retries in milliseconds
+      ): Promise<T> {
+        
+        setError(false);
+        setLoading(true);
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                return await asyncFn(); // Try executing the function
+            } catch (error) {
+                setErrorMessage((error as Error).message); // Update to handle the error object and pass the error message
+                console.log(`Attempt ${attempt} failed. Retrying...`);
+                console.log(`Error: ${(error as Error).message}`);
+                if (attempt < retries) {
+                    await delay(delayMs); // Wait before the next attempt if more retries are left
+                }
+            }
         }
+        setError(true);
+        setLoading(false);
+        // If we reach this point, all retries have failed
+        throw new Error(`Max retries reached. Last error: ${errorMessage}`);
+      }
+
+    async function hinter(question: string) {
+        setOutput(null);
+        await retryAsyncFn(() => getHint(question), 3, 1000).then((response) => {
+            setOutput(response.toString());
+        });
+        setLoading(false);
         
     }
     async function solver(question: string) {
-        setLoading(true);
         setOutput(null);
-        try {
-            const solve = await getSolve(question);
+        await retryAsyncFn(() => getSolve(question), 3, 1000).then((response) => {
             let outputString = '';
-            solve.forEach((item) => {
+            response.forEach((item) => {
                 outputString += item + '\n';
                 console.log(item);
             });
             setOutput(outputString);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-        
+        })
+        setLoading(false);
     }
     
     async function getAnswer(question: string) {
         setOutput(null);
-        setError(false);
-        setLoading(true);
-        await processAgentResponse(question).then((response) => {
-            setLoading(false);
+        await retryAsyncFn(() => processAgentResponse(question), 3, 1000).then((response) => {
             setOutput(response.toString());
-        }).catch(error => {
-            setLoading(false);
-            setErrorMessage(error.message);
-            setError(true);
         });
-        // const eventSource = await processAgentResponse(question);
-        // eventSource.onmessage = function(event) {
-        //     console.log(event.data);
-        //     setOutput(event.data);
+        setLoading(false);
     };
 
     async function handleExampleClick(value: string) {
@@ -97,7 +107,7 @@ const EXAMPLES: ExampleModel[] = [
     { text: "Determine the slope of the line passing through the points (2,5)(2,5) and (4,9)(4,9)", value: "Determine the slope of the line passing through the points (2,5)(2,5) and (4,9)(4,9)" },
     { text: "Calculate the result of (9+3)×4−7", value: "Calculate the result of (9+3)×4−7" },
     { text: "What's the answer for (4.5*2.1)^2.2?", value: "What's the answer for (4.5*2.1)^2.2?" },
-    { text: "Find the mean of the heights of students in centimeters: 160, 165, 170, 175, 180.", value: "The heights (in centimeters) of students in a class are recorded as follows: 160, 165, 170, 175, 180. Find the mean height of the students." }
+    { text: "Find the mean height of students in centimeters: 160, 165, 170, 175, 180.", value: "The heights (in centimeters) of students in a class are recorded as follows: 160, 165, 170, 175, 180. Find the mean height of the students." }
 ];
 
 
@@ -161,16 +171,13 @@ return (
         {loading && <div className="spinner">Loading...</div>}
         {error && <div className="spinner">{errorMessage}</div>}
         {output && 
-                <Accordion defaultActiveKey="0">
-                    
+                    <div className={styles.centeredAnswerContainer}>
                     <h2>
                         Math Assistant Response:
                     </h2>
-                    <Accordion.Collapse eventKey="0">
-                        <ReactMarkdown>{output}</ReactMarkdown>
-                    </Accordion.Collapse>
                     
-                </Accordion>
+                     <ReactMarkdown>{output}</ReactMarkdown>
+                    </div>
             }
     </div>
     </div>

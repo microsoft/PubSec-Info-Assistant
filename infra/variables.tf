@@ -200,6 +200,16 @@ variable "chatGptDeploymentName" {
   default = "gpt-35-turbo-16k"
 }
 
+variable "mathAssistantChatGptDeploymentName" {
+  type    = string
+  default = ""
+}
+
+variable "tabularDataChatGptDeploymentName" {
+  type    = string
+  default = ""
+}
+
 variable "azureOpenAIEmbeddingDeploymentName" {
   type    = string
   default = "text-embedding-ada-002"

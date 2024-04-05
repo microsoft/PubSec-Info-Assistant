@@ -26,7 +26,10 @@ os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
 
 load_dotenv()
 
-azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_MATH_ASSISTANT_CHATGPT_DEPLOYMENT")
+if (os.getenv("AZURE_OPENAI_MATH_ASSISTANT_CHATGPT_DEPLOYMENT") is None):
+    azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
+else:
+    azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_MATH_ASSISTANT_CHATGPT_DEPLOYMENT")
 
 deployment_name = azure_openai_chatgpt_deployment
 OPENAI_DEPLOYMENT_NAME = deployment_name

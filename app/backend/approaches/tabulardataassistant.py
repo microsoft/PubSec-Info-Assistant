@@ -42,7 +42,10 @@ load_dotenv()
 #_________________________________________________________________________
 
 
-azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_TABULAR_DATA_ASSISTANT_CHATGPT_DEPLOYMENT")
+if (os.getenv("AZURE_OPENAI_TABULAR_DATA_ASSISTANT_CHATGPT_DEPLOYMENT") is None):
+    azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
+else:
+    azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_TABULAR_DATA_ASSISTANT_CHATGPT_DEPLOYMENT")
 
 
 deployment_name = azure_openai_chatgpt_deployment

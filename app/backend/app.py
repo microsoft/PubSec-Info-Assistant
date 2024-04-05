@@ -5,6 +5,7 @@ from typing import Optional
 import asyncio
 #from sse_starlette.sse import EventSourceResponse
 #from starlette.responses import StreamingResponse
+from starlette.responses import Response
 import logging
 import os
 import json
@@ -13,7 +14,7 @@ import pandas as pd
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
 from approaches.compareworkwithweb import CompareWorkWithWeb
@@ -34,13 +35,15 @@ from azure.storage.blob import (
 from approaches.mathassistant import(
     generate_response,
     process_agent_scratch_pad,
-    process_agent_response
+    process_agent_response,
+    stream_agent_responses
 )
 from approaches.tabulardataassistant import (
     refreshagent,
     save_df,
     process_agent_response as csv_agent_response,
     process_agent_scratch_pad as csv_agent_scratch_pad,
+    get_images_in_temp
 
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
@@ -640,6 +643,16 @@ async def get_all_tags():
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
+@app.get("/getTempImages")
+async def get_temp_images():
+    """Get the images in the temp directory
+
+    Returns:
+        list: A list of image data in the temp directory.
+    """
+    images = get_images_in_temp()
+    return {"images": images}
+
 @app.get("/getHint")
 async def getHint(question: Optional[str] = None):
     """
@@ -757,6 +770,30 @@ async def getSolve(question: Optional[str] = None):
         log.exception("Exception in /getHint")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+
+@app.get("/stream")
+async def stream_response(question: str):
+    try:
+        stream = stream_agent_responses(question)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.get("/csvstream")
+async def csv_stream_response(question: str):
+    save_df(dffinal)
+    
+
+    try:
+        stream = csv_agent_scratch_pad(question, dffinal)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+
 
 
 @app.get("/process_agent_response")

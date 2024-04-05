@@ -4,7 +4,7 @@
 import React from 'react';
 //import { Button } from '@fluentui/react';
 import { Accordion, Card, Button } from 'react-bootstrap';
-import {getHint, processAgentResponse, getSolve} from "../../api";
+import {getHint, processAgentResponse, getSolve, streamData} from "../../api";
 import { useEffect, useState } from "react";
 import styles from './Tutor.module.css';
 import ReactMarkdown from 'react-markdown';
@@ -17,7 +17,8 @@ const Tutor = () => {
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mathProblem, setMathProblem] = useState('');
-    const [output, setOutput] = useState<string | null>(null);
+    const [output, setOutput] = useState(['']);
+    //const [output, setOutput] = useState<string | null>("");
     const [selectedButton, setSelectedButton] = useState<string | null>(null);
 
     enum ButtonValues {
@@ -39,43 +40,24 @@ const Tutor = () => {
     };
     async function hinter(question: string) {
         try {
-            setOutput(null);
+            setOutput(['']);
             setLoading(true);
             const hint: String = await getHint(question);
             setLoading(false);
-            setOutput(hint.toString());
+            setOutput([hint.toString()]);
             console.log(hint);
         } catch (error) {
             console.log(error);
         }
-        
-    }
-    async function solver(question: string) {
-        setLoading(true);
-        setOutput(null);
-        try {
-            const solve = await getSolve(question);
-            let outputString = '';
-            solve.forEach((item) => {
-                outputString += item + '\n';
-                console.log(item);
-            });
-            setOutput(outputString);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-        
     }
     
     async function getAnswer(question: string) {
-        setOutput(null);
+        setOutput(['']);
         setError(false);
         setLoading(true);
         await processAgentResponse(question).then((response) => {
             setLoading(false);
-            setOutput(response.toString());
+            setOutput([response.toString()]);
         }).catch(error => {
             setLoading(false);
             setErrorMessage(error.message);
@@ -101,6 +83,30 @@ const EXAMPLES: ExampleModel[] = [
 ];
 
 
+    const [eventSource, setEventSource] = useState<EventSource | null>(null);
+
+    const handleButton2Click = () => {
+        setOutput(['']);
+        setLoading(true);
+        setSelectedButton('button2');
+        if (eventSource) {
+          eventSource.close();
+        }
+        const newEventSource = streamData(mathProblem, (data) => {
+            setLoading(false);  
+            setOutput((prevOutput) => [...prevOutput, data]);
+
+        });
+        setEventSource(newEventSource);
+      };
+  
+    useEffect(() => {
+      return () => {
+        if (eventSource) {
+          eventSource.close();
+        }
+      };
+    }, [eventSource]);
 return (
     <div className={styles.App}>
     <MathFormatProfessionalFilled fontSize={"6rem"} primaryFill={"#8A0B31"} aria-hidden="true" aria-label="Supported File Types" />
@@ -142,7 +148,8 @@ return (
                 className={selectedButton === 'button2' ? styles.selectedButton : ''}
                 onClick={() => {
                     setSelectedButton('button2');
-                    solver(mathProblem);
+                    // solver(mathProblem);
+                    handleButton2Click();
                 }}
             >
                 {ButtonValues.Solve}
@@ -160,16 +167,18 @@ return (
         </form>
         {loading && <div className="spinner">Loading...</div>}
         {error && <div className="spinner">{errorMessage}</div>}
-        {output && 
-                <Accordion defaultActiveKey="0">
-                    
+        {output && output.join('') !== '' &&
+                <Accordion defaultActiveKey="0">                   
                     <h2>
                         Math Assistant Response:
                     </h2>
                     <Accordion.Collapse eventKey="0">
-                        <ReactMarkdown>{output}</ReactMarkdown>
-                    </Accordion.Collapse>
-                    
+                        <div>
+                        {output.map((item, index) => (
+                        <ReactMarkdown key={index} children={item} />
+                        ))}
+                    </div>
+                    </Accordion.Collapse>                    
                 </Accordion>
             }
     </div>

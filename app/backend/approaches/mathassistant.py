@@ -124,7 +124,31 @@ zero_shot_agent_math = initialize_agent(
 
 # Prompt template for Zeroshot agent
 
-
+async def stream_agent_responses(question):
+    zero_shot_agent_math = initialize_agent(
+        agent="zero-shot-react-description",
+        tools=tools,
+        llm=model,
+        verbose=True,
+        max_iterations=10,
+        max_execution_time=120,
+        handle_parsing_errors=True,
+    )
+    for chunk in zero_shot_agent_math.stream({"input": question}):
+        if "actions" in chunk:
+            for action in chunk["actions"]:
+                yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
+                yield f'data: I am thinking...: {action.log} \n\n'
+        elif "steps" in chunk:
+            for step in chunk["steps"]:
+                yield f'data: Tool Result: `{step.observation}` \n\n'
+        elif "output" in chunk:
+            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
+            yield output
+            yield (f'data: Stream ended')
+            return
+        else:
+            raise ValueError()
 
 
 

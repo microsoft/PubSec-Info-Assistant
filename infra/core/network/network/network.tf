@@ -26,7 +26,7 @@ resource "azurerm_virtual_network" "vnet" {
 
   ddos_protection_plan {
     id     = azurerm_network_ddos_protection_plan.ddos.id
-    enable = var.ddos_protection_plan_enabled
+    enable = var.ddos_enabled
   }
 }
 

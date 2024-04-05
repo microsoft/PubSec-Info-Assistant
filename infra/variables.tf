@@ -38,6 +38,11 @@ variable "cuaId" {
   default = ""
 }
 
+variable "ddos_enabled" {
+  type    = bool
+  default = true
+}
+
 variable "requireWebsiteSecurityMembership" {
   type    = bool
   default = false

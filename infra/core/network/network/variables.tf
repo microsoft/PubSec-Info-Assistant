@@ -6,6 +6,10 @@ variable "ddos_name" {
   type    = string
 }
 
+variable "ddos_enabled"  {
+  type    = bool
+}
+
 variable "vnet_name" {
   type    = string
 }

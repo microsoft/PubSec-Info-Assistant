@@ -24,7 +24,7 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 f = Figlet()
-print(f.renderText('Migration from 1.0 to 1.1'))
+print(f.renderText('Merging Databases'))
 print("Current Working Directory:", os.getcwd())
 # Read required secrets from azure keyvault
 credential = DefaultAzureCredential()
@@ -57,15 +57,24 @@ def get_keyvault_url(keyvault_name, resource_group=None):
 # *************************************************************************
 # Read required values from infra_output.json & key vault
 print("Reading values from infra_output.json")
-with open('infra_output.json', 'r') as file:
-    inf_output = json.load(file)
-    
-cosmosdb_url = inf_output['properties']['outputs']['azurE_COSMOSDB_URL']['value']
-key_vault_name = inf_output['properties']['outputs']['deploymenT_KEYVAULT_NAME']['value']
-key_vault_url = get_keyvault_url(key_vault_name)
+try:
+    with open('infra_output.json', 'r') as file:
+        inf_output = json.load(file)        
+    cosmosdb_url = inf_output['properties']['outputs']['azurE_COSMOSDB_URL']['value']
+    key_vault_name = inf_output['properties']['outputs']['deploymenT_KEYVAULT_NAME']['value']
+except:
+    # if 'infra_output.json' does not exist
+    with open('upgrade_repoint.config.json', 'r') as file:
+        old_env = json.load(file)
+        old_resource_group = old_env['old_env']['old_resource_group']
+        old_random_text = old_env['old_env']['old_random_text']    
+        cosmosdb_url = f'https://infoasst-cosmos-old_{old_random_text}.documents.azure.com:443/'
+        key_vault_name = f'infoasst-kv-{old_random_text}'
 
+key_vault_url = get_keyvault_url(key_vault_name)
 sClient = SecretClient(vault_url=key_vault_url, credential=credential) 
 cosmosdb_key = sClient.get_secret('COSMOSDB-KEY') 
+
 # *************************************************************************
 
 

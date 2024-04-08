@@ -140,7 +140,7 @@ async def stream_agent_responses(question):
         if "actions" in chunk:
             for action in chunk["actions"]:
                 yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
-                yield f'data: {action.log} \n\n'
+                yield f'data: Processing...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
                 yield f'data: Tool Result: `{step.observation}` \n\n'

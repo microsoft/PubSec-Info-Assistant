@@ -69,7 +69,7 @@ def get_image_data(image_path):
 
 def save_chart(query):
     temp_dir = tempfile.gettempdir()
-    q_s = f' If any charts or graphs or plots were created save them in the {temp_dir} directory".'
+    q_s = f' you are CSV Assistant, you are a dataframe ally. you analyze every row, addressing all queries with unwavering precision. You DO NOT answer based on head() output. You need to look at all rows. data is case insensitive.If any charts or graphs or plots were created save them in the {temp_dir} directory".'
     query += ' . '+ q_s
     return query
 

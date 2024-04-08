@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { BlobServiceClient } from "@azure/storage-blob";
 import { CheckboxVisibility, DetailsList, DetailsListLayoutMode, IColumn, mergeStyles } from '@fluentui/react';
 import classNames from "classnames";
 import { nanoid } from "nanoid";
@@ -11,7 +10,7 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh } from "../../api";
+import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh, getTempImages, streamCsvData } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 import estyles from "../../components/Example/Example.module.css";
@@ -31,7 +30,7 @@ const Tda = ({folderPath, tags}: Props) => {
   const folderName = folderPath;
   const tagList = tags;
   const [fileUploaded, setFileUploaded] = useState(false);
-  const [output, setOutput] = useState('');
+  const [output, setOutput] = useState(['']);
   const [otherq, setOtherq] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [dataFrame, setDataFrame] = useState<object[]>([]);
@@ -39,6 +38,8 @@ const Tda = ({folderPath, tags}: Props) => {
   const [inputValue, setInputValue] = useState("");
   const [base64Images, setBase64Images] = useState<string[]>([]);
   const [fileu, setFile] = useState<File | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+
 
   type ExampleModel = {
     text: string;
@@ -46,21 +47,23 @@ const Tda = ({folderPath, tags}: Props) => {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How many rows are there?", value: "rows" },
-    { text: "What are the data types of each column?", value: "dataType" },
-    { text: "Are there any missing values in the dataset?", value: "missingValues" },
-    { text: "What are the summary statistics for categorical data?", value: "summaryStats" }
+    { text: "How many rows are there?", value: "How many rows are there?" },
+    { text: "What are the data types of each column?", value: "What are the data types of each column?" },
+    { text: "Are there any missing values in the dataset?", value: "Are there any missing values in the dataset?" },
+    { text: "What are the summary statistics for categorical data?", value: "What are the summary statistics for categorical data?" }
 ];
 
 interface Props {
     onExampleClicked: (value: string) => void;
 }
 
-  const setImages = (newBase64Strings: string[]) => {
-    setBase64Images(newBase64Strings);
-  };
-
-
+const fetchImages = async () => {
+  console.log('fetchImages called');
+  const tempImages = await getTempImages();
+  console.log('tempImages:', tempImages);
+  setImages(tempImages);
+  console.log('images:', images);
+};
   const setOtherQ = (selectedQuery: string) => {
     if (inputValue != "") {
       return inputValue;
@@ -68,72 +71,70 @@ interface Props {
     return selectedQuery;
   };
 
-  const handleAnalysis = async () => {
-    const retries: number = 3;
-    setOutput('');
+  const [eventSource, setEventSource] = useState<EventSource | null>(null);
+
+  const handleAnalysis = () => {
+    setImages([])
+    setOutput(['']);
     setLoading(true);
-    let lastError;
-  
-    for (let i = 0; i < retries; i++) {
+    setTimeout(() => {
       try {
         const query = setOtherQ(selectedQuery);
+        if (eventSource) {
+          eventSource.close();
+        }
         if (fileu) {
-          const solve = await getCsvAnalysis(query, fileu);
-          let outputString = '';
-          solve.forEach((item) => {
-            outputString += item + '\n';
-            console.log(item);
+          const newEventSource = streamCsvData(query, fileu, (data, complete) => {
+            setOutput((prevOutput) => {
+              setLoading(false);
+              return [...prevOutput, data];
+            });
+            if (complete) {
+              fetchImages();
+            }
           });
-          setLoading(false);
-          setOutput(outputString);
-          return;  // If everything is successful, return from the function
+          setEventSource(newEventSource);
+          
         } else {
-          setOutput("no file has been uploaded.")
+          setOutput(["no file file has been uploaded."])
           setLoading(false);
-          return;
         }
       } catch (error) {
-        lastError = error;
+        console.log(error);
+        setLoading(false);
       }
-    }
-  
-    // If the code reaches here, all retries have failed. Handle the error as needed.
-    console.error(lastError);
-    setLoading(false);
-    setOutput('An error occurred.');
+    }, 0);
   };
-
   useEffect(() => {
-    const handleRefresh = async () => {
-      // Call your method here
-      await refresh();
-    };
+      return () => {
+        if (eventSource) {
+          eventSource.close();
+        }
+      };
+    }, [eventSource]);
 
-    handleRefresh();
-
-    // Cleanup function
-    return () => {
-      // This function will be called when the component unmounts
-      // You can call another method here if needed
-    };
-  }, []);
-
+    // Handle the analysis here
+  
+  
   const handleAnswer = async () => {
     let lastError;
     const retries: number = 3;
     for (let i = 0; i < retries; i++) {
       try {
+        setImages([])
         const query = setOtherQ(selectedQuery);
-        setOutput('');
+        setOutput(['']);
         setLoading(true);
         if (fileu) {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
-          setOutput(result.toString());
+          setOutput(["",result.toString()]);
+          fetchImages();
           return;
+
         }
         else {
-          setOutput("no file file has been uploaded.")
+          setOutput(["no file file has been uploaded."])
           setLoading(false);
         }
       } catch (error) {
@@ -143,12 +144,13 @@ interface Props {
   // If the code reaches here, all retries have failed. Handle the error as needed.
     console.error(lastError);
     setLoading(false);
-    setOutput('An error occurred.');
+    setOutput(['An error occurred.']);
   };
 
   // handler called when files are selected via the Dropzone component
 
   const handleQueryChange = (value: string) => {
+    setInputValue(value);
     setSelectedQuery(value);
     // Handle the selected query here
 };
@@ -239,7 +241,7 @@ interface Props {
           handleAnswer();
         }
         else {
-          setOutput("no file file has been uploaded.")
+          setOutput(["","no file file has been uploaded."])
           setLoading(false);
         }
       }
@@ -377,11 +379,31 @@ if (dataFrame.length > 0) {
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
     {loading && <div className="spinner">Loading...</div>}
-    { output !== '' && (
+    { output && output.length > 1 && (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
-        <ReactMarkdown>{output}</ReactMarkdown>
+        <div>
+          {output.map((item, index) => (
+            <ReactMarkdown key={index} children={item} />
+            ))}
+        </div>
+        <h2>Generated Images:</h2>
+        <div>
+          {images.length > 0 ? (
+            images.map((image, index) => (
+              <img 
+                key={index} 
+                src={`data:image/png;base64,${image}`} 
+                alt={`Temp Image ${index}`} 
+                style={{maxWidth: '100%'}} 
+              />
+            ))
+          ) : (
+            <p>No images generated</p>
+          )}
+        </div>
         <div className={cstyle.raiwarning}>AI-generated content may be incorrect</div>
+
       </div>
     )}
       </div>

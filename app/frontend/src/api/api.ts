@@ -214,6 +214,31 @@ export async function getHint(question: string): Promise<String> {
     return parsedResponse;
 }
 
+
+export function streamData(question: string): EventSource {
+    const encodedQuestion = encodeURIComponent(question);
+    const eventSource = new EventSource(`/stream?question=${encodedQuestion}`);
+
+    return eventSource;
+}
+
+
+export function streamCsvData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): EventSource {
+
+    const encodedQuestion = encodeURIComponent(question);
+    const eventSource = new EventSource(`/csvstream?question=${encodedQuestion}`);
+    eventSource.onmessage = (event) => {
+        let complete = false;
+        if (event.data.includes("Final Output")) {
+            eventSource.close();
+            complete = true;
+        }
+        onMessage(event.data, complete);
+    };
+
+    return eventSource;
+}
+
 export async function getSolve(question: string): Promise<String[]> {
     const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
         method: "GET",
@@ -245,6 +270,21 @@ export async function refresh(): Promise<String[]> {
     return parsedResponse;
 }
 
+export async function getTempImages(): Promise<string[]> {
+    const response = await fetch(`/getTempImages`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: { images: string[] } = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+    const imgs = parsedResponse.images;
+    return imgs;
+}
 
 export async function postCsv(file: File): Promise<String> {
     const formData = new FormData();

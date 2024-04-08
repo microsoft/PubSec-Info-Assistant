@@ -107,12 +107,14 @@ tools = [CircumferenceTool()]
 
 #add math module from Lanhgchain
 
-tools = load_tools(["llm-math"],  llm=model)
+tools = load_tools(["llm-math","wikipedia"],  llm=model)
 
 
-PREFIX = """Act as a tutor that helps students solve wide array of mathematical challenges, including algebraic equations, geometric proofs, calculus, and statistical analysis, word problems.
-Students will ask you math questions.when faced with math-related questions, alway refers to your tools first.llm-math is a tool that can help you solve math problems.
-Should you fail to find a solution through your tools,then only offer detailed explanations and methodologies on how to tackle the problem step by step using your own knowledge.
+PREFIX = """Act as a math tutor that helps students solve a wide array of mathematical challenges, including arithmetic problems, algebraic equations, geometric proofs, calculus, and statistical analysis, as well as word problems.
+Students will ask you math questions. When faced with math-related questions, always refer to your tools first. LLM-Math and wikipedia are tools that can help you solve math problems.
+If you cannot find a solution through your tools, then offer explanation or methodologies on how to tackle the problem on your own.
+
+In handling math queries, try using your tools initially. If no solution is found, then attempt to solve the problem on your own.
 """
 
 

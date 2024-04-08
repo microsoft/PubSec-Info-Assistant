@@ -22,3 +22,4 @@ python-dotenv==1.0.1
 pandas==2.2.1
 python-multipart==0.0.9
 Pillow==10.3.0
+wikipedia==1.4.0

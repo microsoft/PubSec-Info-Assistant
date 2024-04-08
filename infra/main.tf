@@ -151,8 +151,6 @@ module "backend" {
     AZURE_SEARCH_SERVICE                    = module.searchServices.name
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
     AZURE_OPENAI_CHATGPT_DEPLOYMENT         = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-    AZURE_OPENAI_MATH_ASSISTANT_CHATGPT_DEPLOYMENT = var.mathAssistantChatGptDeploymentName
-    AZURE_OPENAI_TABULAR_DATA_ASSISTANT_CHATGPT_DEPLOYMENT = var.tabularDataChatGptDeploymentName
     AZURE_OPENAI_CHATGPT_MODEL_NAME         = var.chatGptModelName
     AZURE_OPENAI_CHATGPT_MODEL_VERSION      = var.chatGptModelVersion
     USE_AZURE_OPENAI_EMBEDDINGS             = var.useAzureOpenAIEmbeddings

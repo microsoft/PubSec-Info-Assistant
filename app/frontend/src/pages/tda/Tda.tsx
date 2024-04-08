@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 import estyles from "../../components/Example/Example.module.css";
 import { Example } from "../../components/Example";
 import { DocumentDataFilled, SparkleFilled, TableSearchFilled } from "@fluentui/react-icons";
+import CharacterStreamer from '../../components/CharacterStreamer/CharacterStreamer';
 
 
 interface Props {
@@ -24,13 +25,14 @@ interface Props {
 }
 
 const Tda = ({folderPath, tags}: Props) => {
+  const [streamKey, setStreamKey] = useState(0);
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
   const folderName = folderPath;
   const tagList = tags;
   const [fileUploaded, setFileUploaded] = useState(false);
-  const [output, setOutput] = useState(['']);
+  const [output, setOutput] = useState('');
   const [otherq, setOtherq] = useState('');
   const [selectedQuery, setSelectedQuery] = useState('');
   const [dataFrame, setDataFrame] = useState<object[]>([]);
@@ -38,6 +40,7 @@ const Tda = ({folderPath, tags}: Props) => {
   const [inputValue, setInputValue] = useState("");
   const [fileu, setFile] = useState<File | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const eventSourceRef = useRef<EventSource | null>(null);
 
 
   type ExampleModel = {
@@ -75,33 +78,23 @@ const fetchImages = async () => {
     return selectedQuery;
   };
 
-  const [eventSource, setEventSource] = useState<EventSource | null>(null);
-
   const handleAnalysis = () => {
     setImages([])
-    setOutput(['']);
+    setOutput('');
     setLoading(true);
     setTimeout(async () => {
       try {
         const query = setOtherQ(selectedQuery);
-        if (eventSource) {
-          eventSource.close();
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
         }
         if (fileu) {
-      
-          const newEventSource = await streamTdData(query, fileu, (data, complete) => {
-            setOutput((prevOutput) => {
-              setLoading(false);
-              return [...prevOutput, data];
-            });
-            if (complete) {
-              fetchImages();
-            }
-          });
-          setEventSource(newEventSource);
-          
+          eventSourceRef.current = await streamTdData(query, fileu);
+          console.log('EventSource opened');
+          console.log(eventSourceRef.current);
+          setStreamKey(prevKey => prevKey + 1);
         } else {
-          setOutput(["no file file has been uploaded."])
+          setOutput("no file file has been uploaded.")
           setLoading(false);
         }
       } catch (error) {
@@ -110,36 +103,30 @@ const fetchImages = async () => {
       }
     }, 0);
   };
-  useEffect(() => {
-      return () => {
-        if (eventSource) {
-          eventSource.close();
-        }
-      };
-    }, [eventSource]);
 
     // Handle the analysis here
   
   
   const handleAnswer = async () => {
+    setStreamKey(prevKey => prevKey + 1);
     let lastError;
     const retries: number = 3;
     for (let i = 0; i < retries; i++) {
       try {
         setImages([])
         const query = setOtherQ(selectedQuery);
-        setOutput(['']);
+        setOutput('');
         setLoading(true);
         if (fileu) {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
-          setOutput(["",result.toString()]);
+          setOutput(result.toString());
           fetchImages();
           return;
 
         }
         else {
-          setOutput(["no file file has been uploaded."])
+          setOutput("no file file has been uploaded.")
           setLoading(false);
         }
       } catch (error) {
@@ -149,7 +136,7 @@ const fetchImages = async () => {
   // If the code reaches here, all retries have failed. Handle the error as needed.
     console.error(lastError);
     setLoading(false);
-    setOutput(['An error occurred.']);
+    setOutput('An error occurred.');
   };
 
   // handler called when files are selected via the Dropzone component
@@ -246,7 +233,7 @@ const fetchImages = async () => {
           handleAnswer();
         }
         else {
-          setOutput(["","no file file has been uploaded."])
+          setOutput("no file file has been uploaded.")
           setLoading(false);
         }
       }
@@ -258,6 +245,16 @@ if (dataFrame.length > 0) {
     if (length > indexLength) {
       indexLength = length;
     }
+  }
+}
+
+const handleCloseEvent = () => {
+  if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+      fetchImages();
+      setLoading(false);
+      console.log('EventSource closed');
   }
 }
  
@@ -384,13 +381,11 @@ if (dataFrame.length > 0) {
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
     {loading && <div className="spinner">Loading...</div>}
-    { output && output.length > 1 && (
+    { (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
         <div>
-          {output.map((item, index) => (
-            <ReactMarkdown key={index} children={item} />
-            ))}
+          <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} classNames={cstyle.centeredAnswerContainer} nonEventString={output} onStreamingComplete={handleCloseEvent} typingSpeed={10} />
         </div>
         <h2>Generated Images:</h2>
         <div>

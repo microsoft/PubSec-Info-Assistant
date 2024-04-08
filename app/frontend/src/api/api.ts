@@ -221,7 +221,8 @@ export function streamData(question: string): EventSource {
     return eventSource;
 }
 
-export async function streamTdData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): Promise<EventSource> {
+
+export async function streamTdData(question: string, file: File): Promise<EventSource> {
     let lastError;
     const formData = new FormData();
     formData.append('csv', file);
@@ -238,15 +239,6 @@ export async function streamTdData(question: string, file: File, onMessage: (dat
     
     const encodedQuestion = encodeURIComponent(question);
     const eventSource = new EventSource(`/tdstream?question=${encodedQuestion}`);
-    eventSource.onmessage = (event) => {
-        const data = event.data.replace(/<br>/g, "\n");
-        let complete = false;
-        if (event.data.includes("Final Output") || event.data.includes("Error") ) {
-            eventSource.close();
-            complete = true;
-        }
-        onMessage(data, complete);
-    };
 
     return eventSource;
 }

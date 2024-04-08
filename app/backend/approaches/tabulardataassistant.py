@@ -107,7 +107,7 @@ def process_agent_scratch_pad(question, df):
         elif "output" in chunk:
             output = chunk["output"].replace("\n", "<br>")
             yield f'data: Final Output: {output}\n\n'
-            yield 'data: Stream ended\n\n'
+            yield (f'event: end\ndata: Stream ended\n\n')
             return
         else:
             raise ValueError()

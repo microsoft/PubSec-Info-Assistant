@@ -77,14 +77,15 @@ const fetchImages = async () => {
     setImages([])
     setOutput(['']);
     setLoading(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
         const query = setOtherQ(selectedQuery);
         if (eventSource) {
           eventSource.close();
         }
         if (fileu) {
-          const newEventSource = streamCsvData(query, fileu, (data, complete) => {
+      
+          const newEventSource = await streamCsvData(query, fileu, (data, complete) => {
             setOutput((prevOutput) => {
               setLoading(false);
               return [...prevOutput, data];

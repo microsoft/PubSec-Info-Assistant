@@ -108,9 +108,9 @@ def process_agent_scratch_pad(question, df):
             for step in chunk["steps"]:
                 yield f'data: Tool Result: `{step.observation}` \n\n'
         elif "output" in chunk:
-            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
-            yield output
-            yield (f'data: Stream ended')
+            output = chunk["output"].replace("\n", "<br>")
+            yield f'data: Final Output: {output}\n\n'
+            yield 'data: Stream ended\n\n'
             return
         else:
             raise ValueError()
@@ -126,7 +126,7 @@ def process_agent_response(question):
     pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, save_charts=True)
     for chunk in pdagent.stream({"input": question}):
         if "output" in chunk:
-            output = f'Final Output: {chunk["output"]}'
+            output = f'Final Output: ```{chunk["output"]}```'
             return output
 
     

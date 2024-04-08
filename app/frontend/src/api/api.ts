@@ -223,24 +223,38 @@ export function streamData(question: string, onMessage: (data: string) => void):
         onMessage(event.data);
 
         // Add your condition here
-        if (event.data.includes("Final Output")) {
+        if (event.data.includes("Final Output") || event.data.includes("Error")) {
             eventSource.close();
         }
     };
 
     return eventSource;
 }
-export function streamCsvData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): EventSource {
+export async function streamCsvData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): Promise<EventSource> {
+    let lastError;
+    const formData = new FormData();
+    formData.append('csv', file);
 
+    const response = await fetch('/postCsv', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+    
     const encodedQuestion = encodeURIComponent(question);
     const eventSource = new EventSource(`/csvstream?question=${encodedQuestion}`);
     eventSource.onmessage = (event) => {
+        const data = event.data.replace(/<br>/g, "\n");
         let complete = false;
-        if (event.data.includes("Final Output")) {
+        if (event.data.includes("Final Output") || event.data.includes("Error") ) {
             eventSource.close();
             complete = true;
         }
-        onMessage(event.data, complete);
+        onMessage(data, complete);
     };
 
     return eventSource;

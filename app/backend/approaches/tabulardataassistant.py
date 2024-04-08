@@ -4,10 +4,10 @@
 import base64
 import os
 import glob
+import re
+import warnings
 from PIL import Image
 import io
-import warnings
-import re
 import pandas as pd
 from langchain.chat_models import ChatOpenAI
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
@@ -42,7 +42,8 @@ load_dotenv()
 #_________________________________________________________________________
 
 
-azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+
+azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
 
 
 deployment_name = azure_openai_chatgpt_deployment
@@ -95,19 +96,15 @@ def get_images_in_temp():
  
 def save_df(dff):
     global dffinal
-    dffinal = dff      
-
-
-
-      
+    dffinal = dff
+ 
 # function to stream agent response 
 def process_agent_scratch_pad(question, df):
     chat = AzureChatOpenAI(
                 openai_api_version=OPENAI_API_VERSION,
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
-    if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
-        question = save_chart(question)
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, save_charts=True)
+    question = save_chart(question)
+    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
@@ -117,29 +114,22 @@ def process_agent_scratch_pad(question, df):
             for step in chunk["steps"]:
                 yield f'data: Tool Result: `{step.observation}` \n\n'
         elif "output" in chunk:
-            output =   f'data: Final Output: `{chunk["output"]}`\n\n'
-            yield output
-            yield (f'data: Stream ended')
+            output = chunk["output"].replace("\n", "<br>")
+            yield f'data: Final Output: {output}\n\n'
+            yield (f'event: end\ndata: Stream ended\n\n')
             return
         else:
             raise ValueError()
 
 #Function to stream final output       
 def process_agent_response(question):
-    if 'chart' or 'charts' or 'graph' or 'graphs' or 'plot' or 'plt' in question:
-        question = save_chart(question)
+    question = save_chart(question)
     chat = AzureChatOpenAI(
                 openai_api_version=OPENAI_API_VERSION,                        
                 deployment_name=OPENAI_DEPLOYMENT_NAME)
     
-    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, save_charts=True)
+    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
     for chunk in pdagent.stream({"input": question}):
         if "output" in chunk:
-            output = f'Final Output: {chunk["output"]}'
+            output = f'Final Output: ```{chunk["output"]}```'
             return output
-
-    
-   
-    
-    
-    

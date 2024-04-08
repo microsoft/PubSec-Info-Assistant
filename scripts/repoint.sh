@@ -16,13 +16,11 @@ echo "This script repoints a deployment to a prior existing depolyment"
 echo
 
 # core values
-new_resource_group="infoasst-geearl-3421-v1.1"
-new_random_text="bwncp"
 old_resource_group="infoasst-geearl-212-v1.0"
 old_random_text="rgx3o"
+new_resource_group="infoasst-geearl-8399-v1.1"
+new_random_text="akzdx"
 subscription="0d4b9684-ad97-4326-8ed0-df8c5b780d35"
-
-
 
 
 #############################################################
@@ -39,6 +37,7 @@ echo "sp_infoasst-func: $sp_infoasst_func"
 echo "sp_infoasst-enrichmentweb: $sp_infoasst_enrichmentweb"
 echo "sp_infoasst-web-: $sp_infoasst_web"
 
+# assign roles & access policies
 az keyvault set-policy --name infoasst-kv-$old_random_text --object-id $sp_infoasst_func --secret-permissions get list 
 az keyvault set-policy --name infoasst-kv-$old_random_text --object-id $sp_infoasst_enrichmentweb --secret-permissions get list 
 az keyvault set-policy --name infoasst-kv-$old_random_text --object-id $sp_infoasst_web --secret-permissions get list 
@@ -172,7 +171,70 @@ setting_key="COSMOSDB_URL"
 setting_value="https://infoasst-cosmos-$old_random_text.documents.azure.com:443/"
 az functionapp config appsettings set --name "$app_name" --resource-group "$new_resource_group" --settings "$setting_key=$setting_value" > /dev/null
 
-
 setting_key="BLOB_CONNECTION_STRING"
 setting_value="@Microsoft.KeyVault(SecretUri=https://infoasst-kv-$old_random_text.vault.azure.net/secrets/BLOB-CONNECTION-STRING)"
 az functionapp config appsettings set --name "$app_name" --resource-group "$new_resource_group" --settings "$setting_key=$setting_value" > /dev/null
+
+
+#############################################################
+figlet "Delete old services"
+# Delete unrequired services from the old resource group"
+
+resource_group=$old_resource_group
+function_app="infoasst-func-$old_random_text"
+web_app="infoasst-web-$old_random_text"
+enrichment_app="infoasst-enrichmentasp-$old_random_text"
+
+# Function to delete a service and handle non-existence
+delete_service() {
+    service_type=$1
+    service_name=$2
+    echo "Checking if $service_type $service_name exists..."
+    if az $service_type show --name $service_name --resource-group $resource_group > /dev/null 2>&1; then
+        echo "$service_type $service_name exists. Attempting to delete..."
+        if az $service_type delete --name $service_name --resource-group $resource_group --yes; then
+            echo "$service_type $service_name deleted successfully."
+            deleted_services+=("$service_type $service_name")
+        else
+            echo "Failed to delete $service_type $service_name."
+            failed_services+=("$service_type $service_name")
+        fi
+    else
+        echo "$service_type $service_name does not exist."
+        non_existing_services+=("$service_type $service_name")
+    fi
+}
+
+# ANSI yellow color code
+yellow='\033[1;33m'
+no_color='\033[0m'  # No color (reset color)
+
+# Confirmation prompt in yellow
+echo -e "${yellow}Do you wish to delete the function app, web app, and enrichment app? (y/n)${no_color}"
+read -p "" answer
+
+case $answer in
+    [Yy]* )
+        deleted_services=()
+        failed_services=()
+        delete_service "functionapp" $function_app
+        delete_service "webapp" $web_app
+        delete_service "webapp" $enrichment_app
+
+        # Final report
+        echo "Deletion process complete."
+        if [ ${#deleted_services[@]} -ne 0 ]; then
+            echo "The following services were deleted successfully:"
+            printf " - %s\n" "${deleted_services[@]}"
+        fi
+
+        if [ ${#failed_services[@]} -ne 0 ]; then
+            echo "The following services could not be deleted or did not exist:"
+            printf " - %s\n" "${failed_services[@]}"
+        fi
+        ;;
+    * )
+        echo "Deletion cancelled."
+        ;;
+esac
+

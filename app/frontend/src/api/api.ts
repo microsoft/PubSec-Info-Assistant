@@ -221,12 +221,12 @@ export function streamData(question: string): EventSource {
     return eventSource;
 }
 
-export async function streamCsvData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): Promise<EventSource> {
+export async function streamTdData(question: string, file: File, onMessage: (data: string, complete: boolean) => void): Promise<EventSource> {
     let lastError;
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/postCsv', {
+    const response = await fetch('/posttd', {
         method: 'POST',
         body: formData,
     });
@@ -237,7 +237,7 @@ export async function streamCsvData(question: string, file: File, onMessage: (da
     }
     
     const encodedQuestion = encodeURIComponent(question);
-    const eventSource = new EventSource(`/csvstream?question=${encodedQuestion}`);
+    const eventSource = new EventSource(`/tdstream?question=${encodedQuestion}`);
     eventSource.onmessage = (event) => {
         const data = event.data.replace(/<br>/g, "\n");
         let complete = false;
@@ -298,11 +298,11 @@ export async function getTempImages(): Promise<string[]> {
     return imgs;
 }
 
-export async function postCsv(file: File): Promise<String> {
+export async function postTd(file: File): Promise<String> {
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/postCsv', {
+    const response = await fetch('/posttd', {
         method: 'POST',
         body: formData,
     });
@@ -313,42 +313,6 @@ export async function postCsv(file: File): Promise<String> {
     }
 
     return parsedResponse;
-}
-export async function getCsvAnalysis(question: string, file: File, retries: number = 3): Promise<String[]> {
-    let lastError;
-    const formData = new FormData();
-    formData.append('csv', file);
-
-    const response = await fetch('/postCsv', {
-        method: 'POST',
-        body: formData,
-    });
-
-    const parsedResponse: String = await response.text();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
-    }
-    for (let i = 0; i < retries; i++) {
-        try {
-            const response = await fetch(`/getCsvAnalysis?question=${encodeURIComponent(question)}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            });
-
-            const parsedResponse: String[] = await response.json();
-            if (response.status > 299 || !response.ok) {
-                throw Error("Unknown error");
-            }
-
-            return parsedResponse;
-        } catch (error) {
-            lastError = error;
-        }
-    }
-
-    throw lastError;
 }
 
 export async function processCsvAgentResponse(question: string, file: File, retries: number = 3): Promise<String> {

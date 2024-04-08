@@ -10,7 +10,7 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh, getTempImages, streamCsvData } from "../../api";
+import {postTd, processCsvAgentResponse, refresh, getTempImages, streamTdData } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 import estyles from "../../components/Example/Example.module.css";
@@ -36,7 +36,6 @@ const Tda = ({folderPath, tags}: Props) => {
   const [dataFrame, setDataFrame] = useState<object[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [base64Images, setBase64Images] = useState<string[]>([]);
   const [fileu, setFile] = useState<File | null>(null);
   const [images, setImages] = useState<string[]>([]);
 
@@ -56,6 +55,11 @@ const EXAMPLES: ExampleModel[] = [
 interface Props {
     onExampleClicked: (value: string) => void;
 }
+const saveChart = (query: string) => {
+  const tempDir = window?.require?.('os')?.tmpdir?.();
+  const qs = ` If any charts or graphs or plots were created save them in the ${tempDir} directory".`;
+  return query + ' . ' + qs;
+};
 
 const fetchImages = async () => {
   console.log('fetchImages called');
@@ -85,7 +89,7 @@ const fetchImages = async () => {
         }
         if (fileu) {
       
-          const newEventSource = await streamCsvData(query, fileu, (data, complete) => {
+          const newEventSource = await streamTdData(query, fileu, (data, complete) => {
             setOutput((prevOutput) => {
               setLoading(false);
               return [...prevOutput, data];
@@ -198,7 +202,7 @@ const fetchImages = async () => {
                 // You can set it in your state like this:
                 setDataFrame(results.data as object[]);
                 try {               
-                  const response = await postCsv(file).then((response) => {
+                  const response = await postTd(file).then((response) => {
                     setProgress(100);
                     setFileUploaded(true);
                     console.log('Response from server:', response);

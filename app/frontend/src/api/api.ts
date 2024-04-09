@@ -313,7 +313,7 @@ export async function processCsvAgentResponse(question: string, file: File, retr
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/postCsv', {
+    const response = await fetch('/posttd', {
         method: 'POST',
         body: formData,
     });

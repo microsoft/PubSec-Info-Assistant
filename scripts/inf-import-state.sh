@@ -180,28 +180,39 @@ module_path="module.logging.azurerm_application_insights.applicationInsights"
 import_resource_if_needed $module_path "$resourceId$providers"
 
 
+
 # OpenAI Services
 echo
 figlet "OpenAI Services"
-name="infoasst-aoai-$random_text"
-# only import if the service exists in the RG
-serviceExists=$(az resource list --resource-group "$TF_VAR_resource_group_name" --query "[?name=='$name'] | [0].name" --output tsv)
-if [[ $serviceExists == $name ]]; then
 
+if [ $TF_VAR_useExistingAOAIService = "false" ]; then
+    name="infoasst-aoai-$random_text"
     providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-    module_path="module.openaiServices.azurerm_cognitive_account.account"
+    module_path="module.openaiServices.azurerm_cognitive_account.account[0]"
     import_resource_if_needed $module_path "$resourceId$providers"
-    providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_chatGptDeploymentName"
-    module_path="module.openaiServices.azurerm_cognitive_deployment.deployment"
-    import_resource_if_needed "$module_path" "$resourceId$providers"
+
+    if [ -z "$TF_VAR_chatGptDeploymentName" ]; then
+        model_name="gpt-35-turbo-16k"
+    else
+        model_name=TF_VAR_chatGptDeploymentName
+    fi
+    providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$model_name"
+    module_path="module.openaiServices.azurerm_cognitive_deployment.deployment[0]"
+    import_resource_if_needed $module_path "$resourceId$providers"
+
+    providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$TF_VAR_azureOpenAIEmbeddingDeploymentName"
+    module_path="module.openaiServices.azurerm_cognitive_deployment.deployment[1]"
+    import_resource_if_needed $module_path "$resourceId$providers"
 
 else
     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
 fi
+
+exit 0
+
 secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
 module_path="module.openaiServices.azurerm_key_vault_secret.openaiServiceKeySecret"
 import_resource_if_needed "$module_path" "$secret_id"
-
 
 
 # AZ Monitor
@@ -213,39 +224,20 @@ import_resource_if_needed "$module_path" "$secret_id"
 # import_resource_if_needed $module_path "$resourceId$providers"
 
 
-
 # System identity, user and management Roles
 echo
 figlet "Roles"
 
 # Retrieve principal ids
-sp_infoasst_mgmt_access=$(az ad sp list --filter "displayName eq 'infoasst_mgmt_access_$random_text'" --query "[].appId" --output tsv)
+sp_infoasst_mgmt_access=$(az ad sp list --filter "displayName eq 'infoasst_mgmt_access_$random_text'" --query "[].id" --output tsv)
 sp_infoasst_func=$(az ad sp list --filter "displayName eq 'infoasst-func-$random_text'" --query "[].id" --output tsv)
 sp_infoasst_enrichmentweb=$(az ad sp list --filter "displayName eq 'infoasst-enrichmentweb-$random_text'" --query "[].id" --output tsv)
 sp_infoasst_web=$(az ad sp list --filter "displayName eq 'infoasst-web-$random_text'" --query "[].id" --output tsv)
-# echo "sp_infoasst_mgmt_access: $sp_infoasst_mgmt_access"
-# echo "sp_infoasst-func: $sp_infoasst_func"
-# echo "sp_infoasst-enrichmentweb: $sp_infoasst_enrichmentweb"
-# echo "sp_infoasst-web-: $sp_infoasst_web"
 
-json_content=$(<../infra_output.json)
-azure_openai_rg_name=$(echo "$json_content" | jq -r '.properties.outputs.azurE_OPENAI_RESOURCE_GROUP.value')
-aad_mgmt_service_principal_id=$(echo "$json_content" | jq -r '.properties.parameters.aadMgmtServicePrincipalId.value')
-# Compare it with the environment variable and run the command if they are not equal
-if [ "$TF_VAR_resource_group_name" != "$azure_openai_rg_name" ]; then
-    output=$(az role assignment list \
-        --subscription "$TF_VAR_subscriptionId" \
-        --resource-group "$azure_openai_rg_name" \
-        --query "[?principalId == '$aad_mgmt_service_principal_id'].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
-        --output json)
-    # Extract values from the JSON array, assume first index only
-    id=$(echo "$output" | jq -r '.[0].id')
-    principalId=$(echo "$output" | jq -r '.[0].principalId')
-    roleDefinitionName=$(echo "$output" | jq -r '.[0].roleDefinitionName')
-    module_path="module.openAiRoleMgmt[0].azurerm_role_assignment.role" 
-    import_resource_if_needed "$module_path" "$id"
-fi
-
+echo "sp_infoasst_mgmt_access: $sp_infoasst_mgmt_access"
+echo "sp_infoasst-func: $sp_infoasst_func"
+echo "sp_infoasst-enrichmentweb: $sp_infoasst_enrichmentweb"
+echo "sp_infoasst-web-: $sp_infoasst_web"
 
 # Retrieve the role assignments for the resource group
 output=$(az role assignment list \
@@ -253,7 +245,6 @@ output=$(az role assignment list \
   --resource-group $TF_VAR_resource_group_name \
   --query "[].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
   --output json)
-
 
 # Loop through each role assignment in the output and import
 echo "$output" | jq -c '.[]' | while read -r line; do
@@ -278,8 +269,11 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     #     if [ "$roleDefinitionName" == "AcrPull" ]; then
     #         # no roles assigned to this service principal
     #     fi
-    # elif [ "$sp_infoasst_mgmt_access" == "$rolePrincipalId" ]; then
-    #     # no roles assigned to this service principal
+    elif [ "$sp_infoasst_mgmt_access" == "$rolePrincipalId" ]; then
+        # no roles assigned to this service principal
+        if [ "$roleDefinitionName" == "CognitiveServicesOpenAIUser" ]; then
+            module_path="module.userRoles[\"CognitiveServicesOpenAIUser\"].azurerm_role_assignment.role"  
+        fi
     else
         # This is a user role
         if [ "$roleDefinitionName" == "StorageBlobDataReader" ]; then

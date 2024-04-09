@@ -389,7 +389,7 @@ const handleCloseEvent = () => {
     <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
-    {loading && <div className="spinner">Loading...</div>}
+    {loading && <div className="spinner">Loading{dots}</div>}
     { (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>

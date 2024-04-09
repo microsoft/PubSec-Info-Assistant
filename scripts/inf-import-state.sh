@@ -93,8 +93,6 @@ get_secret() {
     echo $secret_id
 }
 
-
-
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "${DIR}/load-env.sh"
@@ -112,24 +110,12 @@ for var in "${!TF_VAR_@}"; do
     echo "\$TF_VAR_${var#TF_VAR_} = ${!var}"
 done
 
-# Read randmom text suffix
-file_path=".state/$TF_VAR_environmentName/random.txt"
-if [ -f "$file_path" ]; then
-    random_text=$(<"$file_path")
-    random_text=$(echo "$random_text" | tr '[:upper:]' '[:lower:]')
-    echo "random text suffix: $random_text"
-else
-    # If the random text suffix is not found in random.txt, prompt the user for input
-    echo
-    echo -e "\033[1;33mPlease enter the random text suffix used in the names of your azure services:\033[0m"
-    read user_input
-    echo
-    # Assign the input to a variable
-    random_text=$user_input
-fi
 
-
-
+#  Get the new and old envrironment values
+FILE_PATH="$DIR/upgrade_repoint.config.json"
+new_random_text=$(jq -r '.new_env.random_text' $FILE_PATH)
+subscription=$TF_VAR_subscriptionId
+random_text=$new_random_text
 
 
 

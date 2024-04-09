@@ -75,7 +75,7 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                             work_citations.push(citationShortName);
                             // switch these to the citationShortName as key to allow dynamic lookup of the source path and page number
                             // The "FileX" moniker will not be used beyond this point in the UX code
-                            web_sourceFiles[citationShortName] = citation.source_path;
+                            work_sourceFiles[citationShortName] = citation.source_path;
                             citationIndex = work_citations.length;
         
                             // Check if the page_number property is a valid number.
@@ -123,7 +123,7 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                             web_citations.push(citation.citation);
                             // switch these to the citation as key to allow dynamic lookup of the source path and page number
                             // The "FileX" moniker will not be used beyond this point in the UX code
-                            work_sourceFiles[citation.citation] = citation.source_path;
+                            web_sourceFiles[citation.citation] = citation.source_path;
                             citationIndex = web_citations.length;
         
                             // The page_number property is not valid for web citation.
@@ -156,7 +156,7 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
             if (work_citation_lookup.hasOwnProperty(key)) {
                 const work_citation = work_citation_lookup[key].citation;
                 work_citations.push(work_citation.split("/").slice(4).join("/"));
-                work_sourceFiles[work_citation] = work_citation_lookup[key].source_path;
+                work_sourceFiles[work_citation.split("/").slice(4).join("/")] = work_citation_lookup[key].source_path;
                 pageNumbers[work_citation] = Number(work_citation_lookup[key].page_number);
             }
         }

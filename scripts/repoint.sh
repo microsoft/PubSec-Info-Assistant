@@ -227,7 +227,7 @@ delete_service() {
     echo "Checking if $service_type $service_name exists..."
     if az $service_type show --name $service_name --resource-group $resource_group > /dev/null 2>&1; then
         echo "$service_type $service_name exists. Attempting to delete..."
-        if az $service_type delete --name $service_name --resource-group $resource_group --yes; then
+        if az $service_type delete --name $service_name --resource-group $resource_group; then
             echo "$service_type $service_name deleted successfully."
             deleted_services+=("$service_type $service_name")
         else

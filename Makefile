@@ -64,14 +64,14 @@ destroy-inf: check-subscription
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
 
-run-upgrade: ## Upgrade from bicep to terraform
+merge-databases: ## Upgrade from bicep to terraform
 	@figlet "Upgrading in place"
 	python ./scripts/merge-databases.py
 
-run-repoint: ## Repoint functions, webapp and enrichment app to old rg cosmos, storage and search
+repoint: ## Repoint functions, webapp and enrichment app to old rg cosmos, storage and search
 	@figlet "Repointing"
 	python ./scripts/merge-databases.py
 	@./scripts/repoint.sh
 
-repoint:
+run-repoint:
 	@./scripts/repoint.sh

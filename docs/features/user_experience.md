@@ -4,10 +4,87 @@ The end user leverages the web interface as the primary method to engage with th
 
 ## Having a conversation with your data
 
-When you engage with IA Accelerator in the "Chat" method, the system maintains a history for your conversation and will be able to understand the context of your questions from one question to the next.
+When you use the "Chat" capabilities, the system maintains a history for your conversation and will be able to understand the context of your questions from one question to the next in a conversation flow.
 
-> You may activate the Chat engagement pattern by choosing the "Chat" link at the top of the page
-> ![Chat Link](/docs/images/chat-interface.png)
+> You may activate the Chat engagement pattern by choosing the "Chat" link at the top right side of the page
+
+> ![Chat Link](/docs/images/info-assist-chat-ui.png)
+
+There are new modes that extend the Information Assistant user experience. Similar to COPILOT, Information Assistant has a Work and a Web Mode called Work Only and Work + Web respectfully. There is also a Generative mode enabling user interaction with the LLM without grounding the response in their data.
+
+## Work Only
+
+Work Only mode provides the natural language conversation with your data that you are familiar with from previous versions of Information Assistant.
+
+## Work + Web
+
+The Work + Web mode experience starts similar to Work Only mode. It provides new options in the response enabling the user to __Searh Web__ to see if there is newer information available or __Compare with Web__ to compare the response from their data with information available on the web. 
+
+![Chat Link](/docs/images/work-plus-web-ui.png)
+
+Selecting either of these options changes the user experience as follows:
+
+### Search Web
+
+Selecting __Search Web__ from a Work Only response asks the same question on the web. The UI color scheme changes to reflect the user is searching a different source.
+
+![Chat Link](/docs/images/work-plus-web-search-web.png)
+
+Options in the __Search Web__ response include Search Work and Compare with Work.
+
+### Compare with Web
+
+Selecting __Compare with Web__ from a Work Only response asks the same question on the web then compares your data response with the response from the web. The UI color scheme changes to reflect the user is comparing Work with Web
+
+![Chat Link](/docs/images/work-plus-web-compare-with-web.png)
+
+The Compare with Web response includes both work and web citations.
+
+## Generative
+
+Generative mode enables user interaction with the LLM without grounding the response in their data.
+
+![Chat Link](/docs/images/generative-ungrounded-ui.png)
+
+On the top right are two new preview features called Math Assistant and Tabular Data Assistant. The Math Assistant and Tabular Data assistant are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
+
+## Math Assistant
+
+The Math Assistant combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.
+
+![Chat Link](/docs/images/math-assistant-ui.png)
+
+Users can select an example query or enter their own math question. There are three options below the question promt where the user can ask for clues, ask the assistant to show them how to solve the math problem, or simply provide an answer.
+
+### Give me clues
+
+Give me clues will assist the user without providing the answer or showing them how to solve the problem.
+
+![Chat Link](/docs/images/math-assistant-give-me-clues.png)
+
+### Show me how to Solve it
+
+Show me how to Solve it illustrates the process steps to solve the math problem then provides the answer.
+
+![Chat Link](/docs/images/math-assistant-show-me-how-to-solve.png)
+
+### Show Me the Answer
+
+Show Me the Answer works like a calculator and simply provides the answer to the math question.
+
+![Chat Link](/docs/images/math-assistant-show-me-the-answer.png)
+
+## Tabular Data Assistant
+
+The Tabular Data Assistants allows users to ask natural language questions about tabular data stored in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data.
+
+First, the user must upload a CSV file. They can drag and drop the file onto the Tabular Data Assistant UI or browse their file system(s) to select files then click the Upload File button.
+
+![Chat Link](/docs/images/tab-data-assist-upload-files-ui.png)
+
+Once a file has been uploaded the user can select and example query or enter thier own question about the CSV file.
+
+![Chat Link](/docs/images/tab-data-assist-how-many-rows.png)
 
 ## Analysis Panel
 

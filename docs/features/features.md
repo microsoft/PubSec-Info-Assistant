@@ -108,13 +108,30 @@ We are rolling out the Math Assistant and Tabular Data Assistant in a preview mo
 
 ## User Experience
 
-![Chat screen](/docs/images/info_assistant_chatscreen.png)
+
+
+![Chat screen](/docs/images/info-assist-chat-ui.png)
 
 The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page.
 
 ## Document Deletion
 
-In order to delete a document from the system entirely, one must only delete the document from the upload container in the `infoasststore*****` Storage Account. The Azure Function `FileDeletion` runs on a 10 minute timer and will delete the relevant documents from the content Storage container, the AI Search Index, and the Cosmos DB tag container. It will then update the state of the document, which can be viewed in the Upload Status portion of the UI under the Manage Content tab at the top right.
+There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure.
+
+### File Deletion in the UI
+
+Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. Follow the steps outlined below to delete files:
+
+1. __Access the Manage Content UI__: Select the __Manage Content__ tab located at the top right.
+2. __Filter Your Files__: On the left, select __Upload Status__ then use the dropdown lists to apply any desired filters.
+3. __Refresh the List__: Click the __Refresh__ icon to update the list of files based on your filters.
+4. __Delete a File__: Once the filtered list appears, select the file you want to delete. Then, click the __Delete__ link located to the right of the Refresh link.
+
+![Upload Status](/docs/images/upload-status-delete.png)
+
+### Technical File Deletion from the upload container
+
+An experienced technical user can delete a document from the upload container in the `infoasststore*****` Storage Account. The Azure Function `FileDeletion` runs on an interval timer and will delete the relevant documents from the content Storage container, the AI Search Index, and CosmosDB. It will then update the state of the document, which can be viewed in the Upload Status portion of the UI under the Manage Content tab at the top right.
 
 ## Works in Progress (Future releases)
 
@@ -126,6 +143,4 @@ We've starting with text-based image retrieval, but in the future, we have plans
 
 To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
 
-### File Deletion in the UI
 
-The ability to delete documents from the system will be enabled through a future UI update.

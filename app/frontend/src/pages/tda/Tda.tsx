@@ -26,6 +26,7 @@ interface Props {
 
 const Tda = ({folderPath, tags}: Props) => {
   const [streamKey, setStreamKey] = useState(0);
+  const [dots, setDots] = useState('');
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
@@ -63,6 +64,14 @@ const saveChart = (query: string) => {
   const qs = ` If any charts or graphs or plots were created save them in the ${tempDir} directory".`;
   return query + ' . ' + qs;
 };
+
+useEffect(() => {
+  const intervalId = setInterval(() => {
+    setDots(prevDots => (prevDots.length < 3 ? prevDots + '.' : ''));
+  }, 500); // Change dot every 500ms
+
+  return () => clearInterval(intervalId); // Cleanup interval on component unmount
+}, [loading]);
 
 const fetchImages = async () => {
   console.log('fetchImages called');

@@ -82,7 +82,7 @@ First, the user must upload a CSV file. They can drag and drop the file onto the
 
 ![Chat Link](/docs/images/tab-data-assist-upload-files-ui.png)
 
-Once a file has been uploaded the user can select and example query or enter thier own question about the CSV file.
+Once a file has been uploaded the user can select an example query or enter thier own question about the CSV file.
 
 ![Chat Link](/docs/images/tab-data-assist-how-many-rows.png)
 

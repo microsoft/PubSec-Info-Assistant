@@ -77,7 +77,6 @@ repoint: ## Repoint functions, webapp and enrichment app to old rg cosmos, stora
 run-repoint:
 	@./scripts/repoint.sh
 
-
 import-state: check-subscription ## import state of current srevcies to TF state
 	@./scripts/inf-import-state.sh
 

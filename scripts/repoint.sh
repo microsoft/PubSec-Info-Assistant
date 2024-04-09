@@ -218,7 +218,7 @@ figlet "Delete old services"
 resource_group=$old_resource_group
 function_app="infoasst-func-$old_random_text"
 web_app="infoasst-web-$old_random_text"
-enrichment_app="infoasst-enrichmentasp-$old_random_text"
+enrichment_app="infoasst-enrichmentweb-$old_random_text"
 
 # Function to delete a service and handle non-existence
 delete_service() {

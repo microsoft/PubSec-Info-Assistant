@@ -9,11 +9,11 @@ resource "azurerm_network_security_group" "nsg" {
 
 //Create the DDoS plan
 
-resource "azurerm_network_ddos_protection_plan" "ddos" {
-  name                = var.ddos_name
-  resource_group_name = var.resourceGroupName
-  location            = var.location
-}
+//resource "azurerm_network_ddos_protection_plan" "ddos" {
+//  name                = var.ddos_name
+//  resource_group_name = var.resourceGroupName
+ // location            = var.location
+// }
 
 //Create the Virtual Network
 
@@ -24,10 +24,10 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = [var.vnetIpAddressCIDR]
   tags = var.tags
 
-  ddos_protection_plan {
-    id     = azurerm_network_ddos_protection_plan.ddos.id
-    enable = var.ddos_enabled
-  }
+ // ddos_protection_plan {
+ //   id     = azurerm_network_ddos_protection_plan.ddos.id
+ //   enable = var.ddos_enabled
+ // }
 }
 
 resource "azurerm_subnet" "ampls" {
@@ -93,108 +93,39 @@ resource "azurerm_subnet_network_security_group_association" "keyVault_snet_to_n
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-resource "azurerm_subnet" "appInbound" {
-  name                 = "appInbound"
+resource "azurerm_subnet" "app" {
+  name                 = "app"
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetAppInboundCIDR]
-
-  delegation {
-    name = "Microsoft.Web/serverFarms"
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
+  address_prefixes     = [var.snetAppCIDR]
 }
 
-resource "azurerm_subnet_network_security_group_association" "appInbound_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.appInbound.id
+resource "azurerm_subnet_network_security_group_association" "app_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.app.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-resource "azurerm_subnet" "appOutbound" {
-  name                 = "appOutbound"
+resource "azurerm_subnet" "function" {
+  name                 = "function"
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetAppOutboundCIDR]
-  private_endpoint_network_policies_enabled = true
-
-  delegation {
-    name = "Microsoft.Web/serverFarms"
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
+  address_prefixes     = [var.SnetFunctionCIDR]
 }
 
-resource "azurerm_subnet_network_security_group_association" "appOutbound_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.appOutbound.id
+resource "azurerm_subnet_network_security_group_association" "function_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.function.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-resource "azurerm_subnet" "functionInbound" {
-  name                 = "functionInbound"
+resource "azurerm_subnet" "enrichment" {
+  name                 = "enrichment"
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetFunctionInboundCIDR]
+  address_prefixes     = [var.snetEnrichmentCIDR]
 }
 
-resource "azurerm_subnet_network_security_group_association" "functionInbound_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.functionInbound.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-
-resource "azurerm_subnet" "functionOutbound" {
-  name                 = "functionOutbound"
-  resource_group_name  = var.resourceGroupName
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetFunctionOutboundCIDR]
-  service_endpoints    = ["Microsoft.Storage"]
-  delegation {
-    name = "Microsoft.Web/serverFarms"
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
-}
-
-resource "azurerm_subnet_network_security_group_association" "functionOutbound_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.functionOutbound.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-
-resource "azurerm_subnet" "enrichmentInbound" {
-  name                 = "enrichmentInbound"
-  resource_group_name  = var.resourceGroupName
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetEnrichmentInboundCIDR]
-}
-
-resource "azurerm_subnet_network_security_group_association" "enrichmentInbound_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.enrichmentInbound.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-
-resource "azurerm_subnet" "enrichmentOutbound" {
-  name                 = "enrichmentOutbound"
-  resource_group_name  = var.resourceGroupName
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.snetEnrichmentOutboundCIDR]
-  service_endpoints    = ["Microsoft.Storage"]
-  delegation {
-    name = "Microsoft.Web/serverFarms"
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
-}
-
-resource "azurerm_subnet_network_security_group_association" "enrichmentOutbound_snet_to_nsg" {
-  subnet_id                 = azurerm_subnet.enrichmentOutbound.id
+resource "azurerm_subnet_network_security_group_association" "enrichment_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.enrichment.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 

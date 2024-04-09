@@ -51,12 +51,9 @@ module "network" {
   snetCosmosDbCIDR           = var.cosmos_db_CIDR
   snetAzureAiCIDR            = var.azure_ai_CIDR
   snetKeyVaultCIDR           = var.key_vault_CIDR
-  snetAppInboundCIDR         = var.webapp_inbound_CIDR
-  snetAppOutboundCIDR        = var.webapp_outbound_CIDR
-  snetFunctionInboundCIDR    = var.functions_inbound_CIDR
-  snetFunctionOutboundCIDR   = var.functions_outbound_CIDR
-  snetEnrichmentInboundCIDR  = var.enrichment_app_inbound_CIDR
-  snetEnrichmentOutboundCIDR = var.enrichment_app_outbound_CIDR
+  snetAppCIDR         = var.webapp_CIDR
+  SnetFunctionCIDR    = var.functions_CIDR
+  snetEnrichmentCIDR  = var.enrichment_app_CIDR
   snetSearchServiceCIDR      = var.search_service_CIDR
   snetAzureVideoIndexerCIDR  = var.azure_video_indexer_CIDR
   snetBingServiceCIDR        = var.bing_service_CIDR
@@ -310,7 +307,7 @@ module "webapp" {
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
   is_secure_mode                      = var.is_secure_mode
-  subnet_id                           = var.is_secure_mode ? module.network[0].snetAppOutbound_id : null
+  subnet_id                           = var.is_secure_mode ? module.network[0].snetApp_id : null
   private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   private_dns_zone_name               = var.is_secure_mode ? module.privateDnsZoneApp[0].privateDnsZoneName : null
 

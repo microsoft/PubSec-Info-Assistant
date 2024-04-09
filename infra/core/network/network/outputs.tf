@@ -34,28 +34,16 @@ output "snetKeyVault_id" {
   value = azurerm_subnet.keyVault.id
 }
 
-output "snetAppInbound_id" {
-  value = azurerm_subnet.appInbound.id
+output "snetApp_id" {
+  value = azurerm_subnet.app.id
 }
 
-output "snetAppOutbound_id" {
-  value = azurerm_subnet.appOutbound.id
+output "SnetFunction_id" {
+  value = azurerm_subnet.function.id
 }
 
-output "snetFunctionInbound_id" {
-  value = azurerm_subnet.functionInbound.id
-}
-
-output "snetFunctionOutbound_id" {
-  value = azurerm_subnet.functionOutbound.id
-}
-
-output "snetEnrichmentInbound_id" {
-  value = azurerm_subnet.enrichmentInbound.id
-}
-
-output "snetEnrichmentOutbound_id" {
-  value = azurerm_subnet.enrichmentOutbound.id
+output "snetEnrichment_id" {
+  value = azurerm_subnet.enrichment.id
 }
 
 output "snetSearch_id" {

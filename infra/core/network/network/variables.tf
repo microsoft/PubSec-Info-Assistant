@@ -50,27 +50,15 @@ variable "snetKeyVaultCIDR" {
   type    = string
 }
 
-variable "snetAppInboundCIDR" {
+variable "snetAppCIDR" {
   type    = string
 }
 
-variable "snetAppOutboundCIDR" {
+variable "SnetFunctionCIDR" {
   type    = string
 }
 
-variable "snetFunctionInboundCIDR" {
-  type    = string
-}
-
-variable "snetFunctionOutboundCIDR" {
-  type    = string
-}
-
-variable "snetEnrichmentInboundCIDR" {
-  type    = string
-}
-
-variable "snetEnrichmentOutboundCIDR" {
+variable "snetEnrichmentCIDR" {
   type    = string
 }
 

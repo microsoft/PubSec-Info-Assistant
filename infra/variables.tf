@@ -281,7 +281,7 @@ variable "sentenceTransformerEmbeddingVectorSize" {
 
 variable "embeddingsDeploymentCapacity" {
   type    = number
-  default = 240
+  default = 40
 }
 
 variable "openai_public_network_access_enabled" {
@@ -328,34 +328,19 @@ variable "key_vault_CIDR" {
   default = "10.0.1.192/26"
 }
 
-variable "webapp_inbound_CIDR" {
+variable "webapp_CIDR" {
   type    = string
   default = "10.0.2.0/26"
 }
 
-variable "webapp_outbound_CIDR" {
-  type    = string
-  default = "10.0.2.128/26"
-}
-
-variable "functions_inbound_CIDR" {
+variable "functions_CIDR" {
   type    = string
   default = "10.0.3.0/26"
 }
 
-variable "functions_outbound_CIDR" {
-  type    = string
-  default = "10.0.3.128/26"
-}
-
-variable "enrichment_app_inbound_CIDR" {
+variable "enrichment_app_CIDR" {
   type    = string
   default = "10.0.4.0/26"
-}
-
-variable "enrichment_app_outbound_CIDR" {
-  type    = string
-  default = "10.0.4.128/26"
 }
 
 variable "search_service_CIDR" {
@@ -410,13 +395,13 @@ variable "enrichmentAppServicePlanName" {
 variable "enrichmentAppServiceSkuSize" {
   description = "The size of the app service plan for the enrichment service. Must match with the tier value in enrichmentAppServiceSkuTier."
   type = string
-  default = "P1v3"
+  default = "S1"
 }
 
 variable "enrichmentAppServiceSkuTier" {
   description = "The tier of the app service plan for the enrichment service. Must match with the size value in enrichmentAppServiceSkuSize."
   type = string
-  default = "PremiumV3"
+  default = "Standard"
 }
 
 variable "logAnalyticsName" {

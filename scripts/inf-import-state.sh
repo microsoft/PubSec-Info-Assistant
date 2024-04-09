@@ -132,6 +132,7 @@ module_path="random_string.random"
 import_resource_if_needed $module_path $random_text
 
 
+
 # Main
 echo
 figlet "Main"
@@ -255,7 +256,7 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     elif [ "$sp_infoasst_mgmt_access" == "$rolePrincipalId" ]; then
         # no roles assigned to this service principal
         if [ "$roleDefinitionName" == "CognitiveServicesOpenAIUser" ]; then
-            module_path="module.userRoles[\"CognitiveServicesOpenAIUser\"].azurerm_role_assignment.role"  
+            module_path="module.openAiRoleMgmt[0].azurerm_role_assignment.role"   
         fi
     else
         # This is a user role
@@ -275,8 +276,14 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     fi
     if [ "$module_path" != "" ]; then
         import_resource_if_needed "$module_path" "$roleId"
+    else
+        echo "Unaccounted for role: "
+        echo "roleDefinitionName: $roleDefinitionName"
+        echo "roleId: $roleId"
+        echo "rolePrincipalId: $rolePrincipalId"    
     fi
 done
+
 
 # appName="infoasst-web-$random_text"
 appName="infoasst_web_access_$random_text"

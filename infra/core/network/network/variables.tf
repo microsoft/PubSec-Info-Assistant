@@ -62,6 +62,10 @@ variable "snetEnrichmentCIDR" {
   type    = string
 }
 
+variable "snetIntegrationCIDR" {
+  type    = string
+}
+
 variable "snetSearchServiceCIDR" {
   type    = string
 }
@@ -77,3 +81,4 @@ variable "snetBingServiceCIDR" {
 variable "snetAzureOpenAICIDR" {
   type    = string
 }
+

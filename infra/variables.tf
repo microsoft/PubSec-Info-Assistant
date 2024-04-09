@@ -362,6 +362,12 @@ variable "azure_openAI_CIDR" {
   type    = string
   default = "10.0.6.128/26"
 }
+
+variable "integration_CIDR" {
+  type    = string
+  default = "10.0.7.0/26"
+
+}
 ////
 
 variable "formRecognizerSkuName" {

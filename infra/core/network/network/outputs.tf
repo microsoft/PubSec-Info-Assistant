@@ -46,6 +46,11 @@ output "snetEnrichment_id" {
   value = azurerm_subnet.enrichment.id
 }
 
+output "snetIntegration_id" {
+  value = azurerm_subnet.integration.id
+}
+
+
 output "snetSearch_id" {
   value = azurerm_subnet.aiSearch.id
 }

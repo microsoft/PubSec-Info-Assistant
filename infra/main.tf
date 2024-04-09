@@ -51,9 +51,10 @@ module "network" {
   snetCosmosDbCIDR           = var.cosmos_db_CIDR
   snetAzureAiCIDR            = var.azure_ai_CIDR
   snetKeyVaultCIDR           = var.key_vault_CIDR
-  snetAppCIDR         = var.webapp_CIDR
-  SnetFunctionCIDR    = var.functions_CIDR
-  snetEnrichmentCIDR  = var.enrichment_app_CIDR
+  snetAppCIDR                = var.webapp_CIDR
+  SnetFunctionCIDR           = var.functions_CIDR
+  snetEnrichmentCIDR          = var.enrichment_app_CIDR
+  snetIntegrationCIDR        = var.integration_CIDR
   snetSearchServiceCIDR      = var.search_service_CIDR
   snetAzureVideoIndexerCIDR  = var.azure_video_indexer_CIDR
   snetBingServiceCIDR        = var.bing_service_CIDR

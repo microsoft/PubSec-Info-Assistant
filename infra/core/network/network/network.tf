@@ -124,6 +124,20 @@ resource "azurerm_subnet" "enrichment" {
   address_prefixes     = [var.snetEnrichmentCIDR]
 }
 
+resource "azurerm_subnet" "integration" { 
+  name                 = "integration"
+  resource_group_name  = var.resourceGroupName
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.snetIntegrationCIDR]
+  
+   delegation {
+    name = "integrationDelegation"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+    }
+  }
+}
+
 resource "azurerm_subnet_network_security_group_association" "enrichment_snet_to_nsg" {
   subnet_id                 = azurerm_subnet.enrichment.id
   network_security_group_id = azurerm_network_security_group.nsg.id

@@ -187,7 +187,6 @@ output "AZURE_AI_FORM_RECOGNIZER_DOMAIN" {
   value = var.azure_ai_form_recognizer_domain
 }
 
-
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
 }

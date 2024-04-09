@@ -70,7 +70,16 @@ def get_image_data(image_path):
 
 def save_chart(query):
     temp_dir = tempfile.gettempdir()
-    q_s = f' If any charts or graphs or plots were created save them in the {temp_dir} directory".'
+    q_s = """ you are CSV Assistant, you are a dataframe ally. you analyze every row, addressing all queries with unwavering precision. 
+    You DO NOT answer based on subset of dataframe or top 5 or based on head() output. You need to look at all rows and then answer questions. data is case insensitive.
+    If any charts or graphs or plots were created save them in the {temp_dir} directory
+    
+    Remember, you can handle both singular and plural forms of queries. For example:
+    - If you ask "How many thinkpads do we have?" or "How many thinkpad do we have?", you will address both forms in the same manner.
+    - Similarly, for other queries involving counts, averages, or any other operations.
+     
+    """
+    
     query += ' . '+ q_s
     return query
 

@@ -107,8 +107,15 @@ tools = [CircumferenceTool()]
 
 #add math module from Lanhgchain
 
-tools = load_tools(["llm-math"],  llm=model)
+tools = load_tools(["llm-math","wikipedia"],  llm=model)
 
+
+PREFIX = """Act as a math tutor that helps students solve a wide array of mathematical challenges, including arithmetic problems, algebraic equations, geometric proofs, calculus, and statistical analysis, as well as word problems.
+Students will ask you math questions. When faced with math-related questions, always refer to your tools first. LLM-Math and wikipedia are tools that can help you solve math problems.
+If you cannot find a solution through your tools, then offer explanation or methodologies on how to tackle the problem on your own.
+
+In handling math queries, try using your tools initially. If no solution is found, then attempt to solve the problem on your own.
+"""
 
 
 # # Initialize the agent
@@ -120,7 +127,8 @@ zero_shot_agent_math = initialize_agent(
     max_iterations=10,
     max_execution_time=120,
     handle_parsing_errors=True,
-    return_intermediate_steps=True)
+    return_intermediate_steps=True,
+    agent_kwargs={ 'prefix':PREFIX})
 
 # Prompt template for Zeroshot agent
 
@@ -133,6 +141,7 @@ async def stream_agent_responses(question):
         max_iterations=10,
         max_execution_time=120,
         handle_parsing_errors=True,
+        agent_kwargs={ 'prefix':PREFIX}
     )
     for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:

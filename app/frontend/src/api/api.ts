@@ -313,7 +313,7 @@ export async function processCsvAgentResponse(question: string, file: File, retr
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/postCsv', {
+    const response = await fetch('/posttd', {
         method: 'POST',
         body: formData,
     });
@@ -324,7 +324,7 @@ export async function processCsvAgentResponse(question: string, file: File, retr
     }
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch(`/process_csv_agent_response?question=${encodeURIComponent(question)}`, {
+            const response = await fetch(`/process_td_agent_response?question=${encodeURIComponent(question)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"

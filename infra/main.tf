@@ -25,7 +25,7 @@ module "entraObjects" {
   isInAutomation                    = var.isInAutomation
   requireWebsiteSecurityMembership  = var.requireWebsiteSecurityMembership
   randomString                      = random_string.random.result
-  azure_websites_domain                      = var.azure_websites_domain
+  azure_websites_domain             = var.azure_websites_domain
   aadWebClientId                    = var.aadWebClientId
   aadMgmtClientId                   = var.aadMgmtClientId
   aadMgmtServicePrincipalId         = var.aadMgmtServicePrincipalId
@@ -58,6 +58,9 @@ module "storage" {
   }
   containers            = ["content","website","upload","function","logs","config"]
   queueNames            = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 module "enrichmentApp" {
@@ -217,6 +220,9 @@ module "openaiServices" {
       rai_policy_name = "Microsoft.Default"
     }
   ]
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 module "formrecognizer" {
@@ -228,6 +234,9 @@ module "formrecognizer" {
   customSubDomainName = "infoasst-fr-${random_string.random.result}"
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId 
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 module "cognitiveServices" {
@@ -238,6 +247,9 @@ module "cognitiveServices" {
   tags     = local.tags
   keyVaultId = module.kvModule.keyVaultId 
   resourceGroupName = azurerm_resource_group.rg.name
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 module "searchServices" {
@@ -252,6 +264,10 @@ module "searchServices" {
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId
   azure_search_domain = var.azure_search_domain
+
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 module "cosmosdb" {
@@ -264,6 +280,10 @@ module "cosmosdb" {
   logContainerName  = "statuscontainer"
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId        = module.kvModule.keyVaultId  
+  
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 
@@ -482,6 +502,9 @@ module "bingSearch" {
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   keyVaultId                    = module.kvModule.keyVaultId
   enableWebChat                 = var.enableWebChat
+  depends_on = [
+    module.kvModule
+  ]
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

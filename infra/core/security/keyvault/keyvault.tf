@@ -10,24 +10,33 @@ resource "azurerm_key_vault" "kv" {
   enabled_for_template_deployment = true
   soft_delete_retention_days  = 7
   purge_protection_enabled    = true
+}
 
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = var.kvAccessObjectId
-
-    key_permissions = [
-      "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import", 
-      "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update", 
+ 
+resource "azurerm_key_vault_access_policy" "infoasst" {
+  depends_on  = [
+    azurerm_key_vault.kv
+  ]
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = var.kvAccessObjectId
+ 
+  key_permissions = [
+      "Backup", "Create", "Decrypt", "Delete", "Encrypt", "Get", "Import",
+      "List", "Purge", "Recover", "Restore", "Sign", "UnwrapKey", "Update",
       "Verify", "WrapKey"
     ]
-
-    secret_permissions = [
+ 
+  secret_permissions = [
       "Backup", "Delete", "Get", "List", "Purge", "Recover", "Restore", "Set"
     ]
-  }
 }
 
 resource "azurerm_key_vault_secret" "spClientKeySecret" {
+  depends_on  = [
+    azurerm_key_vault_access_policy.infoasst,
+    azurerm_key_vault.kv
+  ]
   name         = "AZURE-CLIENT-SECRET"
   value        = var.spClientSecret
   key_vault_id = azurerm_key_vault.kv.id

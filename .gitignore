@@ -398,4 +398,4 @@ infra/infoasst*
 infra/sp_config/config.json
 
 #Scripts
-/scripts/upgrade_repoint.config.json
+scripts/upgrade_repoint.config.json

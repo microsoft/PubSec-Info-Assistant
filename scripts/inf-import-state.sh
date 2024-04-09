@@ -138,9 +138,8 @@ figlet "Main"
 module_path="azurerm_resource_group.rg"
 import_resource_if_needed $module_path "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-$TF_VAR_cuaId"
-module_path="azurerm_resource_group_template_deployment.customer_attribution" 
+module_path="azurerm_resource_group_template_deployment.customer_attribution[0]" 
 import_resource_if_needed $module_path "$resourceId$providers"
-# terraform import azurerm_resource_group_template_deployment.customer_attribution "/subscriptions/0d4b9684-ad97-4326-8ed0-df8c5b780d35/resourceGroups/infoasst-geearl-4221-v1.1/providers/Microsoft.Resources/deployments/pid-7a01ff74-15c2-4fec-9f14-63db7d3d6131"
 
 
 # Entra 
@@ -193,8 +192,6 @@ if [ $TF_VAR_useExistingAOAIService = "false" ]; then
 else
     echo -e "\e[34mService $name not found in resource group $TF_VAR_resource_group_name.\e[0m"
 fi
-
-exit 0
 
 secret_id=$(get_secret "AZURE-OPENAI-SERVICE-KEY")
 module_path="module.openaiServices.azurerm_key_vault_secret.openaiServiceKeySecret"

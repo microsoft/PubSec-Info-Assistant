@@ -1,7 +1,12 @@
 {
 "old_env":
     {
-        "old_resource_group": "",
-        "old_random_text": ""
+        "resource_group": "",
+        "random_text": ""
+    },
+"new_env":
+    {
+        "resource_group": "",
+        "random_text": ""
     }
 }

@@ -499,5 +499,5 @@ variable "enableDevCode" {
 }
 variable "maxCsvFileSize" {
   type    = number
-  default = 5
+  default = 20
 }

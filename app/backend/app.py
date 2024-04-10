@@ -41,8 +41,8 @@ from approaches.mathassistant import(
 from approaches.tabulardataassistant import (
     refreshagent,
     save_df,
-    process_agent_response as csv_agent_response,
-    process_agent_scratch_pad as csv_agent_scratch_pad,
+    process_agent_response as td_agent_response,
+    process_agent_scratch_pad as td_agent_scratch_pad,
     get_images_in_temp
 
 )
@@ -671,8 +671,8 @@ async def getHint(question: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
-@app.post("/postCsv")
-async def postCsv(csv: UploadFile = File(...)):
+@app.post("/posttd")
+async def posttd(csv: UploadFile = File(...)):
     try:
         global dffinal
             # Read the file into a pandas DataFrame
@@ -687,16 +687,16 @@ async def postCsv(csv: UploadFile = File(...)):
     
     
     #return {"filename": csv.filename}
-@app.get("/process_csv_agent_response")
-async def process_csv_agent_response(retries=3, delay=1, question: Optional[str] = None):
+@app.get("/process_td_agent_response")
+async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
     for i in range(retries):
         try:
-            results = csv_agent_response(question)
+            results = td_agent_response(question)
             return results
         except AttributeError as ex:
-            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
@@ -705,14 +705,14 @@ async def process_csv_agent_response(retries=3, delay=1, question: Optional[str]
                 else:
                     raise HTTPException(status_code=500, detail=str(ex)) from ex
         except Exception as ex:
-            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
                 raise HTTPException(status_code=500, detail=str(ex)) from ex
 
-@app.get("/getCsvAnalysis")
-async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
+@app.get("/getTdAnalysis")
+async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
     global dffinal
     if question is None:
             raise HTTPException(status_code=400, detail="Question is required")
@@ -720,10 +720,10 @@ async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
     for i in range(retries):
         try:
             save_df(dffinal)
-            results = csv_agent_scratch_pad(question, dffinal)
+            results = td_agent_scratch_pad(question, dffinal)
             return results
         except AttributeError as ex:
-            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
@@ -732,7 +732,7 @@ async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
                 else:
                     raise HTTPException(status_code=500, detail=str(ex)) from ex
         except Exception as ex:
-            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
@@ -767,7 +767,7 @@ async def getSolve(question: Optional[str] = None):
     try:
         results = process_agent_scratch_pad(question)
     except Exception as ex:
-        log.exception("Exception in /getHint")
+        log.exception("Exception in /getSolve")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
@@ -781,13 +781,13 @@ async def stream_response(question: str):
         log.exception("Exception in /stream")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
 
-@app.get("/csvstream")
-async def csv_stream_response(question: str):
+@app.get("/tdstream")
+async def td_stream_response(question: str):
     save_df(dffinal)
     
 
     try:
-        stream = csv_agent_scratch_pad(question, dffinal)
+        stream = td_agent_scratch_pad(question, dffinal)
         return StreamingResponse(stream, media_type="text/event-stream")
     except Exception as ex:
         log.exception("Exception in /stream")

@@ -47,15 +47,38 @@ h2 {
     width: 50%; /* Adjust as needed */
     
 }
+
+.centeredAnswerContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+    border-radius: 10px;
+    margin: auto;
+    width: 100%; /* Adjust as needed */
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.centeredAnswerContainer ul,
+.centeredAnswerContainer ol {
+  padding-left: 0;
+  margin-left: 0;
+  list-style-type: none;
+}
+
+
+
 .formClass {
     width: 100%;
 }
 .buttonContainer {
     display: flex;
-    flex-direction: column;
     border-radius: 20px; /* Rounds the corners of the buttons */
+    margin-left: 1rem;
+    margin-right: 1rem;
     width: auto;
-    align-items: flex-start;
+    justify-content: space-around;
 }
 
 .buttonContainer button {
@@ -215,6 +238,5 @@ h2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     min-height: 600px;
   }

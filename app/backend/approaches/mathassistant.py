@@ -27,7 +27,7 @@ os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
 load_dotenv()
 
 
-azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
 
 deployment_name = azure_openai_chatgpt_deployment
 OPENAI_DEPLOYMENT_NAME = deployment_name
@@ -36,7 +36,7 @@ OPENAI_DEPLOYMENT_NAME = deployment_name
 OPENAI_DEPLOYMENT_NAME =  azure_openai_chatgpt_deployment
 from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
-from langchain.agents import initialize_agent, load_tools
+from langchain.agents import initialize_agent, load_tools, AgentType
 from langchain.prompts import ChatPromptTemplate
 
 
@@ -107,20 +107,28 @@ tools = [CircumferenceTool()]
 
 #add math module from Lanhgchain
 
-tools = load_tools(["llm-math"],  llm=model)
+tools = load_tools(["llm-math","wikipedia"],  llm=model)
 
+
+PREFIX = """Act as a math tutor that helps students solve a wide array of mathematical challenges, including arithmetic problems, algebraic equations, geometric proofs, calculus, and statistical analysis, as well as word problems.
+Students will ask you math questions. When faced with math-related questions, always refer to your tools first. LLM-Math and wikipedia are tools that can help you solve math problems.
+If you cannot find a solution through your tools, then offer explanation or methodologies on how to tackle the problem on your own.
+
+In handling math queries, try using your tools initially. If no solution is found, then attempt to solve the problem on your own.
+"""
 
 
 # # Initialize the agent
 zero_shot_agent_math = initialize_agent(
-    agent="zero-shot-react-description",
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         tools=tools,
     llm=model,
     verbose=True,
     max_iterations=10,
     max_execution_time=120,
     handle_parsing_errors=True,
-    return_intermediate_steps=True)
+    return_intermediate_steps=True,
+    agent_kwargs={ 'prefix':PREFIX})
 
 # Prompt template for Zeroshot agent
 
@@ -133,19 +141,20 @@ async def stream_agent_responses(question):
         max_iterations=10,
         max_execution_time=120,
         handle_parsing_errors=True,
+        agent_kwargs={ 'prefix':PREFIX}
     )
     for chunk in zero_shot_agent_math.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
                 yield f'data: Calling Tool: `{action.tool}` with input `{action.tool_input}`\n\n'
-                yield f'data: I am thinking...: {action.log} \n\n'
+                yield f'data: Processing...: {action.log} \n\n'
         elif "steps" in chunk:
             for step in chunk["steps"]:
                 yield f'data: Tool Result: `{step.observation}` \n\n'
         elif "output" in chunk:
             output =   f'data: Final Output: `{chunk["output"]}`\n\n'
             yield output
-            yield (f'data: Stream ended')
+            yield (f'event: end\ndata: Stream ended\n\n')
             return
         else:
             raise ValueError()
@@ -204,11 +213,11 @@ Here are a few example questions with expected answer and clues:
 Question: John has 2 houses. Each house has 3 bedrooms and there are 2 windows in each bedroom.
 Each house has 1 kitchen with 2 windows. Also, each house has 5 windows that are not in the bedrooms or kitchens.
 How many windows are there in John's houses?
-Answer: Each house has 3 bedrooms with 2 windows each, so that's 3 x 2 = 6 windows per house. \
-Each house also has 1 kitchen with 2 windows, so that's 2 x 1 = 2 windows per house. \
+Answer: Each house has 3 bedrooms with 2 windows each, so that's 3 * 2 = 6 windows per house. \
+Each house also has 1 kitchen with 2 windows, so that's 2 * 1 = 2 windows per house. \
 Each house has 5 windows that are not in the bedrooms or kitchens, so that's 5 x 1 = 5 windows per house. \
 In total, each house has 6 + 2 + 5 = 13 windows. \
-Since John has 2 houses, he has a total of 2 x 13 = 26 windows. The answer is 26.
+Since John has 2 houses, he has a total of 2 * 13 = 26 windows. The answer is 26.
 Clues: 1. Find the number of bedroom windows, kitchen windows, and other windows separately \
 2. Add them together to find the total number of windows at each house \
 3. Find the total number of windows for all the houses.

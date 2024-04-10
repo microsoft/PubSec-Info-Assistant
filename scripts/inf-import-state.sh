@@ -117,7 +117,8 @@ new_random_text=$(jq -r '.new_env.random_text' $FILE_PATH)
 subscription=$TF_VAR_subscriptionId
 random_text=$new_random_text
 
-
+echo "random_text: $random_text"
+echo "TF_VAR_resource_group_name: $TF_VAR_resource_group_name"
 
 # ***********************************************************
 # Import the existing resources into the Terraform state
@@ -141,6 +142,7 @@ import_resource_if_needed $module_path "$resourceId"
 providers="/providers/Microsoft.Resources/deployments/pid-$TF_VAR_cuaId"
 module_path="azurerm_resource_group_template_deployment.customer_attribution[0]" 
 import_resource_if_needed $module_path "$resourceId$providers"
+
 
 
 # Entra 

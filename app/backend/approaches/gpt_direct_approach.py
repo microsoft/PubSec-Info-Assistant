@@ -94,13 +94,13 @@ class GPTDirectApproach(Approach):
         self.model_version = model_version
 
     # def run(self, history: list[dict], overrides: dict) -> any:
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         user_q = 'Generate response for: ' + history[-1]["user"]
-
+        thought_chain["user_query"] = history[-1]["user"]
         #Generate the follow up prompt to be sent to the GPT model
         follow_up_questions_prompt = (
             self.follow_up_questions_prompt_content
@@ -139,11 +139,13 @@ class GPTDirectApproach(Approach):
 
         #Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+        thought_chain["ungrounded_response"] = urllib.parse.unquote(chat_completion.choices[0].message.content)
 
         return {
             "data_points": [],
             "answer": f"{urllib.parse.unquote(chat_completion.choices[0].message.content)}",
             "thoughts": f"Searched for:<br>{user_q}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+            "thought_chain": thought_chain,
             "work_citation_lookup": {},
             "web_citation_lookup": {}
         }

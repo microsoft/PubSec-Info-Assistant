@@ -75,7 +75,7 @@ class ChatWebRetrieveRead(Approach):
         self.bing_safe_search = bing_safe_search
         
 
-    async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
         """
         Runs the approach to simulate experience with Bing Chat.
 
@@ -91,6 +91,7 @@ class ChatWebRetrieveRead(Approach):
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
+        thought_chain["web_query"] = user_query
 
         follow_up_questions_prompt = (
             self.FOLLOW_UP_QUESTIONS_PROMPT_CONTENT
@@ -109,7 +110,7 @@ class ChatWebRetrieveRead(Approach):
             )
         
         query_resp = await self.make_chat_completion(messages)
-
+        thought_chain["web_search_term"] = query_resp
         # STEP 2: Use the search query to get the top web search results
         url_snippet_dict = await self.web_search_with_safe_search(query_resp)
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
@@ -136,11 +137,12 @@ class ChatWebRetrieveRead(Approach):
         msg_to_display = '\n\n'.join([str(message) for message in messages])
         # STEP 3: Use the search results to answer the user's question
         resp = await self.make_chat_completion(messages)  
-
+        thought_chain["web_response"] = resp
         return {
             "data_points": None,
             "answer": f"{urllib.parse.unquote(resp)}",
             "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+            "thought_chain": thought_chain,
             "work_citation_lookup": {},
             "web_citation_lookup": self.citations
         }

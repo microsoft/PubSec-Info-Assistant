@@ -25,13 +25,15 @@ class Approach:
     USER = "user"
     ASSISTANT = "assistant"
 
-    async def run(self, history: list[dict], overrides: dict) -> any:
+    async def run(self, history: list[dict], overrides: dict, citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> any:
         """
         Run the approach on the query and documents. Not implemented.
 
         Args:
             history: The chat history. (e.g. [{"user": "hello", "bot": "hi"}])
             overrides: Overrides for the approach. (e.g. temperature, etc.)
+            citation_lookup: The dictionary for the citations.
+            thought_chain: The dictionary for the thought chain.
         """
         raise NotImplementedError
 

@@ -274,7 +274,7 @@ def trim_content(sentence, n):
 
 
 def requeue(response, message_json):
-    '''This function handles requeing and erroring of cognitive servcies'''
+    '''This function handles requeuing and erroring of cognitive services'''
     blob_path = message_json["blob_name"]
     queued_count = message_json["text_enrichment_queued_count"]
     if response.status_code == 429:

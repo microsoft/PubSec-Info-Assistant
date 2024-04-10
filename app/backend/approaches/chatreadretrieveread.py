@@ -128,7 +128,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.model_version = model_version
         
     # def run(self, history: list[dict], overrides: dict) -> any:
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
 
         log = logging.getLogger("uvicorn")
         log.setLevel('DEBUG')
@@ -143,6 +143,7 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
+        thought_chain["work_query"] = user_q
 
         # Detect the language of the user's question
         detectedlanguage = self.detect_language(user_q)
@@ -179,6 +180,7 @@ class ChatReadRetrieveReadApproach(Approach):
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
 
+        thought_chain["work_search_term"] = generated_query
         # Generate embedding using REST API
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
         data = [f'"{generated_query}"']
@@ -390,11 +392,13 @@ class ChatReadRetrieveReadApproach(Approach):
             translated_response = self.translate_response(generated_response, detectedlanguage)
         else:
             translated_response = generated_response
-
+        thought_chain["work_response"] = urllib.parse.unquote(translated_response)
+        
         return {
             "data_points": data_points,
             "answer": f"{urllib.parse.unquote(translated_response)}",
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+            "thought_chain": thought_chain,
             "work_citation_lookup": citation_lookup,
             "web_citation_lookup": {}
         }

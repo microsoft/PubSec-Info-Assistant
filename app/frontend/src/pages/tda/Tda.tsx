@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { BlobServiceClient } from "@azure/storage-blob";
 import { CheckboxVisibility, DetailsList, DetailsListLayoutMode, IColumn, mergeStyles } from '@fluentui/react';
 import classNames from "classnames";
 import { nanoid } from "nanoid";
@@ -11,12 +10,13 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import { postCsv, processCsvAgentResponse, getCsvAnalysis, refresh } from "../../api";
+import {postTd, processCsvAgentResponse, refresh, getTempImages, streamTdData } from "../../api";
 import { Accordion, Card, Button } from 'react-bootstrap';
 import ReactMarkdown from "react-markdown";
 import estyles from "../../components/Example/Example.module.css";
 import { Example } from "../../components/Example";
 import { DocumentDataFilled, SparkleFilled, TableSearchFilled } from "@fluentui/react-icons";
+import CharacterStreamer from '../../components/CharacterStreamer/CharacterStreamer';
 
 
 interface Props {
@@ -25,6 +25,8 @@ interface Props {
 }
 
 const Tda = ({folderPath, tags}: Props) => {
+  const [streamKey, setStreamKey] = useState(0);
+  const [dots, setDots] = useState('');
   const [files, setFiles] = useState<any>([]);
   const [progress, setProgress] = useState(0);
   const [uploadStarted, setUploadStarted] = useState(false);
@@ -37,8 +39,10 @@ const Tda = ({folderPath, tags}: Props) => {
   const [dataFrame, setDataFrame] = useState<object[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [base64Images, setBase64Images] = useState<string[]>([]);
   const [fileu, setFile] = useState<File | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const eventSourceRef = useRef<EventSource | null>(null);
+
 
   type ExampleModel = {
     text: string;
@@ -46,21 +50,36 @@ const Tda = ({folderPath, tags}: Props) => {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How many rows are there?", value: "rows" },
-    { text: "What are the data types of each column?", value: "dataType" },
-    { text: "Are there any missing values in the dataset?", value: "missingValues" },
-    { text: "What are the summary statistics for categorical data?", value: "summaryStats" }
+    { text: "How many rows are there?", value: "How many rows are there?" },
+    { text: "What are the data types of each column?", value: "What are the data types of each column?" },
+    { text: "Are there any missing values in the dataset?", value: "Are there any missing values in the dataset?" },
+    { text: "What are the summary statistics for categorical data?", value: "What are the summary statistics for categorical data?" }
 ];
 
 interface Props {
     onExampleClicked: (value: string) => void;
 }
+const saveChart = (query: string) => {
+  const tempDir = window?.require?.('os')?.tmpdir?.();
+  const qs = ` If any charts or graphs or plots were created save them in the ${tempDir} directory".`;
+  return query + ' . ' + qs;
+};
 
-  const setImages = (newBase64Strings: string[]) => {
-    setBase64Images(newBase64Strings);
-  };
+useEffect(() => {
+  const intervalId = setInterval(() => {
+    setDots(prevDots => (prevDots.length < 3 ? prevDots + '.' : ''));
+  }, 500); // Change dot every 500ms
 
+  return () => clearInterval(intervalId); // Cleanup interval on component unmount
+}, [loading]);
 
+const fetchImages = async () => {
+  console.log('fetchImages called');
+  const tempImages = await getTempImages();
+  console.log('tempImages:', tempImages);
+  setImages(tempImages);
+  console.log('images:', images);
+};
   const setOtherQ = (selectedQuery: string) => {
     if (inputValue != "") {
       return inputValue;
@@ -68,61 +87,42 @@ interface Props {
     return selectedQuery;
   };
 
-  const handleAnalysis = async () => {
-    const retries: number = 3;
+  const handleAnalysis = () => {
+    setImages([])
     setOutput('');
     setLoading(true);
-    let lastError;
-  
-    for (let i = 0; i < retries; i++) {
+    setTimeout(async () => {
       try {
         const query = setOtherQ(selectedQuery);
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+        }
         if (fileu) {
-          const solve = await getCsvAnalysis(query, fileu);
-          let outputString = '';
-          solve.forEach((item) => {
-            outputString += item + '\n';
-            console.log(item);
-          });
-          setLoading(false);
-          setOutput(outputString);
-          return;  // If everything is successful, return from the function
+          eventSourceRef.current = await streamTdData(query, fileu);
+          console.log('EventSource opened');
+          console.log(eventSourceRef.current);
+          setStreamKey(prevKey => prevKey + 1);
         } else {
-          setOutput("no file has been uploaded.")
+          setOutput("no file file has been uploaded.")
           setLoading(false);
-          return;
         }
       } catch (error) {
-        lastError = error;
+        console.log(error);
+        setLoading(false);
       }
-    }
-  
-    // If the code reaches here, all retries have failed. Handle the error as needed.
-    console.error(lastError);
-    setLoading(false);
-    setOutput('An error occurred.');
+    }, 0);
   };
 
-  useEffect(() => {
-    const handleRefresh = async () => {
-      // Call your method here
-      await refresh();
-    };
-
-    handleRefresh();
-
-    // Cleanup function
-    return () => {
-      // This function will be called when the component unmounts
-      // You can call another method here if needed
-    };
-  }, []);
-
+    // Handle the analysis here
+  
+  
   const handleAnswer = async () => {
+    setStreamKey(prevKey => prevKey + 1);
     let lastError;
     const retries: number = 3;
     for (let i = 0; i < retries; i++) {
       try {
+        setImages([])
         const query = setOtherQ(selectedQuery);
         setOutput('');
         setLoading(true);
@@ -130,7 +130,9 @@ interface Props {
           const result = await processCsvAgentResponse(query, fileu);
           setLoading(false);
           setOutput(result.toString());
+          fetchImages();
           return;
+
         }
         else {
           setOutput("no file file has been uploaded.")
@@ -149,6 +151,7 @@ interface Props {
   // handler called when files are selected via the Dropzone component
 
   const handleQueryChange = (value: string) => {
+    setInputValue(value);
     setSelectedQuery(value);
     // Handle the selected query here
 };
@@ -195,7 +198,7 @@ interface Props {
                 // You can set it in your state like this:
                 setDataFrame(results.data as object[]);
                 try {               
-                  const response = await postCsv(file).then((response) => {
+                  const response = await postTd(file).then((response) => {
                     setProgress(100);
                     setFileUploaded(true);
                     console.log('Response from server:', response);
@@ -251,6 +254,16 @@ if (dataFrame.length > 0) {
     if (length > indexLength) {
       indexLength = length;
     }
+  }
+}
+
+const handleCloseEvent = () => {
+  if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+      fetchImages();
+      setLoading(false);
+      console.log('EventSource closed');
   }
 }
  
@@ -377,11 +390,29 @@ if (dataFrame.length > 0) {
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
     {loading && <div className="spinner">Loading...</div>}
-    { output !== '' && (
+    { (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>
-        <ReactMarkdown>{output}</ReactMarkdown>
+        <div>
+          <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} classNames={cstyle.centeredAnswerContainer} nonEventString={output} onStreamingComplete={handleCloseEvent} typingSpeed={10} />
+        </div>
+        <h2>Generated Images:</h2>
+        <div>
+          {images.length > 0 ? (
+            images.map((image, index) => (
+              <img 
+                key={index} 
+                src={`data:image/png;base64,${image}`} 
+                alt={`Temp Image ${index}`} 
+                style={{maxWidth: '100%'}} 
+              />
+            ))
+          ) : (
+            <p>No images generated</p>
+          )}
+        </div>
         <div className={cstyle.raiwarning}>AI-generated content may be incorrect</div>
+
       </div>
     )}
       </div>

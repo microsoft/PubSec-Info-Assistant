@@ -5,6 +5,7 @@ from typing import Optional
 import asyncio
 #from sse_starlette.sse import EventSourceResponse
 #from starlette.responses import StreamingResponse
+from starlette.responses import Response
 import logging
 import os
 import json
@@ -13,7 +14,7 @@ import pandas as pd
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
 from approaches.compareworkwithweb import CompareWorkWithWeb
@@ -34,13 +35,15 @@ from azure.storage.blob import (
 from approaches.mathassistant import(
     generate_response,
     process_agent_scratch_pad,
-    process_agent_response
+    process_agent_response,
+    stream_agent_responses
 )
 from approaches.tabulardataassistant import (
     refreshagent,
     save_df,
-    process_agent_response as csv_agent_response,
-    process_agent_scratch_pad as csv_agent_scratch_pad,
+    process_agent_response as td_agent_response,
+    process_agent_scratch_pad as td_agent_scratch_pad,
+    get_images_in_temp
 
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
@@ -290,14 +293,15 @@ async def chat(request: Request):
             return {"error": "unknown approach"}, 400
         
         if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}))
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
         else:
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {})
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
        
         response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
+                "thought_chain": r["thought_chain"],
                 "work_citation_lookup": r["work_citation_lookup"],
                 "web_citation_lookup": r["web_citation_lookup"]
         }
@@ -640,6 +644,16 @@ async def get_all_tags():
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
+@app.get("/getTempImages")
+async def get_temp_images():
+    """Get the images in the temp directory
+
+    Returns:
+        list: A list of image data in the temp directory.
+    """
+    images = get_images_in_temp()
+    return {"images": images}
+
 @app.get("/getHint")
 async def getHint(question: Optional[str] = None):
     """
@@ -658,8 +672,8 @@ async def getHint(question: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
-@app.post("/postCsv")
-async def postCsv(csv: UploadFile = File(...)):
+@app.post("/posttd")
+async def posttd(csv: UploadFile = File(...)):
     try:
         global dffinal
             # Read the file into a pandas DataFrame
@@ -674,16 +688,16 @@ async def postCsv(csv: UploadFile = File(...)):
     
     
     #return {"filename": csv.filename}
-@app.get("/process_csv_agent_response")
-async def process_csv_agent_response(retries=3, delay=1, question: Optional[str] = None):
+@app.get("/process_td_agent_response")
+async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
     for i in range(retries):
         try:
-            results = csv_agent_response(question)
+            results = td_agent_response(question)
             return results
         except AttributeError as ex:
-            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
@@ -692,14 +706,14 @@ async def process_csv_agent_response(retries=3, delay=1, question: Optional[str]
                 else:
                     raise HTTPException(status_code=500, detail=str(ex)) from ex
         except Exception as ex:
-            log.exception(f"Exception in /process_csv_agent_response:{str(ex)}")
+            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
                 raise HTTPException(status_code=500, detail=str(ex)) from ex
 
-@app.get("/getCsvAnalysis")
-async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
+@app.get("/getTdAnalysis")
+async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
     global dffinal
     if question is None:
             raise HTTPException(status_code=400, detail="Question is required")
@@ -707,10 +721,10 @@ async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
     for i in range(retries):
         try:
             save_df(dffinal)
-            results = csv_agent_scratch_pad(question, dffinal)
+            results = td_agent_scratch_pad(question, dffinal)
             return results
         except AttributeError as ex:
-            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
@@ -719,7 +733,7 @@ async def getCsvAnalysis(retries=3, delay=1, question: Optional[str] = None):
                 else:
                     raise HTTPException(status_code=500, detail=str(ex)) from ex
         except Exception as ex:
-            log.exception(f"Exception in /getCsvAnalysis:{str(ex)}")
+            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
             if i < retries - 1:  # i is zero indexed
                 await asyncio.sleep(delay)  # wait a bit before trying again
             else:
@@ -754,9 +768,33 @@ async def getSolve(question: Optional[str] = None):
     try:
         results = process_agent_scratch_pad(question)
     except Exception as ex:
-        log.exception("Exception in /getHint")
+        log.exception("Exception in /getSolve")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+
+@app.get("/stream")
+async def stream_response(question: str):
+    try:
+        stream = stream_agent_responses(question)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.get("/tdstream")
+async def td_stream_response(question: str):
+    save_df(dffinal)
+    
+
+    try:
+        stream = td_agent_scratch_pad(question, dffinal)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+
 
 
 @app.get("/process_agent_response")

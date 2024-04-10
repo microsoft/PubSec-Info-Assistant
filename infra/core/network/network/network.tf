@@ -9,11 +9,11 @@ resource "azurerm_network_security_group" "nsg" {
 
 //Create the DDoS plan
 
-//resource "azurerm_network_ddos_protection_plan" "ddos" {
-//  name                = var.ddos_name
-//  resource_group_name = var.resourceGroupName
- // location            = var.location
-// }
+resource "azurerm_network_ddos_protection_plan" "ddos" {
+  name                = var.ddos_name
+  resource_group_name = var.resourceGroupName
+  location            = var.location
+}
 
 //Create the Virtual Network
 
@@ -24,10 +24,10 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = [var.vnetIpAddressCIDR]
   tags = var.tags
 
- // ddos_protection_plan {
- //   id     = azurerm_network_ddos_protection_plan.ddos.id
- //   enable = var.ddos_enabled
- // }
+  ddos_protection_plan {
+    id     = azurerm_network_ddos_protection_plan.ddos.id
+    enable = var.ddos_enabled
+    }
 }
 
 resource "azurerm_subnet" "ampls" {
@@ -130,12 +130,12 @@ resource "azurerm_subnet" "integration" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetIntegrationCIDR]
   
-   delegation {
+   /* delegation {
     name = "integrationDelegation"
     service_delegation {
       name    = "Microsoft.Web/serverFarms"
     }
-  }
+  } */
 }
 
 resource "azurerm_subnet_network_security_group_association" "enrichment_snet_to_nsg" {

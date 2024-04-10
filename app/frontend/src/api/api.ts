@@ -16,6 +16,7 @@ import { AskResponse,
     DeleteItemRequest,
     ResubmitItemRequest,
     GetFeatureFlagsResponse,
+    getMaxCSVFileSizeType,
     } from "./models";
 
 export async function chatApi(options: ChatRequest): Promise<AskResponse> {
@@ -408,6 +409,22 @@ export async function getWarningBanner(): Promise<GetWarningBanner> {
         }
     });
     const parsedResponse: GetWarningBanner = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getMaxCSVFileSize(): Promise<getMaxCSVFileSizeType> {
+    const response = await fetch("/getMaxCSVFileSize", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: getMaxCSVFileSizeType = await response.json();
     if (response.status > 299 || !response.ok) {
         console.log(response);
         throw Error(parsedResponse.error || "Unknown error");

@@ -4,6 +4,13 @@ As customers move from 1.0 to the 1.1 release we have heard some have the the de
 
 If you feel strongly that you need to maintain your content, without reprocessing we have provided sample code to enable you to do this in two ways, namely to upgrade your 1.0 deployment to 1.1 or alternatively to repoint your 1.1 deployment to the 1.0 deployment. The recommended approach would be to repoint, as this poses the least risk to your existing precessed data. Let's explore these options in a bit more depth.
 
+As a first step, ensure your environment is up to date, by executing the following commands:
+
+```python
+pip install --upgrade azure-core
+pip install --azure-keyvault-secrets
+```
+
 ## Upgrade 
 In this option we overlay the 1.1 assets onto the existing 1.0 deployment, using the same services and resource group. One of the challenges with this approach is that we use a different technology to deploy the services in 1.1 than we do in 1.0, namely Bicep in 1.1 and Terraform in 1.1. The risks or tradeoffs of doing the upgrade approach are:
 - While the upgrade is underway your users will not be able to reliably access the service
@@ -11,11 +18,11 @@ In this option we overlay the 1.1 assets onto the existing 1.0 deployment, using
 - If you have made significant changes at an infrastructure level, such as renaming identities or services, you will need to tailor the sample code.
 
 The benefits are:
-- Once deployed, you will only have a single instance going forwrad
+- Once deployed, you will only have a single instance going forward
 
 ### Steps to upgrade
 To perform an upgrade, ideally review the sample code and test in a sandbox resource group deployment of 1.0. Once happy, more forward with the following steps:
-- Copy the file named upgrade_repoint.config.json.example in the /scripts folder and name it upgrade_repoint.config.json. Edit this file and add the name of your old 1.0 resource group and the 5 character random text suffix applied to all the Azure services in that resource group.Additionally add these same values to the section marked new_env.
+- Copy the file named upgrade_repoint.config.json.example in the /scripts folder and name it upgrade_repoint.config.json. Edit this file and add the name of your old 1.0 resource group and the 5 character random text suffix applied to all the Azure services in that resource group. Additionally add these same values to the section marked new_env, as technically your new environment and old environments will be the same resource group.
 
 ```json
 {

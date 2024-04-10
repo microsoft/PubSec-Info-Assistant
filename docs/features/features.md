@@ -116,18 +116,11 @@ The end user leverages the web interface as the primary method to engage with th
 
 ## Document Deletion
 
-There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure.
+There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure. Document deletions are not instantaneous and can take up to ten minutes to propogate through all components of the system.
 
 ### File Deletion in the UI
 
-Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. Follow the steps outlined below to delete files:
-
-1. __Access the Manage Content UI__: Select the __Manage Content__ tab located at the top right.
-2. __Filter Your Files__: On the left, select __Upload Status__ then use the dropdown lists to apply any desired filters.
-3. __Refresh the List__: Click the __Refresh__ icon to update the list of files based on your filters.
-4. __Delete a File__: Once the filtered list appears, select the file you want to delete. Then, click the __Delete__ link located to the right of the Refresh link.
-
-![Upload Status](/docs/images/upload-status-delete.png)
+Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. They can use filters to locate documents, view detailed status and history of the document, then optionally delete the document. Additional information on document management, including how to upload, search, filter content and delete documents is availabe on the [User Experience](/docs/features/user_experience.md) page.
 
 ### Technical File Deletion from the upload container
 

@@ -113,7 +113,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto; /* or 'scroll' if you always want the scrollbar to be visible */
-    max-height: calc(100vh - 320px); /* optional, adjust according to your layout */
+    max-height: calc(100vh - 313px); /* optional, adjust according to your layout */
 }
 
 .chatMessageGpt {

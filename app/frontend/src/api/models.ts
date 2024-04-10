@@ -17,7 +17,7 @@ export const enum Approaches {
     CompareWebWithWork = 6
 }
 
-export type AskRequestOverrides = {
+export type ChatRequestOverrides = {
     semanticRanker?: boolean;
     semanticCaptions?: boolean;
     excludeCategory?: string;
@@ -37,11 +37,12 @@ export type AskRequestOverrides = {
     selectedTags?: string;
 };
 
-export type AskResponse = {
+export type ChatResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
     approach: Approaches;
+    thought_chain: { [key: string]: string };
     work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
     web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
     error?: string;
@@ -61,8 +62,9 @@ export type Citation = {
 export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
-    overrides?: AskRequestOverrides;
+    overrides?: ChatRequestOverrides;
     citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    thought_chain: { [key: string]: string };
 };
 
 export type BlobClientUrlResponse = {

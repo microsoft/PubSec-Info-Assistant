@@ -55,20 +55,23 @@ def get_keyvault_url(keyvault_name, resource_group=None):
 # *************************************************************************
 
 # *************************************************************************
-# Read required values from infra_output.json & key vault
-print("Reading values from infra_output.json")
+# Read required values from infra_output.json or config & key vault
 try:
-    with open('infra_output.json', 'r') as file:
+    with open('/scripts/infra_output.json', 'r') as file:
         inf_output = json.load(file)        
     cosmosdb_url = inf_output['properties']['outputs']['azurE_COSMOSDB_URL']['value']
     key_vault_name = inf_output['properties']['outputs']['deploymenT_KEYVAULT_NAME']['value']
 except:
     # if 'infra_output.json' does not exist
-    with open('upgrade_repoint.config.json', 'r') as file:
+    cwd = os.getcwd()  # Get the current working directory
+    config_file_path = os.path.join(cwd, "scripts", "upgrade_repoint.config.json")
+    
+    
+    with open(config_file_path, 'r') as file:
         old_env = json.load(file)
-        old_resource_group = old_env['old_env']['old_resource_group']
-        old_random_text = old_env['old_env']['old_random_text']    
-        cosmosdb_url = f'https://infoasst-cosmos-old_{old_random_text}.documents.azure.com:443/'
+        old_resource_group = old_env['old_env']['resource_group']
+        old_random_text = old_env['old_env']['random_text']    
+        cosmosdb_url = f'https://infoasst-cosmos-{old_random_text}.documents.azure.com:443/'
         key_vault_name = f'infoasst-kv-{old_random_text}'
 
 key_vault_url = get_keyvault_url(key_vault_name)

@@ -38,7 +38,7 @@ To perform an upgrade, ideally review the sample code and test in a sandbox reso
     }
 }
 ```
-- Next you need to make some surgical changes to the Cosmos DB instance, where we copy the tag arrays from the tagsdb to the statusdb. To perform this action run the command below in a terminal windwo
+- Next you need to make some surgical changes to the Cosmos DB instance, where we copy the tag arrays from the tagsdb to the statusdb. To perform this action run the command below in a terminal window
 ```bash
 make merge-databases
 ```
@@ -46,16 +46,16 @@ make merge-databases
 ```bash
 make import-state
 ```
-- Once this command has completed processing, review the status output to detreine if any servie's states were not imported. If any failed, rerun or investigate why they failed.
-- Now we have created a state file, we need to augment it with a few items that were not possible to import, but are required for us to overlay the 1.1 deployment on your 1.0 instance. To inject these items perfomr the following command:
+- Once this command has completed processing, review the status output to determine if any service's states were not imported. If any failed, rerun or investigate why they failed.
+- Now we have created a state file, we need to augment it with a few items that were not possible to import, but are required for us to overlay the 1.1 deployment on your 1.0 instance. To inject these items perform the following command:
 ```bash
 make inject-dependencies
 ```
-- We should highlight the above 3 commands can be executed as a single process by running the command, but it is adviseable to do each step independently.
+- We should highlight the above 3 commands can be executed as a single process by running the command, but it is advisable to do each step independently.
 ```bash
 make prep-upgrade
 ```
-- Now we have the state file ready. Terraform will understand the existing servcies, and will therefore be able to assess what needs to change when we deploy the 1.1 codebase into this resource group. To start this process, as with a normal deployment run the command:
+- Now we have the state file ready. Terraform will understand the existing services, and will therefore be able to assess what needs to change when we deploy the 1.1 codebase into this resource group. To start this process, as with a normal deployment run the command:
 ```bash
 make deploy
 ```
@@ -63,7 +63,7 @@ After running these steps, if successful, you will have the 1.1 assets running w
 
 ## Repoint
 In this approach you can make a fresh deployment of 1.1 and repoint the various services to the content focused services in the old 1.0 deployment. Taking this approach removes the complexity associated with overlaying a Terraform managed deployment onto an existing deployment. The risks or tradeoffs of doing the upgrade approach are:
-- You will have 2 seperate resource groups to maintain going forward
+- You will have 2 separate resource groups to maintain going forward
 - It may be complex to upgrade to any future versions as they will not natively assume you have this repointing scenario. This would require you to perform repointing every time you recreate the infrastructure due to adopting a newer version.
 - As you are migrating to a new deployment, your users will need to switch to the new web urls to access the service. 
 
@@ -90,16 +90,16 @@ Copy the file named upgrade_repoint.config.json.example in the /scripts folder a
     }
 }
 ```
-- Next you need to make some surgical changes to the Cosmos DB instance, where we copy the tag arrays from the tagsdb to the statusdb. To perform this action run the command below in a terminal windwo
+- Next you need to make some surgical changes to the Cosmos DB instance, where we copy the tag arrays from the tagsdb to the statusdb. To perform this action run the command below in a terminal window
 ```bash
 make merge-databases
 ```
-- Next we need to update all configuration refernces in the various apps to point at the key vault, storage account, cosmos db and serach index in the old 1.0 deployment. To do this run the following command in a terminal:
+- Next we need to update all configuration references in the various apps to point at the key vault, storage account, cosmos db and search index in the old 1.0 deployment. To do this run the following command in a terminal:
 ```bash
 make run-repoint
 - 
 ```
-- We should highlight the above 3 commands can be executed as a single process by running the command, but it is adviseable to do each step independently.
+- We should highlight the above 3 commands can be executed as a single process by running the command, but it is advisable to do each step independently.
 ```bash
 make repoint
 ```

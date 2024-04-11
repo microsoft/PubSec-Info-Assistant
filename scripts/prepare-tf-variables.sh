@@ -37,7 +37,6 @@ export TF_VAR_azure_environment=$AZURE_ENVIRONMENT
 export TF_VAR_is_secure_mode=$SECURE_MODE
 export TF_VAR_enableBingSafeSearch=$ENABLE_BING_SAFE_SEARCH
 export TF_VAR_azure_environment=$AZURE_ENVIRONMENT
-export TF_VAR_is_secure_mode=$SECURE_MODE
 export TF_VAR_enableWebChat=$ENABLE_WEB_CHAT
 export TF_VAR_enableUngroundedChat=$ENABLE_UNGROUNDED_CHAT
 export TF_VAR_enableMathAssitant=$ENABLE_MATH_ASSISTANT

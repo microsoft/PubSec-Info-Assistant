@@ -43,3 +43,4 @@ export TF_VAR_enableMathAssitant=$ENABLE_MATH_ASSISTANT
 export TF_VAR_enableTabularDataAssistant=$ENABLE_TABULAR_DATA_ASSISTANT
 export TF_VAR_enableSharePointConnector=$ENABLE_SHAREPOINT_CONNECTOR
 export TF_VAR_enableMultimedia=$ENABLE_MULTIMEDIA
+export TF_VAR_maxCsvFileSize=$MAX_CSV_FILE_SIZE

@@ -160,6 +160,11 @@ export type GetWarningBanner = {
     error?: string;
 };
 
+export type getMaxCSVFileSizeType = {
+    MAX_CSV_FILE_SIZE: string;
+    error?: string;
+};
+
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
 export const enum StatusLogClassification {

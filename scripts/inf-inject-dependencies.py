@@ -12,7 +12,7 @@ f = Figlet()
 print(f.renderText('Inject Dependencies'))
 print()
 print('This script updates the imported terraform state file with required')
-print('values that are not suppported or possible with the terraform import command.')
+print('values that are not supported or possible with the terraform import command.')
 print()
 
 # if 'infra_output.json' does not exist

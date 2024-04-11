@@ -15,12 +15,16 @@ print('This script updates the imported terraform state file with required')
 print('values that are not suppported or possible with the terraform import command.')
 print()
 
-with open('infra_output.json', 'r') as file:
-    data = json.load(file)
-    rg_name = str(data['properties']['outputs']['resourcE_GROUP_NAME']['value'])
-    random_text = str(data['properties']['parameters']['randomString']['value'])   
-    print(f"random text suffix: {random_text}")
-    print(f"Resource Group Name: {rg_name}")  
+# if 'infra_output.json' does not exist
+cwd = os.getcwd()  # Get the current working directory
+print(cwd)
+
+config_file_path = os.path.join(cwd, "scripts", "upgrade_repoint.config.json")
+with open(config_file_path, 'r') as file:
+    old_env = json.load(file)
+    rg_name = old_env['old_env']['resource_group']
+    random_text = old_env['old_env']['random_text']    
+    
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 workspace = rg_name.replace("infoasst-", "")
@@ -65,8 +69,7 @@ for resource in data['resources']:
 
 # Write the updated JSON data back to the same file
 with open(state_file_path, 'w') as file:
-    json.dump(data, file, indent=2)        
-    
+    json.dump(data, file, indent=2)            
 # **********************************************************
 
 
@@ -94,59 +97,9 @@ for state_resource in tf_imported_state['resources']:
 
    
 # Save the merged result
-# with open('zztop.json', 'w') as f:
 with open(state_file_path, 'w') as f:
     json.dump(tf_imported_state, f, indent=2)
     
 # **********************************************************
 
 print('Done')
-
-#*************************************************************************************************
-# Below is a sample script to extract dependencies from the Terraform state file using jq
-# the output can then be used to apply dependencies to the resources in the state file
-# in the inject stage above
-
-# import json
-# import os
-
-# # Change the working directory to the specified path
-# os.chdir('/workspaces/infoassist-reston/scripts')
-
-# # Print the current working directory to confirm the change
-# print("Current working directory:", os.getcwd())
-
-# # Load JSON data from file
-# with open('terraform.tfstate', 'r') as file:
-#     data = json.load(file)
-
-# # List to store extracted data
-# extracted_data = []
-
-# # Iterate over resources in the JSON data
-# for resource in data.get('resources', []):
-#     # Extract required fields from each resource
-#     resource_data = {
-#         'mode': resource.get('mode'),
-#         'type': resource.get('type'),
-#         'name': resource.get('name'),
-#         'provider': resource.get('provider'),
-#         'instances': []
-#     }
-    
-#     # Iterate over instances in the resource
-#     for instance in resource.get('instances', []):
-#         # Extract required fields from each instance
-#         instance_data = {
-#             'dependencies': instance.get('dependencies'),
-#             'index_key': instance.get('index_key')
-#         }
-#         resource_data['instances'].append(instance_data)
-    
-#     extracted_data.append(resource_data)
-
-# # Save the extracted data to a file
-# with open('tf-dependencies.json', 'w') as outfile:
-#     json.dump(extracted_data, outfile, indent=4)
-
-#*************************************************************************************************

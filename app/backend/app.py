@@ -101,7 +101,8 @@ ENV = {
     "ENABLE_UNGROUNDED_CHAT": "false",
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "ENABLE_MULTIMEDIA": "false"
+    "ENABLE_MULTIMEDIA": "false",
+    "MAX_CSV_FILE_SIZE": "7"
     }
 
 for key, value in ENV.items():
@@ -591,6 +592,14 @@ async def get_warning_banner():
     """Get the warning banner text"""
     response ={
             "WARNING_BANNER_TEXT": ENV["CHAT_WARNING_BANNER_TEXT"]
+        }
+    return response
+
+@app.get("/getMaxCSVFileSize")
+async def get_max_csv_file_size():
+    """Get the max csv size"""
+    response ={
+            "MAX_CSV_FILE_SIZE": ENV["MAX_CSV_FILE_SIZE"]
         }
     return response
 

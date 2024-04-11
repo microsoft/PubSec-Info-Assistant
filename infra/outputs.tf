@@ -186,3 +186,6 @@ output "AZURE_AI_TEXT_ANALYTICS_DOMAIN" {
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
 }
+output "MAX_CSV_FILE_SIZE" {
+  value = var.maxCsvFileSize
+}

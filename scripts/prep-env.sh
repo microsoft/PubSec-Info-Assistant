@@ -26,14 +26,15 @@ done
 FILE_PATH="$DIR/upgrade_repoint.config.json"
 old_random_text=$(jq -r '.new_env.random_text' $FILE_PATH)
 old_resource_group=$(jq -r '.new_env.resource_group' $FILE_PATH)
-subscription=$TF_VAR_subscriptionId
-random_text=$old_random_text
+
+subscription=$(az account show --query id  -o tsv)
+user_id=$(az ad signed-in-user show --query id -o tsv)
+user_name=$(az ad signed-in-user show --query userPrincipalName)
 
 echo "subscription: $subscription"
 echo "old_random_text: $old_random_text"
-
-user_id=$(az ad signed-in-user show --query id -o tsv)
 echo "current user id: $user_id"
+echo "user_name: $user_name"
 
 
 # assign roles to the current user

@@ -185,7 +185,7 @@ There are considerations for adopting the Information Assistant (IA) accelerator
 
 ## Need Help?
 
-Check these [troubleshotting methods](/docs/deployment/troubleshooting.md).
+Check these [troubleshooting methods](/docs/deployment/troubleshooting.md).
 
 
 If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

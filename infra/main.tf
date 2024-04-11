@@ -11,7 +11,7 @@ resource "random_string" "random" {
   length  = 5
   special = false
   upper   = false
-  numeric = true
+  number  = true
 }
 
 // Organize resources in a resource group

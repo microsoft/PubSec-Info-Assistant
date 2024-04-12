@@ -10,12 +10,11 @@ import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
 import cstyle from "./Tda.module.css" 
 import Papa from "papaparse";
-import {postTd, processCsvAgentResponse, refresh, getTempImages, streamTdData } from "../../api";
-import { Accordion, Card, Button } from 'react-bootstrap';
-import ReactMarkdown from "react-markdown";
+import {postTd, processCsvAgentResponse, refresh, getTempImages, streamTdData, getMaxCSVFileSize, getMaxCSVFileSizeType } from "../../api";
+import { Button } from 'react-bootstrap';
 import estyles from "../../components/Example/Example.module.css";
 import { Example } from "../../components/Example";
-import { DocumentDataFilled, SparkleFilled, TableSearchFilled } from "@fluentui/react-icons";
+import { DocumentDataFilled, TableSearchFilled } from "@fluentui/react-icons";
 import CharacterStreamer from '../../components/CharacterStreamer/CharacterStreamer';
 
 
@@ -42,6 +41,7 @@ const Tda = ({folderPath, tags}: Props) => {
   const [fileu, setFile] = useState<File | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const [maxCSVFileSize, setMaxCSVFileSize] = useState<getMaxCSVFileSizeType | null>(null);
 
 
   type ExampleModel = {
@@ -59,11 +59,6 @@ const EXAMPLES: ExampleModel[] = [
 interface Props {
     onExampleClicked: (value: string) => void;
 }
-const saveChart = (query: string) => {
-  const tempDir = window?.require?.('os')?.tmpdir?.();
-  const qs = ` If any charts or graphs or plots were created save them in the ${tempDir} directory".`;
-  return query + ' . ' + qs;
-};
 
 useEffect(() => {
   const intervalId = setInterval(() => {
@@ -171,6 +166,15 @@ const fetchImages = async () => {
     setUploadStarted(false);
   }, []);
 
+  useEffect(() => {
+    const fetchMaxCSVFileSize = async () => {
+        const size = await getMaxCSVFileSize();
+        console.log(size.MAX_CSV_FILE_SIZE)
+        setMaxCSVFileSize(size);
+    };
+
+    fetchMaxCSVFileSize();
+}, []);
   // handle for removing files form the files list view
   const handleClearFile = useCallback((id: any) => {
     setFiles((prev: any) => prev.filter((file: any) => file.id !== id));
@@ -178,7 +182,8 @@ const fetchImages = async () => {
 
   // whether to show the progress bar or not
   const canShowProgress = useMemo(() => files.length > 0, [files.length]);
-
+  const MAX_CSV_FILE_SIZE = Number(maxCSVFileSize?.MAX_CSV_FILE_SIZE) * 1024 * 1024; // 5 MB default
+  
   // execute the upload operation
   const handleUpload = useCallback(async () => {
     try {
@@ -188,6 +193,12 @@ const fetchImages = async () => {
       setUploadStarted(true);
       files.forEach(async (indexedFile: any) => {  
           var file = indexedFile.file as File;
+          console.log('MAX_CSV_FILE_SIZE:', MAX_CSV_FILE_SIZE);
+          if (file.size > MAX_CSV_FILE_SIZE) {
+            alert(`File is too large. Please upload a file smaller than ${maxCSVFileSize?.MAX_CSV_FILE_SIZE} MB.`);
+            setUploadStarted(false);
+            return;
+            }
             Papa.parse(file, {
               header: true,
               dynamicTyping: true,
@@ -214,6 +225,7 @@ const fetchImages = async () => {
     } catch (error) {
       console.error('Error uploading files: ', error);
     }
+
   }, [files]);
 
 // set progress to zero when there are no files
@@ -322,7 +334,10 @@ const handleCloseEvent = () => {
 
     <DocumentDataFilled fontSize={"40px"} primaryFill={"#7719aa"} aria-hidden="true" aria-label="Data" />
             <span className={cstyle.EmptyObjectivesListItemText}><b>Data</b><br />
-                csv
+                csv<br />
+            </span>
+            <span className={cstyle.EmptyObjectivesListItemText}>
+            Max file size: {maxCSVFileSize?.MAX_CSV_FILE_SIZE} MB
             </span>
     <br />
     <div className={styles.wrapper}>
@@ -389,7 +404,7 @@ const handleCloseEvent = () => {
     <Button variant="secondary" onClick={handleAnalysis}>Here is my analysis</Button>
     <Button variant="secondary" onClick={handleAnswer}>Show me the answer</Button>
     </div>
-    {loading && <div className="spinner">Loading...</div>}
+    {loading && <div className="spinner">Loading{dots}</div>}
     { (
       <div style={{width: '100%'}}>
         <h2>Tabular Data Assistant Response:</h2>

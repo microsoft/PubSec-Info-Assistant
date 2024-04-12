@@ -101,7 +101,8 @@ ENV = {
     "ENABLE_UNGROUNDED_CHAT": "false",
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "ENABLE_MULTIMEDIA": "false"
+    "ENABLE_MULTIMEDIA": "false",
+    "MAX_CSV_FILE_SIZE": "7"
     }
 
 for key, value in ENV.items():
@@ -293,14 +294,15 @@ async def chat(request: Request):
             return {"error": "unknown approach"}, 400
         
         if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}))
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
         else:
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {})
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
        
         response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
+                "thought_chain": r["thought_chain"],
                 "work_citation_lookup": r["work_citation_lookup"],
                 "web_citation_lookup": r["web_citation_lookup"]
         }
@@ -590,6 +592,14 @@ async def get_warning_banner():
     """Get the warning banner text"""
     response ={
             "WARNING_BANNER_TEXT": ENV["CHAT_WARNING_BANNER_TEXT"]
+        }
+    return response
+
+@app.get("/getMaxCSVFileSize")
+async def get_max_csv_file_size():
+    """Get the max csv size"""
+    response ={
+            "MAX_CSV_FILE_SIZE": ENV["MAX_CSV_FILE_SIZE"]
         }
     return response
 

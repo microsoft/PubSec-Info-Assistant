@@ -114,6 +114,10 @@ jq -r  '
         {
             "path": "DEPLOYMENT_KEYVAULT_NAME",
             "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+        },
+        {
+            "path": "MAX_CSV_FILE_SIZE",
+            "env_var": "MAX_CSV_FILE_SIZE"
         }
     ]
         as $env_vars_to_extract

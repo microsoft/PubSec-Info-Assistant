@@ -12,7 +12,7 @@ import remarkGfm from 'remark-gfm'
 import styles from "./AnalysisPanel.module.css";
 
 import { SupportingContent } from "../SupportingContent";
-import { AskResponse, ActiveCitation, getCitationObj } from "../../api";
+import { ChatResponse, ActiveCitation, getCitationObj } from "../../api";
 import { AnalysisPanelTabs } from "./AnalysisPanelTabs";
 
 interface Props {
@@ -23,7 +23,7 @@ interface Props {
     sourceFile: string | undefined;
     pageNumber: string | undefined;
     citationHeight: string;
-    answer: AskResponse;
+    answer: ChatResponse;
 }
 
 const pivotItemDisabledStyle = { disabled: true, style: { color: "grey" } };

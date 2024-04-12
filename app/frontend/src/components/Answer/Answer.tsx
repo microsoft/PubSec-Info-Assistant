@@ -8,13 +8,13 @@ import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
 
-import { Approaches, AskResponse, getCitationFilePath, ChatMode } from "../../api";
+import { Approaches, ChatResponse, getCitationFilePath, ChatMode } from "../../api";
 import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { RAIPanel } from "../RAIPanel";
 
 interface Props {
-    answer: AskResponse;
+    answer: ChatResponse;
     isSelected?: boolean;
     onCitationClicked: (filePath: string, sourcePath: string, pageNumber: string) => void;
     onThoughtProcessClicked: () => void;
@@ -46,7 +46,7 @@ export const Answer = ({
     onRegenerateClick,
     chatMode
 }: Props) => {
-    const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.work_citation_lookup, answer.web_citation_lookup, onCitationClicked), [answer]);
+    const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.work_citation_lookup, answer.web_citation_lookup, answer.thought_chain, onCitationClicked), [answer]);
 
     const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
 
@@ -126,7 +126,7 @@ export const Answer = ({
                     </Stack>
                 </Stack.Item>
             )}
-            {(parsedAnswer.approach == Approaches.CompareWebWithWork && !!parsedAnswer.work_citations.length) && (
+            {parsedAnswer.approach == Approaches.CompareWebWithWork && (
                 <div>
                     <Stack.Item>
                         <Stack horizontal wrap tokens={{ childrenGap: 5 }}>
@@ -159,7 +159,7 @@ export const Answer = ({
                     </Stack.Item>
                 </div>
             )}
-            {(parsedAnswer.approach == Approaches.CompareWorkWithWeb && !!parsedAnswer.work_citations.length) && (
+            {parsedAnswer.approach == Approaches.CompareWorkWithWeb && (
                 <div>
                     <Stack.Item>
                         <Stack horizontal wrap tokens={{ childrenGap: 5 }}>

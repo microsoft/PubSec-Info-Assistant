@@ -286,6 +286,56 @@ echo "$output" | jq -c '.[]' | while read -r line; do
     fi
 done
 
+# If leveraging an existing Azure OpenAI service, read in the management service role
+if [ "$TF_VAR_useExistingAOAIService" == "true" ]; then
+
+    # get the role assignment for the webapp
+    output=$(az role assignment list \
+        --subscription $TF_VAR_subscriptionId \
+        --resource-group $TF_VAR_azureOpenAIResourceGroup \
+        --query "[?roleDefinitionName=='Cognitive Services OpenAI User' && principalId=='$sp_infoasst_mgmt_access'].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
+        --output json)
+    id=$(echo $output | jq -r '.[0].id')    
+    module_path="module.openAiRoleMgmt[0].azurerm_role_assignment.role"
+    if [ -n "$id" ]; then
+        figlet 1
+ 
+        import_resource_if_needed "$module_path" "$id"
+    fi
+
+    # get the role assignment for the management app
+    output=$(az role assignment list \
+        --subscription $TF_VAR_subscriptionId \
+        --resource-group $TF_VAR_azureOpenAIResourceGroup \
+        --query "[?roleDefinitionName=='Cognitive Services OpenAI User' && principalId=='$sp_infoasst_web'].{roleDefinitionName: roleDefinitionName, id: id, principalId: principalId}" \
+        --output json)
+    id=$(echo $output | jq -r '.[0].id') 
+    module_path="module.openAiRoleBackend.azurerm_role_assignment.role"
+    if [ -n "$id" ]; then
+        figlet 2
+        import_resource_if_needed "$module_path" "$id"
+    fi  
+fi
+
+
+exit 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # appName="infoasst-web-$random_text"
 appName="infoasst_web_access_$random_text"
@@ -522,5 +572,17 @@ else
     echo "All commands executed successfully."
 fi
 
+
+python "inf-inject-dependencies.py"
+
+
+# saving the terraform plan
+echo
+figlet "Terraform Plan"
+echo
+
+
+terraform plan -out=IA-terraform.plan
+terraform show IA-terraform.plan
 echo
 figlet "Done"

@@ -191,7 +191,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
 # create the vnet integration
 resource "azurerm_app_service_virtual_network_swift_connection" "swiftConnection" {
   app_service_id = azurerm_linux_web_app.app_service.id
-  subnet_id      = azurerm_subnet.snetIntegration_id
+  subnet_id      = var.snetIntegration_id
 }
 
 

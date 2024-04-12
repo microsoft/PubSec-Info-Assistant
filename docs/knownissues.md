@@ -196,3 +196,7 @@ export TF_VAR_appServiceSkuTier="Standard"
 export TF_VAR_enrichmentAppServiceSkuSize="P1v3"
 export TF_VAR_enrichmentAppServiceSkuTier="PremiumV3"
 ```
+## My image search is not working and returning "I'm sorry, but I don't have any information about..."
+
+### Solution
+Image search is currently only supported with regions that support dense captions. You will need to deploy Information Assistant to one of the regions that supports dense captioning. A full list of regions that support dense captioning can be found [here](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-describe-images-40?tabs=dense)

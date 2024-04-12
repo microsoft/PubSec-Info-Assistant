@@ -51,10 +51,10 @@ SEARCH_CREDS = AzureKeyCredential(os.environ.get("AZURE_SEARCH_SERVICE_KEY"))
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
 API_DETECT_ENDPOINT = (
-        "https://${azure_ai_translation_domain}/detect?api-version=3.0"
+        f"https://{azure_ai_translation_domain}/detect?api-version=3.0"
     )
 API_TRANSLATE_ENDPOINT = (
-        "https://${azure_ai_translation_domain}/translate?api-version=3.0"
+        f"https://{azure_ai_translation_domain}/translate?api-version=3.0"
     )
 
 MAX_CHARS_FOR_DETECTION = 1000

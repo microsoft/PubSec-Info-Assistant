@@ -290,6 +290,15 @@ const Chat = () => {
         setSelectedTags(selectedTags)
     }
 
+    useEffect(() => {
+        // Hide Scrollbar for this page
+        document.body.classList.add('chat-overflow-hidden-body');
+        // Do not apply to other pages
+        return () => {
+            document.body.classList.remove('chat-overflow-hidden-body');
+        };
+    }, []);
+
     return (
         <div className={styles.container}>
             <div className={styles.subHeader}>

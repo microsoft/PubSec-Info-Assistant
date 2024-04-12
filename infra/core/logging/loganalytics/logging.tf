@@ -18,33 +18,42 @@ resource "azurerm_application_insights" "applicationInsights" {
 }
 
 // Diagnostic Settings Data Source
-data "azurerm_monitor_diagnostic_categories" "web_app" {
-  resource_id = azurerm_application_insights.applicationInsights.id
+data "azurerm_client_config" "current" {}
+
+variable "log_categories" {
+  description = "A map of log categories and their enabled states"
+  type        = map(bool)
+  default = {
+    "Administrative" = true,
+    "Security"       = true,
+    "ServiceHealth"  = true,
+    "Alert"          = true,
+    "Recommendation" = true
+  }
 }
 
 // Diagnostic Settings
-resource "azurerm_monitor_diagnostic_setting" "activity_log_diagnostic_setting" {
+resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
   name                        = "${var.logAnalyticsName}-DS"
-  target_resource_id          = azurerm_application_insights.applicationInsights.id
-  log_analytics_workspace_id  = azurerm_log_analytics_workspace.logAnalytics.id
- 
-  dynamic "metric" {
-  for_each = data.azurerm_monitor_diagnostic_categories.web_app.metrics
-  content {
-    category = metric.value
-    enabled  = true
-    }
-  }
+  target_resource_id          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
+ log_analytics_workspace_id   = azurerm_log_analytics_workspace.logAnalytics.id
 
   dynamic "log" {
-    for_each = data.azurerm_monitor_diagnostic_categories.web_app.log_category_groups
+    for_each = var.log_categories
     content {
-      category = log.value
-      enabled  = true
+      category = log.key
+      enabled  = log.value
     }
   }
 
-  depends_on = [azurerm_log_analytics_workspace.logAnalytics]
+  metric {
+    category = "AllMetrics"
+    enabled  = false
+  }
+
+  depends_on = [
+    azurerm_log_analytics_workspace.logAnalytics
+  ]
 }
 
 // Create Azure Private Link Scope for Azure Monitor

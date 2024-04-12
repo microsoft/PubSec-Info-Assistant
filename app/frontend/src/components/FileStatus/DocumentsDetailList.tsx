@@ -286,9 +286,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             isPadded: true,
         },
         {
-            key: 'folder',
+            key: 'filePath',
             name: 'Folder',
-            fieldName: 'folder',
+            fieldName: 'filePath',
             minWidth: 70,
             maxWidth: 90,
             isResizable: true,

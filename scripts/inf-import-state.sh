@@ -133,7 +133,6 @@ module_path="random_string.random"
 import_resource_if_needed $module_path $random_text
 
 
-
 # Main
 echo
 figlet "Main"
@@ -298,8 +297,6 @@ if [ "$TF_VAR_useExistingAOAIService" == "true" ]; then
     id=$(echo $output | jq -r '.[0].id')    
     module_path="module.openAiRoleMgmt[0].azurerm_role_assignment.role"
     if [ -n "$id" ]; then
-        figlet 1
- 
         import_resource_if_needed "$module_path" "$id"
     fi
 
@@ -312,29 +309,9 @@ if [ "$TF_VAR_useExistingAOAIService" == "true" ]; then
     id=$(echo $output | jq -r '.[0].id') 
     module_path="module.openAiRoleBackend.azurerm_role_assignment.role"
     if [ -n "$id" ]; then
-        figlet 2
         import_resource_if_needed "$module_path" "$id"
     fi  
 fi
-
-
-exit 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # appName="infoasst-web-$random_text"
@@ -573,16 +550,7 @@ else
 fi
 
 
+echo "Current directory: $(pwd)"
+cd ../scripts
+echo "Current directory: $(pwd)"
 python "inf-inject-dependencies.py"
-
-
-# saving the terraform plan
-echo
-figlet "Terraform Plan"
-echo
-
-
-terraform plan -out=IA-terraform.plan
-terraform show IA-terraform.plan
-echo
-figlet "Done"

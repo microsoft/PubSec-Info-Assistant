@@ -19,7 +19,7 @@ print()
 cwd = os.getcwd()  # Get the current working directory
 print(cwd)
 
-config_file_path = os.path.join(cwd, "scripts", "upgrade_repoint.config.json")
+config_file_path = os.path.join(cwd, "upgrade_repoint.config.json")
 with open(config_file_path, 'r') as file:
     old_env = json.load(file)
     rg_name = old_env['old_env']['resource_group']

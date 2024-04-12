@@ -28,6 +28,9 @@ export SHAREPOINT_TO_SYNC='[
     ]'
 ```
 
+#### ENABLE_SHAREPOINT_CONNECTOR
+This needs to be set to **true** if you want to use the SharePoint feature, otherwise the required resources for the SharePoint feature will not be deployed
+
 ## Usage Instructions
 
 1. Fill in the SHAREPOINT_TO_SYNC variable in the env file, example can be found above

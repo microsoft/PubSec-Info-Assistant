@@ -153,6 +153,8 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 ## Authorizing SharePoint
 
+*If you do not see these connections, ensure you have the **ENABLE_SHAREPOINT_CONNECTOR** flag set to **true** during your deployment*
+
 1. Go to your resource group in the [Azure Portal](https://portal.azure.com/), select the "sharepointonline" API Connection resource.
 2. Click "Edit API Connection" in the menu on the left side of your screen.
 3. Click "Authorize" and login with the user that has access to the SharePoint sites you put in your environment file. It is **strongly** recommended that you have created a new user for this purpose.

@@ -80,6 +80,8 @@ With this addition, you can easily search for images in the Retrieval Augmented 
 
 When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure AI Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a straight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
 
+Image Search is only available in regions that support dense captions. For a full list of these regions please see the official documentation for Azure Vision Image Captions [here](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-describe-images-40?tabs=dense)
+
 ## Azure AI Search Integration
 
 This accelerator employs Vector Hybrid Search which combines vector similarity with keyword matching to enhance search accuracy. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.

@@ -33,7 +33,7 @@ enrichmentKey =  os.environ["ENRICHMENT_KEY"]
 enrichmentEndpoint = os.environ["ENRICHMENT_ENDPOINT"] 
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"] 
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
-backoff = int(os.environ["ENRICHMENT_BACKOFF"])
+enrichment_backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
 azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
@@ -274,16 +274,16 @@ def trim_content(sentence, n):
 
 
 def requeue(response, message_json):
-    '''This function handles requeing and erroring of cognitive servcies'''
+    '''This function handles requeuing and erroring of cognitive services'''
     blob_path = message_json["blob_name"]
     queued_count = message_json["text_enrichment_queued_count"]
     if response.status_code == 429:
         # throttled, so requeue with random backoff seconds to mitigate throttling,
         # unless it has hit the max tries
         if queued_count < max_requeue_count:
-            max_seconds = backoff * (queued_count**2)
+            max_seconds = enrichment_backoff * (queued_count**2)
             backoff = random.randint(
-                backoff * queued_count, max_seconds
+                enrichment_backoff * queued_count, max_seconds
             )
             queued_count += 1
             message_json["text_enrichment_queued_count"] = queued_count

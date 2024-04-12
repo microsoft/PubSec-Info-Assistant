@@ -30,7 +30,7 @@
 
 }
 
-body {
+.chat-overflow-hidden-body {
     overflow: hidden;
 }
 

@@ -17,6 +17,11 @@ resource "azurerm_application_insights" "applicationInsights" {
   workspace_id        = azurerm_log_analytics_workspace.logAnalytics.id
 }
 
+// Diagnostic Settings Data Source
+data "azurerm_monitor_diagnostic_categories" "web_app" {
+  resource_id = azurerm_application_insights.applicationInsights.id
+}
+
 // Diagnostic Settings
 resource "azurerm_monitor_diagnostic_setting" "activity_log_diagnostic_setting" {
   name                        = "${var.logAnalyticsName}-DS"
@@ -24,21 +29,21 @@ resource "azurerm_monitor_diagnostic_setting" "activity_log_diagnostic_setting" 
   log_analytics_workspace_id  = azurerm_log_analytics_workspace.logAnalytics.id
  
   dynamic "metric" {
-    for_each = data.azurerm_monitor_diagnostic_categories.web_app.metrics
+  for_each = data.azurerm_monitor_diagnostic_categories.web_app.metrics
+  content {
+    category = metric.value
+    enabled  = true
+    }
+  }
+
+  dynamic "log" {
+    for_each = data.azurerm_monitor_diagnostic_categories.web_app.log_category_groups
     content {
-      category = metric.value
+      category = log.value
       enabled  = true
     }
   }
- 
-  // Find all the associated metrics and logs for the Azure Resources
-  dynamic "enabled_log" {
-    for_each = data.azurerm_monitor_diagnostic_categories.web_app.log_category_types
-    content {
-      category = enabled_log.value
-    }
-  }
- 
+
   depends_on = [azurerm_log_analytics_workspace.logAnalytics]
 }
 

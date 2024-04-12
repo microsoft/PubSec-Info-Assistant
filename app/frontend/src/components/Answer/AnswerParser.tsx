@@ -48,15 +48,16 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
     if (approach == Approaches.ChatWebRetrieveRead || approach == Approaches.ReadRetrieveRead) {
         // Split the answer into parts, where the odd parts are citations
         const parts = parsedAnswer.split(/\[([^\]]+)\]/g);
+        const pattern = /^\w+[0-9]$/;
         fragments = parts.map((part, index) => {
-            if (index % 2 === 0) {
+            if (!pattern.test(part)) {
                 // Even parts are just text
                 return part;
             } else {
                 if (approach == Approaches.ReadRetrieveRead) {
                     const citation_lookup = work_citation_lookup;
                     // LLM Sometimes refers to citations as "source"
-                    part = part.replace("source", "File");
+                    part = part.replace(/\w+(\d)$/, 'File$1');
                     // Odd parts are citations as the "FileX" moniker
                     const citation = citation_lookup[part];
                     if (!citation) {
@@ -108,7 +109,7 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                 if (approach == Approaches.ChatWebRetrieveRead) {
                     const citation_lookup = web_citation_lookup;
                     // LLM Sometimes refers to citations as "source"
-                    part = part.replace("source", "url");
+                    part = part.replace(/\w+(\d)$/, 'url$1');
                     // Odd parts are citations as the "FileX" moniker
                     const citation = citation_lookup[part];
                     if (!citation) {

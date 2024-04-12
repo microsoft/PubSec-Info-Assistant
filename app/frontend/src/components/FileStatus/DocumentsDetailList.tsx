@@ -22,7 +22,10 @@ import { deleteItem, DeleteItemRequest, resubmitItem, ResubmitItemRequest } from
 import { StatusContent } from "../StatusContent/StatusContent";
 import { Delete24Regular,
     Send24Regular,
-    ArrowClockwise24Regular
+    ArrowClockwise24Regular,
+    ImageBorderRegular,
+    DocumentFolderFilled,
+    ImageBorderFilled
     } from "@fluentui/react-icons";
 
 export interface IDocument {
@@ -69,13 +72,23 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
         });
         const newItems = copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
         items = newItems as IDocument[];
+        setItems(newItems); 
         setColumns(newColumns);
         onFilesSorted == undefined ? console.log("onFileSorted event undefined") : onFilesSorted(items);
     };
 
     function copyAndSort<T>(items: T[], columnKey: string, isSortedDescending?: boolean): T[] {
-        const key = columnKey as keyof T;
-        return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[key] < b[key] : a[key] > b[key]) ? 1 : -1));
+        const key = columnKey as keyof T; // Cast columnKey to the type of the keys of T
+        const sortedItems = items.slice().sort((a: T, b: T) => {
+            if (columnKey === 'name') {
+                const nameA = String(a[key]).toLowerCase();
+                const nameB = String(b[key]).toLowerCase();
+                return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
+            } else {
+                return a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0;
+            }
+        });
+        return isSortedDescending ? sortedItems.reverse() : sortedItems;
     }
 
     function getKey(item: any, index?: number): string {
@@ -246,11 +259,31 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             minWidth: 16,
             maxWidth: 16,
             onColumnClick: onColumnClick,
-            onRender: (item: IDocument) => (
-                <TooltipHost content={`${item.fileType} file`}>
-                    <img src={"https://res-1.cdn.office.net/files/fabric-cdn-prod_20221209.001/assets/item-types/16/" + item.iconName + ".svg"} className={styles.fileIconImg} alt={`${item.fileType} file icon`} />
-                </TooltipHost>
-            ),
+            onRender: (item: IDocument) => {
+                let src;
+                const supportedFileTypes = ['XML', 'JSON', 'CSV', 'TSV', 'PPTX', 'DOCX', 'PDF', 'TXT', 'XLSX', 'HTM', 'HTML', 'EML', 'MSG'];
+                if (item.fileType === 'PNG' || item.fileType === 'JPEG' || item.fileType === 'JPG') {
+                    return (
+                        <TooltipHost content={`${item.fileType} file`}>
+                            <ImageBorderFilled className={styles.fileIconImg} aria-label={`${item.fileType} file icon`} fontSize="16px" />
+                        </TooltipHost>
+                    );   
+                } else if (supportedFileTypes.includes(item.fileType)) {
+                    src = `https://res-1.cdn.office.net/files/fabric-cdn-prod_20221209.001/assets/item-types/16/${item.iconName}.svg`;
+                    return (
+                        <TooltipHost content={`${item.fileType} file`}>
+                            <img src={src} className={styles.fileIconImg} alt={`${item.fileType} file icon`} />
+                        </TooltipHost>
+                    );
+                } else {
+                    // The file type is not supported, return a default icon
+                    return (
+                        <TooltipHost content={`${item.fileType} file`}>
+                            <DocumentFolderFilled className={styles.fileIconImg} aria-label={`${item.fileType} file icon`} fontSize="16px"/>
+                        </TooltipHost>
+                    );
+                }
+            }
         },
         {
             key: 'name',

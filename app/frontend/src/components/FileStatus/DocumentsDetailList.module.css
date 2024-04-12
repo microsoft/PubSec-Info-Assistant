@@ -25,6 +25,14 @@
     max-width: 16px;
   }
 
+  .fileIconImgphoto {
+    vertical-align: middle;
+    max-height: 16px;
+    max-width: 16px;
+    height: 16px;
+    width: 16px;
+  }
+
 .controlWrapper {
     display: flex;
     flex-wrap: wrap;

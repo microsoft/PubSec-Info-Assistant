@@ -17,13 +17,15 @@ type HtmlParsedAnswer = {
     approach: Approaches;
 };
 
+type ThoughtChain = Record<string, string>;
+
 type CitationLookup = Record<string, {
     citation: string;
     source_path: string;
     page_number: string;
 }>;
 
-export function parseAnswerToHtml(answer: string, approach: Approaches, work_citation_lookup: CitationLookup, web_citation_lookup: CitationLookup, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
+export function parseAnswerToHtml(answer: string, approach: Approaches, work_citation_lookup: CitationLookup, web_citation_lookup: CitationLookup, thought_chain: ThoughtChain, onCitationClicked: (citationFilePath: string, citationSourcePath: string, pageNumber: string) => void): HtmlParsedAnswer {
     const work_citations: string[] = [];
     const web_citations: string[] = [];
     const work_sourceFiles: Record<string, string> = {};
@@ -40,18 +42,22 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
     // trim any whitespace from the end of the answer after removing follow-up questions
     parsedAnswer = parsedAnswer.trim();
     var fragments: string[] = [];
+    var work_fragments: string[] = [];
+    var web_fragments: string[] = [];
+
     if (approach == Approaches.ChatWebRetrieveRead || approach == Approaches.ReadRetrieveRead) {
         // Split the answer into parts, where the odd parts are citations
         const parts = parsedAnswer.split(/\[([^\]]+)\]/g);
+        const pattern = /^\w+[0-9]$/;
         fragments = parts.map((part, index) => {
-            if (index % 2 === 0) {
+            if (!pattern.test(part)) {
                 // Even parts are just text
                 return part;
             } else {
                 if (approach == Approaches.ReadRetrieveRead) {
                     const citation_lookup = work_citation_lookup;
                     // LLM Sometimes refers to citations as "source"
-                    part = part.replace("source", "File");
+                    part = part.replace(/\w+(\d)$/, 'File$1');
                     // Odd parts are citations as the "FileX" moniker
                     const citation = citation_lookup[part];
                     if (!citation) {
@@ -103,7 +109,7 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                 if (approach == Approaches.ChatWebRetrieveRead) {
                     const citation_lookup = web_citation_lookup;
                     // LLM Sometimes refers to citations as "source"
-                    part = part.replace("source", "url");
+                    part = part.replace(/\w+(\d)$/, 'url$1');
                     // Odd parts are citations as the "FileX" moniker
                     const citation = citation_lookup[part];
                     if (!citation) {
@@ -151,24 +157,64 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                 return "";
             }
         });
-        // Enumerate over work_citation_lookup and add the property citation to work_citations string array
-        for (const key in work_citation_lookup) {
-            if (work_citation_lookup.hasOwnProperty(key)) {
-                const work_citation = work_citation_lookup[key].citation;
-                work_citations.push(work_citation.split("/").slice(4).join("/"));
-                work_sourceFiles[work_citation.split("/").slice(4).join("/")] = work_citation_lookup[key].source_path;
-                pageNumbers[work_citation] = Number(work_citation_lookup[key].page_number);
+        const work_parts = thought_chain["work_response"].split(/\[([^\]]+)\]/g);
+        work_fragments = work_parts.map((part, index) => {
+            // Enumerate over work_citation_lookup and add the property citation to work_citations string array
+            if (index % 2 === 0) {
+                // Even parts are just text
+                return part;
+            } else {
+                // LLM Sometimes refers to citations as "source"
+                part = part.replace("source", "File");
+                const work_citation = work_citation_lookup[part];
+                if (!work_citation) {
+                    // if the citation reference provided by the OpenAI response does not match a key in the citation_lookup object
+                    // then return an empty string to avoid a crash or blank citation
+                    console.log("citation not found for: " + part)
+                    return "";
+                }
+                else {
+                    // Check if the citation is already in the citations array
+                    if (work_citations.includes(work_citation.citation.split("/").slice(4).join("/"))) {
+                        // If it exists, don't add it again
+                    } else {
+                        work_citations.push(work_citation.citation.split("/").slice(4).join("/"));
+                        work_sourceFiles[work_citation.citation.split("/").slice(4).join("/")] = work_citation.source_path;
+                        pageNumbers[work_citation.citation] = Number(work_citation.page_number);
+                    }
+                }
             }
-        }
-        // Enumerate over web_citation_lookup and add the property citation to web_citations string array
-        for (const key in web_citation_lookup) {
-            if (web_citation_lookup.hasOwnProperty(key)) {
-                const web_citation = web_citation_lookup[key].citation;
-                web_citations.push(web_citation);
-                web_sourceFiles[web_citation] = web_citation_lookup[key].source_path;
-                pageNumbers[web_citation] = NaN;
+            return "";
+        });
+        const web_parts = thought_chain["web_response"].split(/\[([^\]]+)\]/g);
+        web_fragments = web_parts.map((part, index) => {
+            // Enumerate over web_citation_lookup and add the property citation to web_citations string array
+            if (index % 2 === 0) {
+                // Even parts are just text
+                return part;
+            } else {
+                // LLM Sometimes refers to citations as "source"
+                part = part.replace("source", "url");
+                const web_citation = web_citation_lookup[part];
+                if (!web_citation) {
+                    // if the citation reference provided by the OpenAI response does not match a key in the citation_lookup object
+                    // then return an empty string to avoid a crash or blank citation
+                    console.log("citation not found for: " + part)
+                    return "";
+                }
+                else {
+                    // Check if the citation is already in the citations array
+                    if (web_citations.includes(web_citation.citation)) {
+                        // If it exists, don't add it again
+                    } else {
+                        web_citations.push(web_citation.citation);
+                        web_sourceFiles[web_citation.citation] = web_citation.source_path;
+                        pageNumbers[web_citation.citation] = NaN;
+                    }
+                }
             }
-        }
+            return "";
+        });
     }
     if (approach == Approaches.GPTDirect) {
         fragments.push(parsedAnswer);

@@ -180,6 +180,7 @@ module "backend" {
     ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
     ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
     ENABLE_MULTIMEDIA                       = var.enableMultimedia
+    MAX_CSV_FILE_SIZE                       = var.maxCsvFileSize
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id

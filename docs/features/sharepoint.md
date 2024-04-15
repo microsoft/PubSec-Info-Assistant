@@ -19,7 +19,7 @@ Your SharePoint files will be stored in the blob storage created by Information 
 ### New Local Dev Variables
 
 #### SHAREPOINT_TO_SYNC
-This is a single quoted JSON Array of Objects within the env file. With the keys "url" and "folder" for each sharepoint site to ingest.
+This is a single quoted JSON Array of Objects within the env file. With the keys "url" and "folder" for each sharepoint site to ingest. You **MUST** update this in your environment if you have altered the existing config in your container and are redeploying. It will be overwritten upon redeployment with the value you've set in your environment.
 The forward slash at the beginning of a folder is **required**
 ```JSON
 export SHAREPOINT_TO_SYNC='[

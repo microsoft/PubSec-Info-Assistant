@@ -203,6 +203,7 @@ Image search is currently only supported with regions that support dense caption
 
 ## There are errors in the SharePoint Logic App Designer
 
+### Solution
 These are only in the Logic App Preview Designer. Switching to the Generally Available Designer will resolve these errors. They are purely visual errors in the Preview Designer and have no impact on how the Logic App functions.
 
 ![Image of Logic App Error](./images/sharepoint-preview-designer-known-issue.png)

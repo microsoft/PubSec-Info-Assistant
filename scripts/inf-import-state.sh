@@ -549,7 +549,7 @@ else
     echo "All commands executed successfully."
 fi
 
-
+#Inject dependencies
 echo "Current directory: $(pwd)"
 cd ../scripts
 echo "Current directory: $(pwd)"

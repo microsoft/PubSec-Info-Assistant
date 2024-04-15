@@ -22,6 +22,7 @@ The benefits are:
 
 ### Steps to upgrade
 To perform an upgrade, ideally review the sample code and test in a sandbox resource group deployment of 1.0. Once happy, more forward with the following steps:
+- Create a version of the Local.env file, which should have the same values that were used to deploy your old 1.0 resource group.
 - Copy the file named upgrade_repoint.config.json.example in the /scripts folder and name it upgrade_repoint.config.json. Edit this file and add the name of your old 1.0 resource group and the 5 character random text suffix applied to all the Azure services in that resource group. Additionally add these same values to the section marked new_env, as technically your new environment and old environments will be the same resource group.
 
 ```json
@@ -47,19 +48,22 @@ make merge-databases
 make import-state
 ```
 - Once this command has completed processing, review the status output to determine if any service's states were not imported. If any failed, rerun or investigate why they failed.
-- Now we have created a state file, we need to augment it with a few items that were not possible to import, but are required for us to overlay the 1.1 deployment on your 1.0 instance. To inject these items perform the following command:
-```bash
-make inject-dependencies
-```
-- We should highlight the above 3 commands can be executed as a single process by running the command, but it is advisable to do each step independently.
+- We should highlight the above commands can be executed as a single process by running the command, but it is advisable to do each step independently.
 ```bash
 make prep-upgrade
+```
+- Before deploying version 1.1 you will need to ensure you have the correct privileges to update the existing resources. Ideally log in to Azure through vs code using the same user id that did the roiginal deployment of 1.0. If you can't do this, then run the command below. THis will assign the required permissions to the user account perfomring the upgrade, for example rights to read secrest from Kwy Vault and assigning the user as owners of the variious application registrations. To do this you the account you are using will need the role of Application Administrator. Alternatively request the account to be made owner of the app registrations:
+    - infoasst-enrichmentweb-<random_text_suffix>
+    - infoasst-web-<random_text_suffix>
+    - infoasst-func-<random_text_suffix> 
+```bash
+make prep-env
 ```
 - Now we have the state file ready. Terraform will understand the existing services, and will therefore be able to assess what needs to change when we deploy the 1.1 codebase into this resource group. To start this process, as with a normal deployment run the command:
 ```bash
 make deploy
 ```
-After running these steps, if successful, you will have the 1.1 assets running within your original resource group. **It is imperative that during the make deploy process that you review the terraform plan to validate your old (1.0) services will not be deleted. To achieve this ensure that you carefully review the plan presented to you during the make infrastructure step, to ensure your services are maintained.**
+After running these steps, if successful, you will have the 1.1 assets running within your original resource group. **It is imperative that during the make deploy process that you review the terraform plan to validate your old (1.0) services will not be deleted. The key servcies are the stirage account, cosmos db, key vault and the search index. To achieve this ensure that you carefully review the plan presented to you during the make infrastructure step, to ensure your services are maintained.**
 
 ## Repoint
 In this approach you can make a fresh deployment of 1.1 and repoint the various services to the content focused services in the old 1.0 deployment. Taking this approach removes the complexity associated with overlaying a Terraform managed deployment onto an existing deployment. The risks or tradeoffs of doing the upgrade approach are:

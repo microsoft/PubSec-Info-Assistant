@@ -79,12 +79,13 @@ run-repoint:
 import-state: check-subscription ## import state of current srevcies to TF state
 	@./scripts/inf-import-state.sh
 
-inject-dependencies: ## merge the status and tags db's to the status db
-	python ./scripts/inf-inject-dependencies.py
-
 # Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
 prep-upgrade: 
 	@figlet "Upgrading"
 	merge-databases 
 	import-state 
-	inject-dependencies
+
+#
+prep-env: 
+	@figlet "Preparing Environment"
+	@./scripts/prep-env.sh

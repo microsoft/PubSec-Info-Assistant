@@ -35,13 +35,13 @@ output "AZURE_STORAGE_UPLOAD_CONTAINER" {
   value = var.uploadContainerName
 }
 
-output "BACKEND_URI" {
+/* output "BACKEND_URI" {
   value = module.webapp.uri
-}
+} */
 
-output "BACKEND_NAME" {
+/* output "BACKEND_NAME" {
   value = module.webapp.web_app_name
-}
+} */
 
 output "RESOURCE_GROUP_NAME" {
   value = azurerm_resource_group.rg.name
@@ -55,9 +55,9 @@ output "AZURE_OPENAI_RESOURCE_GROUP" {
   value = var.useExistingAOAIService ? var.azureOpenAIResourceGroup : azurerm_resource_group.rg.name
 }
 
-output "AZURE_FUNCTION_APP_NAME" {
+/* output "AZURE_FUNCTION_APP_NAME" {
   value = module.functions.function_app_name
-}
+} */
 
 output "AZURE_COSMOSDB_URL" {
   value = module.cosmosdb.CosmosDBEndpointURL

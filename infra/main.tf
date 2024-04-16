@@ -283,7 +283,7 @@ module "enrichmentApp" {
 }
 
 // Create the Web App
-module "webapp" {
+/* module "webapp" {
   source                              = "./core/host/webapp"
   name                                = var.webappServiceName != "" ? var.webappServiceName : "infoasst-web-${random_string.random.result}"
   plan_name                           = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
@@ -359,7 +359,7 @@ module "webapp" {
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
   depends_on  = [module.kvModule]
-}
+} */
 
 // Create the Azure OpenAI Service and Model deployments
 module "openaiServices" {
@@ -461,7 +461,7 @@ module "cosmosdb" {
 }
 
 // Create Function App 
-module "functions" {
+/* module "functions" {
   source = "./core/host/functions"
 
   name                                  = var.functionsAppName != "" ? var.functionsAppName : "infoasst-func-${random_string.random.result}"
@@ -525,7 +525,7 @@ module "functions" {
     module.cosmosdb,
     module.kvModule
   ]
-}
+} */
 
 // Create the SharePoint Connector logic app
 module "sharepoint" {
@@ -605,7 +605,7 @@ data "azurerm_resource_group" "existing" {
 
 # Create System Identity Security roles
 
-module "openAiRoleBackend" {
+/* module "openAiRoleBackend" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
@@ -614,9 +614,9 @@ module "openAiRoleBackend" {
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
-}
+} */
 
-module "storageRoleBackend" {
+/* module "storageRoleBackend" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -625,9 +625,9 @@ module "storageRoleBackend" {
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
-}
+} */
 
-module "searchRoleBackend" {
+/* module "searchRoleBackend" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -636,9 +636,9 @@ module "searchRoleBackend" {
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
-}
+} */
 
-module "storageRoleFunc" {
+/* module "storageRoleFunc" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -647,9 +647,9 @@ module "storageRoleFunc" {
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
-}
+} */
 
-module "aviRoleWebapp" {
+/* module "aviRoleWebapp" {
   source            = "./core/security/role"
   count             = var.enableMultimedia ? 1 : 0
   scope             = module.video_indexer[0].vi_id
@@ -658,7 +658,7 @@ module "aviRoleWebapp" {
   principalType     = "ServicePrincipal"
   subscriptionId    = data.azurerm_client_config.current.subscription_id
   resourceGroupId   = azurerm_resource_group.rg.id 
-}
+} */
 
 // Create Management Security roles
 

@@ -26,13 +26,13 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 
-    network_acls {
+/*     network_acls {
     default_action             = "Deny"
     bypass                     = "AzureServices" 
     ip_rules                   = ["203.0.113.0/24", "198.51.100.0/24"]
     // Add the IDs of the subnets here if we want to allow traffic from specific subnets
     // virtual_network_subnet_ids = ["<subnet-id-1>", "<subnet-id-2>", ...]
-  }
+  } */
 }
 
 resource "azurerm_key_vault_secret" "spClientKeySecret" {

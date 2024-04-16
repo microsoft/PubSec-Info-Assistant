@@ -97,3 +97,8 @@ variable "enableOryxBuild" {
   type = bool
   default = true
 }
+
+variable "subnet_id" {
+  type = string
+  default = ""
+}

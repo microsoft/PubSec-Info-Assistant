@@ -115,6 +115,11 @@ resource "azurerm_linux_web_app" "app_service" {
   }
 }
 
+resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment" {
+  app_service_id  = azurerm_linux_web_app.app_service.id
+  subnet_id       = var.subnet_id
+}
+
 data "azurerm_key_vault" "existing" {
   name                = var.keyVaultName
   resource_group_name = var.resourceGroupName

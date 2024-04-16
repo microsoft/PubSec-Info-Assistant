@@ -243,6 +243,7 @@ module "enrichmentApp" {
     tier                                    = var.enrichmentAppServiceSkuTier
     capacity                                = 3
   }
+  subnet_id                           = var.is_secure_mode ? module.network[0].snetEnrichment_id : null
   kind                                = "linux"
   reserved                            = true
   resourceGroupName                   = azurerm_resource_group.rg.name

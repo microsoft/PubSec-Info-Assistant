@@ -88,7 +88,7 @@ if [[ $SECURE_MODE == "true" ]]; then
         echo -e "\e[33mYou have $remaining_capacity diagnostic settings capacity left.\e[0m"
     fi
 else
-    echo -e "\e[32mSECURE_MODE is set to false, skipping diagnostic settings check.\e[0m"
+    echo -e "\e[32mSECURE_MODE is set to false, skipping diagnostic settings capacity check.\e[0m"
 fi
 
 # Create our application configuration file before starting infrastructure

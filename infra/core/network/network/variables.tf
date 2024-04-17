@@ -54,10 +54,6 @@ variable "snetAppCIDR" {
   type    = string
 }
 
-variable "SnetFunctionCIDR" {
-  type    = string
-}
-
 variable "snetEnrichmentCIDR" {
   type    = string
 }
@@ -82,3 +78,6 @@ variable "snetAzureOpenAICIDR" {
   type    = string
 }
 
+variable "snetFunctionCIDR" {
+  type    = string
+}

@@ -143,3 +143,7 @@ variable "private_dns_zone_name" {
 variable "snetIntegration_id" {
   type = string
 }
+
+variable "randomString" {
+  type = string
+}

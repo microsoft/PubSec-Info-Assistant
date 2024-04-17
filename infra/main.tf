@@ -286,7 +286,7 @@ module "enrichmentApp" {
 }
 
 // Create the Web App
-/* module "webapp" {
+module "webapp" {
   source                              = "./core/host/webapp"
   name                                = var.webappServiceName != "" ? var.webappServiceName : "infoasst-web-${random_string.random.result}"
   plan_name                           = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
@@ -315,6 +315,7 @@ module "enrichmentApp" {
   snetIntegration_id                  = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   private_dns_zone_name               = var.is_secure_mode ? module.privateDnsZoneApp[0].privateDnsZoneName : null
+  randomString                        = random_string.random.result
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
@@ -362,7 +363,7 @@ module "enrichmentApp" {
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
   depends_on  = [module.kvModule]
-} */
+}
 
 // Create the Azure OpenAI Service and Model deployments
 module "openaiServices" {

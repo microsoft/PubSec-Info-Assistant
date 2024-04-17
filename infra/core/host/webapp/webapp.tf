@@ -78,8 +78,6 @@ resource "azurerm_linux_web_app" "app_service" {
   service_plan_id               = azurerm_service_plan.appServicePlan.id
   https_only                    = true
   tags                          = var.tags
-  public_network_access_enabled = var.is_secure_mode ? false : true
-  virtual_network_subnet_id     = var.is_secure_mode ? var.subnet_id : null
 
   site_config {
     application_stack {
@@ -189,11 +187,10 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
 
 
 # create the vnet integration
-resource "azurerm_app_service_virtual_network_swift_connection" "swiftConnection" {
+resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment_web_app" {
   app_service_id = azurerm_linux_web_app.app_service.id
   subnet_id      = var.snetIntegration_id
 }
-
 
 resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
@@ -201,7 +198,6 @@ resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
   location                      = var.location
   resource_group_name           = var.resourceGroupName
   subnet_id                     = var.subnet_id
-  custom_network_interface_name = "infoasstwebappnic"
   tags                          = var.tags
 
   private_service_connection {
@@ -219,7 +215,7 @@ resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
 
 resource "azurerm_private_dns_a_record" "backendPrivateDnsARecord" {
   count              = var.is_secure_mode ? 1 : 0
-  name               = "${azurerm_linux_web_app.app_service.name}"
+  name               = "${azurerm_linux_web_app.app_service.name}${var.randomString}"
   zone_name          = "${var.private_dns_zone_name}"
   resource_group_name = var.resourceGroupName
   ttl                = 300
@@ -228,7 +224,7 @@ resource "azurerm_private_dns_a_record" "backendPrivateDnsARecord" {
 
 resource "azurerm_private_dns_a_record" "backendScmPrivateDnsARecord" {
   count              = var.is_secure_mode ? 1 : 0
-  name               = "${azurerm_linux_web_app.app_service.name}.scm"
+  name               = "${azurerm_linux_web_app.app_service.name}${var.randomString}.scm"
   zone_name          = "${var.private_dns_zone_name}"
   resource_group_name = var.resourceGroupName
   ttl                = 300

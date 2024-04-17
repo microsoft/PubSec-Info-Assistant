@@ -60,6 +60,37 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Check for capacity for diagnostic settings
+if [[ $SECURE_MODE == "true" ]]; then
+    diag_settings_count=$(az monitor diagnostic-settings subscription list --query "length(value)" --output tsv)
+    max_diag_settings=5
+    remaining_capacity=$((max_diag_settings - diag_settings_count))
+
+    echo -e "Current diagnostic settings count: \e[32m$diag_settings_count\e[0m"
+    echo -e "Maximum allowed diagnostic settings: \e[32m$max_diag_settings\e[0m"
+    echo -e "Remaining capacity for diagnostic settings: \e[32m$remaining_capacity\e[0m"
+
+    if [ "$diag_settings_count" -ge "$max_diag_settings" ]; then
+        echo -e "\e[31mError: Maximum diagnostic settings capacity reached ($max_diag_settings). Please delete an existing diagnostic setting before proceeding."
+        echo -e "You currently have no capacity left for new diagnostic settings.\e[0m"
+        
+        # Display existing diagnostic settings
+        echo -e "\e[1;34mHere are the current diagnostic settings:\e[0m"
+        az monitor diagnostic-settings subscription list --query "value[].{name: name}" --output table
+        
+        # Provide the command to delete a diagnostic setting
+        echo -e "\e[1;34mTo delete a diagnostic setting, use this command:\e[0m"
+        echo "az monitor diagnostic-settings subscription delete --name <diagnostic setting name>"
+        
+        # Exit the script to prevent further execution
+        exit 1
+    else
+        echo -e "\e[33mYou have $remaining_capacity diagnostic settings capacity left.\e[0m"
+    fi
+else
+    echo -e "\e[32mSECURE_MODE is set to false, skipping diagnostic settings check.\e[0m"
+fi
+
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh
 
@@ -67,3 +98,7 @@ ${DIR}/configuration-create.sh
 ${DIR}/terraform-init.sh "$DIR/../infra/"
 
 ${DIR}/terraform-plan-apply.sh -d "$DIR/../infra" -p "infoasst" -o "$DIR/../inf_output.json"
+
+
+#Check for existing DDOS subscription here - check capacity - if theyre at capacity error out. 
+#user prompt: Here are some values you need to know (secure deployment information)

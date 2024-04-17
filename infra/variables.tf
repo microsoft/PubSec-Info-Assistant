@@ -631,3 +631,5 @@ variable "enableDevCode" {
   type    = bool
   default = false
 }
+
+//Provide DDOS ID if you want to enable DDOS protection

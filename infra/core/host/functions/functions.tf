@@ -164,6 +164,29 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 }
 
+resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment" {
+  app_service_id  = azurerm_linux_function_app.function_app.id
+  subnet_id       = var.subnetIntegration_id
+}
+
+resource "azurerm_private_endpoint" "privateFunctionEndpoint" {
+  name                = "${var.name}-private-endpoint"
+  location            = var.location
+  resource_group_name = var.resourceGroupName
+  subnet_id           = var.subnet_id
+
+  private_dns_zone_group {
+    name = "privatednszonegroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
+
+  private_service_connection {
+    name = "functionappprivateendpointconnection"
+    private_connection_resource_id = azurerm_linux_function_app.function_app.id
+    subresource_names = ["sites"]
+    is_manual_connection = false
+  }
+}
 
 resource "azurerm_key_vault_access_policy" "policy" {
   key_vault_id = data.azurerm_key_vault.existing_kv.id

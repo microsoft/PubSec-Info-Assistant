@@ -109,7 +109,7 @@ resource "azurerm_subnet" "function" {
   name                 = "function"
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = [var.SnetFunctionCIDR]
+  address_prefixes     = [var.snetFunctionCIDR]
 }
 
 resource "azurerm_subnet_network_security_group_association" "function_snet_to_nsg" {

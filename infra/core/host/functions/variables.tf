@@ -255,3 +255,17 @@ variable "azure_ai_translation_domain" {
 variable "azure_ai_text_analytics_domain" {
   type = string
 }
+
+variable "subnet_id" {
+  type = string
+  default = ""
+}
+
+variable "subnetIntegration_id" {
+  type = string
+  default = ""
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}

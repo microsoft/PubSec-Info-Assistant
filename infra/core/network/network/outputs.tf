@@ -38,7 +38,7 @@ output "snetApp_id" {
   value = azurerm_subnet.app.id
 }
 
-output "SnetFunction_id" {
+output "snetFunction_id" {
   value = azurerm_subnet.function.id
 }
 

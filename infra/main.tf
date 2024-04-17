@@ -52,7 +52,7 @@ module "network" {
   snetAzureAiCIDR            = var.azure_ai_CIDR
   snetKeyVaultCIDR           = var.key_vault_CIDR
   snetAppCIDR                = var.webapp_CIDR
-  SnetFunctionCIDR           = var.functions_CIDR
+  snetFunctionCIDR           = var.functions_CIDR
   snetEnrichmentCIDR          = var.enrichment_app_CIDR
   snetIntegrationCIDR        = var.integration_CIDR
   snetSearchServiceCIDR      = var.search_service_CIDR
@@ -463,12 +463,15 @@ module "cosmosdb" {
 }
 
 // Create Function App 
-/* module "functions" {
+module "functions" {
   source = "./core/host/functions"
 
   name                                  = var.functionsAppName != "" ? var.functionsAppName : "infoasst-func-${random_string.random.result}"
   location                              = var.location
   tags                                  = local.tags
+  subnet_id                             = var.is_secure_mode ? module.network[0].snetFunction_id : null
+  subnetIntegration_id                  = var.is_secure_mode ? module.network[0].snetIntegration_id : null
+  private_dns_zone_ids                  = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   keyVaultUri                           = module.kvModule.keyVaultUri
   keyVaultName                          = module.kvModule.keyVaultName 
   plan_name                             = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
@@ -527,7 +530,7 @@ module "cosmosdb" {
     module.cosmosdb,
     module.kvModule
   ]
-} */
+}
 
 // Create the SharePoint Connector logic app
 module "sharepoint" {

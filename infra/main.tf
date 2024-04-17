@@ -53,7 +53,7 @@ module "network" {
   snetKeyVaultCIDR           = var.key_vault_CIDR
   snetAppCIDR                = var.webapp_CIDR
   snetFunctionCIDR           = var.functions_CIDR
-  snetEnrichmentCIDR          = var.enrichment_app_CIDR
+  snetEnrichmentCIDR         = var.enrichment_app_CIDR
   snetIntegrationCIDR        = var.integration_CIDR
   snetSearchServiceCIDR      = var.search_service_CIDR
   snetAzureVideoIndexerCIDR  = var.azure_video_indexer_CIDR

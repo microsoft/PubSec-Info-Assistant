@@ -100,5 +100,4 @@ ${DIR}/terraform-init.sh "$DIR/../infra/"
 ${DIR}/terraform-plan-apply.sh -d "$DIR/../infra" -p "infoasst" -o "$DIR/../inf_output.json"
 
 
-#Check for existing DDOS subscription here - check capacity - if theyre at capacity error out. 
-#user prompt: Here are some values you need to know (secure deployment information)
+#Check for existing DDOS subscription here - check capacity - if they're at capacity error out. 

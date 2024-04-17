@@ -70,7 +70,7 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 }
 
 # Create the Enrichment App Service
-resource "azurerm_linux_web_app" "app_service" {
+resource "azurerm_linux_web_app" "enrichmentapp" {
   name                                            = var.name
   location                                        = var.location
   resource_group_name                             = var.resourceGroupName
@@ -116,8 +116,27 @@ resource "azurerm_linux_web_app" "app_service" {
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment" {
-  app_service_id  = azurerm_linux_web_app.app_service.id
-  subnet_id       = var.subnet_id
+  app_service_id  = azurerm_linux_web_app.enrichmentapp.id
+  subnet_id       = var.subnetIntegration_id
+}
+
+resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
+  name                = ${var.name}-private-endpoint"
+  location            = var.location
+  resource_group_name = var.resourceGroupName
+  subnet_id           = var.subnet_id
+
+  private_dns_zone_group {
+    name = "privatednszonegroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
+
+  private_service_connection {
+    name = "enrichementprivateendpointconnection"
+    private_connection_resource_id = azurerm_linux_web_app.enrichmentapp.id
+    subresource_names = ["sites"]
+    is_manual_connection = false
+  }
 }
 
 data "azurerm_key_vault" "existing" {
@@ -128,8 +147,8 @@ data "azurerm_key_vault" "existing" {
 resource "azurerm_key_vault_access_policy" "policy" {
   key_vault_id = data.azurerm_key_vault.existing.id
 
-  tenant_id = azurerm_linux_web_app.app_service.identity.0.tenant_id
-  object_id = azurerm_linux_web_app.app_service.identity.0.principal_id
+  tenant_id = azurerm_linux_web_app.enrichmentapp.identity.0.tenant_id
+  object_id = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
 
   secret_permissions = [
     "Get",
@@ -139,7 +158,7 @@ resource "azurerm_key_vault_access_policy" "policy" {
 
 resource "azurerm_monitor_diagnostic_setting" "app_service_diagnostic_setting" {
   name                       = "app-service-diagnostic-settings"
-  target_resource_id         = azurerm_linux_web_app.app_service.id
+  target_resource_id         = azurerm_linux_web_app.enrichmentapp.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
 
   enabled_log {

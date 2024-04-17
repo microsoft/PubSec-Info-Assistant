@@ -233,7 +233,6 @@ module "storage" {
 // Create the Enrichment Application
 module "enrichmentApp" {
   source = "./core/host/enrichmentapp"
-
   name      = var.enrichmentServiceName != "" ? var.enrichmentServiceName : "infoasst-enrichmentweb-${random_string.random.result}"
   plan_name = var.enrichmentAppServicePlanName != "" ? var.enrichmentAppServicePlanName : "infoasst-enrichmentasp-${random_string.random.result}"
   location  = var.location
@@ -244,6 +243,7 @@ module "enrichmentApp" {
     capacity                                = 3
   }
   subnet_id                           = var.is_secure_mode ? module.network[0].snetEnrichment_id : null
+  subnetIntegration_id                = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   kind                                = "linux"
   reserved                            = true
   resourceGroupName                   = azurerm_resource_group.rg.name
@@ -251,6 +251,7 @@ module "enrichmentApp" {
   scmDoBuildDuringDeployment          = true
   managedIdentity                     = true
   logAnalyticsWorkspaceResourceId     = module.logging.logAnalyticsId
+  private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   alwaysOn                            = true
   healthCheckPath                     = "/health"
@@ -280,6 +281,7 @@ module "enrichmentApp" {
     AZURE_SEARCH_SERVICE_ENDPOINT          = module.searchServices.endpoint
     WEBSITES_CONTAINER_START_TIME_LIMIT    = 600
   }
+
   depends_on = [module.kvModule]
 }
 
@@ -415,7 +417,6 @@ module "aiDocIntelligence" {
   keyVaultId           = module.kvModule.keyVaultId
   subnetResourceId     = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
   private_dns_zone_ids = var.is_secure_mode ? [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId] : null
-
 }
 
 // Create the AI Services for Text Enrichment

@@ -102,3 +102,12 @@ variable "subnet_id" {
   type = string
   default = ""
 }
+
+variable "subnetIntegration_id" {
+  type = string
+  default = ""
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}

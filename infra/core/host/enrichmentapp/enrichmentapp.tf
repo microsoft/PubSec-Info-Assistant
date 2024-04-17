@@ -121,7 +121,7 @@ resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration
 }
 
 resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
-  name                = ${var.name}-private-endpoint"
+  name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
   subnet_id           = var.subnet_id

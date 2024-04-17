@@ -3,7 +3,8 @@
 ## Overview
 
 > [!IMPORTANT]  
-> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication between your enterprise and Microsoft cloud services using private, dedicated links improving security and reliability. Note: Secure deployment is not supported when using existing Azure OpenAI Services.
+> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication between your enterprise and Microsoft cloud services using private, dedicated links improving security and reliability.
+Notes: Secure deployment is __not supported when using existing Azure OpenAI Services__. Secure deployment will create a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region. As part of security hardening Diagnostic Settings will be enabled. There is a limit of 5 diagnostic settings per subscription. A secure deployment will check capacity for DDOS and Diagnostic Settings. You may need to provide DDOS protection plan information or delete an existing Diagnostic Setting for Information Assistant to successfully deploy.
 
 A secure deployment of the Information Assistant is essential when heightened levels of infrastructure security are necessary. Secure mode should be enabled for all production systems. Key features of a secure deployment include:
 
@@ -12,7 +13,14 @@ A secure deployment of the Information Assistant is essential when heightened le
 * __Data Encryption at Rest and in Transit__: Ensure confidentiality by encrypting data both when stored and during transmission.
 * __Integration via Private Endpoints__: All Azure services connect exclusively through private endpoints within a virtual network
 
-The secure deployment will add several new Azure resources and will likely require additional Azure permissions.
+The secure deployment will add several new Azure resources and will likely require additional Azure permissions. New resources will include:
+
+* Azure Monitor
+* Network Security Group (NSG)
+* Private DNS Zone
+* Private Endpoint
+* Private Link
+* Virtual Network (vnet)
 
 ## Architecture
 
@@ -22,9 +30,9 @@ High level architecture diagram:
 
 A more detailed architecture diagram shows the Information Assistant deployment in a single resource group within a subscription in your tenant and illustrates user interaction with underlying services:
 
-![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-arch.png)
+![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
 
-If your enterprise lacks a secure communication channel between your on-premises environment and the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN). This will allow you to enable access to the Information Assistant for demonstration purposes. To implement this approach, you’ll need to add a VPN Gateway to the Information Assistant infrastructure.
+If your enterprise lacks a secure communication channel between your enterprise and the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN). This will allow you to enable access to the Information Assistant for demonstration purposes. To implement this approach, you’ll need to add a VPN Gateway to the Information Assistant infrastructure.
 
 More information on [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support)
 
@@ -70,7 +78,7 @@ To enable a Secure Deployment, update your local.env file as described below:
 
 ## Additional Considerations for Secure Deployment
 
-The secure deployment defines a virtual network and multiple subnets, one for each service improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classess Inter-Domain Routing (CIDR)s are made available as Terraform parameters. Update the virtual network IP Addresses or CIDRs to avoid conflicts with your existing network(s), using the following variables in your `scripts/environments/local.env` file (*values shown are default values*)
+The secure deployment defines a virtual network and multiple subnets, one for each service improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classess Inter-Domain Routing (CIDR)s are made available as Terraform parameters. Update the virtual network IP Addresses or CIDRs to avoid conflicts with your existing network(s), then copy this block of variables into your `scripts/environments/local.env` file (*values shown are default values*)
 
 ```bash
 export TF_VAR_virtual_network_CIDR="10.0.0.0/21"

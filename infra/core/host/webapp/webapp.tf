@@ -212,22 +212,3 @@ resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
     private_dns_zone_ids = var.private_dns_zone_ids
   }
 }
-
-resource "azurerm_private_dns_a_record" "backendPrivateDnsARecord" {
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "${azurerm_linux_web_app.app_service.name}${var.randomString}"
-  zone_name          = "${var.private_dns_zone_name}"
-  resource_group_name = var.resourceGroupName
-  ttl                = 300
-  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_service_connection[0].private_ip_address]
-}
-
-resource "azurerm_private_dns_a_record" "backendScmPrivateDnsARecord" {
-  count              = var.is_secure_mode ? 1 : 0
-  name               = "${azurerm_linux_web_app.app_service.name}${var.randomString}.scm"
-  zone_name          = "${var.private_dns_zone_name}"
-  resource_group_name = var.resourceGroupName
-  ttl                = 300
-  records            = [azurerm_private_endpoint.backendPrivateEndpoint[0].private_service_connection[0].private_ip_address]
-}
-

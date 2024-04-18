@@ -3,17 +3,28 @@
 ## Overview
 
 > [!IMPORTANT]  
-> The Information Assistant secure deployment option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication between your enterprise and Microsoft cloud services using private, dedicated links improving security and reliability.
-Notes: Secure deployment is __not supported when using existing Azure OpenAI Services__. Secure deployment will create a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region. As part of security hardening Diagnostic Settings will be enabled. There is a limit of 5 diagnostic settings per subscription. A secure deployment will check capacity for DDOS and Diagnostic Settings. You may need to provide DDOS protection plan information or delete an existing Diagnostic Setting for Information Assistant to successfully deploy.
+> The Information Assistant secure mode option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access Information Assistant capabilities. The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication.
+>
+>Notes: 
+>
+>* Secure mode is not supported when using existing Azure OpenAI Services.
+>* Secure mode is not supported with enable web chat.
+>* Secure mode will create a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region.
+>* As part of security hardening Diagnostic Settings will be enabled. There is a limit of 5 diagnostic settings per subscription.
+>* A secure mode will check capacity for DDOS and Diagnostic Settings.
+>* You may need to provide DDOS protection plan information or delete an existing Diagnostic Setting for Information Assistant to successfully deploy in secure mode.
+>
+>
 
-A secure deployment of the Information Assistant is essential when heightened levels of infrastructure security are necessary. Secure mode should be enabled for all production systems. Key features of a secure deployment include:
+
+Information Assistant secure mode is essential when heightened levels of security are necessary. Secure mode should be enabled for all production systems. Key features of a secure mode include:
 
 * __Disabling Public Network Access__: Restrict external access to safeguard sensitive data.
 * __Virtual Network Protection__: Shield your system within a secure virtual network.
 * __Data Encryption at Rest and in Transit__: Ensure confidentiality by encrypting data both when stored and during transmission.
 * __Integration via Private Endpoints__: All Azure services connect exclusively through private endpoints within a virtual network
 
-The secure deployment will add several new Azure resources and will likely require additional Azure permissions. New resources will include:
+The secure mode adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
 * Azure Monitor
 * Network Security Group (NSG)
@@ -26,11 +37,11 @@ The secure deployment will add several new Azure resources and will likely requi
 
 High level architecture diagram:
 
-![Secure deployment - High level architecture](../images/secure-deploy-high-level-architecture.png)
+![Secure mode - High level architecture](../images/secure-deploy-high-level-architecture.png)
 
 A more detailed architecture diagram shows the Information Assistant deployment in a single resource group within a subscription in your tenant and illustrates user interaction with underlying services:
 
-![Secure deployment - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
+![Secure mode - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
 
 If your enterprise lacks a secure communication channel between your enterprise and the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN). This will allow you to enable access to the Information Assistant for demonstration purposes. To implement this approach, you’ll need to add a VPN Gateway to the Information Assistant infrastructure.
 
@@ -40,7 +51,7 @@ Detailed information on how to [create and manage a VPN Gateway is available at 
 
 After setting up a VPN Gateway, [configure the Azure VPN Client on your local machine](https://learn.microsoft.com/en-us/azure/vpn-gateway/openvpn-azure-ad-client)
 
-### Secure deployment - Optional Features
+### Secure mode - Optional Features
 
 For more complex scenarios, explore [Azure Front Door](https://learn.microsoft.com/en-us/azure/frontdoor/). Keep in mind that while Azure Front Door is suitable for basic access to the Information Assistant website, it is not designed for managing deployments and updates to the accelerator.
 
@@ -53,13 +64,13 @@ When secure mode is enabled a private network is created called a virtual networ
 * __Azure AI Search__: Facilitates content discovery from uploaded files.
 * __Cosmos DB__: Provides visibility into the status of uploaded files.
 
-![Secure Deploy - Front End Architecture](../images/secure-deploy-frontend-detail.png)
+![Secure mode - Front End Architecture](../images/secure-deploy-frontend-detail.png)
 
 ## Back end
 
 Back-end processing handles uploading your private data, document extraction and enrichment leveraging AI Services as illustrated in the following diagram:
 
-![Secure Deploy - Function Architecture](../images/secure-deploy-function-detail.png)
+![Secure mode - Function Architecture](../images/secure-deploy-function-detail.png)
 
 ## How to Enable a Secure Deployment
 
@@ -71,14 +82,15 @@ To enable a Secure Deployment, update your local.env file as described below:
 
    ```bash
    export SECURE_MODE=true
+   export ENABLE_WEB_CHAT=false
    export USE_EXISTING_AOAI=false
    ```
 
-   *Note: Secure Mode is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent a deployment from restricting access to a shared instance of Azure OpenAI that may be in use by other workloads*
+   *Note: Secure mode is blocked when enabling the web chat feature or when using an existing Azure OpenAI service. We have blocked this scenario to prevent a deployment from restricting access to a shared instance of Azure OpenAI that may be in use by other workloads*
 
 ## Additional Considerations for Secure Deployment
 
-The secure deployment defines a virtual network and multiple subnets, one for each service improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classess Inter-Domain Routing (CIDR)s are made available as Terraform parameters. Update the virtual network IP Addresses or CIDRs to avoid conflicts with your existing network(s), then copy this block of variables into your `scripts/environments/local.env` file (*values shown are default values*)
+The secure mode defines a virtual network and multiple subnets, one for each service improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classess Inter-Domain Routing (CIDR)s are made available as Terraform parameters. Update the virtual network IP Addresses or CIDRs to avoid conflicts with your existing network(s), then copy this block of variables into your `scripts/environments/local.env` file (*values shown are default values*)
 
 ```bash
 export TF_VAR_virtual_network_CIDR="10.0.0.0/21"

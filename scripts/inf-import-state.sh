@@ -181,7 +181,7 @@ if [ $TF_VAR_useExistingAOAIService = "false" ]; then
     if [ -z "$TF_VAR_chatGptDeploymentName" ]; then
         model_name="gpt-35-turbo-16k"
     else
-        model_name=TF_VAR_chatGptDeploymentName
+        model_name=$TF_VAR_chatGptDeploymentName
     fi
     providers="/providers/Microsoft.CognitiveServices/accounts/$name/deployments/$model_name"
     module_path="module.openaiServices.azurerm_cognitive_deployment.deployment[0]"

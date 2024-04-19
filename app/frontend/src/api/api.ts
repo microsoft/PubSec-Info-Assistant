@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskRequest, 
-    AskResponse, 
+import { ChatResponse, 
     ChatRequest, 
     BlobClientUrlResponse, 
     AllFilesUploadStatus, 
@@ -17,42 +16,10 @@ import { AskRequest,
     DeleteItemRequest,
     ResubmitItemRequest,
     GetFeatureFlagsResponse,
+    getMaxCSVFileSizeType,
     } from "./models";
 
-export async function askApi(options: AskRequest): Promise<AskResponse> {
-    const response = await fetch("/ask", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            question: options.question,
-            approach: options.approach,
-            overrides: {
-                semantic_ranker: options.overrides?.semanticRanker,
-                semantic_captions: options.overrides?.semanticCaptions,
-                top: options.overrides?.top,
-                temperature: options.overrides?.temperature,
-                prompt_template: options.overrides?.promptTemplate,
-                prompt_template_prefix: options.overrides?.promptTemplatePrefix,
-                prompt_template_suffix: options.overrides?.promptTemplateSuffix,
-                exclude_category: options.overrides?.excludeCategory,
-                user_persona: options.overrides?.userPersona,
-                system_persona: options.overrides?.systemPersona,
-                ai_persona: options.overrides?.aiPersona,
-            }
-        })
-    });
-
-    const parsedResponse: AskResponse = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error(parsedResponse.error || "Unknown error");
-    }
-    
-    return parsedResponse;
-}
-
-export async function chatApi(options: ChatRequest): Promise<AskResponse> {
+export async function chatApi(options: ChatRequest): Promise<ChatResponse> {
     const response = await fetch("/chat", {
         method: "POST",
         headers: {
@@ -79,11 +46,13 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
                 response_temp: options.overrides?.responseTemp,
                 selected_folders: options.overrides?.selectedFolders,
                 selected_tags: options.overrides?.selectedTags
-            }
+            },
+            citation_lookup: options.citation_lookup,
+            thought_chain: options.thought_chain
         })
     });
 
-    const parsedResponse: AskResponse = await response.json();
+    const parsedResponse: ChatResponse = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
     }
@@ -231,24 +200,6 @@ export async function getTags(): Promise<string[]> {
 }
 
 
-export async function retryFile(filePath: string): Promise<boolean> {
-    const response = await fetch("/retryFile", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            filePath: filePath
-            })
-        });
-    
-    const parsedResponse: String = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
-    }
-
-    return true;
-}
 export async function getHint(question: string): Promise<String> {
     const response = await fetch(`/getHint?question=${encodeURIComponent(question)}`, {
         method: "GET",
@@ -264,6 +215,36 @@ export async function getHint(question: string): Promise<String> {
 
     return parsedResponse;
 }
+
+
+export function streamData(question: string): EventSource {
+    const encodedQuestion = encodeURIComponent(question);
+    const eventSource = new EventSource(`/stream?question=${encodedQuestion}`);
+    return eventSource;
+}
+
+
+export async function streamTdData(question: string, file: File): Promise<EventSource> {
+    let lastError;
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const response = await fetch('/posttd', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+    
+    const encodedQuestion = encodeURIComponent(question);
+    const eventSource = new EventSource(`/tdstream?question=${encodedQuestion}`);
+
+    return eventSource;
+}
+
 export async function getSolve(question: string): Promise<String[]> {
     const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
         method: "GET",
@@ -278,6 +259,92 @@ export async function getSolve(question: string): Promise<String[]> {
     }
 
     return parsedResponse;
+}
+export async function refresh(): Promise<String[]> {
+    const response = await fetch(`/refresh?`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: String[] = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+
+export async function getTempImages(): Promise<string[]> {
+    const response = await fetch(`/getTempImages`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    
+    const parsedResponse: { images: string[] } = await response.json();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+    const imgs = parsedResponse.images;
+    return imgs;
+}
+
+export async function postTd(file: File): Promise<String> {
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const response = await fetch('/posttd', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+
+    return parsedResponse;
+}
+
+export async function processCsvAgentResponse(question: string, file: File, retries: number = 3): Promise<String> {
+    let lastError;
+
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const response = await fetch('/posttd', {
+        method: 'POST',
+        body: formData,
+    });
+
+    const parsedResponse: String = await response.text();
+    if (response.status > 299 || !response.ok) {
+        throw Error("Unknown error");
+    }
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(`/process_td_agent_response?question=${encodeURIComponent(question)}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const parsedResponse: String = await response.json();
+            if (response.status > 299 || !response.ok) {
+                throw Error("Unknown error");
+            }
+
+            return parsedResponse;
+        } catch (error) {
+            lastError = error;
+        }
+    }
+
+    throw lastError;
 }
 
 export async function processAgentResponse(question: string): Promise<String> {
@@ -343,6 +410,22 @@ export async function getWarningBanner(): Promise<GetWarningBanner> {
         }
     });
     const parsedResponse: GetWarningBanner = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getMaxCSVFileSize(): Promise<getMaxCSVFileSizeType> {
+    const response = await fetch("/getMaxCSVFileSize", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: getMaxCSVFileSizeType = await response.json();
     if (response.status > 299 || !response.ok) {
         console.log(response);
         throw Error(parsedResponse.error || "Unknown error");

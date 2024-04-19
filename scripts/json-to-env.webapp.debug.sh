@@ -152,6 +152,11 @@ jq -r  '
             "path": "AZURE_ARM_MANAGEMENT_API",
             "env_var": "AZURE_ARM_MANAGEMENT_API"
         }
+        ,
+        {
+            "path": "MAX_CSV_FILE_SIZE",
+            "env_var": "MAX_CSV_FILE_SIZE"
+        }
     ]
         as $env_vars_to_extract
     |
@@ -201,7 +206,7 @@ fi
 keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "BINGSEARCH-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do

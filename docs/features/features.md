@@ -8,7 +8,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
 * [Image Search](/docs/features/features.md#image-search)
 * [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
-* [Autonomous Reasoning with Agents (Preview)](/docs/features/features.md#autonomous-reasoning-with-agents)
+* [Assistants (Preview)](/docs/features/features.md#autonomous-reasoning-with-assistants-agents)
 * [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
 * [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
 * [User Experience](/docs/features/features.md#user-experience)
@@ -80,15 +80,17 @@ With this addition, you can easily search for images in the Retrieval Augmented 
 
 When you upload images, data processing pipeline extractions captions and metadata of images and stores them in Azure AI Search Index. Now, when users ask questions using text, Retrieval pipeline extracts image captions matching user queries, allowing user to find images quickly. Just click on the citation, and the image will appear, making content retrieval a straight forward process. Additional information on this can be found [here](/docs/features/document_pre_processing.md)
 
+Image Search is only available in regions that support dense captions. For a full list of these regions please see the official documentation for Azure Vision Image Captions [here](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-describe-images-40?tabs=dense)
+
 ## Azure AI Search Integration
 
 This accelerator employs Vector Hybrid Search which combines vector similarity with keyword matching to enhance search accuracy. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
 
 To learn more, please visit the [Cognitive Search](/docs/features/cognitive_search.md) feature page.
 
-## Autonomous Reasoning with Agents 
+## Autonomous Reasoning with Assistants (Agents)
 
-We are rolling out the Math Agent and CSV Agent in a preview mode. The Math Tutor combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.The CSV Agent allows users to ask natural language questions about tabular data stored in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data. The key strength of Agents lies in their ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows.The Math Agent and CSV Agent are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
+We are rolling out the Math Assistant and Tabular Data Assistant in a preview mode. The Math Assistant combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.The Tabular Data Assistants allows users to ask natural language questions about tabular data stored in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data. The key strength of Agents lies in their ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows.The Math Assistant and Tabular Data assistant are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
 
 ## Customization and Personalization
 
@@ -108,13 +110,23 @@ We are rolling out the Math Agent and CSV Agent in a preview mode. The Math Tuto
 
 ## User Experience
 
-![Chat screen](/docs/images/info_assistant_chatscreen.png)
+
+
+![Chat screen](/docs/images/info-assist-chat-ui.png)
 
 The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page.
 
 ## Document Deletion
 
-In order to delete a document from the system entirely, one must only delete the document from the upload container in the `infoasststore*****` Storage Account. The Azure Function `FileDeletion` runs on a 10 minute timer and will delete the relevant documents from the content Storage container, the AI Search Index, and the Cosmos DB tag container. It will then update the state of the document, which can be viewed in the Upload Status portion of the UI under the Manage Content tab at the top right.
+There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure. Document deletions are not instantaneous and can take up to ten minutes to propogate through all components of the system.
+
+### File Deletion in the UI
+
+Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. They can use filters to locate documents, view detailed status and history of the document, then optionally delete the document. Additional information on document management, including how to upload, search, filter content and delete documents is availabe on the [User Experience](/docs/features/user_experience.md) page.
+
+### Technical File Deletion from the upload container
+
+An experienced technical user can delete a document from the upload container in the `infoasststore*****` Storage Account. The Azure Function `FileDeletion` runs on an interval timer and will delete the relevant documents from the content Storage container, the AI Search Index, and CosmosDB. It will then update the state of the document, which can be viewed in the Upload Status portion of the UI under the Manage Content tab at the top right.
 
 ## Works in Progress (Future releases)
 
@@ -126,6 +138,4 @@ We've starting with text-based image retrieval, but in the future, we have plans
 
 To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
 
-### File Deletion in the UI
 
-The ability to delete documents from the system will be enabled through a future UI update.

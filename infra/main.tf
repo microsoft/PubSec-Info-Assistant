@@ -351,14 +351,14 @@ module "webapp" {
     APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
-    BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
-    BING_SEARCH_KEY                         = var.enableWebChat ? module.bingSearch[0].key : ""
+    BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch.endpoint : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
     ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
     ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
     ENABLE_MULTIMEDIA                       = var.enableMultimedia
+    MAX_CSV_FILE_SIZE                       = var.maxCsvFileSize
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -580,17 +580,6 @@ module "kvModule" {
   tags              = local.tags
 }
 
-// Create the Bing v7 Search Service
-module "bingSearch" {
-  count                        = var.enableWebChat ? 1 : 0
-  source                       = "./core/ai/bingSearch"
-  name                         = "infoasst-bing-${random_string.random.result}"
-  resourceGroupName            = azurerm_resource_group.rg.name
-  tags                         = local.tags
-  sku                          = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
-  arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
-}
-
 // Create User Security roles
 module "userRoles" {
   source   = "./core/security/role"
@@ -691,7 +680,18 @@ module "azWorkbook" {
   componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
 }
 
-// Create the customer attribution tag for the resource group
+module "bingSearch" {
+  source                        = "./core/ai/bingSearch"
+  name                          = "infoasst-bing-${random_string.random.result}"
+  resourceGroupName             = azurerm_resource_group.rg.name
+  tags                          = local.tags
+  sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  keyVaultId                    = module.kvModule.keyVaultId
+  enableWebChat                 = var.enableWebChat
+}
+
+// DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG
 resource "azurerm_resource_group_template_deployment" "customer_attribution" {
   count               = var.cuaEnabled ? 1 : 0
   name                = "pid-${var.cuaId}"

@@ -633,3 +633,8 @@ variable "enableDevCode" {
 }
 
 //Provide DDOS ID if you want to enable DDOS protection
+
+variable "maxCsvFileSize" {
+  type    = string
+  default = "20"
+}

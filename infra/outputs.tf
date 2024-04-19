@@ -164,11 +164,11 @@ output "AZURE_ENVIRONMENT" {
 }
 
 output "BING_SEARCH_ENDPOINT" {
-  value = var.enableWebChat ? module.bingSearch[0].endpoint : ""
+  value = var.enableWebChat ? module.bingSearch.endpoint : ""
 }
 
 output "BING_SEARCH_KEY" {
-  value = var.enableWebChat ? module.bingSearch[0].key : ""
+  value = var.enableWebChat ? module.bingSearch.key : ""
 }
 
 output "ENABLE_BING_SAFE_SEARCH" {
@@ -189,4 +189,7 @@ output "AZURE_AI_FORM_RECOGNIZER_DOMAIN" {
 
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
+}
+output "MAX_CSV_FILE_SIZE" {
+  value = var.maxCsvFileSize
 }

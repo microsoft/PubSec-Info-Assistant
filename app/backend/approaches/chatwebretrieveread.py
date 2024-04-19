@@ -31,8 +31,9 @@ class ChatWebRetrieveRead(Approach):
     {follow_up_questions_prompt}   
     """
 
-    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-    Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
+    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """ALWAYS generate three very brief unordered follow-up questions surrounded by triple chevrons (<<<Are there exclusions for prescriptions?>>>) that the user would likely ask next about their agencies data. 
+    Surround each follow-up question with triple chevrons (<<<Are there exclusions for prescriptions?>>>). Try not to repeat questions that have already been asked.
+    Only generate follow-up questions and do not generate any text before or after the follow-up questions, such as 'Next Questions'
     """
 
     QUERY_PROMPT_TEMPLATE = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in Bing Search.
@@ -43,18 +44,23 @@ class ChatWebRetrieveRead(Approach):
     If you cannot generate a search query, return just the number 0.
     """
     
+     
     QUERY_PROMPT_FEW_SHOTS = [
-        {'role' : Approach.USER, 'content' : 'What are the future plans for public transportation development?' },
-        {'role' : Approach.ASSISTANT, 'content' : 'Future plans for public transportation' },
-        {'role' : Approach.USER, 'content' : 'how much renewable energy was generated last year?' },
-        {'role' : Approach.ASSISTANT, 'content' : 'Renewable energy generation last year' }
-    ]
+    {'role': Approach.USER, 'content': 'Could you search the web for information on the latest advancements in artificial intelligence,citing the provided URLs.?'},
+    {'role': Approach.ASSISTANT, 'content': 'User wants to know about recent advancements in artificial intelligence,with citations from the provided URLs.'},
+    {'role': Approach.USER, 'content': 'can you search the web and provide information on impact of climate change on global agriculture,citing the content from the URLs provided. ?'},
+    {'role': Approach.ASSISTANT, 'content': 'User is seeking information about the effects of climate change on global agriculture,with citations from the content provided in the URLs.'}
+]
+       
 
     RESPONSE_PROMPT_FEW_SHOTS = [
         {"role": Approach.USER ,'content': 'I am looking for information in source urls and its snippets'},
-        {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source urls and its snippets.'}
+        {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source urls and its snippets.'},
+        {"role": Approach.USER, 'content': 'I need data extracted from the URLs and their corresponding snippets.'},
+        {'role': Approach.ASSISTANT, 'content': 'User requires data extracted from the URLs and their snippets.'}
     ]
-
+    
+ 
     citations = {}
     approach_class = ""
 
@@ -69,7 +75,7 @@ class ChatWebRetrieveRead(Approach):
         self.bing_safe_search = bing_safe_search
         
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]],overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
         """
         Runs the approach to simulate experience with Bing Chat.
 
@@ -85,6 +91,7 @@ class ChatWebRetrieveRead(Approach):
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
+        thought_chain["web_query"] = user_query
 
         follow_up_questions_prompt = (
             self.FOLLOW_UP_QUESTIONS_PROMPT_CONTENT
@@ -103,7 +110,7 @@ class ChatWebRetrieveRead(Approach):
             )
         
         query_resp = await self.make_chat_completion(messages)
-
+        thought_chain["web_search_term"] = query_resp
         # STEP 2: Use the search query to get the top web search results
         url_snippet_dict = await self.web_search_with_safe_search(query_resp)
         content = ', '.join(f'{snippet} | {url}' for url, snippet in url_snippet_dict.items())
@@ -130,12 +137,14 @@ class ChatWebRetrieveRead(Approach):
         msg_to_display = '\n\n'.join([str(message) for message in messages])
         # STEP 3: Use the search results to answer the user's question
         resp = await self.make_chat_completion(messages)  
-
+        thought_chain["web_response"] = resp
         return {
             "data_points": None,
             "answer": f"{urllib.parse.unquote(resp)}",
             "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "thought_chain": thought_chain,
+            "work_citation_lookup": {},
+            "web_citation_lookup": self.citations
         }
     
 

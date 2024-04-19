@@ -17,7 +17,7 @@ export const enum Approaches {
     CompareWebWithWork = 6
 }
 
-export type AskRequestOverrides = {
+export type ChatRequestOverrides = {
     semanticRanker?: boolean;
     semanticCaptions?: boolean;
     excludeCategory?: string;
@@ -37,21 +37,14 @@ export type AskRequestOverrides = {
     selectedTags?: string;
 };
 
-export type AskRequest = {
-    question: string;
-    approach: Approaches;
-    overrides?: AskRequestOverrides;
-};
-
-export type AskResponse = {
+export type ChatResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
     approach: Approaches;
-    // citation_lookup: {}
-    // added this for citation bug. aparmar.
-    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
-    
+    thought_chain: { [key: string]: string };
+    work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
     error?: string;
 };
 
@@ -60,10 +53,18 @@ export type ChatTurn = {
     bot?: string;
 };
 
+export type Citation = {
+    citation: string;
+    source_path: string;
+    page_number: string; // or number, if page_number is intended to be a numeric value
+  }
+
 export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
-    overrides?: AskRequestOverrides;
+    overrides?: ChatRequestOverrides;
+    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    thought_chain: { [key: string]: string };
 };
 
 export type BlobClientUrlResponse = {
@@ -156,6 +157,11 @@ export type ActiveCitation = {
 
 export type GetWarningBanner = {
     WARNING_BANNER_TEXT: string;
+    error?: string;
+};
+
+export type getMaxCSVFileSizeType = {
+    MAX_CSV_FILE_SIZE: string;
     error?: string;
 };
 

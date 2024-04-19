@@ -1,16 +1,20 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+from io import StringIO
 from typing import Optional
+import asyncio
 #from sse_starlette.sse import EventSourceResponse
 #from starlette.responses import StreamingResponse
+from starlette.responses import Response
 import logging
 import os
 import json
 import urllib.parse
+import pandas as pd
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
 from approaches.compareworkwithweb import CompareWorkWithWeb
@@ -28,10 +32,19 @@ from azure.storage.blob import (
     ResourceTypes,
     generate_account_sas,
 )
-from approaches.MathTutor import(
+from approaches.mathassistant import(
     generate_response,
     process_agent_scratch_pad,
-    process_agent_response
+    process_agent_response,
+    stream_agent_responses
+)
+from approaches.tabulardataassistant import (
+    refreshagent,
+    save_df,
+    process_agent_response as td_agent_response,
+    process_agent_scratch_pad as td_agent_scratch_pad,
+    get_images_in_temp
+
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from azure.cosmos import CosmosClient
@@ -88,7 +101,8 @@ ENV = {
     "ENABLE_UNGROUNDED_CHAT": "false",
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "ENABLE_MULTIMEDIA": "false"
+    "ENABLE_MULTIMEDIA": "false",
+    "MAX_CSV_FILE_SIZE": "7"
     }
 
 for key, value in ENV.items():
@@ -104,6 +118,7 @@ log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
 
+dffinal = None
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
@@ -147,39 +162,30 @@ model_name = ''
 model_version = ''
 
 # Set up OpenAI management client
+openai_mgmt_client = CognitiveServicesManagementClient(
+    credential=azure_credential,
+    subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
+    base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
 
-## Temp fix for issue https://github.com/Azure/azure-sdk-for-python/issues/34337.
-## Remove this if/else once the issue is fixed in the SDK.
-if "azure.us" in ENV["AZURE_OPENAI_ENDPOINT"]:
-    model_name = ENV["AZURE_OPENAI_CHATGPT_MODEL_NAME"]
-    model_version = ENV["AZURE_OPENAI_CHATGPT_MODEL_VERSION"]
-    embedding_model_name = ENV["AZURE_OPENAI_EMBEDDINGS_MODEL_NAME"]
-    embedding_model_version = ENV["AZURE_OPENAI_EMBEDDINGS_VERSION"]
-else:
-    openai_mgmt_client = CognitiveServicesManagementClient(
-        credential=azure_credential,
-        subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
-        base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
+deployment = openai_mgmt_client.deployments.get(
+    resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
+    account_name=ENV["AZURE_OPENAI_SERVICE"],
+    deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
 
-    deployment = openai_mgmt_client.deployments.get(
+model_name = deployment.properties.model.name
+model_version = deployment.properties.model.version
+
+if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
+    embedding_deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
         account_name=ENV["AZURE_OPENAI_SERVICE"],
-        deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
+        deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
 
-    model_name = deployment.properties.model.name
-    model_version = deployment.properties.model.version
-
-    if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
-        embedding_deployment = openai_mgmt_client.deployments.get(
-            resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
-            account_name=ENV["AZURE_OPENAI_SERVICE"],
-            deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
-
-        embedding_model_name = embedding_deployment.properties.model.name
-        embedding_model_version = embedding_deployment.properties.model.version
-    else:
-        embedding_model_name = ""
-        embedding_model_version = ""
+    embedding_model_name = embedding_deployment.properties.model.name
+    embedding_model_version = embedding_deployment.properties.model.version
+else:
+    embedding_model_name = ""
+    embedding_model_version = ""
 
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
@@ -286,15 +292,22 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}))
+        
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
+        else:
+            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
        
-        # To fix citation bug,below code is added.aparmar
-        return {
+        response = {
                 "data_points": r["data_points"],
                 "answer": r["answer"],
                 "thoughts": r["thoughts"],
-                "citation_lookup": r["citation_lookup"],
-            }
+                "thought_chain": r["thought_chain"],
+                "work_citation_lookup": r["work_citation_lookup"],
+                "web_citation_lookup": r["web_citation_lookup"]
+        }
+
+        return response
 
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")
@@ -459,12 +472,14 @@ async def resubmit_Items(request: Request):
         blob_data = blob_container.download_blob(path).readall()
         # Overwrite the blob with the modified data
         blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
-        statusLog.upsert_document(document_path=path,
+        # add the container to the path to avoid adding another doc in the status db
+        full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
+        statusLog.upsert_document(document_path=full_path,
                     status='Resubmitted to the processing pipeline',
                     status_classification=StatusClassification.INFO,
                     state=State.QUEUED,
                     fresh_start=False)
-        statusLog.save_document(document_path=path)   
+        statusLog.save_document(document_path=full_path)   
 
     except Exception as ex:
         log.exception("Exception in /delete_Items")
@@ -580,6 +595,14 @@ async def get_warning_banner():
         }
     return response
 
+@app.get("/getMaxCSVFileSize")
+async def get_max_csv_file_size():
+    """Get the max csv size"""
+    response ={
+            "MAX_CSV_FILE_SIZE": ENV["MAX_CSV_FILE_SIZE"]
+        }
+    return response
+
 @app.post("/getcitation")
 async def get_citation(request: Request):
     """
@@ -630,6 +653,16 @@ async def get_all_tags():
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
+@app.get("/getTempImages")
+async def get_temp_images():
+    """Get the images in the temp directory
+
+    Returns:
+        list: A list of image data in the temp directory.
+    """
+    images = get_images_in_temp()
+    return {"images": images}
+
 @app.get("/getHint")
 async def getHint(question: Optional[str] = None):
     """
@@ -648,6 +681,93 @@ async def getHint(question: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
+@app.post("/posttd")
+async def posttd(csv: UploadFile = File(...)):
+    try:
+        global dffinal
+            # Read the file into a pandas DataFrame
+        content = await csv.read()
+        df = pd.read_csv(StringIO(content.decode('latin-1')))
+
+        dffinal = df
+        # Process the DataFrame...
+        save_df(df)
+    except Exception as ex:
+            raise HTTPException(status_code=500, detail=str(ex)) from ex
+    
+    
+    #return {"filename": csv.filename}
+@app.get("/process_td_agent_response")
+async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
+    if question is None:
+        raise HTTPException(status_code=400, detail="Question is required")
+    for i in range(retries):
+        try:
+            results = td_agent_response(question)
+            return results
+        except AttributeError as ex:
+            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                if str(ex) == "'NoneType' object has no attribute 'stream'":
+                    return ["error: Csv has not been loaded"]
+                else:
+                    raise HTTPException(status_code=500, detail=str(ex)) from ex
+        except Exception as ex:
+            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.get("/getTdAnalysis")
+async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
+    global dffinal
+    if question is None:
+            raise HTTPException(status_code=400, detail="Question is required")
+        
+    for i in range(retries):
+        try:
+            save_df(dffinal)
+            results = td_agent_scratch_pad(question, dffinal)
+            return results
+        except AttributeError as ex:
+            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                if str(ex) == "'NoneType' object has no attribute 'stream'":
+                    return ["error: Csv has not been loaded"]
+                else:
+                    raise HTTPException(status_code=500, detail=str(ex)) from ex
+        except Exception as ex:
+            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
+            if i < retries - 1:  # i is zero indexed
+                await asyncio.sleep(delay)  # wait a bit before trying again
+            else:
+                raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.post("/refresh")
+async def refresh():
+    """
+    Refresh the agent's state.
+
+    This endpoint calls the `refresh` function to reset the agent's state.
+
+    Raises:
+        HTTPException: If an error occurs while refreshing the agent's state.
+
+    Returns:
+        dict: A dictionary containing the status of the agent's state.
+    """
+    try:
+        refreshagent()
+    except Exception as ex:
+        log.exception("Exception in /refresh")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+    return {"status": "success"}
+
 @app.get("/getSolve")
 async def getSolve(question: Optional[str] = None):
    
@@ -657,9 +777,34 @@ async def getSolve(question: Optional[str] = None):
     try:
         results = process_agent_scratch_pad(question)
     except Exception as ex:
-        log.exception("Exception in /getHint")
+        log.exception("Exception in /getSolve")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
+
+
+@app.get("/stream")
+async def stream_response(question: str):
+    try:
+        stream = stream_agent_responses(question)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.get("/tdstream")
+async def td_stream_response(question: str):
+    save_df(dffinal)
+    
+
+    try:
+        stream = td_agent_scratch_pad(question, dffinal)
+        return StreamingResponse(stream, media_type="text/event-stream")
+    except Exception as ex:
+        log.exception("Exception in /stream")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+
+
 
 @app.get("/process_agent_response")
 async def stream_agent_response(question: str):
@@ -699,36 +844,6 @@ async def stream_agent_response(question: str):
         raise HTTPException(status_code=500, detail=str(e))
     return results
 
-@app.post("/retryFile")
-async def retryFile(request: Request):
-    """
-    Retries submission of a file
-
-    Returns:
-        dict: A dictionary containing the status of all tags
-    """
-    json_body = await request.json()
-    filePath = json_body.get("filePath")
-    
-    try:
-        file_path_parsed = filePath.replace(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + "/", "")
-        blob = blob_client.get_blob_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"], file_path_parsed)  
-        if blob.exists():
-            raw_file = blob.download_blob().readall()
-            # Overwrite the existing blob with new data
-            blob.upload_blob(raw_file, overwrite=True) 
-
-            statusLog.upsert_document(document_path=filePath,
-                        status='Resubmitted to the processing pipeline',
-                        status_classification=StatusClassification.INFO,
-                        state=State.QUEUED,
-                        fresh_start=False)
-            statusLog.save_document(document_path=filePath)   
-
-    except Exception as ex:
-        logging.exception("Exception in /retryFile")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return {"status": 200}
 
 @app.get("/getFeatureFlags")
 async def get_feature_flags():

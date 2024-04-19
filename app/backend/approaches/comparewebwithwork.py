@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+
 import re
 import urllib.parse
 from typing import Any, Sequence
@@ -29,11 +30,13 @@ class CompareWebWithWork(Approach):
     """
 
     COMPARATIVE_RESPONSE_PROMPT_FEW_SHOTS = [
-        {"role": Approach.USER ,'content': 'I am looking for comparative information on an answer based on Web search results and want to compare against an answer based on Work internal documents'},
-        {'role': Approach.ASSISTANT, 'content': 'User is looking to compare an answer based on Web search results against an answer based on Work internal documents.'}
+        # {"role": Approach.USER ,'content': 'I am looking for comparative information on an answer based on Web search results and want to compare against an answer based on Work internal documents'},
+        # {'role': Approach.ASSISTANT, 'content': 'User is looking to compare an answer based on Web search results against an answer based on Work internal documents.'}
+        {"role": Approach.USER, 'content': 'I am looking to compare and contrast answers obtained from both web search results and internal work documents.'},
+        {'role': Approach.ASSISTANT, 'content': 'User wants to compare and contrast responses from both web search results and internal work documents.'},
+        {"role": Approach.USER, 'content': "Even if one of the sources doesn't provide a definite answer, I still want to compare and contrast the available information."},
+        {'role': Approach.ASSISTANT, 'content': "User emphasizes the importance of comparing and contrasting data even if one of the sources is uncertain about the answer."}
     ]
-
-    citations = {}
     
     def __init__(
         self,
@@ -80,7 +83,7 @@ class CompareWebWithWork(Approach):
         self.azure_ai_translation_domain = azure_ai_translation_domain
         self.use_semantic_reranker = use_semantic_reranker
 
-    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], web_citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
         """
         Runs the approach to compare and contrast answers from internal data and Web Search results.
 
@@ -113,19 +116,19 @@ class CompareWebWithWork(Approach):
                                     self.azure_ai_translation_domain,
                                     self.use_semantic_reranker
                                 )
-        rrr_response = await chat_rrr_approach.run(history, overrides)
+        rrr_response = await chat_rrr_approach.run(history, overrides, {}, thought_chain)
+        
 
-        self.citations = rrr_response.get("citation_lookup")
-
+        work_citations = rrr_response.get("work_citation_lookup")
         user_query = history[-1].get("user")
-        web_answer = history[0].get("bot")
+        web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
-        bing_compare_query = user_query + " Web search resutls:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + rrr_response.get("answer") + "\n\n"
-
+        bing_compare_query = user_query + " Web search results:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + rrr_response.get("answer") + "\n\n"
+        thought_chain["web_to_work_comparison_query"] = bing_compare_query
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
                 query_term_language=self.query_term_language,
@@ -149,14 +152,17 @@ class CompareWebWithWork(Approach):
         final_response = f"{urllib.parse.unquote(bing_compare_resp)}"
 
         # Step 4: Append web citations from the Bing Search approach
-        for idx, url in enumerate(self.citations.keys(), start=1):
+        for idx, url in enumerate(work_citations.keys(), start=1):
             final_response += f" [File{idx}]"
-
+        thought_chain["web_to_work_comparison_response"] = final_response
+        
         return {
             "data_points": None,
             "answer": f"{urllib.parse.unquote(final_response)}",
             "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": self.citations
+            "thought_chain": thought_chain,
+            "work_citation_lookup": work_citations,
+            "web_citation_lookup": web_citation_lookup
         }
     
     async def make_chat_completion(self, messages) -> str:

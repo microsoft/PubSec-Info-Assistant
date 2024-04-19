@@ -68,14 +68,6 @@ merge-databases: ## Upgrade from bicep to terraform
 	@figlet "Upgrading in place"
 	python ./scripts/merge-databases.py
 
-repoint: ## Repoint functions, webapp and enrichment app to old rg cosmos, storage and search
-	@figlet "Repointing"
-	python ./scripts/merge-databases.py
-	@./scripts/repoint.sh
-
-run-repoint:
-	@./scripts/repoint.sh
-
 import-state: check-subscription ## import state of current srevcies to TF state
 	@./scripts/inf-import-state.sh
 
@@ -85,7 +77,7 @@ prep-upgrade:
 	merge-databases 
 	import-state 
 
-#
+# Adds role and policy entries if required to allow the import state command and merge db to run
 prep-env: 
 	@figlet "Preparing Environment"
 	@./scripts/prep-env.sh

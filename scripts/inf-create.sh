@@ -72,24 +72,69 @@ if [[ $SECURE_MODE == "true" ]]; then
 
     if [ "$diag_settings_count" -ge "$max_diag_settings" ]; then
         echo -e "\e[31mError: Maximum diagnostic settings capacity reached ($max_diag_settings). Please delete an existing diagnostic setting before proceeding."
-        echo -e "You currently have no capacity left for new diagnostic settings.\e[0m"
+        echo -e "You currently have no capacity left for new diagnostic settings.\n\e[0m"
         
         # Display existing diagnostic settings
         echo -e "\e[1;34mHere are the current diagnostic settings:\e[0m"
         az monitor diagnostic-settings subscription list --query "value[].{name: name}" --output table
+        echo -e "\n"
         
         # Provide the command to delete a diagnostic setting
         echo -e "\e[1;34mTo delete a diagnostic setting, use this command:\e[0m"
-        echo "az monitor diagnostic-settings subscription delete --name <diagnostic setting name>"
-        
+        echo -e "az monitor diagnostic-settings subscription delete --name <diagnostic setting name>\n"
+
         # Exit the script to prevent further execution
         exit 1
     else
-        echo -e "\e[33mYou have $remaining_capacity diagnostic settings capacity left.\e[0m"
+        echo -e "\e[33mYou have $remaining_capacity diagnostic settings capacity left.\n\e[0m"
     fi
 else
-    echo -e "\e[32mSECURE_MODE is set to false, skipping diagnostic settings capacity check.\e[0m"
+    echo -e "\e[32mSECURE_MODE is set to false, skipping diagnostic settings capacity check.\n\e[0m"
 fi
+
+# Check for existing DDOS Protection Plan and use it if available
+if [[ "$SECURE_MODE" == "true" ]]; then
+    if [[ -z "$DDOS_PLAN_ID" ]]; then
+        # No DDOS_PLAN_ID provided in the environment, look up Azure for an existing DDOS plan
+        DDOS_PLAN_ID=$(az network ddos-protection list --query "[?contains(name, 'ddos')].id | [0]" --output tsv)
+        
+        if [[ -z "$DDOS_PLAN_ID" ]]; then
+            echo -e "\e[31mNO EXISTING DDOS PROTECTION PLAN FOUND. A NEW ONE WILL BE CREATED.\n\e[0m"
+        else
+            echo -e "Using existing DDOS Protection Plan: $DDOS_PLAN_ID\n"
+        fi
+    else
+        echo -e "Using provided DDOS Protection Plan ID from environment: $DDOS_PLAN_ID\n"
+    fi
+    
+    # Export the DDOS_PLAN_ID for Terraform to pick up
+    export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
+else
+    echo -e "Secure Mode is set to false. DDOS Subscription is not required and will not be created.\n"
+fi
+
+# PAUSE TO ALLOW FOR MANUAL SETUP OF VPN
+echo "Let's now establish a connection from the client machine to new a virtual network." 
+echo -e "Please configure your virtual network\n"
+while true; do
+    read -p "Are you ready to continue (y/n)? " yn
+    case $yn in
+        [Yy]* ) break;;  # Correct input, proceed with the script
+        [Nn]* ) 
+            while true; do
+                read -p "Please configure your virtual network so the client machine can make a connection. Enter yes to continue (y/n): " retry_yn
+                case $retry_yn in
+                    [Yy]* ) break 2;;  # Correct input, exit both loops and continue the script
+                    [Nn]* ) echo "Please configure your virtual network settings and enter 'y' to continue or 'n' to re-enter this setup.";;
+                    * ) echo "Invalid input. Please answer yes (y) or no (n).";;
+                esac
+            done
+        ;;
+        * ) echo "Invalid input. Please answer yes (y) or no (n).";;
+    esac
+done
+
+echo "Continuing with the deployment..."
 
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh
@@ -98,6 +143,3 @@ ${DIR}/configuration-create.sh
 ${DIR}/terraform-init.sh "$DIR/../infra/"
 
 ${DIR}/terraform-plan-apply.sh -d "$DIR/../infra" -p "infoasst" -o "$DIR/../inf_output.json"
-
-
-#Check for existing DDOS subscription here - check capacity - if they're at capacity error out. 

@@ -40,7 +40,11 @@ variable "cuaId" {
 
 variable "ddos_enabled" {
   type    = bool
-  default = true
+  default = false
+}
+
+variable "ddos_plan_id" {
+  type    = string 
 }
 
 variable "requireWebsiteSecurityMembership" {

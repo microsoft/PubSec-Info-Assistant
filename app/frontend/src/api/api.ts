@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AskResponse, 
+import { ChatResponse, 
     ChatRequest, 
     BlobClientUrlResponse, 
     AllFilesUploadStatus, 
@@ -16,9 +16,10 @@ import { AskResponse,
     DeleteItemRequest,
     ResubmitItemRequest,
     GetFeatureFlagsResponse,
+    getMaxCSVFileSizeType,
     } from "./models";
 
-export async function chatApi(options: ChatRequest): Promise<AskResponse> {
+export async function chatApi(options: ChatRequest): Promise<ChatResponse> {
     const response = await fetch("/chat", {
         method: "POST",
         headers: {
@@ -46,11 +47,12 @@ export async function chatApi(options: ChatRequest): Promise<AskResponse> {
                 selected_folders: options.overrides?.selectedFolders,
                 selected_tags: options.overrides?.selectedTags
             },
-            citation_lookup: options.citation_lookup
+            citation_lookup: options.citation_lookup,
+            thought_chain: options.thought_chain
         })
     });
 
-    const parsedResponse: AskResponse = await response.json();
+    const parsedResponse: ChatResponse = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
     }
@@ -408,6 +410,22 @@ export async function getWarningBanner(): Promise<GetWarningBanner> {
         }
     });
     const parsedResponse: GetWarningBanner = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
+export async function getMaxCSVFileSize(): Promise<getMaxCSVFileSizeType> {
+    const response = await fetch("/getMaxCSVFileSize", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    const parsedResponse: getMaxCSVFileSizeType = await response.json();
     if (response.status > 299 || !response.ok) {
         console.log(response);
         throw Error(parsedResponse.error || "Unknown error");

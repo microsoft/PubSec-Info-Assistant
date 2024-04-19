@@ -8,6 +8,11 @@ variable "ddos_name" {
 
 variable "ddos_enabled"  {
   type    = bool
+  default = false
+}
+
+variable "ddos_plan_id" {
+  type = string
 }
 
 variable "vnet_name" {

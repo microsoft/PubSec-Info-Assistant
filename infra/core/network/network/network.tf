@@ -9,11 +9,12 @@ resource "azurerm_network_security_group" "nsg" {
 
 //Create the DDoS plan
 
-/* resource "azurerm_network_ddos_protection_plan" "ddos" {
+resource "azurerm_network_ddos_protection_plan" "ddos" {
+  count               = var.ddos_enabled ? 1 : 0
   name                = var.ddos_name
   resource_group_name = var.resourceGroupName
   location            = var.location
-} */
+} 
 
 //Create the Virtual Network
 
@@ -24,10 +25,10 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = [var.vnetIpAddressCIDR]
   tags = var.tags
 
-/*   ddos_protection_plan {
-    id     = azurerm_network_ddos_protection_plan.ddos.id
-    enable = var.ddos_enabled
-    } */
+   ddos_protection_plan {
+     id     = var.ddos_plan_id != "" ? var.ddos_plan_id : azurerm_network_ddos_protection_plan.ddos[0].id 
+     enable = var.ddos_enabled
+    } 
 }
 
 resource "azurerm_subnet" "ampls" {

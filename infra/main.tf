@@ -42,6 +42,7 @@ module "network" {
   nsg_name                   = "infoasst-nsg-${random_string.random.result}"
   ddos_name                  = "infoasst-ddos-${random_string.random.result}"
   ddos_enabled               = var.ddos_enabled
+  ddos_plan_id               = var.ddos_plan_id
   location                   = var.location
   tags                       = local.tags
   resourceGroupName          = azurerm_resource_group.rg.name

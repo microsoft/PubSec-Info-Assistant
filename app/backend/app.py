@@ -126,7 +126,7 @@ if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
     AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
 else:
     AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
-openai.api_version = "2023-12-01-preview"
+openai.api_version = "2024-02-01"
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service

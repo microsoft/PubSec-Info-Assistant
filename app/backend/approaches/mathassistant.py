@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 #--------------------------------------------------------------------------
 #variables needed for testing
 OPENAI_API_TYPE = "azure"
-OPENAI_API_VERSION = "2023-06-01-preview"
+OPENAI_API_VERSION = "2024-02-01"
 OPENAI_API_BASE = " "
 OPENAI_API_KEY = " "
 OPENAI_DEPLOYMENT_NAME = " "
@@ -34,15 +34,17 @@ OPENAI_DEPLOYMENT_NAME = deployment_name
 
 
 OPENAI_DEPLOYMENT_NAME =  azure_openai_chatgpt_deployment
-from langchain.chat_models import AzureChatOpenAI
-from langchain.schema import HumanMessage
+
+from langchain_openai import AzureChatOpenAI
 from langchain.agents import initialize_agent, load_tools, AgentType
 from langchain.prompts import ChatPromptTemplate
 
 
 model = AzureChatOpenAI(
+    api_key= OPENAI_API_KEY,
+    azure_endpoint=OPENAI_API_BASE,
     openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)      
+    deployment_name=OPENAI_DEPLOYMENT_NAME)   
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools
@@ -191,8 +193,10 @@ def process_agent_response( question):
 #Function to process clues
 def generate_response(question):
     model = AzureChatOpenAI(
-        openai_api_version=OPENAI_API_VERSION ,
-        deployment_name=OPENAI_DEPLOYMENT_NAME)   
+    api_key= OPENAI_API_KEY,
+    azure_endpoint=OPENAI_API_BASE,
+    openai_api_version=OPENAI_API_VERSION ,
+    deployment_name=OPENAI_DEPLOYMENT_NAME)     
     prompt_template = ChatPromptTemplate.from_template(template=prompt)
     messages = prompt_template.format_messages(
     question=question

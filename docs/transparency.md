@@ -177,7 +177,7 @@ This capability leverages the individual prompts for internally-grounded and ext
 ### Overview
 This capability leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios.
 
-As users may ask questions in the ungrounded experience, ungrounded responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount. Ungrounded responses will NOT have citations available for verification.
+As users may ask questions in the ungrounded experience, ungrounded responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount. Ungrounded responses will NOT have citations avaiable for verification.
 
 The system differentiates the ungrounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish that the answer is ungrounded.
 
@@ -242,8 +242,7 @@ Current known limitations with respect to minors:
 * This accelerator does not have age awareness
 * This accelerator does not utilize, collect or store guardian consent
 * This accelerator does not store user interaction history in any form including user identifiers, queries or responses
-* This accelerator may not have adequate features to prevent "jailbraking" of the system to bypass harm mitigation's
-
+*  This accelerator may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
 # Limitations of IA Accelerator
 
 In this section we describe several known limitations of the IA Accelerator system.
@@ -294,7 +293,7 @@ True Negative | The user asks a question and the system does not find any docume
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. False Positive outcomes may be mitigated by human review of citations.
 
-During web-grounded interactions, human oversight is required to verify the validity of the source data; web content should not be innately trusted. 
+During web-grounded interactions, human oversight is required to verify the vailidity of the source data; web content should not be inately trusted. 
 
 **NOTE:** Due to generative AI's capability to fabricate, end users should always leverage citations to verify results.
 

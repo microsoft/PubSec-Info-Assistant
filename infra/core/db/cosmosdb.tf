@@ -71,7 +71,7 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   }
 }
 
-resource "azurerm_key_vault_secret" "cosmos_db_key" {
+resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "COSMOSDB-KEY"
   value        = azurerm_cosmosdb_account.cosmosdb_account.primary_key
   key_vault_id = var.keyVaultId

@@ -1,3 +1,5 @@
+
+
 // Create Enrichment App Service Plan 
 resource "azurerm_service_plan" "appServicePlan" {
   name                          = var.plan_name

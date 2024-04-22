@@ -14,10 +14,6 @@ from azure.keyvault.secrets import SecretClient
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient
-from datetime import datetime, timedelta
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions
-import urllib.parse
-
 
 
 # Helper function for getting the appropriate Azure CLI Vault URL
@@ -275,12 +271,11 @@ try:
         blob_data = old_blob_client.download_blob().readall()
         
         new_blob_client = new_container_client.get_blob_client(blob.name)
-        new_blob_client.upload_blob(blob_data, overwrite=True)                     
+        metadata = {"do-not-process": "true"}
+        new_blob_client.upload_blob(blob_data, overwrite=True, metadata=metadata)                     
 
 except Exception as e:
     print(e)
-
-
 
 
 # *************************************************************************
@@ -312,16 +307,4 @@ try:
 except Exception as e:
     print(e)
 
-
 print('done')
-        
-                
-
-
-
-
-
-
-
-
-

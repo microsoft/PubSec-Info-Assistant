@@ -3,6 +3,7 @@
 
 import logging
 import os
+import sys
 import json
 import random
 import time
@@ -36,8 +37,6 @@ azure_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
 azure_search_service_index = os.environ["AZURE_SEARCH_INDEX"]
 azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
-
-
 
 
 
@@ -77,8 +76,7 @@ def main(myblob: func.InputStream):
         statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
-        # Create message structure to send to queue
-      
+        # Create message structure to send to queue      
         file_extension = os.path.splitext(myblob.name)[1][1:].lower()
         if file_extension == 'pdf':
              # If the file is a PDF a message is sent to the PDF processing queue.
@@ -111,14 +109,31 @@ def main(myblob: func.InputStream):
         }        
         message_string = json.dumps(message)
         
+        blob_client = BlobServiceClient(
+            account_url=azure_blob_endpoint,
+            credential=azure_blob_key,
+        )    
+        
+        # Check if the blob has been marked as 'do not process' and abort if so
+        # This metadata is set if the blob is already processed and the content from
+        # an existing resource group is simply being copied into this resource group
+        # as part of a miration. In this case the blob has alreday been enriched and indexed
+        # and so no further processing is required on import
+        upload_blob_client = blob_client.get_blob_client(container=azure_blob_upload_container, blob=myblob.name)
+        properties = upload_blob_client.get_blob_properties()
+        metadata = properties.metadata
+        do_not_process = metadata.get('do-not-process')   
+        if 'do-not-process' in metadata:
+            if do_not_process == 'true':   
+                statusLog.upsert_document(myblob.name,'Further procesiang cancelled due to do-not-process metadata = true', StatusClassification.DEBUG, State.COMPLETE)   
+                sys.exit()
+       
+        
         # If this is an update to the blob, then we need to delete any residual chunks
         # as processing will overlay chunks, but if the new file version is smaller
         # than the old, then the residual old chunks will remain. The following
         # code handles this for PDF and non-PDF files.
-        blob_client = BlobServiceClient(
-            account_url=azure_blob_endpoint,
-            credential=azure_blob_key,
-        )
+
         blob_container = blob_client.get_container_client(azure_blob_content_container)
         # List all blobs in the container that start with the name of the blob being processed
         # first remove the container prefix

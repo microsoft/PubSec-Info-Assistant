@@ -68,4 +68,4 @@ prep-migration-env: ## Prepare the environment for migration by assigning requir
 	@./scripts/prep-migration-env.sh
 
 run-data-migration: ## Run the data migration moving data from one rg to another
-	@./scripts/run-data-migration.sh
+	python ./scripts/extract-content.py

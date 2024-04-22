@@ -396,6 +396,3 @@ terraform.tfstate.d
 .tfplan.txt
 infra/infoasst*
 infra/sp_config/config.json
-
-#Scripts
-scripts/upgrade_repoint.config.json

@@ -76,6 +76,11 @@ if [[ $SECURE_MODE == true && $USE_EXISTING_AOAI == true ]]; then
     exit 1
 fi
 
+if [[ $SECURE_MODE == true && $ENABLE_MULTIMEDIA == true ]]; then
+    echo -e "\n"
+    echo -e "Multimedia feature is not available in secure mode. Check your values for SECURE_MODE and ENABLE_MULTIMEDIA.\e[0m\n"
+fi
+
 # Fail if the following environment variables are not set
 if [[ -z $WORKSPACE ]]; then
     echo "\e[31mWORKSPACE must be set.\e[0m\n"

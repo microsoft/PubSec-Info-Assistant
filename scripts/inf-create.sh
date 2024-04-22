@@ -71,15 +71,16 @@ if [[ $SECURE_MODE == "true" ]]; then
     echo -e "Remaining capacity for diagnostic settings: \e[32m$remaining_capacity\e[0m"
 
     if [ "$diag_settings_count" -ge "$max_diag_settings" ]; then
-        echo -e "\e[31mError: Maximum diagnostic settings capacity reached ($max_diag_settings). Please delete an existing diagnostic setting before proceeding."
+        echo -e "\e[31mError: Maximum diagnostic settings capacity reached ($max_diag_settings).\n\e[0m"
         echo -e "You currently have no capacity left for new diagnostic settings.\n\e[0m"
         
         # Display existing diagnostic settings
         echo -e "\e[1;34mHere are the current diagnostic settings:\e[0m"
-        az monitor diagnostic-settings subscription list --query "value[].{name: name}" --output table
+        az monitor diagnostic-settings subscription list --query "value[].{name: name, resourceId: targetResourceId}" --output table
         echo -e "\n"
-        
-        # Provide the command to delete a diagnostic setting
+        echo -e "Please delete an existing diagnostic setting before proceeding.\n"
+
+         # Provide the command to delete a diagnostic setting
         echo -e "\e[1;34mTo delete a diagnostic setting, use this command:\e[0m"
         echo -e "az monitor diagnostic-settings subscription delete --name <diagnostic setting name>\n"
 
@@ -99,9 +100,16 @@ if [[ "$SECURE_MODE" == "true" ]]; then
         DDOS_PLAN_ID=$(az network ddos-protection list --query "[?contains(name, 'ddos')].id | [0]" --output tsv)
         
         if [[ -z "$DDOS_PLAN_ID" ]]; then
-            echo -e "\e[31mNO EXISTING DDOS PROTECTION PLAN FOUND. A NEW ONE WILL BE CREATED.\n\e[0m"
+            echo -e "\e[31mNo existing DDOS protection plan found. Terraform will create a new one.\n\e[0m"
         else
-            echo -e "Using existing DDOS Protection Plan: $DDOS_PLAN_ID\n"
+            echo "Found existing DDOS Protection Plan: $DDOS_PLAN_ID"
+            read -p "Do you want to use this existing DDOS Protection Plan (y/n)? " use_existing
+            if [[ "$use_existing" =~ ^[Yy]$ ]]; then
+                echo -e "Using existing DDOS Protection Plan: $DDOS_PLAN_ID\n"
+            else
+                DDOS_PLAN_ID=""  # Clear the variable to indicate that a new plan should be created
+                echo "A new DDOS Protection Plan will be created by Terraform."
+            fi
         fi
     else
         echo -e "Using provided DDOS Protection Plan ID from environment: $DDOS_PLAN_ID\n"
@@ -110,31 +118,25 @@ if [[ "$SECURE_MODE" == "true" ]]; then
     # Export the DDOS_PLAN_ID for Terraform to pick up
     export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
 else
-    echo -e "Secure Mode is set to false. DDOS Subscription is not required and will not be created.\n"
+    echo -e "Secure Mode is set to false. No DDOS-related operations will be performed.\n"
 fi
 
 # PAUSE TO ALLOW FOR MANUAL SETUP OF VPN
-echo "Let's now establish a connection from the client machine to new a virtual network." 
+echo "Let's now establish a connection from the client machine to a new virtual network."
 echo -e "Please configure your virtual network\n"
 while true; do
     read -p "Are you ready to continue (y/n)? " yn
     case $yn in
-        [Yy]* ) break;;  # Correct input, proceed with the script
+        [Yy]* ) 
+            echo "Continuing with the deployment..."
+            break;;  
         [Nn]* ) 
-            while true; do
-                read -p "Please configure your virtual network so the client machine can make a connection. Enter yes to continue (y/n): " retry_yn
-                case $retry_yn in
-                    [Yy]* ) break 2;;  # Correct input, exit both loops and continue the script
-                    [Nn]* ) echo "Please configure your virtual network settings and enter 'y' to continue or 'n' to re-enter this setup.";;
-                    * ) echo "Invalid input. Please answer yes (y) or no (n).";;
-                esac
-            done
-        ;;
-        * ) echo "Invalid input. Please answer yes (y) or no (n).";;
+            echo "Exiting. Please configure your virtual network settings before continuing."
+            exit 1;;  
+        * ) 
+            echo "Invalid input. Please answer yes (y) or no (n).";;
     esac
 done
-
-echo "Continuing with the deployment..."
 
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh

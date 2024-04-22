@@ -116,27 +116,29 @@ if [[ "$SECURE_MODE" == "true" ]]; then
     fi
     
     # Export the DDOS_PLAN_ID for Terraform to pick up
-    export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
+    export TF_VAR_DDOS_PLAN_ID="$DDOS_PLAN_ID"
 else
     echo -e "Secure Mode is set to false. No DDOS-related operations will be performed.\n"
 fi
 
 # PAUSE TO ALLOW FOR MANUAL SETUP OF VPN
-echo "Let's now establish a connection from the client machine to a new virtual network."
-echo -e "Please configure your virtual network\n"
-while true; do
-    read -p "Are you ready to continue (y/n)? " yn
-    case $yn in
-        [Yy]* ) 
-            echo "Continuing with the deployment..."
-            break;;  
-        [Nn]* ) 
-            echo "Exiting. Please configure your virtual network settings before continuing."
-            exit 1;;  
-        * ) 
-            echo "Invalid input. Please answer yes (y) or no (n).";;
-    esac
-done
+if [[ "$SECURE_MODE" == "true" ]]; then
+    echo "Let's now establish a connection from the client machine to a new virtual network."
+    echo -e "Please configure your virtual network\n"
+    while true; do
+        read -p "Are you ready to continue (y/n)? " yn
+        case $yn in
+            [Yy]* ) 
+                echo "Continuing with the deployment..."
+                break;;  
+            [Nn]* ) 
+                echo "Exiting. Please configure your virtual network settings before continuing."
+                exit 1;;  
+            * ) 
+                echo "Invalid input. Please answer yes (y) or no (n).";;
+        esac
+    done
+fi
 
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh

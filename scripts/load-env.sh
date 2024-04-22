@@ -79,6 +79,7 @@ fi
 if [[ $SECURE_MODE == true && $ENABLE_MULTIMEDIA == true ]]; then
     echo -e "\n"
     echo -e "Multimedia feature is not available in secure mode. Check your values for SECURE_MODE and ENABLE_MULTIMEDIA.\e[0m\n"
+    exit 1
 fi
 
 # Fail if the following environment variables are not set

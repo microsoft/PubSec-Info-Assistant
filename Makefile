@@ -24,8 +24,11 @@ build-containers: extract-env
 infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts/inf-create.sh
 
-extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
+extract-env: check-secure-mode-connectivity extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
 	 @./scripts/json-to-env.sh < inf_output.json > ./scripts/environments/infrastructure.env
+
+check-secure-mode-connectivity: ## Check secure mode connectivity
+	@./scripts/check-secure-mode-connectivity.sh
 
 deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
 	@./scripts/deploy-webapp.sh

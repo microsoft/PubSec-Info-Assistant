@@ -106,19 +106,15 @@ if [[ "$SECURE_MODE" == "true" ]]; then
             read -p "Do you want to use this existing DDOS Protection Plan (y/n)? " use_existing
             if [[ "$use_existing" =~ ^[Yy]$ ]]; then
                 echo -e "Using existing DDOS Protection Plan: $DDOS_PLAN_ID\n"
+                export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
             else
-                DDOS_PLAN_ID=""  # Clear the variable to indicate that a new plan should be created
+                export TF_VAR_ddos_plan_id=""  # Clear the variable to indicate that a new plan should be created
                 echo "A new DDOS Protection Plan will be created by Terraform."
             fi
         fi
     else
         echo -e "Using provided DDOS Protection Plan ID from environment: $DDOS_PLAN_ID\n"
     fi
-    
-    # Export the DDOS_PLAN_ID for Terraform to pick up
-    export TF_VAR_DDOS_PLAN_ID="$DDOS_PLAN_ID"
-else
-    echo -e "Secure Mode is set to false. No DDOS-related operations will be performed.\n"
 fi
 
 # Create our application configuration file before starting infrastructure

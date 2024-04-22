@@ -64,6 +64,10 @@ destroy-inf: check-subscription
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
 
+merge-databases: ## Upgrade from bicep to terraform
+	@figlet "Upgrading in place"
+	python ./scripts/merge-databases.py
+
 prep-migration-env: ## Prepare the environment for migration by assigning required roles
 	@./scripts/prep-migration-env.sh
 

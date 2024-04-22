@@ -1,6 +1,25 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+# PAUSE TO ALLOW FOR MANUAL SETUP OF VPN
+if [[ "$SECURE_MODE" == "true" ]]; then
+    echo "Let's now establish a connection from the client machine to a new virtual network."
+    echo -e "Please configure your virtual network\n"
+    while true; do
+        read -p "Are you ready to continue (y/n)? " yn
+        case $yn in
+            [Yy]* ) 
+                echo "Continuing with the deployment..."
+                break;;  
+            [Nn]* ) 
+                echo "Exiting. Please configure your virtual network settings before continuing."
+                exit 1;;  
+            * ) 
+                echo "Invalid input. Please answer yes (y) or no (n).";;
+        esac
+    done
+fi
+
 #!/bin/bash
 set -e
 

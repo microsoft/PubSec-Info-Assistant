@@ -89,3 +89,9 @@ prep-upgrade:
 prep-env: 
 	@figlet "Preparing Environment"
 	@./scripts/prep-env.sh
+
+prep-migration-env: ## Prepare the environment for migration by assigning required roles
+	@./scripts/prep-migration-env.sh
+
+run-data-migration: ## Run the data migration moving data from one rg to another
+	python ./scripts/extract-content.py

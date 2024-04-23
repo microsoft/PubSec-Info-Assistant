@@ -3,6 +3,7 @@
 
 import logging
 import os
+import sys
 import json
 import random
 import time
@@ -111,14 +112,30 @@ def main(myblob: func.InputStream):
         }        
         message_string = json.dumps(message)
         
+        blob_client = BlobServiceClient(
+            account_url=azure_blob_endpoint,
+            credential=azure_blob_key,
+        )    
+
+        # Check if the blob has been marked as 'do not process' and abort if so
+        # This metadata is set if the blob is already processed and the content from
+        # an existing resource group is simply being copied into this resource group
+        # as part of a miration. In this case the blob has alreday been enriched and indexed
+        # and so no further processing is required on import
+        upload_blob_client = blob_client.get_blob_client(container=azure_blob_upload_container, blob=myblob.name)
+        properties = upload_blob_client.get_blob_properties()
+        metadata = properties.metadata
+        do_not_process = metadata.get('do-not-process')   
+        if 'do-not-process' in metadata:
+            if do_not_process == 'true':   
+                statusLog.upsert_document(myblob.name,'Further procesiang cancelled due to do-not-process metadata = true', StatusClassification.DEBUG, State.COMPLETE)   
+                sys.exit()                    
+        
         # If this is an update to the blob, then we need to delete any residual chunks
         # as processing will overlay chunks, but if the new file version is smaller
         # than the old, then the residual old chunks will remain. The following
         # code handles this for PDF and non-PDF files.
-        blob_client = BlobServiceClient(
-            account_url=azure_blob_endpoint,
-            credential=azure_blob_key,
-        )
+        
         blob_container = blob_client.get_container_client(azure_blob_content_container)
         # List all blobs in the container that start with the name of the blob being processed
         # first remove the container prefix

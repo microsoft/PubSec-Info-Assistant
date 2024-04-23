@@ -72,12 +72,13 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 
 # Create the web app
 resource "azurerm_linux_web_app" "app_service" {
-  name                          = var.name
-  location                      = var.location
-  resource_group_name           = var.resourceGroupName
-  service_plan_id               = azurerm_service_plan.appServicePlan.id
-  https_only                    = true
-  tags                          = var.tags
+  name                                = var.name
+  location                            = var.location
+  resource_group_name                 = var.resourceGroupName
+  service_plan_id                     = azurerm_service_plan.appServicePlan.id
+  https_only                          = true
+  tags                                = var.tags
+  public_network_access_enabled       = var.is_secure_mode == 0 ? true : false  
 
   site_config {
     application_stack {
@@ -189,6 +190,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
 
 # create the vnet integration
 resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment_web_app" {
+  count          = var.is_secure_mode ? 1 : 0
   app_service_id = azurerm_linux_web_app.app_service.id
   subnet_id      = var.snetIntegration_id
 }

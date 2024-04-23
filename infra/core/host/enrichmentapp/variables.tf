@@ -111,3 +111,9 @@ variable "subnetIntegration_id" {
 variable "private_dns_zone_ids" {
   type = set(string)
 }
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}

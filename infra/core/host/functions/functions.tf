@@ -80,13 +80,14 @@ data "azurerm_storage_account" "existing_sa" {
 
 // Create function app resource
 resource "azurerm_linux_function_app" "function_app" {
-  name                      = var.name
-  location                  = var.location
-  resource_group_name       = var.resourceGroupName
-  service_plan_id           = azurerm_service_plan.funcServicePlan.id
-  storage_account_name      = var.blobStorageAccountName
-  storage_account_access_key= "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
-  https_only                = true
+  name                                = var.name
+  location                            = var.location
+  resource_group_name                 = var.resourceGroupName
+  service_plan_id                     = azurerm_service_plan.funcServicePlan.id
+  storage_account_name                = var.blobStorageAccountName
+  storage_account_access_key          = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
+  https_only                          = true
+  public_network_access_enabled       = var.is_secure_mode == 0 ? true : false  
 
   site_config {
     application_stack {
@@ -165,11 +166,13 @@ resource "azurerm_linux_function_app" "function_app" {
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment" {
+  count           = var.is_secure_mode ? 1 : 0
   app_service_id  = azurerm_linux_function_app.function_app.id
   subnet_id       = var.subnetIntegration_id
 }
 
 resource "azurerm_private_endpoint" "privateFunctionEndpoint" {
+  count               = var.is_secure_mode ? 1 : 0
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName

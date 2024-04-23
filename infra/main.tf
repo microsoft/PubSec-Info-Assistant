@@ -123,6 +123,7 @@ module "privateDnsZoneStorageAccountBlob" {
   tags               = local.tags
 }
 
+/*
 module "privateDnsZoneStorageAccountFile" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
@@ -141,7 +142,7 @@ module "privateDnsZoneStorageAccountTable" {
   vnetLinkName       = "infoasst-storage-table-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
-}
+}*/
 
 module "privateDnsZoneStorageAccountQueue" {
   source             = "./core/network/privateDNS"
@@ -202,7 +203,6 @@ module "logging" {
   privateDnsZoneResourceIdBlob          = var.is_secure_mode ? module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId : null
   privateDnsZoneNameBlob                = var.is_secure_mode ? module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneName : null
   groupId                               = "azuremonitor"
-
 }
 
 // Create the storage account
@@ -259,6 +259,7 @@ module "enrichmentApp" {
   appCommandLine                      = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
+  is_secure_mode                      = var.is_secure_mode
   appSettings = {
     EMBEDDINGS_QUEUE                       = var.embeddingsQueue
     LOG_LEVEL                              = "DEBUG"
@@ -526,6 +527,7 @@ module "functions" {
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
   azure_ai_translation_domain           = var.azure_ai_translation_domain
+  is_secure_mode                      = var.is_secure_mode
 
   depends_on = [
     module.storage,

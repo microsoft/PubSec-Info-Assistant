@@ -36,7 +36,7 @@ variable "log_categories" {
 resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
   name                        = "${var.logAnalyticsName}-DS"
   target_resource_id          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
- log_analytics_workspace_id   = azurerm_log_analytics_workspace.logAnalytics.id
+  log_analytics_workspace_id   = azurerm_log_analytics_workspace.logAnalytics.id
 
   dynamic "enabled_log" {
     for_each = [for k, v in var.log_categories : k if v]

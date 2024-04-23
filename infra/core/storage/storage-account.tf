@@ -15,12 +15,17 @@ resource "azurerm_storage_account" "storage" {
   access_tier                   = var.accessTier
   min_tls_version               = var.minimumTlsVersion
   enable_https_traffic_only     = true
-  public_network_access_enabled = var.is_secure_mode ? true : true
+  public_network_access_enabled = var.is_secure_mode ? false : true
+  //public_network_access_enabled = true
 
-  network_rules {
-    default_action = "Allow"
-    bypass         = ["AzureServices"]
-  }
+  network_rules {  
+    default_action             = var.is_secure_mode ? "Deny" : "Allow" 
+    //default_action              = "Allow"  
+    bypass                     = ["AzureServices"]  
+    //ip_rules                   = []  
+    virtual_network_subnet_ids = var.is_secure_mode ? [var.subnetResourceId] : []  
+  }  
+
 
   tags = var.tags
 
@@ -116,6 +121,7 @@ resource "azurerm_private_endpoint" "blobPrivateEndpoint" {
   }
 }
 
+/*
 // Create a private endpoint for blob storage account
 resource "azurerm_private_endpoint" "filePrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
@@ -136,8 +142,9 @@ resource "azurerm_private_endpoint" "filePrivateEndpoint" {
     name                 = "${var.name}PrivateDnsZoneGroup"
     private_dns_zone_ids = var.private_dns_zone_ids
   }
-}
+}*/
 
+/*
 // Create a private endpoint for blob storage account
 resource "azurerm_private_endpoint" "tablePrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
@@ -158,7 +165,7 @@ resource "azurerm_private_endpoint" "tablePrivateEndpoint" {
     name                 = "${var.name}PrivateDnsZoneGroup"
     private_dns_zone_ids = var.private_dns_zone_ids
   }
-}
+}*/
 
 // Create a private endpoint for queue storage account
 resource "azurerm_private_endpoint" "queuePrivateEndpoint" {

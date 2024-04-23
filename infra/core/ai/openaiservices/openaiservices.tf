@@ -25,7 +25,7 @@ resource "azurerm_cognitive_account" "openaiAccount" {
 
 resource "azurerm_private_endpoint" "openaiPrivateEndpoint" {
   count               = var.useExistingAOAIService ? 0 : var.is_secure_mode ? 1 : 0
-  name                = "${var.name}-private-endpoint"                 //"private-endpoint-${azurerm_cognitive_account.openaiAccount[0].name}"
+  name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
   subnet_id           = var.subnetResourceId

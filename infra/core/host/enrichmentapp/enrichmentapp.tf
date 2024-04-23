@@ -80,6 +80,7 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
   webdeploy_publish_basic_authentication_enabled  = false
   client_affinity_enabled                         = false
   enabled                                         = true
+  public_network_access_enabled                   = var.is_secure_mode == 0 ? true : false  
   site_config {
     always_on                                     = var.alwaysOn
     app_command_line                              = var.appCommandLine
@@ -116,11 +117,13 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment" {
+  count           = var.is_secure_mode ? 1 : 0
   app_service_id  = azurerm_linux_web_app.enrichmentapp.id
   subnet_id       = var.subnetIntegration_id
 }
 
 resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
+  count               = var.is_secure_mode ? 1 : 0
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName

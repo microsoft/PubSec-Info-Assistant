@@ -47,5 +47,3 @@ resource "azurerm_private_endpoint" "searchPrivateEndpoint" {
     private_dns_zone_ids = var.private_dns_zone_ids
   }
 }
-
-

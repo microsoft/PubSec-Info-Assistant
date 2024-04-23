@@ -64,5 +64,28 @@ destroy-inf: check-subscription
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
 
-run-migration: ## Migrate from bicep to terraform
+merge-databases: ## Upgrade from bicep to terraform
+	@figlet "Upgrading in place"
 	python ./scripts/merge-databases.py
+
+# repoint: ## Repoint functions, webapp and enrichment app to old rg cosmos, storage and search
+# 	@figlet "Repointing"
+# 	python ./scripts/merge-databases.py
+# 	@./scripts/repoint.sh
+
+# run-repoint:
+# 	@./scripts/repoint.sh
+
+import-state: check-subscription ## import state of current srevcies to TF state
+	@./scripts/inf-import-state.sh
+
+# Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
+prep-upgrade: 
+	@figlet "Upgrading"
+	merge-databases 
+	import-state 
+
+# Apply role assignments as needed to upgrade
+prep-env: 
+	@figlet "Preparing Environment"
+	@./scripts/prep-env.sh

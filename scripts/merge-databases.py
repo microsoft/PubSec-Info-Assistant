@@ -70,7 +70,7 @@ except:
     with open(config_file_path, 'r') as file:
         old_env = json.load(file)
         old_resource_group = old_env['old_env']['resource_group']
-        old_random_text = old_env['old_env']['random_text']    
+        old_random_text = old_env['old_env']['random_text'].lower() 
         cosmosdb_url = f'https://infoasst-cosmos-{old_random_text}.documents.azure.com:443/'
         key_vault_name = f'infoasst-kv-{old_random_text}'
 

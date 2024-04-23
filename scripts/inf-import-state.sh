@@ -115,7 +115,7 @@ done
 FILE_PATH="$DIR/upgrade_repoint.config.json"
 new_random_text=$(jq -r '.new_env.random_text' $FILE_PATH)
 subscription=$TF_VAR_subscriptionId
-random_text=$new_random_text
+random_text=$(echo "$new_random_text" | tr '[:upper:]' '[:lower:]')
 
 echo "random_text: $random_text"
 echo "TF_VAR_resource_group_name: $TF_VAR_resource_group_name"

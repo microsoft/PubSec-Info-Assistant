@@ -23,7 +23,7 @@ config_file_path = os.path.join(cwd, "upgrade_repoint.config.json")
 with open(config_file_path, 'r') as file:
     old_env = json.load(file)
     rg_name = old_env['old_env']['resource_group']
-    random_text = old_env['old_env']['random_text']    
+    random_text = old_env['old_env']['random_text'].lower()    
     
 
 script_dir = os.path.dirname(os.path.realpath(__file__))

@@ -73,9 +73,9 @@ config_file_path = os.path.join(cwd, "scripts", "upgrade_repoint.config.json")
 with open(config_file_path, 'r') as file:
     env = json.load(file)
     old_resource_group = env['old_env']['resource_group']
-    old_random_text = env['old_env']['random_text']   
+    old_random_text = env['old_env']['random_text'].lower()   
     new_resource_group = env['new_env']['resource_group']
-    new_random_text = env['new_env']['random_text']   
+    new_random_text = env['new_env']['random_text'].lower()   
 
 credential = DefaultAzureCredential()
 

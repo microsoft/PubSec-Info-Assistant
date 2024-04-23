@@ -45,7 +45,6 @@ variable "ddos_enabled" {
 
 variable "ddos_plan_id" {
   type    = string 
-  default = ""
 }
 
 variable "requireWebsiteSecurityMembership" {

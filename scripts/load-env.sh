@@ -82,6 +82,14 @@ if [[ $SECURE_MODE == true && $ENABLE_MULTIMEDIA == true ]]; then
     exit 1
 fi
 
+#Sharepoint
+if [[ $SECURE_MODE == true && $ENABLE_SHAREPOINT_CONNECTOR == true ]]; then
+    echo -e "\n"
+    echo -e "SharePoint feature is not available in secure mode. Check your values for SECURE_MODE and ENABLE_SHAREPOINT_CONNECTOR. \e[0m\n"
+    exit 1
+fi
+
+
 # Fail if the following environment variables are not set
 if [[ -z $WORKSPACE ]]; then
     echo "\e[31mWORKSPACE must be set.\e[0m\n"

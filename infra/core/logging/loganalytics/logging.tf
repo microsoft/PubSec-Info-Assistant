@@ -90,13 +90,13 @@ data "azurerm_virtual_network" "vnet" {
 
 // Get the subnet that was set up for Azure Monitor
 data "azurerm_subnet" "ampls" {
-  count               = var.is_secure_mode ? 1 : 0
+  count                = var.is_secure_mode ? 1 : 0
   name                 = "ampls"
   virtual_network_name = var.vnetName
   resource_group_name  = var.resourceGroupName
 }
 
-//// add private endpoint for azure monitor - metrics, app insights, log analytics
+// add private endpoint for azure monitor - metrics, app insights, log analytics
 resource "azurerm_private_endpoint" "ampls" {
   count                             = var.is_secure_mode ? 1 : 0
   name                              = "${var.privateLinkScopeName}-private-endpoint"

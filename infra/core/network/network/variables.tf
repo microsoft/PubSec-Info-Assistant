@@ -8,7 +8,7 @@ variable "ddos_name" {
 
 variable "ddos_enabled"  {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "ddos_plan_id" {

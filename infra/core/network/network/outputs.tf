@@ -65,3 +65,7 @@ output "snetBingSearch_id" {
 output "snetAzureOpenAI_id" {
   value = azurerm_subnet.azureOpenAI.id
 }
+
+output "ddos_plan_id_used" {
+  value = var.ddos_plan_id != "" ? var.ddos_plan_id : "No ID provided"
+}

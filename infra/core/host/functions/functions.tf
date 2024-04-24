@@ -66,18 +66,6 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
   }
 }
 
-
-
-data "azurerm_key_vault" "existing_kv" {
-  name                = var.keyVaultName
-  resource_group_name = var.resourceGroupName
-}
-
-data "azurerm_storage_account" "existing_sa" {
-  name                = var.blobStorageAccountName
-  resource_group_name = var.resourceGroupName
-}
-
 // Create function app resource
 resource "azurerm_linux_function_app" "function_app" {
   name                                = var.name
@@ -87,6 +75,7 @@ resource "azurerm_linux_function_app" "function_app" {
   storage_account_name                = var.blobStorageAccountName
   storage_account_access_key          = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
   https_only                          = true
+  tags                                = var.tags
   public_network_access_enabled       = var.is_secure_mode == 0 ? true : false  
 
   site_config {
@@ -94,21 +83,22 @@ resource "azurerm_linux_function_app" "function_app" {
       python_version = "3.10"
     }
     always_on        = true
-    http2_enabled    = true
+     http2_enabled    = true
+    ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
+    cors {
+      allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
+    }
   }
 
-  connection_string {
-    name  = "BLOB_CONNECTION_STRING"
-    type  = "Custom"
-    value = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
+  identity {
+    type = var.managedIdentity ? "SystemAssigned" : "None"
   }
-
   app_settings = {
     SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
     ENABLE_ORYX_BUILD              = "true"
     AzureWebJobsStorage = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
-    WEBSITE_CONTENTSHARE = lower(var.name)
+  //  WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
+   // WEBSITE_CONTENTSHARE = lower(var.name)
     FUNCTIONS_WORKER_RUNTIME = var.runtime
     FUNCTIONS_EXTENSION_VERSION = "~4"
     WEBSITE_NODE_DEFAULT_VERSION = "~14"
@@ -159,10 +149,24 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_AI_TRANSLATION_DOMAIN = var.azure_ai_translation_domain
     AZURE_AI_TEXT_ANALYTICS_DOMAIN = var.azure_ai_text_analytics_domain
   }
+}
 
-  identity {
-    type = "SystemAssigned"
-  }
+data "azurerm_key_vault" "existing" {
+  name                = var.keyVaultName
+  resource_group_name = var.resourceGroupName
+}
+
+resource "azurerm_key_vault_access_policy" "policy" {
+  key_vault_id = data.azurerm_key_vault.existing.id
+
+  tenant_id = azurerm_linux_function_app.function_app.identity.0.tenant_id
+  object_id = azurerm_linux_function_app.function_app.identity.0.principal_id
+
+
+  secret_permissions = [
+    "Get",
+    "List"
+  ]
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment" {
@@ -177,11 +181,9 @@ resource "azurerm_private_endpoint" "privateFunctionEndpoint" {
   location            = var.location
   resource_group_name = var.resourceGroupName
   subnet_id           = var.subnet_id
+  tags                          = var.tags
 
-  private_dns_zone_group {
-    name = "privatednszonegroup"
-    private_dns_zone_ids = var.private_dns_zone_ids
-  }
+   
 
   private_service_connection {
     name = "functionappprivateendpointconnection"
@@ -189,18 +191,10 @@ resource "azurerm_private_endpoint" "privateFunctionEndpoint" {
     subresource_names = ["sites"]
     is_manual_connection = false
   }
+  
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
 }
-
-resource "azurerm_key_vault_access_policy" "policy" {
-  key_vault_id = data.azurerm_key_vault.existing_kv.id
-
-  tenant_id = azurerm_linux_function_app.function_app.identity.0.tenant_id
-  object_id = azurerm_linux_function_app.function_app.identity.0.principal_id
-
-  secret_permissions = [
-    "Get",
-    "List"
-  ]
-}
-
 

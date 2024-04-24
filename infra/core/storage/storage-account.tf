@@ -16,14 +16,14 @@ resource "azurerm_storage_account" "storage" {
   min_tls_version               = var.minimumTlsVersion
   enable_https_traffic_only     = true
   public_network_access_enabled = var.is_secure_mode ? false : true
-  //public_network_access_enabled = true
+ // public_network_access_enabled = true
 
   network_rules {  
     default_action             = var.is_secure_mode ? "Deny" : "Allow" 
     //default_action              = "Allow"  
     bypass                     = ["AzureServices"]  
-    //ip_rules                   = []  
-    virtual_network_subnet_ids = var.is_secure_mode ? [var.subnetResourceId] : []  
+    ip_rules                   = []  
+  //  virtual_network_subnet_ids = var.is_secure_mode ? [var.subnetResourceId] : []  
   }  
 
 

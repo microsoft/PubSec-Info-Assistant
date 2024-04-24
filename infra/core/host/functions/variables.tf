@@ -275,3 +275,22 @@ variable "is_secure_mode" {
   type        = bool
   default     = false
 }
+
+variable "managedIdentity" {
+  type = bool
+  default = false
+}
+
+variable "ftpsState" {
+  type = string
+  default = "FtpsOnly"
+}
+
+variable "azure_portal_domain" {
+  type = string
+}
+
+variable "allowedOrigins" {
+  type = list(string)
+  default = []
+}

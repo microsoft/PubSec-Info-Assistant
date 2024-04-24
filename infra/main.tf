@@ -226,8 +226,8 @@ module "storage" {
   queueNames            = ["pdf-submit-queue", "pdf-polling-queue", "non-pdf-submit-queue", "media-submit-queue", "text-enrichment-queue", "image-enrichment-queue", "embeddings-queue"]
   subnetResourceId      = var.is_secure_mode ? module.network[0].snetStorageAccount_id : null
   private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
-                                        module.privateDnsZoneStorageAccountFile[0].privateDnsZoneResourceId,
-                                        module.privateDnsZoneStorageAccountTable[0].privateDnsZoneResourceId,
+                                     //  module.privateDnsZoneStorageAccountFile[0].privateDnsZoneResourceId,
+                                      //  module.privateDnsZoneStorageAccountTable[0].privateDnsZoneResourceId,
                                         module.privateDnsZoneStorageAccountQueue[0].privateDnsZoneResourceId] : null
 }
 
@@ -284,7 +284,7 @@ module "enrichmentApp" {
     WEBSITES_CONTAINER_START_TIME_LIMIT    = 600
   }
 
-  depends_on = [module.kvModule]
+  depends_on = [module.kvModule, module.logging, module.storage]
 }
 
 // Create the Web App
@@ -364,7 +364,7 @@ module "webapp" {
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
-  depends_on  = [module.kvModule]
+  depends_on  = [module.kvModule, module.logging, module.storage]
 }
 
 // Create the Azure OpenAI Service and Model deployments
@@ -478,6 +478,8 @@ module "functions" {
   keyVaultUri                           = module.kvModule.keyVaultUri
   keyVaultName                          = module.kvModule.keyVaultName 
   plan_name                             = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-func-asp-${random_string.random.result}"
+  managedIdentity                       = true
+  azure_portal_domain                   = var.azure_portal_domain
   sku                                   = {
     size                                = var.functionsAppSkuSize
     tier                                = var.functionsAppSkuTier
@@ -532,7 +534,8 @@ module "functions" {
   depends_on = [
     module.storage,
     module.cosmosdb,
-    module.kvModule
+    module.kvModule,
+    module.logging
   ]
 }
 
@@ -681,6 +684,8 @@ module "azWorkbook" {
   logWorkbookName   = "infoasst-lw-${random_string.random.result}"
   resourceGroupName = azurerm_resource_group.rg.name
   componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
+
+  depends_on = [ module.logging ]
 }
 
 module "bingSearch" {

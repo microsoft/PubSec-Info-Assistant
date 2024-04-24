@@ -35,6 +35,7 @@ export interface IDocument {
     iconName: string;
     fileType: string;
     filePath: string;
+    fileFolder: string;
     state: string;
     state_description: string;
     upload_timestamp: string;
@@ -319,9 +320,9 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             isPadded: true,
         },
         {
-            key: 'filePath',
+            key: 'fileFolder',
             name: 'Folder',
-            fieldName: 'filePath',
+            fieldName: 'fileFolder',
             minWidth: 70,
             maxWidth: 90,
             isResizable: true,

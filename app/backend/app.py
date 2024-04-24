@@ -483,7 +483,7 @@ async def resubmit_Items(request: Request):
         statusLog.save_document(document_path=full_path)   
 
     except Exception as ex:
-        log.exception("Exception in /delete_Items")
+        log.exception("Exception in /resubmitItems")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
 

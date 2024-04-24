@@ -29,11 +29,12 @@ Information Assistant secure mode is essential when heightened levels of securit
 The secure mode adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
 * Azure Monitor
-* Network Security Group (NSG)
-* Private DNS Zone
-* Private Endpoint
-* Private Link
-* Virtual Network (vnet)
+* Virtual Network (VNet)
+* Subnets
+* Network Security Groups (NSGs)
+* Private DNS Zones
+* Private Endpoints
+* Private Links
 
 ## Architecture
 
@@ -51,17 +52,17 @@ Deploying a dedicated Azure service into your virtual network provides the follo
 * The Azure service fully manages service instances in a virtual network. This management includes monitoring the health of the resources and scaling with load.
 * Private endpoints allow ingress of traffic from your virtual network to an Azure resource securely.
 
-The detailed architecture diagram below shows the VNet is subdivided into subnets that further segment network resources, allowing more granular control of network traffic and security fules. These subnets contain Private Endpoints, network interfaces that connect privately and securely to Azure Services. By using a Private IP address from your VNet, a Private Endpoint brings the service into your VNet, reducing exposure to the public internet. This improves network security through:
+The detailed architecture diagram below shows the VNet is subdivided into subnets that further segment network resources. This allows more granular control of network traffic and security rules. These subnets contain Private Endpoints, network interfaces that connect privately and securely to Azure Services. By using a Private IP address from your VNet, a Private Endpoint enables secure communications with Azure Services from your VNet, reducing exposure to the public internet. This improves network security through:
 
 1. Network isolation: VNets and Subnets provide a segregated environment where only authorized resources can communicate with each other.
-2. Reduced Attack Surface: Private Endp;oints ensure that Azure services are accessed via the private IP space of you VNet, not over the public internet, which significantly reduces the risk of external attacks.
-3. Granular Access Control: NEtowkr SEcurity Groups (NSGs) can be associated with subnets and network interfaces to filter network traffic to and from resources within a VNet. This allwos for fune-tuned control over access and security policies.
+2. Reduced Attack Surface: Private Endpoints ensure that Azure services are accessed via the private IP space of your VNet, not over the public network, which significantly reduces the risk of external attacks.
+3. Granular Access Control: Network Security Groups (NSGs) can be associated with VNets, subnets and network interfaces to filter network traffic to and from resources within a VNet. This allows for fine-tuned control over access and security policies.
 
-The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpreseRoute or S2S VPN for user access to the Virtual Network (vNet) on the left side of the diagram.
+The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpreseRoute or S2S VPN for user access to the Virtual Network (vNet) on the left side of the diagram below.
 
 ![Secure mode - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
 
-If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for demonstration purposes only. This will allow you to access the Information Assistant user experience (UX). To implement this for demonstration purposes, you’ll need to add a VPN Gateway to the Information Assistant infrastructure by creating a gateway subnet and a VPN Gateway then downloading a VPN client and connecting it to the VIP Gateway to access resources on the virtual network (vNet).
+If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for demonstration purposes only. This will allow you to access the Information Assistant user experience (UX). To implement this for demonstration purposes, you’ll need to add a VPN Gateway to the Information Assistant infrastructure by creating a gateway subnet and a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (vNet).
 
 More information on [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support)
 
@@ -72,7 +73,7 @@ After setting up a VPN Gateway, [configure the Azure VPN Client on your local ma
 
 ## Front end
 
- The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through VNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX)in the App Subnet.
+ The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through VNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) in the App Subnet.
  
  The front-end application uses VNet integration to connect to the private network and private DNS zones to acceess the appropriate services such as:
 

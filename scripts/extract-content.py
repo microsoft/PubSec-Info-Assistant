@@ -271,7 +271,7 @@ try:
         blob_data = old_blob_client.download_blob().readall()
 
         new_blob_client = new_container_client.get_blob_client(blob.name)
-        metadata = {"do-not-process": "true"}
+        metadata = {"do_not_process": "true"}
         new_blob_client.upload_blob(blob_data, overwrite=True, metadata=metadata)                     
 
 except Exception as e:

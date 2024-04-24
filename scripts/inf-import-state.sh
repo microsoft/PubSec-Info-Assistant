@@ -138,10 +138,9 @@ echo
 figlet "Main"
 module_path="azurerm_resource_group.rg"
 import_resource_if_needed $module_path "$resourceId"
-providers="/providers/Microsoft.Resources/deployments/pid-$TF_VAR_cuaId"
-module_path="azurerm_resource_group_template_deployment.customer_attribution[0]" 
-import_resource_if_needed $module_path "$resourceId$providers"
-
+# providers="/providers/Microsoft.Resources/deployments/pid-$TF_VAR_cuaId"
+# module_path="azurerm_resource_group_template_deployment.customer_attribution" 
+# import_resource_if_needed $module_path "$resourceId$providers"
 
 
 # Entra 

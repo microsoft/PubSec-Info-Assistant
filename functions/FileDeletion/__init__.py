@@ -115,8 +115,8 @@ def main(mytimer: func.TimerRequest) -> None:
     deleted_blobs = get_deleted_blobs(blob_service_client)
 
     blob_name = ""
-    try:
-        for blob in deleted_blobs:
+    for blob in deleted_blobs:
+        try:
             blob_name = blob
             deleted_content_blobs = delete_content_blobs(blob_service_client, blob)
             logging.info("%s content blobs deleted.", str(len(deleted_content_blobs)))
@@ -135,15 +135,16 @@ def main(mytimer: func.TimerRequest) -> None:
                                     'Document chunks, tags, and entries in AI Search have been deleted',
                                     StatusClassification.INFO,
                                     State.DELETED)
+            status_log.save_document(doc_path)                
+            
+        except Exception as err:
+            logging.info("An exception occured with doc %s: %s", blob_name, str(err))
+            doc_base = os.path.basename(blob)
+            doc_path = f"upload/{format(blob)}"
+            temp_doc_id = status_log.encode_document_id(doc_path)
+            logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
+            status_log.upsert_document(doc_path,
+                                    f'Error deleting document from system: {str(err)}',
+                                    StatusClassification.ERROR,
+                                    State.ERROR)
             status_log.save_document(doc_path)
-    except Exception as err:
-        logging.info("An exception occured with doc %s: %s", blob_name, str(err))
-        doc_base = os.path.basename(blob)
-        doc_path = f"upload/{format(blob)}"
-        temp_doc_id = status_log.encode_document_id(doc_path)
-        logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
-        status_log.upsert_document(doc_path,
-                                f'Error deleting document from system: {str(err)}',
-                                StatusClassification.ERROR,
-                                State.ERROR)
-        status_log.save_document(doc_path)

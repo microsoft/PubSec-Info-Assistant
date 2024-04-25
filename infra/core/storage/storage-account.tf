@@ -28,6 +28,11 @@ resource "azurerm_storage_account" "storage" {
         exposed_headers = ["*"]
         max_age_in_seconds = 86400
         }
+      
+    delete_retention_policy {
+      days = 1
+      }
+        
     }
 }
 

@@ -32,6 +32,7 @@ variable "log_categories" {
   }
 }
 
+/*
 // Diagnostic Settings
 resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
   name                        = "${var.logAnalyticsName}-DS"
@@ -53,7 +54,7 @@ resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
   depends_on = [
     azurerm_log_analytics_workspace.logAnalytics
   ]
-}
+}*/
 
 // Create Azure Private Link Scope for Azure Monitor
 resource "azurerm_monitor_private_link_scope" "ampls" {

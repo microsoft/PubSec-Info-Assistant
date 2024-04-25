@@ -83,6 +83,8 @@ module "privateDnsZoneAzureAi" {
   tags               = local.tags
 }
 
+
+/*
 module "privateDnsZoneAzureAIVideoIndexer" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
@@ -91,7 +93,7 @@ module "privateDnsZoneAzureAIVideoIndexer" {
   vnetLinkName       = "infoasst-azure-ai-video-indexer-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
-}
+}*/
 
 module "privateDnsZoneApp" {
   source             = "./core/network/privateDNS"
@@ -174,6 +176,7 @@ module "privateDnsZoneCosmosDb" {
   tags               = local.tags
 }
 
+/*
 module "privateDnsZoneBingSearch" {
   source             = "./core/network/privateDNS"
   count              = var.is_secure_mode ? 1 : 0
@@ -182,7 +185,7 @@ module "privateDnsZoneBingSearch" {
   vnetLinkName       = "infoasst-bingsearch-vnetlink-${random_string.random.result}"
   virtual_network_id = module.network[0].vnet_id
   tags               = local.tags
-}
+}*/
 
 // Create the Azure Log Analytics and Application Insights
 module "logging" {
@@ -364,7 +367,7 @@ module "webapp" {
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
-  depends_on  = [module.kvModule, module.logging, module.storage]
+  depends_on  = [module.kvModule, module.logging, module.storage, module.entraObjects]
 }
 
 // Create the Azure OpenAI Service and Model deployments
@@ -541,7 +544,7 @@ module "functions" {
 
 // Create the SharePoint Connector logic app
 module "sharepoint" {
-  count                = var.enableSharePointConnector ? 1 : 0
+  count                = var.enableSharePointConnector && !var.is_secure_mode ? 1 : 0  
   source               = "./core/sharepoint"
   location             = azurerm_resource_group.rg.location
   resource_group_name  = azurerm_resource_group.rg.name
@@ -559,7 +562,7 @@ module "sharepoint" {
 
 // Create the Azure AI Video Indexer
 module "video_indexer" {
-  count                               = var.enableMultimedia ? 1 : 0
+  count                               = var.enableMultimedia && !var.is_secure_mode ? 1 : 0  
   source                              = "./core/videoindexer"
   location                            = azurerm_resource_group.rg.location
   resource_group_name                 = azurerm_resource_group.rg.name
@@ -569,8 +572,8 @@ module "video_indexer" {
   azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
   arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
   video_indexer_api_version           = var.video_indexer_api_version
-  subnet_id                           = var.is_secure_mode ? module.network[0].snetAzureAi_id : null
-  privateDnsZoneName                  = var.is_secure_mode ? module.privateDnsZoneAzureAIVideoIndexer[0].privateDnsZoneName : null
+
+  depends_on = [ module.entraObjects ]
 }
 
 // Create the Azure Key Vault
@@ -584,6 +587,8 @@ module "kvModule" {
   resourceGroupId   = azurerm_resource_group.rg.id
   resourceGroupName = azurerm_resource_group.rg.name
   tags              = local.tags
+
+  depends_on = [ module.entraObjects ]
 }
 
 // Create User Security roles
@@ -674,6 +679,8 @@ module "openAiRoleMgmt" {
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
+
+  depends_on = [ module.entraObjects ]
 }
 
 // Create the Azure Workbook for monitoring
@@ -689,6 +696,7 @@ module "azWorkbook" {
 }
 
 module "bingSearch" {
+  count                         = !var.is_secure_mode ? 1 : 0
   source                        = "./core/ai/bingSearch"
   name                          = "infoasst-bing-${random_string.random.result}"
   resourceGroupName             = azurerm_resource_group.rg.name

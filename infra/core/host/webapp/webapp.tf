@@ -164,6 +164,7 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
+/*
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   name                       = azurerm_linux_web_app.app_service.name
   target_resource_id         = azurerm_linux_web_app.app_service.id
@@ -186,7 +187,7 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
     enabled  = true
   }
 }
-
+*/
 
 # create the vnet integration
 resource "azurerm_app_service_virtual_network_swift_connection" "vnetintegration_enrichment_web_app" {

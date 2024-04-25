@@ -157,6 +157,7 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
+/*
 resource "azurerm_monitor_diagnostic_setting" "app_service_diagnostic_setting" {
   name                       = "app-service-diagnostic-settings"
   target_resource_id         = azurerm_linux_web_app.enrichmentapp.id
@@ -177,7 +178,7 @@ resource "azurerm_monitor_diagnostic_setting" "app_service_diagnostic_setting" {
     category = "AllMetrics"
     enabled  = true
   }
-}
+}*/
 
 
 

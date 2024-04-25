@@ -66,6 +66,15 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
   }
 }
 
+data "azurerm_key_vault" "existing" {
+  name                = var.keyVaultName
+  resource_group_name = var.resourceGroupName
+}
+
+data "azurerm_storage_account" "existing_sa" {
+  name                = var.blobStorageAccountName
+  resource_group_name = var.resourceGroupName
+}
 // Create function app resource
 resource "azurerm_linux_function_app" "function_app" {
   name                                = var.name
@@ -93,12 +102,20 @@ resource "azurerm_linux_function_app" "function_app" {
   identity {
     type = var.managedIdentity ? "SystemAssigned" : "None"
   }
+  
+  connection_string {
+    name  = "BLOB_CONNECTION_STRING"
+    type  = "Custom"
+    value = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
+  }
+  
   app_settings = {
+    WEBSITE_CONTENTOVERVNET = var.is_secure_mode ? "1" : "0"
     SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
     ENABLE_ORYX_BUILD              = "true"
     AzureWebJobsStorage = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
-  //  WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
-   // WEBSITE_CONTENTSHARE = lower(var.name)
+    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
+    WEBSITE_CONTENTSHARE = lower(var.name)
     FUNCTIONS_WORKER_RUNTIME = var.runtime
     FUNCTIONS_EXTENSION_VERSION = "~4"
     WEBSITE_NODE_DEFAULT_VERSION = "~14"
@@ -149,11 +166,6 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_AI_TRANSLATION_DOMAIN = var.azure_ai_translation_domain
     AZURE_AI_TEXT_ANALYTICS_DOMAIN = var.azure_ai_text_analytics_domain
   }
-}
-
-data "azurerm_key_vault" "existing" {
-  name                = var.keyVaultName
-  resource_group_name = var.resourceGroupName
 }
 
 resource "azurerm_key_vault_access_policy" "policy" {

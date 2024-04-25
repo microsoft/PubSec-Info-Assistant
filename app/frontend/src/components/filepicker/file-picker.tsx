@@ -85,7 +85,7 @@ const FilePicker = ({folderPath, tags}: Props) => {
     } catch (error) {
       console.log(error);
     }
-  }, [files.length]);
+  }, [files, folderPath, tags]);
 
   // set progress to zero when there are no files
   useEffect(() => {

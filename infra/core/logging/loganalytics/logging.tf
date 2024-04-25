@@ -18,7 +18,7 @@ resource "azurerm_application_insights" "applicationInsights" {
 }
 
 // Diagnostic Settings Data Source
-data "azurerm_client_config" "current" {}
+/* data "azurerm_client_config" "current" {}
 
 variable "log_categories" {
   description = "A map of log categories and their enabled states"
@@ -30,10 +30,10 @@ variable "log_categories" {
     "Alert"          = true,
     "Recommendation" = true
   }
-}
+} */
 
 // Diagnostic Settings
-resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
+/* resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
   name                        = "${var.logAnalyticsName}-DS"
   target_resource_id          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
  log_analytics_workspace_id   = azurerm_log_analytics_workspace.logAnalytics.id
@@ -53,7 +53,7 @@ resource "azurerm_monitor_diagnostic_setting" "subscription_activity_log" {
   depends_on = [
     azurerm_log_analytics_workspace.logAnalytics
   ]
-}
+} */
 
 // Create Azure Private Link Scope for Azure Monitor
 resource "azurerm_monitor_private_link_scope" "ampls" {

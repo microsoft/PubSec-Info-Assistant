@@ -64,6 +64,9 @@ infrastructure-remote-backend: terraform-remote-backend infrastructure
 destroy-inf: check-subscription
 	@./scripts/inf-destroy.sh
 
+cleanup-tf-state: check-subscription  ## Cleanup terraform state  
+	@./scripts/inf-cleanup-terraform-assets.sh
+
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
 

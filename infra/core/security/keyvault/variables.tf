@@ -48,3 +48,37 @@ variable "resourceGroupName" {
   type    = string
   default = ""
 }
+
+variable "vnet_name" {
+  description = "Name of the virtual network"
+  type        = string
+}
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}
+
+variable "snetIntegration_id" {
+  type = string
+}
+
+variable "vnet_id" {
+  description = "VNet ID needed for some configurations"
+  type = string
+}
+
+variable "subnet_id" {
+  description = "Subnet ID for Key Vault"
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "key_vault_CIDR" {
+  type        = string
+  description = "CIDR block for the Key Vault subnet"
+}

@@ -30,4 +30,5 @@ resource "azurerm_key_vault_secret" "bing_search_key" {
   name         = "BINGSEARCH-KEY"
   value        = var.enableWebChat ? jsondecode(azurerm_resource_group_template_deployment.bing_search[0].output_content).key1.value : ""
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }

@@ -329,7 +329,7 @@ variable "azure_ai_CIDR" {
 
 variable "key_vault_CIDR" {
   type    = string
-  default = "10.0.1.192/26"
+  default = "10.0.7.64/26"
 }
 
 variable "webapp_CIDR" {

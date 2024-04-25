@@ -75,6 +75,7 @@ resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "COSMOSDB-KEY"
   value        = azurerm_cosmosdb_account.cosmosdb_account.primary_key
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 resource "azurerm_private_endpoint" "cosmosPrivateEndpoint" {

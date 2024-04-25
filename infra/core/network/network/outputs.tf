@@ -31,6 +31,7 @@ output "snetAzureAi_id" {
 }
 
 output "snetKeyVault_id" {
+  description = "The ID of the subnet dedicated for the Key Vault"
   value = azurerm_subnet.keyVault.id
 }
 

@@ -1,15 +1,28 @@
 data "azurerm_client_config" "current" {}
 
+resource "azurerm_subnet" "kv_subnet" {
+  name                 = "KeyVaultSubnet"
+  resource_group_name  = var.resourceGroupName
+  virtual_network_name = var.vnet_name 
+  address_prefixes     = [var.key_vault_CIDR]
+  service_endpoints    = ["Microsoft.KeyVault"]
+}
+
+resource "azurerm_private_dns_zone" "kv_dns_zone" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = var.resourceGroupName
+}
+
 resource "azurerm_key_vault" "kv" {
-  name                        = var.name
-  location                    = var.location
-  resource_group_name         = var.resourceGroupName // Replace with your resource group name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  tags                        = var.tags
+  name                            = var.name
+  location                        = var.location
+  resource_group_name             = var.resourceGroupName
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
+  sku_name                        = "standard"
+  tags                            = var.tags
+  soft_delete_retention_days      = 7
+  purge_protection_enabled        = true
   enabled_for_template_deployment = true
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = true
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
@@ -26,13 +39,12 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 
-/*     network_acls {
+  network_acls {
     default_action             = "Deny"
-    bypass                     = "AzureServices" 
-    ip_rules                   = ["203.0.113.0/24", "198.51.100.0/24"]
-    // Add the IDs of the subnets here if we want to allow traffic from specific subnets
-    // virtual_network_subnet_ids = ["<subnet-id-1>", "<subnet-id-2>", ...]
-  } */
+    bypass                     = "AzureServices"
+    virtual_network_subnet_ids = [var.subnet_id] 
+  }
+  
 }
 
 resource "azurerm_key_vault_secret" "spClientKeySecret" {
@@ -41,4 +53,29 @@ resource "azurerm_key_vault_secret" "spClientKeySecret" {
   key_vault_id = azurerm_key_vault.kv.id
 }
 
+resource "azurerm_key_vault_access_policy" "app" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = var.kvAccessObjectId
+  key_permissions     = ["Get", "List"]
+  secret_permissions  = ["Get", "List"]
+}
 
+resource "azurerm_private_endpoint" "kv_private_endpoint" {
+  name                = "${var.name}-private-endpoint"
+  location            = var.location
+  resource_group_name = var.resourceGroupName
+  subnet_id           = azurerm_subnet.kv_subnet.id
+
+  private_service_connection {
+    name                           = "${var.name}-kv-connection"
+    private_connection_resource_id = azurerm_key_vault.kv.id
+    is_manual_connection           = false
+    subresource_names              = ["vault"]
+  }
+
+  private_dns_zone_group {
+    name                 = "kv-dns-zone-group"
+    private_dns_zone_ids = [azurerm_private_dns_zone.kv_dns_zone.id]
+  }
+}

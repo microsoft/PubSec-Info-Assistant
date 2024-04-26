@@ -156,7 +156,7 @@ output "CHAT_WARNING_BANNER_TEXT" {
 }
 
 output "AZURE_OPENAI_ENDPOINT"  {
-  value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.openai.azure.com/" : module.openaiServices.endpoint
+  value = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
 }
 
 output "AZURE_ENVIRONMENT" {

@@ -165,7 +165,8 @@ model_version = ''
 openai_mgmt_client = CognitiveServicesManagementClient(
     credential=azure_credential,
     subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
-    base_url=ENV["AZURE_ARM_MANAGEMENT_API"])
+    base_url=ENV["AZURE_ARM_MANAGEMENT_API"],
+    credential_scopes=[ENV["AZURE_ARM_MANAGEMENT_API"] + "/.default"])
 
 deployment = openai_mgmt_client.deployments.get(
     resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
@@ -482,7 +483,7 @@ async def resubmit_Items(request: Request):
         statusLog.save_document(document_path=full_path)   
 
     except Exception as ex:
-        log.exception("Exception in /delete_Items")
+        log.exception("Exception in /resubmitItems")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return True
 

@@ -26,6 +26,12 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
+
+
+}
+
+.chat-overflow-hidden-body {
+    overflow: hidden;
 }
 
 .chatEmptyState {
@@ -99,7 +105,6 @@
 
 .chatMessageStream {
     flex-grow: 1;
-    max-height: 1024px;
     max-width: 1028px;
     width: 100%;
     overflow-y: auto;
@@ -107,6 +112,8 @@
     padding-right: 24px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto; /* or 'scroll' if you always want the scrollbar to be visible */
+    max-height: calc(100vh - 313px); /* optional, adjust according to your layout */
 }
 
 .chatMessageGpt {
@@ -187,7 +194,7 @@
 .chatInputWarningMessage{
     font-size: 12px;
     font-weight: 400;
-    color: rgb(133, 133, 133);
+    color: #858585;
     line-height: 22px;
     padding-top: 6px;
     padding-bottom: 6px;
@@ -195,4 +202,13 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    position: absolute;
+    bottom: 23px;
+    right: 40px;
+}
+
+@media (max-width: 800px) {
+    .chatInputWarningMessage {
+        bottom: 8px;
+    }
 }

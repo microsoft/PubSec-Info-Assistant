@@ -593,6 +593,7 @@ module "kvModule" {
   kv_subnet             = var.is_secure_mode ? module.network[0].snetKeyVault_id : null
   snetIntegration_id    = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
+  userIpAddress         = var.is_secure_mode ? var.userIpAddress : null
   
   depends_on            = [ module.entraObjects ]
 }

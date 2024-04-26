@@ -33,6 +33,7 @@ resource "azurerm_key_vault" "kv" {
 
   network_acls {
     default_action             = "Deny"
+    ip_rules                   = [var.userIpAddress]
     bypass                     = "AzureServices"
     virtual_network_subnet_ids = [var.kv_subnet]
   }
@@ -44,14 +45,6 @@ resource "azurerm_key_vault_secret" "spClientKeySecret" {
   value        = var.spClientSecret
   key_vault_id = azurerm_key_vault.kv.id
   expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
-}
-
-resource "azurerm_key_vault_access_policy" "app" {
-  key_vault_id = azurerm_key_vault.kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = var.kvAccessObjectId
-  key_permissions     = ["Get", "List"]
-  secret_permissions  = ["Get", "List"]
 }
 
 resource "azurerm_private_endpoint" "kv_private_endpoint" {

@@ -642,3 +642,7 @@ variable "maxCsvFileSize" {
   type    = string
   default = "20"
 }
+
+variable "userIpAddress" {
+  type = string
+}

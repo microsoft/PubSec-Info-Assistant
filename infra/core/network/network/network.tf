@@ -148,6 +148,12 @@ resource "azurerm_subnet" "integration" {
   }
 }
 
+resource "azurerm_subnet_network_security_group_association" "integration_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.integration.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
+
 resource "azurerm_subnet" "videoIndexer" {
   name                 = "videoIndexer"
   resource_group_name  = var.resourceGroupName

@@ -76,3 +76,7 @@ variable "private_dns_zone_ids" {
 variable "kv_subnet" {
   type = string  
 }
+
+variable "userIpAddress" {
+  type = string
+}

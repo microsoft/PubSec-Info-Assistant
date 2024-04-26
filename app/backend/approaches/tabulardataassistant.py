@@ -45,6 +45,8 @@ load_dotenv()
 azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
 deployment_name = azure_openai_chatgpt_deployment
 OPENAI_DEPLOYMENT_NAME = deployment_name
+OPENAI_API_BASE = os.environ.get("AZURE_OPENAI_ENDPOINT")
+OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
 
 
 # Page title

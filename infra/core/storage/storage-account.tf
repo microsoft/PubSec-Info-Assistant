@@ -89,12 +89,14 @@ resource "azurerm_key_vault_secret" "storage_connection_string" {
   name         = "BLOB-CONNECTION-STRING"
   value        = azurerm_storage_account.storage.primary_connection_string
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 resource "azurerm_key_vault_secret" "storage_key" {
   name         = "AZURE-BLOB-STORAGE-KEY"
   value        = azurerm_storage_account.storage.primary_access_key
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 // Create a private endpoint for blob storage account

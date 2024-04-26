@@ -106,6 +106,7 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
       "BLOB_CONNECTION_STRING"                    = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
       "AZURE_STORAGE_CONNECTION_STRING"           = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
       "AZURE_OPENAI_SERVICE_KEY"                  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
+      "KEY_EXPIRATION_DATE"                       = timeadd(timestamp(), "1440h") # Added expiration date setting for keys
     }
   )
 

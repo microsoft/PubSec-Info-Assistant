@@ -20,7 +20,7 @@ resource "azurerm_application_insights" "applicationInsights" {
 // Diagnostic Settings Data Source
 /* data "azurerm_client_config" "current" {}
 
-variable "log_categories" {
+/*variable "log_categories" {
   description = "A map of log categories and their enabled states"
   type        = map(bool)
   default = {

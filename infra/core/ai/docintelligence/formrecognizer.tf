@@ -13,6 +13,7 @@ resource "azurerm_key_vault_secret" "docIntelligenceKey" {
   name         = "AZURE-FORM-RECOGNIZER-KEY"
   value        = azurerm_cognitive_account.formRecognizerAccount.primary_access_key
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 

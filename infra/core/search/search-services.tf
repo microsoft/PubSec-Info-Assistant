@@ -19,6 +19,7 @@ resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "AZURE-SEARCH-SERVICE-KEY"
   value        = data.azurerm_search_service.search.primary_key
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 

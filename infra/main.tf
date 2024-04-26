@@ -590,10 +590,9 @@ module "kvModule" {
   is_secure_mode        = var.is_secure_mode
   vnet_name             = var.is_secure_mode ? module.network[0].vnet_name : null
   vnet_id               = var.is_secure_mode ? module.network[0].vnet_id : null
-  subnet_id             = var.is_secure_mode ? module.network[0].snetKeyVault_id : null
+  kv_subnet             = var.is_secure_mode ? module.network[0].snetKeyVault_id : null
   snetIntegration_id    = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
-  key_vault_CIDR        = var.key_vault_CIDR
   
   depends_on            = [ module.entraObjects ]
 }

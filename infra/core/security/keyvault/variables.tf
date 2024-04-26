@@ -69,16 +69,10 @@ variable "vnet_id" {
   type = string
 }
 
-variable "subnet_id" {
-  description = "Subnet ID for Key Vault"
-  type = string
-}
-
 variable "private_dns_zone_ids" {
   type = set(string)
 }
 
-variable "key_vault_CIDR" {
-  type        = string
-  description = "CIDR block for the Key Vault subnet"
+variable "kv_subnet" {
+  type = string  
 }

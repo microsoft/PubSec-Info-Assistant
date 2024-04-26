@@ -1,13 +1,5 @@
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_subnet" "kv_subnet" {
-  name                 = "KeyVaultSubnet"
-  resource_group_name  = var.resourceGroupName
-  virtual_network_name = var.vnet_name 
-  address_prefixes     = [var.key_vault_CIDR]
-  service_endpoints    = ["Microsoft.KeyVault"]
-}
-
 resource "azurerm_private_dns_zone" "kv_dns_zone" {
   name                = "privatelink.vaultcore.azure.net"
   resource_group_name = var.resourceGroupName
@@ -42,7 +34,7 @@ resource "azurerm_key_vault" "kv" {
   network_acls {
     default_action             = "Deny"
     bypass                     = "AzureServices"
-    virtual_network_subnet_ids = [var.subnet_id] 
+    virtual_network_subnet_ids = [var.kv_subnet]
   }
   
 }
@@ -51,6 +43,7 @@ resource "azurerm_key_vault_secret" "spClientKeySecret" {
   name         = "AZURE-CLIENT-SECRET"
   value        = var.spClientSecret
   key_vault_id = azurerm_key_vault.kv.id
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 resource "azurerm_key_vault_access_policy" "app" {
@@ -65,7 +58,7 @@ resource "azurerm_private_endpoint" "kv_private_endpoint" {
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = azurerm_subnet.kv_subnet.id
+  subnet_id           = var.kv_subnet
 
   private_service_connection {
     name                           = "${var.name}-kv-connection"

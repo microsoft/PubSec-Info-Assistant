@@ -823,17 +823,6 @@ async def stream_agent_response(question: str):
     Raises:
         HTTPException: If an error occurs while processing the question.
     """
-    # try:
-    #     def event_stream():
-    #         data_generator = iter(process_agent_response(question))
-    #         while True:
-    #             try:
-    #                 chunk = next(data_generator)
-    #                 yield chunk
-    #             except StopIteration:
-    #                 yield "data: keep-alive\n\n"
-    #                 time.sleep(5)
-    #     return StreamingResponse(event_stream(), media_type="text/event-stream")
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
 

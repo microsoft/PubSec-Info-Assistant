@@ -24,9 +24,9 @@ done
 
 #  Get the new and old envrironment values
 FILE_PATH="$DIR/upgrade_repoint.config.json"
-old_random_text=$(jq -r '.new_env.random_text' $FILE_PATH)
+old_random_text=$(jq -r '.old_env.random_text' $FILE_PATH)
 old_random_text=$(echo "$old_random_text" | tr '[:upper:]' '[:lower:]')
-old_resource_group=$(jq -r '.new_env.resource_group' $FILE_PATH)
+old_resource_group=$(jq -r '.old_env.resource_group' $FILE_PATH)
 
 subscription=$(az account show --query id  -o tsv)
 user_id=$(az ad signed-in-user show --query id -o tsv)

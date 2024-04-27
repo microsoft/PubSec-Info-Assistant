@@ -1,4 +1,4 @@
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
 @minLength(1)
 @maxLength(64)
@@ -35,14 +35,14 @@ param formRecognizerSkuName string = 'S0'
 param enrichmentSkuName string = 'S0'
 param appServicePlanName string = ''
 param enrichmentAppServicePlanName string = ''
-param resourceGroupName string = ''
+param resourceGroupName string = 'rg-hmcts-powerplatform_270324'
 param logAnalyticsName string = ''
 param applicationInsightsName string = ''
 param backendServiceName string = ''
 param enrichmentServiceName string = ''
 param functionsAppName string = ''
 param searchServicesName string = ''
-param searchServicesSkuName string = 'standard'
+param searchServicesSkuName string = 'basic'
 param storageAccountName string = ''
 param containerName string = 'content'
 param uploadContainerName string = 'upload'
@@ -107,19 +107,21 @@ param principalId string = ''
 param kvAccessObjectId string = ''
 
 var abbrs = loadJsonContent('abbreviations.json')
-var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
+//var tags = { ProjectName: 'Information Assistant', BuildNumber: buildNumber }
+var tags = { Application: 'Knowledge Management Assistant', Owner: 'Nitesh Soni' }
 var prefix = 'infoasst'
 
 // Organize resources in a resource group
-resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: !empty(resourceGroupName) ? resourceGroupName : '${prefix}-${environmentName}'
-  location: location
-  tags: tags
-}
+//resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+//  name: !empty(resourceGroupName) ? resourceGroupName : '${prefix}-${environmentName}'
+//  location: location
+//  tags: tags
+//}
 
 module logging 'core/logging/logging.bicep' = {
   name: 'logging'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     logAnalyticsName: !empty(logAnalyticsName) ? logAnalyticsName : '${prefix}-${abbrs.logAnalytics}${randomString}'
     applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${prefix}-${abbrs.appInsights}${randomString}'
@@ -132,13 +134,14 @@ module logging 'core/logging/logging.bicep' = {
 // Create an App Service Plan to group applications under the same payment plan and SKU
 module appServicePlan 'core/host/appserviceplan.bicep' = {
   name: 'appserviceplan'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(appServicePlanName) ? appServicePlanName : '${prefix}-${abbrs.webServerFarms}${randomString}'
     location: location
     tags: tags
     sku: {
-      name: 'S1'
+      name: 'B1'
       capacity: 3
     }
     kind: 'linux'
@@ -148,13 +151,14 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
 // Create an App Service Plan for functions
 module funcServicePlan 'core/host/funcserviceplan.bicep' = {
   name: 'funcserviceplan'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(appServicePlanName) ? appServicePlanName : '${prefix}-${abbrs.funcServerFarms}${randomString}'
     location: location
     tags: tags
     sku: {
-      name: 'S2'
+      name: 'B1'
       capacity: 2
     }
     kind: 'linux'
@@ -164,16 +168,17 @@ module funcServicePlan 'core/host/funcserviceplan.bicep' = {
 // Create an App Service Plan to group applications under the same payment plan and SKU
 module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
   name: 'enrichmentAppserviceplan'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(enrichmentAppServicePlanName) ? enrichmentAppServicePlanName : '${prefix}-enrichment${abbrs.webServerFarms}${randomString}'
     location: location
     tags: tags
     sku: {
-      name: 'P1v3'
-      tier: 'PremiumV3'
-      size: 'P1v3'
-      family: 'Pv3'
+      name: 'B1'
+      tier: 'Basic'
+      size: 'B1'
+      family: 'B'
       capacity: 1
     }
     kind: 'linux'
@@ -184,7 +189,8 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
 // Create an App Service Plan and supporting services for the enrichment app service
 module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
   name: 'enrichmentApp'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(enrichmentServiceName) ? enrichmentServiceName : '${prefix}-enrichment${abbrs.webSitesAppService}${randomString}'
     appServicePlanId: enrichmentAppServicePlan.outputs.id
@@ -233,7 +239,8 @@ module enrichmentApp 'core/host/enrichmentappservice.bicep' = {
 // The application frontend
 module backend 'core/host/appservice.bicep' = {
   name: 'web'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(backendServiceName) ? backendServiceName : '${prefix}-${abbrs.webSitesAppService}${randomString}'
     location: location
@@ -253,7 +260,7 @@ module backend 'core/host/appservice.bicep' = {
       AZURE_BLOB_STORAGE_CONTAINER: containerName
       AZURE_BLOB_STORAGE_UPLOAD_CONTAINER: uploadContainerName
       AZURE_OPENAI_SERVICE: useExistingAOAIService ? azureOpenAIServiceName : cognitiveServices.outputs.name
-      AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : rg.name
+      AZURE_OPENAI_RESOURCE_GROUP: useExistingAOAIService ? azureOpenAIResourceGroup : resourceGroupName //rg.name
       AZURE_SEARCH_INDEX: searchIndexName
       AZURE_SEARCH_SERVICE: searchServices.outputs.name
       AZURE_SEARCH_SERVICE_ENDPOINT: searchServices.outputs.endpoint
@@ -290,7 +297,8 @@ module backend 'core/host/appservice.bicep' = {
 
 module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOAIService) {
   name: 'openai'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(openAiServiceName) ? openAiServiceName : '${prefix}-${abbrs.openAIServices}${randomString}'
     location: location
@@ -331,7 +339,8 @@ module cognitiveServices 'core/ai/cognitiveservices.bicep' = if (!useExistingAOA
 }
 
 module formrecognizer 'core/ai/formrecognizer.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'formrecognizer'
   params: {
     name: !empty(formRecognizerName) ? formRecognizerName : '${prefix}-${abbrs.formRecognizer}${randomString}'
@@ -346,7 +355,8 @@ module formrecognizer 'core/ai/formrecognizer.bicep' = {
 }
 
 module enrichment 'core/ai/enrichment.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'enrichment'
   params: {
     name: !empty(enrichmentName) ? enrichmentName : '${prefix}-enrichment-${abbrs.cognitiveServicesAccounts}${randomString}'
@@ -359,7 +369,8 @@ module enrichment 'core/ai/enrichment.bicep' = {
 }
 
 module searchServices 'core/search/search-services.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'search-services'
   params: {
     name: !empty(searchServicesName) ? searchServicesName : '${prefix}-${abbrs.searchSearchServices}${randomString}'
@@ -381,7 +392,8 @@ module searchServices 'core/search/search-services.bicep' = {
 
 module storage 'core/storage/storage-account.bicep' = {
   name: 'storage'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}${randomString}'
     location: location
@@ -446,7 +458,8 @@ module storage 'core/storage/storage-account.bicep' = {
 
 module storageMedia 'core/storage/storage-account.bicep' = {
   name: 'storage-media'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(storageAccountName) ? storageAccountName : '${prefix}${abbrs.storageStorageAccounts}media${randomString}'
     keyVaultName: kvModule.outputs.keyVaultName
@@ -469,7 +482,8 @@ module storageMedia 'core/storage/storage-account.bicep' = {
 
 module cosmosdb 'core/db/cosmosdb.bicep' = {
   name: 'cosmosdb'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(cosmosdbName) ? cosmosdbName : '${prefix}-${abbrs.cosmosDBAccounts}${randomString}'
     location: location
@@ -489,7 +503,8 @@ module cosmosdb 'core/db/cosmosdb.bicep' = {
 // Function App 
 module functions 'core/function/function.bicep' = {
   name: 'functions'
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   params: {
     name: !empty(functionsAppName) ? functionsAppName : '${prefix}-${abbrs.webSitesFunctions}${randomString}'
     location: location
@@ -549,7 +564,8 @@ module functions 'core/function/function.bicep' = {
 
 // USER ROLES
 module openAiRoleUser 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'openai-role-user'
   params: {
     principalId: principalId
@@ -559,7 +575,8 @@ module openAiRoleUser 'core/security/role.bicep' = {
 }
 
 module storageRoleUser 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'storage-role-user'
   params: {
     principalId: principalId
@@ -569,7 +586,8 @@ module storageRoleUser 'core/security/role.bicep' = {
 }
 
 module storageContribRoleUser 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'storage-contribrole-user'
   params: {
     principalId: principalId
@@ -579,7 +597,8 @@ module storageContribRoleUser 'core/security/role.bicep' = {
 }
 
 module searchRoleUser 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'search-role-user'
   params: {
     principalId: principalId
@@ -589,7 +608,8 @@ module searchRoleUser 'core/security/role.bicep' = {
 }
 
 module searchContribRoleUser 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'search-contrib-role-user'
   params: {
     principalId: principalId
@@ -600,7 +620,8 @@ module searchContribRoleUser 'core/security/role.bicep' = {
 
 // SYSTEM IDENTITIES
 module openAiRoleBackend 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'openai-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
@@ -610,7 +631,8 @@ module openAiRoleBackend 'core/security/role.bicep' = {
 }
 
 module ACRRoleContainerAppService 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'container-webapp-acrpull-role'
   params: {
     principalId: enrichmentApp.outputs.identityPrincipalId
@@ -620,7 +642,8 @@ module ACRRoleContainerAppService 'core/security/role.bicep' = {
 }
 
 module storageRoleBackend 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'storage-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
@@ -630,7 +653,8 @@ module storageRoleBackend 'core/security/role.bicep' = {
 }
 
 module searchRoleBackend 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'search-role-backend'
   params: {
     principalId: backend.outputs.identityPrincipalId
@@ -640,7 +664,8 @@ module searchRoleBackend 'core/security/role.bicep' = {
 }
 
 module storageRoleFunc 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'storage-role-Func'
   params: {
     principalId: functions.outputs.identityPrincipalId
@@ -650,7 +675,8 @@ module storageRoleFunc 'core/security/role.bicep' = {
 }
 
 module containerRegistryPush 'core/security/role.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'AcrPush'
   params: {
     principalId: aadMgmtServicePrincipalId
@@ -661,7 +687,8 @@ module containerRegistryPush 'core/security/role.bicep' = {
 
 // MANAGEMENT SERVICE PRINCIPAL
 module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
-  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment ? azureOpenAIResourceGroup : rg.name)
+  //scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment ? azureOpenAIResourceGroup : rg.name)
+  scope: resourceGroup(useExistingAOAIService && !isGovCloudDeployment ? azureOpenAIResourceGroup : resourceGroupName)
   name: 'openai-role-mgmt'
   params: {
     principalId: aadMgmtServicePrincipalId
@@ -671,17 +698,20 @@ module openAiRoleMgmt 'core/security/role.bicep' = if (!isInAutomation) {
 }
 
 module azMonitor 'core/logging/monitor.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'azure-monitor'
   params: {
     location: location
     logWorkbookName: '${prefix}-${abbrs.logWorkbook}${randomString}'
-    componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
+    //componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${rg.name}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
+    componentResource: '/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupName}/providers/Microsoft.OperationalInsights/workspaces/${logging.outputs.logAnalyticsName}'
   }
 }
 
 module kvModule 'core/security/keyvault.bicep' = {
-  scope: rg
+  //scope: rg
+  scope: resourceGroup(resourceGroupName)
   name: 'keyvault-deployment'
   params: {
     name: '${prefix}-${abbrs.keyvault}${randomString}'
@@ -719,7 +749,7 @@ output AZURE_STORAGE_CONTAINER string = containerName
 output AZURE_STORAGE_UPLOAD_CONTAINER string = uploadContainerName
 output BACKEND_URI string = backend.outputs.uri
 output BACKEND_NAME string = backend.outputs.name
-output RESOURCE_GROUP_NAME string = rg.name
+output RESOURCE_GROUP_NAME string = resourceGroupName //rg.name
 output AZURE_OPENAI_CHAT_GPT_DEPLOYMENT string = !empty(chatGptDeploymentName) ? chatGptDeploymentName : !empty(chatGptModelName) ? chatGptModelName : 'gpt-35-turbo-16k'
 output AZURE_OPENAI_RESOURCE_GROUP string = azureOpenAIResourceGroup
 output AZURE_FUNCTION_APP_NAME string = functions.outputs.name

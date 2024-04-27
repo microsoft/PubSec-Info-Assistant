@@ -203,10 +203,10 @@ echo $parameter_json > $DIR/../infra/main.parameters.json
 az bicep upgrade
 
 #Check and Remove if exists the CUA deployment Object to resolve Bicep limitations
-az deployment sub delete --name "pid-${CUSTOMER_USAGE_ATTRIBUTION_ID}"
+az deployment group delete --name "pid-${CUSTOMER_USAGE_ATTRIBUTION_ID}" --resource-group $RG_NAME
 
 #deploy bicep
-az deployment sub what-if --location $LOCATION --template-file main.bicep --parameters main.parameters.json --name $RG_NAME
+az deployment group what-if --template-file main.bicep --parameters main.parameters.json --name "infoasst-km-pov" --resource-group $RG_NAME
 if [ -z $SKIP_PLAN_CHECK ]
     then
         printInfo "Are you happy with the plan, would you like to apply? (y/N)"
@@ -219,7 +219,7 @@ if [ -z $SKIP_PLAN_CHECK ]
             exit 1
         fi
     fi
-results=$(az deployment sub create --location $LOCATION --template-file main.bicep --parameters main.parameters.json --name $RG_NAME)
+results=$(az deployment group create --template-file main.bicep --parameters main.parameters.json --name "infoasst-km-pov" --resource-group $RG_NAME)
 
 #save deployment output
 printInfo "Writing output to infra_output.json"

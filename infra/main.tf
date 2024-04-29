@@ -532,7 +532,7 @@ module "functions" {
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
   azure_ai_translation_domain           = var.azure_ai_translation_domain
-  is_secure_mode                      = var.is_secure_mode
+  is_secure_mode                        = var.is_secure_mode
 
   depends_on = [
     module.storage,

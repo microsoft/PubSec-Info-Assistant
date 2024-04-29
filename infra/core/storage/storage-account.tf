@@ -7,15 +7,17 @@ locals {
 
 // Create a storage account
 resource "azurerm_storage_account" "storage" {
-  name                          = var.name
-  location                      = var.location
-  resource_group_name           = var.resourceGroupName
-  account_tier                  = var.sku.name
-  account_replication_type      = "LRS"
-  access_tier                   = var.accessTier
-  min_tls_version               = var.minimumTlsVersion
-  enable_https_traffic_only     = true
-  public_network_access_enabled = var.is_secure_mode ? false : true
+  name                            = var.name
+  location                        = var.location
+  resource_group_name             = var.resourceGroupName
+  account_tier                    = var.sku.name
+  account_replication_type        = "LRS"
+  access_tier                     = var.accessTier
+  min_tls_version                 = var.minimumTlsVersion
+  enable_https_traffic_only       = true
+  public_network_access_enabled   = var.is_secure_mode ? false : true
+  allow_nested_items_to_be_public = var.is_secure_mode ? false : true
+  shared_access_key_enabled       = var.is_secure_mode ? false : true
 
   network_rules {  
     default_action             = var.is_secure_mode ? "Deny" : "Allow" 

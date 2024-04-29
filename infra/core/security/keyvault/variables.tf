@@ -48,3 +48,8 @@ variable "resourceGroupName" {
   type    = string
   default = ""
 }
+
+variable "is_secure_mode" {
+  type = bool
+  default = false
+}

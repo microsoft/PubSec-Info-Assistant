@@ -5,7 +5,7 @@ resource "azurerm_cognitive_account" "formRecognizerAccount" {
   kind                          = "FormRecognizer"
   sku_name                      = var.sku["name"]
   custom_subdomain_name         = var.customSubDomainName
-  public_network_access_enabled = var.publicNetworkAccess == "Enabled" ? true : false
+  public_network_access_enabled = var.is_secure_mode ? false : true
   tags                          = var.tags
 }
 

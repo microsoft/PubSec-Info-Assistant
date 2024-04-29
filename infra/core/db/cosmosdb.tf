@@ -32,11 +32,12 @@ locals {
 
 
 resource "azurerm_cosmosdb_account" "cosmosdb_account" {
-  name                = lower(var.name)
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  offer_type          = "Standard"
-  kind                = "GlobalDocumentDB"
+  name                          = lower(var.name)
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  offer_type                    = "Standard"
+  kind                          = "GlobalDocumentDB"
+  public_network_access_enabled = var.is_secure_mode ? false : true
 
   consistency_policy {
     consistency_level       = var.defaultConsistencyLevel

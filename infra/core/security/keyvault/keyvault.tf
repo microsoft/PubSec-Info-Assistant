@@ -1,15 +1,16 @@
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_key_vault" "kv" {
-  name                        = var.name
-  location                    = var.location
-  resource_group_name         = var.resourceGroupName // Replace with your resource group name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  tags                        = var.tags
+  name                            = var.name
+  location                        = var.location
+  resource_group_name             = var.resourceGroupName // Replace with your resource group name
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
+  sku_name                        = "standard"
+  tags                            = var.tags
   enabled_for_template_deployment = true
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = true
+  soft_delete_retention_days      = 7
+  purge_protection_enabled        = true
+  public_network_access_enabled   = var.is_secure_mode ? false : true
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id

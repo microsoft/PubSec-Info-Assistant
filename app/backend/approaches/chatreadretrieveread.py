@@ -34,9 +34,14 @@ class ChatReadRetrieveReadApproach(Approach):
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
     Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
    
-    Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+    Each source has content followed by a pipe character and the URL. Instead of writing the full URL, cite it using placeholders like [File1], [File2], etc., based on their order in the list. Do not combine sources; list each source URL separately, e.g., [File1] [File2].
     Never cite the source content using the examples provided in this paragraph that start with info.
-      
+    Sources:
+    - Content about topic A | info.pdf
+    - Content about topic B | example.txt
+
+    Reference these as [File1] and [File2] respectively in your answers.
+
     Here is how you should answer every question:
     
     -Look for information in the source documents to answer the question in {query_term_language}.

@@ -242,8 +242,7 @@ Current known limitations with respect to minors:
 * This accelerator does not have age awareness
 * This accelerator does not utilize, collect or store guardian consent
 * This accelerator does not store user interaction history in any form including user identifiers, queries or responses
-* This accelerator may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
-
+*  This accelerator may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
 # Limitations of IA Accelerator
 
 In this section we describe several known limitations of the IA Accelerator system.

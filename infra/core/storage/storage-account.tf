@@ -29,13 +29,19 @@ resource "azurerm_storage_account" "storage" {
 
   tags = var.tags
 
-  blob_properties {
-    cors_rule {
-      allowed_headers    = ["*"]
-      allowed_methods    = ["GET", "PUT", "OPTIONS", "POST", "PATCH", "HEAD"]
-      allowed_origins    = ["*"]
-      exposed_headers    = ["*"]
-      max_age_in_seconds = 86400
+   blob_properties{
+    cors_rule{
+        allowed_headers = ["*"]
+        allowed_methods = ["GET", "PUT", "OPTIONS", "POST", "PATCH", "HEAD"]
+        allowed_origins = ["*"]
+        exposed_headers = ["*"]
+        max_age_in_seconds = 86400
+        }
+      
+    delete_retention_policy {
+      days = 1
+      }
+        
     }
   }
 }

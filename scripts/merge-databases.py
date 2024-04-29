@@ -63,9 +63,9 @@ with open('infra_output.json', 'r') as file:
 cosmosdb_url = inf_output['properties']['outputs']['azurE_COSMOSDB_URL']['value']
 key_vault_name = inf_output['properties']['outputs']['deploymenT_KEYVAULT_NAME']['value']
 key_vault_url = get_keyvault_url(key_vault_name)
-
 sClient = SecretClient(vault_url=key_vault_url, credential=credential) 
 cosmosdb_key = sClient.get_secret('COSMOSDB-KEY') 
+
 # *************************************************************************
 
 

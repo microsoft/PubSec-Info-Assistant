@@ -23,15 +23,15 @@ resource "azurerm_resource_group" "rg" {
 
 # Create Azure AD App Registrations and Service Principals
 module "entraObjects" {
-  source                           = "./core/aad"
-  isInAutomation                   = var.isInAutomation
-  requireWebsiteSecurityMembership = var.requireWebsiteSecurityMembership
-  randomString                     = random_string.random.result
-  azure_websites_domain            = var.azure_websites_domain
-  aadWebClientId                   = var.aadWebClientId
-  aadMgmtClientId                  = var.aadMgmtClientId
-  aadMgmtServicePrincipalId        = var.aadMgmtServicePrincipalId
-  aadMgmtClientSecret              = var.aadMgmtClientSecret
+  source                            = "./core/aad"
+  isInAutomation                    = var.isInAutomation
+  requireWebsiteSecurityMembership  = var.requireWebsiteSecurityMembership
+  randomString                      = random_string.random.result
+  azure_websites_domain             = var.azure_websites_domain
+  aadWebClientId                    = var.aadWebClientId
+  aadMgmtClientId                   = var.aadMgmtClientId
+  aadMgmtServicePrincipalId         = var.aadMgmtServicePrincipalId
+  aadMgmtClientSecret               = var.aadMgmtClientSecret
 }
 
 // Create the Virtual Network, Subnets, and Network Security Group

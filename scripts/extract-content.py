@@ -14,8 +14,10 @@ from azure.keyvault.secrets import SecretClient
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient, ContainerClient
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions
+from azure.storage.blob import generate_container_sas, ContainerSasPermissions
 from datetime import datetime, timedelta
+import urllib.parse
+
 
 skip_search_index = False
 skip_cosmos_db = False
@@ -56,6 +58,58 @@ def index_sections(chunks):
     search_item_failed_count = search_item_failed_count + failed
     
     print(f"\tIndexed {search_item_succeeded_count + search_item_failed_count} chunks, {search_item_failed_count} failures")
+    
+    
+
+def check_azcopy_installed():
+    """Check if AzCopy is already installed."""
+    try:
+        # Try to get the version of azcopy
+        result = subprocess.run(['azcopy', '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            print(f"AzCopy is already installed: {result.stdout.strip()}")
+            return True
+    except FileNotFoundError:
+        return False
+    return False
+
+
+def download_and_install_azcopy():
+    """Download and install AzCopy."""
+    download_url = "https://aka.ms/downloadazcopy-v10-linux"
+    tar_file = "azcopy.tar.gz"
+    extract_dir = "azcopy_dir"
+
+    try:
+        # Download AzCopy
+        print("Downloading AzCopy...")
+        subprocess.run(['wget', download_url, '-O', tar_file], check=True)
+
+        # Create directory for extraction
+        if not os.path.exists(extract_dir):
+            os.makedirs(extract_dir)
+
+        # Extract the tar.gz file to a specific directory
+        print("Extracting AzCopy...")
+        subprocess.run(['tar', '-xf', tar_file, '-C', extract_dir, '--strip-components=1'], check=True)
+
+        # Move the azcopy binary to /usr/local/bin
+        azcopy_binary = f'{extract_dir}/azcopy'
+        subprocess.run(['sudo', 'mv', azcopy_binary, '/usr/local/bin/'], check=True)
+
+        # Ensure the binary is executable
+        subprocess.run(['sudo', 'chmod', '+x', '/usr/local/bin/azcopy'], check=True)
+
+        # Check if installation was successful
+        print("Verifying installation...")
+        subprocess.run(['azcopy', '--version'], check=True)
+        print("AzCopy installation completed successfully.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to run a command: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
 
 def get_storage_account_endpoint(storage_account_name):
@@ -271,34 +325,59 @@ if skip_cosmos_db == False:
 # *************************************************************************
 # Migrate upload storage account container blobs
 # using azcopy for server side copy
+
+
 if skip_upload_container == False:
     print(f.renderText('Storage upload container'))
+    download_and_install_azcopy()
     container_name = "upload"
     old_blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
     old_container_client = old_blob_service_client.get_container_client(container_name)
     new_blob_service_client = BlobServiceClient.from_connection_string(new_blob_connection_string)
     new_container_client = new_blob_service_client.get_container_client(container_name)
+    file_count = 0
 
     try:
         blob_list = old_container_client.list_blobs()
         blobs_processed_count = 0
         for blob in blob_list:
-            # write each blob to the new storage account
-            old_blob_client = old_container_client.get_blob_client(blob)
-            blob_data = old_blob_client.download_blob().readall()
 
-            new_blob_client = new_container_client.get_blob_client(blob.name)
-            metadata = {"do_not_process": "true"}
-            new_blob_client.upload_blob(blob_data, overwrite=True, metadata=metadata) 
+            # Generate SAS token for old blob
+            old_sas_token = generate_container_sas(
+                account_name=old_azure_blob_storage_account,
+                container_name=container_name,
+                account_key=old_azure_blob_storage_key,
+                permission=ContainerSasPermissions(read=True, write=False, delete=False, list=True),  # Adjust permissions as needed
+                expiry=datetime.utcnow() + timedelta(hours=12)  
+            )
+            source_url = f"https://{old_azure_blob_storage_account}.blob.core.windows.net/{container_name}/{urllib.parse.quote(blob.name)}?{old_sas_token}"
+
+            # Generate SAS token for new blob
+            new_sas_token = generate_container_sas(
+                account_name=new_azure_blob_storage_account,
+                container_name=container_name,
+                account_key=new_azure_blob_storage_key,
+                permission=ContainerSasPermissions(read=True, write=True, delete=False, list=True),  # Adjust permissions as needed
+                expiry=datetime.utcnow() + timedelta(hours=12)
+            )
+            destination_url = f"https://{new_azure_blob_storage_account}.blob.core.windows.net/{container_name}/{urllib.parse.quote(blob.name)}?{new_sas_token}"
+            
+            # Prepare the azcopy command
+            command = f"azcopy copy '{source_url}' '{destination_url}' --overwrite=true"
             
             blobs_processed_count += 1       
             if blobs_processed_count % 10 == 0:
-                print(f"Processed {blobs_processed_count} blobs")                 
+                print(f"Processed {blobs_processed_count} files")  
+
+            try:
+                result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            except subprocess.CalledProcessError as e:
+                print("An error occurred while running azcopy:", e)
 
     except Exception as e:
         print(e)
         
-    print(f"Completed migratiing upload container blobs. Processed {blobs_processed_count} blobs")     
+    print(f"Completed migratiing upload container blobs. Processed {blobs_processed_count} blobs")   
 
 
 # *************************************************************************
@@ -307,7 +386,9 @@ if skip_upload_container == False:
 if skip_content_container == False:
     print(f.renderText('Storage content container'))
     container_name = "content"
+    old_blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
     old_container_client = old_blob_service_client.get_container_client(container_name)
+    new_blob_service_client = BlobServiceClient.from_connection_string(new_blob_connection_string)
     new_container_client = new_blob_service_client.get_container_client(container_name)
     chunks_processed_count = 0
 

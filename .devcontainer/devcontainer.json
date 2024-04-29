@@ -23,58 +23,57 @@
 		"type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock"
 	],
 
-	// Set *default* container specific settings.json values on container create.
-	"settings": { 
-		"python.pythonPath": "/opt/conda/envs/development/bin/python",
-		"python.languageServer": "Pylance",
-		"python.linting.enabled": true,
-		"python.linting.pylintEnabled": true,
-		"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
-		"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
-		"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
-		"python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
-		"python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
-		"python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
-		"python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
-		"python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
-		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
-        "files.watcherExclude": {
-            "**/.git/objects/**": true,
-            "**/.git/subtree-cache/**": true,
-            "**/node_modules/*/**": true,
-            "**/.python_packages/*/**": true
-          },
-		"files.associations": {
-			"*.workbook": "[jsonc]"
+	// Set *default* container specific settings values on container create.
+	"customizations": {
+		"vscode": {
+			"settings": { 
+				"python.pythonPath": "/opt/conda/envs/development/bin/python",
+				"python.languageServer": "Pylance",
+				"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+				"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+				"files.watcherExclude": {
+          			"**/.git/objects/**": true,
+         			"**/.git/subtree-cache/**": true,
+					"**/node_modules/*/**": true,
+           			"**/.python_packages/*/**": true
+				},
+				"files.associations": {
+					"*.workbook": "[jsonc]"
+				}
+			},
+			// Add extensions you want installed when the container is created into this array
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"IronGeek.vscode-env",
+				"ms-azuretools.vscode-docker",
+				"ms-toolsai.jupyter",
+				"humao.rest-client",
+				"ms-dotnettools.csharp",
+				"ms-vsliveshare.vsliveshare-pack",
+				"ms-vscode.powershell",
+				"DavidAnson.vscode-markdownlint",
+				"redhat.vscode-yaml",
+				"ms-azure-devops.azure-pipelines",
+				"k--kato.docomment",
+				"hediet.vscode-drawio",
+				"msazurermtools.azurerm-vscode-tools",
+				"ms-azuretools.vscode-azurestorage",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"BelkacemBerras.spellcheck",
+				"ms-azuretools.vscode-azureresourcegroups",
+				"ms-azuretools.vscode-azurefunctions",
+				"ms-python.pylint",
+				"ms-python.mypy",
+				"HashiCorp.terraform",
+				"mhutchie.git-graph",
+				"esbenp.prettier-vscode",
+				"mutantdino.resourcemonitor"
+			]
 		}
 	},
-
-	// Add the IDs of extensions you want installed when the container is created.
-	"extensions": [
-		"ms-python.python",
-		"ms-python.vscode-pylance",
-		"irongeek.vscode-env",
-		"ms-azuretools.vscode-docker",
-		"ms-toolsai.jupyter",
-		"humao.rest-client",
-		"ms-dotnettools.csharp",
-		"ms-vsliveshare.vsliveshare-pack",
-		"ms-vscode.powershell",
-		"DavidAnson.vscode-markdownlint",
-		"redhat.vscode-yaml",
-		"ms-azure-devops.azure-pipelines",
-		"k--kato.docomment",
-		"hediet.vscode-drawio",
-		"msazurermtools.azurerm-vscode-tools",
-    	"ms-azuretools.vscode-azurestorage",
-		"ms-azuretools.vscode-bicep",
-		"GitHub.copilot",
-		"BelkacemBerras.spellcheck",
-		"ms-azuretools.vscode-azureresourcegroups",
-		"ms-azuretools.vscode-azurefunctions",
-		"ms-python.python",
-		"ms-python.pylint"
-	],
 
 	"remoteUser": "vscode"
 }

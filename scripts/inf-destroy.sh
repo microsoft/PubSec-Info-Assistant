@@ -16,14 +16,14 @@ if [ -n "${IN_AUTOMATION}" ]
 then
     echo "Delete the resource group $RG_NAME, but don't wait (fire and forget)"
 
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ $AZURE_ENVIRONMENT == "AzureUSGovernment" ]]; then
         az cloud set --name AzureUSGovernment 
     fi
 
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
     az group delete \
-        --resource-group $RG_NAME \
+        --resource-group $TF_VAR_resource_group_name \
         --yes \
         --no-wait
 
@@ -32,6 +32,6 @@ else
     echo "ERROR: inf-destroy.sh does not run outside of build automation"
     echo "Use the following command to do this manually:"
     echo
-    echo az group delete --resource-group $RG_NAME --yes --no-wait
+    echo az group delete --resource-group $TF_VAR_resource_group_name --yes --no-wait
     echo
 fi

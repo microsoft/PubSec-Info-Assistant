@@ -1,19 +1,21 @@
 .folderArea {
-    display: flex;
-    flex-direction: column;
-    justify-content: right;
-    width: 600px;
-    padding-bottom: 20px;
-  }
+  /* /* display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 600px; */
+  padding-bottom: 20px; 
+}
 
-  .folderSelection {
-    display: flex;
-    flex-direction: row;
-    padding-bottom: 5px;
-    justify-content: left;
-    text-align: left;
-  }
+.folderSelection {
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 5px;
+}
 
-  .actionButton {
-    width: 180px;
-  }
+.actionButton {
+  width: 180px;
+}
+
+.hide {
+  display: none;
+}

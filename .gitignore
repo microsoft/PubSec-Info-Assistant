@@ -369,6 +369,7 @@ main.parameters.json
 infrastructure.env
 infrastructure.debug.env
 infra_output.json
+inf_output.json
 random.txt
 .state
 
@@ -386,3 +387,12 @@ packages-microsoft*
 
 # docker container build artifacts
 app/enrichment/shared_code
+
+#terraform
+.terraform
+infra/.terraform*
+terraform.tfstate
+terraform.tfstate.d
+.tfplan.txt
+infra/infoasst*
+infra/sp_config/config.json

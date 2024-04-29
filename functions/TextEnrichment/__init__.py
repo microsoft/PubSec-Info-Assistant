@@ -33,9 +33,11 @@ enrichmentKey =  os.environ["ENRICHMENT_KEY"]
 enrichmentEndpoint = os.environ["ENRICHMENT_ENDPOINT"] 
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"] 
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
-backoff = int(os.environ["ENRICHMENT_BACKOFF"])
+enrichment_backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
+azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
+azure_ai_text_analytics_domain = os.environ["AZURE_AI_TEXT_ANALYTICS_DOMAIN"]
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
@@ -59,16 +61,11 @@ def main(msg: func.QueueMessage) -> None:
     the target language, it will translate the chunks to the target language.'''
 
     try:
-        endpoint_region = enrichmentEndpoint.split("https://")[1].split(".api")[0]        
-        isGovCloud = 'usgovcloudapi' in azure_blob_storage_endpoint.lower()
-        if isGovCloud:
-            suffix = "us"
-        else:
-            suffix = "com"    
+        endpoint_region = enrichmentEndpoint.split("https://")[1].split(".api")[0]            
 
-        apiDetectEndpoint = f"https://api.cognitive.microsofttranslator.{suffix}/detect?api-version=3.0"
-        apiTranslateEndpoint = f"https://api.cognitive.microsofttranslator.{suffix}/translate?api-version=3.0"
-        enrich_endpoint = f"https://{endpoint_region}.api.cognitive.microsoft.{suffix}/language/:analyze-text?api-version=2022-05-01"
+        apiDetectEndpoint = f"https://{azure_ai_translation_domain}/detect?api-version=3.0"
+        apiTranslateEndpoint = f"https://{azure_ai_translation_domain}/translate?api-version=3.0"
+        enrich_endpoint = f"https://{endpoint_region}.{azure_ai_text_analytics_domain}/language/:analyze-text?api-version=2022-05-01"
         
         message_body = msg.get_body().decode("utf-8")
         message_json = json.loads(message_body)
@@ -124,7 +121,7 @@ def main(msg: func.QueueMessage) -> None:
                 blob_path,
                 f"{FUNCTION_NAME} - detected language of text is {detected_language}.",
                 StatusClassification.DEBUG,
-                State.QUEUED,
+                State.PROCESSING
             )             
         else:
             # error or requeue
@@ -137,7 +134,7 @@ def main(msg: func.QueueMessage) -> None:
                 blob_path,
                 f"{FUNCTION_NAME} - Non-target language detected",
                 StatusClassification.DEBUG,
-                State.ERROR,
+                State.PROCESSING
             )      
                
         # regenerate the iterator to reset it to the first chunk
@@ -227,7 +224,7 @@ def main(msg: func.QueueMessage) -> None:
    
         statusLog.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - Text enrichment is complete",
+            f"{FUNCTION_NAME} - Text enrichment is complete, message sent to embeddings queue",
             StatusClassification.DEBUG,
             State.QUEUED,
         )
@@ -277,16 +274,16 @@ def trim_content(sentence, n):
 
 
 def requeue(response, message_json):
-    '''This function handles requeing and erroring of cognitive servcies'''
+    '''This function handles requeuing and erroring of cognitive services'''
     blob_path = message_json["blob_name"]
     queued_count = message_json["text_enrichment_queued_count"]
     if response.status_code == 429:
         # throttled, so requeue with random backoff seconds to mitigate throttling,
         # unless it has hit the max tries
         if queued_count < max_requeue_count:
-            max_seconds = backoff * (queued_count**2)
+            max_seconds = enrichment_backoff * (queued_count**2)
             backoff = random.randint(
-                backoff * queued_count, max_seconds
+                enrichment_backoff * queued_count, max_seconds
             )
             queued_count += 1
             message_json["text_enrichment_queued_count"] = queued_count

@@ -1,13 +1,23 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-export const enum Approaches {
-    RetrieveThenRead = "rtr",
-    ReadRetrieveRead = "rrr",
-    ReadDecomposeAsk = "rda"
+export const enum ChatMode {
+    WorkOnly = 0,
+    WorkPlusWeb = 1,
+    Ungrounded = 2
 }
 
-export type AskRequestOverrides = {
+export const enum Approaches {
+    RetrieveThenRead = 0,
+    ReadRetrieveRead = 1,
+    ReadDecomposeAsk = 2,
+    GPTDirect = 3,
+    ChatWebRetrieveRead = 4,
+    CompareWorkWithWeb = 5,
+    CompareWebWithWork = 6
+}
+
+export type ChatRequestOverrides = {
     semanticRanker?: boolean;
     semanticCaptions?: boolean;
     excludeCategory?: string;
@@ -17,6 +27,7 @@ export type AskRequestOverrides = {
     promptTemplatePrefix?: string;
     promptTemplateSuffix?: string;
     suggestFollowupQuestions?: boolean;
+    byPassRAG?: boolean;
     userPersona?: string;
     systemPersona?: string;
     aiPersona?: string;
@@ -26,20 +37,14 @@ export type AskRequestOverrides = {
     selectedTags?: string;
 };
 
-export type AskRequest = {
-    question: string;
-    approach: Approaches;
-    overrides?: AskRequestOverrides;
-};
-
-export type AskResponse = {
+export type ChatResponse = {
     answer: string;
     thoughts: string | null;
     data_points: string[];
-    // citation_lookup: {}
-    // added this for citation bug. aparmar.
-    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
-    
+    approach: Approaches;
+    thought_chain: { [key: string]: string };
+    work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
     error?: string;
 };
 
@@ -48,10 +53,18 @@ export type ChatTurn = {
     bot?: string;
 };
 
+export type Citation = {
+    citation: string;
+    source_path: string;
+    page_number: string; // or number, if page_number is intended to be a numeric value
+  }
+
 export type ChatRequest = {
     history: ChatTurn[];
     approach: Approaches;
-    overrides?: AskRequestOverrides;
+    overrides?: ChatRequestOverrides;
+    citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } };
+    thought_chain: { [key: string]: string };
 };
 
 export type BlobClientUrlResponse = {
@@ -67,30 +80,54 @@ export type FileUploadBasicStatus = {
     start_timestamp: string;
     state_description: string;
     state_timestamp: string;
+    status_updates: StatusUpdates[];
+    tags: string;
+}
+
+export type StatusUpdates = {
+    status: string;
+    status_timestamp: string;
+    status_classification: string;
 }
 
 export type AllFilesUploadStatus = {
     statuses: FileUploadBasicStatus[];
 }
 
-export type GetUploadStatusRequest = {
-    timeframe: number;
-    state: FileState
+export type AllFolders = {
+    folders: string;
 }
 
+export type GetUploadStatusRequest = {
+    timeframe: number;
+    state: FileState;
+    folder: string;
+    tag: string
+}
+
+export type DeleteItemRequest = {
+    path: string
+}
+
+export type ResubmitItemRequest = {
+    path: string
+}
 
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
 export const enum FileState {
     All = "ALL",
     Processing = "PROCESSING",
+    Indexing = "INDEXING",
     Skipped = "SKIPPED",
     Queued = "QUEUED",
     Complete = "COMPLETE",
-    Error = "ERROR"
+    Error = "ERROR",
+    THROTTLED = "THROTTLED",
+    UPLOADED = "UPLOADED",
+    DELETING = "DELETING",
+    DELETED = "DELETED"    
 }
-
-
 export type GetInfoResponse = {
     AZURE_OPENAI_SERVICE: string;
     AZURE_OPENAI_CHATGPT_DEPLOYMENT: string;
@@ -123,6 +160,11 @@ export type GetWarningBanner = {
     error?: string;
 };
 
+export type getMaxCSVFileSizeType = {
+    MAX_CSV_FILE_SIZE: string;
+    error?: string;
+};
+
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
 export const enum StatusLogClassification {
@@ -135,6 +177,7 @@ export const enum StatusLogClassification {
 // shared code (functions/shared_code/status_log.py)
 export const enum StatusLogState {
     Processing = "Processing",
+    Indexing = "Indexing",
     Skipped = "Skipped",
     Queued = "Queued",
     Complete = "Complete",
@@ -163,5 +206,14 @@ export type ApplicationTitle = {
 
 export type GetTagsResponse = {
     tags: string;
+    error?: string;
+}
+
+export type GetFeatureFlagsResponse = {
+    ENABLE_WEB_CHAT: boolean;
+    ENABLE_UNGROUNDED_CHAT: boolean;
+    ENABLE_MATH_ASSISTANT: boolean;
+    ENABLE_TABULAR_DATA_ASSISTANT: boolean;
+    ENABLE_MULTIMEDIA: boolean;
     error?: string;
 }

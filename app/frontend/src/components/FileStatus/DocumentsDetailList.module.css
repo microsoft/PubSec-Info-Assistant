@@ -25,6 +25,14 @@
     max-width: 16px;
   }
 
+  .fileIconImgphoto {
+    vertical-align: middle;
+    max-height: 16px;
+    max-width: 16px;
+    height: 16px;
+    width: 16px;
+  }
+
 .controlWrapper {
     display: flex;
     flex-wrap: wrap;
@@ -48,3 +56,57 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: dimgrey;
 }
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #f8d7da; /* Light red background */
+  color: #721c24; /* Dark red text */
+  padding: 15px; /* More padding for larger area */
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Adds shadow for better visibility */
+  width: auto; /* Auto width to accommodate longer text */
+  max-width: 80%; /* Maximum width to prevent extremely long lines */
+  overflow: visible; /* Allow overflow */
+  text-overflow: clip; /* Clip text that overflows */
+  white-space: normal; /* Allow text to wrap */
+}
+
+.scrollableDialogContent {
+  max-height: 400px; /* Adjust the height as needed */
+  max-width: 400px;  /* Adjust the width as needed */
+  overflow-y: auto;  /* This enables vertical scrolling */
+}
+
+.buttonsContainer {
+  display: flex;
+  align-items: center; /* Align items vertically in the center */
+  justify-content: flex-start; /* Align items to the start (left) of the container */
+}
+
+.refresharea {
+  display: flex;
+  align-items: center; /* Vertically center the text with the icon */
+  justify-content: center; /* Horizontally center the text and the icon */
+  background-color: transparent; /* Transparent background */
+  cursor: pointer; /* Change cursor to pointer on hover */
+  color: #606060; /* Mid-dark grey text */
+  padding-right: 20px; /* Add 10px padding on the right side */
+  padding-top: 10px; /* Add 20px padding on the top */
+}
+
+.divSpacing {
+  margin: 0px; /* Adjust as needed */
+}
+
+.centeredText {
+  text-align: left;
+}
+
+.refreshtext {
+  font-size: 0.8em; /* Smaller text size, adjust as needed */
+}
+
+.refreshicon {
+  fill: #606060; /* Mid-dark grey for SVG icons */}

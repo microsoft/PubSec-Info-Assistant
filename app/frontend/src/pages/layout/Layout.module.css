@@ -1,6 +1,17 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT license. */
 
+   .centeredContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    padding: 20px;
+    margin: auto;
+    width: 50%; /* Adjust as needed */
+    
+}
 .layout {
     display: flex;
     flex-direction: column;
@@ -81,23 +92,12 @@
     height: 20px;
 }
 
-.raibanner {
+.centered {
     display: flex;
-    align-items: center;
-    justify-content: space-around;
-    background-color: rgb(242, 242, 242);
-    height: fit-content;
-    -webkit-box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
-    box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.3) ;
-    opacity: 25.0;
+    justify-content: center;
 }
 
-.raiwarning {
-    font-size: 12px;
-    font-weight: 400;
-    color: rgb(133, 133, 133);
-    line-height: 22px;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    white-space: pre-line;
+.right {
+    display: flex;
+    justify-content: center;
 }

@@ -3,8 +3,9 @@
 > [!IMPORTANT]  
 > As of November 15, 2023, Azure Cognitive Search has been renamed to Azure AI Search. Azure Cognitive Services have also been renamed to Azure AI Services.
 
-## Table of Contents
+## Table of Contents 
 
+- [Response Generation Approaches](#response-generation-approaches) 
 - [Features](#features)
 - [Azure account requirements](#azure-account-requirements)
 - [Azure Deployment](./docs/deployment/deployment.md)
@@ -19,6 +20,7 @@
 - [Using the app](/docs/deployment/using_ia_first_time.md)
 - [Responsible AI](#responsible-ai)
   - [Transparency Note](#transparency-note)
+  - [Content Safety](#content-safety)
 - [Data Collection Notice](#data-collection-notice)
 - [Resources](#resources)
   - [Known Issues](./docs/knownissues.md)
@@ -39,6 +41,22 @@ The accelerator adapts prompts based on the model type for enhanced performance.
 
 Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with this accelerator.
 
+# Response Generation Approaches
+
+## Work(Grounded)
+It utilizes a retrieval-augmented generation (RAG) pattern to generate responses grounded in specific data sourced from your own dataset. By combining retrieval of relevant information with generative capabilities, It can produce responses that are not only contextually relevant but also grounded in verified data. The RAG pipeline accesses your dataset to retrieve relevant information before generating responses, ensuring accuracy and reliability. Additionally, each response includes a citation to the document chunk from which the answer is derived, providing transparency and allowing users to verify the source. This approach is particularly advantageous in domains where precision and factuality are paramount. Users can trust that the responses generated are based on reliable data sources, enhancing the credibility and usefulness of the application. Specific information on our Grounded (RAG) can be found in [RAG](docs/features/cognitive_search.md#azure-ai-search-integration)
+
+## Ungrounded
+It leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. The LLM has been trained on a vast corpus of text data, enabling it to generate coherent and contextually relevant responses solely based on the input provided. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios. It's important to note that the generated responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount.
+
+## Work and Web 
+It offers 3 response options: one generated through our retrieval-augmented generation (RAG) pipeline, and the other grounded in content directly from the web. When users opt for the RAG response, they receive a grounded answer sourced from your data, complete with citations to document chunks for transparency and verification. Conversely, selecting the web response provides access to a broader range of sources, potentially offering more diverse perspectives. Each web response is grounded in content from the web accompanied by citations of web links, allowing users to explore the original sources for further context and validation. Upon request, It can also generate a final response that compares and contrasts both responses. This comparative analysis allows users to make informed decisions based on the reliability, relevance, and context of the information provided.
+Specific information about our Grounded and Web can be found in [Web](/docs/features/features.md#bing-search-and-compare)
+
+## Assistants 
+It generates response by using LLM as a reasoning engine. The key strength lies in agent's ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows. This approach allows for a dynamic and adaptive response generation process without predefining set of tasks. It harnesses the capabilities of LLM to understand natural language queries and generate responses tailored to specific tasks. These Agents are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future releases, we plan to work to enhance the safety and robustness of these autonomous reasoning capabilities. Specific information on our preview agents can be found in [Assistants](/docs/features/features.md#autonomous-reasoning-with-assistants-agents).
+
+
 ## Features
 
 The IA Accelerator contains several features, many of which have their own documentation.
@@ -46,10 +64,17 @@ The IA Accelerator contains several features, many of which have their own docum
 - Examples of custom Retrieval Augmented Generation (RAG), Prompt Engineering, and Document Pre-Processing
 - Azure AI Search Integration to include text search of both text documents and images
 - Customization and Personalization to enable enhanced AI interaction
+- Preview into autonomous agents
 
 For a detailed review see our [Features](./docs/features/features.md) page.
 
-![Process Flow](/docs/process_flow.png)
+### Process Flow for Work(Grounded), Ungrounded, and Work and Web
+
+![Process Flow for Chat](/docs/process_flow_chat.png)
+
+### Process Flow for Assistants
+
+![Process Flow for Assistants](/docs/process_flow_agent.png)
 
 ## Azure account requirements
 
@@ -61,7 +86,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 
     Model Name | Supported Versions
     ---|---
-    gpt-35-turbo | 0301, 0613
+    gpt-35-turbo | current version
     **gpt-35-turbo-16k** | current version
     **gpt-4** | current version
     gpt-4-32k | current version
@@ -96,6 +121,20 @@ The Information Assistant (IA) Accelerator and Microsoft are committed to the ad
 **Read our [Transparency Note](/docs/transparency.md)**
 
 Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
+
+### Content Safety
+
+Content safety is provided through Azure Open AI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transaparncy Note](/docs/transparency.md)
+
+By default, the content filters are set to filter out prompts and completions that are detected as medium or high severity for those four harm categories. Content labeled as low or safe severity is not filtered.
+
+There are optional binary classifiers/filters that can detect jailbreak risk (trying to bypass filters) as well as existing text or code pulled from public repositories. These are turned off by default, but some scenarios may require enabling the public content detection models to retain coverage under the customer copyright commitment.
+
+The filtering configuration can be customized at the resource level, allowing customers to adjust the severity thresholds for filtering each harm category separately for prompts and completions. 
+
+This provides controls for Azure customers to tailor the content filtering behavior to their needs while aiming to prevent potentially harmful generated content and any copyright violations from public content.
+
+Instructions on how to confiure content filters via Azure OpenAI Studio can be found here <https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/content-filters#configuring-content-filters-via-azure-openai-studio-preview>
 
 ## Data Collection Notice
 
@@ -154,3 +193,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 ### Reporting Security Issues
 
 For security concerns, please see [Security Guidelines](./SECURITY.md)
+

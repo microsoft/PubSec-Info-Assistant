@@ -48,16 +48,25 @@ LOCATION | Yes | The location (West Europe is the default). The BICEP templates 
 WORKSPACE | Yes  | The workspace name (use something simple and unique to you). This will appended to infoasst-????? as the name of the resource group created in your subscription.
 SUBSCRIPTION_ID | Yes | The GUID that represents the Azure Subscription you want the Accelerator to be deployed into. This can be obtained from the *Subscription* blade in the Azure Portal.
 TENANT_ID | Yes | The GUID that represents the Azure Active Directory Tenant for the Subscription you want the accelerator to be deployed into. This can be obtained from the *Tenant Info* blade in the Azure Portal.
-IS_USGOV_DEPLOYMENT | Yes | Defaults to false. This value should be set to true only if you are deploying to one of the US Sovereign regions. Find more information on [Sovereign Deployment](./enable_sovereign_deployment.md)
+AZURE_ENVIRONMENT | Yes | This will determine the Azure cloud environment the deployment will target. Information Assistant currently supports, AzureCloud and AzureUSGovernment. Info available at [Azure cloud environments](https://docs.microsoft.com/en-us/cli/azure/manage-clouds-azure-cli?toc=/cli/azure/toc.json&bc=/cli/azure/breadcrumb/toc.json). If you are targeting "AzureUSGovernment" please see our [sovereign deployment support documentation](/docs/deployment/enable_sovereign_deployment.md).
+SECURE_MODE | Yes | Defaults to `false`. This feature flag will determine if the Information Assistant deploys it's Azure Infrastructure in a secure mode or not.</br>:warning: Before enabling secure mode please read the extra instructions on [Enabling Secure Deployment](#tdb)
+ENABLE_WEB_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to use Web Search results as a data source for generating answers from the LLM. This feature will also deploy a Bing v7 Search instance in Azure to retrieve web results from, however Bing v7 Search is not available in AzureUSGovernment regions, so this feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
+ENABLE_BING_SAFE_SEARCH | No | Defaults to `true`. If you are using the `ENABLE_WEB_CHAT`feature you can set the following values to enable safe search on the Bing v7 Search APIs.
+ENABLE_UNGROUNDED_CHAT | Defaults to `false`. This feature flag will enable the ability to interact directly with an LLM. This experience will be similar to the Azure OpenAI Playground.
+ENABLE_MATH_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Math Assistant tab in the Information Assistant website. Read more information on the [Math Assistant](/docs/features/features.md) 
+ENABLE_TABULAR_DATA_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Tabular Data Assistant tab in the Information Assistant website. Read more information about the [Tabular Data Assistant](/docs/features/features.md)
+ENABLE_SHAREPOINT_CONNECTOR | Yes | Defaults to `false`. This feature flag enabled the ability to ingest data from SharePoint document stores into the Information Assistant. When enabled, be sure to set the `SHAREPOINT_TO_SYNC` parameter for your SharePoint sites. Read more about configuring the [SharePoint Connector](/docs/features/sharepoint.md). This feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
+SHAREPOINT_TO_SYNC | No | This is a JSON Array of Objects for SharePoint Sites and their entry folders. The app will crawl down from the folder specified for each site. Specifying "/Shared Documents" will crawl all the documents in your SharePoint. `[{"url": "https://SharePoint.com/", "folder": "/Shared Documents"}]` This will **overwrite** any prior changes you've made to config.json. Information on setting up SharePoint Ingestion can be found here [SharePoint Connector](/docs/features/sharepoint.md)
+ENABLE_MULTIMEDIA | Yes | Defaults to `false`. This feature flag should not be changed at this time. The multimedia feature is still in development. Enabling this feature will deploy an Azure Video Indexer instance in your resource group only.
 REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
 SKIP_PLAN_CHECK | No | If this value is set to 1, then the BICEP deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
-USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure OpenAI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and BICEP will create a new Azure OpenAI service instance in your resource group.
-AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the resource group that hosts the Azure OpenAI service instance in your subscription.
-AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure OpenAI service instance in your subscription.
-AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure OpenAI service instance in your subscription.
-AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure OpenAI service instance in your subscription.
+USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
+AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the resource group that hosts the Azure Open AI service instance in your subscription.
+AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
+AZURE_OPENAI_SERVICE_KEY | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the Key for the Azure Open AI service instance in your subscription.
+AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
 USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to "true". When set to "true" this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to "false", Information Assistant will use the open source language model that is provided in the values below.
-AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_AZURE_OPENAI_EMBEDDINGS** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure OpenAI service instance in your subscription.
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_AZURE_OPENAI_EMBEDDINGS** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
 OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
 OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure AI Search hybrid index's vector columns can be set to the matching size. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
 AZURE_OPENAI_CHATGPT_MODEL_NAME | No | This can be used to select a different GPT model to be deployed to Azure OpenAI when the default (gpt-35-turbo-16k) isn't available to you.
@@ -65,6 +74,7 @@ AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | This can be used to select a specific 
 AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
 AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
 AZURE_OPENAI_CHATGPT_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the GPT model deployed to Azure OpenAI when you have reduced capacity.
+AZURE_OPENAI_EMBEDDINGS_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the embeddings model deployed to Azure OpenAI.
 CHAT_WARNING_BANNER_TEXT | No | Defaults to "". Provide a value in this parameter to display a header and footer to the UX of Information Assistant with the included warning banner text.
 DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file located in the `scripts/environments/languages` folder. You can then use this file to customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
 ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By default, **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** is set to `true`. The CUA GUID which is pre-configured will tell Microsoft about the usage of this software. Please see [Data Collection Notice](/README.md#data-collection-notice) for more information. <br/><br/>You may provide your own CUA GUID by changing the value in **CUSTOMER_USAGE_ATTRIBUTION_ID**. Ensure you understand how to properly notify your customers by reading <https://learn.microsoft.com/en-us/partner-center/marketplace/azure-partner-customer-usage-attribution#notify-your-customers>.<br/><br/>To disable data collection, set **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** to `false`.
@@ -147,6 +157,20 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
+## Authorizing SharePoint
+
+*If you do not see these connections, ensure you have the **ENABLE_SHAREPOINT_CONNECTOR** flag set to **true** during your deployment*
+
+1. Go to your resource group in the [Azure Portal](https://portal.azure.com/), select the "sharepointonline" API Connection resource.
+2. Click "Edit API Connection" in the menu on the left side of your screen.
+3. Click "Authorize" and login with the user that has access to the SharePoint sites you put in your environment file. It is **strongly** recommended that you have created a new user for this purpose.
+4. After you've done that **click Save**, if you do not click save, you will **NOT** be authorized.
+5. Once you're authorized, you may manually run the logic app (see below) or wait 24 hours for it to automatically run.
+
+More information about SharePoint can be found here [SharePoint Feature](/docs/features/sharepoint.md)
+
+**NOTICE:** You do not need to do this step if you are not using the SharePoint for Information Assistant
+
 ## Find your deployment URL
 
 Once deployed, you can find the URL of your installation by:
@@ -169,6 +193,7 @@ There are considerations for adopting the Information Assistant (IA) accelerator
 
 ## Need Help?
 
-To review logs try [Using the Workbook Template](/docs/deployment/worbook_usage.md)
+Check these [troubleshotting methods](/docs/deployment/troubleshooting.md).
+
 
 If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

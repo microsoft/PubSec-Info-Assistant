@@ -1,7 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import json
 import re
 import logging
 import urllib.parse
@@ -10,14 +9,9 @@ from typing import Any, Sequence
 
 import openai
 from approaches.approach import Approach
-from azure.core.credentials import AzureKeyCredential 
 from azure.search.documents import SearchClient  
-from azure.search.documents.indexes import SearchIndexClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
-
-from text import nonewlines
-from datetime import datetime, timedelta
 from azure.storage.blob import (
     AccountSasPermissions,
     BlobServiceClient,
@@ -25,79 +19,72 @@ from azure.storage.blob import (
     generate_account_sas,
 )
 from text import nonewlines
-import tiktoken
-from core.messagebuilder import MessageBuilder
 from core.modelhelper import get_token_limit
-from core.modelhelper import num_tokens_from_messages
 import requests
-from urllib.parse import quote
-
-# Simple retrieve-then-read implementation, using the Cognitive Search and
-# OpenAI APIs directly. It first retrieves top documents from search,
-# then constructs a prompt with them, and then uses OpenAI to generate
-# an completion (answer) with that prompt.
 
 class ChatReadRetrieveReadApproach(Approach):
-
-     # Chat roles
-    SYSTEM = "system"
-    USER = "user"
-    ASSISTANT = "assistant"
+    """Approach that uses a simple retrieve-then-read implementation, using the Azure AI Search and
+    Azure OpenAI APIs directly. It first retrieves top documents from search,
+    then constructs a prompt with them, and then uses Azure OpenAI to generate
+    an completion (answer) with that prompt."""
      
-    system_message_chat_conversation = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
+
+
+    SYSTEM_MESSAGE_CHAT_CONVERSATION = """You are an Azure OpenAI Completion system. Your persona is {systemPersona} who helps answer questions about an agency's data. {response_length_prompt}
     User persona is {userPersona} Answer ONLY with the facts listed in the list of sources below in {query_term_language} with citations.If there isn't enough information below, say you don't know and do not give citations. For tabular information return it as an html table. Do not return markdown format.
     Your goal is to provide answers based on the facts listed below in the provided source documents. Avoid making assumptions,generating speculative or generalized information or adding personal opinions.
-       
-    
-    Each source has a file name followed by a pipe character and the actual information.Use square brackets to reference the source, e.g. [info1.txt]. Do not combine sources, list each source separately, e.g. [info1.txt][info2.pdf].
+   
+    Each source has content followed by a pipe character and the URL. Instead of writing the full URL, cite it using placeholders like [File1], [File2], etc., based on their order in the list. Do not combine sources; list each source URL separately, e.g., [File1] [File2].
     Never cite the source content using the examples provided in this paragraph that start with info.
-      
+    Sources:
+    - Content about topic A | info.pdf
+    - Content about topic B | example.txt
+
+    Reference these as [File1] and [File2] respectively in your answers.
+
     Here is how you should answer every question:
     
     -Look for information in the source documents to answer the question in {query_term_language}.
     -If the source document has an answer, please respond with citation.You must include a citation to each document referenced only once when you find answer in source documents.      
     -If you cannot find answer in below sources, respond with I am not sure.Do not provide personal opinions or assumptions and do not include citations.
-    
+    -Identify the language of the user's question and translate the final response to that language.if the final answer is " I am not sure" then also translate it to the language of the user's question and then display translated response only. nothing else.
+
     {follow_up_questions_prompt}
     {injected_prompt}
-    
     """
-    follow_up_questions_prompt_content = """
-    Generate three very brief follow-up questions that the user would likely ask next about their agencies data. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
-    Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
+
+    FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """ALWAYS generate three very brief unordered follow-up questions surrounded by triple chevrons (<<<Are there exclusions for prescriptions?>>>) that the user would likely ask next about their agencies data. 
+    Surround each follow-up question with triple chevrons (<<<Are there exclusions for prescriptions?>>>). Try not to repeat questions that have already been asked.
+    Only generate follow-up questions and do not generate any text before or after the follow-up questions, such as 'Next Questions'
     """
-    query_prompt_template = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
+
+    QUERY_PROMPT_TEMPLATE = """Below is a history of the conversation so far, and a new question asked by the user that needs to be answered by searching in source documents.
     Generate a search query based on the conversation and the new question. Treat each search term as an individual keyword. Do not combine terms in quotes or brackets.
     Do not include cited source filenames and document names e.g info.txt or doc.pdf in the search query terms.
     Do not include any text inside [] or <<<>>> in the search query terms.
     Do not include any special characters like '+'.
-    If the question is not in {query_term_language}, translate the question to {query_term_language} before generating the search query.
     If you cannot generate a search query, return just the number 0.
     """
 
-    #Few Shot prompting for Keyword Search Query
-    query_prompt_few_shots = [
-    {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-    {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-    {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-    {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
+    QUERY_PROMPT_FEW_SHOTS = [
+        {'role' : Approach.USER, 'content' : 'What are the future plans for public transportation development?' },
+        {'role' : Approach.ASSISTANT, 'content' : 'Future plans for public transportation' },
+        {'role' : Approach.USER, 'content' : 'how much renewable energy was generated last year?' },
+        {'role' : Approach.ASSISTANT, 'content' : 'Renewable energy generation last year' }
     ]
 
-    #Few Shot prompting for Response. This will feed into Chain of thought system message.
-    response_prompt_few_shots = [
-    {"role": USER ,'content': 'I am looking for information in source documents'},
-    {'role': ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-    {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-    {'role': ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
+    RESPONSE_PROMPT_FEW_SHOTS = [
+        {"role": Approach.USER ,'content': 'I am looking for information in source documents'},
+        {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
+        {'role': Approach.USER, 'content': 'What steps are being taken to promote energy conservation?'},
+        {'role': Approach.ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
     ]
     
-    # # Define a class variable for the base URL
-    # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'
     
     def __init__(
         self,
         search_client: SearchClient,
-        oai_service_name: str,
+        oai_endpoint: str,
         oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
@@ -109,9 +96,14 @@ class ChatReadRetrieveReadApproach(Approach):
         query_term_language: str,
         model_name: str,
         model_version: str,
-        is_gov_cloud_deployment: str,
-        TARGET_EMBEDDING_MODEL: str,
-        ENRICHMENT_APPSERVICE_NAME: str
+        target_embedding_model: str,
+        enrichment_appservice_uri: str,
+        target_translation_language: str,
+        enrichment_endpoint:str,
+        enrichment_key:str,
+        azure_ai_translation_domain: str,
+        use_semantic_reranker: bool
+        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -124,28 +116,29 @@ class ChatReadRetrieveReadApproach(Approach):
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         #escape target embeddiong model name
-        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', TARGET_EMBEDDING_MODEL)
+        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
+        self.target_translation_language=target_translation_language
+        self.enrichment_endpoint=enrichment_endpoint
+        self.enrichment_key=enrichment_key
+        self.oai_endpoint=oai_endpoint
+        self.embedding_service_url = enrichment_appservice_uri
+        self.azure_ai_translation_domain=azure_ai_translation_domain
+        self.use_semantic_reranker=use_semantic_reranker
         
-        if is_gov_cloud_deployment:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.us'
-        else:
-            self.embedding_service_url = f'https://{ENRICHMENT_APPSERVICE_NAME}.azurewebsites.net'
-
-        if is_gov_cloud_deployment:
-            openai.api_base = 'https://' + oai_service_name + '.openai.azure.us/'
-        else:
-            openai.api_base = 'https://' + oai_service_name + '.openai.azure.com/'        
-
+        openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
 
         self.model_name = model_name
         self.model_version = model_version
-        self.is_gov_cloud_deployment = is_gov_cloud_deployment
         
-
     # def run(self, history: list[dict], overrides: dict) -> any:
-    def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any]) -> Any:
+    async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
+
+        log = logging.getLogger("uvicorn")
+        log.setLevel('DEBUG')
+        log.propagate = True
+
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         top = overrides.get("top") or 3
         user_persona = overrides.get("user_persona", "")
@@ -155,21 +148,29 @@ class ChatReadRetrieveReadApproach(Approach):
         tags_filter = overrides.get("selected_tags", "")
 
         user_q = 'Generate search query for: ' + history[-1]["user"]
-        
-        query_prompt=self.query_prompt_template.format(query_term_language=self.query_term_language)
-        
+        thought_chain["work_query"] = user_q
+
+        # Detect the language of the user's question
+        detectedlanguage = self.detect_language(user_q)
+
+        if detectedlanguage != self.target_translation_language:
+            user_question = self.translate_response(user_q, self.target_translation_language)
+        else:
+            user_question = user_q
+
+        query_prompt=self.QUERY_PROMPT_TEMPLATE.format(query_term_language=self.query_term_language)
 
         # STEP 1: Generate an optimized keyword search query based on the chat history and the last question
         messages = self.get_messages_from_history(
             query_prompt,
             self.model_name,
             history,
-            user_q,
-            self.query_prompt_few_shots,
-            self.chatgpt_token_limit - len(user_q)
+            user_question,
+            self.QUERY_PROMPT_FEW_SHOTS,
+            self.chatgpt_token_limit - len(user_question)
             )
 
-        chat_completion = openai.ChatCompletion.create(
+        chat_completion = await openai.ChatCompletion.acreate(
             deployment_id=self.chatgpt_deployment,
             model=self.model_name,
             messages=messages,
@@ -179,10 +180,12 @@ class ChatReadRetrieveReadApproach(Approach):
             n=1)
 
         generated_query = chat_completion.choices[0].message.content
+        
         #if we fail to generate a query, return the last user question
         if generated_query.strip() == "0":
             generated_query = history[-1]["user"]
 
+        thought_chain["work_search_term"] = generated_query
         # Generate embedding using REST API
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
         data = [f'"{generated_query}"']
@@ -196,7 +199,7 @@ class ChatReadRetrieveReadApproach(Approach):
             response_data = response.json()
             embedded_query_vector =response_data.get('data')          
         else:
-            logging.error(f"Error generating embedding:: {response.status_code}")
+            log.error(f"Error generating embedding:: {response.status_code}")
             raise Exception('Error generating embedding:', response.status_code)
 
         #vector set up for pure vector search & Hybrid search & Hybrid semantic
@@ -208,11 +211,10 @@ class ChatReadRetrieveReadApproach(Approach):
         else:
             search_filter = None
         if tags_filter != "" :
-            quoted_tags_filter = tags_filter.replace(",","','")
             if search_filter is not None:
-                search_filter = search_filter + f" and tags/any(t: search.in(t, '{quoted_tags_filter}', ','))"
+                search_filter = search_filter + f" and tags/any(t: search.in(t, '{tags_filter}', ','))"
             else:
-                search_filter = f"tags/any(t: search.in(t, '{quoted_tags_filter}', ','))"
+                search_filter = f"tags/any(t: search.in(t, '{tags_filter}', ','))"
 
         # Hybrid Search
         # r = self.search_client.search(generated_query, vector_queries =[vector], top=top)
@@ -225,14 +227,10 @@ class ChatReadRetrieveReadApproach(Approach):
         # r=self.search_client.search(search_text=None, vectors=[vector], filter="search.ismatch('upload/ospolicydocs/China, climate change and the energy transition.pdf', 'file_name')", top=top)
 
         #  hybrid semantic search using semantic reranker
-       
-        if (not self.is_gov_cloud_deployment and overrides.get("semantic_ranker")):
+        if (self.use_semantic_reranker and overrides.get("semantic_ranker")):
             r = self.search_client.search(
                 generated_query,
                 query_type=QueryType.SEMANTIC,
-                query_language="en-us",
-                # query_language=self.query_term_language,
-                query_speller="lexicon",
                 semantic_configuration_name="default",
                 top=top,
                 query_caption="extractive|highlight-false"
@@ -242,24 +240,21 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         else:
             r = self.search_client.search(
-                generated_query, top=top,vector_queries =[vector], filter=search_filter
+                generated_query, top=top,vector_queries=[vector], filter=search_filter
             )
 
         citation_lookup = {}  # dict of "FileX" moniker to the actual file name
         results = []  # list of results to be used in the prompt
         data_points = []  # list of data points to be used in the response
-        
+
         #  #print search results with score
         # for idx, doc in enumerate(r):  # for each document in the search results
         #     print(f"File{idx}: ", doc['@search.score'])
-        
+
         # cutoff_score=0.01
-        
         # # Only include results where search.score is greater than cutoff_score
         # filtered_results = [doc for doc in r if doc['@search.score'] > cutoff_score]
         # # print("Filtered Results: ", len(filtered_results))
-        
-      
 
         for idx, doc in enumerate(r):  # for each document in the search results
             # include the "FileX" moniker in the prompt, and the actual file name in the response
@@ -281,7 +276,6 @@ class ChatReadRetrieveReadApproach(Approach):
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
             
-
         # create a single string of all the results to be used in the prompt
         results_text = "".join(results)
         if results_text == "":
@@ -291,7 +285,7 @@ class ChatReadRetrieveReadApproach(Approach):
 
         # STEP 3: Generate the prompt to be sent to the GPT model
         follow_up_questions_prompt = (
-            self.follow_up_questions_prompt_content
+            self.FOLLOW_UP_QUESTIONS_PROMPT_CONTENT
             if overrides.get("suggest_followup_questions")
             else ""
         )
@@ -300,7 +294,7 @@ class ChatReadRetrieveReadApproach(Approach):
         prompt_override = overrides.get("prompt_template")
 
         if prompt_override is None:
-            system_message = self.system_message_chat_conversation.format(
+            system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
                 query_term_language=self.query_term_language,
                 injected_prompt="",
                 follow_up_questions_prompt=follow_up_questions_prompt,
@@ -311,7 +305,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 systemPersona=system_persona,
             )
         elif prompt_override.startswith(">>>"):
-            system_message = self.system_message_chat_conversation.format(
+            system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
                 query_term_language=self.query_term_language,
                 injected_prompt=prompt_override[3:] + "\n ",
                 follow_up_questions_prompt=follow_up_questions_prompt,
@@ -322,7 +316,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 systemPersona=system_persona,
             )
         else:
-            system_message = self.system_message_chat_conversation.format(
+            system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
                 query_term_language=self.query_term_language,
                 follow_up_questions_prompt=follow_up_questions_prompt,
                 response_length_prompt=self.get_response_length_prompt_text(
@@ -333,14 +327,13 @@ class ChatReadRetrieveReadApproach(Approach):
             )
         # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
         #Added conditional block to use different system messages for different models.
-
         if self.model_name.startswith("gpt-35-turbo"):
             messages = self.get_messages_from_history(
                 system_message,
                 self.model_name,
                 history,
                 history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
-                self.response_prompt_few_shots,
+                self.RESPONSE_PROMPT_FEW_SHOTS,
                 max_tokens=self.chatgpt_token_limit - 500
             )
 
@@ -354,8 +347,7 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-
-            chat_completion = openai.ChatCompletion.create(
+            chat_completion = await openai.ChatCompletion.acreate(
             deployment_id=self.chatgpt_deployment,
             model=self.model_name,
             messages=messages,
@@ -371,7 +363,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 history,
                 # history[-1]["user"],
                 history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
-                self.response_prompt_few_shots,
+                self.RESPONSE_PROMPT_FEW_SHOTS,
                 max_tokens=self.chatgpt_token_limit
             )
 
@@ -386,7 +378,7 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
 
-            chat_completion = openai.ChatCompletion.create(
+            chat_completion = await openai.ChatCompletion.acreate(
             deployment_id=self.chatgpt_deployment,
             model=self.model_name,
             messages=messages,
@@ -394,66 +386,69 @@ class ChatReadRetrieveReadApproach(Approach):
             max_tokens=1024,
             n=1
         )
-
         # STEP 4: Format the response
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+        generated_response=chat_completion.choices[0].message.content
 
+        # # Detect the language of the response
+        response_language = self.detect_language(generated_response)
+        #if response is not in user's language, translate it to user's language
+        if response_language != detectedlanguage:
+            translated_response = self.translate_response(generated_response, detectedlanguage)
+        else:
+            translated_response = generated_response
+        thought_chain["work_response"] = urllib.parse.unquote(translated_response)
+        
         return {
             "data_points": data_points,
-            "answer": f"{urllib.parse.unquote(chat_completion.choices[0].message.content)}",
+            "answer": f"{urllib.parse.unquote(translated_response)}",
             "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "citation_lookup": citation_lookup
+            "thought_chain": thought_chain,
+            "work_citation_lookup": citation_lookup,
+            "web_citation_lookup": {}
         }
 
-    #Aparmar. Custom method to construct Chat History as opposed to single string of chat History.
-    def get_messages_from_history(
-        self,
-        system_prompt: str,
-        model_id: str,
-        history: Sequence[dict[str, str]],
-        user_conv: str,
-        few_shots = [],
-        max_tokens: int = 4096) -> []:
-        """
-        Construct a list of messages from the chat history and the user's question.
-        """
-        message_builder = MessageBuilder(system_prompt, model_id)
+    def detect_language(self, text: str) -> str:
+        """ Function to detect the language of the text"""
+        try:
+            endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
+            api_detect_endpoint = f"https://{self.azure_ai_translation_domain}/detect?api-version=3.0"
+            headers = {
+                'Ocp-Apim-Subscription-Key': self.enrichment_key,
+                'Content-type': 'application/json',
+                'Ocp-Apim-Subscription-Region': endpoint_region
+            }
+            data = [{"text": text}]
+            response = requests.post(api_detect_endpoint, headers=headers, json=data)
 
-        # Few Shot prompting. Add examples to show the chat what responses we want. It will try to mimic any responses and make sure they match the rules laid out in the system message.
-        for shot in few_shots:
-            message_builder.append_message(shot.get('role'), shot.get('content'))
-
-        user_content = user_conv
-        append_index = len(few_shots) + 1
-
-        message_builder.append_message(self.USER, user_content, index=append_index)
-
-        for h in reversed(history[:-1]):
-            if h.get("bot"):
-                message_builder.append_message(self.ASSISTANT, h.get('bot'), index=append_index)
-            message_builder.append_message(self.USER, h.get('user'), index=append_index)
-            if message_builder.token_length > max_tokens:
-                break
-
-        messages = message_builder.messages
-        return messages
-
-    #Get the prompt text for the response length
-    def get_response_length_prompt_text(self, response_length: int):
-        """ Function to return the response length prompt text"""
-        levels = {
-            1024: "succinct",
-            2048: "standard",
-            3072: "thorough",
+            if response.status_code == 200:
+                detected_language = response.json()[0]['language']
+                return detected_language
+            else:
+                raise Exception(f"Error detecting language: {response.status_code}")
+        except Exception as e:
+            raise Exception(f"An error occurred during language detection: {str(e)}") from e
+     
+    def translate_response(self, response: str, target_language: str) -> str:
+        """ Function to translate the response to target language"""
+        endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]      
+        api_translate_endpoint = f"https://{self.azure_ai_translation_domain}/translate?api-version=3.0"
+        headers = {
+            'Ocp-Apim-Subscription-Key': self.enrichment_key,
+            'Content-type': 'application/json',
+            'Ocp-Apim-Subscription-Region': endpoint_region
         }
-        level = levels[response_length]
-        return f"Please provide a {level} answer. This means that your answer should be no more than {response_length} tokens long."
-
-    def num_tokens_from_string(self, string: str, encoding_name: str) -> int:
-        """ Function to return the number of tokens in a text string"""
-        encoding = tiktoken.get_encoding(encoding_name)
-        num_tokens = len(encoding.encode(string))
-        return num_tokens
+        params={'to': target_language }
+        data = [{
+            "text": response
+        }]          
+        response = requests.post(api_translate_endpoint, headers=headers, json=data, params=params)
+        
+        if response.status_code == 200:
+            translated_response = response.json()[0]['translations'][0]['text']
+            return translated_response
+        else:
+            raise Exception(f"Error translating response: {response.status_code}")
 
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""

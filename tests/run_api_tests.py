@@ -32,13 +32,13 @@ def parse_arguments():
         required=True,
         help="Azure Search Endpoint")
     parser.add_argument(
-        "--is_gov_deployment",
+        "--azure_websites_domain",
         default="False",
-        help="Is Gov Deployment")
+        help="Base domain for Azure Websites (e.g. azurewebsites.net)")
 
     return parser.parse_args()
 
-def main(enrichment_service_endpoint, is_gov_cloud):
+def main(enrichment_service_endpoint, azure_websites_domain):
     """Main function to run API functional tests for Enrichment App"""
     try:
         console.print("Begin API tests...")
@@ -46,10 +46,7 @@ def main(enrichment_service_endpoint, is_gov_cloud):
         # Define the base URL for the API
         base_url = ""
 
-        if is_gov_cloud == "true":
-            base_url = f"https://{enrichment_service_endpoint}.azurewebsites.us/models"
-        else:
-            base_url = f"https://{enrichment_service_endpoint}.azurewebsites.net/models"
+        base_url = f"https://{enrichment_service_endpoint}.{azure_websites_domain}/models"
 
         #Run requests and check responses
         response_data = get_models(base_url)
@@ -134,4 +131,4 @@ def post_embeddings_check(base_url, response_data):
 
 if __name__ == '__main__':
     args = parse_arguments()
-    main(args.enrichment_service_endpoint, args.is_gov_deployment)
+    main(args.enrichment_service_endpoint, args.azure_websites_domain)

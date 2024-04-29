@@ -38,7 +38,7 @@ fi
 if [ -n "${IN_AUTOMATION}" ]
 then
 
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ $AZURE_ENVIRONMENT == "AzureUSGovernment" ]]; then
         az cloud set --name AzureUSGovernment 
     fi
 
@@ -50,4 +50,4 @@ fi
 az webapp deploy --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --type zip --src-path enrichment.zip --async true --timeout 600000 --verbose
 
 echo "Enrichment Webapp deployed successfully"
-echo -e "\n"
+echo -e "\n" 

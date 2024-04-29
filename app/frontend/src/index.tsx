@@ -8,14 +8,17 @@ import { initializeIcons } from "@fluentui/react";
 
 import "./index.css";
 
-import Layout from "./pages/layout/Layout";
+import { Layout } from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
 import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
+import Tutor from "./pages/tutor/Tutor";
+import { Tda } from "./pages/tda/Tda";
 
 initializeIcons();
 
 export default function App() {
+    const [toggle, setToggle] = React.useState('Work');
     return (
         <HashRouter>
             <Routes>
@@ -23,9 +26,11 @@ export default function App() {
                     <Route index element={<Chat />} />
                     <Route path="content" element={<Content />} />
                     <Route path="*" element={<NoPage />} />
-                </Route>
+                    <Route path="tutor" element={<Tutor />} />
+                    <Route path="tda" element={<Tda folderPath={""} tags={[]} />} />
+            </Route>
             </Routes>
-        </HashRouter>
+        </HashRouter>    
     );
 }
 

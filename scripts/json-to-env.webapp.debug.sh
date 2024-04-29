@@ -4,136 +4,158 @@
 #!/bin/bash
 set -e
 
+source ./scripts/load-env.sh > /dev/null 2>&1
+
 jq -r  '
-    .properties.outputs |
     [
         {
-            "path": "azurE_LOCATION",
+            "path": "AZURE_LOCATION",
             "env_var": "LOCATION"
         },
         {
-            "path": "azurE_SEARCH_INDEX",
+            "path": "AZURE_SEARCH_INDEX",
             "env_var": "AZURE_SEARCH_INDEX"
         },
         {
-            "path": "azurE_SEARCH_SERVICE",
+            "path": "AZURE_SEARCH_SERVICE",
             "env_var": "AZURE_SEARCH_SERVICE"
         },
         {
-            "path": "azurE_SEARCH_SERVICE_ENDPOINT",
+            "path": "AZURE_SEARCH_SERVICE_ENDPOINT",
             "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
         },
         {
-            "path": "azurE_STORAGE_ACCOUNT",
+            "path": "AZURE_STORAGE_ACCOUNT",
             "env_var": "AZURE_BLOB_STORAGE_ACCOUNT"
         },
         {
-            "path": "azurE_STORAGE_CONTAINER",
+            "path": "AZURE_STORAGE_CONTAINER",
             "env_var": "AZURE_BLOB_STORAGE_CONTAINER"
         },
         {
-            "path": "azurE_STORAGE_UPLOAD_CONTAINER",
+            "path": "AZURE_STORAGE_UPLOAD_CONTAINER",
             "env_var": "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"
         },
         {
-            "path": "azurE_OPENAI_SERVICE",
+            "path": "AZURE_OPENAI_SERVICE",
             "env_var": "AZURE_OPENAI_SERVICE"
         },
         {
-            "path": "azurE_OPENAI_RESOURCE_GROUP",
+            "path": "AZURE_OPENAI_RESOURCE_GROUP",
             "env_var": "AZURE_OPENAI_RESOURCE_GROUP"
         },
         {
-            "path": "backenD_URI",
+            "path": "BACKEND_URI",
             "env_var": "AZURE_WEBAPP_URI"
         },
         {
-            "path": "backenD_NAME",
+            "path": "BACKEND_NAME",
             "env_var": "AZURE_WEBAPP_NAME"
         },
         {
-            "path": "resourcE_GROUP_NAME",
+            "path": "RESOURCE_GROUP_NAME",
             "env_var": "RESOURCE_GROUP_NAME"
         },
         {
-            "path": "azurE_OPENAI_CHAT_GPT_DEPLOYMENT",
+            "path": "AZURE_OPENAI_CHAT_GPT_DEPLOYMENT",
             "env_var": "AZURE_OPENAI_CHATGPT_DEPLOYMENT"
         },
         {
-            "path": "azurE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+            "path": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
             "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
         },        
         {
-            "path": "azurE_COSMOSDB_URL",
+            "path": "AZURE_COSMOSDB_URL",
             "env_var": "COSMOSDB_URL"
         },
         {
-            "path": "azurE_COSMOSDB_LOG_DATABASE_NAME",
+            "path": "AZURE_COSMOSDB_LOG_DATABASE_NAME",
             "env_var": "COSMOSDB_LOG_DATABASE_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_LOG_CONTAINER_NAME",
+            "path": "AZURE_COSMOSDB_LOG_CONTAINER_NAME",
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "azurE_COSMOSDB_TAGS_DATABASE_NAME",
-            "env_var": "COSMOSDB_TAGS_DATABASE_NAME"
-        },
-        {
-            "path": "azurE_COSMOSDB_TAGS_CONTAINER_NAME",
-            "env_var": "COSMOSDB_TAGS_CONTAINER_NAME"
-        },
-        {
-            "path": "azurE_CLIENT_ID",
-            "env_var": "AZURE_CLIENT_ID"
-        },
-        {
-            "path": "azurE_TENANT_ID",
-            "env_var": "AZURE_TENANT_ID"
-        },
-        {
-            "path": "azurE_SUBSCRIPTION_ID",
+            "path": "AZURE_SUBSCRIPTION_ID",
             "env_var": "AZURE_SUBSCRIPTION_ID"
         },
         {
-            "path": "azurE_STORAGE_CONTAINER",
+            "path": "AZURE_STORAGE_CONTAINER",
             "env_var": "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
         },
         {
-            "path": "bloB_STORAGE_ACCOUNT_ENDPOINT",
+            "path": "BLOB_STORAGE_ACCOUNT_ENDPOINT",
             "env_var": "AZURE_BLOB_STORAGE_ENDPOINT"
         },
         {
-            "path": "targeT_EMBEDDINGS_MODEL",
+            "path": "TARGET_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
         },
         {
-            "path": "embeddinG_VECTOR_SIZE",
+            "path": "EMBEDDING_VECTOR_SIZE",
             "env_var": "EMBEDDING_VECTOR_SIZE"
         },
         {
-            "path": "iS_USGOV_DEPLOYMENT",
-            "env_var": "IS_GOV_CLOUD_DEPLOYMENT"
-        },
-        {
-            "path": "azurE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+            "path": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
             "env_var": "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME"
         },
         {
-            "path": "embeddinG_DEPLOYMENT_NAME",
+            "path": "EMBEDDING_DEPLOYMENT_NAME",
             "env_var": "EMBEDDING_DEPLOYMENT_NAME"
         },
         {
-            "path": "usE_AZURE_OPENAI_EMBEDDINGS",
+            "path": "USE_AZURE_OPENAI_EMBEDDINGS",
             "env_var": "USE_AZURE_OPENAI_EMBEDDINGS"
         },
         {
-            "path": "enrichmenT_APPSERVICE_NAME",
-            "env_var": "ENRICHMENT_APPSERVICE_NAME"
+            "path": "ENRICHMENT_APPSERVICE_URL",
+            "env_var": "ENRICHMENT_APPSERVICE_URL"
         },
         {
-            "path": "deploymenT_KEYVAULT_NAME",
+            "path": "DEPLOYMENT_KEYVAULT_NAME",
             "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+        },
+        {
+            "path": "AZURE_OPENAI_CHATGPT_MODEL_NAME",
+            "env_var": "AZURE_OPENAI_CHATGPT_MODEL_NAME"
+        },
+        {
+            "path": "ENRICHMENT_ENDPOINT",
+            "env_var": "ENRICHMENT_ENDPOINT"
+        },
+        {
+            "path": "AZURE_OPENAI_ENDPOINT",
+            "env_var": "AZURE_OPENAI_ENDPOINT"
+        },
+        {
+            "path": "BING_SEARCH_ENDPOINT",
+            "env_var": "BING_SEARCH_ENDPOINT"
+        },
+        {
+            "path": "BING_SEARCH_KEY",
+            "env_var": "BING_SEARCH_KEY"
+        },
+        {
+            "path": "ENABLEE_BING_SAFE_SEARCH",
+            "env_var": "ENABLE_BING_SAFE_SEARCH"
+        },
+        {
+            "path": "AZURE_AI_TRANSLATION_DOMAIN",
+            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
+        },
+        {
+            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
+            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
+        },
+        {
+            "path": "AZURE_ARM_MANAGEMENT_API",
+            "env_var": "AZURE_ARM_MANAGEMENT_API"
+        }
+        ,
+        {
+            "path": "MAX_CSV_FILE_SIZE",
+            "env_var": "MAX_CSV_FILE_SIZE"
         }
     ]
         as $env_vars_to_extract
@@ -156,16 +178,23 @@ jq -r  '
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
 
     echo "EMBEDDINGS_QUEUE='embeddings-queue'"
-    echo "DEQUEUE_MESSAGE_BATCH_SIZE=1"
-    echo "MAX_EMBEDDING_REQUEUE_COUNT=5"
-    echo "EMBEDDING_REQUEUE_BACKOFF=60"
     echo "CHAT_WARNING_BANNER_TEXT='$CHAT_WARNING_BANNER_TEXT'"
+    echo "APPLICATION_TITLE='$APPLICATION_TITLE'"
+    echo "AZURE_OPENAI_AUTHORITY_HOST='$TF_VAR_azure_openai_authority_host'"
+    echo "AZURE_OPENAI_CHATGPT_MODEL_NAME='$AZURE_OPENAI_CHATGPT_MODEL_NAME'"
+    echo "AZURE_OPENAI_CHATGPT_MODEL_VERSION='$AZURE_OPENAI_CHATGPT_MODEL_VERSION'"
+    echo "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME='$AZURE_OPENAI_EMBEDDINGS_MODEL_NAME'"
+    echo "AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION='$AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION'"
+    echo "ENABLE_BING_SAFE_SEARCH=$ENABLE_BING_SAFE_SEARCH"
+    echo "QUERY_TERM_LANGUAGE='$PROMPT_QUERYTERM_LANGUAGE'"
+    echo "ENABLE_WEB_CHAT=$ENABLE_WEB_CHAT"
+    echo "ENABLE_UNGROUNDED_CHAT=$ENABLE_UNGROUNDED_CHAT"
+    echo "ENABLE_MATH_ASSISTANT=$ENABLE_MATH_ASSISTANT"
+    echo "ENABLE_TABULAR_DATA_ASSISTANT=$ENABLE_TABULAR_DATA_ASSISTANT"
+    echo "ENABLE_MULTIMEDIA=$ENABLE_MULTIMEDIA"
 
-if [ -n "${IN_AUTOMATION}" ]
-then
-    IS_USGOV_DEPLOYMENT=$(jq -r '.properties.outputs.iS_USGOV_DEPLOYMENT.value' infra_output.json)
-
-    if [ -n "${IS_USGOV_DEPLOYMENT}" ] && $IS_USGOV_DEPLOYMENT; then
+if [ -n "${IN_AUTOMATION}" ]; then
+    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then
         az cloud set --name AzureUSGovernment > /dev/null 2>&1
     fi
 
@@ -174,10 +203,10 @@ then
 fi    
 
 # Name of your Key Vault
-keyVaultName=$(cat infra_output.json | jq -r .properties.outputs.deploymenT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET")
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "BINGSEARCH-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do

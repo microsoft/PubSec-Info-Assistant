@@ -8,7 +8,6 @@ import requests
 from azure.storage.blob import BlobServiceClient
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
-from shared_code.tags_helper import TagsHelper
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
 from datetime import datetime
@@ -30,15 +29,13 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-IS_USGOV_DEPLOYMENT = os.getenv("IS_USGOV_DEPLOYMENT", False)
+azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
 
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
-cosmosdb_tags_database_name = os.environ["COSMOSDB_TAGS_DATABASE_NAME"]
-cosmosdb_tags_container_name = os.environ["COSMOSDB_TAGS_CONTAINER_NAME"]
 
 # Cognitive Services
 cognitive_services_key = os.environ["ENRICHMENT_KEY"]
@@ -53,22 +50,12 @@ SEARCH_CREDS = AzureKeyCredential(os.environ.get("AZURE_SEARCH_SERVICE_KEY"))
 # Translation params for OCR'd text
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
-# If running in the US Gov cloud, use the US Gov translation endpoint, Default to global
-if not IS_USGOV_DEPLOYMENT:
-    API_DETECT_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.com/detect?api-version=3.0"
+API_DETECT_ENDPOINT = (
+        f"https://{azure_ai_translation_domain}/detect?api-version=3.0"
     )
-    API_TRANSLATE_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0"
+API_TRANSLATE_ENDPOINT = (
+        f"https://{azure_ai_translation_domain}/translate?api-version=3.0"
     )
-else:
-    API_DETECT_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.us/detect?api-version=3.0"
-    )
-    API_TRANSLATE_ENDPOINT = (
-        "https://api.cognitive.microsofttranslator.us/translate?api-version=3.0"
-    )
-
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {
@@ -321,10 +308,7 @@ def main(msg: func.QueueMessage) -> None:
         else:
             tags_list = []
         # Write the tags to cosmos db
-        tags_helper = TagsHelper(
-            cosmosdb_url, cosmosdb_key, cosmosdb_tags_database_name, cosmosdb_tags_container_name
-        )
-        tags_helper.upsert_document(blob_path, tags_list)
+        statusLog.update_document_tags(blob_path, tags_list)
 
         # Only one chunk per image currently.
         chunk_file=utilities.build_chunk_filepath(file_directory, file_name, file_extension, '0')

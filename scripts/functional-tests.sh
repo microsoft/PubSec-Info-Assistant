@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 set -e
 
@@ -13,7 +16,7 @@ source "${DIR}/load-env.sh"
 
 # This is called if we are in a CI system and we will login
 # with a Service Principal.
-if [ -n "${TF_IN_AUTOMATION}" ]
+if [ -n "${IN_AUTOMATION}" ]
 then
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
@@ -36,4 +39,4 @@ python run_tests.py \
 # Rest API functional test
 python run_api_tests.py \
     --enrichment_service_endpoint "${ENRICHMENT_APPSERVICE_NAME}" \
-    --is_gov_deployment "${IS_USGOV_DEPLOYMENT}"
+    --azure_websites_domain "${TF_VAR_azure_websites_domain}"

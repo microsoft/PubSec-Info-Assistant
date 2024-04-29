@@ -20,7 +20,7 @@
 - [Using the app](/docs/deployment/using_ia_first_time.md)
 - [Responsible AI](#responsible-ai)
   - [Transparency Note](#transparency-note)
-  - [Content Safety] (#content-safety)
+  - [Content Safety](#content-safety)
 - [Data Collection Notice](#data-collection-notice)
 - [Resources](#resources)
   - [Known Issues](./docs/knownissues.md)
@@ -64,10 +64,17 @@ The IA Accelerator contains several features, many of which have their own docum
 - Examples of custom Retrieval Augmented Generation (RAG), Prompt Engineering, and Document Pre-Processing
 - Azure AI Search Integration to include text search of both text documents and images
 - Customization and Personalization to enable enhanced AI interaction
+- Preview into autonomous agents
 
 For a detailed review see our [Features](./docs/features/features.md) page.
 
-![Process Flow](/docs/process_flow.png)
+### Process Flow for Work(Grounded), Ungrounded, and Work and Web
+
+![Process Flow for Chat](/docs/process_flow_chat.png)
+
+### Process Flow for Assistants
+
+![Process Flow for Assistants](/docs/process_flow_agent.png)
 
 ## Azure account requirements
 
@@ -79,7 +86,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 
     Model Name | Supported Versions
     ---|---
-    gpt-35-turbo | 0301, 0613
+    gpt-35-turbo | current version
     **gpt-35-turbo-16k** | current version
     **gpt-4** | current version
     gpt-4-32k | current version

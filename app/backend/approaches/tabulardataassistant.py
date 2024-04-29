@@ -24,7 +24,8 @@ from dotenv import load_dotenv
 #--------------------------------------------------------------------------
 #variables needed for testing
 OPENAI_API_TYPE = "azure"
-OPENAI_API_VERSION = "2023-06-01-preview"
+OPENAI_API_VERSION = "2023-07-01-preview"
+# OPENAI_API_VERSION = "2023-06-01-preview"
 OPENAI_API_BASE = " "
 OPENAI_API_KEY = " "
 OPENAI_DEPLOYMENT_NAME = " "

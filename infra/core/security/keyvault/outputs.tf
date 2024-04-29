@@ -9,3 +9,7 @@ output "keyVaultId" {
 output "keyVaultUri" {
   value = azurerm_key_vault.kv.vault_uri
 }
+
+output "vnet_name" {
+  value = var.vnet_name
+}

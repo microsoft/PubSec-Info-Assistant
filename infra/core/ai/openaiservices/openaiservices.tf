@@ -64,4 +64,5 @@ resource "azurerm_key_vault_secret" "openaiServiceKeySecret" {
   name         = "AZURE-OPENAI-SERVICE-KEY"
   value        = var.useExistingAOAIService ? var.openaiServiceKey : azurerm_cognitive_account.openaiAccount[0].primary_access_key
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }

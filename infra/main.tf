@@ -356,8 +356,8 @@ module "webapp" {
     APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
-    BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch.endpoint : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat
+    BING_SEARCH_ENDPOINT                    = var.enableWebChat && module.bingSearch != [] ? module.bingSearch[0].endpoint : ""
     ENABLE_BING_SAFE_SEARCH                 = var.enableBingSafeSearch
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
     ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
@@ -578,18 +578,26 @@ module "video_indexer" {
 
 // Create the Azure Key Vault
 module "kvModule" {
-  source            = "./core/security/keyvault"
-  name              = "infoasst-kv-${random_string.random.result}"
-  location          = var.location
-  kvAccessObjectId  = data.azurerm_client_config.current.object_id
-  spClientSecret    = module.entraObjects.azure_ad_mgmt_app_secret
-  subscriptionId    = var.subscriptionId
-  resourceGroupId   = azurerm_resource_group.rg.id
-  resourceGroupName = azurerm_resource_group.rg.name
-  tags              = local.tags
-
-  depends_on = [ module.entraObjects ]
+  source                = "./core/security/keyvault"
+  name                  = "infoasst-kv-${random_string.random.result}"
+  location              = var.location
+  kvAccessObjectId      = data.azurerm_client_config.current.object_id
+  spClientSecret        = module.entraObjects.azure_ad_mgmt_app_secret
+  subscriptionId        = var.subscriptionId
+  resourceGroupId       = azurerm_resource_group.rg.id
+  resourceGroupName     = azurerm_resource_group.rg.name
+  tags                  = local.tags
+  is_secure_mode        = var.is_secure_mode
+  vnet_name             = var.is_secure_mode ? module.network[0].vnet_name : null
+  vnet_id               = var.is_secure_mode ? module.network[0].vnet_id : null
+  kv_subnet             = var.is_secure_mode ? module.network[0].snetKeyVault_id : null
+  snetIntegration_id    = var.is_secure_mode ? module.network[0].snetIntegration_id : null
+  private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
+  userIpAddress         = var.is_secure_mode ? var.userIpAddress : null
+  
+  depends_on            = [ module.entraObjects ]
 }
+
 
 // Create User Security roles
 module "userRoles" {

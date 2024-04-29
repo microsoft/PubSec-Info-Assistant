@@ -12,6 +12,7 @@ resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "ENRICHMENT-KEY"
   value        = azurerm_cognitive_account.cognitiveService.primary_access_key
   key_vault_id = var.keyVaultId
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
 resource "azurerm_private_endpoint" "accountPrivateEndpoint" {

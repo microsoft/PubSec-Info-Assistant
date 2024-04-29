@@ -1,5 +1,10 @@
 data "azurerm_client_config" "current" {}
 
+resource "azurerm_private_dns_zone" "kv_dns_zone" {
+  name                = "privatelink.vaultcore.azure.net"
+  resource_group_name = var.resourceGroupName
+}
+
 resource "azurerm_key_vault" "kv" {
   name                            = var.name
   location                        = var.location
@@ -27,19 +32,37 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 
-/*     network_acls {
+  network_acls {
     default_action             = "Deny"
-    bypass                     = "AzureServices" 
-    ip_rules                   = ["203.0.113.0/24", "198.51.100.0/24"]
-    // Add the IDs of the subnets here if we want to allow traffic from specific subnets
-    // virtual_network_subnet_ids = ["<subnet-id-1>", "<subnet-id-2>", ...]
-  } */
+    ip_rules                   = [var.userIpAddress]
+    bypass                     = "AzureServices"
+    virtual_network_subnet_ids = [var.kv_subnet]
+  }
+  
 }
 
 resource "azurerm_key_vault_secret" "spClientKeySecret" {
   name         = "AZURE-CLIENT-SECRET"
   value        = var.spClientSecret
   key_vault_id = azurerm_key_vault.kv.id
+  expiration_date = timeadd(timestamp(), "1440h")  # 60 days * 24 hours
 }
 
+resource "azurerm_private_endpoint" "kv_private_endpoint" {
+  name                = "${var.name}-private-endpoint"
+  location            = var.location
+  resource_group_name = var.resourceGroupName
+  subnet_id           = var.kv_subnet
 
+  private_service_connection {
+    name                           = "${var.name}-kv-connection"
+    private_connection_resource_id = azurerm_key_vault.kv.id
+    is_manual_connection           = false
+    subresource_names              = ["vault"]
+  }
+
+  private_dns_zone_group {
+    name                 = "kv-dns-zone-group"
+    private_dns_zone_ids = [azurerm_private_dns_zone.kv_dns_zone.id]
+  }
+}

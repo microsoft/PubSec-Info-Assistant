@@ -49,7 +49,34 @@ variable "resourceGroupName" {
   default = ""
 }
 
+variable "vnet_name" {
+  description = "Name of the virtual network"
+  type        = string
+}
+
 variable "is_secure_mode" {
-  type = bool
-  default = false
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}
+
+variable "snetIntegration_id" {
+  type = string
+}
+
+variable "vnet_id" {
+  description = "VNet ID needed for some configurations"
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "kv_subnet" {
+  type = string  
+}
+
+variable "userIpAddress" {
+  type = string
 }

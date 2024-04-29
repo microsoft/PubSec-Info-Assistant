@@ -86,10 +86,11 @@ resource "azurerm_subnet_network_security_group_association" "azureAi_snet_to_ns
 }
 
 resource "azurerm_subnet" "keyVault" {
-  name                 = "keyVault"
+  name                 = "KeyVaultSubnet"
   resource_group_name  = var.resourceGroupName
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.snetKeyVaultCIDR]
+  service_endpoints    = ["Microsoft.KeyVault"]
 }
 
 resource "azurerm_subnet_network_security_group_association" "keyVault_snet_to_nsg" {
@@ -146,6 +147,12 @@ resource "azurerm_subnet" "integration" {
     }
   }
 }
+
+resource "azurerm_subnet_network_security_group_association" "integration_snet_to_nsg" {
+  subnet_id                 = azurerm_subnet.integration.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
 
 resource "azurerm_subnet" "videoIndexer" {
   name                 = "videoIndexer"

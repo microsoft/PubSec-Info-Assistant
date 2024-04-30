@@ -29,12 +29,12 @@ const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [promptTemplate, setPromptTemplate] = useState<string>("");
-    const [retrieveCount, setRetrieveCount] = useState<number>(5);
+    const [retrieveCount, setRetrieveCount] = useState<number>(10);
     const [useSemanticRanker, setUseSemanticRanker] = useState<boolean>(true);
     const [useSemanticCaptions, setUseSemanticCaptions] = useState<boolean>(false);
     const [excludeCategory, setExcludeCategory] = useState<string>("");
-    const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
-    const [userPersona, setUserPersona] = useState<string>("analyst");
+    const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(true);
+    const [userPersona, setUserPersona] = useState<string>("system");
     const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
     const [aiPersona, setAiPersona] = useState<string>("");
     // Setting responseLength to 2048 by default, this will effect the default display of the ResponseLengthButtonGroup below.
@@ -251,10 +251,10 @@ const Chat = () => {
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
                             <SparkleFilled fontSize={"120px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Chat logo" />
-                            <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your private data</h1>
+                            <h1 className={styles.chatEmptyStateTitle}>Have a conversation with your documents</h1>
                             <span className={styles.chatEmptyObjectives}>
-                                The objective of the Information Assistant, built with Azure OpenAI, is to leverage a combination of AI components 
-                                to enable you to <b>Chat</b> (Have a conversation) with your own private data. You can use our <b>Upload</b> feature to begin adding your private data now. The Information Assistant attempts to provide responses that are:
+                                The objective of the Knowledge Management Assistant, is to evaluate the value in using various AI components 
+                                to enable you to <b>Chat</b> (Have a conversation) with your knowledge base. The Knowledge Management Assistant attempts to provide responses that are:
                             </span>
                             <span className={styles.chatEmptyObjectivesList}>
                                 <span className={styles.chatEmptyObjectivesListItem}>
@@ -283,7 +283,7 @@ const Chat = () => {
                                 </span>
                             </span>
                             <span className={styles.chatEmptyObjectives}>
-                                <i>Though the Accelerator is focused on the key areas above, human oversight to confirm accuracy is crucial. 
+                                <i>Though the Assistant is focused on the key areas above, human oversight to confirm accuracy is crucial. 
                                 All responses from the system must be verified with the citations provided. 
                                 The responses are only as accurate as the data provided.</i>
                             </span>
@@ -334,7 +334,7 @@ const Chat = () => {
                     <div className={styles.chatInput}>
                         <QuestionInput
                             clearOnSend
-                            placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
+                            placeholder="Type a new question (e.g. What are some specific examples of the digital services implemented by the Home Office?)"
                             disabled={isLoading}
                             onSend={question => makeApiRequest(question)}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}

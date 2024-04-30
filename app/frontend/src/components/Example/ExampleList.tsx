@@ -11,9 +11,9 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "How is strengthening student data privacy accomplished?", value: "How is strengthening student data privacy accomplished?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "What are some flavors of Breyers?", value: "What are some flavors of Breyers?" }
+    { text: "What is the process for submitting travel expenses for reimbursement?", value: "What is the process for submitting travel expenses for reimbursement?" },
+    { text: "What are the guidelines for publishing content on social media platforms?", value: "What are the guidelines for publishing content on social media platforms?" },
+    { text: "What projects were executed during COVID-19?", value: "What projects were executed during COVID-19?" }
 ];
 
 interface Props {

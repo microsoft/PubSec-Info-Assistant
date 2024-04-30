@@ -141,7 +141,7 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B1'
+      name: 'B2'
       capacity: 3
     }
     kind: 'linux'
@@ -158,7 +158,7 @@ module funcServicePlan 'core/host/funcserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B1'
+      name: 'B2'
       capacity: 2
     }
     kind: 'linux'
@@ -175,14 +175,14 @@ module enrichmentAppServicePlan 'core/host/enrichmentappserviceplan.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'B1'
-      tier: 'Basic'
-      size: 'B1'
-      family: 'B'
-      capacity: 1
+      name: 'B2'
+      // tier: 'Basic'
+      // size: 'B1'
+      // family: 'B'
+      capacity: 3
     }
     kind: 'linux'
-    reserved: true
+    //reserved: true
   }
 }
 

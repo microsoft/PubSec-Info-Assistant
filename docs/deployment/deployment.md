@@ -59,9 +59,9 @@ ENABLE_BING_SAFE_SEARCH | No | Defaults to `true`. If you are using the `ENABLE_
 ENABLE_UNGROUNDED_CHAT | Defaults to `false`. This feature flag will enable the ability to interact directly with an LLM. This experience will be similar to the Azure OpenAI Playground.
 ENABLE_MATH_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Math Assistant tab in the Information Assistant website. Read more information on the [Math Assistant](/docs/features/features.md) 
 ENABLE_TABULAR_DATA_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Tabular Data Assistant tab in the Information Assistant website. Read more information about the [Tabular Data Assistant](/docs/features/features.md)
-ENABLE_SHAREPOINT_CONNECTOR | Yes | Defaults to `false`. This feature flag enabled the ability to ingest data from SharePoint document stores into the Information Assistant. When enabled, be sure to set the `SHAREPOINT_TO_SYNC` parameter for your SharePoint sites. Read more about configuring the [SharePoint Connector](/docs/features/sharepoint.md) 
+ENABLE_SHAREPOINT_CONNECTOR | Yes | Defaults to `false`. This feature flag enabled the ability to ingest data from SharePoint document stores into the Information Assistant. When enabled, be sure to set the `SHAREPOINT_TO_SYNC` parameter for your SharePoint sites. Read more about configuring the [SharePoint Connector](/docs/features/sharepoint.md). This feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
 SHAREPOINT_TO_SYNC | No | This is a JSON Array of Objects for SharePoint Sites and their entry folders. The app will crawl down from the folder specified for each site. Specifying "/Shared Documents" will crawl all the documents in your SharePoint. `[{"url": "https://SharePoint.com/", "folder": "/Shared Documents"}]` This will **overwrite** any prior changes you've made to config.json. Information on setting up SharePoint Ingestion can be found here [SharePoint Connector](/docs/features/sharepoint.md)
-ENABLE_MULTIMEDIA | Yes | Defaults to `false`. This feature flag should not be changed at this time. The multimedia feature is still in development. Enabling this feature will deploy an Azure Video Indexer instance in your resource group only. 
+ENABLE_MULTIMEDIA | Yes | Defaults to `false`. This feature flag should not be changed at this time. The multimedia feature is still in development. Enabling this feature will deploy an Azure Video Indexer instance in your resource group only.
 REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
 SKIP_PLAN_CHECK | No | If this value is set to 1, then the BICEP deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
 USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and BICEP will create a new Azure Open AI service instance in your resource group.
@@ -107,6 +107,12 @@ The output here should show that you're logged into the intended Azure subscript
 
 ``` bash
     az account list
+```
+
+If you're a part of multiple tenants, ensure you're in the right tenant by setting the tenantID
+
+``` bash
+    az login --tenant tenantID
 ```
 
 From this output, grab the Subscription ID of the subscription you intend to deploy to and run:

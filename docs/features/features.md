@@ -5,6 +5,7 @@ Please see below sections for coverage of IA Accelerator features.
 * [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
 * [Prompt Engineering](/docs/features/features.md#prompt-engineering)
 * [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
+* [SharePoint Connector](/docs/features/features.md#sharepoint-connector)
 * [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
 * [Image Search](/docs/features/features.md#image-search)
 * [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
@@ -59,6 +60,10 @@ The Information Assistant Accelerator [pre-processes](/docs/features/document_pr
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](/functions/shared_code/status_log.md) page for more details.
 
 Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](/docs/functions_flow.md)
+
+## SharePoint Connector
+
+The Information Assistant now supports integrating your SharePoint document libraries (NOT SharePoint Lists or Websites) for chat using our RAG patterns. See [Configuring SharePoint Connector](/docs/features/sharepoint.md) for more information.
 
 ## Bing Search And Compare
 

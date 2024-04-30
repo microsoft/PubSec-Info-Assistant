@@ -64,6 +64,9 @@ dlldata.c
 # Benchmark Results
 BenchmarkDotNet.Artifacts/
 
+# Web app plugin do not push to repo
+app/backend/plugin/
+
 # .NET Core
 project.lock.json
 project.fragment.lock.json

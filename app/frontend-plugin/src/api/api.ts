@@ -2,9 +2,10 @@
 // Licensed under the MIT license.
 
 import { AskRequest, AskResponse, ChatRequest, BlobClientUrlResponse, AllFilesUploadStatus, GetUploadStatusRequest, GetInfoResponse, ActiveCitation, GetWarningBanner, StatusLogEntry, StatusLogResponse, ApplicationTitle, GetTagsResponse } from "./models";
+const URI = "XXXXX";
 
 export async function askApi(options: AskRequest): Promise<AskResponse> {
-    const requestURI = "https://infoasst-web-viewer-1rn5v.azurewebsites.net/ask";
+    const requestURI = URI + "/ask";
     const response = await fetch(requestURI, {
         method: "POST",
         headers: {
@@ -38,7 +39,7 @@ export async function askApi(options: AskRequest): Promise<AskResponse> {
 }
 
 export async function chatApi(options: ChatRequest): Promise<AskResponse> {
-    const requestURI = "https://infoasst-web-viewer-1rn5v.azurewebsites.net/chat";
+    const requestURI = URI + "/chat";
     const response = await fetch(requestURI, {
         method: "POST",
         headers: {

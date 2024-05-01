@@ -106,7 +106,7 @@ def process_agent_scratch_pad(question, df):
     deployment_name=OPENAI_DEPLOYMENT_NAME)  
          
     question = save_chart(question)
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS)
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:

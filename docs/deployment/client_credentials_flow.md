@@ -4,7 +4,7 @@ If you want to call the backend API directly or want to use a custom User Interf
 
 > :warning: **Important Note**: Executing the instructions in this document will modify the authentication mechanism of the API to expect a token. This change will cause the out-of-the-box UI, included in the app service, to receive a 401 Unauthorized error on page load as it does not include the required token in its requests. Please ensure you have a strategy to handle this change in your UI before proceeding.  
 
-The below directions are showing how to accomplish via portal but most of which could be implemented in existing IaC through Bicep.
+The below directions are showing how to accomplish via portal but most of which could be implemented in existing IaC through Terraform.
 
 ## Update App Registration
 

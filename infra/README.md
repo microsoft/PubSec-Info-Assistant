@@ -26,7 +26,7 @@ build                           Build application code
 infrastructure                  Deploy infrastructure
 deploy-webapp                   Deploys the web app to Azure App Service
 deploy-search-indexes           Deploy search indexes
-extract-env                     Extract infrastructure.env file from BICEP output
+extract-env                     Extract infrastructure.env file from Terraform output
 ```
 
 ## Configure authentication and authorization

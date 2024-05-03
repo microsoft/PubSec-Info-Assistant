@@ -20,7 +20,7 @@
 - [Using the app](/docs/deployment/using_ia_first_time.md)
 - [Responsible AI](#responsible-ai)
   - [Transparency Note](#transparency-note)
-  - [Content Safety] (#content-safety)
+  - [Content Safety](#content-safety)
 - [Data Collection Notice](#data-collection-notice)
 - [Resources](#resources)
   - [Known Issues](./docs/knownissues.md)
@@ -35,7 +35,7 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
@@ -64,10 +64,17 @@ The IA Accelerator contains several features, many of which have their own docum
 - Examples of custom Retrieval Augmented Generation (RAG), Prompt Engineering, and Document Pre-Processing
 - Azure AI Search Integration to include text search of both text documents and images
 - Customization and Personalization to enable enhanced AI interaction
+- Preview into autonomous agents
 
 For a detailed review see our [Features](./docs/features/features.md) page.
 
-![Process Flow](/docs/process_flow.png)
+### Process Flow for Work(Grounded), Ungrounded, and Work and Web
+
+![Process Flow for Chat](/docs/process_flow_chat.png)
+
+### Process Flow for Assistants
+
+![Process Flow for Assistants](/docs/process_flow_agent.png)
 
 ## Azure account requirements
 
@@ -79,7 +86,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 
     Model Name | Supported Versions
     ---|---
-    gpt-35-turbo | 0301, 0613
+    gpt-35-turbo | current version
     **gpt-35-turbo-16k** | current version
     **gpt-4** | current version
     gpt-4-32k | current version
@@ -117,7 +124,7 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 
 ### Content Safety
 
-Content safety is provided through Azure Open AI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transaparncy Note](/docs/transparency.md)
+Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transaparncy Note](/docs/transparency.md)
 
 By default, the content filters are set to filter out prompts and completions that are detected as medium or high severity for those four harm categories. Content labeled as low or safe severity is not filtered.
 

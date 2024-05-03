@@ -7,9 +7,9 @@ You may find better settings to fit your needs. This document explains how this 
 
 ### Overview
 
-The Azure Functions Service Plan Autoscale settings are defined in the file located at `/infra/core/host/functions.tf`. These settings enable automatic scaling of the Azure Functions Service Plan based on CPU usage metrics.
+The Azure Functions Service Plan Autoscale settings are defined in the file located at `/infra/core/host/functions/functions.tf`. These settings enable automatic scaling of the Azure Functions Service Plan based on CPU usage metrics.
 
- **File Location:** `/infra/core/host/functions.tf`
+ **File Location:** `/infra/core/host/functions/functions.tf`
 
 #### Scaling Rules
 
@@ -31,11 +31,11 @@ The Azure Functions Service Plan Autoscale settings are defined in the file loca
 
 ### Overview
 
-The App Service Plan Autoscale settings for the enrichment app are defined in the file located at `/infra/core/host.enrichmentapp.tf`. These settings enable automatic scaling of the App Service Plan based on CPU usage metrics.
+The App Service Plan Autoscale settings for the enrichment app are defined in the file located at `/infra/core/host/enrichmentapp/enrichmentapp.tf`. These settings enable automatic scaling of the App Service Plan based on CPU usage metrics.
 
 ### Key Parameters
 
-**File Location:** `/infra/core/host.enrichmentapp.tf`
+**File Location:** `/infra/core/host/enrichmentapp/enrichmentapp.tf`
 
 #### Scaling Rules
 

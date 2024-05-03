@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from typing import Any, Sequence
 
 import openai
+from openai import AzureOpenAI
+from openai import AsyncAzureOpenAI
 from approaches.approach import Approach
 
 from text import nonewlines
@@ -21,6 +23,7 @@ from core.modelhelper import get_token_limit
 from core.modelhelper import num_tokens_from_messages
 import requests
 from urllib.parse import quote
+
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
@@ -92,6 +95,15 @@ class GPTDirectApproach(Approach):
 
         self.model_name = model_name
         self.model_version = model_version
+        
+          
+        openai.api_type = 'azure'
+        openai.api_version = "2024-02-01"
+        
+        self.client = AsyncAzureOpenAI(
+        azure_endpoint = openai.api_base, 
+        api_key=openai.api_key,  
+        api_version=openai.api_version)
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -129,9 +141,9 @@ class GPTDirectApproach(Approach):
             max_tokens=self.chatgpt_token_limit - 500
         )
 
-        chat_completion = openai.ChatCompletion.create(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
+        
+        chat_completion= await self.client.chat.completions.create(
+            model=self.chatgpt_deployment,
             messages=messages,
             temperature=float(overrides.get("response_temp")) or 0.6,
             n=1

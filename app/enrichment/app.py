@@ -22,6 +22,7 @@ from fastapi.responses import RedirectResponse
 from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
 import openai
+from openai import AzureOpenAI
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from sentence_transformers import SentenceTransformer
 from shared_code.utilities_helper import UtilitiesHelper
@@ -72,7 +73,12 @@ search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
 openai.api_type = "azure"
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
-openai.api_version = "2023-12-01-preview"
+openai.api_version = "2024-02-01"
+
+client = AzureOpenAI(
+        azure_endpoint = openai.api_base, 
+        api_key=openai.api_key,  
+        api_version=openai.api_version)
 
 class AzOAIEmbedding(object):
     """A wrapper for a Azure OpenAI Embedding model"""
@@ -82,11 +88,13 @@ class AzOAIEmbedding(object):
     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
     def encode(self, texts):
         """Embeds a list of texts using a given model"""
-        response = openai.Embedding.create(
-            engine=self.deployment_name,
-            input=texts
+        response = client.embeddings.create(
+        model= self.deployment_name,
+        input=texts
         )
         return response
+    
+   
 
 class STModel(object):
     """A wrapper for a sentence-transformers model"""
@@ -224,7 +232,8 @@ def embed_texts(model: str, texts: List[str]):
     try:
         if model.startswith("azure-openai_"):
             embeddings = model_obj.encode(texts)
-            embeddings = embeddings['data'][0]['embedding']
+            embeddings= embeddings.data[0].embedding
+            
         else:
             embeddings = model_obj.encode(texts)
             embeddings = embeddings.tolist()[0]

@@ -1,10 +1,57 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Approaches, ChatResponse } from '../../api';
+import readNDJSONStream from "ndjson-readablestream";
 
-const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, classNames, typingSpeed = 30 }: { eventSource?: any; nonEventString?: string, onStreamingComplete: any; classNames?: string; typingSpeed?: number }) => {
+const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, classNames, typingSpeed = 30, readableStream, setAnswer, approach = Approaches.ChatWebRetrieveRead }:
+   { readableStream?: ReadableStream, setAnswer?: (data: ChatResponse) => void, eventSource?: any; nonEventString?: string, onStreamingComplete: any; classNames?: string; typingSpeed?: number, approach?: Approaches}) => {
   const [output, setOutput] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   const queueRef = useRef<string[]>([]); // Now TypeScript knows this is an array of strings
   const processingRef = useRef(false);
+
+    const handleStream = async () => {
+      var response = {} as ChatResponse
+      if (readableStream && !readableStream.locked) {
+        for await (const event of readNDJSONStream(readableStream)) {
+          if (event["data_points"]) {
+              response = {
+                  answer: "",
+                  thoughts: event["thoughts"],
+                  data_points: event["data_points"],
+                  approach: approach,
+                  thought_chain: {
+                      "work_response": event["thought_chain"]["work_response"],
+                      "web_response": event["thought_chain"]["web_response"]
+                  },
+                  work_citation_lookup: event["work_citation_lookup"],
+                  web_citation_lookup: event["web_citation_lookup"]
+              }
+          }
+          else if (event["content"]) {
+              response.answer += event["content"]
+              queueRef.current = queueRef.current.concat(event["content"].split(''));
+              if (!processingRef.current) {
+                processQueue();
+              }
+          }
+        }
+        if (setAnswer) {
+          // We need to set these values in the thought_chain so that the compare works
+          if (approach === Approaches.ChatWebRetrieveRead) {
+            response.thought_chain["web_response"] = response.answer
+          }
+          if (approach === Approaches.ReadRetrieveRead) {
+            response.thought_chain["work_response"] = response.answer
+          }
+          setAnswer(response)
+        }
+      }
+    }
+
+    if (readableStream) {
+      handleStream();
+    }
 
   useEffect(() => {
     if (!eventSource && nonEventString) {
@@ -41,6 +88,7 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
   }, [eventSource, nonEventString]);
 
   const processQueue = () => {
+    setIsLoading(false);
     processingRef.current = true;
     const intervalId = setInterval(() => {
       if (queueRef.current.length > 0) {
@@ -53,7 +101,8 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
     }, typingSpeed); // Adjust based on desired "typing" speed
   };
 
-  return <div className={classNames}><ReactMarkdown>{output}</ReactMarkdown></div>;
+  return isLoading ? <div className={classNames}>Generating Answer...</div> : 
+        <div className={classNames}><ReactMarkdown>{output}</ReactMarkdown></div>;
 };
 
 export default CharacterStreamer;

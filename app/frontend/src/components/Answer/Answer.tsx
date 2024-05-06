@@ -12,6 +12,7 @@ import { Approaches, ChatResponse, getCitationFilePath, ChatMode } from "../../a
 import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { RAIPanel } from "../RAIPanel";
+import CharacterStreamer from "../CharacterStreamer/CharacterStreamer";
 
 interface Props {
     answer: ChatResponse;
@@ -28,6 +29,8 @@ interface Props {
     onAdjustClick?: () => void;
     onRegenerateClick?: () => void;
     chatMode: ChatMode;
+    answerStream: ReadableStream | undefined;
+    setAnswer?: (data: ChatResponse) => void;
 }
 
 export const Answer = ({
@@ -44,7 +47,9 @@ export const Answer = ({
     showFollowupQuestions,
     onAdjustClick,
     onRegenerateClick,
-    chatMode
+    chatMode,
+    answerStream,
+    setAnswer
 }: Props) => {
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.work_citation_lookup, answer.web_citation_lookup, answer.thought_chain, onCitationClicked), [answer]);
 
@@ -90,7 +95,8 @@ export const Answer = ({
                         <ShieldCheckmark20Regular></ShieldCheckmark20Regular>Your personal and company data are protected
                     </div>
                 }
-                <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div>
+                { answer.answer && <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div> }
+                {!answer.answer && <CharacterStreamer classNames={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} readableStream={answerStream} setAnswer={setAnswer} onStreamingComplete={() => {}} typingSpeed={10} /> }
             </Stack.Item>
 
             {(parsedAnswer.approach == Approaches.ChatWebRetrieveRead && !!parsedAnswer.web_citations.length) && (

@@ -92,6 +92,25 @@ class StatusLog:
 
         return items
 
+
+    def read_file_state(self,
+                       file_id: str
+                       ):
+        """ 
+        Function to issue a query and return state of a single doc        
+        args
+            file_id - if you wish to return a single document by its path     
+        """
+        query_string = f"SELECT c.state FROM c WHERE c.id = '{self.encode_document_id(file_id)}'"
+
+        items = list(self.container.query_items(
+            query=query_string,
+            enable_cross_partition_query=True
+        ))
+
+        return State(items[0]['state'])
+
+
     def read_files_status_by_timeframe(self, 
                        within_n_hours: int,
                        state: State = State.ALL,
@@ -169,32 +188,26 @@ class StatusLog:
             else:
                 json_document = self._log_document[document_id]
 
-            json_state = json_document['state']
-            if json_state != State.DELETED.value and json_state != State.ERROR.value:
-                # Check if there has been a state change, and therefore to update state
-                if json_document['state'] != state.value:
-                    json_document['state'] = state.value
-                    json_document['state_timestamp'] = str(datetime
-                                                           .now()
-                                                           .strftime('%Y-%m-%d %H:%M:%S'))
+            if json_document['state'] != state.value:
+                json_document['state'] = state.value
+                json_document['state_timestamp'] = str(datetime
+                                                        .now()
+                                                        .strftime('%Y-%m-%d %H:%M:%S'))
 
-                # Update state description with latest status
-                json_document['state_description'] = status
-                # Append a new item to the array
-                status_updates = json_document["status_updates"]
-                new_item = {
-                    "status": status,
-                    "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-                    "status_classification": str(status_classification.value)
-                }
+            # Update state description with latest status
+            json_document['state_description'] = status
+            # Append a new item to the array
+            status_updates = json_document["status_updates"]
+            new_item = {
+                "status": status,
+                "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "status_classification": str(status_classification.value)
+            }
 
-                if status_classification == StatusClassification.ERROR:
-                    new_item["stack_trace"] = self.get_stack_trace()
-                status_updates.append(new_item)
-            else:
-                logging.debug("%s is already marked as %s. No new status to update.",
-                              document_path,
-                              json_state)
+            if status_classification == StatusClassification.ERROR:
+                new_item["stack_trace"] = self.get_stack_trace()
+            status_updates.append(new_item)
+
         except exceptions.CosmosResourceNotFoundError:
             if state != State.DELETED:
                 # this is a valid new document

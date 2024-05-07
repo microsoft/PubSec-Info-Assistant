@@ -35,7 +35,7 @@ Once you have completed the Sizing Estimator and sized your deployment appropria
 
 ## Upgrading or Migrating from 1.0
 
-If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing porcessed data to a newly deployed instance, review the [Upgrade & Migrate documentation](/docs/deployment/move_or_migrate.md)
+If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing processed data to a newly deployed instance, review the [Upgrade & Migrate documentation](/docs/deployment/move_or_migrate.md)
 
 ## Configure ENV files
 

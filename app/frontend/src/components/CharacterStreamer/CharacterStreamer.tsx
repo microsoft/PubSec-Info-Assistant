@@ -9,6 +9,7 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
   const [isLoading, setIsLoading] = useState(true);
   const queueRef = useRef<string[]>([]); // Now TypeScript knows this is an array of strings
   const processingRef = useRef(false);
+  const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
     const handleStream = async () => {
       var response = {} as ChatResponse
@@ -41,9 +42,19 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
           if (approach === Approaches.ChatWebRetrieveRead) {
             response.thought_chain["web_response"] = response.answer
           }
-          if (approach === Approaches.ReadRetrieveRead) {
+          else if (approach === Approaches.ReadRetrieveRead) {
             response.thought_chain["work_response"] = response.answer
           }
+          else if (approach === Approaches.GPTDirect) {
+            response.thought_chain["ungrounded_response"] = response.answer
+          }
+          else if (approach === Approaches.CompareWebWithWork) {
+            response.thought_chain["web_to_work_comparison_response"] = response.answer
+          }
+          else if (approach === Approaches.CompareWorkWithWeb) {
+            response.thought_chain["work_to_web_comparison_response"] = response.answer
+          }
+
           setAnswer(response)
         }
       }
@@ -52,6 +63,10 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
     if (readableStream) {
       handleStream();
     }
+
+  useEffect(() => {
+      chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" });
+    }, [output]);
 
   useEffect(() => {
     if (!eventSource && nonEventString) {
@@ -102,7 +117,8 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
   };
 
   return isLoading ? <div className={classNames}>Generating Answer...</div> : 
-        <div className={classNames}><ReactMarkdown>{output}</ReactMarkdown></div>;
+        <div className={classNames}><ReactMarkdown>{output}</ReactMarkdown>
+        <div ref={chatMessageStreamEnd} /></div>;
 };
 
 export default CharacterStreamer;

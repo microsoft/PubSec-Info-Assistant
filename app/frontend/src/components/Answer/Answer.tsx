@@ -96,7 +96,7 @@ export const Answer = ({
                     </div>
                 }
                 { answer.answer && <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div> }
-                {!answer.answer && <CharacterStreamer classNames={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} readableStream={answerStream} setAnswer={setAnswer} onStreamingComplete={() => {}} typingSpeed={10} /> }
+                {!answer.answer && <CharacterStreamer classNames={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} approach={answer.approach} readableStream={answerStream} setAnswer={setAnswer} onStreamingComplete={() => {}} typingSpeed={10} /> }
             </Stack.Item>
 
             {(parsedAnswer.approach == Approaches.ChatWebRetrieveRead && !!parsedAnswer.web_citations.length) && (
@@ -215,9 +215,9 @@ export const Answer = ({
             <Stack.Item>
                 <div className={styles.raiwarning}>AI-generated content may be incorrect</div>
             </Stack.Item>
-            <Stack.Item align="center">
+            {answer.answer && <Stack.Item align="center">
                 <RAIPanel approach={answer.approach} chatMode={chatMode} onAdjustClick={onAdjustClick} onRegenerateClick={onRegenerateClick} onWebSearchClicked={onWebSearchClicked} onWebCompareClicked={onWebCompareClicked} onRagCompareClicked={onRagCompareClicked} onRagSearchClicked={onRagSearchClicked} />
-            </Stack.Item>
+            </Stack.Item>}
         </Stack>
     );
 };

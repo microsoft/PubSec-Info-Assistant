@@ -24,7 +24,7 @@ build-containers: extract-env
 infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts/inf-create.sh
 
-extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from BICEP output
+extract-env: extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from Terraform output
 	 @./scripts/json-to-env.sh < inf_output.json > ./scripts/environments/infrastructure.env
 
 deploy-webapp: extract-env ## Deploys the web app code to Azure App Service
@@ -39,10 +39,10 @@ deploy-enrichments: extract-env ## Deploys the web app code to Azure App Service
 deploy-search-indexes: extract-env ## Deploy search indexes
 	@./scripts/deploy-search-indexes.sh
 
-extract-env-debug-webapp: ## Extract infrastructure.debug.env file from BICEP output
+extract-env-debug-webapp: ## Extract infrastructure.debug.env file from Terraform output
 	@./scripts/json-to-env.webapp.debug.sh < inf_output.json > ./scripts/environments/infrastructure.debug.env
 
-extract-env-debug-functions: ## Extract local.settings.json to debug functions from BICEP output
+extract-env-debug-functions: ## Extract local.settings.json to debug functions from Terraform output
 	@./scripts/json-to-env.function.debug.sh < inf_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
@@ -64,5 +64,5 @@ destroy-inf: check-subscription
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
 
-run-migration: ## Migrate from bicep to terraform
+run-migration: ## Migrate from BICEP to Terraform
 	python ./scripts/merge-databases.py

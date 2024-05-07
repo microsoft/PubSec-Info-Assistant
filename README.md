@@ -168,7 +168,7 @@ docs/deployment/ | Detailed documentation on how to deploy and start using Infor
 docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
 docs/ | Other supporting documentation that is primarily linked to from the other markdown files.
 functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
-infra/ | The BICEP scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.bicep` file but most of the resource deployments are modularized under the **core** folder.
+infra/ | The Terraform scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.tf` file but most of the resource deployments are modularized under the **core** folder.
 pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the accelerator.
 scripts/environments/ | Deployment configuration files. This is where all external configuration values will be set.
 scripts/ | Supporting scripts that perform the various deployment tasks such as infrastructure deployment, Azure WebApp and Function deployments, building of the webapp and functions source code, etc. These scripts align to the available commands in the `Makefile`.

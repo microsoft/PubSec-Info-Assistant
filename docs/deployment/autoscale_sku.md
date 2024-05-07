@@ -7,11 +7,11 @@ You may find better settings to fit your needs. This document explains how this 
 
 ### Overview
 
-The Azure Functions Service Plan Autoscale settings are defined in the file located at `/infra/core/host/funcserviceplan.bicep`. These settings enable automatic scaling of the Azure Functions Service Plan based on CPU usage metrics.
+The Azure Functions Service Plan Autoscale settings are defined in the file located at `/infra/core/host/functions/functions.tf`. These settings enable automatic scaling of the Azure Functions Service Plan based on CPU usage metrics.
 
 
 
- **File Location:** `/infra/core/host/funcserviceplan.bicep`
+ **File Location:** `/infra/core/host/functions/functions.tf`
 
 #### Scaling Rules
 
@@ -34,11 +34,11 @@ The Azure Functions Service Plan Autoscale settings are defined in the file loca
 
 ### Overview
 
-The App Service Plan Autoscale settings for the enrichment app are defined in the file located at `/infra/core/host.enrichmentappserviceplan.bicep`. These settings enable automatic scaling of the App Service Plan based on CPU usage metrics.
+The App Service Plan Autoscale settings for the enrichment app are defined in the file located at `/infra/core/host/enrichmentapp/enrichmentapp.tf`. These settings enable automatic scaling of the App Service Plan based on CPU usage metrics.
 
 ### Key Parameters
 
-**File Location:** `/infra/core/host.enrichmentappserviceplan.bicep`
+**File Location:** `/infra/core/host/enrichmentapp/enrichmentapp.tf`
 
 #### Scaling Rules
 
@@ -58,7 +58,7 @@ The App Service Plan Autoscale settings for the enrichment app are defined in th
 
 ### Customization
 
-To customize the App Service Plan Autoscale settings, modify the parameters mentioned above in the specified Bicep file. And Run the `make infrastructure` command.
+To customize the App Service Plan Autoscale settings, modify the parameters mentioned above in the specified Terraform file. And Run the `make infrastructure` command.
 
 
 
@@ -66,13 +66,13 @@ To customize the App Service Plan Autoscale settings, modify the parameters ment
 
 ### Overview
 
-The SKU settings for all Service Plans are defined in the file located at `/infra/main.bicep`.  The SKU (Stock Keeping Unit) represents the pricing tier or plan for your App Service. It defines the performance, features, and capacity of the App Service. 
+The SKU settings for all Service Plans are defined in the file located at `/infra/main.tf`.  The SKU (Stock Keeping Unit) represents the pricing tier or plan for your App Service. It defines the performance, features, and capacity of the App Service. 
 More information can be found [here.](https://azure.microsoft.com/en-us/pricing/details/app-service/windows/#purchase-options)
 
 ## Web App Service Plan SKU
 
 
-**File Location:** `/infra/main.bicep`
+**File Location:** `/infra/main.tf`
 
 #### SKU Settings
 
@@ -83,7 +83,7 @@ More information can be found [here.](https://azure.microsoft.com/en-us/pricing/
 ## Functions Service Plan SKU
 
 
-**File Location:** `/infra/main.bicep`
+**File Location:** `/infra/main.tf`
 
 #### SKU Settings
 
@@ -93,7 +93,7 @@ More information can be found [here.](https://azure.microsoft.com/en-us/pricing/
 ## Enrichment App Service Plan SKU
 
 
-**File Location:** `/infra/main.bicep`
+**File Location:** `/infra/main.tf`
 
 #### SKU Settings
 
@@ -104,11 +104,11 @@ More information can be found [here.](https://azure.microsoft.com/en-us/pricing/
 - **Capacity:** `1`
 
 ### Enrichment Message Dequeue Parameter
-There exist a property that can be set in the local.env file called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.bicep` and `app/enrichment/app.py` to the value of **3**. This means the app will process 3 messages from the queue at a time. This is found to be the most optimal with the existing configuration but can be increased if you also increase the enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
+There exist a property that can be set in the local.env file called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.tf` and `app/enrichment/app.py` to the value of **3**. This means the app will process 3 messages from the queue at a time. This is found to be the most optimal with the existing configuration but can be increased if you also increase the enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
 
 ### Customization
 
-To customize the App Service Plans SKU settings, modify the `sku` parameters in the specified Bicep file and run the `make deploy` or `make infrastructure`command.
+To customize the App Service Plans SKU settings, modify the `sku` parameters in the specified Terraform file and run the `make deploy` or `make infrastructure`command.
 
 This can also be adjusted in the Azure Portal.
 

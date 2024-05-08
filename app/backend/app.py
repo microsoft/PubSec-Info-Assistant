@@ -126,7 +126,7 @@ if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
     AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
 else:
     AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
-openai.api_version = "2023-12-01-preview"
+openai.api_version = "2024-02-01"
 # Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service
@@ -815,17 +815,6 @@ async def stream_agent_response(question: str):
     Raises:
         HTTPException: If an error occurs while processing the question.
     """
-    # try:
-    #     def event_stream():
-    #         data_generator = iter(process_agent_response(question))
-    #         while True:
-    #             try:
-    #                 chunk = next(data_generator)
-    #                 yield chunk
-    #             except StopIteration:
-    #                 yield "data: keep-alive\n\n"
-    #                 time.sleep(5)
-    #     return StreamingResponse(event_stream(), media_type="text/event-stream")
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
 

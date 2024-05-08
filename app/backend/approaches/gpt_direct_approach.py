@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from typing import Any, Sequence
 
 import openai
+from openai import AzureOpenAI
+from openai import AsyncAzureOpenAI
 from approaches.approach import Approach
 
 from text import nonewlines
@@ -21,6 +23,7 @@ from core.modelhelper import get_token_limit
 from core.modelhelper import num_tokens_from_messages
 import requests
 from urllib.parse import quote
+
 
 # Simple retrieve-then-read implementation, using the Cognitive Search and
 # OpenAI APIs directly. It first retrieves top documents from search,
@@ -92,6 +95,15 @@ class GPTDirectApproach(Approach):
 
         self.model_name = model_name
         self.model_version = model_version
+        
+          
+        openai.api_type = 'azure'
+        openai.api_version = "2024-02-01"
+        
+        self.client = AsyncAzureOpenAI(
+        azure_endpoint = openai.api_base, 
+        api_key=openai.api_key,  
+        api_version=openai.api_version)
 
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -130,14 +142,13 @@ class GPTDirectApproach(Approach):
         )
 
         try:
-            chat_completion = await openai.ChatCompletion.acreate(
-                deployment_id=self.chatgpt_deployment,
-                model=self.model_name,
+            chat_completion= await self.client.chat.completions.create(
+                model=self.chatgpt_deployment,
                 messages=messages,
-                temperature=float(overrides.get("response_temp")) or 0.6,
+                temperature=0.6,
                 n=1,
                 stream=True
-            )  
+            ) 
             msg_to_display = '\n\n'.join([str(message) for message in messages])
                     # Return the data we know
             yield json.dumps({"data_points": {},
@@ -149,10 +160,11 @@ class GPTDirectApproach(Approach):
             # STEP 4: Format the response
             async for chunk in chat_completion:
                 # Check if there is at least one element and the first element has the key 'delta'
-                if chunk.choices and isinstance(chunk.choices[0], dict) and 'content' in chunk.choices[0].delta:
+                if len(chunk.choices) > 0:
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
         except Exception as e:
             logging.error(f"Error in GPTDirectApproach: {e}")
             yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"
             return
+
     

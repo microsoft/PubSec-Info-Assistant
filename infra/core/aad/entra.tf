@@ -34,6 +34,7 @@ resource "azuread_application_password" "aad_mgmt_app_password" {
   count           = var.isInAutomation ? 0 : 1
   application_id  = azuread_application.aad_mgmt_app[0].id
   display_name    = "infoasst-mgmt"
+  end_date_relative = "${var.password_lifetime * 24}h"
 }
 
 resource "azuread_service_principal" "aad_mgmt_sp" {

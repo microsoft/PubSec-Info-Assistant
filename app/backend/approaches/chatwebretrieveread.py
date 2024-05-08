@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 import json
+import logging
 import os
 import re
 from typing import Any, Sequence
@@ -93,7 +94,10 @@ class ChatWebRetrieveRead(Approach):
         Returns:
             Any: The result of the approach.
         """
-
+        log = logging.getLogger("uvicorn")
+        log.setLevel('DEBUG')
+        log.propagate = True
+        
         user_query = history[-1].get("user")
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
@@ -142,38 +146,33 @@ class ChatWebRetrieveRead(Approach):
              max_tokens=4097 - 500
          )
         msg_to_display = '\n\n'.join([str(message) for message in messages])
-        # STEP 3: Use the search results to answer the user's question
-        resp = await openai.ChatCompletion.acreate(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
-            messages=messages,
-            temperature=0.6,
-            n=1,
-            stream=True
-        ) 
-        
-        # Return the data we know
-        yield json.dumps({"data_points": {},
-                          "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-                          "thought_chain": thought_chain,
-                          "work_citation_lookup": {},
-                          "web_citation_lookup": self.citations}) + "\n"
-        
-        # STEP 4: Format the response
-        async for chunk in resp:
-            # Check if there is at least one element and the first element has the key 'delta'
-            if chunk.choices and isinstance(chunk.choices[0], dict) and 'content' in chunk.choices[0].delta:
-                yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
-        
-        #thought_chain["web_response"] = resp
-        #return {
-        #    "data_points": None,
-        #    "answer": f"{urllib.parse.unquote(resp)}",
-        #    "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-        #    "thought_chain": thought_chain,
-        #    "work_citation_lookup": {},
-        #    "web_citation_lookup": self.citations
-        #}
+        try:
+            # STEP 3: Use the search results to answer the user's question
+            resp = await openai.ChatCompletion.acreate(
+                deployment_id=self.chatgpt_deployment,
+                model=self.model_name,
+                messages=messages,
+                temperature=0.6,
+                n=1,
+                stream=True
+            ) 
+            
+            # Return the data we know
+            yield json.dumps({"data_points": {},
+                            "thoughts": f"Searched for:<br>{query_resp}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+                            "thought_chain": thought_chain,
+                            "work_citation_lookup": {},
+                            "web_citation_lookup": self.citations}) + "\n"
+            
+            # STEP 4: Format the response
+            async for chunk in resp:
+                # Check if there is at least one element and the first element has the key 'delta'
+                if chunk.choices and isinstance(chunk.choices[0], dict) and 'content' in chunk.choices[0].delta:
+                    yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
+        except Exception as e:
+            log.error(f"Error generating chat completion: {str(e)}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e)}"}) + "\n"
+            return
     
 
     async def web_search_with_safe_search(self, user_query):

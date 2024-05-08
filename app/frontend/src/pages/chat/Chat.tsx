@@ -27,7 +27,6 @@ import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
 import React from "react";
-import readNDJSONStream from "ndjson-readablestream";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
@@ -80,26 +79,6 @@ const Chat = () => {
             console.log(error);
         }
     }
-
-    const updateLatestAnswer = (newResponse: ChatResponse) => {
-        // Copy the entire array for immutability
-        const updatedAnswers = [...answers];
-    
-        // Check if there are any answers to update
-        if (updatedAnswers.length > 0) {
-          // Take the last element, copy it to maintain immutability if necessary
-          const lastAnswer = {...updatedAnswers[updatedAnswers.length - 1]};
-    
-          // Update the response part of the last tuple
-          lastAnswer[1] = newResponse;
-    
-          // Update the last element with the new value
-          updatedAnswers[updatedAnswers.length - 1] = lastAnswer;
-        }
-    
-        // Set the updated array back to state
-        setAnswers(updatedAnswers);
-      };
 
     const makeApiRequest = async (question: string, approach: Approaches, 
                                 work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } },
@@ -346,6 +325,11 @@ const Chat = () => {
         });
     }
 
+    const removeAnswerAtIndex = (index: number) => {
+        const newItems = answers.filter((item, idx) => idx !== index);
+        setAnswers(newItems);
+    }
+
     return (
         <div className={styles.container}>
             <div className={styles.subHeader}>
@@ -405,6 +389,7 @@ const Chat = () => {
                                             key={index}
                                             answer={answer[1]}
                                             answerStream={answerStream}
+                                            setError={(error) => {setError(error); removeAnswerAtIndex(index); }}
                                             setAnswer={(response) => updateAnswerAtIndex(index, response)}
                                             isSelected={selectedAnswer === index && activeAnalysisPanelTab !== undefined}
                                             onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
@@ -423,17 +408,6 @@ const Chat = () => {
                                     </div>
                                 </div>
                             ))}
-                            {isLoading && (
-                                <>
-                                    <UserChatMessage
-                                        message={lastQuestionRef.current}
-                                        approach={activeApproach}
-                                    />
-                                    <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerLoading approach={activeApproach}/>
-                                    </div>
-                                </>
-                            )}
                             {error ? (
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} approach={activeApproach}/>

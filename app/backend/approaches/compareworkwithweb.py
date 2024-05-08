@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 import json
+import logging
 import os
 from typing import Any, Sequence
 import urllib.parse
@@ -106,44 +107,35 @@ class CompareWorkWithWeb(Approach):
              max_tokens=4097 - 500
          )
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+        try:
+            # Step 3: Final comparative analysis using OpenAI Chat Completion
+            chat_completion = await openai.ChatCompletion.acreate(
+                deployment_id=self.chatgpt_deployment,
+                model=self.model_name,
+                messages=messages,
+                temperature=float(overrides.get("response_temp")) or 0.6,
+                max_tokens=1024,
+                n=1,
+                stream=True)
 
-        # Step 3: Final comparative analysis using OpenAI Chat Completion
-        #compare_resp = await self.make_chat_completion(messages)
-
-        #final_response = f"{urllib.parse.unquote(compare_resp)}"
-        chat_completion = await openai.ChatCompletion.acreate(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
-            messages=messages,
-            temperature=float(overrides.get("response_temp")) or 0.6,
-            max_tokens=1024,
-            n=1,
-            stream=True)
-
-        yield json.dumps({"data_points": {},
-                          "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-                          "thought_chain": thought_chain,
-                          "work_citation_lookup": work_citation_lookup,
-                          "web_citation_lookup": self.web_citations}) + "\n"
-        
-        # STEP 4: Format the response
-        async for chunk in chat_completion:
-            # Check if there is at least one element and the first element has the key 'delta'
-            if chunk.choices and isinstance(chunk.choices[0], dict) and 'content' in chunk.choices[0].delta:
-                yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
-        # Step 4: Append web citations from the Bing Search approach
-        for idx, url in enumerate(self.web_citations.keys(), start=1):
-            yield json.dumps({"content": f"[url{idx}]"}) + "\n"
-        #thought_chain["work_to_web_compairison_response"] = final_response
-        
-        #return {
-        #    "data_points": None,
-        #    "answer": f"{urllib.parse.unquote(final_response)}",
-        #    "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-        #    "thought_chain": thought_chain,
-        #    "work_citation_lookup": work_citation_lookup,
-        #    "web_citation_lookup": self.web_citations
-        #}
+            yield json.dumps({"data_points": {},
+                            "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+                            "thought_chain": thought_chain,
+                            "work_citation_lookup": work_citation_lookup,
+                            "web_citation_lookup": self.web_citations}) + "\n"
+            
+            # STEP 4: Format the response
+            async for chunk in chat_completion:
+                # Check if there is at least one element and the first element has the key 'delta'
+                if chunk.choices and isinstance(chunk.choices[0], dict) and 'content' in chunk.choices[0].delta:
+                    yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
+            # Step 4: Append web citations from the Bing Search approach
+            for idx, url in enumerate(self.web_citations.keys(), start=1):
+                yield json.dumps({"content": f"[url{idx}]"}) + "\n"
+        except Exception as e:
+            logging.error(f"Error in compare work with web: {e}")
+            yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"
+            return
 
     async def make_chat_completion(self, messages):
         """

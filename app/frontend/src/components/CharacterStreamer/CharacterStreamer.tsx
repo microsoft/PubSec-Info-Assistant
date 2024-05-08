@@ -3,13 +3,14 @@ import ReactMarkdown from 'react-markdown';
 import { Approaches, ChatResponse } from '../../api';
 import readNDJSONStream from "ndjson-readablestream";
 
-const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, classNames, typingSpeed = 30, readableStream, setAnswer, approach = Approaches.ChatWebRetrieveRead }:
-   { readableStream?: ReadableStream, setAnswer?: (data: ChatResponse) => void, eventSource?: any; nonEventString?: string, onStreamingComplete: any; classNames?: string; typingSpeed?: number, approach?: Approaches}) => {
+const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, classNames, typingSpeed = 30, readableStream, setAnswer, approach = Approaches.ChatWebRetrieveRead, setError }:
+   { readableStream?: ReadableStream, setAnswer?: (data: ChatResponse) => void, eventSource?: any; nonEventString?: string, onStreamingComplete: any; classNames?: string; typingSpeed?: number, approach?: Approaches, setError?: (data: string) => void}) => {
   const [output, setOutput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const queueRef = useRef<string[]>([]); // Now TypeScript knows this is an array of strings
   const processingRef = useRef(false);
   const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
+  const [dots, setDots] = useState('');
 
     const handleStream = async () => {
       var response = {} as ChatResponse
@@ -34,6 +35,16 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
               queueRef.current = queueRef.current.concat(event["content"].split(''));
               if (!processingRef.current) {
                 processQueue();
+              }
+          }
+          else if (event["error"]) {
+              if (setError) {
+                setError(event["error"])
+                return
+              }
+              else {
+                console.error(event["error"])
+                return
               }
           }
         }
@@ -63,6 +74,14 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
     if (readableStream) {
       handleStream();
     }
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setDots(prevDots => (prevDots.length < 3 ? prevDots + '.' : ''));
+    }, 500); // Change dot every 500ms
+
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, [isLoading]);
 
   useEffect(() => {
       chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,7 +135,7 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
     }, typingSpeed); // Adjust based on desired "typing" speed
   };
 
-  return isLoading ? <div className={classNames}>Generating Answer...</div> : 
+  return isLoading ? <div className={classNames}>Generating Answer{dots}</div> : 
         <div className={classNames}><ReactMarkdown>{output}</ReactMarkdown>
         <div ref={chatMessageStreamEnd} /></div>;
 };

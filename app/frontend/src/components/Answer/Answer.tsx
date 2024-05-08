@@ -31,6 +31,7 @@ interface Props {
     chatMode: ChatMode;
     answerStream: ReadableStream | undefined;
     setAnswer?: (data: ChatResponse) => void;
+    setError?: (data: string) => void;
 }
 
 export const Answer = ({
@@ -49,7 +50,8 @@ export const Answer = ({
     onRegenerateClick,
     chatMode,
     answerStream,
-    setAnswer
+    setAnswer,
+    setError
 }: Props) => {
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.work_citation_lookup, answer.web_citation_lookup, answer.thought_chain, onCitationClicked), [answer]);
 
@@ -96,7 +98,15 @@ export const Answer = ({
                     </div>
                 }
                 { answer.answer && <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div> }
-                {!answer.answer && <CharacterStreamer classNames={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} approach={answer.approach} readableStream={answerStream} setAnswer={setAnswer} onStreamingComplete={() => {}} typingSpeed={10} /> }
+                {!answer.answer && <CharacterStreamer 
+                    classNames={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} 
+                    approach={answer.approach} 
+                    readableStream={answerStream} 
+                    setAnswer={setAnswer} 
+                    onStreamingComplete={() => {}} 
+                    typingSpeed={10} 
+                    setError={setError}
+                    /> }
             </Stack.Item>
 
             {(parsedAnswer.approach == Approaches.ChatWebRetrieveRead && !!parsedAnswer.web_citations.length) && (

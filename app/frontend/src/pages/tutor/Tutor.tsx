@@ -23,7 +23,6 @@ const Tutor = () => {
     //const [output, setOutput] = useState<string | null>("");
     const [selectedButton, setSelectedButton] = useState<string | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
-    const [dots, setDots] = useState('');
 
     enum ButtonValues {
         Clues = "Give Me Clues",
@@ -140,14 +139,6 @@ const EXAMPLES: ExampleModel[] = [
             }
         };
     }, []);
-
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-          setDots(prevDots => (prevDots.length < 3 ? prevDots + '.' : ''));
-        }, 500); // Change dot every 500ms
-    
-        return () => clearInterval(intervalId); // Cleanup interval on component unmount
-      }, [loading]);
     
 return (
     <div className={styles.App}>
@@ -207,7 +198,6 @@ return (
             </Button>
         </div>
         </form>
-        {loading && <div className="spinner">Loading{dots}</div>}
         {error && <div className="spinner">{errorMessage}</div>}
         {<CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} onStreamingComplete={handleCloseEvent} classNames={styles.centeredAnswerContainer} nonEventString={output} /> }
     </div>

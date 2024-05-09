@@ -4,7 +4,6 @@
 import { useMemo } from "react";
 import { Stack, IconButton } from "@fluentui/react";
 import { ShieldCheckmark20Regular } from '@fluentui/react-icons';
-import DOMPurify from "dompurify";
 
 import styles from "./Answer.module.css";
 
@@ -13,6 +12,9 @@ import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 import { RAIPanel } from "../RAIPanel";
 import CharacterStreamer from "../CharacterStreamer/CharacterStreamer";
+import ReactMarkdown from "react-markdown";
+import rehypeSanitize from "rehype-sanitize";
+import rehypeRaw from "rehype-raw";
 
 interface Props {
     answer: ChatResponse;
@@ -55,8 +57,6 @@ export const Answer = ({
 }: Props) => {
     const parsedAnswer = useMemo(() => parseAnswerToHtml(answer.answer, answer.approach, answer.work_citation_lookup, answer.web_citation_lookup, answer.thought_chain, onCitationClicked), [answer]);
 
-    const sanitizedAnswerHtml = DOMPurify.sanitize(parsedAnswer.answerHtml);
-
     return (
         <Stack className={`${answer.approach == Approaches.ReadRetrieveRead ? styles.answerContainerWork : 
                             answer.approach == Approaches.ChatWebRetrieveRead ? styles.answerContainerWeb :
@@ -97,7 +97,7 @@ export const Answer = ({
                         <ShieldCheckmark20Regular></ShieldCheckmark20Regular>Your personal and company data are protected
                     </div>
                 }
-                { answer.answer && <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} dangerouslySetInnerHTML={{ __html: sanitizedAnswerHtml }}></div> }
+                { answer.answer && <div className={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText}><ReactMarkdown children={parsedAnswer.answerHtml} rehypePlugins={[rehypeRaw, rehypeSanitize]}></ReactMarkdown></div> }
                 {!answer.answer && <CharacterStreamer 
                     classNames={answer.approach == Approaches.GPTDirect ? styles.answerTextUngrounded : styles.answerText} 
                     approach={answer.approach} 

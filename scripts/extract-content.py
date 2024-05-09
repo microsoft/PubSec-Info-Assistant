@@ -191,7 +191,7 @@ error_guidance = 'If you re-run the process, you can skip sections that complete
 # *************************************************************************
 # Migrate Search
 if skip_search_index == False:
-    print(f.renderText('Search index'))
+    print(f.renderText('Search Index'))
     blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
     container_name = "content"
     container_client = blob_service_client.get_container_client(container_name)
@@ -199,7 +199,9 @@ if skip_search_index == False:
     try:
         blob_list = container_client.list_blobs()
         index_chunks = []
+        chunks_misisng_from_index = []
         i = 0
+        missing_index_entries = 0
         for blob in blob_list:
             # retrieve all chunk entries in the search index for this blob
             results = old_search_client.search(
@@ -208,7 +210,10 @@ if skip_search_index == False:
                 filter=f"chunk_file eq '{blob.name}'"
             )        
 
-            for result in results:          
+            has_items = False
+            for result in results:    
+                has_items = True                  
+                    
                 # repoint the file uri
                 old_file_uri = result['file_uri']
                 new_file_uri = old_file_uri.replace(old_random_text, new_random_text)
@@ -231,9 +236,18 @@ if skip_search_index == False:
                 index_chunk['entities'] = result['entities']
                 index_chunk['key_phrases'] = result['key_phrases']
                 index_chunks.append(index_chunk)
+                i += 1
+                
+            if not has_items:
+                # This chunk has no related index, potentially due to an error during processing
+                missing_index_entries += 1
+                upload_blob = blob.name.rsplit('/', 1)[0]
+                if upload_blob not in chunks_misisng_from_index:
+                    chunks_misisng_from_index.append(upload_blob)
+                    print(f"{upload_blob} has chunks missing from the index. Stepping over these chunks.")
+                
 
             # push batch of content to index, rather than each individual chunk
-            i += 1
             if i % 200 == 0:
                 index_sections(index_chunks)
                 index_chunks = []
@@ -242,7 +256,14 @@ if skip_search_index == False:
         # push remainder chunks content to index
         if len(index_chunks) > 0:
             index_sections(index_chunks)
-
+            
+        # Highlight and chunks and assocuiatted files in upload that were not pushed to index
+        if len(index_chunks) > 0:
+            print(f"{missing_index_entries} chunks were missing search index entries, possibly due to failures in original processing.")
+            print(f"These chunks are based on the following files in the upload container")
+            for value in chunks_misisng_from_index:
+                print(value)
+        
     except Exception as e:
         print(e)
         sys.exit()

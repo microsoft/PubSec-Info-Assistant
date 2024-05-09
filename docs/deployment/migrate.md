@@ -32,3 +32,12 @@ make merge-databases
 make run-data-migration
 ```
 Once complete, your new deployment of 1.1 should be functional and contain the processed content from your 1.0 deployment. You can now plan to retire you old 1.0 deployment.
+
+## Re-running a migration
+If you encounter a failure  while running the migration, you can re-run the process, but you have the option to skip steps to avoid repetition. You have the option of setting these values to True in the file called extract-content.py in the scripts folder:
+```bash
+skip_search_index = False
+skip_cosmos_db = False
+skip_upload_container = False
+skip_content_container = False
+```

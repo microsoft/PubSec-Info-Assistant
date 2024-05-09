@@ -7,6 +7,7 @@
 from pyfiglet import Figlet
 import json
 import subprocess
+import sys
 import os
 from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from azure.identity import DefaultAzureCredential
@@ -181,6 +182,10 @@ index_name = 'vector-index'
 old_search_client = SearchClient(endpoint=old_search_endpoint, index_name=index_name, credential=AzureKeyCredential(old_search_key))
 new_search_client = SearchClient(endpoint=new_search_endpoint, index_name=index_name, credential=AzureKeyCredential(new_search_key))
 
+error_guidance = 'If you re-run the process, you can skip sections that completed successfully by setting the corresponding skip flag to True. Read more details her' 
+
+
+
 
 
 # *************************************************************************
@@ -240,6 +245,7 @@ if skip_search_index == False:
 
     except Exception as e:
         print(e)
+        sys.exit()
 
 
 
@@ -320,6 +326,7 @@ if skip_cosmos_db == False:
 
     except exceptions.CosmosHttpResponseError as e:
         print(f'An error occurred: {e}')
+        sys.exit()
 
 
 # *************************************************************************
@@ -376,6 +383,7 @@ if skip_upload_container == False:
 
     except Exception as e:
         print(e)
+        sys.exit()
         
     print(f"Completed migratiing upload container blobs. Processed {blobs_processed_count} blobs")   
 
@@ -417,6 +425,7 @@ if skip_content_container == False:
 
     except Exception as e:
         print(e)
+        sys.exit()
         
     print(f"Completed migratiing content container chnks. Processed {chunks_processed_count} blobs")     
 

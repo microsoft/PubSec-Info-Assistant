@@ -61,7 +61,6 @@ def index_sections(chunks):
     print(f"\tIndexed {search_item_succeeded_count + search_item_failed_count} chunks, {search_item_failed_count} failures")
     
     
-
 def check_azcopy_installed():
     """Check if AzCopy is already installed."""
     try:
@@ -185,9 +184,6 @@ new_search_client = SearchClient(endpoint=new_search_endpoint, index_name=index_
 error_guidance = 'If you re-run the process, you can skip sections that completed successfully by setting the corresponding skip flag to True. Read more details her' 
 
 
-
-
-
 # *************************************************************************
 # Migrate Search
 if skip_search_index == False:
@@ -202,50 +198,61 @@ if skip_search_index == False:
         chunks_misisng_from_index = []
         i = 0
         missing_index_entries = 0
+        failed_searches = []
         for blob in blob_list:
+            
             # retrieve all chunk entries in the search index for this blob
-            results = old_search_client.search(
-                search_text="*",
-                select="*",
-                filter=f"chunk_file eq '{blob.name}'"
-            )        
+            escaped_blob_name = blob.name.replace('\'', '\\\'')
+            try:
+                results = old_search_client.search(
+                    search_text="*",
+                    select="*",
+                    filter = f"chunk_file eq '{escaped_blob_name}'"
+                )
 
-            has_items = False
-            for result in results:    
-                has_items = True                  
+                has_items = False
+                for result in results:    
+                    has_items = True                  
+                        
+                    # repoint the file uri
+                    old_file_uri = result['file_uri']
+                    new_file_uri = old_file_uri.replace(old_random_text, new_random_text)
+
+                    # Prepare the index schema based representation of the chunk with the embedding
+                    index_chunk = {}
+                    index_chunk['id'] = result['id']
+                    index_chunk['processed_datetime'] = result['processed_datetime']
+                    index_chunk['file_name'] = result['file_name']
+                    index_chunk['file_uri'] = new_file_uri
+                    index_chunk['folder'] = result['folder']
+                    index_chunk['tags'] = result['tags']
+                    index_chunk['chunk_file'] = result['chunk_file']
+                    index_chunk['file_class'] = result['file_class']
+                    index_chunk['title'] = result['title']
+                    index_chunk['pages'] = result['pages']
+                    index_chunk['translated_title'] = result['translated_title']
+                    index_chunk['content'] = result['content']
+                    index_chunk['contentVector'] = result['contentVector']
+                    index_chunk['entities'] = result['entities']
+                    index_chunk['key_phrases'] = result['key_phrases']
+                    index_chunks.append(index_chunk)
+                    i += 1
                     
-                # repoint the file uri
-                old_file_uri = result['file_uri']
-                new_file_uri = old_file_uri.replace(old_random_text, new_random_text)
-
-                # Prepare the index schema based representation of the chunk with the embedding
-                index_chunk = {}
-                index_chunk['id'] = result['id']
-                index_chunk['processed_datetime'] = result['processed_datetime']
-                index_chunk['file_name'] = result['file_name']
-                index_chunk['file_uri'] = new_file_uri
-                index_chunk['folder'] = result['folder']
-                index_chunk['tags'] = result['tags']
-                index_chunk['chunk_file'] = result['chunk_file']
-                index_chunk['file_class'] = result['file_class']
-                index_chunk['title'] = result['title']
-                index_chunk['pages'] = result['pages']
-                index_chunk['translated_title'] = result['translated_title']
-                index_chunk['content'] = result['content']
-                index_chunk['contentVector'] = result['contentVector']
-                index_chunk['entities'] = result['entities']
-                index_chunk['key_phrases'] = result['key_phrases']
-                index_chunks.append(index_chunk)
-                i += 1
+                if not has_items:
+                    # This chunk has no related index, potentially due to an error during processing
+                    missing_index_entries += 1
+                    upload_blob = blob.name.rsplit('/', 1)[0]
+                    if upload_blob not in chunks_misisng_from_index:
+                        chunks_misisng_from_index.append(upload_blob)
+                        print(f"{upload_blob} has chunks missing from the index. Stepping over these chunks.")
                 
-            if not has_items:
-                # This chunk has no related index, potentially due to an error during processing
-                missing_index_entries += 1
+            except Exception as e:
+                # failed to retrieve blob from search. Add to missing index entries
                 upload_blob = blob.name.rsplit('/', 1)[0]
-                if upload_blob not in chunks_misisng_from_index:
-                    chunks_misisng_from_index.append(upload_blob)
-                    print(f"{upload_blob} has chunks missing from the index. Stepping over these chunks.")
-                
+                if upload_blob not in failed_searches:
+                    failed_searches.append(upload_blob)
+                    print(f"Failed to retrieve {blob.name} from search. Reprocess this file")
+                continue
 
             # push batch of content to index, rather than each individual chunk
             if i % 200 == 0:
@@ -257,16 +264,21 @@ if skip_search_index == False:
         if len(index_chunks) > 0:
             index_sections(index_chunks)
             
-        # Highlight and chunks and assocuiatted files in upload that were not pushed to index
-        if len(index_chunks) > 0:
+        # Highlight chunks and associated files in upload that were not pushed to index
+        if len(chunks_misisng_from_index) > 0:
             print(f"{missing_index_entries} chunks were missing search index entries, possibly due to failures in original processing.")
             print(f"These chunks are based on the following files in the upload container")
             for value in chunks_misisng_from_index:
                 print(value)
+                
+        # Highlight chunks and associated files in upload that errored on search retrieval
+        if len(index_chunks) > 0:
+            print(f"The following files erroed when trying to retrieved from the search index. Reprocess these files")
+            for value in failed_searches:
+                print(value)
         
     except Exception as e:
         print(e)
-        sys.exit()
 
 
 
@@ -274,6 +286,7 @@ if skip_search_index == False:
 # Migrate cosmos db and merge db's
 if skip_cosmos_db == False:
     print(f.renderText('Cosmos DB'))
+    cosmos_db_error = ""
     try:
         max_item_count = 1
 
@@ -347,7 +360,7 @@ if skip_cosmos_db == False:
 
     except exceptions.CosmosHttpResponseError as e:
         print(f'An error occurred: {e}')
-        sys.exit()
+        cosmos_db_error = e
 
 
 # *************************************************************************
@@ -358,6 +371,7 @@ if skip_cosmos_db == False:
 if skip_upload_container == False:
     print(f.renderText('Storage upload container'))
     download_and_install_azcopy()
+    upload_container_error = ""
     container_name = "upload"
     old_blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
     old_container_client = old_blob_service_client.get_container_client(container_name)
@@ -404,9 +418,9 @@ if skip_upload_container == False:
 
     except Exception as e:
         print(e)
-        sys.exit()
+        upload_container_error = e
         
-    print(f"Completed migratiing upload container blobs. Processed {blobs_processed_count} blobs")   
+    print(f"Completed migrating upload container blobs. Processed {blobs_processed_count} blobs")   
 
 
 # *************************************************************************
@@ -415,6 +429,7 @@ if skip_upload_container == False:
 if skip_content_container == False:
     print(f.renderText('Storage content container'))
     container_name = "content"
+    content_container_error = ""
     old_blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
     old_container_client = old_blob_service_client.get_container_client(container_name)
     new_blob_service_client = BlobServiceClient.from_connection_string(new_blob_connection_string)
@@ -446,9 +461,72 @@ if skip_content_container == False:
 
     except Exception as e:
         print(e)
-        sys.exit()
+        content_container_error = e
         
-    print(f"Completed migratiing content container chnks. Processed {chunks_processed_count} blobs")     
-
+    print(f"Completed migrating content container chunks. Processed {chunks_processed_count} blobs")     
 
 print('done')
+
+
+# *************************************************************************
+# Summary Report
+print(f.renderText('Summary Report'))
+
+if skip_search_index == False: 
+    print("\033[93m Search Index Migration \033[0m")
+    # Highlight chunks and associated files in upload that errored on search retrieval
+    if len(failed_searches) > 0:
+        print(f"The following files errored when trying to retrieved from the search index. Reprocess these files")
+        for value in failed_searches:
+            print(value)
+    else:
+        print("All files were successfully retrieved from the old search index")
+
+    # Highlight chunks and associated files in upload that were not pushed to index
+    if len(chunks_misisng_from_index) > 0:
+        print(f"{missing_index_entries} chunks were missing search index entries, possibly due to failures in original processing.")
+        print(f"These chunks are based on the following files in the upload container")
+        for value in chunks_misisng_from_index:
+            print(value)
+    else:
+        print("All chunks were successfully indexed")
+else:
+    print("Search migration was skipped") 
+    
+    
+if skip_cosmos_db == False: 
+    print("\033[93m Cosmos DB Migration \033[0m")
+    if cosmos_db_error == "":
+        print("All status and tag documents were successfully migrated")
+    else:
+        print(f"An error occurred during cosmos db migration: {cosmos_db_error}")
+else:
+    print("Cosmos DB migration was skipped") 
+    
+    
+if skip_upload_container == False: 
+    print("\033[93m Storage Upload Container Migration \033[0m")
+    print(f"Processed {blobs_processed_count} files")
+    if upload_container_error == "":
+        print("All files were successfully migrated")
+    else:
+        print(f"An error occurred during upload container migration: {upload_container_error}")
+else:
+    print("Storage Upload Container was skipped") 
+    
+    
+if skip_content_container == False: 
+    print("\033[93m Storage Content Container Migration \033[0m")
+    print(f"Processed {chunks_processed_count} files")
+    if content_container_error == "":
+        print(f"All files were successfully migrated")
+    else:
+        print(f"An error occurred during upload container migration: {content_container_error}")
+else:
+    print("Storage Content Container migration was skipped") 
+    
+    
+    
+    
+    
+    

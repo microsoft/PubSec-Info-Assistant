@@ -38,6 +38,8 @@ make merge-databases
 
 5. Next we need to review the deployed 1.0 services and build a Terraform state file, so Terraform understand the existing deployment and can determine which services need to be upgraded, deleted or left untouched when we upgrade to 1.1. To do this run the command:
 
+*IMPORTANT: Before you run `make import-state` ensure your `local.env` is correctly configured to match your 1.0 resource group and deployment settings.*
+
 ```bash
 make import-state
 ```

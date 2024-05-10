@@ -397,5 +397,7 @@ terraform.tfstate.d
 infra/infoasst*
 infra/sp_config/config.json
 
-#Scripts
+#Upgrade & Migrate Support
 scripts/upgrade_repoint.config.json
+azcopy.tar.gz
+azcopy_dir

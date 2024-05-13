@@ -152,6 +152,7 @@ class ChatReadRetrieveReadApproach(Approach):
         log.setLevel('DEBUG')
         log.propagate = True
 
+        chat_completion = None
         use_semantic_captions = True if overrides.get("semantic_captions") else False
         top = overrides.get("top") or 3
         user_persona = overrides.get("user_persona", "")
@@ -183,13 +184,19 @@ class ChatReadRetrieveReadApproach(Approach):
             self.chatgpt_token_limit - len(user_question)
             )
 
-        chat_completion= await self.client.chat.completions.create(
-                model=self.chatgpt_deployment,
-                messages=messages,
-                temperature=0.0,
-                # max_tokens=32, # setting it too low may cause malformed JSON
-                max_tokens=100,
-            n=1)
+        try:
+            chat_completion= await self.client.chat.completions.create(
+                    model=self.chatgpt_deployment,
+                    messages=messages,
+                    temperature=0.0,
+                    # max_tokens=32, # setting it too low may cause malformed JSON
+                    max_tokens=100,
+                n=1)
+        
+        except Exception as e:
+            log.error(f"Error generating optimized keyword search: {str(e)}")
+            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
+            return
 
         generated_query = chat_completion.choices[0].message.content
         

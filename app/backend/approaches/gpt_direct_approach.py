@@ -164,7 +164,7 @@ class GPTDirectApproach(Approach):
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
         except Exception as e:
             logging.error(f"Error in GPTDirectApproach: {e}")
-            yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"
+            yield json.dumps({"error": f"An error occurred while generating the completion. {e}"}) + "\n"
             return
 
     

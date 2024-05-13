@@ -110,6 +110,7 @@ class ChatWebRetrieveRead(Approach):
         log.setLevel('DEBUG')
         log.propagate = True
         
+        query_resp = None
         user_query = history[-1].get("user")
         user_persona = overrides.get("user_persona", "")
         system_persona = overrides.get("system_persona", "")
@@ -132,7 +133,13 @@ class ChatWebRetrieveRead(Approach):
             self.chatgpt_token_limit - len(user_query)
             )
         
-        query_resp = await self.make_chat_completion(messages)
+        try:
+            query_resp = await self.make_chat_completion(messages)
+        except Exception as e:
+            log.error(f"Error generating optimized keyword search: {str(e)}")
+            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
+            return
+        
         thought_chain["web_search_term"] = query_resp
         # STEP 2: Use the search query to get the top web search results
         url_snippet_dict = await self.web_search_with_safe_search(query_resp)
@@ -157,6 +164,7 @@ class ChatWebRetrieveRead(Approach):
             self.RESPONSE_PROMPT_FEW_SHOTS,
              max_tokens=4097 - 500
          )
+        print(messages)
         msg_to_display = '\n\n'.join([str(message) for message in messages])
         try:
             # STEP 3: Use the search results to answer the user's question

@@ -266,16 +266,18 @@ if skip_search_index == False:
             
         # Highlight chunks and associated files in upload that were not pushed to index
         if len(chunks_misisng_from_index) > 0:
+            print()
             print(f"{missing_index_entries} chunks were missing search index entries, possibly due to failures in original processing.")
             print(f"These chunks are based on the following files in the upload container")
             for value in chunks_misisng_from_index:
-                print(value)
+                print("\t" + value)
                 
         # Highlight chunks and associated files in upload that errored on search retrieval
         if len(index_chunks) > 0:
+            print()
             print(f"The following files erroed when trying to retrieved from the search index. Reprocess these files")
             for value in failed_searches:
-                print(value)
+                print("\t" + value)
         
     except Exception as e:
         print(e)
@@ -361,6 +363,8 @@ if skip_cosmos_db == False:
     except exceptions.CosmosHttpResponseError as e:
         print(f'An error occurred: {e}')
         cosmos_db_error = e
+        
+    print("Completed migrating Cosmos DB entries")  
 
 
 # *************************************************************************
@@ -492,6 +496,7 @@ if skip_search_index == False:
         print("All chunks were successfully indexed")
 else:
     print("Search migration was skipped") 
+print()
     
     
 if skip_cosmos_db == False: 
@@ -502,6 +507,7 @@ if skip_cosmos_db == False:
         print(f"An error occurred during cosmos db migration: {cosmos_db_error}")
 else:
     print("Cosmos DB migration was skipped") 
+print()
     
     
 if skip_upload_container == False: 
@@ -513,6 +519,7 @@ if skip_upload_container == False:
         print(f"An error occurred during upload container migration: {upload_container_error}")
 else:
     print("Storage Upload Container was skipped") 
+print()
     
     
 if skip_content_container == False: 
@@ -524,9 +531,3 @@ if skip_content_container == False:
         print(f"An error occurred during upload container migration: {content_container_error}")
 else:
     print("Storage Content Container migration was skipped") 
-    
-    
-    
-    
-    
-    

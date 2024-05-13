@@ -30,6 +30,7 @@ module "entraObjects" {
   aadMgmtClientId                   = var.aadMgmtClientId
   aadMgmtServicePrincipalId         = var.aadMgmtServicePrincipalId
   aadMgmtClientSecret               = var.aadMgmtClientSecret
+  serviceManagementReference        = var.serviceManagementReference
 }
 
 module "logging" {

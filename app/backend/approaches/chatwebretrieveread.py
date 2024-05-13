@@ -164,7 +164,7 @@ class ChatWebRetrieveRead(Approach):
             self.RESPONSE_PROMPT_FEW_SHOTS,
              max_tokens=4097 - 500
          )
-        print(messages)
+
         msg_to_display = '\n\n'.join([str(message) for message in messages])
         try:
             # STEP 3: Use the search results to answer the user's question

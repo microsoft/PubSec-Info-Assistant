@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from typing import Any, Sequence
 
 import openai
+from openai import AzureOpenAI
+from openai import  AsyncAzureOpenAI
 from approaches.approach import Approach
 from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
@@ -128,9 +130,19 @@ class ChatReadRetrieveReadApproach(Approach):
         openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_key = oai_service_key
+        openai.api_version = "2024-02-01"
+        
+        self.client = AsyncAzureOpenAI(
+        azure_endpoint = openai.api_base, 
+        api_key=openai.api_key,  
+        api_version=openai.api_version)
+               
 
         self.model_name = model_name
         self.model_version = model_version
+        
+       
+      
         
     # def run(self, history: list[dict], overrides: dict) -> any:
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -170,9 +182,9 @@ class ChatReadRetrieveReadApproach(Approach):
             self.chatgpt_token_limit - len(user_question)
             )
 
-        chat_completion = await openai.ChatCompletion.acreate(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
+        
+        chat_completion= await self.client.chat.completions.create(
+            model=self.chatgpt_deployment,
             messages=messages,
             temperature=0.0,
             # max_tokens=32, # setting it too low may cause malformed JSON
@@ -186,9 +198,11 @@ class ChatReadRetrieveReadApproach(Approach):
             generated_query = history[-1]["user"]
 
         thought_chain["work_search_term"] = generated_query
+        
         # Generate embedding using REST API
         url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
         data = [f'"{generated_query}"']
+        
         headers = {
                 'Accept': 'application/json',  
                 'Content-Type': 'application/json',
@@ -347,9 +361,9 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-            chat_completion = await openai.ChatCompletion.acreate(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
+            
+            chat_completion= await self.client.chat.completions.create(
+            model=self.chatgpt_deployment,
             messages=messages,
             temperature=float(overrides.get("response_temp")) or 0.6,
             n=1
@@ -378,9 +392,9 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
 
-            chat_completion = await openai.ChatCompletion.acreate(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
+            
+            chat_completion= await self.client.chat.completions.create(
+            model=self.chatgpt_deployment,
             messages=messages,
             temperature=float(overrides.get("response_temp")) or 0.6,
             max_tokens=1024,

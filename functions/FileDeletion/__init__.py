@@ -39,6 +39,7 @@ def chunks(data, size):
         # yield a dictionary with a slice of keys and their values
         yield {k: data [k] for k in islice(it, size)}
 
+
 def get_deleted_blobs(blob_service_client: BlobServiceClient) -> list:
     '''Creates and returns a list of file paths that are soft-deleted.'''
     # Create Uploaded Container Client and list all blobs, including deleted blobs
@@ -53,6 +54,23 @@ def get_deleted_blobs(blob_service_client: BlobServiceClient) -> list:
             logging.debug("\t Deleted Blob name: %s", blob.name)
             deleted_blobs.append(blob.name)
     return deleted_blobs
+
+
+def purge_soft_deleted_blob(blob_service_client: BlobServiceClient) -> list:
+    '''Creates and returns a list of file paths that are soft-deleted.'''
+    # Create Uploaded Container Client and list all blobs, including deleted blobs
+    upload_container_client = blob_service_client.get_container_client(
+        blob_storage_account_upload_container_name)
+    temp_list = upload_container_client.list_blobs(include="deleted")
+
+    deleted_blobs = []
+    # Pull out the soft-deleted blob names
+    for blob in temp_list:
+        if blob.deleted:
+            logging.debug("\t Deleted Blob name: %s", blob.name)
+            deleted_blobs.append(blob.name)
+    return deleted_blobs
+
 
 def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blob: str) -> dict:
     '''Deletes blobs in the content container that correspond to a given
@@ -74,6 +92,7 @@ def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blob: s
         content_container_client.delete_blobs(*item)
     return chunked_blobs_to_delete
 
+
 def delete_search_entries(deleted_content_blobs: dict) -> None:
     '''Takes a list of content blobs that were deleted in a previous
     step and deletes the corresponding entries in the Azure AI 
@@ -93,6 +112,7 @@ def delete_search_entries(deleted_content_blobs: dict) -> None:
         logging.debug("Succesfully deleted items from AI Search index.")
     else:
         logging.debug("No items to delete from AI Search index.")
+
 
 def main(mytimer: func.TimerRequest) -> None:
     '''This function is a cron job that runs every 10 miuntes, detects when 
@@ -114,28 +134,35 @@ def main(mytimer: func.TimerRequest) -> None:
     blob_service_client = BlobServiceClient.from_connection_string(blob_connection_string)
     deleted_blobs = get_deleted_blobs(blob_service_client)
 
+
     blob_name = ""
     for blob in deleted_blobs:
         try:
             blob_name = blob
-            deleted_content_blobs = delete_content_blobs(blob_service_client, blob)
-            logging.info("%s content blobs deleted.", str(len(deleted_content_blobs)))
-            delete_search_entries(deleted_content_blobs)
-            status_log.delete_doc(blob)
+            
+            # Only process if this blob has not already been processed
+            if status_log.read_file_state(f"upload/{format(blob)}") == State.DELETED:
+                logging.info("Blob %s has already been processed.", blob)
+                continue
 
-            # for doc in deleted_blobs:
-            doc_base = os.path.basename(blob)
-            doc_path = f"upload/{format(blob)}"
+            else:
+                deleted_content_blobs = delete_content_blobs(blob_service_client, blob)
+                logging.info("%s content blobs deleted.", str(len(deleted_content_blobs)))
+                delete_search_entries(deleted_content_blobs)
+                status_log.delete_doc(blob)
 
-            temp_doc_id = status_log.encode_document_id(doc_path)
+                # for doc in deleted_blobs:
+                doc_base = os.path.basename(blob)
+                doc_path = f"upload/{format(blob)}"            
+                temp_doc_id = status_log.encode_document_id(doc_path)
 
-            logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
+                logging.info("Modifying status for doc %s \n \t with ID %s", doc_base, temp_doc_id)
 
-            status_log.upsert_document(doc_path,
-                                    'Document chunks, tags, and entries in AI Search have been deleted',
-                                    StatusClassification.INFO,
-                                    State.DELETED)
-            status_log.save_document(doc_path)                
+                status_log.upsert_document(doc_path,
+                                        'Document chunks, tags, and entries in AI Search have been deleted',
+                                        StatusClassification.INFO,
+                                        State.DELETED)
+                status_log.save_document(doc_path)                
             
         except Exception as err:
             logging.info("An exception occured with doc %s: %s", blob_name, str(err))

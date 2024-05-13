@@ -497,7 +497,14 @@ variable "enableDevCode" {
   type    = bool
   default = false
 }
+
 variable "maxCsvFileSize" {
   type    = string
   default = "20"
+}
+
+variable "password_lifetime" {
+  type    = number
+  default = 365
+  description = "The number of days used as the lifetime for passwords"  
 }

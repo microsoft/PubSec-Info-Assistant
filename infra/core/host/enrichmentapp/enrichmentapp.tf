@@ -113,6 +113,23 @@ resource "azurerm_linux_web_app" "app_service" {
   identity {
     type = var.managedIdentity ? "SystemAssigned" : null
   }
+
+  logs {
+    application_logs {
+      file_system_level = "Verbose"
+    }
+
+    http_logs {
+      file_system {
+        retention_in_days = 1
+        retention_in_mb = 35
+      }
+    }
+
+    detailed_error_messages = true
+    failed_request_tracing = true
+  }
+  
 }
 
 data "azurerm_key_vault" "existing" {
@@ -132,8 +149,8 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
-resource "azurerm_monitor_diagnostic_setting" "example" {
-  name                       = "example"
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  name                       = azurerm_linux_web_app.app_service.name
   target_resource_id         = azurerm_linux_web_app.app_service.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
 

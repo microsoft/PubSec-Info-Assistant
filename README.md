@@ -35,7 +35,7 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure Open AI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
@@ -124,7 +124,7 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 
 ### Content Safety
 
-Content safety is provided through Azure Open AI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transaparncy Note](/docs/transparency.md)
+Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transaparncy Note](/docs/transparency.md)
 
 By default, the content filters are set to filter out prompts and completions that are detected as medium or high severity for those four harm categories. Content labeled as low or safe severity is not filtered.
 
@@ -168,7 +168,7 @@ docs/deployment/ | Detailed documentation on how to deploy and start using Infor
 docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
 docs/ | Other supporting documentation that is primarily linked to from the other markdown files.
 functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
-infra/ | The BICEP scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.bicep` file but most of the resource deployments are modularized under the **core** folder.
+infra/ | The Terraform scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.tf` file but most of the resource deployments are modularized under the **core** folder.
 pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the accelerator.
 scripts/environments/ | Deployment configuration files. This is where all external configuration values will be set.
 scripts/ | Supporting scripts that perform the various deployment tasks such as infrastructure deployment, Azure WebApp and Function deployments, building of the webapp and functions source code, etc. These scripts align to the available commands in the `Makefile`.

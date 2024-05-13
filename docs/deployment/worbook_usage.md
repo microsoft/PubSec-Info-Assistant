@@ -45,6 +45,6 @@ To effectively use this template, follow these steps:
 
 ## Customization
 
-If you need to customize the default queries, locate the respective sections in the Bicep file and modify the `query` field within the `content` property.
+If you need to customize the default queries, locate the respective sections in the Terraform file and modify the `query` field within the `content` property.
 
 Feel free to adapt the template based on your specific log analysis requirements.

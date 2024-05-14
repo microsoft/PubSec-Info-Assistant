@@ -66,3 +66,7 @@ functional-tests: extract-env ## Run functional tests to check the processing pi
 
 run-migration: ## Migrate from bicep to terraform
 	python ./scripts/merge-databases.py
+
+# A command triggered by a user to destroy a resource group, associated resources, and related Entra items
+manual-inf-destroy:
+	@./scripts/inf-manual-destroy.sh 

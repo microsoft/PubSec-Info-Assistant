@@ -7,6 +7,7 @@ resource "azuread_application" "aad_web_app" {
   owners                        = [data.azurerm_client_config.current.object_id]
   sign_in_audience              = "AzureADMyOrg"
   oauth2_post_response_required = true
+  service_management_reference = var.serviceManagementReference
   web {
     redirect_uris = ["https://infoasst-web-${var.randomString}.${var.azure_websites_domain}/.auth/login/aad/callback"]
     implicit_grant {
@@ -28,6 +29,7 @@ resource "azuread_application" "aad_mgmt_app" {
   display_name      = "infoasst_mgmt_access_${var.randomString}"
   owners            = [data.azurerm_client_config.current.object_id]
   sign_in_audience  = "AzureADMyOrg"
+  service_management_reference = var.serviceManagementReference
 }
 
 resource "azuread_application_password" "aad_mgmt_app_password" {

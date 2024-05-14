@@ -30,7 +30,6 @@ max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
 azure_blob_content_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 azure_blob_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_upload_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
@@ -111,18 +110,34 @@ def main(myblob: func.InputStream):
         }        
         message_string = json.dumps(message)
         
+        blob_client = BlobServiceClient(
+            account_url=azure_blob_endpoint,
+            credential=azure_blob_key,
+        )    
+        myblob_filename = myblob.name.split("/", 1)[1]
+
+        # Check if the blob has been marked as 'do not process' and abort if so
+        # This metadata is set if the blob is already processed and the content from
+        # an existing resource group is simply being copied into this resource group
+        # as part of a miration. In this case the blob has already been enriched and indexed
+        # and so no further processing is required on import
+        upload_blob_client = blob_client.get_blob_client(container=azure_blob_upload_container, blob=myblob_filename)
+        properties = upload_blob_client.get_blob_properties()
+        metadata = properties.metadata
+        do_not_process = metadata.get('do_not_process')   
+        if 'do_not_process' in metadata:
+            if do_not_process == 'true':   
+                statusLog.upsert_document(myblob.name,'Further procesiang cancelled due to do-not-process metadata = true', StatusClassification.DEBUG, State.COMPLETE)   
+                return                   
+        
         # If this is an update to the blob, then we need to delete any residual chunks
         # as processing will overlay chunks, but if the new file version is smaller
         # than the old, then the residual old chunks will remain. The following
         # code handles this for PDF and non-PDF files.
-        blob_client = BlobServiceClient(
-            account_url=azure_blob_endpoint,
-            credential=azure_blob_key,
-        )
+        
         blob_container = blob_client.get_container_client(azure_blob_content_container)
         # List all blobs in the container that start with the name of the blob being processed
         # first remove the container prefix
-        myblob_filename = myblob.name.split("/", 1)[1]
         blobs = blob_container.list_blobs(name_starts_with=myblob_filename)
         
         # instantiate the search sdk elements

@@ -95,6 +95,8 @@ resource "azurerm_linux_function_app" "function_app" {
     }
     always_on        = true
     http2_enabled    = true
+    application_insights_connection_string = var.appInsightsConnectionString
+    application_insights_key = var.appInsightsInstrumentationKey
   }
 
   connection_string {

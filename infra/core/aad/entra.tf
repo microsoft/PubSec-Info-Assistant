@@ -1,5 +1,27 @@
 data "azurerm_client_config" "current" {}
 
+locals {
+  owners = split(",", var.entraOwners)
+}
+
+resource "azuread_user" "user" {
+  for_each = toset(local.owners)  
+  user_principal_name = each.value
+  display_name        = each.value
+}
+
+# resource "azuread_group" "aad_security_group" {
+#   display_name     = "infoasst_security_group_${var.randomString}"
+#   owners           = [for user in azuread_user.user : user.object_id]
+#   security_enabled = true
+# }
+
+
+
+
+
+
+
 resource "azuread_application" "aad_web_app" {
   count                         = var.isInAutomation ? 0 : 1
   display_name                  = "infoasst_web_access_${var.randomString}"
@@ -15,6 +37,7 @@ resource "azuread_application" "aad_web_app" {
     }
   }
 }
+
 
 resource "azuread_service_principal" "aad_web_sp" {
   count                         = var.isInAutomation ? 0 : 1

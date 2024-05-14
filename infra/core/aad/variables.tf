@@ -32,3 +32,9 @@ variable "aadMgmtClientSecret" {
   type      = string
   sensitive = true
 }
+
+variable "entraOwners" {
+  type    = string
+  default = ""
+  description = "Comma-separated list of owner emails"
+}

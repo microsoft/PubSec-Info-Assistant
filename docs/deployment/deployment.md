@@ -149,6 +149,7 @@ deploy-search-indexes        Deploy search indexes
 extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
 extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
 functional-tests             Run functional tests to check the processing pipeline is working
+manual-inf-destroy           Destroy a resource group specified on execution and associated Azure Entra objects
 ```
 
 ## Configure authentication and authorization

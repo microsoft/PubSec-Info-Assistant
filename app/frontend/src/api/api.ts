@@ -19,7 +19,7 @@ import { ChatResponse,
     getMaxCSVFileSizeType,
     } from "./models";
 
-export async function chatApi(options: ChatRequest): Promise<Response> {
+export async function chatApi(options: ChatRequest, signal: AbortSignal): Promise<Response> {
     const response = await fetch("/chat", {
         method: "POST",
         headers: {
@@ -49,7 +49,8 @@ export async function chatApi(options: ChatRequest): Promise<Response> {
             },
             citation_lookup: options.citation_lookup,
             thought_chain: options.thought_chain
-        })
+        }),
+        signal: signal
     });
 
     if (response.status > 299 || !response.ok) {

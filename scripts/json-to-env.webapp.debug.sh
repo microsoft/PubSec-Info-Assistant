@@ -151,8 +151,7 @@ jq -r  '
         {
             "path": "AZURE_ARM_MANAGEMENT_API",
             "env_var": "AZURE_ARM_MANAGEMENT_API"
-        }
-        ,
+        },
         {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"

@@ -118,6 +118,10 @@ jq -r  '
         {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"
+        },
+        {
+            "path": "SERVICE_MANAGEMENT_REFERENCE",
+            "env_var": "SERVICE_MANAGEMENT_REFERENCE"
         }
     ]
         as $env_vars_to_extract

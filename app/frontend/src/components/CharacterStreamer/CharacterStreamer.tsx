@@ -15,66 +15,74 @@ const CharacterStreamer = ({ eventSource, nonEventString, onStreamingComplete, c
   const [dots, setDots] = useState('');
 
     const handleStream = async () => {
-      var response = {} as ChatResponse
-      if (readableStream && !readableStream.locked) {
-        for await (const event of readNDJSONStream(readableStream)) {
-          if (event["data_points"]) {
-              response = {
-                  answer: "",
-                  thoughts: event["thoughts"],
-                  data_points: event["data_points"],
-                  approach: approach,
-                  thought_chain: {
-                      "work_response": event["thought_chain"]["work_response"],
-                      "web_response": event["thought_chain"]["web_response"]
-                  },
-                  work_citation_lookup: event["work_citation_lookup"],
-                  web_citation_lookup: event["web_citation_lookup"]
-              }
+      try {
+        var response = {} as ChatResponse
+        if (readableStream && !readableStream.locked) {
+          for await (const event of readNDJSONStream(readableStream)) {
+            if (event["data_points"]) {
+                response = {
+                    answer: "",
+                    thoughts: event["thoughts"],
+                    data_points: event["data_points"],
+                    approach: approach,
+                    thought_chain: {
+                        "work_response": event["thought_chain"]["work_response"],
+                        "web_response": event["thought_chain"]["web_response"]
+                    },
+                    work_citation_lookup: event["work_citation_lookup"],
+                    web_citation_lookup: event["web_citation_lookup"]
+                }
+            }
+            else if (event["content"]) {
+                response.answer += event["content"]
+                queueRef.current = queueRef.current.concat(event["content"].split(''));
+                if (!processingRef.current) {
+                  processQueue();
+                }
+            }
+            else if (event["error"]) {
+                if (setError) {
+                  setError(event["error"])
+                  return
+                }
+                else {
+                  console.error(event["error"])
+                  return
+                }
+            }
           }
-          else if (event["content"]) {
-              response.answer += event["content"]
-              queueRef.current = queueRef.current.concat(event["content"].split(''));
-              if (!processingRef.current) {
-                processQueue();
-              }
-          }
-          else if (event["error"]) {
-              if (setError) {
-                setError(event["error"])
-                return
-              }
-              else {
-                console.error(event["error"])
-                return
-              }
-          }
-        }
-        if (setAnswer) {
-          // We need to set these values in the thought_chain so that the compare works
-          if (approach === Approaches.ChatWebRetrieveRead) {
-            response.thought_chain["web_response"] = response.answer
-          }
-          else if (approach === Approaches.ReadRetrieveRead) {
-            response.thought_chain["work_response"] = response.answer
-          }
-          else if (approach === Approaches.GPTDirect) {
-            response.thought_chain["ungrounded_response"] = response.answer
-          }
-          else if (approach === Approaches.CompareWebWithWork) {
-            response.thought_chain["web_to_work_comparison_response"] = response.answer
-          }
-          else if (approach === Approaches.CompareWorkWithWeb) {
-            response.thought_chain["work_to_web_comparison_response"] = response.answer
-          }
+          if (setAnswer) {
+            // We need to set these values in the thought_chain so that the compare works
+            if (approach === Approaches.ChatWebRetrieveRead) {
+              response.thought_chain["web_response"] = response.answer
+            }
+            else if (approach === Approaches.ReadRetrieveRead) {
+              response.thought_chain["work_response"] = response.answer
+            }
+            else if (approach === Approaches.GPTDirect) {
+              response.thought_chain["ungrounded_response"] = response.answer
+            }
+            else if (approach === Approaches.CompareWebWithWork) {
+              response.thought_chain["web_to_work_comparison_response"] = response.answer
+            }
+            else if (approach === Approaches.CompareWorkWithWeb) {
+              response.thought_chain["work_to_web_comparison_response"] = response.answer
+            }
 
-          setAnswer(response)
+            setAnswer(response)
+          }
         }
+      }
+      catch (e : any) {
+        if (e.name !== 'AbortError')
+          {
+            console.error(e);
+          }
       }
     }
 
     if (readableStream) {
-      handleStream();
+        handleStream();
     }
 
   useEffect(() => {

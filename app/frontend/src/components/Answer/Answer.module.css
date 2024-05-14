@@ -96,7 +96,6 @@
     line-height: 22px;
     padding-top: 16px;
     padding-bottom: 16px;
-    white-space: pre-line;
 }
 
 .answerTextUngrounded {
@@ -105,7 +104,6 @@
     line-height: 22px;
     padding-top: 16px;
     padding-bottom: 16px;
-    white-space: pre-line;
     padding-left: 36px;
 }
 

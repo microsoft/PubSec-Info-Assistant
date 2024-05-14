@@ -295,20 +295,11 @@ async def chat(request: Request):
             return {"error": "unknown approach"}, 400
         
         if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
+            r = impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
         else:
-            r = await impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
+            r = impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
        
-        response = {
-                "data_points": r["data_points"],
-                "answer": r["answer"],
-                "thoughts": r["thoughts"],
-                "thought_chain": r["thought_chain"],
-                "work_citation_lookup": r["work_citation_lookup"],
-                "web_citation_lookup": r["web_citation_lookup"]
-        }
-
-        return response
+        return StreamingResponse(r, media_type="application/x-ndjson")
 
     except Exception as ex:
         log.error(f"Error in chat:: {ex}")

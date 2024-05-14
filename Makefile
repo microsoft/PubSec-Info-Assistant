@@ -64,8 +64,27 @@ destroy-inf: check-subscription
 functional-tests: extract-env ## Run functional tests to check the processing pipeline is working
 	@./scripts/functional-tests.sh	
 
-run-migration: ## Migrate from bicep to terraform
+merge-databases: ## Upgrade from bicep to terraform
+	@figlet "Upgrading in place"
 	python ./scripts/merge-databases.py
+
+import-state: check-subscription ## import state of current services to TF state
+	@./scripts/inf-import-state.sh
+
+prep-upgrade: ## Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
+	@figlet "Upgrading"
+	merge-databases 
+	import-state 
+
+prep-env: ## Apply role assignments as needed to upgrade
+	@figlet "Preparing Environment"
+	@./scripts/prep-env.sh
+
+prep-migration-env: ## Prepare the environment for migration by assigning required roles
+	@./scripts/prep-migration-env.sh
+
+run-data-migration: ## Run the data migration moving data from one resource group to another
+	python ./scripts/extract-content.py
 
 manual-inf-destroy: ## A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 	@./scripts/inf-manual-destroy.sh 

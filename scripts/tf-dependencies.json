@@ -1,0 +1,1416 @@
+[
+    {
+        "mode": "managed",
+        "type": "azurerm_resource_group",
+        "name": "rg",
+        "module": null,
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_resource_group_template_deployment",
+        "name": "customer_attribution",
+        "module": null,
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg"
+                ],
+                "index_key": 0
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "random_string",
+        "name": "random",
+        "module": null,
+        "provider": "provider[\"registry.terraform.io/hashicorp/random\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_application_insights_workbook",
+        "name": "example",
+        "module": "module.azMonitor",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_key_vault",
+        "name": "existing",
+        "module": "module.backend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_access_policy",
+        "name": "policy",
+        "module": "module.backend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.backend.azurerm_linux_web_app.app_service",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.backend.data.azurerm_key_vault.existing",
+                    "module.bingSearch.azurerm_resource_group_template_deployment.bing_search",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_linux_web_app",
+        "name": "app_service",
+        "module": "module.backend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.bingSearch.azurerm_resource_group_template_deployment.bing_search",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_monitor_autoscale_setting",
+        "name": "scaleout",
+        "module": "module.backend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_monitor_diagnostic_setting",
+        "name": "diagnostic_logs",
+        "module": "module.backend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.backend.azurerm_linux_web_app.app_service",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.bingSearch.azurerm_resource_group_template_deployment.bing_search",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_service_plan",
+        "name": "appServicePlan",
+        "module": "module.backend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_cognitive_account",
+        "name": "cognitiveService",
+        "module": "module.cognitiveServices",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "search_service_key",
+        "module": "module.cognitiveServices",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_cosmosdb_account",
+        "name": "cosmosdb_account",
+        "module": "module.cosmosdb",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_cosmosdb_sql_container",
+        "name": "log_container",
+        "module": "module.cosmosdb",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_cosmosdb_sql_database",
+        "name": "log_database",
+        "module": "module.cosmosdb",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "search_service_key",
+        "module": "module.cosmosdb",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_key_vault",
+        "name": "existing",
+        "module": "module.enrichmentApp",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_access_policy",
+        "name": "policy",
+        "module": "module.enrichmentApp",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.enrichmentApp.data.azurerm_key_vault.existing",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_linux_web_app",
+        "name": "app_service",
+        "module": "module.enrichmentApp",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_monitor_autoscale_setting",
+        "name": "scaleout",
+        "module": "module.enrichmentApp",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_monitor_diagnostic_setting",
+        "name": "example",
+        "module": "module.enrichmentApp",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_service_plan",
+        "name": "appServicePlan",
+        "module": "module.enrichmentApp",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_client_config",
+        "name": "current",
+        "module": "module.entraObjects",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azuread_application",
+        "name": "aad_mgmt_app",
+        "module": "module.entraObjects",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azuread_application",
+        "name": "aad_web_app",
+        "module": "module.entraObjects",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azuread_application_password",
+        "name": "aad_mgmt_app_password",
+        "module": "module.entraObjects",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azuread_service_principal",
+        "name": "aad_mgmt_sp",
+        "module": "module.entraObjects",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azuread_service_principal",
+        "name": "aad_web_sp",
+        "module": "module.entraObjects",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_cognitive_account",
+        "name": "formRecognizerAccount",
+        "module": "module.formrecognizer",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "docIntelligenceKey",
+        "module": "module.formrecognizer",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_key_vault",
+        "name": "existing_kv",
+        "module": "module.functions",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_storage_account",
+        "name": "existing_sa",
+        "module": "module.functions",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_access_policy",
+        "name": "policy",
+        "module": "module.functions",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.cosmosdb.azurerm_key_vault_secret.search_service_key",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount",
+                    "module.functions.azurerm_linux_function_app.function_app",
+                    "module.functions.azurerm_service_plan.funcServicePlan",
+                    "module.functions.data.azurerm_key_vault.existing_kv",
+                    "module.functions.data.azurerm_storage_account.existing_sa",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
+                    "module.storage.azurerm_key_vault_secret.storage_key",
+                    "module.storage.azurerm_storage_account.storage",
+                    "module.storage.azurerm_storage_blob.config",
+                    "module.storage.azurerm_storage_container.container",
+                    "module.storage.azurerm_storage_queue.queue",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_linux_function_app",
+        "name": "function_app",
+        "module": "module.functions",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.cosmosdb.azurerm_key_vault_secret.search_service_key",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount",
+                    "module.functions.azurerm_service_plan.funcServicePlan",
+                    "module.functions.data.azurerm_storage_account.existing_sa",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
+                    "module.storage.azurerm_key_vault_secret.storage_key",
+                    "module.storage.azurerm_storage_account.storage",
+                    "module.storage.azurerm_storage_blob.config",
+                    "module.storage.azurerm_storage_container.container",
+                    "module.storage.azurerm_storage_queue.queue",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_monitor_autoscale_setting",
+        "name": "scaleout",
+        "module": "module.functions",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.cosmosdb.azurerm_key_vault_secret.search_service_key",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.functions.azurerm_service_plan.funcServicePlan",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
+                    "module.storage.azurerm_key_vault_secret.storage_key",
+                    "module.storage.azurerm_storage_account.storage",
+                    "module.storage.azurerm_storage_blob.config",
+                    "module.storage.azurerm_storage_container.container",
+                    "module.storage.azurerm_storage_queue.queue",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_service_plan",
+        "name": "funcServicePlan",
+        "module": "module.functions",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.cosmosdb.azurerm_key_vault_secret.search_service_key",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
+                    "module.storage.azurerm_key_vault_secret.storage_key",
+                    "module.storage.azurerm_storage_account.storage",
+                    "module.storage.azurerm_storage_blob.config",
+                    "module.storage.azurerm_storage_container.container",
+                    "module.storage.azurerm_storage_queue.queue",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_client_config",
+        "name": "current",
+        "module": "module.kvModule",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault",
+        "name": "kv",
+        "module": "module.kvModule",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "spClientKeySecret",
+        "module": "module.kvModule",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_application_insights",
+        "name": "applicationInsights",
+        "module": "module.logging",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_log_analytics_workspace",
+        "name": "logAnalytics",
+        "module": "module.logging",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.openAiRoleBackend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "data.azurerm_resource_group.existing",
+                    "module.backend.azurerm_linux_web_app.app_service",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.bingSearch.azurerm_resource_group_template_deployment.bing_search",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.openAiRoleMgmt[0]",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "data.azurerm_resource_group.existing",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_service_principal.aad_mgmt_sp",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "openaiServiceKeySecret",
+        "module": "module.openaiServices",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.searchRoleBackend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.backend.azurerm_linux_web_app.app_service",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.bingSearch.azurerm_resource_group_template_deployment.bing_search",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "data",
+        "type": "azurerm_search_service",
+        "name": "search",
+        "module": "module.searchServices",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": null,
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "search_service_key",
+        "module": "module.searchServices",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.searchServices.data.azurerm_search_service.search",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_search_service",
+        "name": "search",
+        "module": "module.searchServices",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "storage_connection_string",
+        "module": "module.storage",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_key_vault_secret",
+        "name": "storage_key",
+        "module": "module.storage",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_storage_account",
+        "name": "storage",
+        "module": "module.storage",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_storage_blob",
+        "name": "config",
+        "module": "module.storage",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "module.storage.azurerm_storage_container.container",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_storage_container",
+        "name": "container",
+        "module": "module.storage",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 1
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 2
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 3
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 4
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 5
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_storage_queue",
+        "name": "queue",
+        "module": "module.storage",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 0
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 1
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 2
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 3
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 4
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 5
+            },
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": 6
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.storageRoleBackend",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.backend.azurerm_linux_web_app.app_service",
+                    "module.backend.azurerm_service_plan.appServicePlan",
+                    "module.bingSearch.azurerm_resource_group_template_deployment.bing_search",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.enrichmentApp.azurerm_linux_web_app.app_service",
+                    "module.enrichmentApp.azurerm_service_plan.appServicePlan",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application.aad_web_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.openaiServices.azurerm_cognitive_account.account",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_storage_account.storage",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.storageRoleFunc",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current",
+                    "module.cognitiveServices.azurerm_cognitive_account.cognitiveService",
+                    "module.cosmosdb.azurerm_cosmosdb_account.cosmosdb_account",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_container.log_container",
+                    "module.cosmosdb.azurerm_cosmosdb_sql_database.log_database",
+                    "module.cosmosdb.azurerm_key_vault_secret.search_service_key",
+                    "module.entraObjects.azuread_application.aad_mgmt_app",
+                    "module.entraObjects.azuread_application_password.aad_mgmt_app_password",
+                    "module.entraObjects.data.azurerm_client_config.current",
+                    "module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount",
+                    "module.functions.azurerm_linux_function_app.function_app",
+                    "module.functions.azurerm_service_plan.funcServicePlan",
+                    "module.functions.data.azurerm_storage_account.existing_sa",
+                    "module.kvModule.azurerm_key_vault.kv",
+                    "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
+                    "module.kvModule.data.azurerm_client_config.current",
+                    "module.logging.azurerm_application_insights.applicationInsights",
+                    "module.logging.azurerm_log_analytics_workspace.logAnalytics",
+                    "module.searchServices.azurerm_search_service.search",
+                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
+                    "module.storage.azurerm_key_vault_secret.storage_key",
+                    "module.storage.azurerm_storage_account.storage",
+                    "module.storage.azurerm_storage_blob.config",
+                    "module.storage.azurerm_storage_container.container",
+                    "module.storage.azurerm_storage_queue.queue",
+                    "random_string.random"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.userRoles[\"CognitiveServicesOpenAIUser\"]",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.userRoles[\"SearchIndexDataContributor\"]",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.userRoles[\"SearchIndexDataReader\"]",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.userRoles[\"StorageBlobDataContributor\"]",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current"
+                ],
+                "index_key": null
+            }
+        ]
+    },
+    {
+        "mode": "managed",
+        "type": "azurerm_role_assignment",
+        "name": "role",
+        "module": "module.userRoles[\"StorageBlobDataReader\"]",
+        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+        "instances": [
+            {
+                "dependencies": [
+                    "azurerm_resource_group.rg",
+                    "data.azurerm_client_config.current"
+                ],
+                "index_key": null
+            }
+        ]
+    }
+]

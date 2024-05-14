@@ -33,6 +33,10 @@ Once you have the completed setting up a GitHub Codespaces, please move on to th
 
 Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the Configuring your Environment step.
 
+## Upgrading or Migrating from 1.0
+
+If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing processed data to a newly deployed instance, review the [Upgrade & Migrate documentation](/docs/deployment/move_or_migrate.md)
+
 ## Configure ENV files
 
 You now need to set up your local environment variables file in preparation for deployment.
@@ -141,15 +145,21 @@ help                         Show this help
 deploy                       Deploy infrastructure and application code
 build                        Build application code
 infrastructure               Deploy infrastructure
-extract-env                  Extract infrastructure.env file from Terraform output
+extract-env                  Extract infrastructure.env file from TF output
 deploy-webapp                Deploys the web app code to Azure App Service
 deploy-functions             Deploys the function code to Azure Function Host
 deploy-enrichments           Deploys the web app code to Azure App Service
 deploy-search-indexes        Deploy search indexes
-extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
-extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
+extract-env-debug-webapp     Extract infrastructure.debug.env file from TF output
+extract-env-debug-functions  Extract local.settings.json to debug functions from TF output
 functional-tests             Run functional tests to check the processing pipeline is working
-manual-inf-destroy           Destroy a resource group specified on execution and associated Azure Entra objects
+merge-databases              Upgrade from bicep to terraform
+import-state                 import state of current services to TF state
+prep-upgrade                 Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
+prep-env                     Apply role assignments as needed to upgrade
+prep-migration-env           Prepare the environment for migration by assigning required roles
+run-data-migration           Run the data migration moving data from one resource group to another
+manual-inf-destroy           A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 ```
 
 ## Configure authentication and authorization

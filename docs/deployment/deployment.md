@@ -81,7 +81,7 @@ ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By de
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 MAX_CSV_FILE_SIZE | No | Defaults to 20 (MB's) for the maximum file size for an uploaded CSV
-SERVICE_MANAGEMENT_REFERENCE | No| Defaults to "". This value is applied to Service management reference entries if required by your organization.
+SERVICE_MANAGEMENT_REFERENCE | No | Defaults to "". Sets the service management reference value on Azure Entra objects created by Information Assistant if required by your organization.
 
 
 ## Log into Azure using the Azure CLI

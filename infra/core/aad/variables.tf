@@ -32,3 +32,8 @@ variable "aadMgmtClientSecret" {
   type      = string
   sensitive = true
 }
+
+variable "serviceManagementReference" {
+  type      = string
+  sensitive = true
+}

@@ -69,6 +69,7 @@ const Chat = () => {
     const [selectedAnswer, setSelectedAnswer] = useState<number>(0);
     const [answers, setAnswers] = useState<[user: string, response: ChatResponse][]>([]);
     const [answerStream, setAnswerStream] = useState<ReadableStream | undefined>(undefined);
+    const [abortController, setAbortController] = useState<AbortController | undefined>(undefined);
 
     async function fetchFeatureFlags() {
         try {
@@ -133,8 +134,10 @@ const Chat = () => {
             };
 
             setAnswers([...answers, [question, temp]]);
-
-            const result = await chatApi(request);
+            const controller = new AbortController();
+            setAbortController(controller);
+            const signal = controller.signal;
+            const result = await chatApi(request, signal);
             if (!result.body) {
                 throw Error("No response body");
             }
@@ -237,6 +240,7 @@ const Chat = () => {
     };
 
     const onChatModeChange = (_ev: any) => {
+        abortController?.abort();
         const chatMode = _ev.target.value as ChatMode || ChatMode.WorkOnly;
         setChatMode(chatMode);
         if (chatMode == ChatMode.WorkOnly)

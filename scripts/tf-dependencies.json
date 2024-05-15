@@ -444,7 +444,7 @@
     {
         "mode": "managed",
         "type": "azurerm_monitor_diagnostic_setting",
-        "name": "example",
+        "name": "diagnostic_setting",
         "module": "module.enrichmentApp",
         "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
         "instances": [

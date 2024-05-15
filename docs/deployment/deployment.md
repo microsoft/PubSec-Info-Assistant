@@ -85,6 +85,9 @@ ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By de
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 ENTRA_OWNERS | No | Defailts to "". Additional user id's you wish to assign as owners of created Azure Entra objects by way of assign to a security group.
+MAX_CSV_FILE_SIZE | No | Defaults to 20 (MB's) for the maximum file size for an uploaded CSV
+SERVICE_MANAGEMENT_REFERENCE | No | Defaults to "". Sets the service management reference value on Azure Entra objects created by Information Assistant if required by your organization.
+
 
 ## Log into Azure using the Azure CLI
 
@@ -146,14 +149,21 @@ help                         Show this help
 deploy                       Deploy infrastructure and application code
 build                        Build application code
 infrastructure               Deploy infrastructure
-extract-env                  Extract infrastructure.env file from Terraform output
+extract-env                  Extract infrastructure.env file from TF output
 deploy-webapp                Deploys the web app code to Azure App Service
 deploy-functions             Deploys the function code to Azure Function Host
 deploy-enrichments           Deploys the web app code to Azure App Service
 deploy-search-indexes        Deploy search indexes
-extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
-extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
+extract-env-debug-webapp     Extract infrastructure.debug.env file from TF output
+extract-env-debug-functions  Extract local.settings.json to debug functions from TF output
 functional-tests             Run functional tests to check the processing pipeline is working
+merge-databases              Upgrade from bicep to terraform
+import-state                 import state of current services to TF state
+prep-upgrade                 Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
+prep-env                     Apply role assignments as needed to upgrade
+prep-migration-env           Prepare the environment for migration by assigning required roles
+run-data-migration           Run the data migration moving data from one resource group to another
+manual-inf-destroy           A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 ```
 
 ## Configure authentication and authorization

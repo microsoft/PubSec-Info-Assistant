@@ -68,22 +68,23 @@ merge-databases: ## Upgrade from bicep to terraform
 	@figlet "Upgrading in place"
 	python ./scripts/merge-databases.py
 
-import-state: check-subscription ## import state of current srevcies to TF state
+import-state: check-subscription ## import state of current services to TF state
 	@./scripts/inf-import-state.sh
 
-# Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
-prep-upgrade: 
+prep-upgrade: ## Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
 	@figlet "Upgrading"
 	merge-databases 
 	import-state 
 
-# Apply role assignments as needed to upgrade
-prep-env: 
+prep-env: ## Apply role assignments as needed to upgrade
 	@figlet "Preparing Environment"
 	@./scripts/prep-env.sh
 
 prep-migration-env: ## Prepare the environment for migration by assigning required roles
 	@./scripts/prep-migration-env.sh
 
-run-data-migration: ## Run the data migration moving data from one rg to another
+run-data-migration: ## Run the data migration moving data from one resource group to another
 	python ./scripts/extract-content.py
+
+manual-inf-destroy: ## A command triggered by a user to destroy a resource group, associated resources, and related Entra items
+	@./scripts/inf-manual-destroy.sh 

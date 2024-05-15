@@ -497,12 +497,19 @@ variable "enableDevCode" {
   type    = bool
   default = false
 }
+
 variable "maxCsvFileSize" {
   type    = string
   default = "20"
 }
+
 variable "entraOwners" {
   type    = string
   default = ""
   description = "Comma-separated list of owner emails"
+}
+
+variable "serviceManagementReference" {
+  type    = string
+  default = ""
 }

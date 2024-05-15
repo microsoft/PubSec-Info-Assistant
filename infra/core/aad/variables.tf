@@ -38,3 +38,8 @@ variable "entraOwners" {
   default = ""
   description = "Comma-separated list of owner emails"
 }
+
+variable "serviceManagementReference" {
+  type      = string
+  sensitive = true
+}

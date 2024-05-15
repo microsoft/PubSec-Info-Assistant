@@ -1,32 +1,16 @@
 data "azurerm_client_config" "current" {}
 
 locals {
-  owners = split(",", var.entraOwners)
+  principal_list = split(",", var.entraOwners)
+  owner_ids = contains(local.principal_list, data.azurerm_client_config.current.object_id) ? local.principal_list : concat(local.principal_list, [data.azurerm_client_config.current.object_id])
 }
-
-resource "azuread_user" "user" {
-  for_each = toset(local.owners)  
-  user_principal_name = each.value
-  display_name        = each.value
-}
-
-# resource "azuread_group" "aad_security_group" {
-#   display_name     = "infoasst_security_group_${var.randomString}"
-#   owners           = [for user in azuread_user.user : user.object_id]
-#   security_enabled = true
-# }
-
-
-
-
-
 
 
 resource "azuread_application" "aad_web_app" {
   count                         = var.isInAutomation ? 0 : 1
   display_name                  = "infoasst_web_access_${var.randomString}"
   identifier_uris               = ["api://infoasst-${var.randomString}"]
-  owners                        = [data.azurerm_client_config.current.object_id]
+  owners                        = local.owner_ids
   sign_in_audience              = "AzureADMyOrg"
   oauth2_post_response_required = true
   web {
@@ -43,13 +27,13 @@ resource "azuread_service_principal" "aad_web_sp" {
   count                         = var.isInAutomation ? 0 : 1
   client_id                     = azuread_application.aad_web_app[0].client_id
   app_role_assignment_required  = var.requireWebsiteSecurityMembership
-  owners                        = [data.azurerm_client_config.current.object_id]
+  owners                        = local.owner_ids
 }
 
 resource "azuread_application" "aad_mgmt_app" {
   count             = var.isInAutomation ? 0 : 1
   display_name      = "infoasst_mgmt_access_${var.randomString}"
-  owners            = [data.azurerm_client_config.current.object_id]
+  owners            = local.owner_ids
   sign_in_audience  = "AzureADMyOrg"
 }
 
@@ -62,7 +46,7 @@ resource "azuread_application_password" "aad_mgmt_app_password" {
 resource "azuread_service_principal" "aad_mgmt_sp" {
   count     = var.isInAutomation ? 0 : 1
   client_id = azuread_application.aad_mgmt_app[0].client_id
-  owners    = [data.azurerm_client_config.current.object_id]
+  owners    = local.owner_ids
 }
 
 output "azure_ad_web_app_client_id" {

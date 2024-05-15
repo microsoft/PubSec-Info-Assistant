@@ -60,6 +60,18 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+
+# prepare vars for the users you wish to aasign to the security group
+object_ids=()
+IFS=',' read -ra ADDR <<< "$ENTRA_OWNERS"
+for user_principal_name in "${ADDR[@]}"; do
+  object_id=$(az ad user list --filter "mail eq '$user_principal_name'" --query "[0].id" -o tsv)
+  object_ids+=($object_id)
+done
+# Join the array of object IDs into a comma-separated string
+object_ids_string=$(IFS=','; echo "${object_ids[*]}")
+export TF_VAR_entraOwners=$object_ids_string
+
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh
 

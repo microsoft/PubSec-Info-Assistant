@@ -61,8 +61,10 @@ then
 fi
 
 
-# prepare vars for the users you wish to aasign to the security group
+# prepare vars for the users you wish to assign to the security group
 object_ids=()
+# Remove spaces from the comma-separated string
+ENTRA_OWNERS=$(echo "$ENTRA_OWNERS" | tr -d ' ')
 IFS=',' read -ra ADDR <<< "$ENTRA_OWNERS"
 for user_principal_name in "${ADDR[@]}"; do
   object_id=$(az ad user list --filter "mail eq '$user_principal_name'" --query "[0].id" -o tsv)

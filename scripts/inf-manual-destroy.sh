@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 #!/bin/bash
-set -e
+set +e
 
 # Get the directory that this script is in
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -23,7 +23,6 @@ set_yellow_text() {
 reset_text_color() {
     tput sgr0  # Reset text color
 }
-
 
 # Set text color to yellow
 set_yellow_text
@@ -85,7 +84,7 @@ echo "Random text: $random_text"
 az group delete \
     --resource-group $rg_name \
     --yes \
-    --no-wait
+    --no-wait 
 echo "Resource group is being deleted."
 echo "Continuing..."
 
@@ -97,8 +96,8 @@ if [ -z "$app_id" ]; then
     exit 1
 else
     # Step 2: Delete the application
+    echo "Deleting application $app_name."
     az ad app delete --id $app_id
-    echo "Application $app_name deleted successfully."
 fi
 
 app_name="infoasst_web_access_$random_text"
@@ -108,9 +107,15 @@ if [ -z "$app_id" ]; then
     exit 1
 else
     # Step 2: Delete the application
+    echo "Deleting application $app_name."
     az ad app delete --id $app_id
-    echo "Application $app_name deleted successfully."
 fi
+
+# Delete the terraform state
+echo "Deleting TF state files"
+rg_suffix=${rg_name#infoasst-}
+rm -r $(pwd)/infra/terraform.tfstate.d/$rg_suffix
+
 
 echo ""
 echo "All services have been successfully deleted."

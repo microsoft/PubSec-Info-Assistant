@@ -68,11 +68,18 @@ ENTRA_OWNERS=$(echo "$ENTRA_OWNERS" | tr -d ' ')
 IFS=',' read -ra ADDR <<< "$ENTRA_OWNERS"
 for user_principal_name in "${ADDR[@]}"; do
   object_id=$(az ad user list --filter "mail eq '$user_principal_name'" --query "[0].id" -o tsv)
-  object_ids+=($object_id)
+  # Check if the object_id is not empty before adding it to the array
+  if [[ -n $object_id ]]; then
+    object_ids+=($object_id)
+    echo "user_principal_name: $user_principal_name and object_id: $object_id to be added as an owner"
+  else
+    echo "No object_id found for user_principal_name: $user_principal_name"
+  fi
 done
 # Join the array of object IDs into a comma-separated string
 object_ids_string=$(IFS=','; echo "${object_ids[*]}")
 export TF_VAR_entraOwners=$object_ids_string
+
 
 # Create our application configuration file before starting infrastructure
 ${DIR}/configuration-create.sh

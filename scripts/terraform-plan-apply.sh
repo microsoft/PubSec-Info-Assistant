@@ -140,7 +140,7 @@ then
 fi
 
 printInfo "Running apply..."
-terraform apply -input=false "$PLAN_NAME"
+terraform apply -input=false "$PLAN_NAME" 
 
 # If output specified then write to output
 if (( ${#OUTPUT_FILES[@]} ));

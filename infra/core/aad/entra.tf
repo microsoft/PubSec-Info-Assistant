@@ -1,7 +1,7 @@
 data "azurerm_client_config" "current" {}
 
 locals {
-  principal_list = split(",", var.entraOwners)
+  principal_list = var.entraOwners == "" ? [] : split(",", var.entraOwners)
   owner_ids = contains(local.principal_list, data.azurerm_client_config.current.object_id) ? local.principal_list : concat(local.principal_list, [data.azurerm_client_config.current.object_id])
 }
 

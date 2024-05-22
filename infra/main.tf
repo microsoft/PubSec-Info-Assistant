@@ -506,6 +506,7 @@ module "functions" {
   resourceGroupName                     = azurerm_resource_group.rg.name
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
+  private_dns_zone_ids                  = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   blobStorageAccountName                = module.storage.name
   blobStorageAccountEndpoint            = module.storage.primary_endpoints
   blobStorageAccountOutputContainerName = var.contentContainerName

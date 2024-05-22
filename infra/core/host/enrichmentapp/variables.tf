@@ -98,6 +98,26 @@ variable "enableOryxBuild" {
   default = true
 }
 
+variable "subnet_id" {
+  type = string
+  default = ""
+}
+
+variable "subnetIntegration_id" {
+  type = string
+  default = ""
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}
+
 variable "image_name" {
   description = "The Name of the image file in the Container Registry"
   type        = string

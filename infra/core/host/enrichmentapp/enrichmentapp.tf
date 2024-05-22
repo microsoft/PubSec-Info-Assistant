@@ -89,8 +89,12 @@ resource "azurerm_linux_web_app" "app_service" {
     http2_enabled                                 = true
     use_32_bit_worker                             = false
     worker_count                                  = 1
+
     application_stack {
-      python_version                              = "3.10"
+      docker_image_name         = var.image_name
+      docker_registry_url       = var.container_registry
+      docker_registry_username  = var.container_registry_admin_username
+      docker_registry_password  = var.container_registry_admin_password
     }
   }
 

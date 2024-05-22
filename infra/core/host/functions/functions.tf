@@ -91,7 +91,13 @@ resource "azurerm_linux_function_app" "function_app" {
 
   site_config {
     application_stack {
-      python_version = "3.10"
+      docker {
+        image_name        = var.image_name
+        image_tag         = var.image_tag
+        registry_url      = var.container_registry
+        registry_username = var.container_registry_admin_username
+        registry_password = var.container_registry_admin_password
+      }
     }
     always_on        = true
     http2_enabled    = true

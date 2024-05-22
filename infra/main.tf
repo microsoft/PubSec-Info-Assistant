@@ -63,6 +63,7 @@ module "network" {
   snetAzureVideoIndexerCIDR     = var.azure_video_indexer_CIDR
   snetBingServiceCIDR           = var.bing_service_CIDR
   snetAzureOpenAICIDR           = var.azure_openAI_CIDR
+  snetACRCIDR                   = var.acr_CIDR
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
 }
 
@@ -268,6 +269,12 @@ module "enrichmentApp" {
   appCommandLine                            = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
   keyVaultUri                               = module.kvModule.keyVaultUri
   keyVaultName                              = module.kvModule.keyVaultName
+
+  container_registry                        = module.acr.login_server
+  container_registry_admin_username         = module.acr.admin_username
+  container_registry_admin_password         = module.acr.admin_password
+  image_name                                = module.enrichment_container_image.enrichment_image_name
+
   appSettings = {
     EMBEDDINGS_QUEUE                        = var.embeddingsQueue
     LOG_LEVEL                               = "DEBUG"
@@ -319,6 +326,11 @@ module "backend" {
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
+
+  container_registry                  = module.acr.login_server
+  container_registry_admin_username   = module.acr.admin_username
+  container_registry_admin_password   = module.acr.admin_password
+  image_name                          = module.webapp_container_image.webapp_image_name
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
@@ -436,6 +448,8 @@ module "cognitiveServices" {
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   key_vault_name                = module.kvModule.keyVaultName
   kv_secret_expiration          = var.kv_secret_expiration
+  vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
+  subnet_name                   = "" //var.is_secure_mode ? module.network[0].**INSERT HERE** : null
 }
 
 module "searchServices" {
@@ -530,11 +544,18 @@ module "functions" {
   endpointSuffix                        = var.azure_storage_domain
   azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
   azure_ai_translation_domain           = var.azure_ai_translation_domain
+ 
+  container_registry                    = module.acr.login_server
+  container_registry_admin_username     = module.acr.admin_username
+  container_registry_admin_password     = module.acr.admin_password
+  image_name                            = module.function_container_image.function_image_name
+  image_tag                             = module.function_container_image.image_tag
 
   depends_on = [
     module.storage,
     module.cosmosdb,
-    module.kvModule
+    module.kvModule,
+    module.function_container_image
   ]
 }
 

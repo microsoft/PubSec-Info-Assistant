@@ -81,7 +81,11 @@ resource "azurerm_linux_web_app" "app_service" {
 
   site_config {
     application_stack {
-      python_version = var.runtimeVersion
+      docker_image_name         = var.image_name
+      docker_registry_url       = var.container_registry
+      docker_registry_username  = var.container_registry_admin_username
+      docker_registry_password  = var.container_registry_admin_password
+      python_version            = var.runtimeVersion
     }
     always_on                      = var.alwaysOn
     ftps_state                     = var.ftpsState

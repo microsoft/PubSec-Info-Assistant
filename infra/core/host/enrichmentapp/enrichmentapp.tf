@@ -1,5 +1,3 @@
-
-
 // Create Enrichment App Service Plan 
 resource "azurerm_service_plan" "appServicePlan" {
   name                          = var.plan_name
@@ -70,7 +68,7 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 }
 
 # Create the Enrichment App Service
-resource "azurerm_linux_web_app" "app_service" {
+resource "azurerm_linux_web_app" "enrichmentapp" {
   name                                            = var.name
   location                                        = var.location
   resource_group_name                             = var.resourceGroupName
@@ -80,6 +78,8 @@ resource "azurerm_linux_web_app" "app_service" {
   webdeploy_publish_basic_authentication_enabled  = false
   client_affinity_enabled                         = false
   enabled                                         = true
+  public_network_access_enabled                   = var.is_secure_mode ? false : true
+  virtual_network_subnet_id                       = var.is_secure_mode ? var.subnetIntegration_id : null
   site_config {
     always_on                                     = var.alwaysOn
     app_command_line                              = var.appCommandLine
@@ -111,29 +111,33 @@ resource "azurerm_linux_web_app" "app_service" {
       "BLOB_CONNECTION_STRING"                    = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
       "AZURE_STORAGE_CONNECTION_STRING"           = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
       "AZURE_OPENAI_SERVICE_KEY"                  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
+      "KEY_EXPIRATION_DATE"                       = timeadd(timestamp(), "4320h") # Added expiration date setting for keys
     }
   )
 
   identity {
     type = var.managedIdentity ? "SystemAssigned" : null
   }
+}
 
-  logs {
-    application_logs {
-      file_system_level = "Verbose"
-    }
+resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
+  count               = var.is_secure_mode ? 1 : 0
+  name                = "${var.name}-private-endpoint"
+  location            = var.location
+  resource_group_name = var.resourceGroupName
+  subnet_id           = var.subnet_id
 
-    http_logs {
-      file_system {
-        retention_in_days = 1
-        retention_in_mb = 35
-      }
-    }
-
-    detailed_error_messages = true
-    failed_request_tracing = true
+  private_dns_zone_group {
+    name = "privatednszonegroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
   }
-  
+
+  private_service_connection {
+    name = "enrichementprivateendpointconnection"
+    private_connection_resource_id = azurerm_linux_web_app.enrichmentapp.id
+    subresource_names = ["sites"]
+    is_manual_connection = false
+  }
 }
 
 data "azurerm_key_vault" "existing" {
@@ -144,46 +148,11 @@ data "azurerm_key_vault" "existing" {
 resource "azurerm_key_vault_access_policy" "policy" {
   key_vault_id = data.azurerm_key_vault.existing.id
 
-  tenant_id = azurerm_linux_web_app.app_service.identity.0.tenant_id
-  object_id = azurerm_linux_web_app.app_service.identity.0.principal_id
+  tenant_id = azurerm_linux_web_app.enrichmentapp.identity.0.tenant_id
+  object_id = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
 
   secret_permissions = [
     "Get",
     "List"
   ]
-}
-
-resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
-  name                       = azurerm_linux_web_app.app_service.name
-  target_resource_id         = azurerm_linux_web_app.app_service.id
-  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
-
-  enabled_log {
-    category = "AppServiceAppLogs"
-  }
-  enabled_log {
-    category = "AppServicePlatformLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceConsoleLogs"
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
-}
-
-
-output "name" {
-  value = azurerm_linux_web_app.app_service.name
-}
-
-output "identityPrincipalId" {
-  value = var.managedIdentity ? azurerm_linux_web_app.app_service.identity.0.principal_id : ""
-}
-
-output "uri" {
-  value = "https://${azurerm_linux_web_app.app_service.default_hostname}"
 }

@@ -1,5 +1,5 @@
 # Use the official Python image for Azure Functions
-FROM mcr.microsoft.com/azure-functions/python:3.0-python3.10
+FROM mcr.microsoft.com/azure-functions/python:3.0-python3.7
 
 # Set the working directory
 WORKDIR /home/site/wwwroot

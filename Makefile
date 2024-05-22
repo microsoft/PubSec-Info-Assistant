@@ -9,17 +9,23 @@ help: ## Show this help
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%s\033[0m|%s\n", $$1, $$2}' \
         | column -t -s '|'
 
-deploy: build infrastructure extract-env deploy-enrichments deploy-search-indexes deploy-webapp deploy-functions ## Deploy infrastructure and application code
+deploy: build build-docker-container-images infrastructure extract-env deploy-enrichments deploy-search-indexes deploy-webapp deploy-functions ## Deploy infrastructure and application code
  
 build-deploy-webapp: build extract-env deploy-webapp ##Build and Deploy the Webapp
 build-deploy-enrichments: build extract-env deploy-enrichments ##Build and Deploy the Enrichment Webapp
 build-deploy-functions: build extract-env deploy-functions ##Build and Deploy the Functions
+build-deploy-docker: build build-docker-container-images ##Build and Deploy the Docker Containers Images
 
 build: ## Build application code
 	@./scripts/build.sh
 
 build-containers: extract-env
 	@./app/enrichment/docker-build.sh
+
+build-docker-container-images:  ## Build the docker containers for the function, webapp, and enrichment
+	@./container_images/enrichment_container_image/docker-build.sh
+	@./container_images/function_container_image/docker-build.sh
+	@./container_images/webapp_container_image/docker-build.sh
 
 infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts/inf-create.sh

@@ -507,6 +507,7 @@ module "functions" {
   kind                                  = "linux"
   runtime                               = "python"
   resourceGroupName                     = azurerm_resource_group.rg.name
+  azure_portal_domain                   = var.azure_portal_domain
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
   private_dns_zone_ids                  = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null

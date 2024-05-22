@@ -263,6 +263,7 @@ module "enrichmentApp" {
   scmDoBuildDuringDeployment                = true
   managedIdentity                           = true
   logAnalyticsWorkspaceResourceId           = module.logging.logAnalyticsId
+  private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   applicationInsightsConnectionString       = module.logging.applicationInsightsConnectionString
   alwaysOn                                  = true
   healthCheckPath                           = "/health"

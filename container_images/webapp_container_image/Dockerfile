@@ -5,8 +5,7 @@ FROM node:14
 WORKDIR /app
 
 # Copy the package.json
-COPY app/frontend/package*.json /app/
-COPY app/frontend /app
+COPY app/backend /home/site/wwwroot
 
 # Expose the port the app runs on
 EXPOSE 3000

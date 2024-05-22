@@ -98,31 +98,6 @@ variable "enableOryxBuild" {
   default = true
 }
 
-variable "subnet_id" {
-  type = string
-  default = ""
-}
-
-variable "subnetIntegration_id" {
-  type = string
-  default = ""
-}
-
-variable "private_dns_zone_ids" {
-  type = set(string)
-}
-
-variable "is_secure_mode" {
-  description = "Specifies whether to deploy in secure mode"
-  type        = bool
-  default     = false
-}
-
-variable "image_name" {
-  description = "The Name of the image file in the Container Registry"
-  type        = string
-}
-
 variable "container_registry" {
   description = "The login server of the container registry"
   type        = string
@@ -136,4 +111,25 @@ variable "container_registry_admin_username" {
 variable "container_registry_admin_password" {
   description = "The admin password of the container registry"
   type        = string
+}
+
+variable "container_name" {
+  description = "The name of the Docker container"
+  type        = string
+}
+
+variable "is_secure_mode" {
+  type = bool
+}
+
+variable "subnetIntegration_id" {
+  type = string
+}
+
+variable "subnet_id" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
 }

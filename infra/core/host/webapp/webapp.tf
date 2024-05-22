@@ -1,3 +1,25 @@
+data "local_file" "image_tag" {
+  filename = "../container_images/webapp_container_image/image_tag.txt"
+}
+
+locals {
+  sanitised_container_name = replace(var.container_name, "_", "")
+  stripped_container_registry = replace(var.container_registry, "https://", "")
+}
+
+resource "null_resource" "docker_push" {
+  provisioner "local-exec" {
+    command = <<-EOT
+        printf "%s" ${var.container_registry_admin_password} | docker login --username ${var.container_registry_admin_username} --password-stdin ${var.container_registry}
+        docker tag webapp_container_image ${local.stripped_container_registry}/webapp_container_image:${data.local_file.image_tag.content}
+        docker push ${local.stripped_container_registry}/webapp_container_image:${data.local_file.image_tag.content}
+      EOT
+  }
+  triggers = {
+    always_run = timestamp()
+  }
+}
+
 # Create the web app service plan
 resource "azurerm_service_plan" "appServicePlan" {
   name                = var.plan_name
@@ -82,7 +104,7 @@ resource "azurerm_linux_web_app" "app_service" {
 
   site_config {
     application_stack {
-      docker_image_name         = var.image_name
+      docker_image_name         = "${var.container_registry}/webapp_container_image:${data.local_file.image_tag.content}"
       docker_registry_url       = var.container_registry
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password

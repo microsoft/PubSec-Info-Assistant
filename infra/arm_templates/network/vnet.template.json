@@ -52,6 +52,9 @@
         },
         "subnet_AzureOpenAI_CIDR": {
             "type": "string"
+        },
+        "subnet_Acr_CIDR": {
+            "type": "string"
         }
     },
     "resources": [
@@ -225,6 +228,19 @@
                             "privateEndpointNetworkPolicies": "Enabled",
                             "privateLinkServiceNetworkPolicies": "Enabled",
                             "serviceEndpoints": [ { "service": "Microsoft.CognitiveServices" } ]
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
+                    },
+                    {
+                        "name": "acr",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet_Acr_CIDR')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     }

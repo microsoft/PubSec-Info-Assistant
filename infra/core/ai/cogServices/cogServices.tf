@@ -1,11 +1,13 @@
 resource "azurerm_cognitive_account" "cognitiveService" {
-  name                     = var.name
-  location                 = var.location
-  resource_group_name      = var.resourceGroupName
-  kind                     = "CognitiveServices"
-  sku_name                 = var.sku["name"]
-  tags                     = var.tags
-  custom_subdomain_name = var.name
+  name                          = var.name
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  kind                          = "CognitiveServices"
+  sku_name                      = var.sku["name"]
+  tags                          = var.tags
+  custom_subdomain_name         = var.name
+  public_network_access_enabled = var.is_secure_mode ? false : true
+  local_auth_enabled            = var.is_secure_mode ? false : true
 }
 
 module "search_service_key" {

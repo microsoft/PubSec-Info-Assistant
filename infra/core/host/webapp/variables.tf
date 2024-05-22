@@ -148,11 +148,6 @@ variable "randomString" {
   type = string
 }
 
-variable "image_name" {
-  description = "The Name of the image file in the Container Registry"
-  type        = string
-}
-
 variable "container_registry" {
   description = "The login server of the container registry"
   type        = string
@@ -165,5 +160,10 @@ variable "container_registry_admin_username" {
 
 variable "container_registry_admin_password" {
   description = "The admin password of the container registry"
+  type        = string
+}
+
+variable "container_name" {
+  description = "The name of the Docker container"
   type        = string
 }

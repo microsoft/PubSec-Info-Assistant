@@ -35,6 +35,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
   kind                          = "GlobalDocumentDB"
   tags                          = var.tags
   public_network_access_enabled = var.is_secure_mode ? false : true
+  local_authentication_disabled = var.is_secure_mode ? true : false
 
   consistency_policy {
     consistency_level       = var.defaultConsistencyLevel

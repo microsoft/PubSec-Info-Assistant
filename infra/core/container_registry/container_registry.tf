@@ -5,7 +5,7 @@ resource "azurerm_container_registry" "acr" {
   sku                 = "Premium"  // Premium is required for networking features
   admin_enabled       = true       // Enables the admin account for Docker login
 
-  public_network_access_enabled = true //var.is_secure_mode ? false : true
+  public_network_access_enabled = var.is_secure_mode ? false : true
 }
 
 resource "azurerm_private_endpoint" "ContainerRegistryPrivateEndpoint" {

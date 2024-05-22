@@ -263,18 +263,20 @@ module "enrichmentApp" {
   scmDoBuildDuringDeployment                = true
   managedIdentity                           = true
   logAnalyticsWorkspaceResourceId           = module.logging.logAnalyticsId
-  private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   applicationInsightsConnectionString       = module.logging.applicationInsightsConnectionString
   alwaysOn                                  = true
   healthCheckPath                           = "/health"
   appCommandLine                            = "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
   keyVaultUri                               = module.kvModule.keyVaultUri
   keyVaultName                              = module.kvModule.keyVaultName
-
   container_registry                        = module.acr.login_server
   container_registry_admin_username         = module.acr.admin_username
   container_registry_admin_password         = module.acr.admin_password
-  image_name                                = module.enrichment_container_image.enrichment_image_name
+  container_name                            = "enrichmentapp"
+  is_secure_mode                            = var.is_secure_mode
+  subnetIntegration_id                      = var.is_secure_mode ? module.network[0].snetIntegration_id : null
+  subnet_id                                 = var.is_secure_mode ? module.network[0].snetEnrichment_id : null
+  private_dns_zone_ids                      = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
 
   appSettings = {
     EMBEDDINGS_QUEUE                        = var.embeddingsQueue
@@ -299,7 +301,6 @@ module "enrichmentApp" {
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
     WEBSITES_CONTAINER_START_TIME_LIMIT     = 600
   }
-  depends_on                                = [ module.kvModule ]
 }
 
 # // The application frontend
@@ -335,7 +336,7 @@ module "webapp" {
   container_registry                  = module.acr.login_server
   container_registry_admin_username   = module.acr.admin_username
   container_registry_admin_password   = module.acr.admin_password
-  image_name                          = module.webapp_container_image.webapp_image_name
+  container_name                      = "webapp"
   randomString                        = random_string.random.result
 
   appSettings = {
@@ -556,15 +557,7 @@ module "functions" {
   container_registry                    = module.acr.login_server
   container_registry_admin_username     = module.acr.admin_username
   container_registry_admin_password     = module.acr.admin_password
-  image_name                            = module.function_container_image.function_image_name
-  image_tag                             = module.function_container_image.image_tag
-
-  depends_on = [
-    module.storage,
-    module.cosmosdb,
-    module.kvModule,
-    module.function_container_image
-  ]
+  container_name                        = "functionapp"
 }
 
 module "acr"{
@@ -572,58 +565,10 @@ module "acr"{
   name                  = "acr${random_string.random.result}" 
   location              = var.location
   resourceGroupName     = azurerm_resource_group.rg.name
+  is_secure_mode        = var.is_secure_mode
   snetACR_id            = var.is_secure_mode ? module.network[0].snetACR_id : null
   private_dns_zone_name = var.is_secure_mode ? module.privateDnsZoneACR[0].privateDnsZoneName : null
   private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneACR[0].privateDnsZoneResourceId] : null
-}
-
-module "enrichment_container_image" {
-  source                            = "./core/container_images/enrichment_container_image"
-  container_name                    = "enrichment_container_image"
-  resource_group_name               = azurerm_resource_group.rg.name
-  location                          = var.location
-  tags                              = local.tags
-  image_tag_filename                = "../container_images/enrichment_container_image/image_tag.txt"
-  random_string                     = random_string.random.result
-  
-  container_registry                = module.acr.login_server
-  container_registry_admin_username = module.acr.admin_username
-  container_registry_admin_password = module.acr.admin_password
-   
-  depends_on = [module.acr]
-
-}
-module "function_container_image" {
-  source                            = "./core/container_images/function_container_image"
-  container_name                    = "function_container_image"
-  resource_group_name               = azurerm_resource_group.rg.name
-  location                          = var.location
-  tags                              = local.tags
-  image_tag_filename                = "../container_images/function_container_image/image_tag.txt"
-  random_string                     = random_string.random.result
-  
-  container_registry                = module.acr.login_server
-  container_registry_admin_username = module.acr.admin_username
-  container_registry_admin_password = module.acr.admin_password
-   
-  depends_on = [module.acr]
-
-}
-module "webapp_container_image" {
-  source                            = "./core/container_images/webapp_container_image"
-  container_name                    = "webapp_container_image"
-  resource_group_name               = azurerm_resource_group.rg.name
-  location                          = var.location
-  tags                              = local.tags
-  image_tag_filename                = "../container_images/webapp_container_image/image_tag.txt"
-  random_string                     = random_string.random.result
-  
-  container_registry                = module.acr.login_server
-  container_registry_admin_username = module.acr.admin_username
-  container_registry_admin_password = module.acr.admin_password
-   
-  depends_on = [module.acr]
-
 }
 
 // SharePoint Connector is not supported in secure mode
@@ -656,6 +601,28 @@ module "video_indexer" {
   azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
   arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
   video_indexer_api_version           = var.video_indexer_api_version
+}
+
+module "azMonitor" {
+  source            = "./core/logging/monitor"
+  logAnalyticsName  = module.logging.logAnalyticsName
+  location          = var.location
+  logWorkbookName   = "infoasst-lw-${random_string.random.result}"
+  resourceGroupName = azurerm_resource_group.rg.name 
+  componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
+}
+
+// Bing Search is not supported in US Government or Secure Mode
+module "bingSearch" {
+  count                         = var.azure_environment == "AzureUSGovernment" ? 0 : var.is_secure_mode ? 0 : var.enableWebChat ? 1 : 0
+  source                        = "./core/ai/bingSearch"
+  name                          = "infoasst-bing-${random_string.random.result}"
+  resourceGroupName             = azurerm_resource_group.rg.name
+  tags                          = local.tags
+  sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  key_vault_name                = module.kvModule.keyVaultId
+  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 // USER ROLES
@@ -744,28 +711,6 @@ module "openAiRoleMgmt" {
   principalType   = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
-}
-
-module "azMonitor" {
-  source            = "./core/logging/monitor"
-  logAnalyticsName  = module.logging.logAnalyticsName
-  location          = var.location
-  logWorkbookName   = "infoasst-lw-${random_string.random.result}"
-  resourceGroupName = azurerm_resource_group.rg.name 
-  componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
-}
-
-// Bing Search is not supported in US Government or Secure Mode
-module "bingSearch" {
-  count                         = var.azure_environment == "AzureUSGovernment" ? 0 : var.is_secure_mode ? 0 : var.enableWebChat ? 1 : 0
-  source                        = "./core/ai/bingSearch"
-  name                          = "infoasst-bing-${random_string.random.result}"
-  resourceGroupName             = azurerm_resource_group.rg.name
-  tags                          = local.tags
-  sku                           = "S1" //supported SKUs can be found at https://www.microsoft.com/en-us/bing/apis/pricing
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = module.kvModule.keyVaultId
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 // DEPLOYMENT OF AZURE CUSTOMER ATTRIBUTION TAG

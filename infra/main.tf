@@ -303,7 +303,7 @@ module "enrichmentApp" {
 }
 
 # // The application frontend
-module "backend" {
+module "webapp" {
   source                              = "./core/host/webapp"
   name                                = var.backendServiceName != "" ? var.backendServiceName : "infoasst-web-${random_string.random.result}"
   plan_name                           = var.appServicePlanName != "" ? var.appServicePlanName : "infoasst-asp-${random_string.random.result}"
@@ -327,6 +327,8 @@ module "backend" {
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
+  private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
+  private_dns_zone_name               = var.is_secure_mode ? module.privateDnsZoneApp[0].privateDnsZoneName : null
 
   container_registry                  = module.acr.login_server
   container_registry_admin_username   = module.acr.admin_username

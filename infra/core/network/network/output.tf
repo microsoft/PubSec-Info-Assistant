@@ -39,6 +39,10 @@ output "snetKeyVault_id" {
   value = data.azurerm_subnet.keyVault.id
 }
 
+output "snetACR_id" {
+  value = data.azurerm_subnet.acr.id
+}
+
 output "snetApp_id" {
   value = data.azurerm_subnet.app.id
 }

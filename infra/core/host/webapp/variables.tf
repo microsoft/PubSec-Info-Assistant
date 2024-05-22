@@ -122,6 +122,32 @@ variable "runtimeVersion" {
   default = "3.10"
 }
 
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}
+
+variable "subnet_id" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "private_dns_zone_name" {
+  type = string
+}
+
+variable "snetIntegration_id" {
+  type = string
+}
+
+variable "randomString" {
+  type = string
+}
+
 variable "image_name" {
   description = "The Name of the image file in the Container Registry"
   type        = string

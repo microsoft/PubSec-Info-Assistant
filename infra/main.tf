@@ -175,7 +175,7 @@ module "privateDnsZoneACR" {
   name               = "privatelink.${var.azure_acr_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-acr-vnetlink-${random_string.random.result}"
-  virtual_network_id = module.network["resource"].vnet_id
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 

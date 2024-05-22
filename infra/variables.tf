@@ -43,6 +43,7 @@ variable "requireWebsiteSecurityMembership" {
   default = false
 }
 
+//// Feature flags and supporting variables
 variable "enableBingSafeSearch" {
   type    = bool
   default = true
@@ -79,8 +80,8 @@ variable "enableMultimedia" {
   
 }
 ////
-// variables that can vary based on the Azure environment being targeted
-////
+
+//// Variables that can vary based on the Azure environment being targeted
 variable "azure_environment" {
   type        = string
   default     = "AzureCloud"
@@ -115,6 +116,10 @@ variable "azure_ai_text_analytics_domain" {
   type = string
 }
 
+variable "azure_ai_form_recognizer_domain" {
+  type = string
+}
+
 variable "azure_search_domain" {
   type = string
 }
@@ -133,11 +138,49 @@ variable "arm_template_schema_mgmt_api" {
   default     = "https://schema.management.azure.com"
   description = "The URI root for ARM template Management API. Defaults to value for 'AzureCloud'"
 }
+
+variable "azure_keyvault_domain" {
+  type = string
+}
+
+variable "cosmosdb_domain" {
+  type = string
+}
+
+variable "azure_monitor_domain" {
+  type = string
+}
+
+variable "azure_monitor_oms_domain" {
+  type = string
+}
+
+variable "azure_monitor_ods_domain" {
+  type = string
+}
+
+variable "azure_automation_domain" {
+  type = string
+}
+
+variable "azure_ai_document_intelligence_domain" {
+  type = string
+}
+
+variable "azure_ai_videoindexer_domain" {
+  type = string
+}
+
+variable "azure_bing_search_domain" {
+  type = string
+}
+
+variable "azure_ai_private_link_domain" {
+  type = string
+}
 ////
 
-////
-// Variables that are used for CI/CD automation
-////
+//// Variables that are used for CI/CD automation
 variable "isInAutomation" {
   type    = bool
   default = false
@@ -165,9 +208,7 @@ variable "aadMgmtServicePrincipalId" {
 }
 ////
 
-////
-// Variables that are used for the Azure OpenAI service
-////
+//// Variables that are used for the Azure OpenAI service
 variable "useExistingAOAIService" {
   type = bool
 }
@@ -233,6 +274,99 @@ variable "sentenceTransformerEmbeddingVectorSize" {
 variable "embeddingsDeploymentCapacity" {
   type    = number
   default = 240
+}
+////
+
+//// Variables that are used for Secure Mode
+variable "is_secure_mode" {
+  type    = bool
+  default = false
+}
+
+variable "virtual_network_CIDR" {
+  type    = string
+  default = "10.0.0.0/21"
+}
+
+variable "azure_monitor_CIDR" {
+  type    = string
+  default = "10.0.0.64/26"
+}
+
+variable "storage_account_CIDR" {
+  type    = string
+  default = "10.0.1.0/26"
+}
+
+variable "cosmos_db_CIDR" {
+  type    = string
+  default = "10.0.1.64/26"
+}
+
+variable "azure_ai_CIDR" {
+  type    = string
+  default = "10.0.1.128/26"
+}
+
+variable "key_vault_CIDR" {
+  type    = string
+  default = "10.0.7.64/26"
+}
+
+variable "webapp_CIDR" {
+  type    = string
+  default = "10.0.2.0/26"
+}
+
+variable "functions_CIDR" {
+  type    = string
+  default = "10.0.3.0/26"
+}
+
+variable "enrichment_app_CIDR" {
+  type    = string
+  default = "10.0.4.0/26"
+}
+
+variable "search_service_CIDR" {
+  type    = string
+  default = "10.0.5.0/26"
+}
+
+variable "azure_video_indexer_CIDR" {
+  type    = string
+  default = "10.0.5.128/26"
+}
+
+variable "bing_service_CIDR" {
+  type    = string
+  default = "10.0.6.0/26"
+}
+
+variable "azure_openAI_CIDR" {
+  type    = string
+  default = "10.0.6.128/26"
+}
+
+variable "integration_CIDR" {
+  type    = string
+  default = "10.0.7.0/26"
+
+}
+
+variable "ddos_plan_id" {
+  type    = string
+  default = ""
+}
+
+variable "openai_public_network_access_enabled" {
+  type    = string
+  default = "Enabled"
+}
+
+variable "kv_secret_expiration" {
+  type = string
+  description = "The value for key vault secret expiration in  seconds since 1970-01-01T00:00:00Z"
 }
 ////
 

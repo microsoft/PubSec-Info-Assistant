@@ -1,17 +1,28 @@
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_key_vault" "kv" {
-  name                        = var.name
-  location                    = var.location
-  resource_group_name         = var.resourceGroupName // Replace with your resource group name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  tags                        = var.tags
-  enabled_for_template_deployment = true
-  soft_delete_retention_days  = 7
-  purge_protection_enabled    = true
+data "azurerm_private_dns_zone" "kv_dns_zone" {
+  name                = "privatelink.${var.azure_keyvault_domain}"
+  resource_group_name = var.resourceGroupName
 }
 
+resource "azurerm_key_vault" "kv" {
+  name                            = var.name
+  location                        = var.location
+  resource_group_name             = var.resourceGroupName // Replace with your resource group name
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
+  sku_name                        = "standard"
+  tags                            = var.tags
+  enabled_for_template_deployment = true
+  soft_delete_retention_days      = 7
+  purge_protection_enabled        = true
+  public_network_access_enabled   = var.is_secure_mode ? false : true
+
+  network_acls {
+    default_action             = var.is_secure_mode ? "Deny" : "Allow" 
+    bypass                     = "AzureServices"
+    virtual_network_subnet_ids = [var.kv_subnet]
+  }
+}
  
 resource "azurerm_key_vault_access_policy" "infoasst" {
   depends_on  = [
@@ -32,24 +43,33 @@ resource "azurerm_key_vault_access_policy" "infoasst" {
     ]
 }
 
-resource "azurerm_key_vault_secret" "spClientKeySecret" {
-  depends_on  = [
-    azurerm_key_vault_access_policy.infoasst,
-    azurerm_key_vault.kv
-  ]
-  name         = "AZURE-CLIENT-SECRET"
-  value        = var.spClientSecret
-  key_vault_id = azurerm_key_vault.kv.id
+module "spClientKeySecret" {
+  source = "../keyvaultSecret"
+  resourceGroupName             = var.resourceGroupName
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  key_vault_name                = azurerm_key_vault.kv.name
+  secret_name                   = "AZURE-CLIENT-SECRET"
+  secret_value                  = var.spClientSecret
+  tags                          = var.tags
+  alias                         = "clientsecret"
+  kv_secret_expiration          = var.kv_secret_expiration
 }
 
-output "keyVaultName" {
-  value = azurerm_key_vault.kv.name
-}
+resource "azurerm_private_endpoint" "kv_private_endpoint" {
+  name                = "${var.name}-private-endpoint"
+  location            = var.location
+  resource_group_name = var.resourceGroupName
+  subnet_id           = var.kv_subnet
 
-output "keyVaultId" {
-  value = azurerm_key_vault.kv.id
-}
+  private_service_connection {
+    name                           = "${var.name}-kv-connection"
+    private_connection_resource_id = azurerm_key_vault.kv.id
+    is_manual_connection           = false
+    subresource_names              = ["vault"]
+  }
 
-output "keyVaultUri" {
-  value = azurerm_key_vault.kv.vault_uri
+  private_dns_zone_group {
+    name                 = "kv-dns-zone-group"
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.kv_dns_zone.id]
+  }
 }

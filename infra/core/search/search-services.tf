@@ -10,31 +10,41 @@ resource "azurerm_search_service" "search" {
     type = "SystemAssigned"
   }
 
-  public_network_access_enabled = true
+  public_network_access_enabled = var.is_secure_mode ? false : true
   replica_count                 = 1
   partition_count               = 1
   semantic_search_sku           = var.semanticSearch 
 }
 
-resource "azurerm_key_vault_secret" "search_service_key" {
-  name         = "AZURE-SEARCH-SERVICE-KEY"
-  value        = data.azurerm_search_service.search.primary_key
-  key_vault_id = var.keyVaultId
+module "search_service_key" {
+  source                        = "../security/keyvaultSecret"
+  key_vault_name                = var.key_vault_name
+  resourceGroupName             = var.resourceGroupName
+  secret_name                   = "AZURE-SEARCH-SERVICE-KEY"
+  secret_value                  = azurerm_search_service.search.primary_key
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  alias                         = "searchkey"
+  tags                          = var.tags
+  kv_secret_expiration          = var.kv_secret_expiration
 }
 
-output "id" {
-  value = azurerm_search_service.search.id
-}
+resource "azurerm_private_endpoint" "searchPrivateEndpoint" {
+  count                         = var.is_secure_mode ? 1 : 0
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = var.subnetResourceId
+  custom_network_interface_name = "infoasstsearchnic"
 
-output "endpoint" {
-  value = "https://${azurerm_search_service.search.name}.${var.azure_search_domain}/"
-}
+  private_service_connection {
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_search_service.search.id
+    is_manual_connection           = false
+    subresource_names              = ["searchService"]
+  }
 
-output "name" {
-  value = azurerm_search_service.search.name
-}
-
-data "azurerm_search_service" "search" {
-  name                = azurerm_search_service.search.name
-  resource_group_name = var.resourceGroupName
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
 }

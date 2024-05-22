@@ -72,7 +72,7 @@ output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.formrecognizer.formRecognizerAccountEndpoint
+  value = module.aiDocIntelligence.formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -164,11 +164,11 @@ output "AZURE_ENVIRONMENT" {
 }
 
 output "BING_SEARCH_ENDPOINT" {
-  value = var.enableWebChat ? module.bingSearch.endpoint : ""
+  value = var.enableWebChat ? module.bingSearch[0].endpoint : ""
 }
 
 output "BING_SEARCH_KEY" {
-  value = var.enableWebChat ? module.bingSearch.key : ""
+  value = var.enableWebChat ? module.bingSearch[0].key : ""
 }
 
 output "ENABLE_BING_SAFE_SEARCH" {

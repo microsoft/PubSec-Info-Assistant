@@ -1,9 +1,21 @@
+variable "arm_template_schema_mgmt_api" {
+  type = string
+}
+
 variable "resourceGroupName" {
   type    = string
   default = ""
 }
 
-variable "name" {
+variable "key_vault_name" {
+  type = string
+}
+
+variable "secret_name" {
+  type = string
+}
+
+variable "secret_value" {
   type = string
 }
 
@@ -12,17 +24,8 @@ variable "tags" {
   default = {}
 }
 
-variable "sku" {
+variable "alias" {
   type = string
-}
-
-variable "arm_template_schema_mgmt_api" {
-  type = string
-}
-
-variable "key_vault_name" { 
-  type = string
-  sensitive   = true
 }
 
 variable "kv_secret_expiration" {

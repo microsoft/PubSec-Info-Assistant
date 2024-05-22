@@ -256,6 +256,45 @@ variable "azure_ai_text_analytics_domain" {
   type = string
 }
 
+variable "subnet_id" {
+  type = string
+  default = ""
+}
+
+variable "subnetIntegration_id" {
+  type = string
+  default = ""
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}
+
+variable "managedIdentity" {
+  type = bool
+  default = false
+}
+
+variable "ftpsState" {
+  type = string
+  default = "FtpsOnly"
+}
+
+variable "azure_portal_domain" {
+  type = string
+}
+
+variable "allowedOrigins" {
+  type = list(string)
+  default = []
+}
+
 variable "image_tag" {
   description = "The tag of the image in the Container Registry"
   type        = string

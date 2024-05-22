@@ -327,7 +327,8 @@ module "webapp" {
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
-  subnet_id                           = var.is_secure_mode ? module.network["resource"].snetApp_id : null
+  subnet_id                           = var.is_secure_mode ? module.network[0].snetApp_id : null
+  snetIntegration_id                  = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
   private_dns_zone_name               = var.is_secure_mode ? module.privateDnsZoneApp[0].privateDnsZoneName : null
 
@@ -571,7 +572,7 @@ module "acr"{
   name                  = "acr${random_string.random.result}" 
   location              = var.location
   resourceGroupName     = azurerm_resource_group.rg.name
-  snetACR_id            = var.is_secure_mode ? module.network["resource"].snetACR_id : null
+  snetACR_id            = var.is_secure_mode ? module.network[0].snetACR_id : null
   private_dns_zone_name = var.is_secure_mode ? module.privateDnsZoneACR[0].privateDnsZoneName : null
   private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneACR[0].privateDnsZoneResourceId] : null
 }
@@ -680,7 +681,7 @@ module "openAiRoleBackend" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId      = module.backend.identityPrincipalId
+  principalId      = module.webapp.identityPrincipalId
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -691,7 +692,7 @@ module "storageRoleBackend" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = module.backend.identityPrincipalId
+  principalId      = module.webapp.identityPrincipalId
   roleDefinitionId = local.azure_roles.StorageBlobDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -702,7 +703,7 @@ module "searchRoleBackend" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = module.backend.identityPrincipalId
+  principalId      = module.webapp.identityPrincipalId
   roleDefinitionId = local.azure_roles.SearchIndexDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -724,7 +725,7 @@ module "aviRoleBackend" {
   source            = "./core/security/role"
   count             = var.enableMultimedia ? 1 : 0
   scope             = module.video_indexer[0].vi_id
-  principalId       = module.backend.identityPrincipalId
+  principalId       = module.webapp.identityPrincipalId
   roleDefinitionId  = local.azure_roles.Contributor
   principalType     = "ServicePrincipal"
   subscriptionId    = data.azurerm_client_config.current.subscription_id

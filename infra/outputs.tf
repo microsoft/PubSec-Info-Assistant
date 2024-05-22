@@ -36,11 +36,11 @@ output "AZURE_STORAGE_UPLOAD_CONTAINER" {
 }
 
 output "BACKEND_URI" {
-  value = module.backend.uri
+  value = module.webapp.uri
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.web_app_name 
+  value = module.webapp.web_app_name 
 }
 
 output "RESOURCE_GROUP_NAME" {

@@ -1,4 +1,3 @@
-
 # Create the web app service plan
 resource "azurerm_service_plan" "appServicePlan" {
   name                = var.plan_name
@@ -72,12 +71,14 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 
 # Create the web app
 resource "azurerm_linux_web_app" "app_service" {
-  name                = var.name
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  service_plan_id = azurerm_service_plan.appServicePlan.id
-  https_only          = true
-  tags                = var.tags
+  name                                = var.name
+  location                            = var.location
+  resource_group_name                 = var.resourceGroupName
+  service_plan_id                     = azurerm_service_plan.appServicePlan.id
+  https_only                          = true
+  tags                                = var.tags
+  public_network_access_enabled       = var.is_secure_mode ? false : true 
+  virtual_network_subnet_id           = var.is_secure_mode ? var.snetIntegration_id : null
 
   site_config {
     application_stack {
@@ -85,21 +86,22 @@ resource "azurerm_linux_web_app" "app_service" {
       docker_registry_url       = var.container_registry
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password
-      python_version            = var.runtimeVersion
     }
     always_on                      = var.alwaysOn
-    ftps_state                     = var.ftpsState
+    ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
     app_command_line               = var.appCommandLine
     health_check_path              = var.healthCheckPath
+    
     cors {
       allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
+
   }
 
   identity {
     type = var.managedIdentity ? "SystemAssigned" : "None"
   }
- 
+  
   app_settings = merge(
     var.appSettings,
     {
@@ -125,6 +127,7 @@ resource "azurerm_linux_web_app" "app_service" {
         retention_in_mb   = 35
       }
     }
+    failed_request_tracing = true
   }
 
   auth_settings_v2 {
@@ -146,7 +149,6 @@ resource "azurerm_linux_web_app" "app_service" {
       token_store_enabled = false
     }
   }
-
 }
 
 data "azurerm_key_vault" "existing" {
@@ -166,42 +168,23 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
+resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
+  count                         = var.is_secure_mode ? 1 : 0
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = var.subnet_id
+  tags                          = var.tags
 
-resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
-  name                       = azurerm_linux_web_app.app_service.name
-  target_resource_id         = azurerm_linux_web_app.app_service.id
-  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
-
-  enabled_log  {
-    category = "AppServiceAppLogs"
+  private_service_connection {
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_linux_web_app.app_service.id
+    is_manual_connection           = false
+    subresource_names               = ["sites"]
   }
 
-  enabled_log {
-    category = "AppServicePlatformLogs"
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
   }
-
-  enabled_log {
-    category = "AppServiceConsoleLogs"
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
-}
-
-output "identityPrincipalId" {
-  value = var.managedIdentity ? azurerm_linux_web_app.app_service.identity.0.principal_id : ""
-}
-
-output "web_app_name" {
-  value = azurerm_linux_web_app.app_service.name
-}
-
-output "uri" {
-  value = "https://${azurerm_linux_web_app.app_service.default_hostname}"
-}
-
-output "web_serviceplan_name" {
-  value = azurerm_service_plan.appServicePlan.name
 }

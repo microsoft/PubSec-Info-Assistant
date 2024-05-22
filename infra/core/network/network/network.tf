@@ -47,6 +47,7 @@ resource "azurerm_resource_group_template_deployment" "vnet_w_subnets" {
     "subnet_Integration_CIDR"   = { value = "${var.snetIntegrationCIDR}" },
     "subnet_AiSearch_CIDR"      = { value = "${var.snetSearchServiceCIDR}" },
     "subnet_AzureOpenAI_CIDR"   = { value = "${var.snetAzureOpenAICIDR}" },
+    "subnet_ACR_CIDR"           = { value = "${var.snetACRCIDR}" }
   })
   template_content = data.template_file.workflow.template
   # The filemd5 forces this to run when the file is changed
@@ -128,6 +129,13 @@ data "azurerm_subnet" "aiSearch" {
 data "azurerm_subnet" "azureOpenAI" {
   depends_on = [ azurerm_resource_group_template_deployment.vnet_w_subnets ]
   name                 = "azureOpenAI"
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
+data "azurerm_subnet" "acr" {
+  depends_on = [ azurerm_resource_group_template_deployment.vnet_w_subnets ]
+  name                 = "acr"
   virtual_network_name = var.vnet_name
   resource_group_name  = var.resourceGroupName
 }

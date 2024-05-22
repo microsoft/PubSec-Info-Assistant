@@ -168,6 +168,16 @@ module "privateDnsZoneCosmosDb" {
   tags               = local.tags
 }
 
+module "privateDnsZoneACR" {
+  source             = "./core/network/privateDNS"
+  count              = var.is_secure_mode ? 1 : 0
+  name               = "privatelink.${var.azure_acr_domain}"
+  resourceGroupName  = azurerm_resource_group.rg.name
+  vnetLinkName       = "infoasst-acr-vnetlink-${random_string.random.result}"
+  virtual_network_id = module.network["resource"].vnet_id
+  tags               = local.tags
+}
+
 module "logging" {
   depends_on = [ module.network ]
   source = "./core/logging/loganalytics"
@@ -526,6 +536,65 @@ module "functions" {
     module.cosmosdb,
     module.kvModule
   ]
+}
+
+module "acr"{
+  source                = "./core/container_registry"
+  name                  = "acr${random_string.random.result}" 
+  location              = var.location
+  resourceGroupName     = azurerm_resource_group.rg.name
+  snetACR_id            = var.is_secure_mode ? module.network["resource"].snetACR_id : null
+  private_dns_zone_name = var.is_secure_mode ? module.privateDnsZoneACR[0].privateDnsZoneName : null
+  private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneACR[0].privateDnsZoneResourceId] : null
+}
+
+module "enrichment_container_image" {
+  source                            = "./core/container_images/enrichment_container_image"
+  container_name                    = "enrichment_container_image"
+  resource_group_name               = azurerm_resource_group.rg.name
+  location                          = var.location
+  tags                              = local.tags
+  image_tag_filename                = "../container_images/enrichment_container_image/image_tag.txt"
+  random_string                     = random_string.random.result
+  
+  container_registry                = module.acr.login_server
+  container_registry_admin_username = module.acr.admin_username
+  container_registry_admin_password = module.acr.admin_password
+   
+  depends_on = [module.acr]
+
+}
+module "function_container_image" {
+  source                            = "./core/container_images/function_container_image"
+  container_name                    = "function_container_image"
+  resource_group_name               = azurerm_resource_group.rg.name
+  location                          = var.location
+  tags                              = local.tags
+  image_tag_filename                = "../container_images/function_container_image/image_tag.txt"
+  random_string                     = random_string.random.result
+  
+  container_registry                = module.acr.login_server
+  container_registry_admin_username = module.acr.admin_username
+  container_registry_admin_password = module.acr.admin_password
+   
+  depends_on = [module.acr]
+
+}
+module "webapp_container_image" {
+  source                            = "./core/container_images/webapp_container_image"
+  container_name                    = "webapp_container_image"
+  resource_group_name               = azurerm_resource_group.rg.name
+  location                          = var.location
+  tags                              = local.tags
+  image_tag_filename                = "../container_images/webapp_container_image/image_tag.txt"
+  random_string                     = random_string.random.result
+  
+  container_registry                = module.acr.login_server
+  container_registry_admin_username = module.acr.admin_username
+  container_registry_admin_password = module.acr.admin_password
+   
+  depends_on = [module.acr]
+
 }
 
 // SharePoint Connector is not supported in secure mode

@@ -124,6 +124,10 @@ variable "azure_search_domain" {
   type = string
 }
 
+variable "azure_acr_domain" {
+  type        = string
+}
+
 variable "use_semantic_reranker" {
   type    = bool
   default = true
@@ -352,6 +356,11 @@ variable "integration_CIDR" {
   type    = string
   default = "10.0.7.0/26"
 
+}
+
+variable "acr_CIDR" {
+  type    = string
+  default = "10.0.7.128/26"
 }
 
 variable "ddos_plan_id" {

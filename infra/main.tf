@@ -334,6 +334,7 @@ module "webapp" {
   container_registry_admin_username   = module.acr.admin_username
   container_registry_admin_password   = module.acr.admin_password
   image_name                          = module.webapp_container_image.webapp_image_name
+  randomString                        = random_string.random.result
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString

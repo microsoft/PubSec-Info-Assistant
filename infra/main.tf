@@ -564,7 +564,7 @@ module "acr"{
   name                  = "acr${random_string.random.result}" 
   location              = var.location
   resourceGroupName     = azurerm_resource_group.rg.name
-  snetACR_id            = var.is_secure_mode ? module.network["resource"].snetACR_id : null
+  snetACR_id            = var.is_secure_mode ? module.network[0].snetACR_id : null
   private_dns_zone_name = var.is_secure_mode ? module.privateDnsZoneACR[0].privateDnsZoneName : null
   private_dns_zone_ids  = var.is_secure_mode ? [module.privateDnsZoneACR[0].privateDnsZoneResourceId] : null
 }

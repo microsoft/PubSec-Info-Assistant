@@ -455,7 +455,7 @@ module "cognitiveServices" {
   key_vault_name                = module.kvModule.keyVaultName
   kv_secret_expiration          = var.kv_secret_expiration
   vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
-  subnet_name                   = "" //var.is_secure_mode ? module.network[0].**INSERT HERE** : null
+  subnet_name                   = var.is_secure_mode ? module.network[0].snetAzureAi_name : null
 }
 
 module "searchServices" {

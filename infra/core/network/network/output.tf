@@ -34,6 +34,10 @@ output "snetAzureAi_id" {
   value = data.azurerm_subnet.azureAi.id
 }
 
+output "snetAzureAi_name" {
+  value = data.azurerm_subnet.azureAi.name
+}
+
 output "snetKeyVault_id" {
   description = "The ID of the subnet dedicated for the Key Vault"
   value = data.azurerm_subnet.keyVault.id

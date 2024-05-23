@@ -25,10 +25,23 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Push the docker image to the container registry
+tag=$(cat "../functions/image_tag.txt")
+echo "Tag for the docker image is $tag"
+echo "Pushing the docker image to the container registry"
+printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_REGISTRY_USERNAME --password-stdin "https://${CONTAINER_REGISTRY}"
+docker tag functionapp $CONTAINER_REGISTRY/functionapp:$tag
+docker push $CONTAINER_REGISTRY/functionapp:$tag
+
+# Update the function app with the new image
+echo "Updating the function webapp with the new image"
+az webapp config container set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_REGISTRY/functionapp:$tag
+
 # deploy the zip file to the webapp
-az functionapp deploy --resource-group $RESOURCE_GROUP_NAME --name $AZURE_FUNCTION_APP_NAME --src-path functions.zip --type zip --async true --verbose
+# az functionapp deploy --resource-group $RESOURCE_GROUP_NAME --name $AZURE_FUNCTION_APP_NAME --src-path functions.zip --type zip --async true --verbose
 
 # Restart the Azure Functions after deployment
-az functionapp restart --name $AZURE_FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP_NAME
+# az functionapp restart --name $AZURE_FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP_NAME
 
 echo "Functions deployed successfully"
+echo -e "\n" 

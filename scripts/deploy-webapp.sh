@@ -46,7 +46,20 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Push the docker image to the container registry
+tag=$(cat "../container_images/webapp_container_image/image_tag.txt")
+echo "Tag for the docker image is $tag"
+echo "Pushing the docker image to the container registry"
+printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_REGISTRY_USERNAME --password-stdin "https://${CONTAINER_REGISTRY}"
+docker tag webapp $CONTAINER_REGISTRY/webapp:$tag
+docker push $CONTAINER_REGISTRY/webapp:$tag
+
+# Update the webapp with the new image
+echo "Updating the webapp with the new image"
+az webapp config container set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --docker-custom-image-name $CONTAINER_REGISTRY/webapp:$tag
+
 # deploy the zip file to the webapp
-az webapp deploy --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --type zip --src-path webapp.zip --async true --timeout 600000 --verbose
+# az webapp deploy --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --type zip --src-path webapp.zip --async true --timeout 600000 --verbose
 
 echo "Webapp deployed successfully"
+echo -e "\n"

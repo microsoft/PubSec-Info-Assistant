@@ -574,7 +574,6 @@ module "functions" {
   container_registry                    = module.acr.login_server
   container_registry_admin_username     = module.acr.admin_username
   container_registry_admin_password     = module.acr.admin_password
-  container_name                        = "functionapp"
 }
 
 module "acr"{

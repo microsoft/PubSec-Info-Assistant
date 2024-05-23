@@ -20,7 +20,7 @@ resource "azurerm_key_vault" "kv" {
   network_acls {
     default_action             = var.is_secure_mode ? "Deny" : "Allow" 
     bypass                     = "AzureServices"
-    virtual_network_subnet_ids = [var.kv_subnet]
+    virtual_network_subnet_ids = [var.subnet_id]
   }
 }
  
@@ -55,11 +55,18 @@ module "spClientKeySecret" {
   kv_secret_expiration          = var.kv_secret_expiration
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 resource "azurerm_private_endpoint" "kv_private_endpoint" {
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.kv_subnet
+  subnet_id           = data.azurerm_subnet.subnet[0].id
 
   private_service_connection {
     name                           = "${var.name}-kv-connection"

@@ -256,14 +256,16 @@ variable "azure_ai_text_analytics_domain" {
   type = string
 }
 
-variable "subnet_id" {
+variable "vnet_name" {
   type = string
-  default = ""
+}
+
+variable "subnet_name" {
+  type = string
 }
 
 variable "subnetIntegration_id" {
   type = string
-  default = ""
 }
 
 variable "private_dns_zone_ids" {
@@ -273,7 +275,6 @@ variable "private_dns_zone_ids" {
 variable "is_secure_mode" {
   description = "Specifies whether to deploy in secure mode"
   type        = bool
-  default     = false
 }
 
 variable "managedIdentity" {
@@ -313,4 +314,8 @@ variable "container_registry_admin_password" {
 variable "container_name" {
   description = "The name of the Docker container"
   type        = string
+}
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
 }

@@ -7,18 +7,18 @@ locals {
   stripped_container_registry = replace(var.container_registry, "https://", "")
 }
 
-resource "null_resource" "docker_push" {
-  provisioner "local-exec" {
-    command = <<-EOT
-        printf "%s" ${var.container_registry_admin_password} | docker login --username ${var.container_registry_admin_username} --password-stdin ${var.container_registry}
-        docker tag enrichment_container_image ${local.stripped_container_registry}/enrichment_container_image:${data.local_file.image_tag.content}
-        docker push ${local.stripped_container_registry}/enrichment_container_image:${data.local_file.image_tag.content}
-      EOT
-  }
-  triggers = {
-    always_run = timestamp()
-  }
-}
+#resource "null_resource" "docker_push" {
+#  provisioner "local-exec" {
+#    command = <<-EOT
+#        printf "%s" ${var.container_registry_admin_password} | docker login --username ${var.container_registry_admin_username} --password-stdin ${var.container_registry}
+#        docker tag enrichment_container_image ${local.stripped_container_registry}/enrichment_container_image:${data.local_file.image_tag.content}
+#        docker push ${local.stripped_container_registry}/enrichment_container_image:${data.local_file.image_tag.content}
+#      EOT
+#  }
+#  triggers = {
+#    always_run = timestamp()
+#  }
+#}
 
 // Create Enrichment App Service Plan 
 resource "azurerm_service_plan" "appServicePlan" {
@@ -140,6 +140,66 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
   identity {
     type = var.managedIdentity ? "SystemAssigned" : null
   }
+
+  logs {
+    application_logs {
+      file_system_level = "Verbose"
+    }
+    http_logs {
+      file_system {
+        retention_in_days = 1
+        retention_in_mb   = 35
+      }
+    }
+    failed_request_tracing = true
+  }
+
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
+  name                       = azurerm_linux_web_app.enrichmentapp.name
+  target_resource_id         = azurerm_linux_web_app.enrichmentapp.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log  {
+    category = "AppServiceAppLogs"
+  }
+
+  enabled_log {
+    category = "AppServicePlatformLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceConsoleLogs"
+  }
+  
+  enabled_log {
+    category = "AppServiceIPSecAuditLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceHTTPLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceAuditLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceAuthenticationLogs"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
 }
 
 resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
@@ -147,7 +207,7 @@ resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.subnet_id
+  subnet_id           = data.azurerm_subnet.subnet[0].id
 
   private_dns_zone_group {
     name = "privatednszonegroup"

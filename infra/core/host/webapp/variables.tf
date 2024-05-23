@@ -125,10 +125,13 @@ variable "runtimeVersion" {
 variable "is_secure_mode" {
   description = "Specifies whether to deploy in secure mode"
   type        = bool
-  default     = false
 }
 
-variable "subnet_id" {
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
   type = string
 }
 

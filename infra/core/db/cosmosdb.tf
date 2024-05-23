@@ -80,12 +80,19 @@ module "cosmos_db_key" {
   kv_secret_expiration          = var.kv_secret_expiration
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 resource "azurerm_private_endpoint" "cosmosPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = var.subnetResourceId
+  subnet_id                     = data.azurerm_subnet.subnet[0].id
   custom_network_interface_name = "infoasstcosmosnic"
 
   private_service_connection {

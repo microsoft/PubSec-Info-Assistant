@@ -39,8 +39,16 @@ variable "private_dns_zone_ids" {
   type = set(string)
 }
 
-variable "kv_subnet" {
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
   type = string  
+}
+
+variable "subnet_id" {
+  type = string
 }
 
 variable "azure_keyvault_domain" {

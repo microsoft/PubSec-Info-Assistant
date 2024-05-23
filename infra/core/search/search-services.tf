@@ -1,19 +1,19 @@
 
 resource "azurerm_search_service" "search" {
-  name                = var.name
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  sku                 = var.sku["name"]
-  tags                = var.tags
+  name                          = var.name
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  sku                           = var.sku["name"]
+  tags                          = var.tags
+  public_network_access_enabled = var.is_secure_mode ? false : true
+  local_authentication_enabled  = var.is_secure_mode ? false : true
+  replica_count                 = 1
+  partition_count               = 1
+  semantic_search_sku           = var.semanticSearch 
 
   identity {
     type = "SystemAssigned"
   }
-
-  public_network_access_enabled = var.is_secure_mode ? false : true
-  replica_count                 = 1
-  partition_count               = 1
-  semantic_search_sku           = var.semanticSearch 
 }
 
 module "search_service_key" {
@@ -28,12 +28,19 @@ module "search_service_key" {
   kv_secret_expiration          = var.kv_secret_expiration
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 resource "azurerm_private_endpoint" "searchPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = var.subnetResourceId
+  subnet_id                     = data.azurerm_subnet.subnet[0].id
   custom_network_interface_name = "infoasstsearchnic"
 
   private_service_connection {

@@ -47,17 +47,17 @@ variable "is_secure_mode" {
   default = false
 }
 
-variable "subnet_id" {
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
   type = string
   default = ""
 }
 
 variable "private_dns_zone_ids" {
   type = set(string)
-}
-
-variable "subnetResourceId" {
-  type = string
 }
 
 variable "arm_template_schema_mgmt_api" {

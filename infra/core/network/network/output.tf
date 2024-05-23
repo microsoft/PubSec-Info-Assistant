@@ -14,20 +14,16 @@ output "vnet_id" {
   value = jsondecode(azurerm_resource_group_template_deployment.vnet_w_subnets.output_content).id.value
 }
 
-output "snetAmpls_id" {
-  value = data.azurerm_subnet.ampls.id
-}
-
-output "snetStorage_id" {
-  value = data.azurerm_subnet.storageAccount.id
+output "snetAmpls_name" {
+  value = data.azurerm_subnet.ampls.name
 }
 
 output "snetStorage_name" {
   value = data.azurerm_subnet.storageAccount.name
 }
 
-output "snetCosmosDb_id" {
-  value = data.azurerm_subnet.cosmosDb.id
+output "snetCosmosDb_name" {
+  value = data.azurerm_subnet.cosmosDb.name
 }
 
 output "snetAzureAi_id" {
@@ -43,32 +39,44 @@ output "snetKeyVault_id" {
   value = data.azurerm_subnet.keyVault.id
 }
 
-output "snetACR_id" {
-  value = data.azurerm_subnet.acr.id
+output "snetKeyVault_name" {
+  value = data.azurerm_subnet.keyVault.name
 }
 
-output "snetApp_id" {
-  value = data.azurerm_subnet.app.id
+output "snetACR_name" {
+  value = data.azurerm_subnet.acr.name
+}
+
+output "snetApp_name" {
+  value = data.azurerm_subnet.app.name
 }
 
 output "snetFunction_id" {
   value = data.azurerm_subnet.function.id
 }
 
-output "snetEnrichment_id" {
-  value = data.azurerm_subnet.enrichment.id
+output "snetFunction_name" {
+  value = data.azurerm_subnet.function.name
+}
+
+output "snetEnrichment_name" {
+  value = data.azurerm_subnet.enrichment.name
 }
 
 output "snetIntegration_id" {
   value = data.azurerm_subnet.integration.id
 }
 
-output "snetSearch_id" {
-  value = data.azurerm_subnet.aiSearch.id
+output "snetSearch_name" {
+  value = data.azurerm_subnet.aiSearch.name
 }
 
 output "snetAzureOpenAI_id" {
   value = data.azurerm_subnet.azureOpenAI.id
+}
+
+output "snetAzureOpenAI_name" {
+  value = data.azurerm_subnet.azureOpenAI.name
 }
 
 output "ddos_plan_id" {

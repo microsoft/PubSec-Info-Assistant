@@ -6,6 +6,7 @@ resource "azurerm_cognitive_account" "openaiAccount" {
   kind                                = var.kind
   sku_name                            = var.sku["name"]
   public_network_access_enabled       = var.is_secure_mode ? false : true
+  local_auth_enabled                  = var.is_secure_mode ? false : true
   outbound_network_access_restricted  = var.outbound_network_access_restricted
   custom_subdomain_name               = var.name
   tags = var.tags
@@ -16,7 +17,7 @@ resource "azurerm_cognitive_account" "openaiAccount" {
 
 
     virtual_network_rules {
-      subnet_id = var.subnetResourceId
+      subnet_id = var.subnet_id
     }
   }
 }
@@ -37,12 +38,19 @@ resource "azurerm_cognitive_deployment" "deployment" {
   }
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 resource "azurerm_private_endpoint" "openaiPrivateEndpoint" {
   count               = var.useExistingAOAIService ? 0 : var.is_secure_mode ? 1 : 0
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.subnetResourceId
+  subnet_id           = data.azurerm_subnet.subnet[0].id
 
   private_service_connection {
     name                            = "cognitiveAccount"

@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "storage" {
   enable_https_traffic_only       = true
   public_network_access_enabled   = var.is_secure_mode ? false : true
   allow_nested_items_to_be_public = var.is_secure_mode ? false : true
-  shared_access_key_enabled       = var.is_secure_mode ? false : true
+  #shared_access_key_enabled       = var.is_secure_mode ? false : true
 
   network_rules {  
     default_action                = var.is_secure_mode ? "Deny" : "Allow"
@@ -37,6 +37,100 @@ resource "azurerm_storage_account" "storage" {
       days = 7
     }
         
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
+  name                       = azurerm_storage_account.storage.name
+  target_resource_id         = azurerm_storage_account.storage.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transactions"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "blob_diagnostic_logs" {
+  name                       = "${azurerm_storage_account.storage.name}-blob"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/blobServices"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+  enabled_log  {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transactions"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "file_diagnostic_logs" {
+  name                       = "${azurerm_storage_account.storage.name}-file"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/fileServices"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+  enabled_log  {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Transactions"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_logs" {
+  name                       = "${azurerm_storage_account.storage.name}-queue"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/queueServices"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+  enabled_log  {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Transactions"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "table_diagnostic_logs" {
+  name                       = "${azurerm_storage_account.storage.name}-table"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/tableServices"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+  enabled_log  {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Transactions"
+    enabled  = true
   }
 }
 

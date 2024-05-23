@@ -7,18 +7,18 @@ locals {
   stripped_container_registry = replace(var.container_registry, "https://", "")
 }
 
-resource "null_resource" "docker_push" {
-  provisioner "local-exec" {
-    command = <<-EOT
-        printf "%s" ${var.container_registry_admin_password} | docker login --username ${var.container_registry_admin_username} --password-stdin ${var.container_registry}
-        docker tag function_container_image ${local.stripped_container_registry}/function_container_image:${data.local_file.image_tag.content}
-        docker push ${local.stripped_container_registry}/function_container_image:${data.local_file.image_tag.content}
-      EOT
-  }
-  triggers = {
-    always_run = timestamp()
-  }
-}
+#resource "null_resource" "docker_push" {
+#  provisioner "local-exec" {
+#    command = <<-EOT
+#        printf "%s" ${var.container_registry_admin_password} | docker login --username ${var.container_registry_admin_username} --password-stdin ${var.container_registry}
+#        docker tag function_container_image ${local.stripped_container_registry}/function_container_image:${data.local_file.image_tag.content}
+#        docker push ${local.stripped_container_registry}/function_container_image:${data.local_file.image_tag.content}
+#      EOT
+#  }
+#  triggers = {
+#    always_run = timestamp()
+#  }
+#}
 
 # Terraform resource file to create a service plan for the function app
 resource "azurerm_service_plan" "funcServicePlan" {
@@ -198,6 +198,25 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
+  name                       = azurerm_linux_function_app.function_app.name
+  target_resource_id         = azurerm_linux_function_app.function_app.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log  {
+    category = "FunctionAppLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceAuthenticationLogs"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_key_vault_access_policy" "policy" {
   key_vault_id = data.azurerm_key_vault.existing.id
 
@@ -211,12 +230,19 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 resource "azurerm_private_endpoint" "privateFunctionEndpoint" {
   count               = var.is_secure_mode ? 1 : 0
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.subnet_id
+  subnet_id           = data.azurerm_subnet.subnet[0].id
   tags                = var.tags
    
 

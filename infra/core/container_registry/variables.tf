@@ -13,7 +13,11 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "snetACR_id" {
+variable "vnet_name" {
+  type = string  
+}
+
+variable "subnet_name" {
   type = string
 }
 

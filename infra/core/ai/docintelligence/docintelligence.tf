@@ -1,12 +1,13 @@
 resource "azurerm_cognitive_account" "formRecognizerAccount" {
-  name                     = var.name
-  location                 = var.location
-  resource_group_name      = var.resourceGroupName
-  kind                     = "FormRecognizer"
-  sku_name                 = var.sku["name"]
-  custom_subdomain_name    = var.customSubDomainName
+  name                          = var.name
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  kind                          = "FormRecognizer"
+  sku_name                      = var.sku["name"]
+  custom_subdomain_name         = var.customSubDomainName
   public_network_access_enabled = var.is_secure_mode ? false : true
-  tags                     = var.tags
+  local_auth_enabled            = var.is_secure_mode ? false : true
+  tags                          = var.tags
 }
 
 module "docIntelligenceKey" {
@@ -21,12 +22,19 @@ module "docIntelligenceKey" {
   kv_secret_expiration          = var.kv_secret_expiration
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 resource "azurerm_private_endpoint" "formPrivateEndpoint" {
   count               = var.is_secure_mode ? 1 : 0
   name                = "${var.name}-private-endpoint"
   location            = var.location
   resource_group_name = var.resourceGroupName
-  subnet_id           = var.subnetResourceId
+  subnet_id           = data.azurerm_subnet.subnet[0].id
 
   private_service_connection {
     name                           = "cognitiveAccount"

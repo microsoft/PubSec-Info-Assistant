@@ -17,8 +17,4 @@ output "name" {
 
 output "subnet_integration_id" {  
   value = var.subnetIntegration_id  
-}  
-  
-output "subnet_id" {  
-  value = var.subnet_id  
 } 

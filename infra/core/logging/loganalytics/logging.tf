@@ -43,13 +43,20 @@ resource "azurerm_monitor_private_link_scoped_service" "ampl_ss_app_insights" {
   linked_resource_id  = azurerm_application_insights.applicationInsights.id
 }
 
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
 // add private endpoint for azure monitor - metrics, app insights, log analytics
 resource "azurerm_private_endpoint" "ampls" {
   count                             = var.is_secure_mode ? 1 : 0
   name                              = "${var.privateLinkScopeName}-private-endpoint"
   location                          = var.location
   resource_group_name               = var.resourceGroupName
-  subnet_id                         = var.ampls_subnet_id
+  subnet_id                         = data.azurerm_subnet.subnet[0].id
   custom_network_interface_name     = "infoasstamplsnic"
 
   private_service_connection {

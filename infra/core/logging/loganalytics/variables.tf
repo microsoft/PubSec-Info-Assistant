@@ -77,7 +77,11 @@ variable "privateLinkScopeName" {
   type    = string
 }
 
-variable "ampls_subnet_id" {
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
   type = string
 }
 

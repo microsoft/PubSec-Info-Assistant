@@ -165,8 +165,3 @@ variable "container_registry_admin_password" {
   description = "The admin password of the container registry"
   type        = string
 }
-
-variable "container_name" {
-  description = "The name of the Docker container"
-  type        = string
-}

@@ -18,9 +18,9 @@ build-deploy-functions: build extract-env deploy-functions ##Build and Deploy th
 build: ## Build application code
 	@./scripts/build.sh
 
-build-containers: extract-env ## Build the docker containers for the function, webapp, and enrichment
+build-containers: ## Build the docker containers for the function, webapp, and enrichment
 	@./container_images/enrichment_container_image/docker-build.sh
-	@./container_images/function_container_image/docker-build.sh
+	@./functions/docker-build.sh
 	@./container_images/webapp_container_image/docker-build.sh
 
 infrastructure: check-subscription ## Deploy infrastructure

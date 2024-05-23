@@ -5,7 +5,8 @@ set -eo pipefail
 figlet "Build Docker Container Images"
 
 # Build the Docker image with the correct context
-echo "Building Docker image with Dockerfile: $SCRIPT_DIR/Dockerfile"
+echo "Building Docker image: enrichmentapp"
+echo -e "\n"
 sudo docker build -f ./container_images/enrichment_container_image/Dockerfile -t enrichmentapp .
 
 # Generate a unique tag for the image
@@ -17,3 +18,4 @@ sudo docker tag enrichmentapp enrichmentapp:$tag
 echo -n "$tag" > ./container_images/enrichment_container_image/image_tag.txt
 
 echo "Build and tagging complete. Tag: $tag"
+echo -e "\n"

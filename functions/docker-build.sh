@@ -15,7 +15,7 @@ echo "Tagging image with: $tag"
 sudo docker tag functions functions:$tag
 
 # Output the tag to a file to be used in deployment
-echo -n "$tag" > ./image_tag.txt
+echo -n "$tag" > ./functions/image_tag.txt
 
 echo "Build and tagging complete. Tag: $tag"
 echo -e "\n"

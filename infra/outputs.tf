@@ -192,14 +192,14 @@ output "MAX_CSV_FILE_SIZE" {
 }
 
 output "CONTAINER_REGISTRY" {
-  value = module.container_registry.login_server
+  value = module.acr.login_server
 }
 
 output "CONTAINER_REGISTRY_USERNAME" {
-  value = module.container_registry.admin_username
+  value = module.acr.admin_username
 }
 
 output "CONTAINER_REGISTRY_PASSWORD" {
   sensitive = true
-  value = module.container_registry.admin_password
+  value = module.acr.admin_password
 }

@@ -185,7 +185,20 @@ output "AZURE_AI_TEXT_ANALYTICS_DOMAIN" {
 
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
-}
+}CONTAINER_APP_SERVICE
 output "MAX_CSV_FILE_SIZE" {
   value = var.maxCsvFileSize
+}
+
+output "CONTAINER_REGISTRY" {
+  value = module.container_registry.login_server
+}
+
+output "CONTAINER_REGISTRY_USERNAME" {
+  value = module.container_registry.admin_username
+}
+
+output "CONTAINER_REGISTRY_PASSWORD" {
+  sensitive = true
+  value = module.container_registry.admin_password
 }

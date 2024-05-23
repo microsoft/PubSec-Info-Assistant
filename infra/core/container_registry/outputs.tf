@@ -1,5 +1,5 @@
 output "login_server" {
-  value = "https://${azurerm_container_registry.acr.login_server}"
+  value = azurerm_container_registry.acr.login_server
 }
 
 output "admin_username" {

@@ -63,15 +63,6 @@ jq -r  '
             "env_var": "AZURE_FUNCTION_APP_NAME"
         },
         {
-            "path": "CONTAINER_REGISTRY_NAME",
-            "env_var": "CONTAINER_REGISTRY_NAME"
-        },
-        {
-            "path": "CONTAINER_APP_SERVICE",
-            "env_var": "CONTAINER_APP_SERVICE"
-
-        },
-        {
             "path": "embeddingsqueue",
             "env_var": "EMBEDDINGS_QUEUE"
         },
@@ -122,6 +113,18 @@ jq -r  '
         {
             "path": "SERVICE_MANAGEMENT_REFERENCE",
             "env_var": "SERVICE_MANAGEMENT_REFERENCE"
+        },
+        {
+            "path": "CONTAINER_REGISTRY",
+            "env_var": "CONTAINER_REGISTRY"
+        },
+        {
+            "path": "CONTAINER_REGISTRY_USERNAME",
+            "env_var": "CONTAINER_REGISTRY_USERNAME"
+        },
+        {
+            "path": "CONTAINER_REGISTRY_PASSWORD",
+            "env_var": "CONTAINER_REGISTRY_PASSWORD"
         }
     ]
         as $env_vars_to_extract

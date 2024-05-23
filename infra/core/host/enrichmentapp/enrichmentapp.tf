@@ -96,7 +96,7 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
 
     application_stack {
       docker_image_name         = "https://${var.container_registry}/enrichmentapp:${data.local_file.image_tag.content}"
-      docker_registry_url       = var.container_registry
+      docker_registry_url       = "https://${var.container_registry}"
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password
     }

@@ -17,6 +17,20 @@ resource "azurerm_application_insights" "applicationInsights" {
   workspace_id        = azurerm_log_analytics_workspace.logAnalytics.id
 }
 
+// Create Diagnostic Setting for NSG here since the log analytics workspace is created here after the network is created
+resource "azurerm_monitor_diagnostic_setting" "nsg_diagnostic_logs" {
+  count                      = var.is_secure_mode ? 1 : 0
+  name                       = var.nsg_name
+  target_resource_id         = var.nsg_id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.logAnalytics.id
+  enabled_log  {
+    category = "NetworkSecurityGroupEvent"
+  }
+  enabled_log {
+    category = "NetworkSecurityGroupRuleCounter"
+  }
+}
+
 // Create Azure Private Link Scope for Azure Monitor
 resource "azurerm_monitor_private_link_scope" "ampls" {
   count               = var.is_secure_mode ? 1 : 0

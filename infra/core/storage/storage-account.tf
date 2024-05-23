@@ -49,14 +49,14 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
     enabled  = true
   }
   metric {
-    category = "Transactions"
+    category = "Transaction"
     enabled  = true
   }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "blob_diagnostic_logs" {
   name                       = "${azurerm_storage_account.storage.name}-blob"
-  target_resource_id         = "${azurerm_storage_account.storage.id}/blobServices"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/blobServices/default"
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
   enabled_log  {
     category = "StorageRead"
@@ -72,14 +72,14 @@ resource "azurerm_monitor_diagnostic_setting" "blob_diagnostic_logs" {
     enabled  = true
   }
   metric {
-    category = "Transactions"
+    category = "Transaction"
     enabled  = true
   }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "file_diagnostic_logs" {
   name                       = "${azurerm_storage_account.storage.name}-file"
-  target_resource_id         = "${azurerm_storage_account.storage.id}/fileServices"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/fileServices/default"
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
   enabled_log  {
     category = "StorageRead"
@@ -91,14 +91,14 @@ resource "azurerm_monitor_diagnostic_setting" "file_diagnostic_logs" {
     category = "StorageDelete"
   }
   metric {
-    category = "Transactions"
+    category = "Transaction"
     enabled  = true
   }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_logs" {
   name                       = "${azurerm_storage_account.storage.name}-queue"
-  target_resource_id         = "${azurerm_storage_account.storage.id}/queueServices"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/queueServices/default"
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
   enabled_log  {
     category = "StorageRead"
@@ -110,14 +110,14 @@ resource "azurerm_monitor_diagnostic_setting" "queue_diagnostic_logs" {
     category = "StorageDelete"
   }
   metric {
-    category = "Transactions"
+    category = "Transaction"
     enabled  = true
   }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "table_diagnostic_logs" {
   name                       = "${azurerm_storage_account.storage.name}-table"
-  target_resource_id         = "${azurerm_storage_account.storage.id}/tableServices"
+  target_resource_id         = "${azurerm_storage_account.storage.id}/tableServices/default"
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
   enabled_log  {
     category = "StorageRead"
@@ -129,7 +129,7 @@ resource "azurerm_monitor_diagnostic_setting" "table_diagnostic_logs" {
     category = "StorageDelete"
   }
   metric {
-    category = "Transactions"
+    category = "Transaction"
     enabled  = true
   }
 }

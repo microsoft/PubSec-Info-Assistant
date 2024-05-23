@@ -63,10 +63,11 @@ data "azurerm_subnet" "subnet" {
 }
 
 resource "azurerm_private_endpoint" "kv_private_endpoint" {
-  name                = "${var.name}-private-endpoint"
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  subnet_id           = data.azurerm_subnet.subnet[0].id
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = data.azurerm_subnet.subnet[0].id
+  custom_network_interface_name = "infoasstkvnic"
 
   private_service_connection {
     name                           = "${var.name}-kv-connection"

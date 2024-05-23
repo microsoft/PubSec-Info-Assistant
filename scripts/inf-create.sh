@@ -124,13 +124,3 @@ ${DIR}/configuration-create.sh
 ${DIR}/terraform-init.sh "$DIR/../infra/"
 
 ${DIR}/terraform-plan-apply.sh -d "$DIR/../infra" -p "infoasst" -o "$DIR/../inf_output.json"
-
-if [[ "$SECURE_MODE" == "true" ]]; then
-  #TODO: Remove before release
-  echo "Do you wish to continue the network restrictions? Y to continue, N to stop"
-  read -r answer
-  if [[ "$answer" == "Y" || "$answer" == "y" ]]; then
-    export TF_VAR_secure_deploy_restrict_networking="true"
-    ${DIR}/terraform-plan-apply.sh -d "$DIR/../infra" -p "infoasst" -o "$DIR/../inf_output.json"
-  fi  
-fi

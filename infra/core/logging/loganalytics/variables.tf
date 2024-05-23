@@ -88,3 +88,11 @@ variable "subnet_name" {
 variable "ampls_subnet_CIDR" {
   type = string
 }
+
+variable "nsg_name" {
+  type = string
+}
+
+variable "nsg_id" {
+  type = string
+}

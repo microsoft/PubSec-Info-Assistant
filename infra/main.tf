@@ -40,31 +40,31 @@ module "entraObjects" {
 
 // Create the Virtual Network, Subnets, and Network Security Group
 module "network" {
-  source                        = "./core/network/network"
-  count                         = var.is_secure_mode ? 1 : 0
-  vnet_name                     = "infoasst-vnet-${random_string.random.result}"
-  nsg_name                      = "infoasst-nsg-${random_string.random.result}"
-  ddos_name                     = "infoasst-ddos-${random_string.random.result}"
-  ddos_plan_id                  = var.ddos_plan_id
-  location                      = var.location
-  tags                          = local.tags
-  resourceGroupName             = azurerm_resource_group.rg.name
-  vnetIpAddressCIDR             = var.virtual_network_CIDR
-  snetAzureMonitorCIDR          = var.azure_monitor_CIDR
-  snetStorageAccountCIDR        = var.storage_account_CIDR
-  snetCosmosDbCIDR              = var.cosmos_db_CIDR
-  snetAzureAiCIDR               = var.azure_ai_CIDR
-  snetKeyVaultCIDR              = var.key_vault_CIDR
-  snetAppCIDR                   = var.webapp_CIDR
-  snetFunctionCIDR              = var.functions_CIDR
-  snetEnrichmentCIDR            = var.enrichment_app_CIDR
-  snetIntegrationCIDR           = var.integration_CIDR
-  snetSearchServiceCIDR         = var.search_service_CIDR
-  snetAzureVideoIndexerCIDR     = var.azure_video_indexer_CIDR
-  snetBingServiceCIDR           = var.bing_service_CIDR
-  snetAzureOpenAICIDR           = var.azure_openAI_CIDR
-  snetACRCIDR                   = var.acr_CIDR
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  source                          = "./core/network/network"
+  count                           = var.is_secure_mode ? 1 : 0
+  vnet_name                       = "infoasst-vnet-${random_string.random.result}"
+  nsg_name                        = "infoasst-nsg-${random_string.random.result}"
+  ddos_name                       = "infoasst-ddos-${random_string.random.result}"
+  ddos_plan_id                    = var.ddos_plan_id
+  location                        = var.location
+  tags                            = local.tags
+  resourceGroupName               = azurerm_resource_group.rg.name
+  vnetIpAddressCIDR               = var.virtual_network_CIDR
+  snetAzureMonitorCIDR            = var.azure_monitor_CIDR
+  snetStorageAccountCIDR          = var.storage_account_CIDR
+  snetCosmosDbCIDR                = var.cosmos_db_CIDR
+  snetAzureAiCIDR                 = var.azure_ai_CIDR
+  snetKeyVaultCIDR                = var.key_vault_CIDR
+  snetAppCIDR                     = var.webapp_CIDR
+  snetFunctionCIDR                = var.functions_CIDR
+  snetEnrichmentCIDR              = var.enrichment_app_CIDR
+  snetIntegrationCIDR             = var.integration_CIDR
+  snetSearchServiceCIDR           = var.search_service_CIDR
+  snetAzureVideoIndexerCIDR       = var.azure_video_indexer_CIDR
+  snetBingServiceCIDR             = var.bing_service_CIDR
+  snetAzureOpenAICIDR             = var.azure_openAI_CIDR
+  snetACRCIDR                     = var.acr_CIDR
+  arm_template_schema_mgmt_api    = var.arm_template_schema_mgmt_api
 }
 
 // Create the Private DNS Zones for all the services
@@ -201,6 +201,8 @@ module "logging" {
   vnet_name                             = var.is_secure_mode ? module.network[0].vnet_name : null
   ampls_subnet_CIDR                     = var.azure_monitor_CIDR
   vnet_id                               = var.is_secure_mode ? module.network[0].vnet_id : null
+  nsg_id                                = var.is_secure_mode ? module.network[0].nsg_id : null
+  nsg_name                              = var.is_secure_mode ? module.network[0].nsg_name : null
 }
 
 module "storage" {
@@ -395,43 +397,44 @@ module "webapp" {
 }
 
 module "openaiServices" {
-  source                        = "./core/ai/openaiservices"
-  name                          = var.openAIServiceName != "" ? var.openAIServiceName : "infoasst-aoai-${random_string.random.result}"
-  location                      = var.location
-  tags                          = local.tags
-  resourceGroupName             = azurerm_resource_group.rg.name
-  openaiServiceKey              = var.azureOpenAIServiceKey
-  useExistingAOAIService        = var.useExistingAOAIService
-  is_secure_mode                = var.is_secure_mode
-  subnet_name                   = var.is_secure_mode ? module.network[0].snetAzureOpenAI_name : null
-  vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
-  subnet_id                     = var.is_secure_mode ? module.network[0].snetAzureOpenAI_id : null
-  private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneAzureOpenAi[0].privateDnsZoneResourceId] : null
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = module.kvModule.keyVaultName
-  kv_secret_expiration          = var.kv_secret_expiration
+  source                          = "./core/ai/openaiservices"
+  name                            = var.openAIServiceName != "" ? var.openAIServiceName : "infoasst-aoai-${random_string.random.result}"
+  location                        = var.location
+  tags                            = local.tags
+  resourceGroupName               = azurerm_resource_group.rg.name
+  openaiServiceKey                = var.azureOpenAIServiceKey
+  useExistingAOAIService          = var.useExistingAOAIService
+  is_secure_mode                  = var.is_secure_mode
+  subnet_name                     = var.is_secure_mode ? module.network[0].snetAzureOpenAI_name : null
+  vnet_name                       = var.is_secure_mode ? module.network[0].vnet_name : null
+  subnet_id                       = var.is_secure_mode ? module.network[0].snetAzureOpenAI_id : null
+  private_dns_zone_ids            = var.is_secure_mode ? [module.privateDnsZoneAzureOpenAi[0].privateDnsZoneResourceId] : null
+  arm_template_schema_mgmt_api    = var.arm_template_schema_mgmt_api
+  key_vault_name                  = module.kvModule.keyVaultName
+  kv_secret_expiration            = var.kv_secret_expiration
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
 
   deployments = [
     {
-      name = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
-      model = {
-        format = "OpenAI"
-        name = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
-        version = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
+      name            = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
+      model           = {
+        format        = "OpenAI"
+        name          = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
+        version       = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
       }
-      sku_name = "Standard"
-      sku_capacity = var.chatGptDeploymentCapacity
+      sku_name        = "Standard"
+      sku_capacity    = var.chatGptDeploymentCapacity
       rai_policy_name = "Microsoft.Default"
     },
     {
-      name = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : "text-embedding-ada-002"
-      model = {
-        format = "OpenAI"
-        name = var.azureOpenAIEmbeddingsModelName != "" ? var.azureOpenAIEmbeddingsModelName : "text-embedding-ada-002"
-        version = "2"
+      name            = var.azureOpenAIEmbeddingDeploymentName != "" ? var.azureOpenAIEmbeddingDeploymentName : "text-embedding-ada-002"
+      model           = {
+        format        = "OpenAI"
+        name          = var.azureOpenAIEmbeddingsModelName != "" ? var.azureOpenAIEmbeddingsModelName : "text-embedding-ada-002"
+        version       = "2"
       }
-      sku_name = "Standard"
-      sku_capacity = var.embeddingsDeploymentCapacity
+      sku_name        = "Standard"
+      sku_capacity    = var.embeddingsDeploymentCapacity
       rai_policy_name = "Microsoft.Default"
     }
   ]
@@ -578,7 +581,7 @@ module "functions" {
 
 module "acr"{
   source                = "./core/container_registry"
-  name                  = "acr${random_string.random.result}" 
+  name                  = "infoasstacr${random_string.random.result}" 
   location              = var.location
   resourceGroupName     = azurerm_resource_group.rg.name
   is_secure_mode        = var.is_secure_mode

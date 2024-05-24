@@ -24,13 +24,13 @@ help                         Show this help
 deploy                       Deploy infrastructure and application code
 build                        Build application code
 infrastructure               Deploy infrastructure
-extract-env                  Extract infrastructure.env file from TF output
+extract-env                  Extract infrastructure.env file from Terraform output
 deploy-webapp                Deploys the web app code to Azure App Service
 deploy-functions             Deploys the function code to Azure Function Host
 deploy-enrichments           Deploys the web app code to Azure App Service
 deploy-search-indexes        Deploy search indexes
-extract-env-debug-webapp     Extract infrastructure.debug.env file from TF output
-extract-env-debug-functions  Extract local.settings.json to debug functions from TF output
+extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
+extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
 functional-tests             Run functional tests to check the processing pipeline is working
 merge-databases              Upgrade from bicep to terraform
 import-state                 import state of current services to TF state

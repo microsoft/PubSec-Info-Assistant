@@ -29,7 +29,7 @@ Once you have the completed setting up a GitHub Codespaces, please move on to th
 
  The IA Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
 
- To change the size of components deployed, make changes in the [Main Terraform](/infra/main.tf) file.
+ To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
 
 Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the Configuring your Environment step.
 
@@ -85,9 +85,9 @@ ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By de
 ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
 APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
 ENTRA_OWNERS | No | Defaults to "". Additional user id's you wish to assign as owners of created Azure Entra objects by way of assign to a security group.
-MAX_CSV_FILE_SIZE | No | Defaults to 20 (MB's) for the maximum file size for an uploaded CSV
 SERVICE_MANAGEMENT_REFERENCE | No | Defaults to "". Sets the service management reference value on Azure Entra objects created by Information Assistant if required by your organization.
-
+MAX_CSV_FILE_SIZE | Yes | Defaults to 20. This value limits the size of CSV files in MBs that will be supported for upload in the Tabular Data Assistant UX feature.
+PASSWORD_LIFETIME | No | Defaults to 365. The number of days that passwords associated with created identities are set to expire after creation. Change this setting if needed to conform to you policy requirements
 
 ## Log into Azure using the Azure CLI
 
@@ -149,13 +149,13 @@ help                         Show this help
 deploy                       Deploy infrastructure and application code
 build                        Build application code
 infrastructure               Deploy infrastructure
-extract-env                  Extract infrastructure.env file from TF output
+extract-env                  Extract infrastructure.env file from Terraform output
 deploy-webapp                Deploys the web app code to Azure App Service
 deploy-functions             Deploys the function code to Azure Function Host
 deploy-enrichments           Deploys the web app code to Azure App Service
 deploy-search-indexes        Deploy search indexes
-extract-env-debug-webapp     Extract infrastructure.debug.env file from TF output
-extract-env-debug-functions  Extract local.settings.json to debug functions from TF output
+extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
+extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
 functional-tests             Run functional tests to check the processing pipeline is working
 merge-databases              Upgrade from bicep to terraform
 import-state                 import state of current services to TF state

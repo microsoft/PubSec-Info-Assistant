@@ -513,3 +513,9 @@ variable "serviceManagementReference" {
   type    = string
   default = ""
 }
+
+variable "password_lifetime" {
+  type    = number
+  default = 365
+  description = "The number of days used as the lifetime for passwords"  
+}

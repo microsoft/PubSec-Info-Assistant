@@ -120,12 +120,10 @@ class CompareWorkWithWeb(Approach):
         msg_to_display = '\n\n'.join([str(message) for message in messages])
         try:
             # Step 3: Final comparative analysis using OpenAI Chat Completion
-            chat_completion = await openai.ChatCompletion.acreate(
-                deployment_id=self.chatgpt_deployment,
-                model=self.model_name,
+            chat_completion = await self.client.chat.completions.create(
+                model=self.chatgpt_deployment,
                 messages=messages,
                 temperature=float(overrides.get("response_temp")) or 0.6,
-                max_tokens=1024,
                 n=1,
                 stream=True)
 

@@ -1,0 +1,240 @@
+DESCRIPTION,Stock Level,ROP,ROQ,Avg Turnover,Avg Lead Time,Average Price,ABC Analysis,XYZ Analysis,Location
+Track Fixture APC Tank 12253183,76,3,6,4,3,$195.00 ,C,X,"Tobruk Barracks, Puckapunyal"
+SEAL HUB ROADWHEEL M48 SEAL HUB 11669372,104,8,4,10,3,$74.21 ,B,Z,"Tobruk Barracks, Puckapunyal"
+RADIATOR 11669369,15,12,2,3,58,"$2,750.00 ",B,X,"Tobruk Barracks, Puckapunyal"
+"BEARING,BALL,ROD END",151,21,7,7,6,$41.66 ,C,X,"Tobruk Barracks, Puckapunyal"
+"Track T130 Track For APC T130 Track Shoe Series, M125, M577A1, M 548A",123,2,7,6,5,$142.50 ,B,Y,"Tobruk Barracks, Puckapunyal"
+Military MS51073-1 DOME LIGHT 7064671,69,3,3,7,4,$197.89 ,B,Y,"Tobruk Barracks, Puckapunyal"
+Periscope APC 7043549,81,14,9,3,50,$250.00 ,C,X,"Tobruk Barracks, Puckapunyal"
+APC m548 Spider U Joint 10861450,50,5,2,11,3,$81.58 ,C,Z,"Tobruk Barracks, Puckapunyal"
+Wheel Solid 11678270 Aluminum,31,19,3,4,42,$398.00 ,C,Y,"Tobruk Barracks, Puckapunyal"
+APC Shock Absorber 11669371,83,22,5,6,45,$295.00 ,B,X,"Tobruk Barracks, Puckapunyal"
+Pump Ramp Hyd 10861448,87,17,5,2,47,$418.99 ,C,Y,"Tobruk Barracks, Puckapunyal"
+M151 Pressure Switch Oil 10874979,119,6,20,12,1,$138.86 ,A,Y,"Tobruk Barracks, Puckapunyal"
+KT1017 STEERING PART KITS,82,4,3,11,3,$69.88 ,C,X,"Tobruk Barracks, Puckapunyal"
+TX100 SHAFT 6774438 8356120 6774438 000172563,23,22,2,6,20,$285.00 ,C,Y,"Tobruk Barracks, Puckapunyal"
+Parts Kit Transfer Gear Case 5703779,14,29,3,2,47,$525.80 ,C,Z,"Tobruk Barracks, Puckapunyal"
+M548 Parts Kit Brake Shoe 12268818,74,29,4,7,10,$146.89 ,B,Y,"Tobruk Barracks, Puckapunyal"
+APC IDLER WHEEL 10907799,63,24,1,0,41,$415.00 ,C,X,Shoalwater Bay Military Training Area
+"Gear, Spur Differential 8756535",23,24,2,5,55,$395.00 ,C,Y,Shoalwater Bay Military Training Area
+Military Ignition Unit 305002 APC M60 Ect,26,23,3,3,26,$950.00 ,C,Y,Shoalwater Bay Military Training Area
+Lever Fire Control,21,24,2,5,32,$399.18 ,C,X,Shoalwater Bay Military Training Area
+"APC Track Bushing Long, Long Track Bushing 11678029",58,17,2,10,7,$12.50 ,C,Z,Shoalwater Bay Military Training Area
+M35A2 Nartron Push Start Button 11640178,186,21,20,12,6,$89.89 ,A,Z,Shoalwater Bay Military Training Area
+M88 M41 M110 M60 Ignition Unit 305002 5145768,19,13,3,2,49,$788.90 ,C,X,Shoalwater Bay Military Training Area
+APC Cooling Pump 5104392,86,30,6,1,35,$425.00 ,C,Y,Shoalwater Bay Military Training Area
+M548 APC Road Wheel Arm Assembly Pivot Track Suspension,16,30,3,1,53,"$1,156.89 ",C,X,Shoalwater Bay Military Training Area
+Spider U Joint High Block 11640643,185,2,12,5,5,$129.51 ,B,Z,Shoalwater Bay Military Training Area
+Air Cleaner Intake Filter 11660316,110,21,5,8,8,$125.91 ,B,Z,Shoalwater Bay Military Training Area
+ALTERNATOR 12320970 200 amp apc Military 200 AMP Alternator,11,17,2,1,57,"$2,150.00 ",C,Y,Shoalwater Bay Military Training Area
+M113A1 M113A2 Fan Assembly 12253584 12349795-1,24,29,1,0,34,"$6,585.26 ",C,Y,Shoalwater Bay Military Training Area
+5134915 PC5134915 2950010602496 Blower Housing APC,43,15,3,5,6,$225.86 ,C,Z,Shoalwater Bay Military Training Area
+APC Tracked Logging Vehicle Differential 10875026 Assembly,26,30,5,2,46,"$8,295.00 ",A,X,Shoalwater Bay Military Training Area
+"Hunter A20 Vehicle Heater APC 12474864 60,000 BTU/HR APC",12,2,2,3,58,"$5,621.18 ",A,Z,Shoalwater Bay Military Training Area
+M51 M74 M88 M60 Hydraulic Head 7748811,15,26,2,1,47,"$1,845.00 ",C,Z,Shoalwater Bay Military Training Area
+Parts kit Filter 12367078-1 M88,2,9,1,3,1,$225.86 ,C,Z,Shoalwater Bay Military Training Area
+Military Tank Truck Dome Light 7064671 Bradley MLRS,52,9,3,6,4,$197.38 ,C,Z,Shoalwater Bay Military Training Area
+M548 Torsion Bar Suspension 12269037-1,13,12,2,3,50,$795.00 ,C,Z,Shoalwater Bay Military Training Area
+Drive Pin Punch,79,12,1,0,43,$434.00 ,C,Y,"Holsworthy Barracks - Holsworthy, Liverpool Military Area, Sydney"
+Drive Pin Punch,76,7,4,6,5,$434.00 ,B,X,Campbell Barracks - Swanbourne
+Undefined,149,23,9,5,7,$83.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,152,15,6,8,9,$123.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,60,12,4,5,43,$283.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,82,23,9,3,51,$416.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,20,18,2,4,46,$287.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,101,2,3,12,1,$132.00 ,A,Z,Shoalwater Bay Military Training Area
+Undefined,69,16,4,6,8,$244.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,63,28,10,2,31,$414.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,22,30,2,5,51,$346.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,42,4,4,4,1,$150.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,58,19,3,7,38,$350.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,104,11,3,11,7,$93.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,32,23,2,6,60,$358.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,80,12,4,6,59,$288.00 ,B,Z,Shoalwater Bay Military Training Area
+Undefined,174,10,5,12,2,$137.00 ,A,X,Shoalwater Bay Military Training Area
+Undefined,98,7,3,11,3,$44.00 ,C,Y,Shoalwater Bay Military Training Area
+Undefined,58,11,1,0,30,$432.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,53,16,1,0,46,$472.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,33,19,2,7,7,$203.00 ,C,Y,Shoalwater Bay Military Training Area
+Undefined,188,27,12,5,7,$30.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,80,29,4,6,39,$299.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,63,18,5,4,22,$294.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,73,20,4,7,6,$81.00 ,C,Y,Shoalwater Bay Military Training Area
+Undefined,87,18,7,4,10,$203.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,83,5,4,8,4,$122.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,71,18,11,2,60,$420.00 ,C,Y,Shoalwater Bay Military Training Area
+Undefined,135,7,6,7,4,$149.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,95,12,5,6,6,$233.00 ,B,Z,Shoalwater Bay Military Training Area
+Undefined,42,13,7,2,46,$409.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,54,16,2,11,9,$96.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,114,22,4,10,7,$57.00 ,C,Y,Shoalwater Bay Military Training Area
+Undefined,197,19,7,9,8,$105.00 ,A,Y,Shoalwater Bay Military Training Area
+Undefined,16,15,1,5,55,$363.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,17,25,2,4,21,$336.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,65,7,5,4,5,$154.00 ,C,Y,Shoalwater Bay Military Training Area
+Undefined,88,26,3,10,8,$55.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,68,12,7,3,44,$432.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,68,12,6,4,20,$378.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,175,6,11,5,5,$138.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,79,29,24,1,34,$428.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,72,19,4,7,7,$214.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,98,20,4,8,8,$111.00 ,B,X,Shoalwater Bay Military Training Area
+Undefined,73,26,6,4,23,$399.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,80,27,4,7,7,$143.00 ,B,Y,Shoalwater Bay Military Training Area
+Undefined,75,15,8,3,9,$249.00 ,C,X,Shoalwater Bay Military Training Area
+Undefined,95,26,10,3,35,$487.00 ,B,Z,Shoalwater Bay Military Training Area
+Undefined,36,28,11,1,32,$461.00 ,C,Z,Shoalwater Bay Military Training Area
+Undefined,13,24,2,3,47,$374.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,62,13,1,0,35,$474.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,186,7,6,10,4,$134.00 ,A,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,4,17,1,7,50,$275.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,99,3,6,5,3,$87.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,146,13,6,8,8,$54.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,90,24,6,5,10,$172.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,43,6,3,5,4,$158.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,25,23,3,3,56,$310.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,43,15,7,2,37,$430.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,68,20,4,6,7,$135.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,100,12,10,3,21,$455.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,131,1,5,9,3,$36.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,116,6,4,10,2,$144.00 ,A,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,69,13,7,3,39,$334.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,69,19,3,7,46,$391.00 ,A,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,24,9,2,5,3,$167.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,33,14,5,2,52,$427.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,28,13,5,2,59,$461.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,176,11,5,11,8,$97.00 ,A,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,18,13,1,0,41,$478.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,91,10,5,6,1,$208.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,150,0,7,7,3,$119.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,85,26,5,6,45,$274.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,33,13,3,4,57,$384.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,79,5,4,6,1,$39.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,177,5,8,7,4,$42.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,90,4,3,10,5,$73.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,175,5,6,10,4,$117.00 ,A,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,82,2,5,6,5,$74.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,18,15,1,7,50,$383.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,65,6,2,11,5,$132.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,191,5,5,12,1,$42.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,84,22,6,5,7,$209.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,6,14,1,4,8,$158.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,0,18,1,0,47,$477.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,80,30,5,5,9,$211.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,96,14,29,1,59,$464.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,62,18,4,5,38,$278.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,35,10,4,3,59,$475.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,18,20,6,1,26,$401.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,60,15,4,5,25,$274.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,54,1,3,8,4,$70.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,50,4,3,7,5,$166.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,51,6,2,10,4,$56.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,0,20,0,7,23,$398.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,2,14,1,4,9,$228.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,77,24,5,5,27,$299.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,88,0,3,10,1,$145.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,100,7,4,9,5,$55.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,56,13,6,3,7,$204.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,97,27,3,11,10,$131.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,5,24,1,6,27,$353.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,49,28,1,0,59,$478.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,94,27,10,3,34,$431.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,85,26,6,5,8,$122.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,0,18,0,3,21,$446.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,63,3,4,5,5,$189.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,53,15,4,4,9,$246.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,3,18,1,3,54,$294.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,28,25,2,7,49,$257.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,57,12,5,4,22,$333.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,46,11,3,6,21,$312.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,59,8,5,4,1,$208.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,50,24,1,0,26,$410.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,111,5,4,9,3,$85.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,58,26,6,3,30,$259.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,88,13,4,7,8,$183.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,67,28,4,6,56,$353.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,164,15,5,11,6,$126.00 ,A,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,2,20,1,3,49,$450.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,98,29,6,5,44,$375.00 ,A,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,97,20,30,1,24,$409.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,62,1,7,3,2,$217.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,98,4,5,6,1,$47.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,3,16,1,6,35,$365.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,33,24,3,4,59,$272.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,81,24,7,4,33,$382.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,114,20,4,9,6,$132.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,5,21,1,4,23,$378.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,24,19,8,1,47,$487.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,89,11,9,3,59,$264.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,51,6,2,12,1,$120.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,38,18,2,7,10,$182.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,37,25,4,3,46,$479.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,71,21,8,3,9,$181.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,54,13,5,4,45,$360.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,41,20,7,2,58,$471.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,3,13,1,7,58,$304.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,35,20,3,4,50,$304.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,6,21,1,5,47,$268.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,80,10,6,4,39,$338.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,51,14,4,5,42,$271.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,166,29,5,12,8,$119.00 ,A,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,74,3,4,6,4,$150.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,55,19,9,2,34,$422.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,160,1,6,9,3,$103.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,53,25,6,3,44,$388.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,41,30,3,5,8,$209.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,89,22,6,5,7,$230.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,7,21,1,0,34,$455.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,189,0,8,8,5,$42.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,17,17,3,2,28,$443.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,62,0,5,4,2,$194.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,49,23,3,6,7,$161.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,68,18,5,5,36,$318.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,63,17,4,5,40,$279.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,86,28,13,2,48,$431.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,97,10,3,12,2,$141.00 ,A,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,54,21,6,3,52,$261.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,155,5,10,5,5,$141.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,11,25,2,2,59,$456.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,73,25,6,4,9,$150.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,24,26,1,0,25,$430.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,66,19,5,4,8,$191.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,44,30,5,3,9,$160.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,98,12,5,6,47,$328.00 ,A,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,81,20,4,7,40,$313.00 ,A,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,71,8,6,4,4,$169.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,81,13,4,7,57,$250.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,6,25,1,4,20,$370.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,97,5,5,6,4,$147.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,86,10,9,3,4,$223.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,86,17,13,2,20,$479.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,14,28,2,4,27,$300.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,133,27,6,7,9,$96.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,87,30,3,12,7,$127.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,113,25,6,6,6,$77.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,195,4,6,11,2,$123.00 ,A,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,63,29,7,3,38,$267.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,65,20,3,7,37,$314.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,96,14,5,6,39,$330.00 ,A,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,98,28,5,6,9,$214.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,119,24,3,12,7,$110.00 ,A,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,68,19,7,3,37,$459.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,176,5,7,8,1,$43.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,18,30,2,5,25,$322.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,54,10,5,4,3,$200.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,153,27,5,11,6,$132.00 ,A,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,197,1,10,6,4,$78.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,69,5,3,10,4,$56.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,74,0,4,7,5,$202.00 ,B,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,38,25,6,2,39,$459.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,61,28,7,3,28,$371.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,68,26,2,12,6,$147.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,61,16,7,3,60,$453.00 ,B,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,188,26,8,8,7,$36.00 ,C,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,23,27,7,1,37,$450.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,15,27,2,3,45,$252.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,88,23,6,5,39,$268.00 ,B,Y,"RAAF Base Edinburgh, Adelaide"
+Undefined,45,26,4,4,37,$396.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,6,11,1,4,35,$376.00 ,C,X,"RAAF Base Edinburgh, Adelaide"
+Undefined,52,5,3,6,3,$227.00 ,C,Z,"RAAF Base Edinburgh, Adelaide"
+Undefined,198,8,6,10,4,$61.00 ,B,X,"RAAF Base Edinburgh, Adelaide"

@@ -88,3 +88,6 @@ run-data-migration: ## Run the data migration moving data from one resource grou
 
 manual-inf-destroy: ## A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 	@./scripts/inf-manual-destroy.sh 
+
+run-backend-tests: ## Run backend tests
+	pytest ./app/backend/testsuite.py

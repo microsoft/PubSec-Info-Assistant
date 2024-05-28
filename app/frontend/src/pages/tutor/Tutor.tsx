@@ -4,7 +4,7 @@
 import React, { useRef } from 'react';
 //import { Button } from '@fluentui/react';
 import { Accordion, Card, Button } from 'react-bootstrap';
-import {getHint, processAgentResponse, getSolve, streamData} from "../../api";
+import {getHint, processAgentResponse, streamData} from "../../api";
 import { useEffect, useState } from "react";
 import styles from './Tutor.module.css';
 import ReactMarkdown from 'react-markdown';
@@ -15,12 +15,11 @@ import CharacterStreamer from '../../components/CharacterStreamer/CharacterStrea
 
 const Tutor = () => {
     const [streamKey, setStreamKey] = useState(0);
-    const [loading, setLoading] = useState(false);
+    const [renderAnswer, setRenderAnswer] = useState(false);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mathProblem, setMathProblem] = useState('');
     const [output, setOutput] = useState('');
-    //const [output, setOutput] = useState<string | null>("");
     const [selectedButton, setSelectedButton] = useState<string | null>(null);
     const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -32,14 +31,12 @@ const Tutor = () => {
 
     const handleInput = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setLoading(true);
         userInput(mathProblem);
     };
 
     const userInput = (problem: string) => {
         // Process the user's math problem here
         console.log(problem);
-        setLoading(false);
     };
 
     function delay(ms: number): Promise<void> {
@@ -53,7 +50,6 @@ const Tutor = () => {
       ): Promise<T> {
         
         setError(false);
-        setLoading(true);
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
                 return await asyncFn(); // Try executing the function
@@ -67,7 +63,6 @@ const Tutor = () => {
             }
         }
         setError(true);
-        setLoading(false);
         // If we reach this point, all retries have failed
         throw new Error(`Max retries reached. Last error: ${errorMessage}`);
       }
@@ -75,10 +70,10 @@ const Tutor = () => {
     async function hinter(question: string) {
         setStreamKey(prevKey => prevKey + 1);
         setOutput('');
+        setRenderAnswer(true);
         await retryAsyncFn(() => getHint(question), 3, 1000).then((response) => {
             setOutput(response.toString());
         });
-        setLoading(false);
         
     }
 
@@ -86,14 +81,15 @@ const Tutor = () => {
     async function getAnswer(question: string) {
         setStreamKey(prevKey => prevKey + 1);
         setOutput('');
+        setRenderAnswer(true);
         await retryAsyncFn(() => processAgentResponse(question), 3, 1000).then((response) => {
             setOutput(response.toString());
         });
-        setLoading(false);
     };
 
     async function handleExampleClick(value: string) {
         setStreamKey(prevKey => prevKey + 1);
+        setRenderAnswer(true);
         setMathProblem(value);
         getAnswer(value);
     }
@@ -109,7 +105,7 @@ const EXAMPLES: ExampleModel[] = [
     const handleButton2Click = () => {
         setStreamKey(prevKey => prevKey + 1);
         setOutput('');
-        setLoading(true);
+        setRenderAnswer(true);
         setSelectedButton('button2');
         if (eventSourceRef.current) {
             eventSourceRef.current.close();
@@ -124,7 +120,6 @@ const EXAMPLES: ExampleModel[] = [
         if (eventSourceRef.current) {
             eventSourceRef.current.close();
             eventSourceRef.current = null;
-            setLoading(false);
             console.log('EventSource closed');
         }
     }
@@ -134,7 +129,6 @@ const EXAMPLES: ExampleModel[] = [
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
                 eventSourceRef.current = null;
-                setLoading(false);
                 console.log('EventSource closed');
             }
         };
@@ -199,7 +193,7 @@ return (
         </div>
         </form>
         {error && <div className="spinner">{errorMessage}</div>}
-        {<CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} onStreamingComplete={handleCloseEvent} classNames={styles.centeredAnswerContainer} nonEventString={output} /> }
+        {renderAnswer && <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} onStreamingComplete={handleCloseEvent} classNames={styles.centeredAnswerContainer} nonEventString={output} /> }
     </div>
     </div>
 )

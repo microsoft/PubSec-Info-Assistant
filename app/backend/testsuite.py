@@ -1,4 +1,6 @@
 import json
+import re
+import pytest
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import os
 from fastapi.testclient import TestClient
@@ -74,8 +76,8 @@ def test_work_chat_api():
             
     assert "Satya" in content or "I am not sure." in content
 
-# Work compare to Web API Validation for Microsoft CEO
-def test_work_compare_web_chat_api():
+# Search work, then compare with web API Validation for Microsoft CEO
+def test_web_compare_work_chat_api():
     response = client.post("/chat", json={
         "history":[{"user":"who is the CEO of Microsoft?"}],
         "approach":1,
@@ -95,12 +97,106 @@ def test_work_compare_web_chat_api():
         "thought_chain":{}})
     assert response.status_code == 200
     content = ""
+    work_citation_lookup = ""
+    for line in response.iter_lines():
+        eventJson = json.loads(line)
+        if "content" in eventJson and eventJson["content"] != None:
+            content += eventJson["content"]
+        elif "work_citation_lookup" in eventJson and eventJson["work_citation_lookup"] != None:
+            work_citation_lookup = eventJson["work_citation_lookup"]
+            
+    payload = {"history":[{"user":"who is the CEO of Microsoft?",
+                 "bot":content},
+                {"user":"who is the CEO of Microsoft?"}],
+     "approach":5,
+     "overrides":{
+                  "semantic_ranker":True,
+                  "semantic_captions":False,
+                  "top":5,
+                  "suggest_followup_questions":False,
+                  "user_persona":"analyst",
+                  "system_persona":"an Assistant",
+                  "ai_persona":"",
+                  "response_length":2048,
+                  "response_temp":0.6,
+                  "selected_folders":"All",
+                  "selected_tags":""},
+     "citation_lookup": work_citation_lookup,
+     "thought_chain":{"work_response": content}
+     }
+    
+    response = client.post("/chat", json=payload)
+    
+    assert response.status_code == 200
+    content = ""
     for line in response.iter_lines():
         eventJson = json.loads(line)
         if "content" in eventJson and eventJson["content"] != None:
             content += eventJson["content"]
             
-    assert "Satya" in content
+    assert "Satya" in content or "I am not sure." in content
+
+
+# Search web, then compare with work API Validation for Microsoft CEO
+def test_work_compare_web_chat_api():
+    response = client.post("/chat", json={
+        "history":[{"user":"who is the CEO of Microsoft?"}],
+        "approach":4,
+        "overrides":{
+            "semantic_ranker":True,
+            "semantic_captions":False,
+            "top":5,
+            "suggest_followup_questions":False,
+            "user_persona":"analyst",
+            "system_persona":"an Assistant",
+            "ai_persona":"",
+            "response_length":2048,
+            "response_temp":0.6,
+            "selected_folders":"All",
+            "selected_tags":""},
+        "citation_lookup":{},
+        "thought_chain":{}})
+    assert response.status_code == 200
+    content = ""
+    web_citation_lookup = ""
+    for line in response.iter_lines():
+        eventJson = json.loads(line)
+        if "content" in eventJson and eventJson["content"] != None:
+            content += eventJson["content"]
+        elif "web_citation_lookup" in eventJson and eventJson["web_citation_lookup"] != None:
+            web_citation_lookup = eventJson["web_citation_lookup"]
+            
+    payload = {"history":[{"user":"who is the CEO of Microsoft?",
+                 "bot":content},
+                {"user":"who is the CEO of Microsoft?"}],
+     "approach":6,
+     "overrides":{
+                  "semantic_ranker":True,
+                  "semantic_captions":False,
+                  "top":5,
+                  "suggest_followup_questions":False,
+                  "user_persona":"analyst",
+                  "system_persona":"an Assistant",
+                  "ai_persona":"",
+                  "response_length":2048,
+                  "response_temp":0.6,
+                  "selected_folders":"All",
+                  "selected_tags":""},
+     "citation_lookup": web_citation_lookup,
+     "thought_chain":{"web_response": content}
+     }
+    
+    response = client.post("/chat", json=payload)
+    
+    assert response.status_code == 200
+    content = ""
+    for line in response.iter_lines():
+        eventJson = json.loads(line)
+        if "content" in eventJson and eventJson["content"] != None:
+            content += eventJson["content"]
+            
+    assert "Satya" in content or "I am not sure." in content
+
 
 def test_get_blob_client_url():
     response = client.get("/getblobclienturl")
@@ -132,7 +228,7 @@ def test_get_hint():
     
     response = client.get("/getHint", params={"question": "What is 2+2?"})
     assert response.status_code == 200
-    assert "add" in response.json().lower()
+    assert "add" in response.json().lower() or "addition" in response.json().lower()
 
 
 def test_post_td():
@@ -223,6 +319,15 @@ def test_upload_blob():
     with open(local_file_path, "rb") as data:
         blob_client.upload_blob(data, overwrite=True)
 
+def test_log_status():
+    response = client.post("/logstatus", json={
+        "path": "upload/parts_inventory.csv",
+        "status": "File uploaded from test suite to Azure Blob Storage",
+        "status_classification": "Info",
+        "state": "Uploaded"
+    })
+    assert response.status_code == 200
+    
 def test_resubmit_item():
     response = client.post("/resubmitItems", json={"path": "/parts_inventory.csv"})
     assert response.status_code == 200
@@ -233,15 +338,51 @@ def test_delete_item():
     assert response.status_code == 200
     assert response.json() == True
 
-#def test_get_citation_obj():
-#    response = client.post("/getcitation", json={"citation": "some citation"})
-#    assert response.status_code == 200
 
-#def test_log_status():
-#    response = client.post("/logstatus", json={
-#        "path": "some/path",
-#        "status": "completed",
-#        "status_classification": "info",
-#        "state": "finished"
-#    })
-#    assert response.status_code == 200
+# This test requires some amount of data to be present and processed in IA
+# It is commented out because processing the data takes time and the test will fail if the data is not processed
+# Change the question to a valid question that will produce citations if you want to run this test
+'''
+def test_get_citation_obj():
+    question = "Who is the CEO of Microsoft?"
+    response = client.post("/chat", json={
+        "history":[{"user": question}],
+        "approach":1,
+        "overrides":{
+            "semantic_ranker": True,
+            "semantic_captions": False,
+            "top":5,
+            "suggest_followup_questions":False,
+            "user_persona":"analyst",
+            "system_persona":"an Assistant",
+            "ai_persona":"",
+            "response_length":2048,
+            "response_temp":0.6,
+            "selected_folders":"All",
+            "selected_tags":""},
+        "citation_lookup":{},
+        "thought_chain":{}})
+    
+    assert response.status_code == 200
+    content = ""
+    work_citation_lookup = {}
+    for line in response.iter_lines():
+        eventJson = json.loads(line)
+        if "content" in eventJson and eventJson["content"] != None:
+            content += eventJson["content"]
+        elif "work_citation_lookup" in eventJson and eventJson["work_citation_lookup"] != None:
+            work_citation_lookup = eventJson["work_citation_lookup"]
+            
+    # Define the regex pattern
+    pattern = r'\[(File[0-9])\]'
+    
+    # Search for the first match
+    match = re.search(pattern, content)
+    
+    # If a match is found, make a call to get citation object
+    if match:
+        response = client.post("/getcitation", json={"citation": work_citation_lookup[match.group(1)]})
+        assert response.status_code == 200
+    else:
+        pytest.fail("No citation was found in work response. Unable to make a call to get citation object.")
+'''

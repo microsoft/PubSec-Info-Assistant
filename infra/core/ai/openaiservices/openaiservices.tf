@@ -15,9 +15,11 @@ resource "azurerm_cognitive_account" "openaiAccount" {
     default_action = "Allow"
     ip_rules       = var.network_acls_ip_rules
 
-
-    virtual_network_rules {
-      subnet_id = var.subnet_id
+    dynamic "virtual_network_rules" {
+      for_each = var.is_secure_mode ? [1] : []
+      content {
+        subnet_id = var.subnet_id
+      }
     }
   }
 }

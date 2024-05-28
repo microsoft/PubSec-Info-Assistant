@@ -20,7 +20,7 @@ resource "azurerm_key_vault" "kv" {
   network_acls {
     default_action             = var.is_secure_mode ? "Deny" : "Allow" 
     bypass                     = "AzureServices"
-    virtual_network_subnet_ids = [var.subnet_id]
+    virtual_network_subnet_ids = var.is_secure_mode ? [var.subnet_id] : []
   }
 }
  
@@ -63,6 +63,7 @@ data "azurerm_subnet" "subnet" {
 }
 
 resource "azurerm_private_endpoint" "kv_private_endpoint" {
+  count                         = var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName

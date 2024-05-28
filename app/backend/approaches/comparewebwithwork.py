@@ -136,7 +136,7 @@ class CompareWebWithWork(Approach):
             eventJson = json.loads(event)
             if "work_citation_lookup" in eventJson:
                 work_citations = eventJson["work_citation_lookup"]
-            elif "content" in eventJson:
+            elif "content" in eventJson and eventJson["content"] != None:
                 content += eventJson["content"]
 
         thought_chain["work_response"] = content

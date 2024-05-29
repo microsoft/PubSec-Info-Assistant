@@ -45,6 +45,8 @@ def test_web_chat_api():
         eventJson = json.loads(line)
         if "content" in eventJson and eventJson["content"] != None:
             content += eventJson["content"]
+        elif "error" in eventJson and eventJson["error"] != None:
+            content += eventJson["error"]
             
     assert "Satya" in content
     
@@ -73,6 +75,8 @@ def test_work_chat_api():
         eventJson = json.loads(line)
         if "content" in eventJson and eventJson["content"] != None:
             content += eventJson["content"]
+        elif "error" in eventJson and eventJson["error"] != None:
+            content += eventJson["error"]
             
     assert "Satya" in content or "I am not sure." in content
 
@@ -104,6 +108,8 @@ def test_web_compare_work_chat_api():
             content += eventJson["content"]
         elif "work_citation_lookup" in eventJson and eventJson["work_citation_lookup"] != None:
             work_citation_lookup = eventJson["work_citation_lookup"]
+        elif "error" in eventJson and eventJson["error"] != None:
+            content += eventJson["error"]
             
     payload = {"history":[{"user":"who is the CEO of Microsoft?",
                  "bot":content},
@@ -133,6 +139,8 @@ def test_web_compare_work_chat_api():
         eventJson = json.loads(line)
         if "content" in eventJson and eventJson["content"] != None:
             content += eventJson["content"]
+        elif "error" in eventJson and eventJson["error"] != None:
+            content += eventJson["error"]
             
     assert "Satya" in content or "I am not sure." in content
 
@@ -165,6 +173,8 @@ def test_work_compare_web_chat_api():
             content += eventJson["content"]
         elif "web_citation_lookup" in eventJson and eventJson["web_citation_lookup"] != None:
             web_citation_lookup = eventJson["web_citation_lookup"]
+        elif "error" in eventJson and eventJson["error"] != None:
+            content += eventJson["error"]
             
     payload = {"history":[{"user":"who is the CEO of Microsoft?",
                  "bot":content},
@@ -194,6 +204,8 @@ def test_work_compare_web_chat_api():
         eventJson = json.loads(line)
         if "content" in eventJson and eventJson["content"] != None:
             content += eventJson["content"]
+        elif "error" in eventJson and eventJson["error"] != None:
+            content += eventJson["error"]
             
     assert "Satya" in content or "I am not sure." in content
 

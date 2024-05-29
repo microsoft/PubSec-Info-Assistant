@@ -267,7 +267,7 @@ variable "enrichmentAppServicePlanName" {
 variable "enrichmentAppServiceSkuSize" {
   description = "The size of the app service plan for the enrichment service. Must match with the tier value in enrichmentAppServiceSkuTier."
   type = string
-  default = "P1v3"
+  default = "P2v3"
 }
 
 variable "enrichmentAppServiceSkuTier" {
@@ -501,6 +501,17 @@ variable "enableDevCode" {
 variable "maxCsvFileSize" {
   type    = string
   default = "20"
+}
+
+variable "entraOwners" {
+  type    = string
+  default = ""
+  description = "Comma-separated list of owner emails"
+}
+
+variable "serviceManagementReference" {
+  type    = string
+  default = ""
 }
 
 variable "password_lifetime" {

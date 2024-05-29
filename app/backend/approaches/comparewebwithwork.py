@@ -2,10 +2,14 @@
 # Licensed under the MIT license.
 
 
+import json
+import logging
 import re
 import urllib.parse
 from typing import Any, Sequence
 import openai
+from openai import AzureOpenAI
+from openai import  AsyncAzureOpenAI
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approach
 from azure.search.documents import SearchClient  
@@ -82,6 +86,15 @@ class CompareWebWithWork(Approach):
         self.enrichment_appservice_url = enrichment_appservice_url
         self.azure_ai_translation_domain = azure_ai_translation_domain
         self.use_semantic_reranker = use_semantic_reranker
+        
+          # openai.api_base = oai_endpoint
+        openai.api_type = 'azure'
+        openai.api_version = "2024-02-01"
+               
+        self.client = AsyncAzureOpenAI(
+        azure_endpoint = openai.api_base, 
+        api_key=openai.api_key,  
+        api_version=openai.api_version)
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], web_citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
         """
@@ -116,10 +129,17 @@ class CompareWebWithWork(Approach):
                                     self.azure_ai_translation_domain,
                                     self.use_semantic_reranker
                                 )
-        rrr_response = await chat_rrr_approach.run(history, overrides, {}, thought_chain)
-        
+        rrr_response = chat_rrr_approach.run(history, overrides, {}, thought_chain)
+        content = ""
+        work_citations = {}
+        async for event in rrr_response:
+            eventJson = json.loads(event)
+            if "work_citation_lookup" in eventJson:
+                work_citations = eventJson["work_citation_lookup"]
+            elif "content" in eventJson and eventJson["content"] != None:
+                content += eventJson["content"]
 
-        work_citations = rrr_response.get("work_citation_lookup")
+        thought_chain["work_response"] = content
         user_query = history[-1].get("user")
         web_answer = next((obj['bot'] for obj in reversed(history) if 'bot' in obj), None)
         user_persona = overrides.get("user_persona", "")
@@ -127,7 +147,7 @@ class CompareWebWithWork(Approach):
         response_length = int(overrides.get("response_length") or 1024)
 
         # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
-        bing_compare_query = user_query + " Web search results:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + rrr_response.get("answer") + "\n\n"
+        bing_compare_query = user_query + " Web search results:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + content + "\n\n"
         thought_chain["web_to_work_comparison_query"] = bing_compare_query
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
@@ -145,25 +165,34 @@ class CompareWebWithWork(Approach):
              max_tokens=4097 - 500
          )
         msg_to_display = '\n\n'.join([str(message) for message in messages])
+        try:
+            # Step 3: Final comparative analysis using OpenAI Chat Completion
+            chat_completion = await self.client.chat.completions.create(
+                model=self.chatgpt_deployment,
+                messages=messages,
+                temperature=float(overrides.get("response_temp")) or 0.6,
+                n=1,
+                stream=True)
 
-        # Step 3: Final comparative analysis using OpenAI Chat Completion
-        bing_compare_resp = await self.make_chat_completion(messages)
-
-        final_response = f"{urllib.parse.unquote(bing_compare_resp)}"
-
-        # Step 4: Append web citations from the Bing Search approach
-        for idx, url in enumerate(work_citations.keys(), start=1):
-            final_response += f" [File{idx}]"
-        thought_chain["web_to_work_comparison_response"] = final_response
-        
-        return {
-            "data_points": None,
-            "answer": f"{urllib.parse.unquote(final_response)}",
-            "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
-            "thought_chain": thought_chain,
-            "work_citation_lookup": work_citations,
-            "web_citation_lookup": web_citation_lookup
-        }
+            yield json.dumps({"data_points": {},
+                            "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+                            "thought_chain": thought_chain,
+                            "work_citation_lookup": work_citations,
+                            "web_citation_lookup": web_citation_lookup}) + "\n"
+            
+            # STEP 4: Format the response
+            async for chunk in chat_completion:
+                # Check if there is at least one element and the first element has the key 'delta'
+                if len(chunk.choices) > 0:
+                    yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
+            # Step 4: Append web citations from the Bing Search approach
+            for idx, url in enumerate(work_citations.keys(), start=1):
+                yield json.dumps({"content": f"[File{idx}]"}) + "\n"
+        except Exception as e:
+            logging.error(f"Error in compare web with work: {e}")
+            yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"
+            return
+            
     
     async def make_chat_completion(self, messages) -> str:
         """
@@ -175,9 +204,9 @@ class CompareWebWithWork(Approach):
         Returns:
             str: The generated chat completion response.
         """
-        chat_completion = await openai.ChatCompletion.acreate(
-            deployment_id=self.chatgpt_deployment,
-            model=self.model_name,
+        
+        chat_completion= await self.client.chat.completions.create(
+            model=self.chatgpt_deployment,
             messages=messages,
             temperature=0.6,
             n=1

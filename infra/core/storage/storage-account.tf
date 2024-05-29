@@ -30,7 +30,7 @@ resource "azurerm_storage_account" "storage" {
         }
       
     delete_retention_policy {
-      days = 1
+      days = 7
       }
         
     }

@@ -92,21 +92,11 @@ More information can be found [here.](https://azure.microsoft.com/en-us/pricing/
 - **enrichmentAppServiceSkuTier** `PremiumV3`
 
 ### Enrichment Message Dequeue Parameter
-
-There exist a property called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.tf` to the value of **1**. This means the app will process 1 messages from the queue at a time. This is found to be the most optimal with the existing configuration but can be increased if you also increase the enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
+There exist a property that can be set in the local.env file called `DEQUEUE_MESSAGE_BATCH_SIZE` and is defaulted in the `infra/main.tf` and `app/enrichment/app.py` to the value of **3**. This means the app will process 3 messages from the queue at a time. This is found to be the most optimal with the existing configuration but can be increased if you also increase the enrichment app service SKU. It is important to note that there will be issues if it is increased more than the app service SKU can handle.
 
 ### Customization
 
-To customize the App Service Plans SKU settings, modify the terraform parameters by adding the following values to your `local.env` and run the `make deploy` or `make infrastructure`command.
-
-```bash
-export TF_VAR_functionsAppSkuSize="S2"
-export TF_VAR_functionsAppSkuTier="Standard"
-export TF_VAR_appServiceSkuSize="S1"
-export TF_VAR_appServiceSkuTier="Standard"
-export TF_VAR_enrichmentAppServiceSkuSize="P1V3"
-export TF_VAR_enrichmentAppServiceSkuTier="PremiumV3"
-```
+To customize the App Service Plans SKU settings, modify the `sku` parameters in the specified Terraform file and run the `make deploy` or `make infrastructure`command.
 
 This can also be adjusted in the Azure Portal.
 

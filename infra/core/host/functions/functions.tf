@@ -87,6 +87,7 @@ resource "azurerm_linux_function_app" "function_app" {
   storage_account_name      = var.blobStorageAccountName
   storage_account_access_key= "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
   https_only                = true
+  tags                      = var.tags
 
   site_config {
     application_stack {
@@ -94,6 +95,8 @@ resource "azurerm_linux_function_app" "function_app" {
     }
     always_on        = true
     http2_enabled    = true
+    application_insights_connection_string = var.appInsightsConnectionString
+    application_insights_key = var.appInsightsInstrumentationKey
   }
 
   connection_string {

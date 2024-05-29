@@ -13,17 +13,17 @@
 >* Secure mode is not supported when you enable multimedia.
 >* Secure mode will create a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region.
 >* As part of security hardening Diagnostic Settings will be enabled. There is a limit of 5 diagnostic settings per subscription.
->* A secure mode will check capacity for DDOS and Diagnostic Settings.
+>* A secure mode deployment will check capacity for DDOS and Diagnostic Settings.
 >* You may need to provide DDOS protection plan information or delete an existing Diagnostic Setting for Information Assistant to successfully deploy in secure mode.
 >
 >
 
 
-Information Assistant secure mode is essential when heightened levels of security are necessary. Secure mode should be enabled for all production systems. Key features of a secure mode include:
+Information Assistant secure mode is essential when heightened levels of security are necessary. Secure mode should be enabled for all production systems. Key features of secure mode include:
 
 * __Disabling Public Network Access__: Restrict external access to safeguard sensitive data.
 * __Virtual Network Protection__: Shield your system within a secure virtual network.
-* __Data Encryption at Rest and in Transit__: Ensure confidentiality by encrypting data both when stored and during transmission.
+* __Data Encryption at Rest and in Transit__: Ensure confidentiality by encrypting data when stored and during transmission.
 * __Integration via Private Endpoints__: All Azure services connect exclusively through private endpoints within a virtual network
 
 The secure mode adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
@@ -38,11 +38,17 @@ The secure mode adds several new Azure resources and will likely require additio
 
 ## Architecture
 
-Secure mode builds on the Single Virtual Network Pattern in which all components of your workload are inside a single virtual network (VNet). This pattern is possible if you're operating in a single region. A virtual network can't span multiple regions. The virtual network isolates your resources and traffic from other VNets and provides a boundary for applying security policies. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data. 
+Secure mode builds on the Single Virtual Network Pattern in which all components of your workload are inside a single virtual network (VNet). This pattern is possible if you're operating in a single region, as a virtual network can't span multiple regions. The virtual network isolates your resources and traffic from other VNets and provides a boundary for applying security policies. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data.
 
 High level architecture diagram:
 
 ![Secure mode - High level architecture](../images/secure-deploy-high-level-architecture.png)
+
+The detailed architecture diagram below shows the VNet is subdivided into subnets that further segment network resources. This allows more granular control of network traffic and security rules. These subnets contain Private Endpoints, network interfaces that connect privately and securely to Azure Services. By using a Private IP address from your VNet, a Private Endpoint enables secure communications with Azure Services from your VNet, reducing exposure to the public internet. This improves network security through:
+
+1. Network isolation: VNets and Subnets provide a segregated environment where only authorized resources can communicate with each other.
+2. Reduced Attack Surface: Private Endpoints ensure that Azure services are accessed via the private IP space of your VNet, not over the public network, which significantly reduces the risk of external attacks.
+3. Granular Access Control: Network Security Groups (NSGs) can be associated with VNets, subnets and network interfaces to filter network traffic to and from resources within a VNet. This allows for fine-tuned control over access and security policies.
 
 Deploying a dedicated Azure service into your virtual network provides the following capabilities:
 
@@ -52,15 +58,9 @@ Deploying a dedicated Azure service into your virtual network provides the follo
 * The Azure service fully manages service instances in a virtual network. This management includes monitoring the health of the resources and scaling with load.
 * Private endpoints allow ingress of traffic from your virtual network to an Azure resource securely.
 
-The detailed architecture diagram below shows the VNet is subdivided into subnets that further segment network resources. This allows more granular control of network traffic and security rules. These subnets contain Private Endpoints, network interfaces that connect privately and securely to Azure Services. By using a Private IP address from your VNet, a Private Endpoint enables secure communications with Azure Services from your VNet, reducing exposure to the public internet. This improves network security through:
+The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpreseRoute or S2S VPN for user access to the Virtual Network (vNet) on the left of the diagram below.
 
-1. Network isolation: VNets and Subnets provide a segregated environment where only authorized resources can communicate with each other.
-2. Reduced Attack Surface: Private Endpoints ensure that Azure services are accessed via the private IP space of your VNet, not over the public network, which significantly reduces the risk of external attacks.
-3. Granular Access Control: Network Security Groups (NSGs) can be associated with VNets, subnets and network interfaces to filter network traffic to and from resources within a VNet. This allows for fine-tuned control over access and security policies.
-
-The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpreseRoute or S2S VPN for user access to the Virtual Network (vNet) on the left side of the diagram below.
-
-![Secure mode - Detailed Architecture](../images/secure-deploy-detailed-architecture.png)
+![Secure mode - Detailed Architecture](../images/secure-deploy-detail-architecture.png)
 
 If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for demonstration purposes only. This will allow you to access the Information Assistant user experience (UX). To implement this for demonstration purposes, you’ll need to add a VPN Gateway to the Information Assistant infrastructure by creating a gateway subnet and a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (vNet).
 
@@ -73,7 +73,7 @@ After setting up a VPN Gateway, [configure the Azure VPN Client on your local ma
 
 ## Front end
 
- The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through VNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) in the App Subnet.
+The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through VNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) in the App Subnet.
  
  The front-end application uses VNet integration to connect to the private network and private DNS zones to acceess the appropriate services such as:
 

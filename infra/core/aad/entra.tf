@@ -1,7 +1,7 @@
 data "azurerm_client_config" "current" {}
 
 locals {
-  principal_list = split(",", var.entraOwners)
+  principal_list = var.entraOwners == "" ? [] : split(",", var.entraOwners)
   owner_ids = contains(local.principal_list, data.azurerm_client_config.current.object_id) ? local.principal_list : concat(local.principal_list, [data.azurerm_client_config.current.object_id])
 }
 
@@ -43,6 +43,7 @@ resource "azuread_application_password" "aad_mgmt_app_password" {
   count           = var.isInAutomation ? 0 : 1
   application_id  = azuread_application.aad_mgmt_app[0].id
   display_name    = "infoasst-mgmt"
+  end_date_relative = "${var.password_lifetime * 24}h"
 }
 
 resource "azuread_service_principal" "aad_mgmt_sp" {

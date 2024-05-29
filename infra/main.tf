@@ -32,6 +32,7 @@ module "entraObjects" {
   aadMgmtClientSecret               = var.aadMgmtClientSecret
   entraOwners                       = var.entraOwners
   serviceManagementReference        = var.serviceManagementReference
+  password_lifetime                 = var.password_lifetime
 }
 
 module "logging" {

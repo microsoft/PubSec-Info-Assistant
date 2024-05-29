@@ -207,3 +207,17 @@ Image search is currently only supported with regions that support dense caption
 These are only in the Logic App Preview Designer. Switching to the Generally Available Designer will resolve these errors. They are purely visual errors in the Preview Designer and have no impact on how the Logic App functions.
 
 ![Image of Logic App Error](./images/sharepoint-preview-designer-known-issue.png)
+
+---
+
+## Error: CredentialInvalidLifetimeAsPerAppPolicy: Credential lifetime exceeds the max value allowed as per assigned
+### Solution
+Your organization's policy places a limit on the lifetime of an identities password. In your copy of Local.env there is a setting called PASSWORD_LIFETIME. This value is used when creating or updating the identity password and has a default value of the number of days the password will exist before expiring. Change this value to a number of days that your organization allows.
+
+To view the value after deploying go the Microsoft Entra ID page from the Azure Portal home page. Then search your tenant for infoasst_mgmt_access_<your-5-character-suffix> as shown in the image below.
+
+![Image of Entra App Registration](./images/credential-lifespan.png)
+
+Next click on the App Registration value, and then the page will open for that applciuation registration. Then select Clients & Secrets from the left menu. You will then see the expiry date of the password that was applied through Terraform.
+
+![Image of Entra App Registration](./images/app_registration.png)

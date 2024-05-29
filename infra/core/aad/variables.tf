@@ -43,3 +43,7 @@ variable "serviceManagementReference" {
   type      = string
   sensitive = true
 }
+
+variable "password_lifetime" {
+  type      = number
+}

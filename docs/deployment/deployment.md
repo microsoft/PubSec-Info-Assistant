@@ -166,6 +166,10 @@ run-data-migration           Run the data migration moving data from one resourc
 manual-inf-destroy           A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 ```
 
+## Configure AD app registration ( manual steps )
+
+If you have insufficient permissions at the tenant level (Application Administrator Entry Role), follow the guide to complete the deployment [manual app registration](/docs/deployment/manual_app_registration.md).
+
 ## Configure authentication and authorization
 
 If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](/docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure.

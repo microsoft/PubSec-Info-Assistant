@@ -65,23 +65,13 @@ These values will be used to update the code in the Infrastructure Deployment se
 
 In the file `scripts/inf-create.sh`, between lines 63 - 69, you would need to uncomment the code  and update parameters with values provided by your tenant Administrator.
 
+```
 export TF_VAR_isInAutomation=true
 export TF_VAR_aadWebClientId=""
 export TF_VAR_aadMgmtClientId=""
 export TF_VAR_aadMgmtServicePrincipalId=""
 export TF_VAR_aadMgmtClientSecret=""
-
-- Management Access App Registration Client Secret
-
-### 4.Adjust Code in Infrastructure Deployment
-
-In the file `scripts/inf-create.sh`, between lines 63 - 69, you would need to uncomment the code  and update parameters with values provided by your tenant Administrator.
-
-export TF_VAR_isInAutomation=true
-export TF_VAR_aadWebClientId=""
-export TF_VAR_aadMgmtClientId=""
-export TF_VAR_aadMgmtServicePrincipalId=""
-export TF_VAR_aadMgmtClientSecret=""
+```
 
 ### 5. Resume the deployment as per the deployment procedure
 

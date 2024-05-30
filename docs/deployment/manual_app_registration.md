@@ -2,7 +2,7 @@
 
 If you are unable to obtain the permission at the tenant level described in [Azure account requirements](https://github.com/microsoft/PubSec-Info-Assistant/tree/v1.0?tab=readme-ov-file#azure-account-requirements), you can follow the guidance below to create a manual app registration.
 
-## Tenant Administrator: Manual Steps to create App Registrations
+## Tenant Administrator: Manual steps to create app registrations
 
 Here are the details of each step:
 
@@ -10,7 +10,7 @@ Here are the details of each step:
 
 Manually create a random string for your environment, which should be a 1 to 5 character sequence. The value must be a combination of letters a-z, A-Z, or numbers 0-9.
 
-### 2. Have Tenant Administrator Create Two AD App Registrations
+### 2. Have the Tenant Administrator Should Create Two AD App Registrations
 
 An Administrator in the tenant would need to create two Azure AD App Registrations and Service Principals for you manually.
 
@@ -49,7 +49,7 @@ The second AD App Registration will be used to query the Azure management plane 
 | name | `infoasst_mgmt_access_<<random_string_from_above>>` |
 | sign-in-audience | AzureADMyOrg |
 
-### 3.  Information to Obtain from Tenant Administrator
+### 3.  Information to obtain from Tenant Administrator
 
 You will need to obtain the following information from your tenant Administrator to continue:
 
@@ -59,9 +59,9 @@ You will need to obtain the following information from your tenant Administrator
 - Management Access Service Principal ID (guid)
 - Management Access App Registration Client Secret (string)
 
-These values will be used to update the code in the Infrastructure Deployment section.
+These values will be used to update the code in the infrastructure deployment section.
 
-### 4.  Adjust Code in Infrastructure Deployment
+### 4.  Adjust code in infrastructure deployment
 
 In the file `scripts/inf-create.sh`, between lines 63 - 69, you would need to uncomment the code  and update parameters with values provided by your tenant Administrator.
 

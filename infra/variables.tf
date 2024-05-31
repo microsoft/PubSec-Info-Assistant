@@ -312,55 +312,55 @@ variable "azure_ai_CIDR" {
   default = "10.0.1.128/26"
 }
 
-variable "key_vault_CIDR" {
+variable "webapp_CIDR" {
   type    = string
-  default = "10.0.7.64/26"
+  default = "10.0.1.192/26"
 }
 
-variable "webapp_CIDR" {
+variable "key_vault_CIDR" {
   type    = string
   default = "10.0.2.0/26"
 }
 
 variable "functions_CIDR" {
   type    = string
-  default = "10.0.3.0/26"
+  default = "10.0.2.64/26"
 }
 
 variable "enrichment_app_CIDR" {
   type    = string
-  default = "10.0.4.0/26"
+  default = "10.0.2.128/26"
 }
 
 variable "search_service_CIDR" {
   type    = string
-  default = "10.0.5.0/26"
+  default = "10.0.2.192/26"
 }
 
 variable "azure_video_indexer_CIDR" {
   type    = string
-  default = "10.0.5.128/26"
+  default = "10.0.3.0/26"
 }
 
 variable "bing_service_CIDR" {
   type    = string
-  default = "10.0.6.0/26"
+  default = "10.0.3.64/26"
 }
 
 variable "azure_openAI_CIDR" {
   type    = string
-  default = "10.0.6.128/26"
+  default = "10.0.3.128/26"
 }
 
 variable "integration_CIDR" {
   type    = string
-  default = "10.0.7.0/26"
+  default = "10.0.3.192/26"
 
 }
 
 variable "acr_CIDR" {
   type    = string
-  default = "10.0.7.128/26"
+  default = "10.0.4.0/26"
 }
 
 variable "ddos_plan_id" {

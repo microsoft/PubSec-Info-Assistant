@@ -231,7 +231,7 @@ resource "azurerm_key_vault_access_policy" "policy" {
 
 resource "null_resource" "run_script" {
   provisioner "local-exec" {
-    command = "./scripts/enable_container_image_pull.sh ${var.resourceGroupName} ${azurerm_linux_web_app.enrichmentapp.name}"
+    command = "../scripts/enable_container_image_pull.sh ${var.resourceGroupName} ${azurerm_linux_web_app.enrichmentapp.name}"
   }
 
   depends_on = [

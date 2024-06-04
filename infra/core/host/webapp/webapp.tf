@@ -257,7 +257,7 @@ resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
 
 resource "null_resource" "run_script_web" {
   provisioner "local-exec" {
-    command = "./scripts/enable_container_image_pull.sh ${var.resourceGroupName} ${azurerm_linux_web_app.app_service.name}"
+    command = "../scripts/enable_container_image_pull.sh ${var.resourceGroupName} ${azurerm_linux_web_app.app_service.name}"
   }
 
   depends_on = [

@@ -228,3 +228,15 @@ resource "azurerm_key_vault_access_policy" "policy" {
     "List"
   ]
 }
+
+resource "null_resource" "run_script" {
+  provisioner "local-exec" {
+    command = "./scripts/enable_container_image_pull.sh ${var.resourceGroupName} ${azurerm_linux_web_app.enrichmentapp.name}"
+  }
+
+  depends_on = [
+    azurerm_linux_web_app.enrichmentapp,
+    azurerm_role_assignment.acr_pull_role,
+    azurerm_private_endpoint.privateEnrichmentEndpoint
+  ]
+}

@@ -90,7 +90,7 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 resource "azurerm_role_assignment" "acr_pull_role" {
   principal_id         = azurerm_linux_function_app.function_app.identity.0.principal_id
   role_definition_name = "AcrPull"
-  scope                = container_registry_id
+  scope                = var.container_registry_id
 }
 
 data "azurerm_key_vault" "existing" {
@@ -125,6 +125,7 @@ resource "azurerm_linux_function_app" "function_app" {
         registry_password = var.container_registry_admin_password
       }
     }
+    container_registry_use_managed_identity       = true
     always_on        = true
      http2_enabled    = true
     ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState

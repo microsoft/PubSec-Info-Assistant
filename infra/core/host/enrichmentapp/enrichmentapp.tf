@@ -71,12 +71,6 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
   }
 }
 
-resource "azurerm_role_assignment" "acr_pull_role" {
-  principal_id         = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
-  role_definition_name = "AcrPull"
-  scope                = container_registry_id
-}
-
 # Create the Enrichment App Service
 resource "azurerm_linux_web_app" "enrichmentapp" {
   name                                            = var.name
@@ -99,6 +93,7 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
     http2_enabled                                 = true
     use_32_bit_worker                             = false
     worker_count                                  = 1
+    container_registry_use_managed_identity       = true
 
     application_stack {
       docker_image_name         = "enrichmentapp:${data.local_file.image_tag.content}"
@@ -142,6 +137,12 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
     failed_request_tracing = true
   }
 
+}
+
+resource "azurerm_role_assignment" "acr_pull_role" {
+  principal_id         = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
+  role_definition_name = "AcrPull"
+  scope                = var.container_registry_id
 }
 
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {

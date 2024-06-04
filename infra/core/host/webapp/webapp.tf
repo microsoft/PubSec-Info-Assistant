@@ -91,7 +91,7 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 resource "azurerm_role_assignment" "acr_pull_role" {
   principal_id         = azurerm_linux_web_app.app_service.identity.0.principal_id
   role_definition_name = "AcrPull"
-  scope                = container_registry_id
+  scope                = var.container_registry_id
 }
 
 # Create the web app
@@ -113,6 +113,7 @@ resource "azurerm_linux_web_app" "app_service" {
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password
     }
+    container_registry_use_managed_identity       = true
     always_on                      = var.alwaysOn
     ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
     app_command_line               = var.appCommandLine

@@ -55,6 +55,9 @@
         },
         "subnet_Acr_CIDR": {
             "type": "string"
+        },
+        "subnet_Dns_CIDR": {
+            "type": "string"
         }
     },
     "resources": [
@@ -235,6 +238,19 @@
                         "name": "acr",
                         "properties": {
                             "addressPrefix": "[parameters('subnet_Acr_CIDR')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+                            },
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
+                    },
+                    {
+                        "name": "dns",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet_Dns_CIDR')]",
                             "networkSecurityGroup": {
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },

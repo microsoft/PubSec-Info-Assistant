@@ -128,6 +128,7 @@ export TF_VAR_bing_service_CIDR="10.0.3.64/26"
 export TF_VAR_azure_openAI_CIDR="10.0.3.128/26"
 export TF_VAR_integration_CIDR="10.0.3.192/26"
 export TF_VAR_acr_CIDR="10.0.4.0/26"
+export TF_VAR_dns_CIDR="10.0.4.64/26"
 ```
 
 The network architecture diagram below contains additional details on Private Endpoints and Private Links. A Private Link provides access to services over the Private Endpoint network interface. Private Endpoint uses a private IP address from your virtual network. You can access various services over that private IP address such as:

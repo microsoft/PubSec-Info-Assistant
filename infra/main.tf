@@ -64,6 +64,7 @@ module "network" {
   snetBingServiceCIDR             = var.bing_service_CIDR
   snetAzureOpenAICIDR             = var.azure_openAI_CIDR
   snetACRCIDR                     = var.acr_CIDR
+  snetDnsCIDR                     = var.dns_CIDR
   arm_template_schema_mgmt_api    = var.arm_template_schema_mgmt_api
 }
 

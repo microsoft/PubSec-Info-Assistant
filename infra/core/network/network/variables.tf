@@ -86,6 +86,10 @@ variable "snetACRCIDR" {
   type    = string
 }
 
+variable "snetDnsCIDR" {
+  type    = string
+}
+
 variable "arm_template_schema_mgmt_api" {
   type = string
 }

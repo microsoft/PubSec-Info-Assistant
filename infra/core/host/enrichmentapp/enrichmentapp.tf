@@ -72,7 +72,7 @@ resource "azurerm_monitor_autoscale_setting" "scaleout" {
 }
 
 resource "azurerm_role_assignment" "acr_pull_role" {
-  principal_id         = service_principal_id
+  principal_id         = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
   role_definition_name = "AcrPull"
   scope                = azurerm_container_registry.acr.id
 }

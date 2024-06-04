@@ -17,3 +17,7 @@ output "name" {
 output "privateEndpointId" {
   value = var.is_secure_mode ? azurerm_private_endpoint.ContainerRegistryPrivateEndpoint[0].id : null
 }
+
+output "acr_id" {
+  value = azurerm_container_registry.acr.id
+}

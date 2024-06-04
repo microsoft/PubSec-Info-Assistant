@@ -279,6 +279,7 @@ module "enrichmentApp" {
   container_registry                        = module.acr.login_server
   container_registry_admin_username         = module.acr.admin_username
   container_registry_admin_password         = module.acr.admin_password
+  container_registry_id                     = module.acr.acr_id
   is_secure_mode                            = var.is_secure_mode
   subnetIntegration_id                      = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   subnet_name                               = var.is_secure_mode ? module.network[0].snetEnrichment_name : null
@@ -345,6 +346,7 @@ module "webapp" {
   container_registry                  = module.acr.login_server
   container_registry_admin_username   = module.acr.admin_username
   container_registry_admin_password   = module.acr.admin_password
+  container_registry_id               = module.acr.acr_id
   randomString                        = random_string.random.result
 
   appSettings = {
@@ -575,6 +577,7 @@ module "functions" {
   container_registry                    = module.acr.login_server
   container_registry_admin_username     = module.acr.admin_username
   container_registry_admin_password     = module.acr.admin_password
+  container_registry_id                 = module.acr.acr_id
 }
 
 module "acr"{

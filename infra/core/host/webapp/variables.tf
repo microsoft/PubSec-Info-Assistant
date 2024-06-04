@@ -161,6 +161,11 @@ variable "container_registry_admin_username" {
   type        = string
 }
 
+variable "container_registry_id" {
+  description = "The id of the container registry"
+  type        = string
+}
+
 variable "container_registry_admin_password" {
   description = "The admin password of the container registry"
   type        = string

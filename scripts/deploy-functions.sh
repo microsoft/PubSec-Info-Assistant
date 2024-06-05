@@ -51,7 +51,7 @@ docker push $CONTAINER_REGISTRY/functionapp:$tag
 
 # Update the function app with the new image
 echo "Updating the function webapp with the new image"
-az functionapp config container set --name $AZURE_FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP_NAME --image functionapp:$tag --registry-server "https://${CONTAINER_REGISTRY}" --registry-username $CONTAINER_REGISTRY_USERNAME --registry-password $CONTAINER_REGISTRY_PASSWORD
+az functionapp config container set --name $AZURE_FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP_NAME --image ${CONTAINER_REGISTRY}/functionapp:$tag --registry-server "https://${CONTAINER_REGISTRY}" --registry-username $CONTAINER_REGISTRY_USERNAME --registry-password $CONTAINER_REGISTRY_PASSWORD
 
 # Restart the Azure Functions after deployment
 az functionapp restart --name $AZURE_FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP_NAME

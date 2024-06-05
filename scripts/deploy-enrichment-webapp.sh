@@ -51,8 +51,11 @@ docker tag enrichmentapp $CONTAINER_REGISTRY/enrichmentapp:$tag
 docker push $CONTAINER_REGISTRY/enrichmentapp:$tag
 
 # Update the enrichment webapp with the new image
+echo "Configuring enrichment webapp startup command"
+az webapp config set --name $ENRICHMENT_APPSERVICE_NAM --resource-group $RESOURCE_GROUP_NAME --startup-file "uvicorn app:app --host 0.0.0.0 --port 80 --workers 2 --timeout-keep-alive 600"
+
 echo "Updating the enrichment webapp with the new image"
-az webapp config container set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --container-image-name enrichmentapp:$tag --container-registry-url "https://${CONTAINER_REGISTRY}" --container-registry-user $CONTAINER_REGISTRY_USERNAME --container-registry-password $CONTAINER_REGISTRY_PASSWORD --enable-app-service-storage false
+az webapp config container set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --container-image-name ${CONTAINER_REGISTRY}/enrichmentapp:$tag --container-registry-url "https://${CONTAINER_REGISTRY}" --container-registry-user $CONTAINER_REGISTRY_USERNAME --container-registry-password $CONTAINER_REGISTRY_PASSWORD --enable-app-service-storage false
 
 # Restart the webapp
 az webapp restart --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME

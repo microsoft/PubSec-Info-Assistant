@@ -265,15 +265,3 @@ resource "azurerm_private_endpoint" "privateFunctionEndpoint" {
     private_dns_zone_ids = var.private_dns_zone_ids
   }
 }
-
-/* resource "null_resource" "run_script_func" {
-  provisioner "local-exec" {
-    command = "../scripts/enable_container_image_pull.sh ${var.resourceGroupName} ${azurerm_linux_function_app.function_app.name}"
-  }
-
-  depends_on = [
-    azurerm_linux_function_app.function_app,
-    azurerm_role_assignment.acr_pull_role,
-    azurerm_private_endpoint.privateFunctionEndpoint
-  ]
-} */

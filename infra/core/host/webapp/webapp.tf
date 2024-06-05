@@ -108,7 +108,7 @@ resource "azurerm_linux_web_app" "app_service" {
   
   site_config {
     application_stack {
-      docker_image_name         = "https://${var.container_registry}/webapp:${data.local_file.image_tag.content}"
+      docker_image_name         = "${var.container_registry}/webapp:${data.local_file.image_tag.content}"
       docker_registry_url       = "https://${var.container_registry}"
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password
@@ -141,6 +141,7 @@ resource "azurerm_linux_web_app" "app_service" {
       "AZURE_BLOB_STORAGE_KEY"    = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
       "ENRICHMENT_KEY"            = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/ENRICHMENT-KEY)"
       "AZURE_OPENAI_SERVICE_KEY"  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
+      "WEBSITE_PULL_IMAGE_OVER_VNET"= var.is_secure_mode ? true : false
     }
   )
 

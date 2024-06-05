@@ -54,7 +54,7 @@ docker push $CONTAINER_REGISTRY/webapp:$tag
 
 # Configure container startup commanf
 echo "Configuring enrichment webapp startup command"
-az webapp config set --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --startup-file "uvicorn app:app --host 0.0.0.0 --port 80 --workers 2 --timeout-keep-alive 600"
+az webapp config set --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --startup-file "gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
 
 # Update the webapp with the new image
 echo "Updating the webapp with the new image"

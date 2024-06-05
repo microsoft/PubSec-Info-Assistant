@@ -115,10 +115,11 @@ resource "azurerm_linux_function_app" "function_app" {
   public_network_access_enabled       = var.is_secure_mode ? false : true 
   virtual_network_subnet_id           = var.is_secure_mode ? var.subnetIntegration_id : null
 
+
   site_config {
     application_stack {
       docker {
-        image_name        = "https://${var.container_registry}/functions:${data.local_file.image_tag.content}"
+        image_name        = "${var.container_registry}/functionapp:${data.local_file.image_tag.content}"
         image_tag         = data.local_file.image_tag.content
         registry_url      = "https://${var.container_registry}"
         registry_username = var.container_registry_admin_username
@@ -201,6 +202,7 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_SEARCH_INDEX = var.azureSearchIndex
     AZURE_AI_TRANSLATION_DOMAIN = var.azure_ai_translation_domain
     AZURE_AI_TEXT_ANALYTICS_DOMAIN = var.azure_ai_text_analytics_domain
+    WEBSITE_PULL_IMAGE_OVER_VNET= var.is_secure_mode ? true : false
   }
 }
 

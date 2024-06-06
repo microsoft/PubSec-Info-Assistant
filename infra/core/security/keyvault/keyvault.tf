@@ -1,6 +1,7 @@
 data "azurerm_client_config" "current" {}
 
 data "azurerm_private_dns_zone" "kv_dns_zone" {
+  count                = var.is_secure_mode ? 1 : 0
   name                = "privatelink.${var.azure_keyvault_domain}"
   resource_group_name = var.resourceGroupName
 }
@@ -79,6 +80,6 @@ resource "azurerm_private_endpoint" "kv_private_endpoint" {
 
   private_dns_zone_group {
     name                 = "kv-dns-zone-group"
-    private_dns_zone_ids = [data.azurerm_private_dns_zone.kv_dns_zone.id]
+    private_dns_zone_ids = [data.azurerm_private_dns_zone.kv_dns_zone[0].id]
   }
 }

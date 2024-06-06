@@ -75,7 +75,7 @@ module "privateDnsZoneAzureOpenAi" {
   name               = "privatelink.${var.azure_openai_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -85,7 +85,7 @@ module "privateDnsZoneAzureAi" {
   name               = "privatelink.${var.azure_ai_private_link_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-ai-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -95,7 +95,7 @@ module "privateDnsZoneApp" {
   name               = "privatelink.${var.azure_websites_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-app-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -105,7 +105,7 @@ module "privateDnsZoneKeyVault" {
   name               = "privatelink.${var.azure_keyvault_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-kv-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -115,7 +115,7 @@ module "privateDnsZoneStorageAccountBlob" {
   name               = "privatelink.blob.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-blob-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -126,7 +126,7 @@ module "privateDnsZoneStorageAccountFile" {
   name               = "privatelink.file.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-file-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -136,7 +136,7 @@ module "privateDnsZoneStorageAccountTable" {
   name               = "privatelink.table.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-table-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -146,7 +146,7 @@ module "privateDnsZoneStorageAccountQueue" {
   name               = "privatelink.queue.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-queue-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -156,7 +156,7 @@ module "privateDnsZoneSearchService" {
   name               = "privatelink.${var.azure_search_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-search-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -166,7 +166,7 @@ module "privateDnsZoneCosmosDb" {
   name               = "privatelink.${var.cosmosdb_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-cosmos-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 
@@ -176,7 +176,7 @@ module "privateDnsZoneACR" {
   name               = "privatelink.${var.azure_acr_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-acr-vnetlink-${random_string.random.result}"
-  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
+  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
   tags               = local.tags
 }
 

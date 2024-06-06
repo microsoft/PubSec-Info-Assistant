@@ -6,7 +6,7 @@ variable "vnetLinkName" {
   type = string
 }
 
-variable "virtual_network_id" {
+variable "virtual_network_name" {
   type = string
 }
 

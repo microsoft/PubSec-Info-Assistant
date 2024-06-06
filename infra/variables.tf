@@ -289,83 +289,83 @@ variable "is_secure_mode" {
 
 variable "virtual_network_CIDR" {
   type    = string
-  default = "10.0.0.0/21"
+  default = "10.0.8.0/21"
 }
 
 variable "azure_monitor_CIDR" {
   type    = string
-  default = "10.0.0.64/26"
+  default = "10.0.8.64/26"
 }
 
 variable "storage_account_CIDR" {
   type    = string
-  default = "10.0.1.0/26"
+  default = "10.0.9.0/26"
 }
 
 variable "cosmos_db_CIDR" {
   type    = string
-  default = "10.0.1.64/26"
+  default = "10.0.9.64/26"
 }
 
 variable "azure_ai_CIDR" {
   type    = string
-  default = "10.0.1.128/26"
+  default = "10.0.9.128/26"
 }
 
 variable "webapp_CIDR" {
   type    = string
-  default = "10.0.1.192/26"
+  default = "10.0.9.192/26"
 }
 
 variable "key_vault_CIDR" {
   type    = string
-  default = "10.0.2.0/26"
+  default = "10.0.10.0/26"
 }
 
 variable "functions_CIDR" {
   type    = string
-  default = "10.0.2.64/26"
+  default = "10.0.10.64/26"
 }
 
 variable "enrichment_app_CIDR" {
   type    = string
-  default = "10.0.2.128/26"
+  default = "10.0.10.128/26"
 }
 
 variable "search_service_CIDR" {
   type    = string
-  default = "10.0.2.192/26"
+  default = "10.0.10.192/26"
 }
 
 variable "azure_video_indexer_CIDR" {
   type    = string
-  default = "10.0.3.0/26"
+  default = "10.0.11.0/26"
 }
 
 variable "bing_service_CIDR" {
   type    = string
-  default = "10.0.3.64/26"
+  default = "10.0.11.64/26"
 }
 
 variable "azure_openAI_CIDR" {
   type    = string
-  default = "10.0.3.128/26"
+  default = "10.0.11.128/26"
 }
 
 variable "integration_CIDR" {
   type    = string
-  default = "10.0.3.192/26"
+  default = "10.0.11.192/26"
 
 }
 
 variable "acr_CIDR" {
   type    = string
-  default = "10.0.4.0/26"
+  default = "10.0.12.0/26"
 }
 
 variable "dns_CIDR" {
   type    = string
-  default = "10.0.4.64/26"
+  default = "10.0.12.64/26"
 }
 
 variable "ddos_plan_id" {

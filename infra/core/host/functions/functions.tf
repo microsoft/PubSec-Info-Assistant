@@ -119,7 +119,7 @@ resource "azurerm_linux_function_app" "function_app" {
   site_config {
     application_stack {
       docker {
-        image_name        = "${var.container_registry}/functionapp:${data.local_file.image_tag.content}"
+        image_name        = "${var.container_registry}/functionapp"
         image_tag         = data.local_file.image_tag.content
         registry_url      = "https://${var.container_registry}"
         registry_username = var.container_registry_admin_username

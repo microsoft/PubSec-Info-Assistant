@@ -202,7 +202,7 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_SEARCH_INDEX = var.azureSearchIndex
     AZURE_AI_TRANSLATION_DOMAIN = var.azure_ai_translation_domain
     AZURE_AI_TEXT_ANALYTICS_DOMAIN = var.azure_ai_text_analytics_domain
-    WEBSITE_PULL_IMAGE_OVER_VNET= var.is_secure_mode ? true : false
+    WEBSITE_PULL_IMAGE_OVER_VNET = var.is_secure_mode ? true : false
   }
 }
 

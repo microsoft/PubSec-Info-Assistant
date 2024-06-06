@@ -141,7 +141,7 @@ resource "azurerm_linux_web_app" "app_service" {
       "AZURE_BLOB_STORAGE_KEY"    = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
       "ENRICHMENT_KEY"            = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/ENRICHMENT-KEY)"
       "AZURE_OPENAI_SERVICE_KEY"  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
-      "WEBSITE_PULL_IMAGE_OVER_VNET"= var.is_secure_mode ? true : false
+      "WEBSITE_PULL_IMAGE_OVER_VNET" = var.is_secure_mode ? "true" : "false"
     }
   )
 

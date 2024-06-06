@@ -168,7 +168,7 @@ manual-inf-destroy           A command triggered by a user to destroy a resource
 
 ## Configure AD app registration ( manual steps )
 
-If you have insufficient permissions at the tenant level (Application Administrator Entry Role), follow the guide to complete the deployment [manual app registration](/docs/deployment/manual_app_registration.md).
+If you have insufficient permissions at the tenant level (Application Administrator Entra Role), follow the guide to complete the deployment [manual app registration](/docs/deployment/manual_app_registration.md).
 
 ## Configure authentication and authorization
 

@@ -105,7 +105,7 @@ variable "azure_openai_authority_host" {
 }
 
 variable "azure_arm_management_api" {
-  type        = string
+  type = string
 }
 
 variable "azure_ai_translation_domain" {
@@ -125,7 +125,7 @@ variable "azure_search_domain" {
 }
 
 variable "azure_acr_domain" {
-  type        = string
+  type = string
 }
 
 variable "use_semantic_reranker" {

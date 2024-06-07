@@ -10,6 +10,10 @@ variable "virtual_network_name" {
   type = string
 }
 
+variable "virtual_network_id" {
+  type = string
+}
+
 variable "resourceGroupName" {
   type = string
 }

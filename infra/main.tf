@@ -76,6 +76,7 @@ module "privateDnsZoneAzureOpenAi" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -86,6 +87,7 @@ module "privateDnsZoneAzureAi" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-ai-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -96,6 +98,7 @@ module "privateDnsZoneApp" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-app-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -106,6 +109,7 @@ module "privateDnsZoneKeyVault" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-kv-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -116,6 +120,7 @@ module "privateDnsZoneStorageAccountBlob" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-blob-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -127,6 +132,7 @@ module "privateDnsZoneStorageAccountFile" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-file-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -137,6 +143,7 @@ module "privateDnsZoneStorageAccountTable" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-table-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -147,6 +154,7 @@ module "privateDnsZoneStorageAccountQueue" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-queue-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -157,6 +165,7 @@ module "privateDnsZoneSearchService" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-search-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -167,6 +176,7 @@ module "privateDnsZoneCosmosDb" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-cosmos-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 
@@ -177,6 +187,7 @@ module "privateDnsZoneACR" {
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-acr-vnetlink-${random_string.random.result}"
   virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
 }
 

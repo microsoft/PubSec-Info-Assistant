@@ -199,3 +199,4 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
     statusLog.save_document(blob_name)
+    

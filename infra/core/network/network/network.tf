@@ -140,3 +140,25 @@ data "azurerm_subnet" "acr" {
   virtual_network_name = var.vnet_name
   resource_group_name  = var.resourceGroupName
 }
+
+
+resource "azurerm_private_dns_resolver" "private_dns_resolver" {
+    name                = "dns-resolver"
+    location            = var.location
+    resource_group_name = var.resourceGroupName
+    virtual_network_id  = jsondecode(azurerm_resource_group_template_deployment.vnet_w_subnets.output_content).id.value
+
+    depends_on = [ azurerm_resource_group_template_deployment.vnet_w_subnets ]
+}
+
+resource "azurerm_private_dns_resolver_inbound_endpoint" "private_dns_resolver" {
+    name                        = "dns-resolver-inbound-endpoint"
+    location                    = var.location
+    private_dns_resolver_id     = azurerm_private_dns_resolver.private_dns_resolver.id
+
+    ip_configurations {
+      subnet_id                 = jsondecode(azurerm_resource_group_template_deployment.vnet_w_subnets.output_content).dnsSubnetId.value   
+    }
+
+    depends_on = [ azurerm_private_dns_resolver.private_dns_resolver ]
+}

@@ -276,6 +276,10 @@
         "id": {
             "value": "[resourceId('Microsoft.Network/virtualNetworks',parameters('name'))]",
             "type": "string"
+        },
+        "dnsSubnetId": {  
+            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('name'), 'dns')]",  
+            "type": "string"  
         }
     }
 }

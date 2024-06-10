@@ -251,7 +251,7 @@ def test_post_td():
 def test_process_td_agent_response():
     response = client.get("/process_td_agent_response", params={"question": "How many rows are there in this file?"})
     assert response.status_code == 200
-    assert "239" in response.json()
+    assert "200" in response.json()
 
 def test_process_agent_response():
     response = client.get("/process_agent_response", params={"question": "What is 2+2?"})

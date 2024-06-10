@@ -8,7 +8,10 @@ export default defineConfig({
     build: {
         outDir: "../backend/static",
         emptyOutDir: true,
-        sourcemap: true
+        sourcemap: true,
+        rollupOptions: {
+            external: ['__vite-browser-external']
+        } 
     },
     server: {
         proxy: {

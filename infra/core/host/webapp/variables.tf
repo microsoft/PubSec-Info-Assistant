@@ -124,5 +124,5 @@ variable "runtimeVersion" {
 
 variable "aadClientSecret" {
   type = string
-  sensitive   = true
+  sensitive = true
 }

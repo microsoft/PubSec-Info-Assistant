@@ -169,7 +169,7 @@ resource "azurerm_key_vault_access_policy" "policy" {
 resource "azurerm_key_vault_secret" "webClientSecret" {
   name         = "MICROSOFT-PROVIDER-AUTHENTICATION-SECRET"
   value        = var.aadClientSecret
-  key_vault_id = azurerm_key_vault.existing.id
+  key_vault_id = data.azurerm_key_vault.existing.id
 }
 
 

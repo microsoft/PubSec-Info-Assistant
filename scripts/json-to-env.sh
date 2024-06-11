@@ -122,6 +122,14 @@ jq -r  '
         {
             "path": "SERVICE_MANAGEMENT_REFERENCE",
             "env_var": "SERVICE_MANAGEMENT_REFERENCE"
+        },
+        {
+            "path": "APIM_URI",
+            "env_var": "VITE_API_ENDPOINT"
+        },
+        {
+            "path": "APIM_SUBSCRIPTION_KEY",
+            "env_var": "VITE_OCP_APIM_SUBSCRIPTION_KEY"
         }
     ]
         as $env_vars_to_extract

@@ -11,6 +11,31 @@ resource "azurerm_api_management" "apim" {
   }
 }
 
+resource "azurerm_api_management_product" "unlimited" {
+  product_id            = "unlimited"
+  api_management_name   = azurerm_api_management.apim.name
+  resource_group_name   = var.resourceGroupName
+  display_name          = "Unlimited"
+  subscription_required = true
+  approval_required     = true
+  subscriptions_limit   = 1
+  published             = true
+}
+
+resource "azurerm_api_management_product_group" "unlimited_developers_group" {
+  product_id          = azurerm_api_management_product.unlimited.product_id
+  group_name          = "developers"
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resourceGroupName
+}
+
+resource "azurerm_api_management_product_group" "unlimited_guests_group" {
+  product_id          = azurerm_api_management_product.unlimited.product_id
+  group_name          = "guests"
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resourceGroupName
+}
+
 resource "azurerm_api_management_backend" "backend" {
   name                = var.backendName
   resource_group_name = var.resourceGroupName
@@ -20,7 +45,7 @@ resource "azurerm_api_management_backend" "backend" {
 }
 
 resource "azurerm_api_management_api" "api" {
-  name                = replace(lower(var.apiName)," ","-")
+  name                = replace(lower(var.apiName), " ", "-")
   resource_group_name = var.resourceGroupName
   api_management_name = azurerm_api_management.apim.name
   revision            = "1"
@@ -34,6 +59,12 @@ resource "azurerm_api_management_api" "api" {
   }
 }
 
+resource "azurerm_api_management_product_api" "unlimited_api" {
+  api_name            = azurerm_api_management_api.api.name
+  product_id          = azurerm_api_management_product.unlimited.product_id
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resourceGroupName
+}
 
 resource "azurerm_api_management_policy_fragment" "api_policy_fragments" {
   count             = length(var.policyFragments)
@@ -44,25 +75,25 @@ resource "azurerm_api_management_policy_fragment" "api_policy_fragments" {
 }
 
 resource "azurerm_api_management_api_policy" "base_policy" {
-  api_name            = replace(lower(var.apiName)," ","-")
+  api_name            = azurerm_api_management_api.api.name
   api_management_name = azurerm_api_management.apim.name
   resource_group_name = var.resourceGroupName
-  xml_content = var.basePolicyContent
-  depends_on = [ azurerm_api_management_api.api ]
+  xml_content         = var.basePolicyContent
+  depends_on          = [azurerm_api_management_api.api]
 }
 
 resource "azurerm_api_management_api_operation_policy" "operation_policy" {
-  count = length(var.operationPolicies)
-  api_name            = replace(lower(var.apiName)," ","-")
+  count               = length(var.operationPolicies)
+  api_name            = azurerm_api_management_api.api.name
   api_management_name = azurerm_api_management.apim.name
   resource_group_name = var.resourceGroupName
-  operation_id = var.operationPolicies[count.index].operationId
-  xml_content = var.operationPolicies[count.index].policyContent
-  depends_on = [ azurerm_api_management_api.api, azurerm_api_management_policy_fragment.api_policy_fragments ]
+  operation_id        = var.operationPolicies[count.index].operationId
+  xml_content         = var.operationPolicies[count.index].policyContent
+  depends_on          = [azurerm_api_management_api.api, azurerm_api_management_policy_fragment.api_policy_fragments]
 }
 
 resource "azurerm_api_management_named_value" "name_values" {
-  count = length(var.nameValues)
+  count               = length(var.nameValues)
   name                = var.nameValues[count.index].name
   resource_group_name = var.resourceGroupName
   api_management_name = azurerm_api_management.apim.name

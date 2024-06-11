@@ -191,5 +191,9 @@ output "MAX_CSV_FILE_SIZE" {
 }
 
 output "APIM_URI" {
-  value = module.apim.api_management_service_name
+  value = module.apim.apim_uri
+}
+
+output "APIM_SUBSCRIPTION_KEY" {
+  value = module.apim.apim_subscription_key
 }

@@ -155,6 +155,14 @@ jq -r  '
         {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"
+        },
+        {
+            "path": "APIM_URI",
+            "env_var": "VITE_API_ENDPOINT"
+        },
+        {
+            "path": "APIM_SUBSCRIPTION_KEY",
+            "env_var": "VITE_OCP_APIM_SUBSCRIPTION_KEY"
         }
     ]
         as $env_vars_to_extract

@@ -125,6 +125,10 @@ jq -r  '
         {
             "path": "CONTAINER_REGISTRY_PASSWORD",
             "env_var": "CONTAINER_REGISTRY_PASSWORD"
+        },
+        {
+            "path": "DNS_PRIVATE_RESOLVER_IP",
+            "env_var": "DNS_PRIVATE_RESOLVER_IP"
         }
     ]
         as $env_vars_to_extract

@@ -166,7 +166,7 @@ To perform a secure deployment, follow these steps:
     \____\___/|_| |_|_| |_|\___|\___|\__|_| \_/ |_|\__|\__, |
                                                         |___/ 
     Connection from the client machine to the Information Assistant virtual network is required to continue the deployment.
-    Please configure your connectivity 
+    Please configure your connectivity and ensure you are using the DNS resolver at XXX.XXX.XXX.XXX
 
     Are you ready to continue (y/n)? 
     ```

@@ -203,3 +203,7 @@ output "CONTAINER_REGISTRY_PASSWORD" {
   sensitive = true
   value = module.acr.admin_password
 }
+
+output "DNS_PRIVATE_RESOLVER_IP" {
+  value = var.is_secure_mode ? module.network[0].dns_private_resolver_ip : ""
+}

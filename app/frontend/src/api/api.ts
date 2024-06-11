@@ -245,21 +245,6 @@ export async function streamTdData(question: string, file: File): Promise<EventS
     return eventSource;
 }
 
-export async function getSolve(question: string): Promise<String[]> {
-    const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-    
-    const parsedResponse: String[] = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error("Unknown error");
-    }
-
-    return parsedResponse;
-}
 export async function refresh(): Promise<String[]> {
     const response = await fetch(`/refresh?`, {
         method: "POST",

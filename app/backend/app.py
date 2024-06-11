@@ -760,19 +760,6 @@ async def refresh():
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return {"status": "success"}
 
-@app.get("/getSolve")
-async def getSolve(question: Optional[str] = None):
-   
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-
-    try:
-        results = process_agent_scratch_pad(question)
-    except Exception as ex:
-        log.exception("Exception in /getSolve")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return results
-
 
 @app.get("/stream")
 async def stream_response(question: str):

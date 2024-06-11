@@ -305,6 +305,7 @@ module "storage_key" {
 
 // Only create the config blob if we are not in secure mode as SharePoint integration is not supported in secure mode
 resource "azurerm_storage_blob" "config" {
+  depends_on = [ azurerm_resource_group_template_deployment.container ]
   count                  = var.is_secure_mode ? 0 : 1
   name                   = "config.json"
   storage_account_name   = azurerm_storage_account.storage.name

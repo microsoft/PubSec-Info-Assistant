@@ -53,8 +53,8 @@ docker push $CONTAINER_REGISTRY/webapp:$tag
 #az role assignment create --assignee  --role "DocumentDB Account Contributor" --scope 
 
 # Configure container startup commanf
-echo "Configuring enrichment webapp startup command"
-az webapp config set --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --startup-file "gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
+echo "Configuring webapp startup command"
+az webapp config set --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --startup-file "uvicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
 
 # Update the webapp with the new image
 echo "Updating the webapp with the new image"

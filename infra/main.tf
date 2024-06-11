@@ -45,6 +45,7 @@ module "network" {
   vnet_name                       = "infoasst-vnet-${random_string.random.result}"
   nsg_name                        = "infoasst-nsg-${random_string.random.result}"
   ddos_name                       = "infoasst-ddos-${random_string.random.result}"
+  dns_resolver_name               = "infoasst-dns-${random_string.random.result}"
   ddos_plan_id                    = var.ddos_plan_id
   location                        = var.location
   tags                            = local.tags

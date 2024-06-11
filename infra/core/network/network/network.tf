@@ -143,7 +143,7 @@ data "azurerm_subnet" "acr" {
 
 
 resource "azurerm_private_dns_resolver" "private_dns_resolver" {
-    name                = "dns-resolver"
+    name                = var.dns_resolver_name
     location            = var.location
     resource_group_name = var.resourceGroupName
     virtual_network_id  = jsondecode(azurerm_resource_group_template_deployment.vnet_w_subnets.output_content).id.value

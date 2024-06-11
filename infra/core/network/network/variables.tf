@@ -14,6 +14,10 @@ variable "vnet_name" {
   type    = string
 }
 
+variable "dns_resolver_name" {
+  type    = string
+}
+
 variable "location" {
   type    = string
 }

@@ -23,6 +23,12 @@ resource "azuread_application" "aad_web_app" {
   }
 }
 
+resource "azuread_application_password" "aad_web_app_password" {
+  count           = var.isInAutomation ? 0 : 1
+  application_id  = azuread_application.aad_web_app[0].id
+  display_name    = "infoasst-web"
+  end_date_relative = "${var.password_lifetime * 24}h"
+}
 
 resource "azuread_service_principal" "aad_web_sp" {
   count                         = var.isInAutomation ? 0 : 1
@@ -55,6 +61,11 @@ resource "azuread_service_principal" "aad_mgmt_sp" {
 output "azure_ad_web_app_client_id" {
   value       = var.isInAutomation ? var.aadWebClientId : azuread_application.aad_web_app[0].client_id
   description = "Client ID of the Azure AD Web App"
+}
+
+output "azure_ad_web_app_client_secret" {
+  value       = azuread_application_password.aad_web_app_password[0].value
+  description = "Client secret of the Azure AD Web App"
 }
 
 output "azure_ad_mgmt_app_client_id" {

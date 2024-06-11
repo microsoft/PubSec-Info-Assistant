@@ -108,7 +108,7 @@ resource "azurerm_linux_web_app" "app_service" {
       "AZURE_BLOB_STORAGE_KEY"    = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
       "ENRICHMENT_KEY"            = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/ENRICHMENT-KEY)"
       "AZURE_OPENAI_SERVICE_KEY"  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
-      "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET"  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-CLIENT-SECRET)"
+      "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET"  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/MICROSOFT-PROVIDER-AUTHENTICATION-SECRET)"
     }
   )
 
@@ -164,6 +164,12 @@ resource "azurerm_key_vault_access_policy" "policy" {
     "Get",
     "List"
   ]
+}
+
+resource "azurerm_key_vault_secret" "webClientSecret" {
+  name         = "MICROSOFT-PROVIDER-AUTHENTICATION-SECRET"
+  value        = var.aadClientSecret
+  key_vault_id = azurerm_key_vault.existing.id
 }
 
 

@@ -188,6 +188,7 @@ module "backend" {
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
+  aadClientSecret = module.entraObjects.azure_ad_web_app_client_secret
   depends_on  = [module.kvModule]
 }
 

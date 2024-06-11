@@ -46,3 +46,6 @@ export TF_VAR_enableMultimedia=$ENABLE_MULTIMEDIA
 export TF_VAR_maxCsvFileSize=$MAX_CSV_FILE_SIZE
 export TF_VAR_serviceManagementReference=$SERVICE_MANAGEMENT_REFERENCE
 export TF_VAR_password_lifetime=$PASSWORD_LIFETIME
+export TF_VAR_apimPublisherName=$APIM_PUBLISHER_NAME
+export TF_VAR_apimPublisherEmail=$APIM_PUBLISHER_EMAIL
+export TF_VAR_apimName=$APIM_NAME

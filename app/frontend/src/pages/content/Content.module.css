@@ -7,7 +7,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 600px;
   }
   
   .App-logo {
@@ -61,6 +60,11 @@
     flex-direction: column;
     justify-content: center;
     width: 100%;
+  }
+
+  .topPivot div[role='tabpanel'] {
+    max-height: calc(100vh - 254px);
+    overflow-y: auto;
   }
   
 .fileIconImg {

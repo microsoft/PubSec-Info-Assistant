@@ -1,0 +1,713 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "HHS Chat GPT Web API",
+        "description": "A Python API to serve as Backend For the Information Assistant Web App",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/chat": {
+            "post": {
+                "summary": "Chat",
+                "description": "Chat with the bot using a given approach\n\nArgs:\n    request (Request): The incoming request object\n\nReturns:\n    dict: The response containing the chat results\n\nRaises:\n    dict: The error response if an exception occurs during the chat",
+                "operationId": "chat_chat_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getblobclienturl": {
+            "get": {
+                "summary": "Get Blob Client Url",
+                "description": "Get a URL for a file in Blob Storage with SAS token.\n\nThis function generates a Shared Access Signature (SAS) token for accessing a file in Blob Storage.\nThe generated URL includes the SAS token as a query parameter.\n\nReturns:\n    dict: A dictionary containing the URL with the SAS token.",
+                "operationId": "get_blob_client_url_getblobclienturl_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getalluploadstatus": {
+            "post": {
+                "summary": "Get All Upload Status",
+                "description": "Get the status and tags of all file uploads in the last N hours.\n\nParameters:\n- request: The HTTP request object.\n\nReturns:\n- results: The status of all file uploads in the specified timeframe.",
+                "operationId": "get_all_upload_status_getalluploadstatus_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getfolders": {
+            "post": {
+                "summary": "Get Folders",
+                "description": "Get all folders.\n\nParameters:\n- request: The HTTP request object.\n\nReturns:\n- results: list of unique folders.",
+                "operationId": "get_folders_getfolders_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/deleteItems": {
+            "post": {
+                "summary": "Delete Items",
+                "description": "Delete a blob.\n\nParameters:\n- request: The HTTP request object.\n\nReturns:\n- results: list of unique folders.",
+                "operationId": "delete_Items_deleteItems_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/resubmitItems": {
+            "post": {
+                "summary": "Resubmit Items",
+                "description": "Resubmit a blob.\n\nParameters:\n- request: The HTTP request object.\n\nReturns:\n- results: list of unique folders.",
+                "operationId": "resubmit_Items_resubmitItems_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/gettags": {
+            "post": {
+                "summary": "Get Tags",
+                "description": "Get all tags.\n\nParameters:\n- request: The HTTP request object.\n\nReturns:\n- results: list of unique tags.",
+                "operationId": "get_tags_gettags_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logstatus": {
+            "post": {
+                "summary": "Logstatus",
+                "description": "Log the status of a file upload to CosmosDB.\n\nParameters:\n- request: Request object containing the HTTP request data.\n\nReturns:\n- A dictionary with the status code 200 if successful, or an error\n    message with status code 500 if an exception occurs.",
+                "operationId": "logstatus_logstatus_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getInfoData": {
+            "get": {
+                "summary": "Get Info Data",
+                "description": "Get the info data for the app.\n\nReturns:\n    dict: A dictionary containing various information data for the app.\n        - \"AZURE_OPENAI_CHATGPT_DEPLOYMENT\": The deployment information for Azure OpenAI ChatGPT.\n        - \"AZURE_OPENAI_MODEL_NAME\": The name of the Azure OpenAI model.\n        - \"AZURE_OPENAI_MODEL_VERSION\": The version of the Azure OpenAI model.\n        - \"AZURE_OPENAI_SERVICE\": The Azure OpenAI service information.\n        - \"AZURE_SEARCH_SERVICE\": The Azure search service information.\n        - \"AZURE_SEARCH_INDEX\": The Azure search index information.\n        - \"TARGET_LANGUAGE\": The target language for query terms.\n        - \"USE_AZURE_OPENAI_EMBEDDINGS\": Flag indicating whether to use Azure OpenAI embeddings.\n        - \"EMBEDDINGS_DEPLOYMENT\": The deployment information for embeddings.\n        - \"EMBEDDINGS_MODEL_NAME\": The name of the embeddings model.\n        - \"EMBEDDINGS_MODEL_VERSION\": The version of the embeddings model.",
+                "operationId": "get_info_data_getInfoData_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getWarningBanner": {
+            "get": {
+                "summary": "Get Warning Banner",
+                "description": "Get the warning banner text",
+                "operationId": "get_warning_banner_getWarningBanner_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getMaxCSVFileSize": {
+            "get": {
+                "summary": "Get Max Csv File Size",
+                "description": "Get the max csv size",
+                "operationId": "get_max_csv_file_size_getMaxCSVFileSize_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getcitation": {
+            "post": {
+                "summary": "Get Citation",
+                "description": "Get the citation for a given file\n\nParameters:\n    request (Request): The HTTP request object\n\nReturns:\n    dict: The citation results in JSON format",
+                "operationId": "get_citation_getcitation_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getApplicationTitle": {
+            "get": {
+                "summary": "Get Application Title",
+                "description": "Get the application title text\n\nReturns:\n    dict: A dictionary containing the application title.",
+                "operationId": "get_application_title_getApplicationTitle_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getDisclaimerText": {
+            "get": {
+                "summary": "Get Disclaimer Text",
+                "description": "Get the disclaimer text\n\nReturns:\n    dict: A dictionary containing the disclaimer text.",
+                "operationId": "get_disclaimer_text_getDisclaimerText_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getalltags": {
+            "get": {
+                "summary": "Get All Tags",
+                "description": "Get the status of all tags in the system\n\nReturns:\n    dict: A dictionary containing the status of all tags",
+                "operationId": "get_all_tags_getalltags_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getTempImages": {
+            "get": {
+                "summary": "Get Temp Images",
+                "description": "Get the images in the temp directory\n\nReturns:\n    list: A list of image data in the temp directory.",
+                "operationId": "get_temp_images_getTempImages_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getHint": {
+            "get": {
+                "summary": "Gethint",
+                "description": "Get the hint for a question\n\nReturns:\n    str: A string containing the hint",
+                "operationId": "getHint_getHint_get",
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/posttd": {
+            "post": {
+                "summary": "Posttd",
+                "operationId": "posttd_posttd_post",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_posttd_posttd_post"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/process_td_agent_response": {
+            "get": {
+                "summary": "Process Td Agent Response",
+                "operationId": "process_td_agent_response_process_td_agent_response_get",
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Retries",
+                            "default": 3
+                        },
+                        "name": "retries",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Delay",
+                            "default": 1000
+                        },
+                        "name": "delay",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getTdAnalysis": {
+            "get": {
+                "summary": "Gettdanalysis",
+                "operationId": "getTdAnalysis_getTdAnalysis_get",
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Retries",
+                            "default": 3
+                        },
+                        "name": "retries",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "schema": {
+                            "title": "Delay",
+                            "default": 1
+                        },
+                        "name": "delay",
+                        "in": "query"
+                    },
+                    {
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/refresh": {
+            "post": {
+                "summary": "Refresh",
+                "description": "Refresh the agent's state.\n\nThis endpoint calls the `refresh` function to reset the agent's state.\n\nRaises:\n    HTTPException: If an error occurs while refreshing the agent's state.\n\nReturns:\n    dict: A dictionary containing the status of the agent's state.",
+                "operationId": "refresh_refresh_post",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getSolve": {
+            "get": {
+                "summary": "Getsolve",
+                "operationId": "getSolve_getSolve_get",
+                "parameters": [
+                    {
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/stream": {
+            "get": {
+                "summary": "Stream Response",
+                "operationId": "stream_response_stream_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tdstream": {
+            "get": {
+                "summary": "Td Stream Response",
+                "operationId": "td_stream_response_tdstream_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/process_agent_response": {
+            "get": {
+                "summary": "Stream Agent Response",
+                "description": "Stream the response of the agent for a given question.\n\nThis endpoint uses Server-Sent Events (SSE) to stream the response of the agent. \nIt calls the `process_agent_response` function which yields chunks of data as they become available.\n\nArgs:\n    question (str): The question to be processed by the agent.\n\nYields:\n    dict: A dictionary containing a chunk of the agent's response.\n\nRaises:\n    HTTPException: If an error occurs while processing the question.",
+                "operationId": "stream_agent_response_process_agent_response_get",
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Question"
+                        },
+                        "name": "question",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/getFeatureFlags": {
+            "get": {
+                "summary": "Get Feature Flags",
+                "description": "Get the feature flag settings for the app.\n\nReturns:\n    dict: A dictionary containing various feature flags for the app.\n        - \"ENABLE_WEB_CHAT\": Flag indicating whether web chat is enabled.\n        - \"ENABLE_UNGROUNDED_CHAT\": Flag indicating whether ungrounded chat is enabled.\n        - \"ENABLE_MATH_ASSISTANT\": Flag indicating whether the math assistant is enabled.\n        - \"ENABLE_TABULAR_DATA_ASSISTANT\": Flag indicating whether the tabular data assistant is enabled.\n        - \"ENABLE_MULTIMEDIA\": Flag indicating whether multimedia is enabled.",
+                "operationId": "get_feature_flags_getFeatureFlags_get",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Body_posttd_posttd_post": {
+                "properties": {
+                    "csv": {
+                        "type": "string",
+                        "format": "binary",
+                        "title": "Csv"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "csv"
+                ],
+                "title": "Body_posttd_posttd_post"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        }
+    }
+}

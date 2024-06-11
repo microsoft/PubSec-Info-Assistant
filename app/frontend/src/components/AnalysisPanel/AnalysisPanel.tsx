@@ -113,7 +113,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                 headerText="Citation"
                 headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
             >
-                <Pivot className={className}>
+                <Pivot className={`${className} ${styles.file}`} >
                     <PivotItem itemKey="indexedFile" headerText="Document Section">
                         {activeCitationObj === undefined ? (
                             <Text>Loading...</Text>

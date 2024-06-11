@@ -204,6 +204,12 @@ export type ApplicationTitle = {
     error?: string;
 };
 
+export type DisclaimerText = {
+    Content: string;
+    error?: string;
+};
+
+
 export type GetTagsResponse = {
     tags: string;
     error?: string;

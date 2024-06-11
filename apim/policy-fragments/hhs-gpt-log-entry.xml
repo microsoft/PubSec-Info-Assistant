@@ -1,0 +1,49 @@
+<!--
+    IMPORTANT:
+    - Policy fragment are included as-is whenever they are referenced.
+    - If using variables. Ensure they are setup before use.
+    - Copy and paste your code here or simply start coding
+-->
+<fragment>
+	<set-variable name="tableName" value="{{StorageTableName}}" />
+	<set-variable name="accountName" value="{{StorageAccount}}" />
+	<set-variable name="partitionKey" value="1" />
+	<set-variable name="rowKey" value="@(Guid.NewGuid().ToString())" />
+	<authentication-managed-identity resource="https://storage.azure.com/" output-token-variable-name="accessToken" ignore-error="false" />
+	<!-- Send request to Azure Storage Table API -->
+	<send-request mode="new" timeout="10" response-variable-name="storageResponse" ignore-error="true">
+		<set-url>@{
+        var accountName = context.Variables.GetValueOrDefault<string>("accountName");
+        var tableName = context.Variables.GetValueOrDefault<string>("tableName");
+        return $"https://{accountName}.table.core.windows.net/{tableName}";
+    }</set-url>
+		<set-method>POST</set-method>
+		<set-header name="Authorization" exists-action="override">
+			<value>@("Bearer " + context.Variables.GetValueOrDefault<string>("accessToken"))</value>
+		</set-header>
+		<set-header name="Content-Type" exists-action="override">
+			<value>application/json</value>
+		</set-header>
+		<set-header name="Accept" exists-action="override">
+			<value>application/json;odata=nometadata</value>
+		</set-header>
+		<set-header name="x-ms-version" exists-action="override">
+			<value>2019-02-02</value>
+		</set-header>
+		<set-body>
+            @{
+                var responseDetails = new {
+                   PartitionKey=context.Variables.GetValueOrDefault<string>("partitionKey"),
+                   RowKey=context.Variables.GetValueOrDefault<string>("rowKey"),
+                   UserName=context.Variables.GetValueOrDefault<string>("userName"),
+                   Request=context.Variables.GetValueOrDefault<string>("requestBody"),
+                   Response=context.Variables.GetValueOrDefault<string>("responseBody"),
+                   RequestTime=context.Variables.GetValueOrDefault<string>("requestTime"),
+                   ResponseTime=context.Variables.GetValueOrDefault<string>("responseTime")
+                };
+
+                return Newtonsoft.Json.JsonConvert.SerializeObject(responseDetails);
+            }
+        </set-body>
+	</send-request>
+</fragment>

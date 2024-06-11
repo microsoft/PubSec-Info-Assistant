@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@azure/storage-blob": "^12.13.0",
-    "@fluentui/react": "^8.110.7",
-    "@fluentui/react-icons": "^2.0.195",
+    "@fluentui/react": "^8.118.6",
+    "@fluentui/react-icons": "^2.0.242",
     "@react-spring/web": "^9.7.1",
     "classnames": "^2.3.1",
     "dompurify": "^3.0.1",
@@ -23,6 +23,7 @@
     "react-bootstrap": "2.7.4",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
+    "react-jwt": "^1.2.1",
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.8.1",
     "react-switch": "^7.0.0",

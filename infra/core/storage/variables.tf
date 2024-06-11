@@ -76,6 +76,11 @@ variable "containers" {
   default = []
 }
 
+variable "tables" {
+  type = list(string)
+  default = []
+}
+
 variable "queueNames" {
   type = list(string)
   default = []

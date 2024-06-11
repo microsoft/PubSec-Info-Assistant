@@ -136,10 +136,10 @@ const EXAMPLES: ExampleModel[] = [
     
 return (
     <div className={styles.App}>
-    <MathFormatProfessionalFilled fontSize={"6rem"} primaryFill={"#8A0B31"} aria-hidden="true" aria-label="Supported File Types" />
+    <MathFormatProfessionalFilled fontSize={"6rem"} primaryFill={"#005ea2"} aria-hidden="true" aria-label="Supported File Types" />
     <h1 className={styles.title}>Math Assistant</h1>
     <span className={styles.chatEmptyObjectives}>
-      <i className={styles.centered}>Information Assistant uses AI. Check for mistakes.</i> <a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer"> Transparency Note</a>
+      {/* <i className={styles.centered}>Information Assistant uses AI. Check for mistakes.</i> <a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer"> Transparency Note</a> */}
     </span>
     <div className={styles.centeredContainer}>
     <p>Select an example query:</p>

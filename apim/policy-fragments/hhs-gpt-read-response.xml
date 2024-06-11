@@ -1,0 +1,10 @@
+<!--
+    IMPORTANT:
+    - Policy fragment are included as-is whenever they are referenced.
+    - If using variables. Ensure they are setup before use.
+    - Copy and paste your code here or simply start coding
+-->
+<fragment>
+	<set-variable name="responseTime" value="@(System.DateTime.UtcNow.ToString())" />
+	<set-variable name="responseBody" value="@(context.Response.Body.As<string>(preserveContent: true))" />
+</fragment>

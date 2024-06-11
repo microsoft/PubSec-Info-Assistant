@@ -88,7 +88,7 @@ variable "azure_environment" {
 }
 
 variable "azure_websites_domain" {
-  type        = string
+  type = string
 }
 
 variable "azure_portal_domain" {
@@ -100,11 +100,11 @@ variable "azure_openai_domain" {
 }
 
 variable "azure_openai_authority_host" {
-  type = string  
+  type = string
 }
 
 variable "azure_arm_management_api" {
-  type        = string
+  type = string
 }
 
 variable "azure_ai_translation_domain" {
@@ -160,7 +160,7 @@ variable "aadMgmtClientSecret" {
 }
 
 variable "aadMgmtServicePrincipalId" {
-  type = string
+  type    = string
   default = ""
 }
 ////
@@ -186,7 +186,7 @@ variable "azureOpenAIServiceKey" {
 }
 
 variable "openAIServiceName" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -248,15 +248,15 @@ variable "appServicePlanName" {
 
 variable "appServiceSkuSize" {
   description = "The size of the app service plan for the IA website. Must match with the tier value in appServiceSkuTier."
-  type = string
-  default = "S1"
+  type        = string
+  default     = "S1"
 }
 
 variable "appServiceSkuTier" {
   description = "The tier of the app service plan for the IA website. Must match with the size value in appServiceSkuSize."
-  type = string
-  default = "Standard"
-  
+  type        = string
+  default     = "Standard"
+
 }
 
 variable "enrichmentAppServicePlanName" {
@@ -266,14 +266,14 @@ variable "enrichmentAppServicePlanName" {
 
 variable "enrichmentAppServiceSkuSize" {
   description = "The size of the app service plan for the enrichment service. Must match with the tier value in enrichmentAppServiceSkuTier."
-  type = string
-  default = "P2v3"
+  type        = string
+  default     = "P2v3"
 }
 
 variable "enrichmentAppServiceSkuTier" {
   description = "The tier of the app service plan for the enrichment service. Must match with the size value in enrichmentAppServiceSkuSize."
-  type = string
-  default = "PremiumV3"
+  type        = string
+  default     = "PremiumV3"
 }
 
 variable "logAnalyticsName" {
@@ -303,14 +303,14 @@ variable "functionsAppName" {
 
 variable "functionsAppSkuSize" {
   description = "The size of the app service plan for the functions app. Must match with the tier value in functionsAppSkuTier."
-  type = string
-  default = "S2"
+  type        = string
+  default     = "S2"
 }
 
 variable "functionsAppSkuTier" {
   description = "The tier of the app service plan for the functions app. Must match with the size value in functionsAppSkuSize."
-  type = string
-  default = "Standard"
+  type        = string
+  default     = "Standard"
 }
 
 variable "videoIndexerName" {
@@ -489,7 +489,7 @@ variable "applicationtitle" {
 }
 
 variable "video_indexer_api_version" {
-  type = string
+  type    = string
   default = "2024-01-01"
 }
 
@@ -504,8 +504,8 @@ variable "maxCsvFileSize" {
 }
 
 variable "entraOwners" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = "Comma-separated list of owner emails"
 }
 
@@ -515,7 +515,19 @@ variable "serviceManagementReference" {
 }
 
 variable "password_lifetime" {
-  type    = number
-  default = 365
-  description = "The number of days used as the lifetime for passwords"  
+  type        = number
+  default     = 365
+  description = "The number of days used as the lifetime for passwords"
+}
+
+variable "apimPublisherName" {
+  type = string
+}
+
+variable "apimPublisherEmail" {
+  type = string
+}
+
+variable "apimName" {
+  type = string
 }

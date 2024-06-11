@@ -53,8 +53,9 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
 
     const teachingBubbleStyles: Partial<ITeachingBubbleStyles> = {
         content: {
-            background: "#d3d3d3",
-            borderColor: "#696969"
+            background: "#f7f9fa",
+            borderColor: "#dfe1e2",
+            boxShadow: '0 1px .25rem 0 rgba(0,0,0,.1)'
         },
         headline: {
             color: "#696969"

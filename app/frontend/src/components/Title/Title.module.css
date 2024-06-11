@@ -1,0 +1,20 @@
+.titleWithLogoContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.titleContainer{
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+}
+
+.titleHero
+{
+    margin-bottom: 0px;
+}
+
+.titleCaption {
+    margin-left: 15px;
+    margin-bottom: 0px;
+}

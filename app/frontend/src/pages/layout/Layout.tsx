@@ -2,12 +2,13 @@
 // Licensed under the MIT license.
 
 import { Outlet, NavLink, Link } from "react-router-dom";
-import openai from "../../assets/openai.svg";
+import logo from "../../assets/full-logo.png";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 import { Title } from "../../components/Title/Title";
 import { getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
 import { useEffect, useState } from "react";
+import { Chat48Regular, ChatMultiple24Regular, ChatMultiple32Regular, ChatMultipleRegular, ContentSettings32Regular, MathFormatProfessionalFilled, MathFormatProfessionalRegular, TableSearchFilled, TableSearchRegular } from "@fluentui/react-icons";
 
 export const Layout = () => {
     const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | null>(null);
@@ -29,52 +30,54 @@ export const Layout = () => {
     return (
         <div className={styles.layout}>
             <header className={styles.header} role={"banner"}>
-                <WarningBanner />
                 <div className={styles.headerContainer}>
                     <div className={styles.headerTitleContainer}>
-                        <img src={openai} alt="Azure OpenAI" className={styles.headerLogo} />
-                        <h3 className={styles.headerTitle}><Title /></h3>
+                        <img src={logo} alt="U.S. Department of HHS" className={styles.headerLogo} />
                     </div>
-                    <nav>
-                        <ul className={styles.headerNavList}>
-                            <li>
-                                <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Chat
-                                </NavLink>
-                            </li>
-                            <li className={styles.headerNavLeftMargin}>
-                                <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Manage Content
-                                </NavLink>
-                            </li>
-                            {featureFlags?.ENABLE_MATH_ASSISTANT &&
-                                <li className={styles.headerNavLeftMargin}>
-                                    <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Math Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
-                                    </NavLink>
-                                </li>
-                            }
-                            {featureFlags?.ENABLE_TABULAR_DATA_ASSISTANT &&
-                                <li className={styles.headerNavLeftMargin}>
-                                    <NavLink to="/tda" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Tabular Data Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
-                                    </NavLink>
-                                    
-                                      
-                                </li>
-                            }
-                    </ul>
-                    </nav>
                 </div>
+
             </header>
+            <nav className={styles.nav}>
+                <div className={styles.navLogo}>
+                    <Title />
+                </div>
+                <ul className={styles.headerNavList}>
+                    <li>
+                        <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                            <ChatMultiple32Regular />
+                            Chat
+                        </NavLink>
+                    </li>
+                    <li className={styles.headerNavLeftMargin}>
+                        <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                            <ContentSettings32Regular />
+                            Manage Content
+                        </NavLink>
+                    </li>
+                    {featureFlags?.ENABLE_MATH_ASSISTANT &&
+                        <li className={styles.headerNavLeftMargin}>
+                            <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                                <MathFormatProfessionalRegular fontSize={'2em'} />
+                                Math Assistant
+                            </NavLink>
+                        </li>
+                    }
+                    {featureFlags?.ENABLE_TABULAR_DATA_ASSISTANT &&
+                        <li className={styles.headerNavLeftMargin}>
+                            <NavLink to="/tda" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
+                                <TableSearchRegular fontSize={'2em'} />
+                                Tabular Data Assistant
+                            </NavLink>
 
+
+                        </li>
+                    }
+                </ul>
+            </nav>
+            <div className={styles.contentContainer}>
             <Outlet />
-
-            <footer>
+            </div>
+            <footer className={styles.footer}>
                 <WarningBanner />
             </footer>
         </div>

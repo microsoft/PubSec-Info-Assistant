@@ -1,0 +1,14 @@
+<!--
+    IMPORTANT:
+    - Policy fragment are included as-is whenever they are referenced.
+    - If using variables. Ensure they are setup before use.
+    - Copy and paste your code here or simply start coding
+-->
+<fragment>
+	<set-variable name="userName" value="@{
+     var jwt = context.Request.Headers.GetValueOrDefault("Authorization").AsJwt();
+    return jwt?.Claims.GetValueOrDefault("name") ?? "unknown";
+}" />
+	<set-variable name="requestTime" value="@(System.DateTime.UtcNow.ToString())" />
+	<set-variable name="requestBody" value="@(context.Request.Body.As<string>(preserveContent: true))" />
+</fragment>

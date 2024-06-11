@@ -5,7 +5,8 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    margin-top: 20px;
+    margin-top: 10px;
+    padding: 0px 10px;
 }
 
 .subHeader {
@@ -113,7 +114,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto; /* or 'scroll' if you always want the scrollbar to be visible */
-    max-height: calc(100vh - 313px); /* optional, adjust according to your layout */
+    max-height: calc(100vh - 407px); /* optional, adjust according to your layout */
 }
 
 .chatMessageGpt {
@@ -133,12 +134,11 @@
     bottom: 0;
     flex: 0 0 100px;
     padding-top: 12px;
-    padding-bottom: 24px;
+    padding-bottom: 12px;
     padding-left: 24px;
     padding-right: 24px;
     width: 100%;
     max-width: 1028px;
-    background: #f2f2f2;
 }
 
 .chatAnalysisPanel {
@@ -148,6 +148,11 @@
     margin-left: 20px;
     margin-right: 20px;
 }
+
+.chatAnalysisPanel div[role='tabpanel'] {
+    max-height: calc(100vh - 315px);
+    overflow-y: auto;
+  }
 
 .chatSettingsSeparator {
     margin-top: 15px;
@@ -181,7 +186,7 @@
 .defaultApproachWorkOption {
     font-size: 18px;
     font-weight: 600;
-    color: #1B4AEF;
+    color: #005ea2;
     padding-left: 10px;
 }
 

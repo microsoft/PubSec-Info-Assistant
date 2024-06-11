@@ -50,6 +50,12 @@ resource "azurerm_storage_queue" "queue" {
   storage_account_name = azurerm_storage_account.storage.name
 }
 
+resource "azurerm_storage_table" "table" {
+  count = length(var.tables)
+  name                  = var.tables[count.index]
+  storage_account_name  = azurerm_storage_account.storage.name
+}
+
 resource "azurerm_key_vault_secret" "storage_connection_string" {
   name         = "BLOB-CONNECTION-STRING"
   value        = azurerm_storage_account.storage.primary_connection_string

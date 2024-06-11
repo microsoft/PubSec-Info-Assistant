@@ -78,13 +78,14 @@
     margin-bottom: 5px;
 }
 .inputField {
-    background-color: #cbcbcba6; /* Lighter grey */
+    background-color: #f1f3f6; /* Lighter grey */
     border: none; /* Removes border */
     margin-bottom: 10px; /* Same as button margin bottom */
     width: 100%;
     box-sizing: border-box;
     border-radius: 10px;
     padding: 10px;
+    outline-color: #dfe1e2;
 }
 .centeredContainer {
     display: flex;

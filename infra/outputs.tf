@@ -189,3 +189,7 @@ output "AZURE_ARM_MANAGEMENT_API" {
 output "MAX_CSV_FILE_SIZE" {
   value = var.maxCsvFileSize
 }
+
+output "APIM_URI" {
+  value = module.apim.api_management_service_name
+}

@@ -1,0 +1,14 @@
+
+Welcome to the internal beta test of HHSGPT, a Large Language Model (LLM) for the Department of Health and Human Services! This tool provides LLM capabilities in a secure, federally-hosted computer environment that protects the data submitted and received.
+
+We are excited to have you participating in this cutting-edge initiative, and are excited to learn how you will use this tool to assist and enhancing your work within the department.During this pilot program, we encourage you to explore the capabilities of the HHSGPT language model and provide feedback on your experiences. We welcome your input on what works, what doesn't work, and opportunities to improve the tool.Your input is invaluable in helping us refine and improve this capability to better serve the Department.
+
+Please keep in mind that HHSGPT is an AI model, and while it is incredibly skilled, it may not always provide perfect responses. Responses from the HHSGPT tool should be checked for accuracy and proofread by a human user before use in work products or materials. Use of the tool for non-work, offensive, or hostile purposes is not permitted.Also, please remember to always follow the [User Guide.](https://gcc02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fhhsgpt.hhs.gov%2FHome%2FUserGuide&data=05|02|Jacob.Rascon@hhs.gov|1303c4be95ec41c4259708dc83f3a26f|d58addea50534a808499ba4d944910df|0|0|638530329619581844|Unknown|TWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D|0|||&sdata=g9dgrnGAAxwVh3BJs7GutvJ0PQ%2BToJgUq7AB8cR%2Fmq0%3D&reserved=0)
+
+As this is a test capability, we appreciate your patience and understanding for any outages, disruptions, and improvements as we fine tune the capability.
+
+To get started, simply type your questions, concerns, or requests into the chatbox, and HHSGPT will do its best to assist you promptly and accurately. Remember to be as specific as possible to receive the most relevant responses.Please refer to [User Hints and Tips.](https://gcc02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fhhsgpt.hhs.gov%2FHome%2FHints_Tips&data=05|02|Jacob.Rascon@hhs.gov|1303c4be95ec41c4259708dc83f3a26f|d58addea50534a808499ba4d944910df|0|0|638530329619594779|Unknown|TWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D|0|||&sdata=d%2Bfq2PzyJBhAh5FpRPoFH1hqEWwRAiTUnohF2ylgyuE%3D&reserved=0)
+
+As a reminder, the HHSGPT tool is a U.S. Federal Government computer system.Usage may be monitored, recorded, and/or subject to audit, and users expressly consent to such monitoring and recording.
+
+Please reach out with any comments, questions, feedback, and requests at: [hhsgpt@hhs.gov](mailto:hhsgpt@hhs.gov)

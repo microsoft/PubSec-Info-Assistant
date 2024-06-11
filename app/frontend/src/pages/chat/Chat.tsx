@@ -27,14 +27,15 @@ import { InfoContent } from "../../components/InfoContent/InfoContent";
 import { FolderPicker } from "../../components/FolderPicker";
 import { TagPickerInline } from "../../components/TagPicker";
 import React from "react";
+import { Disclaimer } from "../../components/Disclaimer/Disclaimer";
 
 const Chat = () => {
     const [isConfigPanelOpen, setIsConfigPanelOpen] = useState(false);
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [retrieveCount, setRetrieveCount] = useState<number>(5);
     const [useSuggestFollowupQuestions, setUseSuggestFollowupQuestions] = useState<boolean>(false);
-    const [userPersona, setUserPersona] = useState<string>("analyst");
-    const [systemPersona, setSystemPersona] = useState<string>("an Assistant");
+    const [userPersona, setUserPersona] = useState<string>("a Professional Analyst");
+    const [systemPersona, setSystemPersona] = useState<string>("a Professional Researcher Assistant");
     // Setting responseLength to 2048 by default, this will effect the default display of the ResponseLengthButtonGroup below.
     // It must match a valid value of one of the buttons in the ResponseLengthButtonGroup.tsx file. 
     // If you update the default value here, you must also update the default value in the onResponseLengthChange method.
@@ -70,6 +71,7 @@ const Chat = () => {
     const [answers, setAnswers] = useState<[user: string, response: ChatResponse][]>([]);
     const [answerStream, setAnswerStream] = useState<ReadableStream | undefined>(undefined);
     const [abortController, setAbortController] = useState<AbortController | undefined>(undefined);
+    const [isDiclaimerAccepted, setIsDisclaimerAccepted] = useState<boolean>(false)
 
     async function fetchFeatureFlags() {
         try {
@@ -81,10 +83,10 @@ const Chat = () => {
         }
     }
 
-    const makeApiRequest = async (question: string, approach: Approaches, 
-                                work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } },
-                                web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } },
-                                thought_chain: { [key: string]: string}) => {
+    const makeApiRequest = async (question: string, approach: Approaches,
+        work_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } },
+        web_citation_lookup: { [key: string]: { citation: string; source_path: string; page_number: string } },
+        thought_chain: { [key: string]: string }) => {
         lastQuestionRef.current = question;
         lastQuestionWorkCitationRef.current = work_citation_lookup;
         lastQuestionWebCitiationRef.current = web_citation_lookup;
@@ -244,15 +246,15 @@ const Chat = () => {
         const chatMode = _ev.target.value as ChatMode || ChatMode.WorkOnly;
         setChatMode(chatMode);
         if (chatMode == ChatMode.WorkOnly)
-                setDefaultApproach(Approaches.ReadRetrieveRead);
-                setActiveApproach(Approaches.ReadRetrieveRead);
+            setDefaultApproach(Approaches.ReadRetrieveRead);
+        setActiveApproach(Approaches.ReadRetrieveRead);
         if (chatMode == ChatMode.WorkPlusWeb)
-            if (defaultApproach == Approaches.GPTDirect) 
+            if (defaultApproach == Approaches.GPTDirect)
                 setDefaultApproach(Approaches.ReadRetrieveRead)
-                setActiveApproach(Approaches.ReadRetrieveRead);
+        setActiveApproach(Approaches.ReadRetrieveRead);
         if (chatMode == ChatMode.Ungrounded)
             setDefaultApproach(Approaches.GPTDirect)
-            setActiveApproach(Approaches.GPTDirect);
+        setActiveApproach(Approaches.GPTDirect);
         clearChat();
     }
 
@@ -260,7 +262,7 @@ const Chat = () => {
         defaultApproach == Approaches.ReadRetrieveRead ? setDefaultApproach(Approaches.ChatWebRetrieveRead) : setDefaultApproach(Approaches.ReadRetrieveRead);
     }
 
-    useEffect(() => {fetchFeatureFlags()}, []);
+    useEffect(() => { fetchFeatureFlags() }, []);
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
 
     const onRetrieveCountChange = (_ev?: React.SyntheticEvent<HTMLElement, Event>, newValue?: string) => {
@@ -336,196 +338,212 @@ const Chat = () => {
         setAnswers(newItems);
     }
 
+    useEffect(() => {
+        const disclaimerAgreed = localStorage.getItem('hhs-chat-gpt-dislaimer-agreed');
+        if (disclaimerAgreed) {
+            setIsDisclaimerAccepted(true);
+        }
+    }, [])
+
+    const onDiclamainerAcceptanceClickHandler = () => {
+        setIsDisclaimerAccepted(true);
+        localStorage.setItem('hhs-chat-gpt-dislaimer-agreed', 'true');
+    }
+
     return (
         <div className={styles.container}>
-            <div className={styles.subHeader}>
-                <ChatModeButtonGroup className="" defaultValue={activeChatMode} onClick={onChatModeChange} featureFlags={featureFlags} /> 
-                <div className={styles.commandsContainer}>
-                    <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
-                    <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />
-                    <InfoButton className={styles.commandButton} onClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)} />
+            {!isDiclaimerAccepted && <Disclaimer onDiclamainerAcceptanceClick={onDiclamainerAcceptanceClickHandler} />}
+            {isDiclaimerAccepted && <>
+                <div className={styles.subHeader}>
+                    <ChatModeButtonGroup className="" defaultValue={activeChatMode} onClick={onChatModeChange} featureFlags={featureFlags} />
+                    <div className={styles.commandsContainer}>
+                        <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
+                        <SettingsButton className={styles.commandButton} onClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)} />
+                        <InfoButton className={styles.commandButton} onClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)} />
+                    </div>
                 </div>
-            </div>
-            <div className={styles.chatRoot}>
-                <div className={styles.chatContainer}>
-                    {!lastQuestionRef.current ? (
-                        <div className={styles.chatEmptyState}>
-                            {activeChatMode == ChatMode.WorkOnly ? 
-                                <div>
-                                    <div className={styles.chatEmptyStateHeader}> 
-                                        <BuildingMultipleFilled fontSize={"100px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Chat with your Work Data logo" />
+                <div className={styles.chatRoot}>
+                    <div className={styles.chatContainer}>
+                        {!lastQuestionRef.current ? (
+                            <div className={styles.chatEmptyState}>
+                                {activeChatMode == ChatMode.WorkOnly ?
+                                    <div>
+                                        <div className={styles.chatEmptyStateHeader}>
+                                            <BuildingMultipleFilled fontSize={"100px"} primaryFill={"rgba(0, 94, 162, 1)"} aria-hidden="true" aria-label="Chat with your Work Data logo" />
                                         </div>
-                                    <h1 className={styles.chatEmptyStateTitle}>Chat with your work data</h1>
-                                </div>
-                            : activeChatMode == ChatMode.WorkPlusWeb ?
-                                <div>
-                                    <div className={styles.chatEmptyStateHeader}> 
-                                        <BuildingMultipleFilled fontSize={"80px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Chat with your Work and Web Data logo" /><AddFilled fontSize={"50px"} primaryFill={"rgba(0, 0, 0, 0.7)"} aria-hidden="true" aria-label=""/><GlobeFilled fontSize={"80px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="" />
+                                        <h1 className={styles.chatEmptyStateTitle}>Chat with your work data</h1>
                                     </div>
-                                    <h1 className={styles.chatEmptyStateTitle}>Chat with your work and web data</h1>
-                                </div>
-                            : //else Ungrounded
-                                <div>
-                                    <div className={styles.chatEmptyStateHeader}> 
-                                        <ChatSparkleFilled fontSize={"80px"} primaryFill={"rgba(0, 0, 0, 0.35)"} aria-hidden="true" aria-label="Chat logo" />
-                                    </div>
-                                    <h1 className={styles.chatEmptyStateTitle}>Chat directly with a LLM</h1>
-                                </div>
-                            }
-                            <span className={styles.chatEmptyObjectives}>
-                                <i>Information Assistant uses AI. Check for mistakes.   </i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a>
-                            </span>
-                            {activeChatMode != ChatMode.Ungrounded &&
-                                <div>
-                                    <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
-                                    <ExampleList onExampleClicked={onExampleClicked} />
-                                </div>
-                            }
-                        </div>
-                    ) : (
-                        <div className={styles.chatMessageStream}>
-                            {answers.map((answer, index) => (
-                                <div key={index}>
-                                    <UserChatMessage
-                                        message={answer[0]}
-                                        approach={answer[1].approach}
-                                    />
-                                    <div className={styles.chatMessageGpt}>
-                                        <Answer
-                                            key={index}
-                                            answer={answer[1]}
-                                            answerStream={answerStream}
-                                            setError={(error) => {setError(error); removeAnswerAtIndex(index); }}
-                                            setAnswer={(response) => updateAnswerAtIndex(index, response)}
-                                            isSelected={selectedAnswer === index && activeAnalysisPanelTab !== undefined}
-                                            onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
-                                            onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab, index)}
-                                            onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
-                                            onFollowupQuestionClicked={q => makeApiRequest(q, answer[1].approach, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
-                                            showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
-                                            onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                                            onRegenerateClick={() => makeApiRequest(answers[index][0], answer[1].approach, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
-                                            onWebSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ChatWebRetrieveRead, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
-                                            onWebCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWorkWithWeb, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
-                                            onRagCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWebWithWork, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
-                                            onRagSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ReadRetrieveRead, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
-                                            chatMode={activeChatMode}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                            {error ? (
-                                <>
-                                    <UserChatMessage message={lastQuestionRef.current} approach={activeApproach}/>
-                                    <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach, lastQuestionWorkCitationRef.current, lastQuestionWebCitiationRef.current, lastQuestionThoughtChainRef.current)} />
-                                    </div>
-                                </>
-                            ) : null}
-                            <div ref={chatMessageStreamEnd} />
-                        </div>
-                    )}
-                    
-                    <div className={styles.chatInput}>
-                        {activeChatMode == ChatMode.WorkPlusWeb && (
-                            <div className={styles.chatInputWarningMessage}> 
-                                {defaultApproach == Approaches.ReadRetrieveRead && 
-                                    <div>Questions will be answered by default from Work <BuildingMultipleFilled fontSize={"20px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Work Data" /></div>}
-                                {defaultApproach == Approaches.ChatWebRetrieveRead && 
-                                    <div>Questions will be answered by default from Web <GlobeFilled fontSize={"20px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="Web Data" /></div>
+                                    : activeChatMode == ChatMode.WorkPlusWeb ?
+                                        <div>
+                                            <div className={styles.chatEmptyStateHeader}>
+                                                <BuildingMultipleFilled fontSize={"80px"} primaryFill={"rgba(0, 94, 162, 1)"} aria-hidden="true" aria-label="Chat with your Work and Web Data logo" /><AddFilled fontSize={"50px"} primaryFill={"rgba(0, 0, 0, 0.7)"} aria-hidden="true" aria-label="" /><GlobeFilled fontSize={"80px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="" />
+                                            </div>
+                                            <h1 className={styles.chatEmptyStateTitle}>Chat with your work and web data</h1>
+                                        </div>
+                                        : //else Ungrounded
+                                        <div>
+                                            <div className={styles.chatEmptyStateHeader}>
+                                                <ChatSparkleFilled fontSize={"80px"} primaryFill={"rgba(0, 0, 0, 0.35)"} aria-hidden="true" aria-label="Chat logo" />
+                                            </div>
+                                            <h1 className={styles.chatEmptyStateTitle}>Chat directly with a LLM</h1>
+                                        </div>
                                 }
-                            </div> 
-                        )}
-                        <QuestionInput
-                            clearOnSend
-                            placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
-                            disabled={isLoading}
-                            onSend={question => makeApiRequest(question, defaultApproach, {}, {}, {})}
-                            onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
-                            onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
-                            showClearChat={true}
-                            onClearClick={clearChat}
-                            onRegenerateClick={() => makeApiRequest(lastQuestionRef.current, defaultApproach, {}, {}, {})}
-                        />
-                    </div>
-                </div>
-
-                {answers.length > 0 && activeAnalysisPanelTab && (
-                    <AnalysisPanel
-                        className={styles.chatAnalysisPanel}
-                        activeCitation={activeCitation}
-                        sourceFile={activeCitationSourceFile}
-                        pageNumber={activeCitationSourceFilePageNumber}
-                        onActiveTabChanged={x => onToggleTab(x, selectedAnswer)}
-                        citationHeight="760px"
-                        answer={answers[selectedAnswer][1]}
-                        activeTab={activeAnalysisPanelTab}
-                    />
-                )}
-
-                <Panel
-                    headerText="Configure answer generation"
-                    isOpen={isConfigPanelOpen}
-                    isBlocking={false}
-                    onDismiss={() => setIsConfigPanelOpen(false)}
-                    closeButtonAriaLabel="Close"
-                    onRenderFooterContent={() => <DefaultButton onClick={() => setIsConfigPanelOpen(false)}>Close</DefaultButton>}
-                    isFooterAtBottom={true}
-                >
-                    {activeChatMode == ChatMode.WorkPlusWeb &&
-                        <div>
-                            <Label>Use this datasource to answer Questions by default:</Label>
-                            <div className={styles.defaultApproachSwitch}>
-                                <div className={styles.defaultApproachWebOption} onClick={handleToggle}>Web</div>
-                                <Switch onChange={handleToggle} checked={defaultApproach == Approaches.ReadRetrieveRead} uncheckedIcon={true} checkedIcon={true} onColor="#1B4AEF" offColor="#188d45"/>
-                                <div className={styles.defaultApproachWorkOption} onClick={handleToggle}>Work</div>
+                                <span className={styles.chatEmptyObjectives}>
+                                    {/* <i>Information Assistant uses AI. Check for mistakes.   </i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a> */}
+                                </span>
+                                {activeChatMode != ChatMode.Ungrounded &&
+                                    <div>
+                                        <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
+                                        <ExampleList onExampleClicked={onExampleClicked} />
+                                    </div>
+                                }
                             </div>
-                        </div>
-                    }
-                    {activeChatMode != ChatMode.Ungrounded &&
-                        <SpinButton
-                            className={styles.chatSettingsSeparator}
-                            label="Retrieve this many documents from search:"
-                            min={1}
-                            max={50}
-                            defaultValue={retrieveCount.toString()}
-                            onChange={onRetrieveCountChange}
-                        />
-                    }
-                    {activeChatMode != ChatMode.Ungrounded &&
-                        <Checkbox
-                            className={styles.chatSettingsSeparator}
-                            checked={useSuggestFollowupQuestions}
-                            label="Suggest follow-up questions"
-                            onChange={onUseSuggestFollowupQuestionsChange}
-                        />
-                    }
-                    <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
-                    <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
-                    <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength} />
-                    <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp} />
-                    {activeChatMode != ChatMode.Ungrounded &&
-                        <div>
-                            <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
-                            <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders} />
-                            <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags} />
-                        </div>
-                    }
-                </Panel>
+                        ) : (
+                            <div className={styles.chatMessageStream}>
+                                {answers.map((answer, index) => (
+                                    <div key={index}>
+                                        <UserChatMessage
+                                            message={answer[0]}
+                                            approach={answer[1].approach}
+                                        />
+                                        <div className={styles.chatMessageGpt}>
+                                            <Answer
+                                                key={index}
+                                                answer={answer[1]}
+                                                answerStream={answerStream}
+                                                setError={(error) => { setError(error); removeAnswerAtIndex(index); }}
+                                                setAnswer={(response) => updateAnswerAtIndex(index, response)}
+                                                isSelected={selectedAnswer === index && activeAnalysisPanelTab !== undefined}
+                                                onCitationClicked={(c, s, p) => onShowCitation(c, s, p, index)}
+                                                onThoughtProcessClicked={() => onToggleTab(AnalysisPanelTabs.ThoughtProcessTab, index)}
+                                                onSupportingContentClicked={() => onToggleTab(AnalysisPanelTabs.SupportingContentTab, index)}
+                                                onFollowupQuestionClicked={q => makeApiRequest(q, answer[1].approach, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
+                                                showFollowupQuestions={useSuggestFollowupQuestions && answers.length - 1 === index}
+                                                onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
+                                                onRegenerateClick={() => makeApiRequest(answers[index][0], answer[1].approach, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
+                                                onWebSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ChatWebRetrieveRead, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
+                                                onWebCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWorkWithWeb, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
+                                                onRagCompareClicked={() => makeApiRequest(answers[index][0], Approaches.CompareWebWithWork, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
+                                                onRagSearchClicked={() => makeApiRequest(answers[index][0], Approaches.ReadRetrieveRead, answer[1].work_citation_lookup, answer[1].web_citation_lookup, answer[1].thought_chain)}
+                                                chatMode={activeChatMode}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                                {error ? (
+                                    <>
+                                        <UserChatMessage message={lastQuestionRef.current} approach={activeApproach} />
+                                        <div className={styles.chatMessageGptMinWidth}>
+                                            <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach, lastQuestionWorkCitationRef.current, lastQuestionWebCitiationRef.current, lastQuestionThoughtChainRef.current)} />
+                                        </div>
+                                    </>
+                                ) : null}
+                                <div ref={chatMessageStreamEnd} />
+                            </div>
+                        )}
 
-                <Panel
-                    headerText="Information"
-                    isOpen={isInfoPanelOpen}
-                    isBlocking={false}
-                    onDismiss={() => setIsInfoPanelOpen(false)}
-                    closeButtonAriaLabel="Close"
-                    onRenderFooterContent={() => <DefaultButton onClick={() => setIsInfoPanelOpen(false)}>Close</DefaultButton>}
-                    isFooterAtBottom={true}                >
-                    <div className={styles.resultspanel}>
-                        <InfoContent />
+                        <div className={styles.chatInput}>
+                            {activeChatMode == ChatMode.WorkPlusWeb && (
+                                <div className={styles.chatInputWarningMessage}>
+                                    {defaultApproach == Approaches.ReadRetrieveRead &&
+                                        <div>Questions will be answered by default from Work <BuildingMultipleFilled fontSize={"20px"} primaryFill={"rgba(0, 94, 162, 1)"} aria-hidden="true" aria-label="Work Data" /></div>}
+                                    {defaultApproach == Approaches.ChatWebRetrieveRead &&
+                                        <div>Questions will be answered by default from Web <GlobeFilled fontSize={"20px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="Web Data" /></div>
+                                    }
+                                </div>
+                            )}
+                            <QuestionInput
+                                clearOnSend
+                                placeholder="Type a new query (e.g. Who are Microsoft's top executives, provided as a table?)"
+                                disabled={isLoading}
+                                onSend={question => makeApiRequest(question, defaultApproach, {}, {}, {})}
+                                onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
+                                onInfoClick={() => setIsInfoPanelOpen(!isInfoPanelOpen)}
+                                showClearChat={false}
+                                onClearClick={clearChat}
+                                onRegenerateClick={() => makeApiRequest(lastQuestionRef.current, defaultApproach, {}, {}, {})}
+                            />
+                        </div>
                     </div>
-                </Panel>
-            </div>
+
+                    {answers.length > 0 && activeAnalysisPanelTab && (
+                        <AnalysisPanel
+                            className={styles.chatAnalysisPanel}
+                            activeCitation={activeCitation}
+                            sourceFile={activeCitationSourceFile}
+                            pageNumber={activeCitationSourceFilePageNumber}
+                            onActiveTabChanged={x => onToggleTab(x, selectedAnswer)}
+                            citationHeight="760px"
+                            answer={answers[selectedAnswer][1]}
+                            activeTab={activeAnalysisPanelTab}
+                        />
+                    )}
+
+                    <Panel
+                        headerText="Configure answer generation"
+                        isOpen={isConfigPanelOpen}
+                        isBlocking={false}
+                        onDismiss={() => setIsConfigPanelOpen(false)}
+                        closeButtonAriaLabel="Close"
+                        onRenderFooterContent={() => <DefaultButton onClick={() => setIsConfigPanelOpen(false)}>Close</DefaultButton>}
+                        isFooterAtBottom={true}
+                    >
+                        {activeChatMode == ChatMode.WorkPlusWeb &&
+                            <div>
+                                <Label>Use this datasource to answer Questions by default:</Label>
+                                <div className={styles.defaultApproachSwitch}>
+                                    <div className={styles.defaultApproachWebOption} onClick={handleToggle}>Web</div>
+                                    <Switch onChange={handleToggle} checked={defaultApproach == Approaches.ReadRetrieveRead} uncheckedIcon={true} checkedIcon={true} onColor="#005ea2" offColor="#188d45" />
+                                    <div className={styles.defaultApproachWorkOption} onClick={handleToggle}>Work</div>
+                                </div>
+                            </div>
+                        }
+                        {activeChatMode != ChatMode.Ungrounded &&
+                            <SpinButton
+                                className={styles.chatSettingsSeparator}
+                                label="Retrieve this many documents from search:"
+                                min={1}
+                                max={50}
+                                defaultValue={retrieveCount.toString()}
+                                onChange={onRetrieveCountChange}
+                            />
+                        }
+                        {activeChatMode != ChatMode.Ungrounded &&
+                            <Checkbox
+                                className={styles.chatSettingsSeparator}
+                                checked={useSuggestFollowupQuestions}
+                                label="Suggest follow-up questions"
+                                onChange={onUseSuggestFollowupQuestionsChange}
+                            />
+                        }
+                        <TextField className={styles.chatSettingsSeparator} defaultValue={userPersona} label="User Persona" onChange={onUserPersonaChange} />
+                        <TextField className={styles.chatSettingsSeparator} defaultValue={systemPersona} label="System Persona" onChange={onSystemPersonaChange} />
+                        <ResponseLengthButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseLengthChange} defaultValue={responseLength} />
+                        <ResponseTempButtonGroup className={styles.chatSettingsSeparator} onClick={onResponseTempChange} defaultValue={responseTemp} />
+                        {activeChatMode != ChatMode.Ungrounded &&
+                            <div>
+                                <Separator className={styles.chatSettingsSeparator}>Filter Search Results by</Separator>
+                                <FolderPicker allowFolderCreation={false} onSelectedKeyChange={onSelectedKeyChanged} preSelectedKeys={selectedFolders} />
+                                <TagPickerInline allowNewTags={false} onSelectedTagsChange={onSelectedTagsChange} preSelectedTags={selectedTags} />
+                            </div>
+                        }
+                    </Panel>
+
+                    <Panel
+                        headerText="Information"
+                        isOpen={isInfoPanelOpen}
+                        isBlocking={false}
+                        onDismiss={() => setIsInfoPanelOpen(false)}
+                        closeButtonAriaLabel="Close"
+                        onRenderFooterContent={() => <DefaultButton onClick={() => setIsInfoPanelOpen(false)}>Close</DefaultButton>}
+                        isFooterAtBottom={true}                >
+                        <div className={styles.resultspanel}>
+                            <InfoContent />
+                        </div>
+                    </Panel>
+                </div>
+            </>
+            }
         </div>
     );
 };

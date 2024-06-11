@@ -1,26 +1,72 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { ChatResponse, 
-    ChatRequest, 
-    BlobClientUrlResponse, 
-    AllFilesUploadStatus, 
-    GetUploadStatusRequest, 
-    GetInfoResponse, 
-    ActiveCitation, 
-    GetWarningBanner, 
-    StatusLogEntry, 
-    StatusLogResponse, 
-    ApplicationTitle, 
+import { isExpired } from "react-jwt";
+import {
+    ChatResponse,
+    ChatRequest,
+    BlobClientUrlResponse,
+    AllFilesUploadStatus,
+    GetUploadStatusRequest,
+    GetInfoResponse,
+    ActiveCitation,
+    GetWarningBanner,
+    StatusLogEntry,
+    StatusLogResponse,
+    ApplicationTitle,
     GetTagsResponse,
     DeleteItemRequest,
     ResubmitItemRequest,
     GetFeatureFlagsResponse,
     getMaxCSVFileSizeType,
-    } from "./models";
+    DisclaimerText,
+} from "./models";
+
+async function getAccessToken(): Promise<string | null | undefined> {
+    try {
+        let accessToken = sessionStorage.getItem('hhs-gpt-access-token')
+        if (!accessToken || isExpired(accessToken)) {
+            const tokenResp = await fetch('/.auth/me')
+            if (tokenResp.status === 200) {
+                const tokenRespJson = await tokenResp.json();
+                const newAccessToken = tokenRespJson[0].id_token;
+
+                if (isExpired(newAccessToken)) {
+                    const refreshResp = await fetch('/.auth/refresh')
+                    if (refreshResp.status === 200) {
+                        return await getAccessToken();
+                    }
+                }
+
+                if (newAccessToken) {
+                    sessionStorage.setItem('hhs-gpt-access-token', newAccessToken)
+                }
+                return newAccessToken;
+            }
+        }
+        return accessToken
+    }
+    catch {
+        return null;
+    }
+}
+
+
+async function fetchApi(
+    input: string | URL | globalThis.Request,
+    init?: RequestInit,
+): Promise<Response> {
+    let headers: HeadersInit = { ...init?.headers, "Ocp-Apim-Subscription-Key": import.meta.env.VITE_OCP_APIM_SUBSCRIPTION_KEY }
+    const accessToken = await getAccessToken();
+    if (accessToken) {
+        headers = { ...headers, "Authorization": `Bearer ${accessToken}` }
+    }
+
+    return await fetch(`${import.meta.env.VITE_API_ENDPOINT}${input}`, { ...init, headers: headers })
+}
 
 export async function chatApi(options: ChatRequest, signal: AbortSignal): Promise<Response> {
-    const response = await fetch("/chat", {
+    const response = await fetchApi("/chat", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -56,7 +102,7 @@ export async function chatApi(options: ChatRequest, signal: AbortSignal): Promis
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
     }
-   
+
     return response;
 }
 
@@ -65,7 +111,7 @@ export function getCitationFilePath(citation: string): string {
 }
 
 export async function getBlobClientUrl(): Promise<string> {
-    const response = await fetch("/getblobclienturl", {
+    const response = await fetchApi("/getblobclienturl", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -81,7 +127,7 @@ export async function getBlobClientUrl(): Promise<string> {
 }
 
 export async function getAllUploadStatus(options: GetUploadStatusRequest): Promise<AllFilesUploadStatus> {
-    const response = await fetch("/getalluploadstatus", {
+    const response = await fetchApi("/getalluploadstatus", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -91,20 +137,20 @@ export async function getAllUploadStatus(options: GetUploadStatusRequest): Promi
             state: options.state as string,
             folder: options.folder as string,
             tag: options.tag as string
-            })
-        });
-    
+        })
+    });
+
     const parsedResponse: any = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
     }
-    const results: AllFilesUploadStatus = {statuses: parsedResponse};
+    const results: AllFilesUploadStatus = { statuses: parsedResponse };
     return results;
 }
 
 export async function deleteItem(options: DeleteItemRequest): Promise<boolean> {
     try {
-        const response = await fetch("/deleteItems", {
+        const response = await fetchApi("/deleteItems", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -129,7 +175,7 @@ export async function deleteItem(options: DeleteItemRequest): Promise<boolean> {
 
 export async function resubmitItem(options: ResubmitItemRequest): Promise<boolean> {
     try {
-        const response = await fetch("/resubmitItems", {
+        const response = await fetchApi("/resubmitItems", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -153,15 +199,15 @@ export async function resubmitItem(options: ResubmitItemRequest): Promise<boolea
 
 
 export async function getFolders(): Promise<string[]> {
-    const response = await fetch("/getfolders", {
+    const response = await fetchApi("/getfolders", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            })
-        });
-    
+        })
+    });
+
     const parsedResponse: any = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
@@ -177,15 +223,15 @@ export async function getFolders(): Promise<string[]> {
 
 
 export async function getTags(): Promise<string[]> {
-    const response = await fetch("/gettags", {
+    const response = await fetchApi("/gettags", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            })
-        });
-    
+        })
+    });
+
     const parsedResponse: any = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
@@ -201,13 +247,13 @@ export async function getTags(): Promise<string[]> {
 
 
 export async function getHint(question: string): Promise<String> {
-    const response = await fetch(`/getHint?question=${encodeURIComponent(question)}`, {
+    const response = await fetchApi(`/getHint?question=${encodeURIComponent(question)}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
     });
-    
+
     const parsedResponse: String = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
@@ -229,7 +275,7 @@ export async function streamTdData(question: string, file: File): Promise<EventS
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/posttd', {
+    const response = await fetchApi('/posttd', {
         method: 'POST',
         body: formData,
     });
@@ -238,7 +284,7 @@ export async function streamTdData(question: string, file: File): Promise<EventS
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
     }
-    
+
     const encodedQuestion = encodeURIComponent(question);
     const eventSource = new EventSource(`/tdstream?question=${encodedQuestion}`);
 
@@ -246,13 +292,13 @@ export async function streamTdData(question: string, file: File): Promise<EventS
 }
 
 export async function getSolve(question: string): Promise<String[]> {
-    const response = await fetch(`/getSolve?question=${encodeURIComponent(question)}`, {
+    const response = await fetchApi(`/getSolve?question=${encodeURIComponent(question)}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
     });
-    
+
     const parsedResponse: String[] = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
@@ -261,13 +307,13 @@ export async function getSolve(question: string): Promise<String[]> {
     return parsedResponse;
 }
 export async function refresh(): Promise<String[]> {
-    const response = await fetch(`/refresh?`, {
+    const response = await fetchApi(`/refresh?`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         }
     });
-    
+
     const parsedResponse: String[] = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
@@ -277,13 +323,13 @@ export async function refresh(): Promise<String[]> {
 }
 
 export async function getTempImages(): Promise<string[]> {
-    const response = await fetch(`/getTempImages`, {
+    const response = await fetchApi(`/getTempImages`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
     });
-    
+
     const parsedResponse: { images: string[] } = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
@@ -296,7 +342,7 @@ export async function postTd(file: File): Promise<String> {
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/posttd', {
+    const response = await fetchApi('/posttd', {
         method: 'POST',
         body: formData,
     });
@@ -315,7 +361,7 @@ export async function processCsvAgentResponse(question: string, file: File, retr
     const formData = new FormData();
     formData.append('csv', file);
 
-    const response = await fetch('/posttd', {
+    const response = await fetchApi('/posttd', {
         method: 'POST',
         body: formData,
     });
@@ -326,7 +372,7 @@ export async function processCsvAgentResponse(question: string, file: File, retr
     }
     for (let i = 0; i < retries; i++) {
         try {
-            const response = await fetch(`/process_td_agent_response?question=${encodeURIComponent(question)}`, {
+            const response = await fetchApi(`/process_td_agent_response?question=${encodeURIComponent(question)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json"
@@ -348,23 +394,23 @@ export async function processCsvAgentResponse(question: string, file: File, retr
 }
 
 export async function processAgentResponse(question: string): Promise<String> {
-    const response = await fetch(`/process_agent_response?question=${encodeURIComponent(question)}`, {
+    const response = await fetchApi(`/process_agent_response?question=${encodeURIComponent(question)}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
     });
-    
+
     const parsedResponse: String = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error("Unknown error");
     }
 
-    return parsedResponse;    
+    return parsedResponse;
 }
 
 export async function logStatus(status_log_entry: StatusLogEntry): Promise<StatusLogResponse> {
-    var response = await fetch("/logstatus", {
+    var response = await fetchApi("/logstatus", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -374,7 +420,7 @@ export async function logStatus(status_log_entry: StatusLogEntry): Promise<Statu
             "status": status_log_entry.status,
             "status_classification": status_log_entry.status_classification,
             "state": status_log_entry.state
-            })
+        })
     });
 
     var parsedResponse: StatusLogResponse = await response.json();
@@ -382,12 +428,12 @@ export async function logStatus(status_log_entry: StatusLogEntry): Promise<Statu
         throw Error(parsedResponse.error || "Unknown error");
     }
 
-    var results: StatusLogResponse = {status: parsedResponse.status};
+    var results: StatusLogResponse = { status: parsedResponse.status };
     return results;
 }
 
 export async function getInfoData(): Promise<GetInfoResponse> {
-    const response = await fetch("/getInfoData", {
+    const response = await fetchApi("/getInfoData", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -403,7 +449,7 @@ export async function getInfoData(): Promise<GetInfoResponse> {
 }
 
 export async function getWarningBanner(): Promise<GetWarningBanner> {
-    const response = await fetch("/getWarningBanner", {
+    const response = await fetchApi("/getWarningBanner", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -419,7 +465,7 @@ export async function getWarningBanner(): Promise<GetWarningBanner> {
 }
 
 export async function getMaxCSVFileSize(): Promise<getMaxCSVFileSizeType> {
-    const response = await fetch("/getMaxCSVFileSize", {
+    const response = await fetchApi("/getMaxCSVFileSize", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -435,7 +481,7 @@ export async function getMaxCSVFileSize(): Promise<getMaxCSVFileSizeType> {
 }
 
 export async function getCitationObj(citation: string): Promise<ActiveCitation> {
-    const response = await fetch(`/getcitation`, {
+    const response = await fetchApi(`/getcitation`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -454,7 +500,7 @@ export async function getCitationObj(citation: string): Promise<ActiveCitation> 
 
 export async function getApplicationTitle(): Promise<ApplicationTitle> {
     console.log("fetch Application Titless");
-    const response = await fetch("/getApplicationTitle", {
+    const response = await fetchApi("/getApplicationTitle", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -470,8 +516,27 @@ export async function getApplicationTitle(): Promise<ApplicationTitle> {
     return parsedResponse;
 }
 
+
+export async function getDisclaimerText(): Promise<DisclaimerText> {
+    console.log("fetch Disclaimer Text");
+    const response = await fetchApi("/getDisclaimerText", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    const parsedResponse: DisclaimerText = await response.json();
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error(parsedResponse.error || "Unknown error");
+    }
+    console.log(parsedResponse);
+    return parsedResponse;
+}
+
 export async function getAllTags(): Promise<GetTagsResponse> {
-    const response = await fetch("/getalltags", {
+    const response = await fetchApi("/getalltags", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
@@ -483,12 +548,12 @@ export async function getAllTags(): Promise<GetTagsResponse> {
         console.log(response);
         throw Error(parsedResponse.error || "Unknown error");
     }
-    var results: GetTagsResponse = {tags: parsedResponse};
+    var results: GetTagsResponse = { tags: parsedResponse };
     return results;
 }
 
 export async function getFeatureFlags(): Promise<GetFeatureFlagsResponse> {
-    const response = await fetch("/getFeatureFlags", {
+    const response = await fetchApi("/getFeatureFlags", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"

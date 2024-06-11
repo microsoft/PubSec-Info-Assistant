@@ -102,7 +102,8 @@ ENV = {
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
     "ENABLE_MULTIMEDIA": "false",
-    "MAX_CSV_FILE_SIZE": "7"
+    "MAX_CSV_FILE_SIZE": "7",
+    "DISCLAIMER_CONTENT_FILE_PATH":"./disclaimer.md"
     }
 
 for key, value in ENV.items():
@@ -262,7 +263,7 @@ chat_approaches = {
 
 # Create API
 app = FastAPI(
-    title="IA Web API",
+    title="HHS Chat GPT Web API",
     description="A Python API to serve as Backend For the Information Assistant Web App",
     version="0.1.0",
     docs_url="/docs",
@@ -629,6 +630,21 @@ async def get_application_title():
             "APPLICATION_TITLE": ENV["APPLICATION_TITLE"]
         }
     return response
+
+@app.get("/getDisclaimerText")
+async def get_disclaimer_text():
+    """Get the disclaimer text
+    
+    Returns:
+        dict: A dictionary containing the disclaimer text.
+    """
+    with open(ENV["DISCLAIMER_CONTENT_FILE_PATH"], 'r') as content_file:
+        content = content_file.read()
+    response = {
+            "Content": content
+        }
+    return response
+
 
 @app.get("/getalltags")
 async def get_all_tags():

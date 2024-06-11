@@ -157,6 +157,7 @@ export TF_VAR_dns_CIDR="10.0.8.136/29"
 * *azure monitor (ampls) requires at least a /27 range*
 * *storage account requires at least a /28 range*
 * *integration requires at least a /26 range*
+* *dns requires at least a /28 range*
 
 ### Private vnet and endpoint connectivity
 

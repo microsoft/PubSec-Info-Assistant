@@ -364,7 +364,7 @@ variable "acr_CIDR" {
 
 variable "dns_CIDR" {
   type    = string
-  default = "10.0.8.136/29"
+  default = "10.0.8.176/28"
 }
 
 variable "ddos_plan_id" {

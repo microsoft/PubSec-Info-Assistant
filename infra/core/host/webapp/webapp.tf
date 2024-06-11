@@ -227,19 +227,12 @@ resource "azurerm_key_vault_access_policy" "policy" {
   ]
 }
 
-data "azurerm_subnet" "subnet" {
-  count                = var.is_secure_mode ? 1 : 0
-  name                 = var.subnet_name
-  virtual_network_name = var.vnet_name
-  resource_group_name  = var.resourceGroupName
-}
-
 resource "azurerm_private_endpoint" "backendPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = data.azurerm_subnet.subnet[0].id
+  subnet_id                     = var.subnet_id
   tags                          = var.tags
   custom_network_interface_name = "infoasstwebnic"
 

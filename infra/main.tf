@@ -75,7 +75,7 @@ module "privateDnsZoneAzureOpenAi" {
   name               = "privatelink.${var.azure_openai_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-openai-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -86,7 +86,7 @@ module "privateDnsZoneAzureAi" {
   name               = "privatelink.${var.azure_ai_private_link_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-azure-ai-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -97,7 +97,7 @@ module "privateDnsZoneApp" {
   name               = "privatelink.${var.azure_websites_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-app-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -108,7 +108,7 @@ module "privateDnsZoneKeyVault" {
   name               = "privatelink.${var.azure_keyvault_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-kv-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -119,7 +119,7 @@ module "privateDnsZoneStorageAccountBlob" {
   name               = "privatelink.blob.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-blob-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -131,7 +131,7 @@ module "privateDnsZoneStorageAccountFile" {
   name               = "privatelink.file.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-file-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -142,7 +142,7 @@ module "privateDnsZoneStorageAccountTable" {
   name               = "privatelink.table.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-table-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -153,7 +153,7 @@ module "privateDnsZoneStorageAccountQueue" {
   name               = "privatelink.queue.${var.azure_storage_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-storage-queue-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -164,7 +164,7 @@ module "privateDnsZoneSearchService" {
   name               = "privatelink.${var.azure_search_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-search-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -175,7 +175,7 @@ module "privateDnsZoneCosmosDb" {
   name               = "privatelink.${var.cosmosdb_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-cosmos-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -186,7 +186,7 @@ module "privateDnsZoneACR" {
   name               = "privatelink.${var.azure_acr_domain}"
   resourceGroupName  = azurerm_resource_group.rg.name
   vnetLinkName       = "infoasst-acr-vnetlink-${random_string.random.result}"
-  virtual_network_name = var.is_secure_mode ? module.network[0].vnet_name : null
+  virtual_network_id = var.is_secure_mode ? module.network[0].vnet_id : null
   tags               = local.tags
   depends_on = [ module.network[0] ]
 }
@@ -257,7 +257,7 @@ module "kvModule" {
   vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
   subnet_id                     = var.is_secure_mode ? module.network[0].snetKeyVault_id : null
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
-  depends_on                    = [ module.entraObjects ]
+  depends_on                    = [ module.entraObjects, module.privateDnsZoneKeyVault[0] ]
   azure_keyvault_domain         = var.azure_keyvault_domain
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   kv_secret_expiration          = var.kv_secret_expiration
@@ -348,7 +348,7 @@ module "webapp" {
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
   is_secure_mode                      = var.is_secure_mode
-  subnet_name                         = var.is_secure_mode ? module.network[0].snetApp_name : null
+  subnet_id                           = var.is_secure_mode ? module.network[0].snetApp_id : null
   vnet_name                           = var.is_secure_mode ? module.network[0].vnet_name : null
   snetIntegration_id                  = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null

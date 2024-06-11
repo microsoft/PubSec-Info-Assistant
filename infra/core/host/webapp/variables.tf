@@ -131,7 +131,7 @@ variable "vnet_name" {
   type = string
 }
 
-variable "subnet_name" {
+variable "subnet_id" {
   type = string
 }
 

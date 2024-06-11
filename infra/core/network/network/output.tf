@@ -47,6 +47,10 @@ output "snetACR_name" {
   value = data.azurerm_subnet.acr.name
 }
 
+output "snetApp_id" {
+  value = data.azurerm_subnet.app.id
+}
+
 output "snetApp_name" {
   value = data.azurerm_subnet.app.name
 }

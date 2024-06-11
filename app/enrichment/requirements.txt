@@ -3,7 +3,6 @@
 sentence-transformers == 2.2.2
 fastapi == 0.109.1
 fastapi-utils == 0.2.1
-gunicorn==20.1.0
 uvicorn==0.14.0
 azure-storage-queue == 12.6.0
 azure-storage-blob==12.16.0

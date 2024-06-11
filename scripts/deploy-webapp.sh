@@ -49,13 +49,6 @@ printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_RE
 docker tag webapp $CONTAINER_REGISTRY/webapp:$tag
 docker push $CONTAINER_REGISTRY/webapp:$tag
 
-# ToDo: Configure Cosmo db access 
-#az role assignment create --assignee  --role "DocumentDB Account Contributor" --scope 
-
-# Configure container startup commanf
-echo "Configuring webapp startup command"
-az webapp config set --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --startup-file "gunicorn --workers 2 --worker-class uvicorn.workers.UvicornWorker app:app --timeout 600"
-
 # Update the webapp with the new image
 echo "Updating the webapp with the new image"
 az webapp config container set --name $AZURE_WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --container-image-name ${CONTAINER_REGISTRY}/webapp:$tag --container-registry-url "https://${CONTAINER_REGISTRY}" --container-registry-user $CONTAINER_REGISTRY_USERNAME --container-registry-password $CONTAINER_REGISTRY_PASSWORD --enable-app-service-storage false

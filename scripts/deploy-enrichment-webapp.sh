@@ -50,10 +50,6 @@ printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_RE
 docker tag enrichmentapp $CONTAINER_REGISTRY/enrichmentapp:$tag
 docker push $CONTAINER_REGISTRY/enrichmentapp:$tag
 
-# Update the enrichment webapp with the new image
-echo "Configuring enrichment webapp startup command"
-az webapp config set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --startup-file "gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app"
-
 echo "Updating the enrichment webapp with the new image"
 az webapp config container set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --container-image-name ${CONTAINER_REGISTRY}/enrichmentapp:$tag --container-registry-url "https://${CONTAINER_REGISTRY}" --container-registry-user $CONTAINER_REGISTRY_USERNAME --container-registry-password $CONTAINER_REGISTRY_PASSWORD --enable-app-service-storage false
 

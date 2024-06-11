@@ -128,7 +128,7 @@ resource "azurerm_linux_function_app" "function_app" {
     }
     container_registry_use_managed_identity       = true
     always_on        = true
-     http2_enabled    = true
+    http2_enabled    = true
     ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
     cors {
       allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)

@@ -45,7 +45,7 @@ Check out how to [setup Sovereign Region Deployment](/docs/deployment/enable_sov
 
 ## Secure Deployment
 
-Learn more about secure deployments and how to [enable a Secure Deployment](/docs/deployment/enable_secure_deployment.md)
+Learn more about secure deployments and how to [enable a Secure Deployment](/docs/deployment/secure_deployment.md)
 
 ## Configure REST API access
 

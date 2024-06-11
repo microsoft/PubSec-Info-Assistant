@@ -22,10 +22,6 @@ then
 
     az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID"
     az account set -s "$ARM_SUBSCRIPTION_ID"
-    
-    appid=$(az ad sp list --all --query "[?displayName=='$TF_VAR_backend_name'].appId" -o tsv)
-    role_assignment_id=$(az role assignment list --resource-group $TF_VAR_azureOpenAIResourceGroup --query "[?principalName=='$appid'].id" -o tsv)
-    az role assignment delete --ids $role_assignment_id
     az group delete \
         --resource-group $TF_VAR_resource_group_name \
         --yes \

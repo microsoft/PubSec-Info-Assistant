@@ -264,6 +264,11 @@ const Chat = () => {
 
     useEffect(() => { fetchFeatureFlags() }, []);
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
+    useEffect(() => {
+        if (featureFlags?.ENABLE_WEB_CHAT) {
+            onChatModeChange({ target: { value: ChatMode.Ungrounded } })
+        }
+    }, [featureFlags])
 
     const onRetrieveCountChange = (_ev?: React.SyntheticEvent<HTMLElement, Event>, newValue?: string) => {
         setRetrieveCount(parseInt(newValue || "5"));

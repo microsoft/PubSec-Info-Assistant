@@ -11,7 +11,7 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "What is zero trust?", value: "What is zero trust?" },
+    { text: "What is Zero Trust?", value: "What is Zero Trust?" },
     { text: "What is the difference between GPT 3.5 and 4?", value: "What is the difference between GPT 3.5 and 4?" },
     { text: "What is Conversational AI?", value: "What is Conversational AI?" }
 ];

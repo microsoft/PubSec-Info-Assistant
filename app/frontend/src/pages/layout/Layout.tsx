@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Outlet, NavLink, Link } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
+import logo from "../../assets/full-logo.png";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 import { Title } from "../../components/Title/Title";
 import { getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
 import { useEffect, useState } from "react";
-import { Chat48Regular, ChatMultiple24Regular, ChatMultiple32Regular, ChatMultipleRegular, ContentSettings32Regular, MathFormatProfessionalFilled, MathFormatProfessionalRegular, TableSearchFilled, TableSearchRegular } from "@fluentui/react-icons";
+import { ChatMultiple32Regular, ContentSettings32Regular, MathFormatProfessionalRegular, TableSearchRegular } from "@fluentui/react-icons";
 
 export const Layout = () => {
     const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | null>(null);
@@ -31,7 +32,7 @@ export const Layout = () => {
             <header className={styles.header} role={"banner"}>
                 <div className={styles.headerContainer}>
                     <div className={styles.headerTitleContainer}>
-                        <img src="/full-logo.png" alt="U.S. Department of HHS" className={styles.headerLogo} />
+                        <img src={logo} alt="U.S. Department of HHS" className={styles.headerLogo} />
                     </div>
                 </div>
 
@@ -74,7 +75,7 @@ export const Layout = () => {
                 </ul>
             </nav>
             <div className={styles.contentContainer}>
-            <Outlet />
+                <Outlet />
             </div>
             <footer className={styles.footer}>
                 <WarningBanner />

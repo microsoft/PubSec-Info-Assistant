@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import { Outlet, NavLink, Link } from "react-router-dom";
-import logo from "../../assets/full-logo.png";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 import { Title } from "../../components/Title/Title";
@@ -32,7 +31,7 @@ export const Layout = () => {
             <header className={styles.header} role={"banner"}>
                 <div className={styles.headerContainer}>
                     <div className={styles.headerTitleContainer}>
-                        <img src={logo} alt="U.S. Department of HHS" className={styles.headerLogo} />
+                        <img src="/full-logo.png" alt="U.S. Department of HHS" className={styles.headerLogo} />
                     </div>
                 </div>
 

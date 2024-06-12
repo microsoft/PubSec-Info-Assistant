@@ -12,5 +12,5 @@ output "apim_uri" {
 }
 
 output "apim_subscription_key" {
- value = replace(data.local_file.subscription_key.content,"\r\n","")
+ value = replace(data.local_file.subscription_key.content,"\n","")
 }

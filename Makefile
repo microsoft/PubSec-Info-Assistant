@@ -97,3 +97,4 @@ manual-inf-destroy: ## A command triggered by a user to destroy a resource group
 run-backend-tests: ## Run backend tests
 	pip install -r ./app/backend/requirements.txt --disable-pip-version-check -q
 	pytest ./app/backend/testsuite.py
+

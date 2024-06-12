@@ -12,5 +12,5 @@ output "apim_uri" {
 }
 
 output "apim_subscription_key" {
- value = "Azure APIM Subscription key place holder" # data.local_file.apim_subscription_key.content
+ value = replace(data.local_file.subscription_key.content,"\r\n","")
 }

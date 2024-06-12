@@ -1,3 +1,6 @@
+locals {
+  subscription_key_file_name="subscriptionkey.txt"
+}
 resource "azurerm_api_management" "apim" {
   name                = var.name
   location            = var.location
@@ -99,4 +102,22 @@ resource "azurerm_api_management_named_value" "name_values" {
   api_management_name = azurerm_api_management.apim.name
   display_name        = var.nameValues[count.index].name
   value               = var.nameValues[count.index].value
+}
+
+
+resource "null_resource" "get_subscription_key" {
+  depends_on = [azurerm_api_management_product.unlimited]
+  provisioner "local-exec" {
+   
+    command  = <<EOT
+    $subscriptonId=az rest --uri "${azurerm_api_management.apim.id}/subscriptions?api-version=2022-08-01" --query "value[? contains(properties.scope,'${azurerm_api_management_product.unlimited.product_id}')] | [0].name" -o tsv
+    az rest --method post --uri "${azurerm_api_management.apim.id}/subscriptions/$subscriptonId/listSecrets?api-version=2022-08-01" --query primaryKey -o tsv > ${local.subscription_key_file_name}
+  EOT
+  interpreter = ["pwsh", "-Command"]
+  }
+}
+
+data "local_file" "subscription_key" {
+  filename = local.subscription_key_file_name
+  depends_on = [null_resource.get_subscription_key]
 }

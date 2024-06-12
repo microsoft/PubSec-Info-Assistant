@@ -49,21 +49,22 @@ def PartitionFile(file_extension: str, file_url: str):
     response.close()   
     metadata = [] 
     elements = None
+    file_extension_lower = file_extension.lower()
     try:        
-        if file_extension == '.csv':
+        if file_extension_lower == '.csv':
             from unstructured.partition.csv import partition_csv
             elements = partition_csv(file=bytes_io)               
                      
-        elif file_extension == '.doc':
+        elif file_extension_lower == '.doc':
             from unstructured.partition.doc import partition_doc
             elements = partition_doc(file=bytes_io) 
             
-        elif file_extension == '.docx':
+        elif file_extension_lower == '.docx':
             from unstructured.partition.docx import partition_docx
             elements = partition_docx(file=bytes_io)
             
-        elif file_extension == '.eml' or file_extension == '.msg':
-            if file_extension == '.msg':
+        elif file_extension_lower == '.eml' or file_extension_lower == '.msg':
+            if file_extension_lower == '.msg':
                 from unstructured.partition.msg import partition_msg
                 elements = partition_msg(file=bytes_io) 
             else:        
@@ -76,31 +77,31 @@ def PartitionFile(file_extension: str, file_url: str):
                 sent_to_str = sent_to_str + " " + sent_to
             metadata.append(sent_to_str)
             
-        elif file_extension == '.html' or file_extension == '.htm':  
+        elif file_extension_lower == '.html' or file_extension_lower == '.htm':  
             from unstructured.partition.html import partition_html
             elements = partition_html(file=bytes_io) 
             
-        elif file_extension == '.md':
+        elif file_extension_lower == '.md':
             from unstructured.partition.md import partition_md
             elements = partition_md(file=bytes_io)
                        
-        elif file_extension == '.ppt':
+        elif file_extension_lower == '.ppt':
             from unstructured.partition.ppt import partition_ppt
             elements = partition_ppt(file=bytes_io)
             
-        elif file_extension == '.pptx':    
+        elif file_extension_lower == '.pptx':    
             from unstructured.partition.pptx import partition_pptx
             elements = partition_pptx(file=bytes_io)
             
-        elif any(file_extension in x for x in ['.txt', '.json']):
+        elif any(file_extension_lower in x for x in ['.txt', '.json']):
             from unstructured.partition.text import partition_text
             elements = partition_text(file=bytes_io)
             
-        elif file_extension == '.xlsx':
+        elif file_extension_lower == '.xlsx':
             from unstructured.partition.xlsx import partition_xlsx
             elements = partition_xlsx(file=bytes_io)
             
-        elif file_extension == '.xml':
+        elif file_extension_lower == '.xml':
             from unstructured.partition.xml import partition_xml
             elements = partition_xml(file=bytes_io)
             
@@ -198,3 +199,4 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.upsert_document(blob_name, f"{function_name} - An error occurred - {str(e)}", StatusClassification.ERROR, State.ERROR)
 
     statusLog.save_document(blob_name)
+    

@@ -46,9 +46,9 @@ const Chat = () => {
     // If you update the default value here, you must also update the default value in the onResponseTempChange method.
     const [responseTemp, setResponseTemp] = useState<number>(0.6);
 
-    const [activeChatMode, setChatMode] = useState<ChatMode>(ChatMode.WorkOnly);
-    const [defaultApproach, setDefaultApproach] = useState<number>(Approaches.ReadRetrieveRead);
-    const [activeApproach, setActiveApproach] = useState<number>(Approaches.ReadRetrieveRead);
+    const [activeChatMode, setChatMode] = useState<ChatMode>(ChatMode.Ungrounded);
+    const [defaultApproach, setDefaultApproach] = useState<number>(Approaches.GPTDirect);
+    const [activeApproach, setActiveApproach] = useState<number>(Approaches.GPTDirect);
     const [featureFlags, setFeatureFlags] = useState<GetFeatureFlagsResponse | undefined>(undefined);
 
     const lastQuestionRef = useRef<string>("");
@@ -80,6 +80,7 @@ const Chat = () => {
         } catch (error) {
             // Handle the error here
             console.log(error);
+            onChatModeChange({ target: { value: ChatMode.WorkOnly } })
         }
     }
 
@@ -265,8 +266,8 @@ const Chat = () => {
     useEffect(() => { fetchFeatureFlags() }, []);
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
     useEffect(() => {
-        if (featureFlags?.ENABLE_WEB_CHAT) {
-            onChatModeChange({ target: { value: ChatMode.Ungrounded } })
+        if (!featureFlags?.ENABLE_WEB_CHAT) {
+            onChatModeChange({ target: { value: ChatMode.WorkOnly } })
         }
     }, [featureFlags])
 

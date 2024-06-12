@@ -37,7 +37,8 @@ export const WarningBanner = ({ className }: Props) => {
 
     return (
         <div className={`${styles.warningBanner} ${className ?? ""}`}>
-            {infoData?.WARNING_BANNER_TEXT}. <a target="_blank" href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md">Transparency Note</a>
+            {infoData?.WARNING_BANNER_TEXT} 
+            {/* . <a target="_blank" href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md">Transparency Note</a> */}
         </div>
     );
 };

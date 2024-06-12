@@ -77,6 +77,10 @@ const Chat = () => {
         try {
             const fetchedFeatureFlags = await getFeatureFlags();
             setFeatureFlags(fetchedFeatureFlags);
+
+            if (!fetchedFeatureFlags?.ENABLE_WEB_CHAT) {
+                onChatModeChange({ target: { value: ChatMode.WorkOnly } })
+            }
         } catch (error) {
             // Handle the error here
             console.log(error);
@@ -265,11 +269,6 @@ const Chat = () => {
 
     useEffect(() => { fetchFeatureFlags() }, []);
     useEffect(() => chatMessageStreamEnd.current?.scrollIntoView({ behavior: "smooth" }), [isLoading]);
-    useEffect(() => {
-        if (!featureFlags?.ENABLE_WEB_CHAT) {
-            onChatModeChange({ target: { value: ChatMode.WorkOnly } })
-        }
-    }, [featureFlags])
 
     const onRetrieveCountChange = (_ev?: React.SyntheticEvent<HTMLElement, Event>, newValue?: string) => {
         setRetrieveCount(parseInt(newValue || "5"));

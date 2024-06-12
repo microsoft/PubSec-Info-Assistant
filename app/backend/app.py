@@ -493,8 +493,15 @@ async def resubmit_Items(request: Request):
         blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
         # Read the blob content into memory
         blob_data = blob_container.download_blob(path).readall()
-        # Overwrite the blob with the modified data
-        blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
+        
+        submitted_blob_client = blob_container.get_blob_client(blob=path)
+        blob_properties = submitted_blob_client.get_blob_properties()
+        metadata = blob_properties.metadata
+        blob_container.upload_blob(name=path, data=blob_data, overwrite=True, metadata=metadata)   
+       
+        
+        
+
         # add the container to the path to avoid adding another doc in the status db
         full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
         statusLog.upsert_document(document_path=full_path,

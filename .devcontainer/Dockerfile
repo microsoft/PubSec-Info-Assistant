@@ -104,3 +104,5 @@ RUN pip install azure-cosmos
 RUN pip install pyfiglet
 RUN pip install azure-identity
 RUN pip install azure-keyvault-secrets
+# Python Package for Backend Testing
+RUN pip install pytest

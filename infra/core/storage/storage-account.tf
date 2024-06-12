@@ -14,8 +14,8 @@ resource "azurerm_storage_account" "storage" {
   min_tls_version                 = var.minimumTlsVersion
   enable_https_traffic_only       = true
   public_network_access_enabled   = var.is_secure_mode ? false : true
-  allow_nested_items_to_be_public = var.is_secure_mode ? false : true
-  #shared_access_key_enabled       = var.is_secure_mode ? false : true
+  allow_nested_items_to_be_public = false
+  shared_access_key_enabled       = var.is_secure_mode ? false : true
 
   network_rules {  
     default_action                = var.is_secure_mode ? "Deny" : "Allow"

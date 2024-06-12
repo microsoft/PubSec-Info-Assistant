@@ -414,7 +414,7 @@ variable "enrichmentAppServicePlanName" {
 variable "enrichmentAppServiceSkuSize" {
   description = "The size of the app service plan for the enrichment service. Must match with the tier value in enrichmentAppServiceSkuTier."
   type = string
-  default = "P1v3"
+  default = "P2v3"
 }
 
 variable "enrichmentAppServiceSkuTier" {
@@ -659,4 +659,10 @@ variable "entraOwners" {
 variable "serviceManagementReference" {
   type    = string
   default = ""
+}
+
+variable "password_lifetime" {
+  type    = number
+  default = 365
+  description = "The number of days used as the lifetime for passwords"  
 }

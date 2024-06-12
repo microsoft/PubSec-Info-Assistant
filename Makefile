@@ -26,7 +26,7 @@ build-containers: ## Build the docker containers for the function, webapp, and e
 infrastructure: check-subscription ## Deploy infrastructure
 	@./scripts/inf-create.sh
 
-extract-env: check-secure-mode-connectivity extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from TF output
+extract-env: check-secure-mode-connectivity extract-env-debug-webapp extract-env-debug-functions ## Extract infrastructure.env file from Terraform output
 	 @./scripts/json-to-env.sh < inf_output.json > ./scripts/environments/infrastructure.env
 
 check-secure-mode-connectivity: ## Check secure mode connectivity
@@ -44,10 +44,10 @@ deploy-enrichments: extract-env ## Deploys the web app code to Azure App Service
 deploy-search-indexes: extract-env ## Deploy search indexes
 	@./scripts/deploy-search-indexes.sh
 
-extract-env-debug-webapp: ## Extract infrastructure.debug.env file from TF output
+extract-env-debug-webapp: ## Extract infrastructure.debug.env file from Terraform output
 	@./scripts/json-to-env.webapp.debug.sh < inf_output.json > ./scripts/environments/infrastructure.debug.env
 
-extract-env-debug-functions: ## Extract local.settings.json to debug functions from TF output
+extract-env-debug-functions: ## Extract local.settings.json to debug functions from Terraform output
 	@./scripts/json-to-env.function.debug.sh < inf_output.json > ./functions/local.settings.json
 
 # Utils (used by other Makefile rules)
@@ -93,3 +93,7 @@ run-data-migration: ## Run the data migration moving data from one resource grou
 
 manual-inf-destroy: ## A command triggered by a user to destroy a resource group, associated resources, and related Entra items
 	@./scripts/inf-manual-destroy.sh 
+
+run-backend-tests: ## Run backend tests
+	pip install -r ./app/backend/requirements.txt --disable-pip-version-check -q
+	pytest ./app/backend/testsuite.py

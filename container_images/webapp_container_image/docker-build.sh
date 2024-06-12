@@ -4,7 +4,7 @@ set -eo pipefail
 # Build the Docker image with the correct context
 echo "Building Docker image: webapp"
 echo -e "\n"
-sudo docker build -f ./container_images/webapp_container_image/Dockerfile -t webapp .
+sudo docker build -f ./container_images/webapp_container_image/Dockerfile -t webapp . --build-arg BUILDKIT_INLINE_CACHE=1
 
 # Generate a unique tag for the image
 tag=$(date -u +"%Y%m%d-%H%M%S")

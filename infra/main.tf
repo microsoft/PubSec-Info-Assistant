@@ -279,7 +279,8 @@ module "enrichmentApp" {
   reserved                                  = true
   resourceGroupName                         = azurerm_resource_group.rg.name
   storageAccountId                          = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
-  scmDoBuildDuringDeployment                = true
+  scmDoBuildDuringDeployment                = false
+  enableOryxBuild                           = false
   managedIdentity                           = true
   logAnalyticsWorkspaceResourceId           = module.logging.logAnalyticsId
   applicationInsightsConnectionString       = module.logging.applicationInsightsConnectionString
@@ -319,7 +320,6 @@ module "enrichmentApp" {
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     EMBEDDING_VECTOR_SIZE                   = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
-    WEBSITES_CONTAINER_START_TIME_LIMIT     = 600
   }
 }
 
@@ -338,12 +338,14 @@ module "webapp" {
   location                            = var.location
   tags                                = merge(local.tags, { "azd-service-name" = "backend" })
   runtimeVersion                      = "3.10" 
-  scmDoBuildDuringDeployment          = true
+  scmDoBuildDuringDeployment          = false
   managedIdentity                     = true
+  alwaysOn                            = true
   appCommandLine                      = ""
+  healthCheckPath                     = "/health"
   logAnalyticsWorkspaceResourceId     = module.logging.logAnalyticsId
   azure_portal_domain                 = var.azure_portal_domain
-  enableOryxBuild                     = true
+  enableOryxBuild                     = false
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName

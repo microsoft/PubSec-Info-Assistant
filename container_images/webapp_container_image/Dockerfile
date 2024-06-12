@@ -11,7 +11,7 @@ COPY app/backend /home/site/wwwroot
 RUN pip install -r /home/site/wwwroot/requirements.txt
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 6000
 
 # Run the application
-CMD ["uvicorn", "app:app", "--reload", "--port", "5000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "6000"]

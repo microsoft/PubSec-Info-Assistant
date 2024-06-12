@@ -148,8 +148,8 @@ resource "azurerm_linux_function_app" "function_app" {
   app_settings = {
     WEBSITE_VNET_ROUTE_ALL = "1"  
     WEBSITE_CONTENTOVERVNET = var.is_secure_mode ? "1" : "0"
-    SCM_DO_BUILD_DURING_DEPLOYMENT = "true"
-    ENABLE_ORYX_BUILD              = "true"
+    SCM_DO_BUILD_DURING_DEPLOYMENT = "false"
+    ENABLE_ORYX_BUILD              = "false"
     AzureWebJobsStorage = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
     WEBSITE_CONTENTSHARE = "funcfileshare"

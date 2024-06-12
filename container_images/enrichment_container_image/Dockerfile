@@ -10,7 +10,7 @@ COPY app/enrichment /app
 RUN pip install -r /app/requirements.txt
 
 # Expose the port the app runs on
-EXPOSE 5001
+EXPOSE 6000
 
 # Run the application
-CMD ["uvicorn", "app:app", "--reload", "--port", "5001"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "6000"]

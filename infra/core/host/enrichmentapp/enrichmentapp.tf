@@ -118,6 +118,9 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
       "AZURE_OPENAI_SERVICE_KEY"                  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
       "KEY_EXPIRATION_DATE"                       = timeadd(timestamp(), "4320h") # Added expiration date setting for keys
       "WEBSITE_PULL_IMAGE_OVER_VNET"              = var.is_secure_mode ? "true" : "false"
+      "WEBSITES_PORT"                             = "6000"
+      "WEBSITES_CONTAINER_START_TIME_LIMIT"       = "1600"
+      "WEBSITES_ENABLE_APP_SERVICE_STORAGE"       = "false"
     }
   )
 

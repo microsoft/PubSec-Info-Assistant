@@ -7,7 +7,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # Build the Docker image with the correct context
 echo "Building Docker image: functions"
 echo -e "\n"
-sudo docker build -t functionapp ${DIR}
+sudo docker build -t functionapp ${DIR} --build-arg BUILDKIT_INLINE_CACHE=1
 
 # Generate a unique tag for the image
 tag=$(date -u +"%Y%m%d-%H%M%S")

@@ -11,9 +11,9 @@ export type ExampleModel = {
 };
 
 const EXAMPLES: ExampleModel[] = [
-    { text: "Are there any radio telescopes in Australia?", value: "Are there any radio telescopes in Australia?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "What are some flavors of Breyers?", value: "What are some flavors of Breyers?" }
+    { text: "What is zero trust?", value: "What is zero trust?" },
+    { text: "What is the difference between GPT 3.5 and 4?", value: "What is the difference between GPT 3.5 and 4?" },
+    { text: "What is Conversational AI?", value: "What is Conversational AI?" }
 ];
 
 interface Props {

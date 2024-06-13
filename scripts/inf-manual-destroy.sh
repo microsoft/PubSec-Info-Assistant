@@ -33,6 +33,13 @@ echo "Please enter the name of the resource group you wish to destroy:"
 reset_text_color
 read rg_name
 echo ""
+#Prompt the user for oa_ai resource group
+set_yellow_text
+echo ""
+echo "Please enter the name of the open ai resource group your resource group is connected to:"
+reset_text_color
+read oa_ai_rg_name
+echo ""
 
 # Prompt the user for confirmation
 set_yellow_text
@@ -80,6 +87,15 @@ random_text=${storage_account_name: -5}
 echo "Resource group: $rg_name"
 echo "Random text: $random_text"
 
+#delete ao_ai connection
+echo "Deleting open ai connection..."
+appid=$(az ad sp list --all --query "[?displayName=='infoasst-web-$random_text'].appId" -o tsv)
+echo "Deleting role assignment for app id: $appid"
+role_assignment_id=$(az role assignment list --resource-group $oa_ai_rg_name --query "[?principalName=='$appid'].id" -o tsv)
+echo "Role assignment id: $role_assignment_id"
+az role assignment delete --ids $role_assignment_id
+echo "Role assignment deleted."
+
 # Delete RG
 az group delete \
     --resource-group $rg_name \
@@ -87,6 +103,8 @@ az group delete \
     --no-wait 
 echo "Resource group is being deleted."
 echo "Continuing..."
+
+
 
 # Delete app regitsrations
 app_name="infoasst_mgmt_access_$random_text"

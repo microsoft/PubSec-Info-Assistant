@@ -27,6 +27,7 @@ import { Delete24Regular,
     DocumentFolderFilled,
     ImageBorderFilled
     } from "@fluentui/react-icons";
+import moment from "moment";
 
 export interface IDocument {
     key: string;
@@ -355,7 +356,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             data: 'string',
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => {
-                return <span>{item.upload_timestamp}</span>;
+                return <span>{moment.utc(item.upload_timestamp).local().format('YYYY-MM-DD HH:mm:ss')}</span>;
             },
             isPadded: true,
         },
@@ -375,7 +376,7 @@ export const DocumentsDetailList = ({ items, onFilesSorted, onRefresh }: Props) 
             data: 'number',
             onColumnClick: onColumnClick,
             onRender: (item: IDocument) => {
-                return <span>{item.modified_timestamp}</span>;
+                return <span>{moment.utc(item.modified_timestamp).local().format('YYYY-MM-DD HH:mm:ss')}</span>;
             },
         },
         {

@@ -60,6 +60,14 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+#If you are unable to obtain the permission at the tenant level described in Azure account requirements, you can set the following to true provided you have created Azure AD App Registrations. 
+
+#export TF_VAR_isInAutomation=true
+#export TF_VAR_aadWebClientId=""
+#export TF_VAR_aadMgmtClientId=""
+#export TF_VAR_aadMgmtServicePrincipalId=""
+#export TF_VAR_aadMgmtClientSecret=""
+
 
 # prepare vars for the users you wish to assign to the security group
 object_ids=()

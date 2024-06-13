@@ -12,6 +12,7 @@ resource "azurerm_storage_account" "storage" {
   access_tier              = var.accessTier
   min_tls_version          = var.minimumTlsVersion
   enable_https_traffic_only = true
+  allow_nested_items_to_be_public = false
 
   network_rules {
     default_action             = "Allow"

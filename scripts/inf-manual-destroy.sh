@@ -89,7 +89,7 @@ echo "Random text: $random_text"
 
 #delete ao_ai connection
 echo "Deleting open ai connection..."
-appid=$(az ad sp list --all --query "[?displayName=='infoasst-web-$random_text'].appId" -o tsv)
+appid=$(az ad sp list --filter "displayname eq 'infoasst-web-$random_text'" --output json | jq -r '.[].appId')
 echo "Deleting role assignment for app id: $appid"
 role_assignment_id=$(az role assignment list --resource-group $oa_ai_rg_name --query "[?principalName=='$appid'].id" -o tsv)
 echo "Role assignment id: $role_assignment_id"

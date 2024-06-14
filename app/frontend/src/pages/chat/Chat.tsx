@@ -398,7 +398,7 @@ const Chat = () => {
                                 <span className={styles.chatEmptyObjectives}>
                                     {/* <i>Information Assistant uses AI. Check for mistakes.   </i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a> */}
                                 </span>
-                                {activeChatMode != ChatMode.Ungrounded &&
+                                {activeChatMode == ChatMode.Ungrounded &&
                                     <div>
                                         <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
                                         <ExampleList onExampleClicked={onExampleClicked} />

@@ -422,7 +422,7 @@ class ChatReadRetrieveReadApproach(Approach):
         
         
             # Return the data we know
-            yield json.dumps({"data_points": {},
+            yield json.dumps({"data_points": data_points,
                               "thoughts": f"Searched for:<br>{generated_query}<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
                               "thought_chain": thought_chain,
                               "work_citation_lookup": citation_lookup,

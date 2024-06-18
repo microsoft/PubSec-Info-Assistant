@@ -11,7 +11,7 @@ azure-cosmos == 4.3.1
 tiktoken == 0.7.0
 fastapi == 0.109.1
 fastapi-utils == 0.2.1
-uvicorn==0.14.0
+uvicorn == 0.23.2
 numexpr == 2.10.0
 langchain-experimental==0.0.52
 microsoft-bing-websearch==1.0.0

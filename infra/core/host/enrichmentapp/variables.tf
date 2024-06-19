@@ -137,3 +137,7 @@ variable "subnet_name" {
 variable "private_dns_zone_ids" {
   type = set(string)
 }
+
+variable "azure_environment" {
+  type        = string
+}

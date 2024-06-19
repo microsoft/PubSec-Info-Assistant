@@ -170,3 +170,7 @@ variable "container_registry_admin_password" {
   description = "The admin password of the container registry"
   type        = string
 }
+
+variable "azure_environment" {
+  type        = string
+}

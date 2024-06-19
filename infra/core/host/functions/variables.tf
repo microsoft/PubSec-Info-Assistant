@@ -319,3 +319,7 @@ variable "container_registry_admin_password" {
 variable "logAnalyticsWorkspaceResourceId" {
   type = string
 }
+
+variable "azure_environment" {
+  type        = string
+}

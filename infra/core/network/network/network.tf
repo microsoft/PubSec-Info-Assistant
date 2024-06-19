@@ -49,6 +49,8 @@ resource "azurerm_resource_group_template_deployment" "vnet_w_subnets" {
     "subnet_AzureOpenAI_CIDR"   = { value = "${var.snetAzureOpenAICIDR}" },
     "subnet_Acr_CIDR"           = { value = "${var.snetACRCIDR}" },
     "subnet_Dns_CIDR"           = { value = "${var.snetDnsCIDR}" },
+    "privateEndpointNetworkPoliciesStatus" = { value = "${var.azure_environment == "AzureUSGovernment" ? "Disabled" : "Enabled"}" },
+    "privateLinkServiceNetworkPoliciesStatus" = { value = "${var.azure_environment == "AzureUSGovernment" ? "Disabled" : "Enabled"}" },
   })
   template_content = data.template_file.workflow.template
   # The filemd5 forces this to run when the file is changed

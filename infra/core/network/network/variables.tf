@@ -97,3 +97,7 @@ variable "snetDnsCIDR" {
 variable "arm_template_schema_mgmt_api" {
   type = string
 }
+
+variable "azure_environment" {
+  type        = string
+}

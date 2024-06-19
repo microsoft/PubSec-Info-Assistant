@@ -182,7 +182,8 @@ resource "azurerm_linux_web_app" "app_service" {
   }
 }
 
-resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_commercial" {
+  count                      = var.azure_environment == "AzureUSGovernment" ? 0 : 1
   name                       = azurerm_linux_web_app.app_service.name
   target_resource_id         = azurerm_linux_web_app.app_service.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
@@ -207,6 +208,46 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   enabled_log {
     category = "AppServiceAuthenticationLogs"
   }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_usgov" {
+  count                      = var.azure_environment == "AzureUSGovernment" ? 1 : 0
+  name                       = azurerm_linux_web_app.app_service.name
+  target_resource_id         = azurerm_linux_web_app.app_service.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log  {
+    category = "AppServiceAppLogs"
+  }
+
+  enabled_log {
+    category = "AppServicePlatformLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceConsoleLogs"
+  }
+  
+  enabled_log {
+    category = "AppServiceIPSecAuditLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceHTTPLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceAuditLogs"
+  }
+
+  enabled_log {
+    category = "AppServiceFileAuditLogs"
+  }
+
   metric {
     category = "AllMetrics"
     enabled  = true

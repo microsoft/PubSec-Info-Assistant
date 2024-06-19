@@ -58,6 +58,12 @@
         },
         "subnet_Dns_CIDR": {
             "type": "string"
+        },
+        "privateEndpointNetworkPoliciesStatus": {
+            "type": "string"
+        },
+        "privateLinkServiceNetworkPoliciesStatus": {
+            "type": "string"
         }
     },
     "resources": [
@@ -84,8 +90,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
@@ -97,8 +103,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
@@ -110,8 +116,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
@@ -123,8 +129,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.CognitiveServices" } ]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -137,8 +143,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.KeyVault" } ]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -151,8 +157,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -165,8 +171,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.Storage" }, { "service": "Microsoft.KeyVault" }]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -179,8 +185,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -201,8 +207,8 @@
                                     "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
                                 }
                             ],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -215,8 +221,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
@@ -228,8 +234,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled",
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
                             "serviceEndpoints": [ { "service": "Microsoft.CognitiveServices" } ]
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
@@ -242,8 +248,8 @@
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
                             "delegations": [],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
@@ -263,8 +269,8 @@
                                     "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
                                 }
                             ],
-                            "privateEndpointNetworkPolicies": "Enabled",
-                            "privateLinkServiceNetworkPolicies": "Enabled"
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     }

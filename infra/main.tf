@@ -68,6 +68,7 @@ module "network" {
   snetACRCIDR                     = var.acr_CIDR
   snetDnsCIDR                     = var.dns_CIDR
   arm_template_schema_mgmt_api    = var.arm_template_schema_mgmt_api
+  azure_environment               = var.azure_environment
 }
 
 // Create the Private DNS Zones for all the services
@@ -299,6 +300,7 @@ module "enrichmentApp" {
   subnet_name                               = var.is_secure_mode ? module.network[0].snetEnrichment_name : null
   vnet_name                                 = var.is_secure_mode ? module.network[0].vnet_name : null
   private_dns_zone_ids                      = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
+  azure_environment                         = var.azure_environment
 
   appSettings = {
     EMBEDDINGS_QUEUE                        = var.embeddingsQueue
@@ -363,6 +365,7 @@ module "webapp" {
   container_registry_admin_password   = module.acr.admin_password
   container_registry_id               = module.acr.acr_id
   randomString                        = random_string.random.result
+  azure_environment                   = var.azure_environment 
 
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
@@ -482,6 +485,7 @@ module "functions" {
   container_registry_admin_username     = module.acr.admin_username
   container_registry_admin_password     = module.acr.admin_password
   container_registry_id                 = module.acr.acr_id
+  azure_environment                     = var.azure_environment
 }
 
 module "openaiServices" {

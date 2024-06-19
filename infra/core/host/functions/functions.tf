@@ -206,7 +206,8 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 }
 
-resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_commercial" {
+  count                      = var.azure_environment == "AzureUSGovernment" ? 0 : 1
   name                       = azurerm_linux_function_app.function_app.name
   target_resource_id         = azurerm_linux_function_app.function_app.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
@@ -217,6 +218,22 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
 
   enabled_log {
     category = "AppServiceAuthenticationLogs"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_usgov" {
+  count                      = var.azure_environment == "AzureUSGovernment" ? 1 : 0
+  name                       = azurerm_linux_function_app.function_app.name
+  target_resource_id         = azurerm_linux_function_app.function_app.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log  {
+    category = "FunctionAppLogs"
   }
 
   metric {

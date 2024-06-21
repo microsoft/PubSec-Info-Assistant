@@ -56,7 +56,7 @@ class GPTDirectApproach(Approach):
         
         """
     follow_up_questions_prompt_content = """
-        Generate three very brief follow-up questions that the user would likely ask next about their previous chat context. Use triple angle brackets to reference the questions, e.g. <<<Are there exclusions for prescriptions?>>>. Try not to repeat questions that have already been asked.
+        Generate three very brief follow-up questions that the user would likely ask next about their previous chat context. Use triple angle brackets to reference the questions, e.g. <<<What is the main theme of the source documents?>>>. Try not to repeat questions that have already been asked.
         Only generate questions and do not generate any text before or after the questions, such as 'Next Questions'
         """
     

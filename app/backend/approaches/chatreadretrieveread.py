@@ -92,10 +92,12 @@ Here is how you should answer every question:
     ]
 
     RESPONSE_PROMPT_FEW_SHOTS = [
-        {"role": Approach.USER ,'content': 'I am looking for information in source documents'},
+        {"role": Approach.USER, 'content': 'I am looking for information in source documents'},
         {'role': Approach.ASSISTANT, 'content': 'user is looking for information in source documents. Do not provide answers that are not in the source documents'},
-        {'role': Approach.USER, 'content': 'What steps are being taken to promote energy conservation?'},
-        {'role': Approach.ASSISTANT, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources.Citations[File0]'}
+        {'role': Approach.USER, 'content': 'What is the main theme of the source documents?'},
+        {'role': Approach.ASSISTANT, 'content': 'The user wants to know the main theme of the document. Provide a summary based on the documents content.Citations[File0]'},
+        {'role': Approach.USER, 'content': 'Can you find any inconsistencies in the documents?'},
+        {'role': Approach.ASSISTANT, 'content': 'The user is asking for any inconsistencies in the document. Compare and contrast the information in the document to find any discrepancies.Citations[File0]'}
     ]
     
     

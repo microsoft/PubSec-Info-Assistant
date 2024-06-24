@@ -71,27 +71,16 @@ class GPTDirectApproach(Approach):
 
     #Few Shot prompting for Keyword Search Query
     query_prompt_few_shots = [
-        {'role' : USER, 'content' : 'What are the key factors of the data we are researching? Can we ask, What would happen if?' },
-        {'role' : ASSISTANT, 'content' : 'Absolutely, understanding the key factors of the data we are researching is crucial. It helps us identify the variables that have the most impact on our analysis. As for your question, "What would happen if?", it\'s a great way to explore hypothetical scenarios and understand potential outcomes.' },
-        {'role' : USER, 'content' : 'How does a narrative report compare to a data-driven report in terms of reader engagement?' },
-        {'role' : ASSISTANT, 'content' : 'I\'ll find a comparison between narrative and data-driven reports in terms of reader engagement.' },
-        {'role' : USER, 'content' : 'Using the source documents, what trends are identifiable?",' },
-        {'role' : ASSISTANT, 'content' : 'Sure, I can assist with that. Please specify the objective of the analysis, the timeframe, and any notable points to consider?"' }
+        {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
+        {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
+        {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
+        {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
         ]
 
     #Few Shot prompting for Response. This will feed into Chain of thought system message.
     response_prompt_few_shots = [
-        {'role': USER, 'content': 'I need clarification on this topic. Can you provide a comprehensive breakdown?'},
-
-        {'role': ASSISTANT, 'content': 'Sure, I’d be happy to help. Here’s a detailed explanation of the topic: [Insert comprehensive breakdown here]. This includes the main concepts, key terms, and relevant examples to provide a full understanding.'},
-
-        {'role': USER, 'content': 'What key factors are represented? Are any external factors noted?'},
-
-        {'role': ASSISTANT, 'content': 'The key factors represented include [insert key factors here]. Additionally, external factors such as [insert external factors here] are also noted, which can influence the main topic in various ways.'},
-
-        {'role': USER, 'content': 'What questions would help me look deeper into the topic?'},
-
-        {'role': ASSISTANT, 'content': 'To delve deeper into the topic, you could consider the following questions:\n\nWhat are the underlying causes or reasons behind the key factors?\nHow do these factors interrelate and affect each other?\nWhat are the potential long-term implications of these factors?\nAre there any case studies or real-world examples that illustrate these factors in action?\nHow do external factors modify or influence the main factors?\nWhat are the possible solutions or strategies to address the challenges presented by these factorss?'}
+        {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
+        {'role': USER, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources. Citations[info1.json]'}
         ]
     
     # # Define a class variable for the base URL

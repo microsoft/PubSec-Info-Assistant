@@ -121,3 +121,56 @@ variable "runtimeVersion" {
   type    = string
   default = "3.10"
 }
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+}
+
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_id" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "private_dns_zone_name" {
+  type = string
+}
+
+variable "snetIntegration_id" {
+  type = string
+}
+
+variable "randomString" {
+  type = string
+}
+
+variable "container_registry" {
+  description = "The login server of the container registry"
+  type        = string
+}
+
+variable "container_registry_admin_username" {
+  description = "The admin username of the container registry"
+  type        = string
+}
+
+variable "container_registry_id" {
+  description = "The id of the container registry"
+  type        = string
+}
+
+variable "container_registry_admin_password" {
+  description = "The admin password of the container registry"
+  type        = string
+}
+
+variable "azure_environment" {
+  type        = string
+}

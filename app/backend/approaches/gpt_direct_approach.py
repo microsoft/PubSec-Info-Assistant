@@ -58,19 +58,8 @@ class GPTDirectApproach(Approach):
         If you cannot generate a search query, return just the number 0.
         """
 
-    #Few Shot prompting for Keyword Search Query
-    query_prompt_few_shots = [
-        {'role' : USER, 'content' : 'What are the future plans for public transportation development?' },
-        {'role' : ASSISTANT, 'content' : 'Future plans for public transportation' },
-        {'role' : USER, 'content' : 'how much renewable energy was generated last year?' },
-        {'role' : ASSISTANT, 'content' : 'Renewable energy generation last year' }
-        ]
-
     #Few Shot prompting for Response. This will feed into Chain of thought system message.
-    response_prompt_few_shots = [
-        {'role': USER, 'content': 'What steps are being taken to promote energy conservation?'},
-        {'role': USER, 'content': 'Several steps are being taken to promote energy conservation including reducing energy consumption, increasing energy efficiency, and increasing the use of renewable energy sources. Citations[info1.json]'}
-        ]
+    response_prompt_few_shots = []
     
     # # Define a class variable for the base URL
     # EMBEDDING_SERVICE_BASE_URL = 'https://infoasst-cr-{}.azurewebsites.net'

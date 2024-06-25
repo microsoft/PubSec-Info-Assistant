@@ -19,7 +19,6 @@ from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
-from fastapi_utils.tasks import repeat_every
 from model_handling import load_models
 import openai
 from openai import AzureOpenAI

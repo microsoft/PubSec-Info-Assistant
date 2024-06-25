@@ -11,6 +11,7 @@ import os
 import json
 import urllib.parse
 import pandas as pd
+import pydantic
 from datetime import datetime, time, timedelta
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
@@ -117,6 +118,15 @@ str_to_bool = {'true': True, 'false': False}
 log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
+
+class StatusResponse(pydantic.BaseModel):
+    status: str
+    uptime_seconds: float
+    version: str
+
+start_time = datetime.now()
+
+IS_READY = False
 
 dffinal = None
 # Used by the OpenAI SDK
@@ -260,6 +270,8 @@ chat_approaches = {
     )
 }
 
+IS_READY = True
+
 # Create API
 app = FastAPI(
     title="IA Web API",
@@ -273,6 +285,25 @@ async def root():
     """Redirect to the index.html page"""
     return RedirectResponse(url="/index.html")
 
+@app.get("/health", response_model=StatusResponse, tags=["health"])
+def health():
+    """Returns the health of the API
+
+    Returns:
+        StatusResponse: The health of the API
+    """
+
+    uptime = datetime.now() - start_time
+    uptime_seconds = uptime.total_seconds()
+
+    output = {"status": None, "uptime_seconds": uptime_seconds, "version": app.version}
+
+    if IS_READY:
+        output["status"] = "ready"
+    else:
+        output["status"] = "loading"
+
+    return output
 
 @app.post("/chat")
 async def chat(request: Request):
@@ -462,8 +493,15 @@ async def resubmit_Items(request: Request):
         blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
         # Read the blob content into memory
         blob_data = blob_container.download_blob(path).readall()
-        # Overwrite the blob with the modified data
-        blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
+        
+        submitted_blob_client = blob_container.get_blob_client(blob=path)
+        blob_properties = submitted_blob_client.get_blob_properties()
+        metadata = blob_properties.metadata
+        blob_container.upload_blob(name=path, data=blob_data, overwrite=True, metadata=metadata)   
+       
+        
+        
+
         # add the container to the path to avoid adding another doc in the status db
         full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
         statusLog.upsert_document(document_path=full_path,

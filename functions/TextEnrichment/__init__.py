@@ -125,6 +125,7 @@ def main(msg: func.QueueMessage) -> None:
         else:
             # error or requeue
             requeue(response, message_json)
+            statusLog.save_document(blob_path)
             return
             
         # If the language of the document is not equal to target language then translate the generated chunks
@@ -304,7 +305,8 @@ def requeue(response, message_json):
         statusLog.upsert_document(
             blob_path,
             f"{FUNCTION_NAME} - Error on language detection - {response.status_code} - {response.reason}",
-            StatusClassification.ERROR
+            StatusClassification.ERROR,
+            State.ERROR
         )     
         
 

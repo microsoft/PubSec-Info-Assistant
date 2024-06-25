@@ -22,7 +22,11 @@ RUN sudo apt-get update \
     && sudo apt-get -y install --no-install-recommends apt-utils dialog nano bash-completion sudo bsdmainutils cmake \
     #
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
-    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential
+    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
+
+RUN sudo mkdir -p /dev/net \
+    && sudo mknod /dev/net/tun c 10 200 \
+    && sudo chmod 600 /dev/net/tun
 
 # Save command line history
 RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/home/$USERNAME/.bashrc" \
@@ -49,7 +53,7 @@ RUN git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prom
     && echo "if [ -f \"$HOME/.bash-git-prompt/gitprompt.sh\" ]; then GIT_PROMPT_ONLY_IN_REPO=1 && source $HOME/.bash-git-prompt/gitprompt.sh; fi" >> "/home/$USERNAME/.bashrc"
 
 # terraform + tflint
-ARG TERRAFORM_VERSION=1.3.7
+ARG TERRAFORM_VERSION=1.8.5
 ARG TFLINT_VERSION=0.44.1
 RUN mkdir -p /tmp/docker-downloads \
     && curl -sSL -o /tmp/docker-downloads/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \

@@ -255,3 +255,71 @@ variable "azure_ai_translation_domain" {
 variable "azure_ai_text_analytics_domain" {
   type = string
 }
+
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
+  type = string
+}
+
+variable "subnetIntegration_id" {
+  type = string
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+}
+
+variable "managedIdentity" {
+  type = bool
+  default = false
+}
+
+variable "ftpsState" {
+  type = string
+  default = "FtpsOnly"
+}
+
+variable "azure_portal_domain" {
+  type = string
+}
+
+variable "allowedOrigins" {
+  type = list(string)
+  default = []
+}
+
+variable "container_registry" {
+  description = "The login server of the container registry"
+  type        = string
+}
+
+variable "container_registry_admin_username" {
+  description = "The admin username of the container registry"
+  type        = string
+}
+
+variable "container_registry_id" {
+  description = "The id of the container registry"
+  type        = string
+}
+
+variable "container_registry_admin_password" {
+  description = "The admin password of the container registry"
+  type        = string
+}
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}
+
+variable "azure_environment" {
+  type        = string
+}

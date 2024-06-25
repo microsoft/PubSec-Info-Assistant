@@ -36,11 +36,11 @@ output "AZURE_STORAGE_UPLOAD_CONTAINER" {
 }
 
 output "BACKEND_URI" {
-  value = module.backend.uri
+  value = module.webapp.uri
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.web_app_name 
+  value = module.webapp.web_app_name 
 }
 
 output "RESOURCE_GROUP_NAME" {
@@ -72,7 +72,7 @@ output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.formrecognizer.formRecognizerAccountEndpoint
+  value = module.aiDocIntelligence.formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -164,11 +164,11 @@ output "AZURE_ENVIRONMENT" {
 }
 
 output "BING_SEARCH_ENDPOINT" {
-  value = var.enableWebChat ? module.bingSearch.endpoint : ""
+  value = var.enableWebChat ? module.bingSearch[0].endpoint : ""
 }
 
 output "BING_SEARCH_KEY" {
-  value = var.enableWebChat ? module.bingSearch.key : ""
+  value = var.enableWebChat ? module.bingSearch[0].key : ""
 }
 
 output "ENABLE_BING_SAFE_SEARCH" {
@@ -186,6 +186,24 @@ output "AZURE_AI_TEXT_ANALYTICS_DOMAIN" {
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
 }
+
 output "MAX_CSV_FILE_SIZE" {
   value = var.maxCsvFileSize
+}
+
+output "CONTAINER_REGISTRY" {
+  value = module.acr.login_server
+}
+
+output "CONTAINER_REGISTRY_USERNAME" {
+  value = module.acr.admin_username
+}
+
+output "CONTAINER_REGISTRY_PASSWORD" {
+  sensitive = true
+  value = module.acr.admin_password
+}
+
+output "DNS_PRIVATE_RESOLVER_IP" {
+  value = var.is_secure_mode ? module.network[0].dns_private_resolver_ip : ""
 }

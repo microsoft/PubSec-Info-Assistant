@@ -50,6 +50,10 @@ steps:
     displayName: 'Build'
     makeCommand: 'build'
 
+- template: make-command.yml
+  parameters:
+    displayName: 'build-containers'
+    makeCommand: 'build-containers'
 
 - ${{ if eq(parameters.fullBuild, true) }}:
   - template: make-command.yml

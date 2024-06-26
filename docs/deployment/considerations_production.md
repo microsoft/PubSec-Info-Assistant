@@ -36,7 +36,7 @@ Implement Azure Front Door for global load balancing and improved content delive
 Configure regional routing and caching for optimized user experience.
 Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontdoor/front-door-overview).
 
-## Security 
+## Security
 
 ### Private Endpoints
 
@@ -45,7 +45,7 @@ Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontd
 **Recommendation:** Consider implementing Private Endpoints to establish a private connection between public ingress points and related services, like storage accounts. By avoiding exposure to the public internet, you reduce the attack surface and enhance data privacy. Ensure that only necessary traffic is allowed through the Private Endpoint for increased security.
 Learn more [here](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview).
 
-### Web Application Firewall (WAF) 
+### Web Application Firewall (WAF)
 
 **Consideration:** Safeguarding your IA application from cyber threats is crucial for protecting sensitive data and maintaining user trust.
 

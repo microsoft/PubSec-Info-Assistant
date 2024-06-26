@@ -27,7 +27,6 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 - Azure OpenAI [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/openai-service/)
 - Storage account  [:link:](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
 - Azure Active Directory [:link:](https://www.microsoft.com/en-sg/security/business/microsoft-entra-pricing?rtc=1)
-- Azure AI Video Indexer [:link:](https://azure.microsoft.com/en-us/pricing/details/video-indexer/)
 
 ---
 **NOTE:**

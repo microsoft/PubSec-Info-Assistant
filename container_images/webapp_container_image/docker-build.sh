@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 set -eo pipefail
 
@@ -18,8 +21,9 @@ echo -e "\n"
 # Export docker image to the artifacts folder
 echo "Exporting docker image to artifacts folder"
 echo -e "\n"
+rm -rf ./artifacts/webapp
 mkdir -p ./artifacts/webapp
-skopeo copy docker-daemon:webapp:$tag oci-archive:./artifacts/webapp
+skopeo copy docker-daemon:webapp:$tag oci:./artifacts/webapp
 
 echo "Build and tagging complete. Tag: $tag"
 echo -e "\n"

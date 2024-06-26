@@ -1,3 +1,8 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+#!/bin/bash
+
 # Initialize variables with a default value
 name=myapp
 tag=latest
@@ -78,37 +83,48 @@ function config_upload {
   local digest=$2
   local config=$3
  
-curl -s -X POST "https://$CONTAINER_REGISTRY/v2/$name/blobs/uploads/?digest=sha256:$digest" -H "Authorization: Basic $base64creds" -H "Content-Type: application/octet-stream" --data-binary @"$config" 
+curl -s -X POST "https://$CONTAINER_REGISTRY/v2/$name/blobs/uploads/?digest=$digest" -H "Authorization: Basic $base64creds" -H "Content-Type: application/octet-stream" --data-binary @"$config" 
 }
  
+# Function to upload a layer    
 # Function to upload a layer    
 function upload_layer {  
   local layer=$1  
   echo "Uploading layer $layer"  
-  # 1. Initiate the upload  
+  # 1. Initiate the upload
   local location=$(initiate_upload)  
   if [ -z "$location" ]; then  
     echo "Failed to initiate upload for $layer"  
     exit 1  
   fi  
-  # 2. Upload the layer using PATCH  
+
+  # Calculate total size and total number of chunks
+  local total_size=$(stat -c%s "$layer")
+  local chunk_size=10485760  # 10 MB per chunk
+  local total_chunks=$((total_size / chunk_size))
+  if [ $((total_size % chunk_size)) -gt 0 ]; then
+    ((total_chunks++))  # Add one more chunk for the remaining bytes
+  fi
+
   local offset=0  
-  local chunk_size=10485760 
-  while [ $offset -lt $(stat -c%s "$layer") ]; do  
-    echo "Uploading chunk $offset"  
+  local uploaded_chunks=0
+
+  # 2. Upload the layer using PATCH  
+  while [ $offset -lt $total_size ]; do  
     local chunk="${layer}.chunk"  
     dd if="$layer" of="$chunk" skip=$((offset / chunk_size)) bs=$chunk_size count=1 status=none  
     local range="$offset-$((offset + $(stat -c%s "$chunk") - 1))"  
     local length=$(stat -c%s "$chunk")  
     local upload_response=$(upload_chunk "$location" "$chunk" "$range" "$length")  
-    location=$upload_response  
-    if [ -z "$location" ]; then  
-      echo "Failed to upload chunk for $layer"  
-      exit 1  
-    fi  
-    offset=$((offset + chunk_size))  
-    rm "$chunk"  
-  done  
+    location=$upload_response
+
+    ((uploaded_chunks++))
+    local percentage=$((uploaded_chunks * 100 / total_chunks))
+    echo "Uploaded chunk $uploaded_chunks of $total_chunks ($percentage% complete)"
+
+    offset=$((offset + length))
+  done
+
   # 3. Complete the upload  
   local digest=$(get_digest "$layer")  
   local complete_response=$(complete_upload "$location" "$digest")  
@@ -120,16 +136,16 @@ function upload_layer {
 }
 
 cd $folder
-base64creds=$(echo -n "${CONTAINER_REGISTRY_USERNAME}:${CONTAINER_REGISTRY_PASSWORD}" | base64)
+base64creds=$(echo -n "${CONTAINER_REGISTRY_USERNAME}:${CONTAINER_REGISTRY_PASSWORD}" | base64 -w 0)
 
 # Read layers from digest
 # Read index.json to get the manifest digest  
 echo "Looking for manifest digest in index.json in $folder"
 manifest_digest=$(jq -r '.manifests[0].digest' index.json)  
-echo "Manifest Digest: $manifest_digest"  
+echo "Manifest Digest: $manifest_digest for $name:$tag"  
+echo -e "\n" 
 # Get the manifest blob name  
 manifest_blob_name=${manifest_digest#*:}  
-echo "Manifest Blob Name: $manifest_blob_name"  
 # Extract the manifest blob  
 manifest_file="blobs/sha256/$manifest_blob_name"  
 if [ ! -f "$manifest_file" ]; then  
@@ -143,32 +159,75 @@ for raw_layer in $raw_layers; do
     layer="blobs/sha256/${raw_layer:7}"
     layers+=($layer)
 done
-echo "Layers: ${layers[@]}"
 
-# Upload layers in parallel  put cap on max degree of parallelism to 3
-for layer in "${layers[@]}"; do  
-  upload_layer "$layer" &  
-done  
-# Wait for all background jobs to complete  
+# Initialize a counter for running jobs
+running_jobs=0
+max_jobs=3
+progress=()
+
+# Create a temporary directory for progress tracking
+mkdir -p /tmp/layer_progress
+
+# Upload layers in parallel with a cap on max degree of parallelism to 3
+for i in "${!layers[@]}"; do
+  layer=${layers[$i]}
+  progress_file="/tmp/layer_progress/progress_$i"
+  touch "$progress_file"
+  
+  # Simulate upload_layer function with background progress update
+  (upload_layer "$layer" > "$progress_file" 2>&1 && echo "100% done" >> "$progress_file") &
+  
+  progress+=("$progress_file")
+  ((running_jobs++))
+
+  # If running jobs reach 3, wait for at least one to complete before continuing
+  if [ "$running_jobs" -ge $max_jobs ]; then
+    wait -n  # Wait for at least one process to finish
+    ((running_jobs--))  # Decrement the counter by the number of jobs finished
+  fi
+done
+
+# Monitor progress
+while :; do
+  clear
+  for j in "${!progress[@]}"; do
+    progress_file="${progress[$j]}"
+    if [ -f "$progress_file" ]; then
+      echo -n "Layer $j progress: "
+      tail -n 1 "$progress_file" || echo "Waiting..."
+    fi
+  done
+  sleep 1
+  # Exit loop if all uploads are done
+  [[ $(jobs -r | wc -l) -eq 0 ]] && break
+done
+
+# Cleanup
+rm -rf /tmp/layer_progress
+
+# Wait for all background jobs to complete
 wait  
  
 # Upload the config file
-config=$(jq -r '.config.digest' $manifest_file)
-config_digest=$(get_digest ./blobs/sha256/${config:7})
- 
-config_response=$(config_upload "$location" "$config_digest" "$config")
-echo "Config uploaded"
+config_digest=$(jq -r '.config.digest' $manifest_file)
+#echo "Config: $config"
+config_file="./blobs/sha256/${config_digest:7}"
+
+config_response=$(config_upload "$location" "$config_digest" "$config_file")
 if echo "$config_response" | grep -q "error"; then
  echo "Failed to upload config"
  exit 1
 fi
- 
+echo "Config uploaded" 
+
 # Push the image manifest
 manifest_response=$(curl -s -D - -X PUT "https://$CONTAINER_REGISTRY/v2/$name/manifests/$tag" -H "Content-Type: application/vnd.oci.image.manifest.v1+json" -H "Authorization: Basic $base64creds" --data-binary @$manifest_file)
-echo "Manifest uploaded"
+
 if echo "$manifest_response" | grep -q "error"; then
-echo "Failed to upload manifest"
-exit 1
+ echo "Failed to upload manifest"
+ exit 1
 fi
- 
-echo "Image pushed successfully"
+echo "Manifest uploaded"
+echo -e "\n" 
+
+echo "Image: $name pushed successfully"

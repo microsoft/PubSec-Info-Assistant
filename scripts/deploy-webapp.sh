@@ -41,13 +41,15 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Build the docker image for the webapp
+echo "Building the docker image for the webapp"
+$DIR/../container_images/webapp_container_image/docker-build.sh
+
 # Push the docker image to the container registry
 tag=$(cat "$DIR/../container_images/webapp_container_image/image_tag.txt")
 echo "Tag for the docker image is $tag"
 echo "Pushing the docker image to the container registry"
-printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_REGISTRY_USERNAME --password-stdin "https://${CONTAINER_REGISTRY}"
-docker tag webapp $CONTAINER_REGISTRY/webapp:$tag
-docker push $CONTAINER_REGISTRY/webapp:$tag
+$DIR/../scripts/push-to-acr.sh -n webapp -t $tag -f $DIR/../artifacts/webapp
 
 # Update the webapp with the new image
 echo "Updating the webapp with the new image"

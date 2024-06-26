@@ -22,7 +22,7 @@ RUN sudo apt-get update \
     && sudo apt-get -y install --no-install-recommends apt-utils dialog nano bash-completion sudo bsdmainutils cmake \
     #
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
-    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
+    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn skopeo
 
 RUN sudo mkdir -p /dev/net \
     && sudo mknod /dev/net/tun c 10 200 \

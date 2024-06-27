@@ -175,7 +175,7 @@ To perform a secure deployment, follow these steps:
 
     * Establish vnet peering with your corporate network via Express Route.
     * Establish a Point-to-Site (P2S) VPN for your development workstation. See [Secure Communication to Azure](#secure-communication-to-azure) section.
-    * If using Microsft's Cloud for Soverienity (MCfSov), there are additional considerations you can find in the [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov) section.
+    * If using Microsoft's Cloud for Sovereignty (MCfSov), there are additional considerations you can find in the [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov) section.
 
 8. If you are choosing to use a P2S VPN to connect to the Info Assistant vnet, then follow these steps. Otherwise, skip to Step 18.
 
@@ -227,7 +227,7 @@ To perform a secure deployment, follow these steps:
 
       `sudo pkill openvpn`
 
-      The bash prompt should block when connected. You will need to open anohter bash Terminal in VSCode to run additional commands. If the bash prompt does not block but return you can run the following command to review the logs for errors:
+      The bash prompt should block when connected. You will need to open another bash Terminal in VSCode to run additional commands. If the bash prompt does not block but return you can run the following command to review the logs for errors:
 
       `sudo cat openvpn.log`
 

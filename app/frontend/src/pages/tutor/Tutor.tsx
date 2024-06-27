@@ -70,6 +70,7 @@ const Tutor = () => {
     async function hinter(question: string) {
         setStreamKey(prevKey => prevKey + 1);
         setOutput('');
+        setError(false);
         setRenderAnswer(true);
         await retryAsyncFn(() => getHint(question), 3, 1000).then((response) => {
             setOutput(response.toString());
@@ -80,6 +81,7 @@ const Tutor = () => {
     
     async function getAnswer(question: string) {
         setStreamKey(prevKey => prevKey + 1);
+        setError(false);
         setOutput('');
         setRenderAnswer(true);
         await retryAsyncFn(() => processAgentResponse(question), 3, 1000).then((response) => {
@@ -193,7 +195,7 @@ return (
         </div>
         </form>
         {error && <div className="spinner">{errorMessage}</div>}
-        {renderAnswer && <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} onStreamingComplete={handleCloseEvent} classNames={styles.centeredAnswerContainer} nonEventString={output} /> }
+        {renderAnswer && !error && <CharacterStreamer key={streamKey} eventSource={eventSourceRef.current} onStreamingComplete={handleCloseEvent} classNames={styles.centeredAnswerContainer} nonEventString={output} /> }
     </div>
     </div>
 )

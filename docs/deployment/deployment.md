@@ -57,7 +57,7 @@ SECURE_MODE | Yes | Defaults to `false`. This feature flag will determine if the
 ENABLE_WEB_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to use Web Search results as a data source for generating answers from the LLM. This feature will also deploy a Bing v7 Search instance in Azure to retrieve web results from, however Bing v7 Search is not available in AzureUSGovernment regions, so this feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
 ENABLE_BING_SAFE_SEARCH | No | Defaults to `true`. If you are using the `ENABLE_WEB_CHAT`feature you can set the following values to enable safe search on the Bing v7 Search APIs.
 ENABLE_UNGROUNDED_CHAT | Defaults to `false`. This feature flag will enable the ability to interact directly with an LLM. This experience will be similar to the Azure OpenAI Playground.
-ENABLE_MATH_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Math Assistant tab in the Information Assistant website. Read more information on the [Math Assistant](/docs/features/features.md) 
+ENABLE_MATH_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Math Assistant tab in the Information Assistant website. Read more information on the [Math Assistant](/docs/features/features.md)
 ENABLE_TABULAR_DATA_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Tabular Data Assistant tab in the Information Assistant website. Read more information about the [Tabular Data Assistant](/docs/features/features.md)
 ENABLE_SHAREPOINT_CONNECTOR | Yes | Defaults to `false`. This feature flag enabled the ability to ingest data from SharePoint document stores into the Information Assistant. When enabled, be sure to set the `SHAREPOINT_TO_SYNC` parameter for your SharePoint sites. Read more about configuring the [SharePoint Connector](/docs/features/sharepoint.md). This feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
 SHAREPOINT_TO_SYNC | No | This is a JSON Array of Objects for SharePoint Sites and their entry folders. The app will crawl down from the folder specified for each site. Specifying "/Shared Documents" will crawl all the documents in your SharePoint. `[{"url": "https://SharePoint.com/", "folder": "/Shared Documents"}]` This will **overwrite** any prior changes you've made to config.json. Information on setting up SharePoint Ingestion can be found here [SharePoint Connector](/docs/features/sharepoint.md)
@@ -212,7 +212,7 @@ There are considerations for adopting the Information Assistant (IA) accelerator
 
 ## Need Help?
 
-Check these [troubleshotting methods](/docs/deployment/troubleshooting.md).
+Check these [troubleshooting methods](/docs/deployment/troubleshooting.md).
 
 
 If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

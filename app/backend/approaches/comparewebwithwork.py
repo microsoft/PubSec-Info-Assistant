@@ -60,8 +60,9 @@ class CompareWebWithWork(Approach):
         target_embedding_model: str,
         enrichment_appservice_url: str,
         target_translation_language: str,
-        enrichment_endpoint:str,
-        enrichment_key:str,
+        azure_ai_endpoint:str,
+        azure_ai_key:str,
+        azure_ai_location: str,
         azure_ai_translation_domain: str,
         use_semantic_reranker: bool
     ):
@@ -77,8 +78,9 @@ class CompareWebWithWork(Approach):
         self.chatgpt_token_limit = get_token_limit(model_name)
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
-        self.enrichment_endpoint=enrichment_endpoint
-        self.enrichment_key=enrichment_key
+        self.azure_ai_endpoint=azure_ai_endpoint
+        self.azure_ai_key=azure_ai_key
+        self.azure_ai_location = azure_ai_location
         self.oai_service_name = oai_service_name
         self.oai_service_key = oai_service_key
         self.model_name = model_name
@@ -124,8 +126,9 @@ class CompareWebWithWork(Approach):
                                     self.escaped_target_model,
                                     self.enrichment_appservice_url,
                                     self.target_translation_language,
-                                    self.enrichment_endpoint,
-                                    self.enrichment_key,
+                                    self.azure_ai_endpoint,
+                                    self.azure_ai_location,
+                                    self.azure_ai_key,
                                     self.azure_ai_translation_domain,
                                     self.use_semantic_reranker
                                 )

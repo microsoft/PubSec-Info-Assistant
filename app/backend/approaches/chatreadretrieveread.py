@@ -102,8 +102,9 @@ class ChatReadRetrieveReadApproach(Approach):
         target_embedding_model: str,
         enrichment_appservice_uri: str,
         target_translation_language: str,
-        enrichment_endpoint:str,
-        enrichment_key:str,
+        azure_ai_endpoint:str,
+        azure_ai_key:str,
+        azure_ai_location:str,
         azure_ai_translation_domain: str,
         use_semantic_reranker: bool
         
@@ -121,8 +122,9 @@ class ChatReadRetrieveReadApproach(Approach):
         #escape target embeddiong model name
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
-        self.enrichment_endpoint=enrichment_endpoint
-        self.enrichment_key=enrichment_key
+        self.azure_ai_endpoint=azure_ai_endpoint
+        self.azure_ai_key=azure_ai_key
+        self.azure_ai_location=azure_ai_location
         self.oai_endpoint=oai_endpoint
         self.embedding_service_url = enrichment_appservice_uri
         self.azure_ai_translation_domain=azure_ai_translation_domain
@@ -442,12 +444,11 @@ class ChatReadRetrieveReadApproach(Approach):
     def detect_language(self, text: str) -> str:
         """ Function to detect the language of the text"""
         try:
-            endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]
             api_detect_endpoint = f"https://{self.azure_ai_translation_domain}/detect?api-version=3.0"
             headers = {
-                'Ocp-Apim-Subscription-Key': self.enrichment_key,
+                'Ocp-Apim-Subscription-Key': self.azure_ai_key,
                 'Content-type': 'application/json',
-                'Ocp-Apim-Subscription-Region': endpoint_region
+                'Ocp-Apim-Subscription-Region': self.azure_ai_location
             }
             data = [{"text": text}]
             response = requests.post(api_detect_endpoint, headers=headers, json=data)
@@ -462,10 +463,10 @@ class ChatReadRetrieveReadApproach(Approach):
      
     def translate_response(self, response: str, target_language: str) -> str:
         """ Function to translate the response to target language"""
-        endpoint_region = self.enrichment_endpoint.split("https://")[1].split(".api")[0]      
+        endpoint_region = self.azure_ai_endpoint.split("https://")[1].split(".api")[0]      
         api_translate_endpoint = f"https://{self.azure_ai_translation_domain}/translate?api-version=3.0"
         headers = {
-            'Ocp-Apim-Subscription-Key': self.enrichment_key,
+            'Ocp-Apim-Subscription-Key': self.azure_ai_key,
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': endpoint_region
         }

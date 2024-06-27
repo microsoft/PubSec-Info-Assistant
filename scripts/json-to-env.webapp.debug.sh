@@ -121,8 +121,8 @@ jq -r  '
             "env_var": "AZURE_OPENAI_CHATGPT_MODEL_NAME"
         },
         {
-            "path": "ENRICHMENT_ENDPOINT",
-            "env_var": "ENRICHMENT_ENDPOINT"
+            "path": "AZURE_AI_ENDPOINT",
+            "env_var": "AZURE_AI_ENDPOINT"
         },
         {
             "path": "AZURE_OPENAI_ENDPOINT",
@@ -155,6 +155,10 @@ jq -r  '
         {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"
+        },
+        {
+            "path": "AZURE_AI_LOCATION",
+            "env_var": "AZURE_AI_LOCATION"
         }
     ]
         as $env_vars_to_extract
@@ -206,9 +210,9 @@ keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
 
 # Names of your secrets
 if [ -n "${SECURE_MODE}" ]; then
-    secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")
+    secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "AZURE-AI-KEY")
 else
-    secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "BINGSEARCH-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")    
+    secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "BINGSEARCH-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "AZURE-AI-KEY")    
 fi
 
 

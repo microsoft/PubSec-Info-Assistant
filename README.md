@@ -3,9 +3,9 @@
 > [!IMPORTANT]  
 > As of November 15, 2023, Azure Cognitive Search has been renamed to Azure AI Search. Azure Cognitive Services have also been renamed to Azure AI Services.
 
-## Table of Contents 
+## Table of Contents
 
-- [Response Generation Approaches](#response-generation-approaches) 
+- [Response Generation Approaches](#response-generation-approaches)
 - [Features](#features)
 - [Azure account requirements](#azure-account-requirements)
 - [Azure Deployment](./docs/deployment/deployment.md)
@@ -124,7 +124,7 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 
 ### Content Safety
 
-Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transaparncy Note](/docs/transparency.md)
+Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transparency Note](/docs/transparency.md)
 
 By default, the content filters are set to filter out prompts and completions that are detected as medium or high severity for those four harm categories. Content labeled as low or safe severity is not filtered.
 
@@ -134,7 +134,7 @@ The filtering configuration can be customized at the resource level, allowing cu
 
 This provides controls for Azure customers to tailor the content filtering behavior to their needs while aiming to prevent potentially harmful generated content and any copyright violations from public content.
 
-Instructions on how to confiure content filters via Azure OpenAI Studio can be found here <https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/content-filters#configuring-content-filters-via-azure-openai-studio-preview>
+Instructions on how to configure content filters via Azure OpenAI Studio can be found here <https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/content-filters#configuring-content-filters-via-azure-openai-studio-preview>
 
 ## Data Collection Notice
 
@@ -193,4 +193,3 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 ### Reporting Security Issues
 
 For security concerns, please see [Security Guidelines](./SECURITY.md)
-

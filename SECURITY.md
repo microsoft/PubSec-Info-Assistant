@@ -33,6 +33,7 @@ If you are reporting for a bug bounty, more complete reports can contribute to a
 ## Providing Feedback
 
 Please refer to the [Contributing](./CONTRIBUTING.md) guidelines for acceptable methods to provide feedback for issues which are not security related.
+
 ## Preferred Languages
 
 We prefer all communications to be in English.

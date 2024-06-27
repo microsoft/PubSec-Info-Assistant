@@ -71,7 +71,7 @@ The Information Assistant now supports integrating your SharePoint document libr
 The latter, "Bing Compare," takes a grounded LLM response and performs a second Bing search, integrating citations from both sources for a comprehensive answer.
 
 Additionally, a "Switch to Web" button in the subtitle bar allows users to transition between "Work" and "Web" workspaces, directing prompts either to the grounded LLM with access to Bing-related functionalities or behaving as if the "Search Bing" button was pressed.
- In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses. 
+ In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses.
  These features empower users to seamlessly access and validate information across various sources within the chat interface.
  More information can be found in the [markdown here](/docs/features/bing_search.md)
 
@@ -123,7 +123,7 @@ The end user leverages the web interface as the primary method to engage with th
 
 ## Document Deletion
 
-There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure. Document deletions are not instantaneous and can take up to ten minutes to propogate through all components of the system.
+There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure. Document deletions are not instantaneous and can take up to ten minutes to propagate through all components of the system.
 
 ### File Deletion in the UI
 
@@ -142,5 +142,3 @@ We've starting with text-based image retrieval, but in the future, we have plans
 ### Adding Evaluation Guidance and Metrics
 
 To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
-
-

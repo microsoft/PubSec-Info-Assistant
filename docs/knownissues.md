@@ -21,7 +21,6 @@ Manually create a "Azure AI services" in your Azure Subscription and Accept "Res
 
 ***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
-
 ---
 
 ## Error "Your administrator has configured the application infoasst_web_access_xxxxx to block users..."
@@ -71,9 +70,9 @@ The back off and retry parameter values are surfaced as configuration settings i
 | MAX_READ_ATTEMPTS           | 5     | Number of times to retry reading a processed document from FR                                                             |
 | MAX_SECONDS_HIDE_ON_UPLOAD  | 30    | Max number of seconds between uploading a file and submitting it to FR                                                    |
 | MAX_SUBMIT_REQUEUE_COUNT    | 10    | Max number of times a file can be resubmitted to FR for throttling or capacity limitations                                |
-| PDF_SUBMIT_QUEUE_BACKOFF    | 60    | Number of seconds a message sleeps before resubmitting due to throttlng request from FR                                   |
+| PDF_SUBMIT_QUEUE_BACKOFF    | 60    | Number of seconds a message sleeps before resubmitting due to throttling request from FR                                   |
 | POLL_QUEUE_SUBMIT_BACKOFF   | 60    | Number of seconds a message sleeps before we poll for FR completion                                                       |
-| POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to FR still processing a file. This value esalates exponentially |
+| POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to FR still processing a file. This value escalates exponentially |
 | SUBMIT_REQUEUE_HIDE_SECONDS | 1200  | Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error                       |
 
 ```
@@ -96,7 +95,7 @@ submitRequeueHideSeconds
 
 ```bash
 InvalidTemplateDeployment - The template deployment 'infoasst-myworkspace' is not valid according to the validation procedure. The tracking id is 'XXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXX'. See inner errors for details.
-InsufficientQuota: This opeeration requre xxx new capacity in quota  'Tokens Per Minute (thousands) - GPT-XXX or Text-Embeddings-Ada-002 which is bigger than the current available capacity of xxx.
+InsufficientQuota: This operation require xxx new capacity in quota  'Tokens Per Minute (thousands) - GPT-XXX or Text-Embeddings-Ada-002 which is bigger than the current available capacity of xxx.
 ```
 
 ### Solution
@@ -196,6 +195,7 @@ export TF_VAR_appServiceSkuTier="Standard"
 export TF_VAR_enrichmentAppServiceSkuSize="P1v3"
 export TF_VAR_enrichmentAppServiceSkuTier="PremiumV3"
 ```
+
 ## My image search is not working and returning "I'm sorry, but I don't have any information about..."
 
 ### Solution
@@ -218,6 +218,6 @@ To view the value after deploying go the Microsoft Entra ID page from the Azure 
 
 ![Image of Entra App Registration](./images/credential-lifespan.png)
 
-Next click on the App Registration value, and then the page will open for that applciuation registration. Then select Clients & Secrets from the left menu. You will then see the expiry date of the password that was applied through Terraform.
+Next click on the App Registration value, and then the page will open for that application registration. Then select Clients & Secrets from the left menu. You will then see the expiry date of the password that was applied through Terraform.
 
 ![Image of Entra App Registration](./images/app_registration.png)

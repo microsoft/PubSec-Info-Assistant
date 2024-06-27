@@ -8,7 +8,7 @@ feature request as a new Issue.
 
 For help and questions about using this project, please use the [Discussion](https://github.com/microsoft/PubSec-Info-Assistant/discussions) forums on our GitHub Repo page.
 
-For customer support deploying this accelerator, please reach out to your local Microsoft representative or email the [Industry Solutions Accelerator Team](mailto:isat-support@microsoft.com). 
+For customer support deploying this accelerator, please reach out to your local Microsoft representative or email the [Industry Solutions Accelerator Team](mailto:isat-support@microsoft.com).
 
 ## Providing Feedback
 

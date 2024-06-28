@@ -231,3 +231,15 @@ echo "Manifest uploaded"
 echo -e "\n" 
 
 echo "Image: $name pushed successfully"
+
+# Function to clean up the artifacts directory
+function cleanup_artifacts {
+  echo "Cleaning up artifacts directory: $folder"
+  rm -rf "$folder"
+  echo "Cleanup completed."
+}
+
+# Call the cleanup function after all uploads have completed successfully
+cleanup_artifacts
+
+echo "Image: $name pushed successfully"

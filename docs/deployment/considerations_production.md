@@ -45,11 +45,19 @@ Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontd
 **Recommendation:** Consider implementing Private Endpoints to establish a private connection between public ingress points and related services, like storage accounts. By avoiding exposure to the public internet, you reduce the attack surface and enhance data privacy. Ensure that only necessary traffic is allowed through the Private Endpoint for increased security.
 Learn more [here](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-overview).
 
+Private Endpoints are now offered as part of our "secure-mode". Learn more about it [here](/docs/deployment/secure_deployment.md)
+
 ### Web Application Firewall (WAF)
 
 **Consideration:** Safeguarding your IA application from cyber threats is crucial for protecting sensitive data and maintaining user trust.
 
 **Recommendation:** Implement Azure WAF to protect against common web vulnerabilities and attacks. Regularly update WAF rules and policies to stay resilient against evolving security threats. Integrate with Azure Security Center for comprehensive threat detection and response. Learn more [here](https://learn.microsoft.com/en-us/azure/web-application-firewall/overview).
+
+### Secure Mode
+
+**Consideration:** Encompassing your IA application in a single VNet isolating your traffic and enhancing security
+
+**Recommendation:** Private VNet and many other security offerings are part of our "secure-mode". You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
 
 ### Proactive Monitoring
 

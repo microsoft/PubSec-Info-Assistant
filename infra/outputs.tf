@@ -95,8 +95,12 @@ output "TARGET_PAGES" {
   value = var.targetPages
 }
 
-output "ENRICHMENT_ENDPOINT" {
+output "AZURE_AI_ENDPOINT" {
   value = module.cognitiveServices.cognitiveServiceEndpoint
+}
+
+output "AZURE_AI_LOCATION" {
+  value = var.location
 }
 
 output "ENRICHMENT_NAME" {

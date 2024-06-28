@@ -369,7 +369,7 @@ name="infoasst-enrichment-cog-$random_text"
 providers="/providers/Microsoft.CognitiveServices/accounts/$name"
 module_path="module.cognitiveServices.azurerm_cognitive_account.cognitiveService"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "ENRICHMENT-KEY")
+secret_id=$(get_secret "AZURE-AI-KEY")
 module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
 import_resource_if_needed "$module_path" "$secret_id"
 

@@ -38,9 +38,9 @@ cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
 # Cognitive Services
-cognitive_services_key = os.environ["ENRICHMENT_KEY"]
-cognitive_services_endpoint = os.environ["ENRICHMENT_ENDPOINT"]
-cognitive_services_account_location = os.environ["ENRICHMENT_LOCATION"]
+cognitive_services_key = os.environ["AZURE_AI_KEY"]
+cognitive_services_endpoint = os.environ["AZURE_AI_ENDPOINT"]
+cognitive_services_account_location = os.environ["AZURE_AI_LOCATION"]
 
 # Search Service
 AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")

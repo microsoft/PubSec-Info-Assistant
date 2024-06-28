@@ -397,7 +397,8 @@ module "webapp" {
     CHAT_WARNING_BANNER_TEXT                = var.chatWarningBannerText
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     ENRICHMENT_APPSERVICE_URL               = module.enrichmentApp.uri
-    ENRICHMENT_ENDPOINT                     = module.cognitiveServices.cognitiveServiceEndpoint
+    AZURE_AI_ENDPOINT                       = module.cognitiveServices.cognitiveServiceEndpoint
+    AZURE_AI_LOCATION                       = var.location
     APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
     AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker

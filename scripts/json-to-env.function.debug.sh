@@ -20,7 +20,7 @@ secrets="{"
 keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "ENRICHMENT-KEY")
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "AZURE-AI-KEY")
 azWebJobSecretName="BLOB-CONNECTION-STRING"
 azWebJobVarName="AzureWebJobsStorage"
 
@@ -90,8 +90,8 @@ jq -r --arg secrets "$secrets" '
             "env_var": "AzureWebJobsStorage"
         },
         {
-            "path": "ENRICHMENT_ENDPOINT",
-            "env_var": "ENRICHMENT_ENDPOINT"
+            "path": "AZURE_AI_ENDPOINT",
+            "env_var": "AZURE_AI_ENDPOINT"
         },
         {
             "path": "ENRICHMENT_NAME",
@@ -111,7 +111,7 @@ jq -r --arg secrets "$secrets" '
         },
         {
             "path": "AZURE_LOCATION",
-            "env_var": "ENRICHMENT_LOCATION"
+            "env_var": "AZURE_AI_LOCATION"
         },
         {
             "path": "AZURE_SEARCH_INDEX",
@@ -132,6 +132,10 @@ jq -r --arg secrets "$secrets" '
         {
             "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
             "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
+        },
+        {
+            "path": "AZURE_AI_LOCATION",
+            "env_var": "AZURE_AI_LOCATION"
         }
     ] 
         as $env_vars_to_extract

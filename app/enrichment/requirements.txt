@@ -1,5 +1,8 @@
 #### Any version change made here should also be made and tested for the webapp backend and function apps in /functions and /app/backend
-
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+torchaudio
 sentence-transformers == 2.2.2
 fastapi == 0.109.1
 fastapi-utils == 0.2.1

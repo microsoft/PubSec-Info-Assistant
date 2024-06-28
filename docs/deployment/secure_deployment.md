@@ -13,6 +13,7 @@
 >Secure mode requires a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region. You can reuse an existing DDOS plan in your tenant or Info Assistant can deploy one for you.
 >
 
+* [Additional Azure account requirements](#additional-azure-account-requirements)
 * [Overview](#overview)
 * [Architecture](#architecture)
   * [High Level Architecture](#high-level-architecture)
@@ -26,6 +27,14 @@
   * [Secure Communication to Azure](#secure-communication-to-azure)
   * [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov)
   
+## Additional Azure account requirements
+
+In order to deploy the "secure mode" of Information Assistant, you will need the following in addition to the standard [Azure account requirements](/README.md#azure-account-requirements):
+
+* Your GitHub Codespace machine type must be at least **4-core**.
+![alt text](image.png).
+* If you are going to use an existing DDOS that resides in another subscription, you will need to have `TBD` permission on the subscription where the DDOS Protection Plan exists to allow associating to the vnet when it is created.
+
 ## Overview
 
 Information Assistant secure mode is essential when heightened levels of security are necessary. Secure mode is recommended for all production systems. Key features of secure mode include:

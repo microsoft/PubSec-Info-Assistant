@@ -38,12 +38,11 @@ RUN sudo apt-get update \
     && curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && sudo apt-get update -y \
-    && sudo apt-get install -y docker-ce-cli containerd.io
+    && sudo apt-get install -y docker-ce-cli
 
-RUN sudo usermod -aG docker $USERNAME
-#ARG DOCKER_GROUP_ID
-#COPY ./scripts/docker-client.sh /tmp/
-#RUN /tmp/docker-client.sh $USERNAME
+ARG DOCKER_GROUP_ID
+COPY ./scripts/docker-client.sh /tmp/
+RUN /tmp/docker-client.sh $USERNAME
 
 # Git command prompt
 RUN git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt --depth=1 \

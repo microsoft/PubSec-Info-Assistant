@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bullseye
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bookworm
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -39,11 +39,6 @@ RUN sudo apt-get update \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && sudo apt-get update -y \
     && sudo apt-get install -y docker-ce-cli
-
-# Install skopeo
-RUN echo 'deb http://ftp.debian.org/debian bookworm main' | sudo tee /etc/apt/sources.list.d/debian.bookwork.list \
-    && sudo apt-get update \
-    && sudo apt-get install skopeo
 
 ARG DOCKER_GROUP_ID
 COPY ./scripts/docker-client.sh /tmp/
@@ -99,5 +94,13 @@ RUN pip install azure-cosmos
 RUN pip install pyfiglet
 RUN pip install azure-identity
 RUN pip install azure-keyvault-secrets
+
 # Python Package for Backend Testing
 RUN pip install pytest
+
+# Install skopeo - This must be at the end due to pulling from trixie
+RUN sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install usrmerge
+
+RUN echo 'deb http://ftp.debian.org/debian trixie main' | sudo tee /etc/apt/sources.list.d/debian.trixie.list \
+    && sudo apt-get update \
+    && sudo apt-get install skopeo

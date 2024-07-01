@@ -24,11 +24,6 @@ RUN sudo apt-get update \
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
     && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
 
-# Install skopeo
-RUN curl -fsSL https://download.opensuse.org/repositories/home:alvistack/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null \
-    && sudo apt update \
-    && sudo apt install skopeo
-
 # Save command line history
 RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/home/$USERNAME/.bashrc" \
     && echo "export PROMPT_COMMAND='history -a'" >> "/home/$USERNAME/.bashrc" \
@@ -44,6 +39,11 @@ RUN sudo apt-get update \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && sudo apt-get update -y \
     && sudo apt-get install -y docker-ce-cli
+
+# Install skopeo
+RUN echo 'deb http://ftp.debian.org/debian bookworm main' | sudo tee /etc/apt/sources.list.d/debian.bookwork.list \
+    && sudo apt-get update \
+    && sudo apt-get install skopeo
 
 ARG DOCKER_GROUP_ID
 COPY ./scripts/docker-client.sh /tmp/

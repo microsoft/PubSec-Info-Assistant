@@ -40,5 +40,5 @@ cd ${ENRICHMENT_ROOT_PATH}
 mkdir -p ./shared_code
 cp  ../../functions/shared_code/status_log.py ./shared_code
 cp  ../../functions/shared_code/utilities_helper.py ./shared_code
-echo "Successfully prepared enrichment app"
+echo "Successfully prepared enrichment app code"
 echo -e "\n"

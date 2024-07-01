@@ -22,7 +22,12 @@ RUN sudo apt-get update \
     && sudo apt-get -y install --no-install-recommends apt-utils dialog nano bash-completion sudo bsdmainutils cmake \
     #
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
-    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn skopeo
+    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
+
+# Install skopeo
+RUN curl -fsSL https://download.opensuse.org/repositories/home:alvistack/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null \
+    && sudo apt update \
+    && sudo apt install skopeo
 
 # Save command line history
 RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/home/$USERNAME/.bashrc" \

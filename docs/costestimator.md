@@ -1,11 +1,11 @@
-# IA Accelerator, version 1.0 - Estimation
+# IA Accelerator, version 1.1.2 - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 1.1, and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 1.1.2, and provides cost estimates based on the chosen configurations.
 
 
 | Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA Accelerator, version 1.1 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/a409b0bc66194490917aa31e592b7cbf) | 
+| IA Accelerator, version 1.1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/55c61add4bac4c1fb3a09e53a61b8940) | 
 
 ---
 ### Azure Services
@@ -32,7 +32,8 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 **NOTE:**
 
 - The proposed the cost estimation prepared based on Sandbox environment, estimation may vary customer to customer.
-- For detailed Azure OpenAI Service [pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing)
+- For detailed Azure OpenAI Service please refer to the detailed [pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing)
+- The estimation for Bing Search Service is not included in the Azure Estimation. Please consider it separately as mentioned under [Bing Search Service Pricing](https://www.microsoft.com/en-us/bing/apis/pricing)
 - Customers with latency-sensitive scenarios can opt for provisioned throughput which allows customers to reserve model processing capacity. [Read More](/docs/deployment/considerations_production.md#gpt-model---throttling)
 
 ---

@@ -106,7 +106,13 @@ def process_agent_scratch_pad(question, df):
     deployment_name=OPENAI_DEPLOYMENT_NAME)  
          
     question = save_chart(question)
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+    # This agent relies on access to a python repl tool which can execute arbitrary code.
+    # This can be dangerous and requires a specially sandboxed environment to be safely used.
+    # Failure to properly sandbox this class can lead to arbitrary code execution vulnerabilities,
+    # which can lead to data breaches, data loss, or other security incidents. You must opt in
+    # to use this functionality by setting allow_dangerous_code=True.
+    # https://api.python.langchain.com/en/latest/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html
+    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS,allow_dangerous_code=True , handle_parsing_errors=True )
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
@@ -134,7 +140,7 @@ def process_agent_response(question):
     deployment_name=OPENAI_DEPLOYMENT_NAME)  
     
        
-    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS)
+    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, allow_dangerous_code=True)
     for chunk in pdagent.stream({"input": question}):
         if "output" in chunk:
             output = f'Final Output: ```{chunk["output"]}```'

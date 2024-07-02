@@ -47,6 +47,10 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
     location          = var.location
     failover_priority = 0
   }
+
+  capabilities {
+    name = "EnableServerless"
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "log_database" {
@@ -63,9 +67,10 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
 
   partition_key_path = "/file_name"
 
-  autoscale_settings {
-    max_throughput = var.autoscaleMaxThroughput
-  }
+  /// commenting out - autoscale settings incompatible with Serverless
+  /// autoscale_settings {
+    /// max_throughput = var.autoscaleMaxThroughput
+  /// }
 }
 
 module "cosmos_db_key" {

@@ -41,13 +41,15 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Build the docker image for the functions
+echo "Building the docker image for the functions"
+$DIR/../functions/docker-build.sh
+
 # Push the docker image to the container registry
 tag=$(cat "$DIR/../functions/image_tag.txt")
 echo "Tag for the docker image is $tag"
 echo "Pushing the docker image to the container registry"
-printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_REGISTRY_USERNAME --password-stdin "https://${CONTAINER_REGISTRY}"
-docker tag functionapp $CONTAINER_REGISTRY/functionapp:$tag
-docker push $CONTAINER_REGISTRY/functionapp:$tag
+$DIR/../scripts/push-to-acr.sh -n functionapp -t $tag -f $DIR/../artifacts/functionapp
 
 # Update the function app with the new image
 echo "Updating the function webapp with the new image"

@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bullseye
+FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bookworm
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -24,10 +24,6 @@ RUN sudo apt-get update \
     # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
     && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
 
-RUN sudo mkdir -p /dev/net \
-    && sudo mknod /dev/net/tun c 10 200 \
-    && sudo chmod 600 /dev/net/tun
-
 # Save command line history
 RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/home/$USERNAME/.bashrc" \
     && echo "export PROMPT_COMMAND='history -a'" >> "/home/$USERNAME/.bashrc" \
@@ -38,11 +34,11 @@ RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/hom
 # docker-client
 RUN sudo apt-get update \
     # libgl dependencies and install Docker CE CLI
-    && sudo apt-get install ffmpeg libsm6 libxext6 apt-transport-https ca-certificates curl gnupg-agent software-properties-common lsb-release -y \
-    && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]')/gpg | sudo apt-key add - 2>/dev/null \
-    && sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr '[:upper:]' '[:lower:]') $(lsb_release -cs) stable" \
-    && sudo apt-get update \
-    && sudo apt-get install -y docker-ce-cli 
+    && sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release -y \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && sudo apt-get update -y \
+    && sudo apt-get install -y docker-ce-cli
 
 ARG DOCKER_GROUP_ID
 COPY ./scripts/docker-client.sh /tmp/
@@ -79,12 +75,6 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian
     && apt-get update \
     && apt-get install -y azure-functions-core-tools-4
 
-# Install Powershell
-RUN apt-get update \
-    && apt-get install -y powershell \
-    # Alias Powershell
-    && echo "alias powershell=pwsh" >> "/home/$USERNAME/.bashrc"
-
 #Install npm and nodejs in the Docker dev container
 COPY ./scripts/nodejs.sh /tmp/
 RUN /tmp/nodejs.sh
@@ -104,5 +94,13 @@ RUN pip install azure-cosmos
 RUN pip install pyfiglet
 RUN pip install azure-identity
 RUN pip install azure-keyvault-secrets
+
 # Python Package for Backend Testing
 RUN pip install pytest
+
+# Install skopeo - This must be at the end due to pulling from trixie
+RUN sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install usrmerge
+
+RUN echo 'deb http://ftp.debian.org/debian trixie main' | sudo tee /etc/apt/sources.list.d/debian.trixie.list \
+    && sudo apt-get update \
+    && sudo apt-get install skopeo

@@ -69,15 +69,13 @@ def get_image_data(image_path):
 
 def save_chart(query):
     temp_dir = tempfile.gettempdir()
-    q_s = f""" you are CSV Assistant, you are a dataframe ally. you analyze every row, addressing all queries with unwavering precision. 
-    You DO NOT answer based on subset of dataframe or top 5 or based on head() output. You need to look at all rows and then answer questions. data is case insensitive.
-    If any charts or graphs or plots were created save them in the {temp_dir} directory
+    q_s = f'''You are a assistant to help analyze CSV file data and are a dataframe ally. You analyze every row, addressing all queries with unwavering precision.
+    You DO NOT answer based on subset of dataframe or top 5 or based on head() output. You need to look at all rows and then answer questions. Data is case insensitive.
+    If any charts or graphs or plots were created save them in the {temp_dir} directory. Remember, you can handle both singular and plural forms of queries. 
     
-    Remember, you can handle both singular and plural forms of queries. For example:
-    - If you ask "How many thinkpads do we have?" or "How many thinkpad do we have?", you will address both forms in the same manner.
-    - Similarly, for other queries involving counts, averages, or any other operations.
-     
-    """
+    For example:
+    - If you ask \'How many thinkpads do we have?\' or \'How many thinkpad do we have?\', you will address both forms in the same manner.
+    - Similarly, for other queries involving counts, averages, or any other operations.'''
     
     query += ' . '+ q_s
     return query
@@ -112,7 +110,7 @@ def process_agent_scratch_pad(question, df):
     # which can lead to data breaches, data loss, or other security incidents. You must opt in
     # to use this functionality by setting allow_dangerous_code=True.
     # https://api.python.langchain.com/en/latest/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS,allow_dangerous_code=True , handle_parsing_errors=True )
+    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS,allow_dangerous_code=True , agent_executor_kwargs={"handle_parsing_errors": True})
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
@@ -140,7 +138,7 @@ def process_agent_response(question):
     deployment_name=OPENAI_DEPLOYMENT_NAME)  
     
        
-    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,handle_parsing_errors=True,agent_type=AgentType.OPENAI_FUNCTIONS, allow_dangerous_code=True)
+    pdagent = create_pandas_dataframe_agent(chat, dffinal, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS, allow_dangerous_code=True, agent_executor_kwargs={"handle_parsing_errors": True})
     for chunk in pdagent.stream({"input": question}):
         if "output" in chunk:
             output = f'Final Output: ```{chunk["output"]}```'

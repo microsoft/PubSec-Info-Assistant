@@ -31,7 +31,7 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 **NOTE:**
 
 - The proposed the cost estimation prepared based on Sandbox environment, estimation may vary customer to customer.
-- For detailed Azure OpenAI Service [pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing)
+- For detailed Azure OpenAI Service please refer to the detailed [pricing](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing)
 - The estimation for Bing Search Service is not included in the Azure Estimation. Please consider it separately as mentioned under [Bing Search Service Pricing](https://www.microsoft.com/en-us/bing/apis/pricing)
 - Customers with latency-sensitive scenarios can opt for provisioned throughput which allows customers to reserve model processing capacity. [Read More](/docs/deployment/considerations_production.md#gpt-model---throttling)
 

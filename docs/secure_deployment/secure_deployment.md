@@ -21,6 +21,7 @@
 * [Front End Architecture](#front-end-architecture)
 * [Back End Service Architecture](#back-end-service-architecture)
 * [Private vnet and endpoint Architecture](#private-vnet-and-endpoint-architecture)
+* [Sizing Estimator](#sizing-estimator)
 * [How to Deploy Secure Mode](#how-to-deploy-secure-mode)
 * [Additional Considerations for Secure Deployment](#additional-considerations-for-secure-deployment)
   * [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration)
@@ -115,6 +116,14 @@ The network architecture diagram below contains additional details on Private En
 Traffic between your virtual network and the service that you're accessing travels across the Azure network backbone. As a result, you no longer access the service over a public endpoint, effectively reducing exposure and enhancing security.
 
 ![Secure mode - Network Architecture](../images/secure-deploy-network-architecture.png)
+
+## Sizing Estimator
+
+The IA Accelerator "secure mode" needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
+
+To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
+
+Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the How to Deploy Secure Mode step.
 
 ## How to Deploy Secure Mode
 

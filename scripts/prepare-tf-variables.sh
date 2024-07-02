@@ -45,3 +45,4 @@ export TF_VAR_enableSharePointConnector=$ENABLE_SHAREPOINT_CONNECTOR
 export TF_VAR_maxCsvFileSize=$MAX_CSV_FILE_SIZE
 export TF_VAR_serviceManagementReference=$SERVICE_MANAGEMENT_REFERENCE
 export TF_VAR_password_lifetime=$PASSWORD_LIFETIME
+export TF_VAR_enabledDDOSProtectionPlan=$ENABLE_DDOS_PROTECTION_PLAN

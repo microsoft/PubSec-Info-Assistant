@@ -20,6 +20,8 @@ A codespace is a development environment that's hosted in the cloud. You can cus
 1. First you will need to select your repository you forked from the Information Assistant repo
 1. Next, by default you will be on **main** branch, you can switch to specific branch where you would like to create a Codespaces.
 1. Then select options for **Region** and **Machine type**. The "Dev Container configuration" will be pre-populated and does not need to be changed.
+    * The **Machine type** will need to be at least **4-core**.
+![GitHub Codespace machine type: 4-core](image.png).
 1. Next, click on  **Create codespace**
 ![GitHub Codespaces creation](/docs/images/codespace_creation.png)
 

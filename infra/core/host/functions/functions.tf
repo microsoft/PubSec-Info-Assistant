@@ -1,24 +1,3 @@
-data "local_file" "image_tag" {
-  filename = "../functions/image_tag.txt"
-}
-
-locals {
-  stripped_container_registry = replace(var.container_registry, "https://", "")
-}
-
-#resource "null_resource" "docker_push" {
-#  provisioner "local-exec" {
-#    command = <<-EOT
-#        printf "%s" ${var.container_registry_admin_password} | docker login --username ${var.container_registry_admin_username} --password-stdin ${var.container_registry}
-#        docker tag functions ${local.stripped_container_registry}/functions:${data.local_file.image_tag.content}
-#        docker push ${local.stripped_container_registry}/functions:${data.local_file.image_tag.content}
-#      EOT
-#  }
-#  triggers = {
-#    always_run = timestamp()
-#  }
-#}
-
 # Terraform resource file to create a service plan for the function app
 resource "azurerm_service_plan" "funcServicePlan" {
   name                = var.plan_name
@@ -120,7 +99,7 @@ resource "azurerm_linux_function_app" "function_app" {
     application_stack {
       docker {
         image_name        = "${var.container_registry}/functionapp"
-        image_tag         = data.local_file.image_tag.content
+        image_tag         = "latest"
         registry_url      = "https://${var.container_registry}"
         registry_username = var.container_registry_admin_username
         registry_password = var.container_registry_admin_password

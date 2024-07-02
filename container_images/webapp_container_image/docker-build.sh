@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 set -eo pipefail
 
@@ -13,6 +16,14 @@ sudo docker tag webapp webapp:$tag
 
 # Output the tag to a file to be used in deployment
 echo -n "$tag" > ./container_images/webapp_container_image/image_tag.txt
+echo -e "\n"
+
+# Export docker image to the artifacts folder
+echo "Exporting docker image to artifacts folder"
+echo -e "\n"
+rm -rf ./artifacts/webapp
+mkdir -p ./artifacts/webapp
+skopeo copy docker-daemon:webapp:$tag oci:./artifacts/webapp
 
 echo "Build and tagging complete. Tag: $tag"
 echo -e "\n"

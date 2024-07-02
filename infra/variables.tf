@@ -77,7 +77,6 @@ variable "enableSharePointConnector" {
 variable "enableMultimedia" {
   type    = bool
   default = false
-  
 }
 ////
 

@@ -1,7 +1,3 @@
-data "local_file" "image_tag" {
-  filename = "../container_images/enrichment_container_image/image_tag.txt"
-}
-
 // Create Enrichment App Service Plan 
 resource "azurerm_service_plan" "appServicePlan" {
   name                          = var.plan_name
@@ -96,7 +92,7 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
     container_registry_use_managed_identity       = true
 
     application_stack {
-      docker_image_name         = "${var.container_registry}/enrichmentapp:${data.local_file.image_tag.content}"
+      docker_image_name         = "${var.container_registry}/enrichmentapp:latest"
       docker_registry_url       = "https://${var.container_registry}"
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password

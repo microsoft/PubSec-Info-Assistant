@@ -41,14 +41,15 @@ then
     az account set -s "$ARM_SUBSCRIPTION_ID"
 fi
 
+# Build the docker image for the webapp
+echo "Building the docker image for the webapp"
+$DIR/../container_images/enrichment_container_image/docker-build.sh
+
 # Push the docker image to the container registry
 tag=$(cat "$DIR/../container_images/enrichment_container_image/image_tag.txt")
-        
 echo "Tag for the docker image is $tag"
 echo "Pushing the docker image to the container registry"
-printf "%s" $CONTAINER_REGISTRY_PASSWORD | docker login --username $CONTAINER_REGISTRY_USERNAME --password-stdin "https://${CONTAINER_REGISTRY}"
-docker tag enrichmentapp $CONTAINER_REGISTRY/enrichmentapp:$tag
-docker push $CONTAINER_REGISTRY/enrichmentapp:$tag
+$DIR/../scripts/push-to-acr.sh -n enrichmentapp -t $tag -f $DIR/../artifacts/enrichmentapp
 
 echo "Updating the enrichment webapp with the new image"
 az webapp config container set --name $ENRICHMENT_APPSERVICE_NAME --resource-group $RESOURCE_GROUP_NAME --container-image-name ${CONTAINER_REGISTRY}/enrichmentapp:$tag --container-registry-url "https://${CONTAINER_REGISTRY}" --container-registry-user $CONTAINER_REGISTRY_USERNAME --container-registry-password $CONTAINER_REGISTRY_PASSWORD --enable-app-service-storage false

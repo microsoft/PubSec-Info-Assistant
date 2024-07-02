@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 #!/bin/bash
 set -eo pipefail
 
@@ -16,6 +19,14 @@ sudo docker tag enrichmentapp enrichmentapp:$tag
 
 # Output the tag to a file to be used in deployment
 echo -n "$tag" > ./container_images/enrichment_container_image/image_tag.txt
+echo -e "\n"
+
+# Export docker image to the artifacts folder
+echo "Exporting docker image to artifacts folder"
+echo -e "\n"
+rm -rf ./artifacts/enrichmentapp
+mkdir -p ./artifacts/enrichmentapp
+skopeo copy docker-daemon:enrichmentapp:$tag oci:./artifacts/enrichmentapp
 
 echo "Build and tagging complete. Tag: $tag"
 echo -e "\n"

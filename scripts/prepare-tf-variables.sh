@@ -42,7 +42,6 @@ export TF_VAR_enableUngroundedChat=$ENABLE_UNGROUNDED_CHAT
 export TF_VAR_enableMathAssitant=$ENABLE_MATH_ASSISTANT
 export TF_VAR_enableTabularDataAssistant=$ENABLE_TABULAR_DATA_ASSISTANT
 export TF_VAR_enableSharePointConnector=$ENABLE_SHAREPOINT_CONNECTOR
-export TF_VAR_enableMultimedia=$ENABLE_MULTIMEDIA
 export TF_VAR_maxCsvFileSize=$MAX_CSV_FILE_SIZE
 export TF_VAR_serviceManagementReference=$SERVICE_MANAGEMENT_REFERENCE
 export TF_VAR_password_lifetime=$PASSWORD_LIFETIME

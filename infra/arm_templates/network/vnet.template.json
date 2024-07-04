@@ -78,9 +78,9 @@
                     "addressPrefixes": [ "[parameters('vnet_CIDR')]" ]
                 },
                 "ddosProtectionPlan": {
-                    "id": "[parameters('ddos_plan_id')]"
+                    "id": "[if(equals(parameters('ddos_plan_id'), ''), json('null'), parameters('ddos_plan_id'))]"
                 },
-                "enableDdosProtection": "true",
+                "enableDdosProtection": "[if(equals(parameters('ddos_plan_id'), ''), 'false', 'true')]",
                 "subnets": [
                     {
                         "name": "ampls",

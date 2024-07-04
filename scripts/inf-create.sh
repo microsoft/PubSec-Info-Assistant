@@ -90,31 +90,36 @@ export TF_VAR_entraOwners=$object_ids_string
 
 # Check for existing DDOS Protection Plan and use it if available
 if [[ "$SECURE_MODE" == "true" ]]; then
-    if [[ -z "$DDOS_PLAN_ID" ]]; then
-        # No DDOS_PLAN_ID provided in the environment, look up Azure for an existing DDOS plan
-        DDOS_PLAN_ID=$(az network ddos-protection list --query "[?contains(name, 'ddos')].id | [0]" --output tsv)
-        
-        if [[ -z "$DDOS_PLAN_ID" ]]; then
-            echo -e "\e[31mNo existing DDOS protection plan found. Terraform will create a new one.\n\e[0m"
-        else
-            echo "Found existing DDOS Protection Plan: $DDOS_PLAN_ID"
-            read -p "Do you want to use this existing DDOS Protection Plan (y/n)? " use_existing
-            if [[ "$use_existing" =~ ^[Yy]$ ]]; then
-                echo -e "Using existing DDOS Protection Plan: $DDOS_PLAN_ID\n"
-                export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
+    if [[ "$ENABLE_DDOS_PROTECTION_PLAN" == "true" ]]; then
+      if [[ -z "$DDOS_PLAN_ID" ]]; then
+          # No DDOS_PLAN_ID provided in the environment, look up Azure for an existing DDOS plan
+          DDOS_PLAN_ID=$(az network ddos-protection list --query "[?contains(name, 'ddos')].id | [0]" --output tsv)
+          
+          if [[ -z "$DDOS_PLAN_ID" ]]; then
+              echo -e "\e[31mNo existing DDOS protection plan found. Terraform will create a new one.\n\e[0m"
+          else
+              echo "Found existing DDOS Protection Plan: $DDOS_PLAN_ID"
+              read -p "Do you want to use this existing DDOS Protection Plan (y/n)? " use_existing
+              if [[ "$use_existing" =~ ^[Yy]$ ]]; then
+                  echo -e "Using existing DDOS Protection Plan: $DDOS_PLAN_ID\n"
+                  export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
 
-                echo -e "-------------------------------------\n"
-                echo "DDOS_PLAN_ID is set to: $DDOS_PLAN_ID"
-                echo -e "-------------------------------------\n"
+                  echo -e "-------------------------------------\n"
+                  echo "DDOS_PLAN_ID is set to: $DDOS_PLAN_ID"
+                  echo -e "-------------------------------------\n"
 
-            else
-                export TF_VAR_ddos_plan_id=""  # Clear the variable to indicate that a new plan should be created
-                echo "A new DDOS Protection Plan will be created by Terraform."
-            fi
-        fi
+              else
+                  export TF_VAR_ddos_plan_id=""  # Clear the variable to indicate that a new plan should be created
+                  echo "A new DDOS Protection Plan will be created by Terraform."
+              fi
+          fi
+      else
+          echo -e "Using provided DDOS Protection Plan ID from environment: $DDOS_PLAN_ID\n"
+          export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
+      fi
     else
-        echo -e "Using provided DDOS Protection Plan ID from environment: $DDOS_PLAN_ID\n"
-        export TF_VAR_ddos_plan_id="$DDOS_PLAN_ID"
+        echo "DDOS Protection Plan is disabled. No DDOS Protection Plan will be created."
+        export TF_VAR_ddos_plan_id=""
     fi
 fi
 

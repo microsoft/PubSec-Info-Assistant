@@ -84,7 +84,7 @@ output "snetAzureOpenAI_name" {
 }
 
 output "ddos_plan_id" {
-  value = var.ddos_plan_id == "" ? azurerm_network_ddos_protection_plan.ddos[0].id : var.ddos_plan_id
+  value = var.enabledDDOSProtectionPlan ? var.ddos_plan_id == "" ? azurerm_network_ddos_protection_plan.ddos[0].id : var.ddos_plan_id : ""
 }
 
 output "dns_private_resolver_ip" {

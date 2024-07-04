@@ -75,8 +75,10 @@ OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Infor
 OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure AI Search hybrid index's vector columns can be set to the matching size. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
 AZURE_OPENAI_CHATGPT_MODEL_NAME | No | This can be used to select a different GPT model to be deployed to Azure OpenAI when the default (gpt-35-turbo-16k) isn't available to you.
 AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | This can be used to select a specific version of the GPT model above when the default (0613) isn't available to you.
-AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
-AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION | No | This will display in the Info panel in the UX if you don't have access to the resource group where the Azure OpenAI embeddings models are deployed. See *local.env.example* for specific guidance.
+AZURE_OPENAI_CHATGPT_SKU | No | This can be used to select a different GPT model SKU to be used on the deployment to Azure OpenAI when the default (Standard) isn't available.
+AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This can be used to select a different embeddings model to be deployed to Azure OpenAI when the default (text-embedding-ada-002) isn't available to you.
+AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION | No | This can be used to select a specific version of the embeddings model above when the default (2) isn't available to you.
+AZURE_OPENAI_EMBEDDINGS_SKU | No | This can be used to select a different embeddings model SKU to be used on the deployment to Azure OpenAI when the default (Standard) isn't available.
 AZURE_OPENAI_CHATGPT_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the GPT model deployed to Azure OpenAI when you have reduced capacity.
 AZURE_OPENAI_EMBEDDINGS_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the embeddings model deployed to Azure OpenAI.
 CHAT_WARNING_BANNER_TEXT | No | Defaults to "". Provide a value in this parameter to display a header and footer to the UX of Information Assistant with the included warning banner text.

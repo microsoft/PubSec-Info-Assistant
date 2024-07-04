@@ -515,7 +515,7 @@ module "openaiServices" {
         name          = var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k"
         version       = var.chatGptModelVersion != "" ? var.chatGptModelVersion : "0613"
       }
-      sku_name        = "Standard"
+      sku_name        = var.chatGptModelSkuName
       sku_capacity    = var.chatGptDeploymentCapacity
       rai_policy_name = "Microsoft.Default"
     },
@@ -526,7 +526,7 @@ module "openaiServices" {
         name          = var.azureOpenAIEmbeddingsModelName != "" ? var.azureOpenAIEmbeddingsModelName : "text-embedding-ada-002"
         version       = "2"
       }
-      sku_name        = "Standard"
+      sku_name        = var.azureOpenAIEmbeddingsModelSku
       sku_capacity    = var.embeddingsDeploymentCapacity
       rai_policy_name = "Microsoft.Default"
     }

@@ -1,5 +1,5 @@
 locals {
-  arm_file_path = "arm_templates/network/vnet.template.json"
+  arm_file_path = var.enabledDDOSProtectionPlan ? "arm_templates/network/vnet_w_ddos.template.json" : "arm_templates/network/vnet.template.json"
 }
 
 # Create the Bing Search instance via ARM Template

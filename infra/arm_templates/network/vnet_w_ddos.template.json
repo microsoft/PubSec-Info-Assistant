@@ -77,7 +77,10 @@
                 "addressSpace": {
                     "addressPrefixes": [ "[parameters('vnet_CIDR')]" ]
                 },
-                "enableDdosProtection": "false",
+                "ddosProtectionPlan": {
+                    "id": "[parameters('ddos_plan_id')]"
+                },
+                "enableDdosProtection": "true",
                 "subnets": [
                     {
                         "name": "ampls",

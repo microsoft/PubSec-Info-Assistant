@@ -189,7 +189,7 @@ done
 
 # Monitor progress
 while :; do
-  clear
+  #clear
   for j in "${!progress[@]}"; do
     progress_file="${progress[$j]}"
     if [ -f "$progress_file" ]; then

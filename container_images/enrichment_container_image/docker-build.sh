@@ -4,9 +4,6 @@
 #!/bin/bash
 set -eo pipefail
 
-# Display banner
-figlet "Build Docker Container Images"
-
 # Build the Docker image with the correct context
 echo "Building Docker image: enrichmentapp"
 echo -e "\n"

@@ -46,3 +46,9 @@ export TF_VAR_maxCsvFileSize=$MAX_CSV_FILE_SIZE
 export TF_VAR_serviceManagementReference=$SERVICE_MANAGEMENT_REFERENCE
 export TF_VAR_password_lifetime=$PASSWORD_LIFETIME
 export TF_VAR_enabledDDOSProtectionPlan=$ENABLE_DDOS_PROTECTION_PLAN
+if [[ -n $AZURE_OPENAI_CHATGPT_SKU ]]; then
+    export TF_VAR_chatGptModelSkuName=$AZURE_OPENAI_CHATGPT_SKU
+fi
+if [[ -n $AZURE_OPENAI_EMBEDDINGS_SKU ]]; then
+    export TF_VAR_azureOpenAIEmbeddingsModelSku=$AZURE_OPENAI_EMBEDDINGS_SKU
+fi

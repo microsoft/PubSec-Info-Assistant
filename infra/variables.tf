@@ -244,6 +244,27 @@ variable "chatGptDeploymentName" {
   default = "gpt-35-turbo-16k"
 }
 
+variable "chatGptModelName" {
+  type    = string
+  default = "gpt-35-turbo-16k"
+}
+
+variable "chatGptModelSkuName" {
+  type    = string
+  default = "Standard"
+  
+}
+
+variable "chatGptModelVersion" {
+  type    = string
+  default = "0613"
+}
+
+variable "chatGptDeploymentCapacity" {
+  type    = number
+  default = 240
+}
+
 variable "azureOpenAIEmbeddingDeploymentName" {
   type    = string
   default = "text-embedding-ada-002"
@@ -257,6 +278,11 @@ variable "azureOpenAIEmbeddingsModelName" {
 variable "azureOpenAIEmbeddingsModelVersion" {
   type    = string
   default = "2"
+}
+
+variable "azureOpenAIEmbeddingsModelSku" {
+  type    = string
+  default = "Standard"
 }
 
 variable "useAzureOpenAIEmbeddings" {
@@ -508,21 +534,6 @@ variable "searchIndexName" {
 variable "chatWarningBannerText" {
   type    = string
   default = ""
-}
-
-variable "chatGptModelName" {
-  type    = string
-  default = "gpt-35-turbo-16k"
-}
-
-variable "chatGptModelVersion" {
-  type    = string
-  default = "0613"
-}
-
-variable "chatGptDeploymentCapacity" {
-  type    = number
-  default = 240
 }
 
 variable "chunkTargetSize" {

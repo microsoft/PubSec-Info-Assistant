@@ -198,7 +198,7 @@ To perform a secure deployment, follow these steps:
 
 8. If you are choosing to use a P2S VPN to connect to the Info Assistant vnet, then follow these steps. Otherwise, skip to Step 18.
 
-    [!IMPORTANT] *You will need your VPN configuration and client certificate that matches your Azure VPN Gateway to continue*
+    :warning: *You will need your VPN configuration and client certificate that matches your Azure VPN Gateway to continue*
 9. Copy your `vpnconfig.ovpn` and PFX certificate file into the `/workspace/openvpn` folder in the Codespace.
 10. Extract the private key and the base64 thumbprint from the .pfx. There are multiple ways to do this. Using OpenSSL on your computer is one way.
 

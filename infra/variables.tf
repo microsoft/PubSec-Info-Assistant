@@ -406,6 +406,12 @@ variable "kv_secret_expiration" {
   type = string
   description = "The value for key vault secret expiration in  seconds since 1970-01-01T00:00:00Z"
 }
+
+variable "enabledDDOSProtectionPlan" {
+  type        = bool
+  description = "This variable is used to enable or disable DDOS protection plan"
+  default = false
+}
 ////
 
 variable "formRecognizerSkuName" {

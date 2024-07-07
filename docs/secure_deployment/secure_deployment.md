@@ -144,10 +144,11 @@ To perform a secure deployment, follow these steps:
    *Note: Secure mode is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads*
 
 4. Review the network and subnet CIDRs for  your deployment. See the section [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration) for more details.
-5. Decide you approach for DDOS protection for your Info Assistant vnet. If you plan to use an existing DDOS protection plan you can select it in one of two ways:
+5. Decide you approach for DDOS protection for your Info Assistant vnet. If you simply don't want to use a DDOS protection plan simply leave the `ENABLE_DDOS_PROTECTION_PLAN` flag set to false. If you plan to use a DDOS protection plan, you need to enable it by setting the `ENABLE_DDOS_PROTECTION_PLAN` flag set to true and then you can select a specific DDOS protection plan in one of two ways:
    * **RECOMMENDED:** You can manually provide the DDOS plan ID in your `local.env` file using the following parameter. Be sure to update the subscription id, resource group name, and ddos plan name values.
 
        ```bash
+       export ENABLE_DDOS_PROTECTION_PLAN=true
        export DDOS_PLAN_ID="/subscriptions/{subscription id}/resourceGroups/{resource group name}/providers/Microsoft.Network/ddosProtectionPlans/{ddos plan name}"`
        ```
 

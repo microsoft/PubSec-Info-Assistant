@@ -101,3 +101,7 @@ variable "arm_template_schema_mgmt_api" {
 variable "azure_environment" {
   type        = string
 }
+
+variable "enabledDDOSProtectionPlan" {
+  type = bool
+}

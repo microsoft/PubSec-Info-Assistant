@@ -1,5 +1,5 @@
 locals {
-  arm_file_path = "arm_templates/network/vnet.template.json"
+  arm_file_path = var.enabledDDOSProtectionPlan ? "arm_templates/network/vnet_w_ddos.template.json" : "arm_templates/network/vnet.template.json"
 }
 
 # Create the Bing Search instance via ARM Template
@@ -20,7 +20,7 @@ resource "azurerm_network_security_group" "nsg" {
 
 //Create the DDoS plan
 resource "azurerm_network_ddos_protection_plan" "ddos" {
-  count               = var.ddos_plan_id == "" ? 1 : 0
+  count               = var.enabledDDOSProtectionPlan ? var.ddos_plan_id == "" ? 1 : 0 : 0
   name                = var.ddos_name
   resource_group_name = var.resourceGroupName
   location            = var.location
@@ -33,7 +33,7 @@ resource "azurerm_resource_group_template_deployment" "vnet_w_subnets" {
     "name"                      = { value = "${var.vnet_name}" },
     "location"                  = { value = "${var.location}" },
     "tags"                      = { value = var.tags },
-    "ddos_plan_id"              = { value = "${var.ddos_plan_id == "" ? azurerm_network_ddos_protection_plan.ddos[0].id : var.ddos_plan_id}" },
+    "ddos_plan_id"              = { value = "${var.enabledDDOSProtectionPlan ? var.ddos_plan_id == "" ? azurerm_network_ddos_protection_plan.ddos[0].id : var.ddos_plan_id : ""}" },
     "nsg_name"                  = { value = "${azurerm_network_security_group.nsg.name}" },
     "vnet_CIDR"                 = { value = "${var.vnetIpAddressCIDR}" },
     "subnet_AzureMonitor_CIDR"  = { value = "${var.snetAzureMonitorCIDR}" },

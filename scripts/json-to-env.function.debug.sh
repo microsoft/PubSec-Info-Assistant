@@ -20,20 +20,13 @@ secrets="{"
 keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "AZURE-AI-KEY")
-azWebJobSecretName="BLOB-CONNECTION-STRING"
-azWebJobVarName="AzureWebJobsStorage"
+secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "AZURE-AI-KEY")
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do
   secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
   envVarName=$(echo $secretName | tr '-' '_')
   secrets+="\"$envVarName\": \"$secretValue\","
-
-  if [ "$secretName" == "$azWebJobSecretName" ]; then
-    export $azWebJobVarName=$secretValue
-    secrets+="\"$azWebJobVarName\": \"$secretValue\","
-  fi
 done 
 secrets=${secrets%?} # Remove the trailing comma
 secrets+="}"

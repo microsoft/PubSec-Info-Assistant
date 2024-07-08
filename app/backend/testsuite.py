@@ -2,6 +2,7 @@ import json
 import re
 import pytest
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.identity import DefaultAzureCredential
 import os
 from fastapi.testclient import TestClient
 from dotenv import load_dotenv
@@ -12,6 +13,8 @@ if ("/app/backend" not in dir):
     os.chdir(f'{dir}/app/backend')
 
 load_dotenv(dotenv_path=f'../../scripts/environments/infrastructure.debug.env')
+
+azure_credentials = DefaultAzureCredential()
 
 from app import app
 client = TestClient(app)
@@ -210,10 +213,10 @@ def test_work_compare_web_chat_api():
     assert "Satya" in content or "I am not sure." in content
 
 
-def test_get_blob_client_url():
-    response = client.get("/getblobclienturl")
+def test_get_blob_client():
+    response = client.get("/getblobclient")
     assert response.status_code == 200
-    assert "blob.core.windows.net" in response.json()["url"]
+    assert "blob.core.windows.net" in response.json()["client"].url
 
 def test_get_all_upload_status():
     response = client.post("/getalluploadstatus", json={
@@ -312,10 +315,9 @@ def test_get_feature_flags():
     assert response.json() == expected_response
 
 def test_upload_blob():
-    account_name = os.getenv("AZURE_BLOB_STORAGE_ACCOUNT")
-    account_key = os.getenv("AZURE_BLOB_STORAGE_KEY")
+    storage_account_url=os.getenv("BLOB_STORAGE_ACCOUNT_ENDPOINT")
     container_name = os.getenv("AZURE_BLOB_STORAGE_UPLOAD_CONTAINER")
-    blob_service_client = BlobServiceClient(account_url=f"https://{account_name}.blob.core.windows.net", credential=account_key)
+    blob_service_client = BlobServiceClient(account_url=storage_account_url, credential=azure_credentials)
 
     # Create a container client
     container_client = blob_service_client.get_container_client(container_name)

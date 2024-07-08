@@ -20,7 +20,7 @@ import { IIconProps } from '@fluentui/react';
 import { IButtonProps } from '@fluentui/react/lib/Button';
 import { BlobServiceClient } from "@azure/storage-blob";
 
-import { getBlobClientUrl } from "../../api";
+import { getBlobClient } from "../../api";
 import styles from "./FolderPicker.module.css";
 
 var allowNewFolders = false;
@@ -85,8 +85,7 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
 
     async function fetchBlobFolderData() {
         try {
-            const blobClientUrl = await getBlobClientUrl();
-            const blobServiceClient = new BlobServiceClient(blobClientUrl);
+            const blobServiceClient = await getBlobClient() as BlobServiceClient;
             var containerClient = blobServiceClient.getContainerClient("upload");
             const delimiter = "/";
             const prefix = "";

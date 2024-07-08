@@ -84,7 +84,7 @@ cosmosdb_key = sClient.get_secret('COSMOSDB-KEY')
 # *************************************************************************
 # Migrate Cosmos DB tags from the old tags container and database to the
 # status container and database as these have now been merged
-client = CosmosClient(cosmosdb_url, cosmosdb_key.value)
+client = CosmosClient(cosmosdb_url, cosmosdb_key.value, consistency_level='Session')
 
 try:
     # Get old status docs

@@ -88,7 +88,8 @@ resource "azurerm_linux_function_app" "function_app" {
   resource_group_name                 = var.resourceGroupName
   service_plan_id                     = azurerm_service_plan.funcServicePlan.id
   storage_account_name                = var.blobStorageAccountName
-  storage_account_access_key          = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
+  storage_uses_managed_identity       = true
+  #storage_account_access_key          = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
   https_only                          = true
   tags                                = var.tags
   public_network_access_enabled       = var.is_secure_mode ? false : true 
@@ -119,7 +120,7 @@ resource "azurerm_linux_function_app" "function_app" {
   }
   
   connection_string {
-    name  = "BLOB_CONNECTION_STRING"
+    name  = "STORAGE_CONNECTION_STRING"
     type  = "Custom"
     value = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
   }
@@ -130,6 +131,7 @@ resource "azurerm_linux_function_app" "function_app" {
     SCM_DO_BUILD_DURING_DEPLOYMENT              = "false"
     ENABLE_ORYX_BUILD                           = "false"
     AzureWebJobsStorage                         = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
+    AzureWebJobsStorage__accountName            = var.blobStorageAccountName
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING    = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
     WEBSITE_CONTENTSHARE                        = "funcfileshare"
     FUNCTIONS_WORKER_RUNTIME                    = var.runtime
@@ -142,13 +144,11 @@ resource "azurerm_linux_function_app" "function_app" {
     BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME  = var.blobStorageAccountUploadContainerName
     BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME  = var.blobStorageAccountOutputContainerName
     BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME     = var.blobStorageAccountLogContainerName
-    AZURE_BLOB_STORAGE_KEY                      = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
     CHUNK_TARGET_SIZE                           = var.chunkTargetSize
     TARGET_PAGES                                = var.targetPages
     FR_API_VERSION                              = var.formRecognizerApiVersion
     AZURE_FORM_RECOGNIZER_ENDPOINT              = var.formRecognizerEndpoint
     AZURE_FORM_RECOGNIZER_KEY                   = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-FORM-RECOGNIZER-KEY)"
-    BLOB_CONNECTION_STRING                      = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
     COSMOSDB_URL                                = var.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME                  = var.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME                 = var.CosmosDBLogContainerName
@@ -182,6 +182,7 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_AI_TRANSLATION_DOMAIN                 = var.azure_ai_translation_domain
     AZURE_AI_TEXT_ANALYTICS_DOMAIN              = var.azure_ai_text_analytics_domain
     WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
+    STORAGE_CONNECTION_STRING__queueServiceUri  = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
   }
 }
 

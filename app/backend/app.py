@@ -24,7 +24,7 @@ from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
 from azure.core.credentials import AzureKeyCredential
-from azure.identity import DefaultAzureCredential, AzureAuthorityHosts
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
 from azure.storage.blob import (
@@ -56,7 +56,6 @@ from azure.cosmos import CosmosClient
 ENV = {
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
-    "AZURE_BLOB_STORAGE_KEY": None,
     "AZURE_BLOB_STORAGE_CONTAINER": "content",
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
     "AZURE_SEARCH_SERVICE": "gptkb",
@@ -104,7 +103,8 @@ ENV = {
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
     "ENABLE_MULTIMEDIA": "false",
-    "MAX_CSV_FILE_SIZE": "7"
+    "MAX_CSV_FILE_SIZE": "7",
+    "LOCAL_DEBUG": "false"
     }
 
 for key, value in ENV.items():
@@ -142,10 +142,13 @@ openai.api_version = "2024-02-01"
 # just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
 # keys for each service
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
-azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+if ENV["LOCAL_DEBUG"] == "true":
+    azure_credential = DefaultAzureCredential()
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
-# openai.api_type = "azure_ad"
-# openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
+openai.api_type = "azure_ad"
+openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
 openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
 
 # Setup StatusLog to allow access to CosmosDB for logging
@@ -165,7 +168,7 @@ search_client = SearchClient(
 )
 blob_client = BlobServiceClient(
     account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
-    credential=ENV["AZURE_BLOB_STORAGE_KEY"],
+    credential=azure_credential,
 )
 blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
 
@@ -342,33 +345,16 @@ async def chat(request: Request):
 
     
 
-@app.get("/getblobclienturl")
-async def get_blob_client_url():
-    """Get a URL for a file in Blob Storage with SAS token.
+@app.get("/getblobclient")
+async def get_blob_client():
+    """Get an authenticated blob client.
 
-    This function generates a Shared Access Signature (SAS) token for accessing a file in Blob Storage.
-    The generated URL includes the SAS token as a query parameter.
+    This function generates a Blob Client for accessing the Blob Storage Account.
 
     Returns:
-        dict: A dictionary containing the URL with the SAS token.
+        dict: A dictionary containing the Blob Client object.
     """
-    sas_token = generate_account_sas(
-        ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
-        ENV["AZURE_BLOB_STORAGE_KEY"],
-        resource_types=ResourceTypes(object=True, service=True, container=True),
-        permission=AccountSasPermissions(
-            read=True,
-            write=True,
-            list=True,
-            delete=False,
-            add=True,
-            create=True,
-            update=True,
-            process=False,
-        ),
-        expiry=datetime.utcnow() + timedelta(hours=1),
-    )
-    return {"url": f"{blob_client.url}?{sas_token}"}
+    return {"client": blob_client}
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):
@@ -396,7 +382,7 @@ async def get_all_upload_status(request: Request):
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key, consistency_level='Session')
         database = cosmos_client.get_database_client(statusLog._database_name)
         container = database.get_container_client(statusLog._container_name)
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
@@ -534,7 +520,7 @@ async def get_tags(request: Request):
     try:
         # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)     
+        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key, consistency_level='Session')     
         database = cosmos_client.get_database_client(statusLog._database_name)               
         container = database.get_container_client(statusLog._container_name) 
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  

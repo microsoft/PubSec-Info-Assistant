@@ -12,8 +12,11 @@ from datetime import datetime, timedelta, timezone
 from rich.console import Console
 import rich.traceback
 from azure.storage.blob import BlobServiceClient
+from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
+
+azure_credential = DefaultAzureCredential()
 
 rich.traceback.install()
 console = Console()
@@ -49,9 +52,9 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--storage_account_connection_str",
+        "--storage_account_url",
         required=True,
-        help="Storage account connection string (set in extract-env)")
+        help="Storage account endpoint string (set in extract-env)")
     parser.add_argument(
         "--search_service_endpoint",
         required=True,
@@ -226,8 +229,8 @@ def get_files_by_extension(folder_path, extensions):
 if __name__ == '__main__':
     args = parse_arguments()
     try:
-        storage_blob_service_client = BlobServiceClient.from_connection_string(
-            args.storage_account_connection_str)
+        storage_blob_service_client = BlobServiceClient(
+            args.storage_account_url, credential=azure_credential)
         # Get a list of files with specified extensions in the test_data folder
         test_file_names = get_files_by_extension(FILE_PATH, args.file_extensions)
 

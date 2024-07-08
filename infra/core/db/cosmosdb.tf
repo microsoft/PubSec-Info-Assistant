@@ -35,7 +35,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
   kind                          = "GlobalDocumentDB"
   tags                          = var.tags
   public_network_access_enabled = var.is_secure_mode ? false : true
-  local_authentication_disabled = var.is_secure_mode ? true : false
+  #local_authentication_disabled = var.is_secure_mode ? true : false
 
   consistency_policy {
     consistency_level       = var.defaultConsistencyLevel
@@ -46,6 +46,10 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
   geo_location {
     location          = var.location
     failover_priority = 0
+  }
+
+  capabilities {
+    name = "EnableServerless"
   }
 }
 
@@ -62,10 +66,6 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   database_name       = azurerm_cosmosdb_sql_database.log_database.name
 
   partition_key_path = "/file_name"
-
-  autoscale_settings {
-    max_throughput = var.autoscaleMaxThroughput
-  }
 }
 
 module "cosmos_db_key" {

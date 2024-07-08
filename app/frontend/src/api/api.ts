@@ -3,7 +3,7 @@
 
 import { ChatResponse, 
     ChatRequest, 
-    BlobClientUrlResponse, 
+    BlobClientResponse, 
     AllFilesUploadStatus, 
     GetUploadStatusRequest, 
     GetInfoResponse, 
@@ -64,20 +64,20 @@ export function getCitationFilePath(citation: string): string {
     return `${encodeURIComponent(citation)}`;
 }
 
-export async function getBlobClientUrl(): Promise<string> {
-    const response = await fetch("/getblobclienturl", {
+export async function getBlobClient(): Promise<any> {
+    const response = await fetch("/getblobclient", {
         method: "GET",
         headers: {
             "Content-Type": "application/json"
         }
     });
 
-    const parsedResponse: BlobClientUrlResponse = await response.json();
+    const parsedResponse: BlobClientResponse = await response.json();
     if (response.status > 299 || !response.ok) {
         throw Error(parsedResponse.error || "Unknown error");
     }
 
-    return parsedResponse.url;
+    return parsedResponse.client;
 }
 
 export async function getAllUploadStatus(options: GetUploadStatusRequest): Promise<AllFilesUploadStatus> {

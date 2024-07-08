@@ -492,9 +492,6 @@ import_resource_if_needed "$module_path[5]" "$url"
 url="https://$name.queue.core.windows.net/embeddings-queue"
 import_resource_if_needed "$module_path[6]" "$url"
 
-secret_id=$(get_secret "BLOB-CONNECTION-STRING")
-module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
-import_resource_if_needed "$module_path" "$secret_id"
 secret_id=$(get_secret "AZURE-BLOB-STORAGE-KEY")
 module_path="module.storage.azurerm_key_vault_secret.storage_key"
 import_resource_if_needed "$module_path" "$secret_id"

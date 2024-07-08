@@ -8,6 +8,7 @@ import random
 import azure.functions as func
 import requests
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.identity import ManagedIdentityCredential
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
 
@@ -19,8 +20,6 @@ azure_blob_drop_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
@@ -40,11 +39,11 @@ utilities = Utilities(
     azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
-    azure_blob_storage_key,
 )
 FUNCTION_NAME = "FileFormRecSubmissionPDF"
 FR_MODEL = "prebuilt-layout"
 
+azure_credential = ManagedIdentityCredential()
 
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the pdf-submit-queue.
@@ -108,11 +107,10 @@ def main(msg: func.QueueMessage) -> None:
             result_id = response.headers.get("apim-request-id")
             message_json["FR_resultId"] = result_id
             message_json["polling_queue_count"] = 1
-            queue_client = QueueClient.from_connection_string(
-                azure_blob_connection_string,
-                queue_name=pdf_polling_queue,
-                message_encode_policy=TextBase64EncodePolicy(),
-            )
+            queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                               queue_name=pdf_polling_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
             message_json_str = json.dumps(message_json)
             queue_client.send_message(
                 message_json_str, visibility_timeout=poll_queue_submit_backoff
@@ -139,11 +137,10 @@ def main(msg: func.QueueMessage) -> None:
                     f"{FUNCTION_NAME} - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds",
                     StatusClassification.DEBUG,
                 )
-                queue_client = QueueClient.from_connection_string(
-                    azure_blob_connection_string,
-                    queue_name=pdf_submit_queue,
-                    message_encode_policy=TextBase64EncodePolicy(),
-                )
+                queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                               queue_name=pdf_submit_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
                 message_json_str = json.dumps(message_json)
                 queue_client.send_message(message_json_str, visibility_timeout=backoff)
                 statusLog.upsert_document(

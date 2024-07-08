@@ -1,6 +1,7 @@
 import logging
 import azure.functions as func
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.identity import ManagedIdentityCredential
 from azure.storage.blob import BlobServiceClient
 from shared_code.utilities import Utilities
 import os
@@ -20,8 +21,6 @@ azure_blob_drop_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -50,12 +49,13 @@ utilities = Utilities(
     azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
-    azure_blob_storage_key,
 )
 
 statusLog = StatusLog(
     cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
-)     
+)
+
+azure_credential = ManagedIdentityCredential()
 
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
@@ -86,7 +86,10 @@ def main(msg: func.QueueMessage) -> None:
         
         # Detect language of the document
         chunk_content = ''        
-        blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
+        blob_service_client = BlobServiceClient(
+            account_url=azure_blob_storage_endpoint,
+            credential=azure_credential,
+        )
         container_client = blob_service_client.get_container_client(azure_blob_content_storage_container)
         # Iterate over the chunks in the container, retrieving up to the max number of chars required
         chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
@@ -217,7 +220,10 @@ def main(msg: func.QueueMessage) -> None:
             block_blob_client.upload_blob(json_str, overwrite=True)
                 
         # Queue message to embeddings queue for downstream processing
-        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queueName, message_encode_policy=TextBase64EncodePolicy())
+        queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                               queue_name=queueName,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
         embeddings_queue_backoff =  random.randint(1, 60)
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string, visibility_timeout = embeddings_queue_backoff)
@@ -287,11 +293,10 @@ def requeue(response, message_json):
             )
             queued_count += 1
             message_json["text_enrichment_queued_count"] = queued_count
-            queue_client = QueueClient.from_connection_string(
-                azure_blob_connection_string,
-                queue_name=text_enrichment_queue,
-                message_encode_policy=TextBase64EncodePolicy(),
-            )
+            queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                               queue_name=text_enrichment_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
             message_json_str = json.dumps(message_json)
             queue_client.send_message(message_json_str, visibility_timeout=backoff)
             statusLog.upsert_document(

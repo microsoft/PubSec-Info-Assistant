@@ -9,9 +9,10 @@ import azure.functions as func
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient
+from azure.identity import ManagedIdentityCredential
 from shared_code.status_log import State, StatusClassification, StatusLog
 
-blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
+azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 blob_storage_account_upload_container_name = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 blob_storage_account_output_container_name = os.environ[
@@ -28,6 +29,8 @@ status_log = StatusLog(cosmosdb_url,
                        cosmosdb_key,
                        cosmosdb_log_database_name,
                        cosmosdb_log_container_name)
+
+azure_credential = ManagedIdentityCredential()
 
 def chunks(data, size):
     '''max number of blobs to delete in one request is 256, so this breaks
@@ -131,7 +134,7 @@ def main(mytimer: func.TimerRequest) -> None:
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
 
     # Create Blob Service Client
-    blob_service_client = BlobServiceClient.from_connection_string(blob_connection_string)
+    blob_service_client = BlobServiceClient(account_url=azure_blob_storage_endpoint, credential=azure_credential)
     deleted_blobs = get_deleted_blobs(blob_service_client)
 
 

@@ -44,7 +44,7 @@ class StatusLog:
         self._key = key
         self._database_name = database_name
         self._container_name = container_name
-        self.cosmos_client = CosmosClient(url=self._url, credential=self._key)
+        self.cosmos_client = CosmosClient(url=self._url, credential=self._key, consistency_level='Session')
         self._log_document = {}
 
         # Select a database (will create it if it doesn't exist)

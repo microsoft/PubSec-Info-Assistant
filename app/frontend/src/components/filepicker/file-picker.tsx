@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
-import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
+import { getBlobClient, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
 
 interface Props {
   folderPath: string;
@@ -50,8 +50,7 @@ const FilePicker = ({folderPath, tags}: Props) => {
       setUploadStarted(true);
 
       // create an instance of the BlobServiceClient
-      const blobClientUrl = await getBlobClientUrl();
-      const blobServiceClient = new BlobServiceClient(blobClientUrl);
+      const blobServiceClient = await getBlobClient() as BlobServiceClient;
 
       const containerClient = blobServiceClient.getContainerClient("upload");
       var counter = 1;

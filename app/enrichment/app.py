@@ -15,6 +15,7 @@ import random
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.search.documents import SearchClient
 from azure.core.credentials import AzureKeyCredential
+from azure.identity import ManagedIdentityCredential
 from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
 from fastapi import FastAPI, HTTPException
@@ -32,7 +33,6 @@ from urllib.parse import unquote
 # === ENV Setup ===
 
 ENV = {
-    "AZURE_BLOB_STORAGE_KEY": None,
     "EMBEDDINGS_QUEUE": None,
     "LOG_LEVEL": "DEBUG", # Will be overwritten by LOG_LEVEL in Environment
     "DEQUEUE_MESSAGE_BATCH_SIZE": 1,
@@ -53,7 +53,6 @@ ENV = {
     "AZURE_SEARCH_INDEX": None,
     "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_SERVICE": None,
-    "BLOB_CONNECTION_STRING": None,
     "TARGET_EMBEDDINGS_MODEL": None,
     "EMBEDDING_VECTOR_SIZE": None,
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
@@ -118,13 +117,14 @@ log.info("Starting up")
 utilities_helper = UtilitiesHelper(
     azure_blob_storage_account=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
     azure_blob_storage_endpoint=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
-    azure_blob_storage_key=ENV["AZURE_BLOB_STORAGE_KEY"],
 )
 
 statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
 # === API Setup ===
 
 start_time = datetime.now()
+
+azure_credential = ManagedIdentityCredential()
 
 IS_READY = False
 
@@ -279,16 +279,13 @@ def get_tags(blob_path):
     # Remove the container prefix
     path_parts = blob_path.split('/')
     blob_path = '/'.join(path_parts[1:])
-    
-    blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
-    # container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
+
+    blob_service_client = BlobServiceClient(ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+                                            credential=azure_credential)
     blob_client = blob_service_client.get_blob_client(
         container=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
         blob=blob_path)
 
-    
-    # blob_client = container_client.get_blob_client(
-    # blob_client = container_client.get_blob_client(container_client=container_client, blob=blob_path)
     blob_properties = blob_client.get_blob_properties()
     tags = blob_properties.metadata.get("tags")
     if tags != '' and tags is not None:
@@ -308,9 +305,9 @@ def poll_queue() -> None:
         log.debug("Skipping poll_queue call, models not yet loaded")
         return
     
-    queue_client = QueueClient.from_connection_string(
-        conn_str=ENV["BLOB_CONNECTION_STRING"], queue_name=ENV["EMBEDDINGS_QUEUE"]
-    )
+    queue_client = QueueClient(account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+                               queue_name=ENV["EMBEDDINGS_QUEUE"],
+                               credential=azure_credential)
 
     log.debug("Polling embeddings queue for messages...")
     response = queue_client.receive_messages(max_messages=int(ENV["DEQUEUE_MESSAGE_BATCH_SIZE"]))
@@ -336,7 +333,8 @@ def poll_queue() -> None:
             statusLog.upsert_document(blob_path, f'Embeddings process started with model {target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
             file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
             chunk_folder_path = file_directory + file_name + file_extension
-            blob_service_client = BlobServiceClient.from_connection_string(ENV["BLOB_CONNECTION_STRING"])
+            blob_service_client = BlobServiceClient(ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+                                            credential=azure_credential)
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
             index_chunks = []
                                     
@@ -432,10 +430,10 @@ def poll_queue() -> None:
             if requeue_count <= int(ENV["MAX_EMBEDDING_REQUEUE_COUNT"]):
                 message_json['embeddings_queued_count'] = requeue_count
                 # Requeue with a random backoff within limits
-                queue_client = QueueClient.from_connection_string(
-                    ENV["BLOB_CONNECTION_STRING"], 
-                    ENV["EMBEDDINGS_QUEUE"], 
-                    message_encode_policy=TextBase64EncodePolicy())
+                queue_client = QueueClient(account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+                               queue_name=ENV["EMBEDDINGS_QUEUE"],
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
                 message_string = json.dumps(message_json)
                 max_seconds = int(ENV["EMBEDDING_REQUEUE_BACKOFF"]) * (requeue_count**2)
                 backoff = random.randint(

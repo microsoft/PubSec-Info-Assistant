@@ -6,6 +6,7 @@ import azure.ai.vision as visionsdk
 import azure.functions as func
 import requests
 from azure.storage.blob import BlobServiceClient
+from azure.identity import ManagedIdentityCredential
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
 from azure.search.documents import SearchClient
@@ -21,8 +22,6 @@ azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
-azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
@@ -105,13 +104,13 @@ analysis_options.model_version = "latest"
 
 FUNCTION_NAME = "ImageEnrichment"
 
+azure_credential = ManagedIdentityCredential()
 
 utilities = Utilities(
     azure_blob_storage_account=azure_blob_storage_account,
     azure_blob_storage_endpoint=azure_blob_storage_endpoint,
     azure_blob_drop_storage_container=azure_blob_drop_storage_container,
     azure_blob_content_storage_container=azure_blob_content_storage_container,
-    azure_blob_storage_key=azure_blob_storage_key
 )
 
 
@@ -296,7 +295,7 @@ def main(msg: func.QueueMessage) -> None:
         
         # Get the tags from metadata on the blob
         path = file_directory + file_name + file_extension
-        blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
+        blob_service_client = BlobServiceClient(account_url=azure_blob_storage_endpoint, credential=azure_credential)
         blob_client = blob_service_client.get_blob_client(container=azure_blob_drop_storage_container, blob=path)
         blob_properties = blob_client.get_blob_properties()
         tags = blob_properties.metadata.get("tags")

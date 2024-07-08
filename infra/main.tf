@@ -355,7 +355,7 @@ module "webapp" {
   keyVaultName                        = module.kvModule.keyVaultName
   tenantId                            = var.tenantId
   is_secure_mode                      = var.is_secure_mode
-  subnet_id                           = var.is_secure_mode ? module.network[0].snetApp_id : null
+  subnet_name                         = var.is_secure_mode ? module.network[0].snetApp_name : null
   vnet_name                           = var.is_secure_mode ? module.network[0].vnet_name : null
   snetIntegration_id                  = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null

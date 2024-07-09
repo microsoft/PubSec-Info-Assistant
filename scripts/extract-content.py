@@ -13,7 +13,6 @@ from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
 from azure.storage.blob import BlobServiceClient
 from azure.storage.blob import generate_container_sas, ContainerSasPermissions
 from datetime import datetime, timedelta
@@ -173,8 +172,8 @@ new_azure_blob_storage_endpoint = get_storage_account_endpoint(new_azure_blob_st
 
 index_name = 'vector-index'
 
-old_search_client = SearchClient(endpoint=old_search_endpoint, index_name=index_name, credential=AzureKeyCredential(old_search_key))
-new_search_client = SearchClient(endpoint=new_search_endpoint, index_name=index_name, credential=AzureKeyCredential(new_search_key))
+old_search_client = SearchClient(endpoint=old_search_endpoint, index_name=index_name, credential=credential)
+new_search_client = SearchClient(endpoint=new_search_endpoint, index_name=index_name, credential=credential)
 
 error_guidance = 'If you re-run the process, you can skip sections that completed successfully by setting the corresponding skip flag to True. Read more details her' 
 

@@ -6,10 +6,9 @@ import os
 from datetime import datetime, timezone
 from itertools import islice
 import azure.functions as func
-from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from shared_code.status_log import State, StatusClassification, StatusLog
 
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
@@ -19,18 +18,33 @@ blob_storage_account_output_container_name = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
 azure_search_index = os.environ["AZURE_SEARCH_INDEX"]
-azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
 cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
+local_debug = os.environ["LOCAL_DEBUG"] or "false"
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
 status_log = StatusLog(cosmosdb_url,
                        cosmosdb_key,
                        cosmosdb_log_database_name,
                        cosmosdb_log_container_name)
 
-azure_credential = ManagedIdentityCredential()
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
 
 def chunks(data, size):
     '''max number of blobs to delete in one request is 256, so this breaks
@@ -102,7 +116,7 @@ def delete_search_entries(deleted_content_blobs: dict) -> None:
     Search index.'''
     search_client = SearchClient(azure_search_service_endpoint,
                                  azure_search_index,
-                                 AzureKeyCredential(azure_search_service_key))
+                                 azure_credential)
 
     search_id_list_to_delete = []
     for file_path in deleted_content_blobs.keys():

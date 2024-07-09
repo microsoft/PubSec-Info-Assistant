@@ -105,10 +105,7 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
       "SCM_DO_BUILD_DURING_DEPLOYMENT"            = lower(tostring(var.scmDoBuildDuringDeployment))
       "ENABLE_ORYX_BUILD"                         = tostring(var.enableOryxBuild)
       "APPLICATIONINSIGHTS_CONNECTION_STRING"     = var.applicationInsightsConnectionString
-      "AZURE_SEARCH_SERVICE_KEY"                  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)"
       "COSMOSDB_KEY"                              = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
-      "AZURE_AI_KEY"                            = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-AI-KEY)"
-      "AZURE_OPENAI_SERVICE_KEY"                  = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-OPENAI-SERVICE-KEY)"
       "KEY_EXPIRATION_DATE"                       = timeadd(timestamp(), "4320h") # Added expiration date setting for keys
       "WEBSITE_PULL_IMAGE_OVER_VNET"              = var.is_secure_mode ? "true" : "false"
       "WEBSITES_PORT"                             = "6000"

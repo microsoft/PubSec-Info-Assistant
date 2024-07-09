@@ -88,7 +88,6 @@ class ChatReadRetrieveReadApproach(Approach):
         self,
         search_client: SearchClient,
         oai_endpoint: str,
-        oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
         content_field: str,
@@ -103,11 +102,9 @@ class ChatReadRetrieveReadApproach(Approach):
         enrichment_appservice_uri: str,
         target_translation_language: str,
         azure_ai_endpoint:str,
-        azure_ai_key:str,
         azure_ai_location:str,
-        azure_ai_translation_domain: str,
+        azure_ai_token_provider:str,
         use_semantic_reranker: bool
-        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -123,21 +120,19 @@ class ChatReadRetrieveReadApproach(Approach):
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
         self.azure_ai_endpoint=azure_ai_endpoint
-        self.azure_ai_key=azure_ai_key
         self.azure_ai_location=azure_ai_location
+        self.azure_ai_token_provider=azure_ai_token_provider
         self.oai_endpoint=oai_endpoint
         self.embedding_service_url = enrichment_appservice_uri
-        self.azure_ai_translation_domain=azure_ai_translation_domain
         self.use_semantic_reranker=use_semantic_reranker
         
         openai.api_base = oai_endpoint
         openai.api_type = 'azure'
-        openai.api_key = oai_service_key
         openai.api_version = "2024-02-01"
         
         self.client = AsyncAzureOpenAI(
-        azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_endpoint = openai.api_base,
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
                
 
@@ -222,10 +217,10 @@ class ChatReadRetrieveReadApproach(Approach):
             response = requests.post(url, json=data,headers=headers,timeout=60)
             if response.status_code == 200:
                 response_data = response.json()
-                embedded_query_vector =response_data.get('data')          
+                embedded_query_vector =response_data.get('data')
             else:
                 # Generate an error message if the embedding generation fails
-                log.error(f"Error generating embedding:: {response.status_code}")
+                log.error(f"Error generating embedding:: {response.status_code} - {response.text}")
                 yield json.dumps({"error": "Error generating embedding"}) + "\n"
                 return # Go no further
         except Exception as e:
@@ -444,9 +439,9 @@ class ChatReadRetrieveReadApproach(Approach):
     def detect_language(self, text: str) -> str:
         """ Function to detect the language of the text"""
         try:
-            api_detect_endpoint = f"https://{self.azure_ai_translation_domain}/detect?api-version=3.0"
+            api_detect_endpoint = f'{self.azure_ai_endpoint}translator/text/v3.0/detect'
             headers = {
-                'Ocp-Apim-Subscription-Key': self.azure_ai_key,
+                'Authorization': f'Bearer {self.azure_ai_token_provider()}',
                 'Content-type': 'application/json',
                 'Ocp-Apim-Subscription-Region': self.azure_ai_location
             }
@@ -457,15 +452,15 @@ class ChatReadRetrieveReadApproach(Approach):
                 detected_language = response.json()[0]['language']
                 return detected_language
             else:
-                raise Exception(f"Error detecting language: {response.status_code}")
+                raise Exception(f"Error detecting language: {response.status_code} - {response.text}")
         except Exception as e:
             raise Exception(f"An error occurred during language detection: {str(e)}") from e
      
     def translate_response(self, response: str, target_language: str) -> str:
         """ Function to translate the response to target language"""     
-        api_translate_endpoint = f"https://{self.azure_ai_translation_domain}/translate?api-version=3.0"
+        api_translate_endpoint = f"{self.azure_ai_endpoint}translator/text/v3.0/translate"
         headers = {
-            'Ocp-Apim-Subscription-Key': self.azure_ai_key,
+            'Authorization': f'Bearer {self.azure_ai_token_provider()}',
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': self.azure_ai_location
         }

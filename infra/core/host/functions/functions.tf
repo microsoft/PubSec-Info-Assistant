@@ -144,6 +144,7 @@ resource "azurerm_linux_function_app" "function_app" {
     BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME  = var.blobStorageAccountUploadContainerName
     BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME  = var.blobStorageAccountOutputContainerName
     BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME     = var.blobStorageAccountLogContainerName
+    AZURE_QUEUE_STORAGE_ENDPOINT                = var.queueStorageAccountEndpoint
     CHUNK_TARGET_SIZE                           = var.chunkTargetSize
     TARGET_PAGES                                = var.targetPages
     FR_API_VERSION                              = var.formRecognizerApiVersion
@@ -175,14 +176,12 @@ resource "azurerm_linux_function_app" "function_app" {
     ENRICHMENT_BACKOFF                          = var.enrichmentBackoff
     ENABLE_DEV_CODE                             = tostring(var.enableDevCode)
     EMBEDDINGS_QUEUE                            = var.EMBEDDINGS_QUEUE
-    AZURE_SEARCH_SERVICE_KEY                    = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-SEARCH-SERVICE-KEY)"
     COSMOSDB_KEY                                = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT               = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX                          = var.azureSearchIndex
-    AZURE_AI_TRANSLATION_DOMAIN                 = var.azure_ai_translation_domain
-    AZURE_AI_TEXT_ANALYTICS_DOMAIN              = var.azure_ai_text_analytics_domain
     WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
     STORAGE_CONNECTION_STRING__queueServiceUri  = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
+    AZURE_AI_CREDENTIAL_DOMAIN                  = var.azure_ai_credential_domain
   }
 }
 

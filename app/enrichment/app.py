@@ -14,8 +14,7 @@ import requests
 import random
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, DefaultAzureCredential, get_bearer_token_provider, AzureAuthorityHosts
 from data_model import (EmbeddingResponse, ModelInfo, ModelListResponse,
                         StatusResponse)
 from fastapi import FastAPI, HTTPException
@@ -47,16 +46,16 @@ ENV = {
     "MAX_EMBEDDING_REQUEUE_COUNT": 5,
     "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
-    "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_OPENAI_ENDPOINT": None,
     "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": None,
     "AZURE_SEARCH_INDEX": None,
-    "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_SERVICE": None,
     "TARGET_EMBEDDINGS_MODEL": None,
     "EMBEDDING_VECTOR_SIZE": None,
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
-    "AZURE_BLOB_STORAGE_ENDPOINT": None
+    "LOCAL_DEBUG": "false",
+    "AZURE_AI_CREDENTIAL_DOMAIN": None,
+    "AZURE_OPENAI_AUTHORITY_HOST": None
 }
 
 for key, value in ENV.items():
@@ -66,16 +65,33 @@ for key, value in ENV.items():
     elif value is None:
         raise ValueError(f"Environment variable {key} not set")
     
-search_creds = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
-    
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
 openai.api_type = "azure"
-openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
+if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 openai.api_version = "2024-02-01"
 
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if ENV["LOCAL_DEBUG"] == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+# Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
+openai.api_type = "azure_ad"
+token_provider = get_bearer_token_provider(azure_credential,
+                                           f'https://{ENV["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
+openai.azure_ad_token_provider = token_provider
+#openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
+
 client = AzureOpenAI(
-        azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_endpoint = openai.api_base,
+        azure_ad_token_provider=token_provider,
         api_version=openai.api_version)
 
 class AzOAIEmbedding(object):
@@ -117,14 +133,13 @@ log.info("Starting up")
 utilities_helper = UtilitiesHelper(
     azure_blob_storage_account=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
     azure_blob_storage_endpoint=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+    credential=azure_credential
 )
 
 statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
 # === API Setup ===
 
 start_time = datetime.now()
-
-azure_credential = ManagedIdentityCredential()
 
 IS_READY = False
 
@@ -256,7 +271,7 @@ def index_sections(chunks):
     """    
     search_client = SearchClient(endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
                                     index_name=ENV["AZURE_SEARCH_INDEX"],
-                                    credential=search_creds)    
+                                    credential=azure_credential)    
 
     results = search_client.upload_documents(documents=chunks)
     succeeded = sum([1 for r in results if r.succeeded])
@@ -305,7 +320,7 @@ def poll_queue() -> None:
         log.debug("Skipping poll_queue call, models not yet loaded")
         return
     
-    queue_client = QueueClient(account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+    queue_client = QueueClient(account_url=ENV["AZURE_QUEUE_STORAGE_ENDPOINT"],
                                queue_name=ENV["EMBEDDINGS_QUEUE"],
                                credential=azure_credential)
 

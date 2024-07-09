@@ -23,19 +23,12 @@ from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
-from azure.core.credentials import AzureKeyCredential
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
-from azure.storage.blob import (
-    AccountSasPermissions,
-    BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
-)
+from azure.storage.blob import BlobServiceClient
 from approaches.mathassistant import(
     generate_response,
-    process_agent_scratch_pad,
     process_agent_response,
     stream_agent_responses
 )
@@ -45,7 +38,6 @@ from approaches.tabulardataassistant import (
     process_agent_response as td_agent_response,
     process_agent_scratch_pad as td_agent_scratch_pad,
     get_images_in_temp
-
 )
 from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
 from azure.cosmos import CosmosClient
@@ -60,7 +52,6 @@ ENV = {
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
     "AZURE_SEARCH_SERVICE": "gptkb",
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
-    "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_INDEX": "gptkbindex",
     "USE_SEMANTIC_RERANKER": "true",
     "AZURE_OPENAI_SERVICE": "myopenai",
@@ -74,7 +65,6 @@ ENV = {
     "EMBEDDING_DEPLOYMENT_NAME": "",
     "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "",
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
-    "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_SUBSCRIPTION_ID": None,
     "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
     "CHAT_WARNING_BANNER_TEXT": "",
@@ -92,9 +82,7 @@ ENV = {
     "ENRICHMENT_APPSERVICE_URL": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
     "AZURE_AI_ENDPOINT": None,
-    "AZURE_AI_KEY": None,
     "AZURE_AI_LOCATION": "",
-    "AZURE_AI_TRANSLATION_DOMAIN": "api.cognitive.microsofttranslator.com",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
     "ENABLE_BING_SAFE_SEARCH": "true",
@@ -104,7 +92,8 @@ ENV = {
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
     "ENABLE_MULTIMEDIA": "false",
     "MAX_CSV_FILE_SIZE": "7",
-    "LOCAL_DEBUG": "false"
+    "LOCAL_DEBUG": "false",
+    "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
 
 for key, value in ENV.items():
@@ -138,18 +127,20 @@ if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
 else:
     AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 openai.api_version = "2024-02-01"
-# Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
-# just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
-# keys for each service
-# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
 if ENV["LOCAL_DEBUG"] == "true":
-    azure_credential = DefaultAzureCredential()
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
 else:
     azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
 # Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
 openai.api_type = "azure_ad"
-openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
+token_provider = get_bearer_token_provider(azure_credential, f'https://{ENV["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
+openai.azure_ad_token_provider = token_provider
+#openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
@@ -159,12 +150,11 @@ statusLog = StatusLog(
     ENV["COSMOSDB_LOG_CONTAINER_NAME"]
 )
 
-azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
     endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
     index_name=ENV["AZURE_SEARCH_INDEX"],
-    credential=azure_search_key_credential,
+    credential=azure_credential,
 )
 blob_client = BlobServiceClient(
     account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
@@ -206,7 +196,6 @@ chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
                                     search_client,
                                     ENV["AZURE_OPENAI_ENDPOINT"],
-                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
                                     ENV["KB_FIELDS_CONTENT"],
@@ -221,9 +210,8 @@ chat_approaches = {
                                     ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["AZURE_AI_ENDPOINT"],
-                                    ENV["AZURE_AI_KEY"],
                                     ENV["AZURE_AI_LOCATION"],
-                                    ENV["AZURE_AI_TRANSLATION_DOMAIN"],
+                                    token_provider,
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
     Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
@@ -232,20 +220,23 @@ chat_approaches = {
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
                                     ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
-    ),
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
+                                    token_provider
+                                ),
     Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
                                     model_name,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
                                     ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
-    ),
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
+                                    token_provider
+                                ),
     Approaches.CompareWebWithWork: CompareWebWithWork(
                                     search_client,
                                     ENV["AZURE_OPENAI_ENDPOINT"],
-                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
                                     ENV["KB_FIELDS_CONTENT"],
@@ -260,14 +251,12 @@ chat_approaches = {
                                     ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["AZURE_AI_ENDPOINT"],
-                                    ENV["AZURE_AI_KEY"],
                                     ENV["AZURE_AI_LOCATION"],
-                                    ENV["AZURE_AI_TRANSLATION_DOMAIN"],
+                                    token_provider,
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
     Approaches.GPTDirect: GPTDirectApproach(
-                                ENV["AZURE_OPENAI_SERVICE"],
-                                ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                token_provider,
                                 ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                 ENV["QUERY_TERM_LANGUAGE"],
                                 model_name,

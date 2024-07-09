@@ -9,7 +9,6 @@ from enum import Enum
 import zipfile
 import os
 from azure.storage.blob import BlobServiceClient
-from azure.identity import ManagedIdentityCredential
 from shared_code.utilities_helper import UtilitiesHelper
 from nltk.tokenize import sent_tokenize
 import tiktoken
@@ -17,8 +16,6 @@ import nltk
 # Try to download using nltk.download
 nltk.download('punkt')
 from bs4 import BeautifulSoup
-
-azure_credential = ManagedIdentityCredential()
 
 punkt_dir = os.path.join(nltk.data.path[0], 'tokenizers/punkt')
 
@@ -72,14 +69,16 @@ class Utilities:
                  azure_blob_storage_account,
                  azure_blob_storage_endpoint,
                  azure_blob_drop_storage_container,
-                 azure_blob_content_storage_container
+                 azure_blob_content_storage_container,
+                 azure_credential
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
         self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
         self.utilities_helper = UtilitiesHelper(azure_blob_storage_account,
-                                                azure_blob_storage_endpoint)
+                                                azure_blob_storage_endpoint,
+                                                azure_credential)
 
     def write_blob(self, output_container, content, output_filename, folder_set=""):
         """ Function to write a generic blob """

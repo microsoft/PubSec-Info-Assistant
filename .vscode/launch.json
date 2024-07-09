@@ -100,8 +100,7 @@
             "env": {
                 "storage_account_url": "${env:AZURE_BLOB_STORAGE_ENDPOINT}",
                 "SEARCH_SERVICE_ENDPOINT": "${env:AZURE_SEARCH_SERVICE_ENDPOINT}",
-                "SEARCH_INDEX": "${env:AZURE_SEARCH_INDEX}",
-                "SEARCH_KEY": "${env:AZURE_SEARCH_SERVICE_KEY}"
+                "SEARCH_INDEX": "${env:AZURE_SEARCH_INDEX}"
             },
             "cwd": "${workspaceFolder}/tests",
             "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",

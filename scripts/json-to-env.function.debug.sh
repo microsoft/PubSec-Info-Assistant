@@ -17,7 +17,7 @@ fi
 
 secrets="{"
 # Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
 secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "AZURE-AI-KEY")
@@ -115,20 +115,16 @@ jq -r --arg secrets "$secrets" '
             "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
         },
         {
-            "path": "DEPLOYMENT_KEYVAULT_NAME",
-            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
-        },
-        {
-            "path": "AZURE_AI_TRANSLATION_DOMAIN",
-            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
-        },
-        {
-            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
-            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
+            "path": "AZURE_KEYVAULT_NAME",
+            "env_var": "AZURE_KEYVAULT_NAME"
         },
         {
             "path": "AZURE_AI_LOCATION",
             "env_var": "AZURE_AI_LOCATION"
+        },
+        {
+            "path": "AZURE_AI_CREDENTIAL_DOMAIN",
+            "env_var": "AZURE_AI_CREDENTIAL_DOMAIN"
         }
     ] 
         as $env_vars_to_extract
@@ -169,6 +165,7 @@ jq -r --arg secrets "$secrets" '
             "EMBEDDINGS_QUEUE": "embeddings-queue",
             "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
             "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue",
+            "LOCAL_DEBUG": "true",
             } + ($secrets | fromjson)
              
     )}

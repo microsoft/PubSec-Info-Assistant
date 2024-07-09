@@ -9,7 +9,7 @@ from collections import namedtuple
 import time
 import azure.functions as func
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 import requests
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities, MediaType
@@ -46,13 +46,29 @@ submit_requeue_hide_seconds = int(os.environ["SUBMIT_REQUEUE_HIDE_SECONDS"])
 polling_backoff = int(os.environ["POLLING_BACKOFF"])
 max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
 enableDevCode = string_to_bool(os.environ["ENABLE_DEV_CODE"])
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
 function_name = "FileFormRecPollingPDF"
-utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container)
 FR_MODEL = "prebuilt-layout"
 
-azure_credential = ManagedIdentityCredential()
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+
+utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_credential)
 
 def main(msg: func.QueueMessage) -> None:
     

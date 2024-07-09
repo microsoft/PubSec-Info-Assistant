@@ -10,9 +10,8 @@ from shared_code.status_log import StatusLog, State, StatusClassification
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
 from shared_code.utilities_helper import UtilitiesHelper
 from urllib.parse import unquote
 
@@ -33,20 +32,33 @@ azure_blob_upload_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_
 azure_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
 azure_search_service_index = os.environ["AZURE_SEARCH_INDEX"]
-azure_search_service_key = os.environ["AZURE_SEARCH_SERVICE_KEY"]
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 
-
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
 
 
 function_name = "FileUploadedFunc"
 utilities_helper = UtilitiesHelper(
     azure_blob_storage_account=azure_storage_account,
     azure_blob_storage_endpoint=azure_blob_endpoint,
+    credential=azure_credential
 )
 statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
-
-azure_credential = ManagedIdentityCredential()
 
 def get_tags_and_upload_to_cosmos(blob_service_client, blob_path):
     """ Gets the tags from the blob metadata and uploads them to cosmos db"""
@@ -142,7 +154,7 @@ def main(myblob: func.InputStream):
         # instantiate the search sdk elements
         search_client = SearchClient(azure_search_service_endpoint,
                                 azure_search_service_index,
-                                AzureKeyCredential(azure_search_service_key))
+                                azure_credential)
         search_id_list_to_delete = []
         
         # Iterate through the blobs and delete each one from blob and the search index

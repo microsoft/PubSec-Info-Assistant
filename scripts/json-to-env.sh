@@ -103,8 +103,8 @@ jq -r  '
             "env_var": "ENRICHMENT_APPSERVICE_NAME"
         },
         {
-            "path": "DEPLOYMENT_KEYVAULT_NAME",
-            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+            "path": "AZURE_KEYVAULT_NAME",
+            "env_var": "AZURE_KEYVAULT_NAME"
         },
         {
             "path": "MAX_CSV_FILE_SIZE",
@@ -160,7 +160,7 @@ if [ -n "${IN_AUTOMATION}" ]; then
 fi
 
 # Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 # Names of your secrets
 secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY")
 

@@ -9,7 +9,7 @@ from io import BytesIO
 import azure.functions as func
 from azure.storage.blob import generate_blob_sas
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from shared_code.status_log import StatusLog, State, StatusClassification
 from shared_code.utilities import Utilities, MediaType
 
@@ -29,12 +29,28 @@ pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
-
-utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container)
 function_name = "FileLayoutParsingOther"
 
-azure_credential = ManagedIdentityCredential()
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+
+utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_credential)
 
 class UnstructuredError(Exception):
     pass

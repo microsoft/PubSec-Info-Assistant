@@ -46,7 +46,6 @@ class CompareWebWithWork(Approach):
         self,
         search_client: SearchClient,
         oai_service_name: str,
-        oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
         content_field: str,
@@ -61,9 +60,8 @@ class CompareWebWithWork(Approach):
         enrichment_appservice_url: str,
         target_translation_language: str,
         azure_ai_endpoint:str,
-        azure_ai_key:str,
         azure_ai_location: str,
-        azure_ai_translation_domain: str,
+        azure_ai_token_provider: str,
         use_semantic_reranker: bool
     ):
         self.search_client = search_client
@@ -79,14 +77,12 @@ class CompareWebWithWork(Approach):
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
         self.azure_ai_endpoint=azure_ai_endpoint
-        self.azure_ai_key=azure_ai_key
         self.azure_ai_location = azure_ai_location
+        self.azure_ai_token_provider=azure_ai_token_provider
         self.oai_service_name = oai_service_name
-        self.oai_service_key = oai_service_key
         self.model_name = model_name
         self.model_version = model_version
         self.enrichment_appservice_url = enrichment_appservice_url
-        self.azure_ai_translation_domain = azure_ai_translation_domain
         self.use_semantic_reranker = use_semantic_reranker
         
           # openai.api_base = oai_endpoint
@@ -95,7 +91,7 @@ class CompareWebWithWork(Approach):
                
         self.client = AsyncAzureOpenAI(
         azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_ad_token_provider=azure_ai_token_provider,  
         api_version=openai.api_version)
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], web_citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -112,7 +108,6 @@ class CompareWebWithWork(Approach):
         chat_rrr_approach = ChatReadRetrieveReadApproach(
                                     self.search_client,
                                     self.oai_service_name,
-                                    self.oai_service_key,
                                     self.chatgpt_deployment,
                                     self.source_file_field,
                                     self.content_field,
@@ -128,8 +123,7 @@ class CompareWebWithWork(Approach):
                                     self.target_translation_language,
                                     self.azure_ai_endpoint,
                                     self.azure_ai_location,
-                                    self.azure_ai_key,
-                                    self.azure_ai_translation_domain,
+                                    self.azure_ai_token_provider,
                                     self.use_semantic_reranker
                                 )
         rrr_response = chat_rrr_approach.run(history, overrides, {}, thought_chain)

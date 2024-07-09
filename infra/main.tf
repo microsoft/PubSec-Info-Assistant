@@ -312,7 +312,8 @@ module "enrichmentApp" {
     AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
     AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
-    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_blob_endpoint
+    AZURE_QUEUE_STORAGE_ENDPOINT            = module.storage.primary_queue_endpoint
     COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
@@ -326,6 +327,8 @@ module "enrichmentApp" {
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     EMBEDDING_VECTOR_SIZE                   = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_AI_CREDENTIAL_DOMAIN              = var.azure_ai_private_link_domain
+    AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
   }
 }
 
@@ -373,7 +376,7 @@ module "webapp" {
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
     AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
-    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_blob_endpoint
     AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
     AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
@@ -403,7 +406,6 @@ module "webapp" {
     AZURE_AI_ENDPOINT                       = module.cognitiveServices.cognitiveServiceEndpoint
     AZURE_AI_LOCATION                       = var.location
     APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
-    AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
     BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat
@@ -413,6 +415,7 @@ module "webapp" {
     ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
     ENABLE_MULTIMEDIA                       = var.enableMultimedia
     MAX_CSV_FILE_SIZE                       = var.maxCsvFileSize
+    AZURE_AI_CREDENTIAL_DOMAIN               = var.azure_ai_private_link_domain
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -441,10 +444,11 @@ module "functions" {
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
   blobStorageAccountName                = module.storage.name
-  blobStorageAccountEndpoint            = module.storage.primary_endpoints
+  blobStorageAccountEndpoint            = module.storage.primary_blob_endpoint
   blobStorageAccountOutputContainerName = var.contentContainerName
   blobStorageAccountUploadContainerName = var.uploadContainerName 
-  blobStorageAccountLogContainerName    = var.functionLogsContainerName 
+  blobStorageAccountLogContainerName    = var.functionLogsContainerName
+  queueStorageAccountEndpoint           = module.storage.primary_queue_endpoint
   formRecognizerEndpoint                = module.aiDocIntelligence.formRecognizerAccountEndpoint
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
@@ -477,8 +481,6 @@ module "functions" {
   azureSearchIndex                      = var.searchIndexName
   azureSearchServiceEndpoint            = module.searchServices.endpoint
   endpointSuffix                        = var.azure_storage_domain
-  azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
-  azure_ai_translation_domain           = var.azure_ai_translation_domain
   logAnalyticsWorkspaceResourceId       = module.logging.logAnalyticsId
   is_secure_mode                        = var.is_secure_mode
   vnet_name                             = var.is_secure_mode ? module.network[0].vnet_name : null
@@ -490,6 +492,7 @@ module "functions" {
   container_registry_admin_password     = module.acr.admin_password
   container_registry_id                 = module.acr.acr_id
   azure_environment                     = var.azure_environment
+  azure_ai_credential_domain            = var.azure_ai_private_link_domain
 }
 
 module "openaiServices" {

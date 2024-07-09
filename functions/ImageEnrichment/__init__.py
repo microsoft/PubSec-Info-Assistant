@@ -6,11 +6,10 @@ import azure.ai.vision as visionsdk
 import azure.functions as func
 import requests
 from azure.storage.blob import BlobServiceClient
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, DefaultAzureCredential, get_bearer_token_provider, AzureAuthorityHosts
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
 from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
 from datetime import datetime
 
 
@@ -28,7 +27,9 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
+# Authentication settings
+azure_authority_host = os.environ["AZURE_AUTHORITY_HOST"]
+local_debug = os.environ.get("LOCAL_DEBUG", False)
 
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -37,35 +38,46 @@ cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
 # Cognitive Services
-cognitive_services_key = os.environ["AZURE_AI_KEY"]
-cognitive_services_endpoint = os.environ["AZURE_AI_ENDPOINT"]
-cognitive_services_account_location = os.environ["AZURE_AI_LOCATION"]
+azure_ai_key = os.environ["AZURE_AI_KEY"]
+azure_ai_endpoint = os.environ["AZURE_AI_ENDPOINT"]
+azure_ai_location = os.environ["AZURE_AI_LOCATION"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
 
 # Search Service
 AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
 AZURE_SEARCH_INDEX = os.environ.get("AZURE_SEARCH_INDEX") or "gptkbindex"
-SEARCH_CREDS = AzureKeyCredential(os.environ.get("AZURE_SEARCH_SERVICE_KEY"))
+
+if azure_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+if local_debug:
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential,
+                                           f'https://{azure_ai_credential_domain}/.default')
 
 # Translation params for OCR'd text
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
 API_DETECT_ENDPOINT = (
-        f"https://{azure_ai_translation_domain}/detect?api-version=3.0"
+        f"{azure_ai_endpoint}translator/text/v3.0/detect"
     )
 API_TRANSLATE_ENDPOINT = (
-        f"https://{azure_ai_translation_domain}/translate?api-version=3.0"
+        f"{azure_ai_endpoint}translator/text/v3.0/translate"
     )
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {
-    "Ocp-Apim-Subscription-Key": cognitive_services_key,
+    "Auhorization": f"Bearer {token_provider()}",
     "Content-type": "application/json",
-    "Ocp-Apim-Subscription-Region": cognitive_services_account_location,
+    "Ocp-Apim-Subscription-Region": azure_ai_location,
 }
 
 # Vision SDK
 vision_service_options = visionsdk.VisionServiceOptions(
-    endpoint=cognitive_services_endpoint, key=cognitive_services_key
+    endpoint=azure_ai_endpoint, key=azure_ai_key
 )
 
 analysis_options = visionsdk.ImageAnalysisOptions()
@@ -74,7 +86,7 @@ analysis_options = visionsdk.ImageAnalysisOptions()
 # Korea Central, North Europe, Southeast Asia, West Europe, West US). Remove "CAPTION" and "DENSE_CAPTIONS"
 # from the list below if your Computer Vision key is not from one of those regions.
 
-if cognitive_services_account_location in [
+if azure_ai_location in [
     "eastus",
     "francecentral",
     "koreacentral",
@@ -104,13 +116,12 @@ analysis_options.model_version = "latest"
 
 FUNCTION_NAME = "ImageEnrichment"
 
-azure_credential = ManagedIdentityCredential()
-
 utilities = Utilities(
     azure_blob_storage_account=azure_blob_storage_account,
     azure_blob_storage_endpoint=azure_blob_storage_endpoint,
     azure_blob_drop_storage_container=azure_blob_drop_storage_container,
     azure_blob_content_storage_container=azure_blob_content_storage_container,
+    azure_credential
 )
 
 
@@ -354,6 +365,6 @@ def index_section(index_content, file_name, file_directory, chunk_id, chunk_file
 
     search_client = SearchClient(endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
                                     index_name=AZURE_SEARCH_INDEX,
-                                    credential=SEARCH_CREDS)
+                                    credential=azure_credential)
 
     search_client.upload_documents(documents=batch)

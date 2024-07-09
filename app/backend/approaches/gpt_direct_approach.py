@@ -66,8 +66,7 @@ class GPTDirectApproach(Approach):
     
     def __init__(
         self,
-        oai_service_name: str,
-        oai_service_key: str,
+        azure_openai_token_provider: str,
         chatgpt_deployment: str,
         query_term_language: str,
         model_name: str,
@@ -79,19 +78,16 @@ class GPTDirectApproach(Approach):
         self.chatgpt_token_limit = get_token_limit(model_name)
         
         openai.api_base = azure_openai_endpoint
-        openai.api_type = 'azure'
-        openai.api_key = oai_service_key
+        openai.api_type = "azure_ad"
+        openai.azure_ad_token_provider = azure_openai_token_provider
+        openai.api_version = "2024-02-01"
 
         self.model_name = model_name
         self.model_version = model_version
         
-          
-        openai.api_type = 'azure'
-        openai.api_version = "2024-02-01"
-        
         self.client = AsyncAzureOpenAI(
         azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_ad_token_provider=azure_openai_token_provider,
         api_version=openai.api_version)
 
     # def run(self, history: list[dict], overrides: dict) -> any:

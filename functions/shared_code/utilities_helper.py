@@ -6,17 +6,17 @@ import logging
 import urllib.parse
 from datetime import datetime, timedelta
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
-from azure.identity import ManagedIdentityCredential
 
 class UtilitiesHelper:
     """ Helper class for utility functions"""
     def __init__(self,
                  azure_blob_storage_account,
-                 azure_blob_storage_endpoint
+                 azure_blob_storage_endpoint,
+                 credential
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
         self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
-        self.blob_service_client = BlobServiceClient(azure_blob_storage_endpoint, credential=ManagedIdentityCredential())
+        self.blob_service_client = BlobServiceClient(azure_blob_storage_endpoint, credential=credential)
         
     def get_filename_and_extension(self, path):
             """ Function to return the file name & type"""

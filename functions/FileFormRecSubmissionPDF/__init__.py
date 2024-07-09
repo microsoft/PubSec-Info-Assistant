@@ -8,7 +8,7 @@ import random
 import azure.functions as func
 import requests
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
 
@@ -32,18 +32,36 @@ api_version = os.environ["FR_API_VERSION"]
 max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
 poll_queue_submit_backoff = int(os.environ["POLL_QUEUE_SUBMIT_BACKOFF"])
 pdf_submit_queue_backoff = int(os.environ["PDF_SUBMIT_QUEUE_BACKOFF"])
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
+
+FUNCTION_NAME = "FileFormRecSubmissionPDF"
+FR_MODEL = "prebuilt-layout"
+
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
 
 utilities = Utilities(
     azure_blob_storage_account,
     azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
+    azure_credential,
 )
-FUNCTION_NAME = "FileFormRecSubmissionPDF"
-FR_MODEL = "prebuilt-layout"
-
-azure_credential = ManagedIdentityCredential()
 
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the pdf-submit-queue.

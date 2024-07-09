@@ -89,6 +89,10 @@ jq -r  '
             "env_var": "AZURE_BLOB_STORAGE_ENDPOINT"
         },
         {
+            "path": "AZURE_QUEUE_STORAGE_ENDPOINT",
+            "env_var": "AZURE_QUEUE_STORAGE_ENDPOINT"
+        },
+        {
             "path": "TARGET_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
         },
@@ -113,8 +117,8 @@ jq -r  '
             "env_var": "ENRICHMENT_APPSERVICE_URL"
         },
         {
-            "path": "DEPLOYMENT_KEYVAULT_NAME",
-            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+            "path": "AZURE_KEYVAULT_NAME",
+            "env_var": "AZURE_KEYVAULT_NAME"
         },
         {
             "path": "AZURE_OPENAI_CHATGPT_MODEL_NAME",
@@ -141,14 +145,6 @@ jq -r  '
             "env_var": "ENABLE_BING_SAFE_SEARCH"
         },
         {
-            "path": "AZURE_AI_TRANSLATION_DOMAIN",
-            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
-        },
-        {
-            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
-            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
-        },
-        {
             "path": "AZURE_ARM_MANAGEMENT_API",
             "env_var": "AZURE_ARM_MANAGEMENT_API"
         },
@@ -159,6 +155,10 @@ jq -r  '
         {
             "path": "AZURE_AI_LOCATION",
             "env_var": "AZURE_AI_LOCATION"
+        },
+        {
+            "path": "AZURE_AI_CREDENTIAL_DOMAIN",
+            "env_var": "AZURE_AI_CREDENTIAL_DOMAIN"
         }
     ]
         as $env_vars_to_extract
@@ -195,6 +195,7 @@ jq -r  '
     echo "ENABLE_MATH_ASSISTANT=$ENABLE_MATH_ASSISTANT"
     echo "ENABLE_TABULAR_DATA_ASSISTANT=$ENABLE_TABULAR_DATA_ASSISTANT"
     echo "ENABLE_MULTIMEDIA=$ENABLE_MULTIMEDIA"
+    echo "LOCAL_DEBUG=true"
 
 if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then
@@ -206,7 +207,7 @@ if [ -n "${IN_AUTOMATION}" ]; then
 fi    
 
 # Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
 if [ -n "${SECURE_MODE}" ]; then

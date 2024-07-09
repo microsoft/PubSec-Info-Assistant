@@ -23,10 +23,6 @@ output "AZURE_STORAGE_ACCOUNT" {
   value = module.storage.name
 }
 
-output "AZURE_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
-}
-
 output "AZURE_STORAGE_CONTAINER" {
   value = var.contentContainerName
 }
@@ -120,7 +116,11 @@ output "AZURE_SUBSCRIPTION_ID" {
 }
 
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage.primary_blob_endpoint
+}
+
+output "AZURE_QUEUE_STORAGE_ENDPOINT" {
+  value = module.sotrage.primary_queue_endpoint
 }
 
 output "EMBEDDING_VECTOR_SIZE" {
@@ -151,7 +151,7 @@ output "ENRICHMENT_APPSERVICE_URL" {
   value = module.enrichmentApp.uri
 }
 
-output "DEPLOYMENT_KEYVAULT_NAME" {
+output "AZURE_KEYVAULT_NAME" {
   value = module.kvModule.keyVaultName
 }
 
@@ -179,14 +179,6 @@ output "ENABLE_BING_SAFE_SEARCH" {
   value = var.enableBingSafeSearch
 }
 
-output "AZURE_AI_TRANSLATION_DOMAIN" {
-  value = var.azure_ai_translation_domain
-}
-
-output "AZURE_AI_TEXT_ANALYTICS_DOMAIN" {
-  value = var.azure_ai_text_analytics_domain
-}
-
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
 }
@@ -210,4 +202,8 @@ output "CONTAINER_REGISTRY_PASSWORD" {
 
 output "DNS_PRIVATE_RESOLVER_IP" {
   value = var.is_secure_mode ? module.network[0].dns_private_resolver_ip : ""
+}
+
+output "AZURE_AI_CREDENTIAL_DOMAIN" {
+  value = var.azure_ai_private_link_domain
 }

@@ -1,7 +1,7 @@
 import logging
 import azure.functions as func
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from azure.identity import ManagedIdentityCredential
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.storage.blob import BlobServiceClient
 from shared_code.utilities import Utilities
 import os
@@ -28,43 +28,56 @@ cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
-enrichmentKey =  os.environ["AZURE_AI_KEY"]
-enrichmentEndpoint = os.environ["AZURE_AI_ENDPOINT"] 
-targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"] 
+azure_ai_endpoint = os.environ["AZURE_AI_ENDPOINT"]
+targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 enrichment_backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
-azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
-azure_ai_text_analytics_domain = os.environ["AZURE_AI_TEXT_ANALYTICS_DOMAIN"]
-endpoint_region = os.environ["AZURE_AI_LOCATION"]
-enrich_endpoint = os.environ["AZURE_AI_ENDPOINT"]
+azure_ai_location = os.environ["AZURE_AI_LOCATION"]
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
 
+
+statusLog = StatusLog(
+    cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
+)
+
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential, f'https://{azure_ai_credential_domain}/.default')
 
 utilities = Utilities(
     azure_blob_storage_account,
     azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
+    azure_credential,
 )
-
-statusLog = StatusLog(
-    cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
-)
-
-azure_credential = ManagedIdentityCredential()
-
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from
     the target language, it will translate the chunks to the target language.'''
 
     try:
-        apiDetectEndpoint = f"https://{azure_ai_translation_domain}/detect?api-version=3.0"
-        apiTranslateEndpoint = f"https://{azure_ai_translation_domain}/translate?api-version=3.0"
+        apiDetectEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/detect"
+        apiTranslateEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/translate"
         
         message_body = msg.get_body().decode("utf-8")
         message_json = json.loads(message_body)
@@ -110,9 +123,9 @@ def main(msg: func.QueueMessage) -> None:
 
         # detect language           
         headers = {
-            'Ocp-Apim-Subscription-Key': enrichmentKey,
+            'Authorization': f'Bearer {token_provider()}',
             'Content-type': 'application/json',
-            'Ocp-Apim-Subscription-Region': endpoint_region
+            'Ocp-Apim-Subscription-Region': azure_ai_location
         }            
         data = [{"text": chunk_content}]
 
@@ -155,11 +168,7 @@ def main(msg: func.QueueMessage) -> None:
             for field in fields_to_enrich:
                 translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
                                 
-            # Extract entities for index    
-            enrich_headers = {
-                'Ocp-Apim-Subscription-Key': enrichmentKey,
-                'Content-type': 'application/json'
-            }        
+            # Extract entities for index           
             target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
             enrich_data = {
                 "kind": "EntityRecognition",
@@ -176,7 +185,7 @@ def main(msg: func.QueueMessage) -> None:
                     ]
                 }
             }                
-            response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+            response = requests.post(azure_ai_endpoint, headers=headers, json=enrich_data, params=params)
             try:
                 entities = response.json()['results']['documents'][0]['entities']
             except:
@@ -187,10 +196,6 @@ def main(msg: func.QueueMessage) -> None:
             chunk_dict[f"entities"] = entities_collection
                         
             # Extract key phrases for index    
-            enrich_headers = {
-                'Ocp-Apim-Subscription-Key': enrichmentKey,
-                'Content-type': 'application/json'
-            }        
             target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
             enrich_data = {
                 "kind": "KeyPhraseExtraction",
@@ -207,7 +212,7 @@ def main(msg: func.QueueMessage) -> None:
                     ]
                 }
             }                
-            response = requests.post(enrich_endpoint, headers=enrich_headers, json=enrich_data, params=params)
+            response = requests.post(azure_ai_endpoint, headers=headers, json=enrich_data, params=params)
             try:
                 key_phrases = response.json()['results']['documents'][0]['keyPhrases']
             except:

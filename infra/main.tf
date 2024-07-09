@@ -2,8 +2,10 @@ locals {
   tags            = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles     = jsondecode(file("${path.module}/azure_roles.json"))
   selected_roles  = ["CognitiveServicesOpenAIUser", 
+                      "CognitiveServicesUser",
                       "StorageBlobDataReader", 
-                      "StorageBlobDataContributor", 
+                      "StorageBlobDataContributor",
+                      "StorageQueueDataMessageProcessor",
                       "SearchIndexDataReader", 
                       "SearchIndexDataContributor"]
 }
@@ -691,6 +693,50 @@ module "openAiRoleBackend" {
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
   principalId      = module.webapp.identityPrincipalId
   roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "webAppCognitiveServicesUserBackend" {
+  source = "./core/security/role"
+
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.webapp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "functionAppCognitiveServicesUserBackend" {
+  source = "./core/security/role"
+
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "webAppStorageQueueDataMessageProcessorBackend" {
+  source = "./core/security/role"
+
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.webapp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageQueueDataMessageProcessor
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "functionAppStorageQueueDataMessageProcessorBackend" {
+  source = "./core/security/role"
+
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageQueueDataMessageProcessor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id

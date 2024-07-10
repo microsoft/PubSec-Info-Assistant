@@ -3,16 +3,15 @@
 
 #Turn warnings off
 #from st_pages import Page, show_pages, add_page_title
-import warnings
-warnings.filterwarnings('ignore')
 import os
-# import openai
+import warnings
 from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 from langchain.agents import initialize_agent, load_tools, AgentType
 from langchain.prompts import ChatPromptTemplate
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 
+warnings.filterwarnings('ignore')
 load_dotenv()
 
 OPENAI_API_BASE = os.environ.get("AZURE_OPENAI_ENDPOINT")
@@ -180,12 +179,7 @@ def process_agent_response( question):
   
 
 #Function to process clues
-def generate_response(question):
-    model = AzureChatOpenAI(
-    api_key= OPENAI_API_KEY,
-    azure_endpoint=OPENAI_API_BASE,
-    openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)     
+def generate_response(question):    
     prompt_template = ChatPromptTemplate.from_template(template=prompt)
     messages = prompt_template.format_messages(
     question=question

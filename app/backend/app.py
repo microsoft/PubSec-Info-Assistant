@@ -1,18 +1,16 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+
 from io import StringIO
 from typing import Optional
 import asyncio
-#from sse_starlette.sse import EventSourceResponse
-#from starlette.responses import StreamingResponse
-from starlette.responses import Response
 import logging
 import os
 import json
 import urllib.parse
 import pandas as pd
 import pydantic
-from datetime import datetime, time, timedelta
+from datetime import datetime
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse, StreamingResponse
@@ -39,7 +37,7 @@ from approaches.tabulardataassistant import (
     process_agent_scratch_pad as td_agent_scratch_pad,
     get_images_in_temp
 )
-from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
+from shared_code.status_log import State, StatusClassification, StatusLog
 from azure.cosmos import CosmosClient
 
 
@@ -701,7 +699,7 @@ async def posttd(csv: UploadFile = File(...)):
         # Process the DataFrame...
         save_df(df)
     except Exception as ex:
-            raise HTTPException(status_code=500, detail=str(ex)) from ex
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     
     
     #return {"filename": csv.filename}
@@ -733,7 +731,7 @@ async def process_td_agent_response(retries=3, delay=1000, question: Optional[st
 async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
     global dffinal
     if question is None:
-            raise HTTPException(status_code=400, detail="Question is required")
+        raise HTTPException(status_code=400, detail="Question is required")
         
     for i in range(retries):
         try:
@@ -825,7 +823,7 @@ async def stream_agent_response(question: str):
         results = process_agent_response(question)
     except Exception as e:
         print(f"Error processing agent response: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
     return results
 
 

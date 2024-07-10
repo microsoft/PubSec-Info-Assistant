@@ -10,18 +10,6 @@ resource "azurerm_cognitive_account" "formRecognizerAccount" {
   tags                          = var.tags
 }
 
-module "docIntelligenceKey" {
-  source                        = "../../security/keyvaultSecret"
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  resourceGroupName             = var.resourceGroupName
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "AZURE-FORM-RECOGNIZER-KEY"
-  secret_value                  = azurerm_cognitive_account.formRecognizerAccount.primary_access_key
-  alias                         = "docintkey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
-}
-
 data "azurerm_subnet" "subnet" {
   count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name

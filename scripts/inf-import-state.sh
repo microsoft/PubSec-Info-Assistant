@@ -357,10 +357,6 @@ name="infoasst-fr-$random_text"
 providers="/providers/Microsoft.CognitiveServices/accounts/$name"
 module_path="module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
-module_path="module.formrecognizer.azurerm_key_vault_secret.docIntelligenceKey"
-import_resource_if_needed "$module_path" "$secret_id"
-
 
 # Cognitive Services 
 echo
@@ -381,9 +377,6 @@ keyVaultId="infoasst-kv-$random_text"
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId"
 module_path="module.kvModule.azurerm_key_vault.kv"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-CLIENT-SECRET")
-module_path="module.kvModule.azurerm_key_vault_secret.spClientKeySecret"
-import_resource_if_needed "$module_path" "$secret_id"
 current_user_id=$(az ad signed-in-user show --query id -o tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$current_user_id"
 module_path="module.kvModule.azurerm_key_vault_access_policy.infoasst"
@@ -492,11 +485,6 @@ import_resource_if_needed "$module_path[5]" "$url"
 url="https://$name.queue.core.windows.net/embeddings-queue"
 import_resource_if_needed "$module_path[6]" "$url"
 
-secret_id=$(get_secret "AZURE-BLOB-STORAGE-KEY")
-module_path="module.storage.azurerm_key_vault_secret.storage_key"
-import_resource_if_needed "$module_path" "$secret_id"
-
-
 # Cosmos DB 
 echo
 figlet "Cosmos DB"
@@ -522,10 +510,6 @@ name="infoasst-search-$random_text"
 providers="/providers/Microsoft.Search/searchServices/$name"
 module_path="module.searchServices.azurerm_search_service.search" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
-module_path="module.searchServices.azurerm_key_vault_secret.search_service_key" 
-import_resource_if_needed "$module_path" "$secret_id"
-
 
 # Output log on imported services
 echo

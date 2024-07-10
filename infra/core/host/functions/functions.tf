@@ -89,7 +89,6 @@ resource "azurerm_linux_function_app" "function_app" {
   service_plan_id                     = azurerm_service_plan.funcServicePlan.id
   storage_account_name                = var.blobStorageAccountName
   storage_uses_managed_identity       = true
-  #storage_account_access_key          = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-BLOB-STORAGE-KEY)"
   https_only                          = true
   tags                                = var.tags
   public_network_access_enabled       = var.is_secure_mode ? false : true 
@@ -149,7 +148,6 @@ resource "azurerm_linux_function_app" "function_app" {
     TARGET_PAGES                                = var.targetPages
     FR_API_VERSION                              = var.formRecognizerApiVersion
     AZURE_FORM_RECOGNIZER_ENDPOINT              = var.formRecognizerEndpoint
-    AZURE_FORM_RECOGNIZER_KEY                   = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-FORM-RECOGNIZER-KEY)"
     COSMOSDB_URL                                = var.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME                  = var.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME                 = var.CosmosDBLogContainerName

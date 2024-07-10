@@ -120,7 +120,7 @@ output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
 }
 
 output "AZURE_QUEUE_STORAGE_ENDPOINT" {
-  value = module.sotrage.primary_queue_endpoint
+  value = module.storage.primary_queue_endpoint
 }
 
 output "EMBEDDING_VECTOR_SIZE" {

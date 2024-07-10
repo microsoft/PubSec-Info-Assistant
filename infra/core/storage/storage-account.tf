@@ -279,18 +279,6 @@ resource "azurerm_private_endpoint" "queuePrivateEndpoint" {
   }
 }
 
-module "storage_key" {
-  source                        = "../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "AZURE-BLOB-STORAGE-KEY"
-  secret_value                  = azurerm_storage_account.storage.primary_access_key
-  tags                          = var.tags
-  alias                         = "blobkey"
-  kv_secret_expiration          = var.kv_secret_expiration
-}
-
 // Only create the config blob if we are not in secure mode as SharePoint integration is not supported in secure mode
 resource "azurerm_storage_blob" "config" {
   depends_on = [ azurerm_resource_group_template_deployment.container ]

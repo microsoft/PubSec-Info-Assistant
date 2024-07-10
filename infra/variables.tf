@@ -216,11 +216,6 @@ variable "azureOpenAIResourceGroup" {
   type = string
 }
 
-variable "azureOpenAIServiceKey" {
-  type      = string
-  sensitive = true
-}
-
 variable "openAIServiceName" {
   type = string
   default = ""

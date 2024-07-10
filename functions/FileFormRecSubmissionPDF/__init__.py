@@ -27,7 +27,6 @@ cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
-FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
 max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
 poll_queue_submit_backoff = int(os.environ["POLL_QUEUE_SUBMIT_BACKOFF"])
@@ -54,6 +53,7 @@ if local_debug == "true":
     azure_credential = DefaultAzureCredential(authority=AUTHORITY)
 else:
     azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential, f'https://{os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
 
 utilities = Utilities(
     azure_blob_storage_account,
@@ -101,7 +101,7 @@ def main(msg: func.QueueMessage) -> None:
         # Construct and submmit the message to FR
         headers = {
             "Content-Type": "application/json",
-            "Ocp-Apim-Subscription-Key": FR_key,
+            'Authorization': f'Bearer {token_provider()}'
         }
 
         params = {"api-version": api_version}

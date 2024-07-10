@@ -23,7 +23,6 @@ Next you will need to create local configuration values that are used by the fun
     "COSMOSDB_KEY": "<YOUR AZURE VALUE>",
     "COSMOSDB_URL": "<YOUR AZURE VALUE>",
     "AZURE_FORM_RECOGNIZER_ENDPOINT": "<YOUR AZURE VALUE>",
-    "AZURE_FORM_RECOGNIZER_KEY": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": "content",
     "CHUNK_TARGET_SIZE": "750",

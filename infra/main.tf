@@ -501,7 +501,6 @@ module "openaiServices" {
   location                        = var.location
   tags                            = local.tags
   resourceGroupName               = azurerm_resource_group.rg.name
-  openaiServiceKey                = var.azureOpenAIServiceKey
   useExistingAOAIService          = var.useExistingAOAIService
   is_secure_mode                  = var.is_secure_mode
   subnet_name                     = var.is_secure_mode ? module.network[0].snetAzureOpenAI_name : null

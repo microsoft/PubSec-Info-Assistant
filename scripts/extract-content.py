@@ -159,11 +159,9 @@ new_secret_client = SecretClient(vault_url=new_key_vault_url, credential=credent
 old_cosmosdb_url = f'https://infoasst-cosmos-{old_random_text}.documents.azure.com:443/'
 old_cosmosdb_key = old_secret_client.get_secret('COSMOSDB-KEY').value
 old_search_endpoint = f'https://infoasst-search-{old_random_text}.search.windows.net'
-old_search_key = old_secret_client.get_secret('AZURE-SEARCH-SERVICE-KEY').value 
 old_azure_blob_storage_account = f"infoasststore{old_random_text}"
 old_azure_blob_storage_endpoint = get_storage_account_endpoint(old_azure_blob_storage_account)
 
-new_search_key = new_secret_client.get_secret('AZURE-SEARCH-SERVICE-KEY').value
 new_search_endpoint = f'https://infoasst-search-{new_random_text}.search.windows.net'
 new_cosmosdb_url = f'https://infoasst-cosmos-{new_random_text}.documents.azure.com:443/'
 new_cosmosdb_key = new_secret_client.get_secret('COSMOSDB-KEY').value

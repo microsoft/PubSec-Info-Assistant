@@ -305,7 +305,7 @@ class StatusLog:
         trc = 'Traceback (most recent call last):\n'
         stackstr = trc + ''.join(traceback.format_list(stack))
         if exc is not None:
-            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+            stackstr += '  ' + traceback.format_exc().lstrip()
         return stackstr
 
     def get_all_tags(self):

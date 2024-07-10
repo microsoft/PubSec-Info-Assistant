@@ -121,7 +121,7 @@ utilities = Utilities(
     azure_blob_storage_endpoint=azure_blob_storage_endpoint,
     azure_blob_drop_storage_container=azure_blob_drop_storage_container,
     azure_blob_content_storage_container=azure_blob_content_storage_container,
-    azure_credential
+    azure_credential=azure_credential
 )
 
 

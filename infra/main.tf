@@ -701,6 +701,17 @@ module "openAiRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
+module "enrichmentOpenAiRoleBackend" {
+  source = "./core/security/role"
+
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
 module "webAppCognitiveServicesUserBackend" {
   source = "./core/security/role"
 
@@ -761,6 +772,28 @@ module "searchRoleBackend" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.webapp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.SearchIndexDataReader
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "functionSearchRoleBackend" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.SearchIndexDataReader
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "encrichmentSearchRoleBackend" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
   roleDefinitionId = local.azure_roles.SearchIndexDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id

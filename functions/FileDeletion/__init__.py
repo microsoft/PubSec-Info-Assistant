@@ -72,23 +72,6 @@ def get_deleted_blobs(blob_service_client: BlobServiceClient) -> list:
             deleted_blobs.append(blob.name)
     return deleted_blobs
 
-
-def purge_soft_deleted_blob(blob_service_client: BlobServiceClient) -> list:
-    '''Creates and returns a list of file paths that are soft-deleted.'''
-    # Create Uploaded Container Client and list all blobs, including deleted blobs
-    upload_container_client = blob_service_client.get_container_client(
-        blob_storage_account_upload_container_name)
-    temp_list = upload_container_client.list_blobs(include="deleted")
-
-    deleted_blobs = []
-    # Pull out the soft-deleted blob names
-    for blob in temp_list:
-        if blob.deleted:
-            logging.debug("\t Deleted Blob name: %s", blob.name)
-            deleted_blobs.append(blob.name)
-    return deleted_blobs
-
-
 def delete_content_blobs(blob_service_client: BlobServiceClient, deleted_blob: str) -> dict:
     '''Deletes blobs in the content container that correspond to a given
     soft-deleted blob from the upload container. Returns a list of deleted

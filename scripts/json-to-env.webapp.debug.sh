@@ -117,10 +117,6 @@ jq -r  '
             "env_var": "ENRICHMENT_APPSERVICE_URL"
         },
         {
-            "path": "AZURE_KEYVAULT_NAME",
-            "env_var": "AZURE_KEYVAULT_NAME"
-        },
-        {
             "path": "AZURE_OPENAI_CHATGPT_MODEL_NAME",
             "env_var": "AZURE_OPENAI_CHATGPT_MODEL_NAME"
         },

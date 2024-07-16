@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { BlobServiceClient } from "@azure/storage-blob";
+import { ContainerClient } from "@azure/storage-blob";
 import classNames from "classnames";
 import { nanoid } from "nanoid";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
-import { getBlobClient, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
+import { getBlobClientUrl, logStatus, StatusLogClassification, StatusLogEntry, StatusLogState } from "../../api"
 
 interface Props {
   folderPath: string;
@@ -50,32 +50,34 @@ const FilePicker = ({folderPath, tags}: Props) => {
       setUploadStarted(true);
 
       // create an instance of the BlobServiceClient
-      const blobServiceClient = await getBlobClient() as BlobServiceClient;
-
-      const containerClient = blobServiceClient.getContainerClient("upload");
+      const blobClientUrl = await getBlobClientUrl();
+      
+      const containerClient = new ContainerClient(blobClientUrl);
       var counter = 1;
       files.forEach(async (indexedFile: any) => {
         // add each file into Azure Blob Storage
         var file = indexedFile.file as File;
         var filePath = (folderPath == "") ? file.name : folderPath + "/" + file.name;
-        const blobClient = containerClient.getBlockBlobClient(filePath);
         // set mimetype as determined from browser with file upload control
         const options = {
           blobHTTPHeaders: { blobContentType: file.type },
           metadata: { tags: tags.map(encodeURIComponent).join(",") }
         };
-
-        // upload file
-        blobClient.uploadData(file, options);
-        //write status to log
-        var logEntry: StatusLogEntry = {
-          path: "upload/"+filePath,
-          status: "File uploaded from browser to Azure Blob Storage",
-          status_classification: StatusLogClassification.Info,
-          state: StatusLogState.Uploaded
+        try {
+          // upload file
+          await containerClient.uploadBlockBlob(filePath, file, file.size, options)
+          //write status to log
+          var logEntry: StatusLogEntry = {
+            path: "upload/"+filePath,
+            status: "File uploaded from browser to Azure Blob Storage",
+            status_classification: StatusLogClassification.Info,
+            state: StatusLogState.Uploaded
+          }
+          await logStatus(logEntry);
         }
-        await logStatus(logEntry);
-
+        catch (error) {
+          console.log("Unable to upload file"+filePath+" : Error: "+error);
+        }
         setProgress((counter/files.length) * 100);
         counter++;
       });

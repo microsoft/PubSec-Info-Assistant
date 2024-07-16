@@ -41,7 +41,7 @@ class UtilitiesHelper:
             blob_path.split(separator)[0:1])
 
         # Obtain the user delegation key
-        user_delegation_key = self.blob_service_client.get_user_delegation_key(key_start_time=datetime.now(datetime.UTC), key_expiry_time=datetime.now(datetime.UTC) + timedelta(hours=12))
+        user_delegation_key = self.blob_service_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=12))
 
         # Gen SAS token
         sas_token = generate_blob_sas(

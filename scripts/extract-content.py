@@ -381,7 +381,7 @@ if skip_upload_container == False:
         for blob in blob_list:
 
             # Obtain the user delegation key
-            old_user_delegation_key = old_blob_service_client.get_user_delegation_key(key_start_time=datetime.now(datetime.UTC), key_expiry_time=datetime.now(datetime.UTC) + timedelta(hours=12))
+            old_user_delegation_key = old_blob_service_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=12))
 
             # Generate SAS token for old blob
             old_sas_token = generate_container_sas(
@@ -394,7 +394,7 @@ if skip_upload_container == False:
             source_url = f"https://{old_azure_blob_storage_account}.blob.core.windows.net/{container_name}/{urllib.parse.quote(blob.name)}?{old_sas_token}"
 
             # Obtain the user delegation key
-            new_user_delegation_key = new_blob_service_client.get_user_delegation_key(key_start_time=datetime.now(datetime.UTC), key_expiry_time=datetime.now(datetime.UTC) + timedelta(hours=12))
+            new_user_delegation_key = new_blob_service_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=12))
 
             # Generate SAS token for new blob
             new_sas_token = generate_container_sas(

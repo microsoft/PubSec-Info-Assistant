@@ -21,6 +21,7 @@ def string_to_bool(s):
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
@@ -119,7 +120,7 @@ def main(msg: func.QueueMessage) -> None:
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete, {chunk_count} chunks created.', StatusClassification.DEBUG)  
                 
                 # submit message to the enrichment queue to continue processing                
-                queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=text_enrichment_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())
@@ -136,7 +137,7 @@ def main(msg: func.QueueMessage) -> None:
                     queued_count += 1
                     message_json['polling_queue_count'] = queued_count
                     statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Polling back off of attempt {queued_count} of {max_polling_requeue_count} for {backoff} seconds", StatusClassification.DEBUG, State.QUEUED) 
-                    queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                    queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=pdf_polling_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())
@@ -148,7 +149,7 @@ def main(msg: func.QueueMessage) -> None:
                 # unexpected status returned by FR, such as internal capacity overload, so requeue
                 if submit_queued_count < max_submit_requeue_count:
                     statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from Form Recognizer- code: {response.status_code} status: {response_status} - text: {response.text}. Document will be resubmitted', StatusClassification.ERROR)                  
-                    queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                    queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=pdf_submit_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())

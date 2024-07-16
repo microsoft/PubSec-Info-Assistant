@@ -2,11 +2,9 @@ locals {
   tags            = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles     = jsondecode(file("${path.module}/azure_roles.json"))
   selected_roles  = ["CognitiveServicesOpenAIUser", 
-                      "CognitiveServicesUser",
-                      "StorageBlobDataReader", 
-                      "StorageBlobDataContributor",
-                      "StorageQueueDataMessageProcessor",
-                      "SearchIndexDataReader", 
+                      "CognitiveServicesUser", 
+                      "StorageBlobDataOwner",
+                      "StorageQueueDataContributor", 
                       "SearchIndexDataContributor"]
 }
 
@@ -689,7 +687,7 @@ data "azurerm_resource_group" "existing" {
 }
 
 # # // SYSTEM IDENTITY ROLES
-module "openAiRoleBackend" {
+module "webApp_OpenAiRole" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
@@ -700,7 +698,7 @@ module "openAiRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "enrichmentOpenAiRoleBackend" {
+module "enrichmentApp_OpenAiRole" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
@@ -711,7 +709,7 @@ module "enrichmentOpenAiRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "webAppCognitiveServicesUserBackend" {
+module "webApp_CognitiveServicesUser" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
@@ -722,7 +720,7 @@ module "webAppCognitiveServicesUserBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "functionAppCognitiveServicesUserBackend" {
+module "functionApp_CognitiveServicesUser" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
@@ -733,29 +731,29 @@ module "functionAppCognitiveServicesUserBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "webAppStorageQueueDataMessageProcessorBackend" {
+module "enrichmentApp_StorageQueueDataContributor" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
-  principalId      = module.webapp.identityPrincipalId
-  roleDefinitionId = local.azure_roles.StorageQueueDataMessageProcessor
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageQueueDataContributor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "functionAppStorageQueueDataMessageProcessorBackend" {
+module "functionApp_StorageQueueDataContributor" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
   principalId      = module.functions.identityPrincipalId
-  roleDefinitionId = local.azure_roles.StorageQueueDataMessageProcessor
+  roleDefinitionId = local.azure_roles.StorageQueueDataContributor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "storageRoleBackend" {
+module "webApp_StorageBlobDataReader" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -766,7 +764,7 @@ module "storageRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "searchRoleBackend" {
+module "webApp_SearchIndexDataReader" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -777,7 +775,7 @@ module "searchRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "functionSearchRoleBackend" {
+module "functionApp_SearchIndexDataReader" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -788,7 +786,7 @@ module "functionSearchRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "encrichmentSearchRoleBackend" {
+module "encrichmentApp_SearchIndexDataReader" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -799,15 +797,25 @@ module "encrichmentSearchRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "storageRoleFunc" {
+module "fuctionApp_StorageBlobDataOwner" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.functions.function_app_identity_principal_id
-  roleDefinitionId = local.azure_roles.StorageBlobDataReader
+  roleDefinitionId = local.azure_roles.StorageBlobDataOwner
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "docIntel_StorageBlobDataReader" {
+  source = "./core/security/role"
+  scope = azurerm_resource_group.rg.id
+  principalId = module.aiDocIntelligence.docIntelligenceIdentity
+  roleDefinitionId = local.azure_roles.StorageBlobDataReader
+  principalType = "ServicePrincipal"
+  subscriptionId = data.azurerm_client_config.current.subscription_id
+  resourceGroupId = azurerm_resource_group.rg.id
 }
 
 module "aviRoleBackend" {

@@ -18,9 +18,9 @@ import { ITextFieldStyleProps, ITextFieldStyles, TextField } from '@fluentui/rea
 import { ILabelStyles, ILabelStyleProps } from '@fluentui/react/lib/Label';
 import { IIconProps } from '@fluentui/react';
 import { IButtonProps } from '@fluentui/react/lib/Button';
-import { BlobServiceClient } from "@azure/storage-blob";
+import { ContainerClient } from "@azure/storage-blob";
 
-import { getBlobClient } from "../../api";
+import { getBlobClientUrl } from "../../api";
 import styles from "./FolderPicker.module.css";
 
 var allowNewFolders = false;
@@ -85,8 +85,8 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
 
     async function fetchBlobFolderData() {
         try {
-            const blobServiceClient = await getBlobClient() as BlobServiceClient;
-            var containerClient = blobServiceClient.getContainerClient("upload");
+            const blobClientUrl = await getBlobClientUrl();
+            var containerClient = new ContainerClient(blobClientUrl);
             const delimiter = "/";
             const prefix = "";
             var newOptions: IComboBoxOption[] = allowNewFolders ? [] : [

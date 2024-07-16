@@ -38,6 +38,7 @@ ENV = {
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
     "AZURE_BLOB_STORAGE_CONTAINER": None,
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
+    "AZURE_QUEUE_STORAGE_ENDPOINT": None,
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": None,
     "COSMOSDB_URL": None,
     "COSMOSDB_KEY": None,
@@ -445,7 +446,7 @@ def poll_queue() -> None:
             if requeue_count <= int(ENV["MAX_EMBEDDING_REQUEUE_COUNT"]):
                 message_json['embeddings_queued_count'] = requeue_count
                 # Requeue with a random backoff within limits
-                queue_client = QueueClient(account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
+                queue_client = QueueClient(account_url=ENV["AZURE_QUEUE_STORAGE_ENDPOINT"],
                                queue_name=ENV["EMBEDDINGS_QUEUE"],
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())

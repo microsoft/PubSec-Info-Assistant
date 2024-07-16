@@ -15,6 +15,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
 ]
@@ -225,7 +226,7 @@ def main(msg: func.QueueMessage) -> None:
             block_blob_client.upload_blob(json_str, overwrite=True)
                 
         # Queue message to embeddings queue for downstream processing
-        queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+        queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=queueName,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())
@@ -298,7 +299,7 @@ def requeue(response, message_json):
             )
             queued_count += 1
             message_json["text_enrichment_queued_count"] = queued_count
-            queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+            queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=text_enrichment_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())

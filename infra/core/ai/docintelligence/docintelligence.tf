@@ -1,4 +1,4 @@
-resource "azurerm_cognitive_account" "formRecognizerAccount" {
+resource "azurerm_cognitive_account" "docIntelligenceAccount" {
   name                          = var.name
   location                      = var.location
   resource_group_name           = var.resourceGroupName
@@ -8,6 +8,9 @@ resource "azurerm_cognitive_account" "formRecognizerAccount" {
   public_network_access_enabled = var.is_secure_mode ? false : true
   local_auth_enabled            = var.is_secure_mode ? false : true
   tags                          = var.tags
+  identity {
+    type = "SystemAssigned"
+  }
 }
 
 data "azurerm_subnet" "subnet" {
@@ -17,7 +20,7 @@ data "azurerm_subnet" "subnet" {
   resource_group_name  = var.resourceGroupName
 }
 
-resource "azurerm_private_endpoint" "formPrivateEndpoint" {
+resource "azurerm_private_endpoint" "docintPrivateEndpoint" {
   count                         = var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
@@ -28,7 +31,7 @@ resource "azurerm_private_endpoint" "formPrivateEndpoint" {
   private_service_connection {
     name                           = "cognitiveAccount"
     is_manual_connection           = false
-    private_connection_resource_id = azurerm_cognitive_account.formRecognizerAccount.id
+    private_connection_resource_id = azurerm_cognitive_account.docIntelligenceAccount.id
     subresource_names               = ["account"]
   }
 

@@ -14,6 +14,7 @@ from shared_code.utilities import Utilities
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
 ]
@@ -125,7 +126,7 @@ def main(msg: func.QueueMessage) -> None:
             result_id = response.headers.get("apim-request-id")
             message_json["FR_resultId"] = result_id
             message_json["polling_queue_count"] = 1
-            queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+            queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=pdf_polling_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())
@@ -155,7 +156,7 @@ def main(msg: func.QueueMessage) -> None:
                     f"{FUNCTION_NAME} - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds",
                     StatusClassification.DEBUG,
                 )
-                queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+                queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=pdf_submit_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())

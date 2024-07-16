@@ -118,19 +118,15 @@ resource "azurerm_linux_function_app" "function_app" {
     type = "SystemAssigned"
   }
   
-  connection_string {
-    name  = "STORAGE_CONNECTION_STRING"
-    type  = "Custom"
-    value = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
-  }
-  
   app_settings = {
     WEBSITE_VNET_ROUTE_ALL                      = "1"  
     WEBSITE_CONTENTOVERVNET                     = var.is_secure_mode ? "1" : "0"
     SCM_DO_BUILD_DURING_DEPLOYMENT              = "false"
     ENABLE_ORYX_BUILD                           = "false"
-    AzureWebJobsStorage                         = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
+    AzureWebJobsStorage                         = ""
     AzureWebJobsStorage__accountName            = var.blobStorageAccountName
+    AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
+    AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
     WEBSITE_CONTENTAZUREFILECONNECTIONSTRING    = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
     WEBSITE_CONTENTSHARE                        = "funcfileshare"
     FUNCTIONS_WORKER_RUNTIME                    = var.runtime
@@ -178,6 +174,9 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_SEARCH_SERVICE_ENDPOINT               = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX                          = var.azureSearchIndex
     WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
+    STORAGE_CONNECTION_STRING                  = ""
+    STORAGE_CONNECTION_STRING__accountName      = var.blobStorageAccountName
+    STORAGE_CONNECTION_STRING__blobServiceUri  = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
     STORAGE_CONNECTION_STRING__queueServiceUri  = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
     AZURE_AI_CREDENTIAL_DOMAIN                  = var.azure_ai_credential_domain
   }

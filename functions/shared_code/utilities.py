@@ -76,6 +76,7 @@ class Utilities:
         self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
+        self.azure_credential = azure_credential
         self.utilities_helper = UtilitiesHelper(azure_blob_storage_account,
                                                 azure_blob_storage_endpoint,
                                                 azure_credential)
@@ -86,7 +87,7 @@ class Utilities:
         # Get path and file name minus the root container
         blob_service_client = BlobServiceClient(
             self.azure_blob_storage_endpoint,
-            credential=azure_credential
+            credential=self.azure_credential
             )
         block_blob_client = blob_service_client.get_blob_client(
             container=output_container, blob=f'{folder_set}{output_filename}')
@@ -326,7 +327,7 @@ class Utilities:
         file_name, file_extension, file_directory = self.get_filename_and_extension(myblob_name)
         blob_service_client = BlobServiceClient(
             self.azure_blob_storage_endpoint,
-            credential=azure_credential)
+            credential=self.azure_credential)
         json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
         block_blob_client = blob_service_client.get_blob_client(
             container=self.azure_blob_content_storage_container,

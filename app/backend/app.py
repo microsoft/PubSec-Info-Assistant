@@ -10,7 +10,7 @@ import json
 import urllib.parse
 import pandas as pd
 import pydantic
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import RedirectResponse, StreamingResponse
@@ -24,7 +24,7 @@ from approaches.approach import Approaches
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, generate_container_sas, ContainerSasPermissions
 from approaches.mathassistant import(
     generate_response,
     process_agent_response,
@@ -332,16 +332,27 @@ async def chat(request: Request):
 
     
 
-@app.get("/getblobclient")
-async def get_blob_client():
-    """Get an authenticated blob client.
+@app.get("/getblobclienturl")
+async def get_blob_client_url():
+    """Get a URL for a file in Blob Storage with SAS token.
 
-    This function generates a Blob Client for accessing the Blob Storage Account.
+    This function generates a Shared Access Signature (SAS) token for accessing a file in Blob Storage.
+    The generated URL includes the SAS token as a query parameter.
 
     Returns:
-        dict: A dictionary containing the Blob Client object.
+        dict: A dictionary containing the URL with the SAS token.
     """
-    return {"client": blob_client}
+    # Obtain the user delegation key
+    user_delegation_key = blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
+
+    sas_token = generate_container_sas(account_name=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
+                        container_name=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
+                        permission=ContainerSasPermissions(read=True, write=True, delete=False, list=True, tag=True, create=True),
+                        user_delegation_key=user_delegation_key,
+                        expiry=datetime.utcnow() + timedelta(hours=2)
+    )
+    
+    return {"url": f"{blob_client.url}upload?{sas_token}"}
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):

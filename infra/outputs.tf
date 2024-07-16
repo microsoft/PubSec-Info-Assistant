@@ -207,3 +207,31 @@ output "DNS_PRIVATE_RESOLVER_IP" {
 output "AZURE_AI_CREDENTIAL_DOMAIN" {
   value = var.azure_ai_private_link_domain
 }
+
+output "FUNC_AzureWebJobsStorage__accountName" {
+  value = module.functions.AzureWebJobsStorage__accountName
+}
+
+output "FUNC_AzureWebJobsStorage__blobServiceUri" {
+  value = module.functions.AzureWebJobsStorage__blobServiceUri
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__accountName" {
+  value = module.functions.STORAGE_CONNECTION_STRING__accountName
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri" {
+  value = module.functions.STORAGE_CONNECTION_STRING__queueServiceUri
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__blobServiceUri" {
+  value = module.functions.STORAGE_CONNECTION_STRING__blobServiceUri
+}
+
+output "AZURE_OPENAI_AUTHORITY_HOST" {
+  value = var.azure_openai_authority_host
+}
+
+output "AZURE_QUEUE_STORAGE_ENDPOINT" {
+  value = module.storage.primary_queue_endpoint
+}

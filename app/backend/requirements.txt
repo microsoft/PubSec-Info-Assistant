@@ -6,7 +6,7 @@ azure-mgmt-cognitiveservices==13.5.0
 openai==1.35.8
 # azure-search-documents==11.4.0
 azure-search-documents==11.4.0b11
-azure-storage-blob==12.16.0
+azure-storage-blob==12.20.0
 azure-cosmos == 4.7.0
 tiktoken == 0.7.0
 fastapi == 0.109.1

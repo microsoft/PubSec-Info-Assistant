@@ -17,6 +17,7 @@ import requests
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
@@ -206,7 +207,7 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.upsert_document(blob_name, f'{function_name} - chunking stored.', StatusClassification.DEBUG)   
         
         # submit message to the text enrichment queue to continue processing                
-        queue_client = QueueClient(account_url=azure_blob_storage_endpoint,
+        queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=text_enrichment_queue,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())

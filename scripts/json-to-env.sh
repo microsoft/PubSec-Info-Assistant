@@ -103,10 +103,6 @@ jq -r  '
             "env_var": "ENRICHMENT_APPSERVICE_NAME"
         },
         {
-            "path": "AZURE_KEYVAULT_NAME",
-            "env_var": "AZURE_KEYVAULT_NAME"
-        },
-        {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"
         },

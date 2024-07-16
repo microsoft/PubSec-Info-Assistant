@@ -28,7 +28,7 @@ azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
 # Authentication settings
-azure_authority_host = os.environ["AZURE_AUTHORITY_HOST"]
+azure_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 local_debug = os.environ.get("LOCAL_DEBUG", False)
 
 # Cosmos DB

@@ -6,20 +6,18 @@ import re
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
-from typing import Any, AsyncGenerator, Coroutine, Sequence
+from typing import Any, Sequence
 
 import openai
-from openai import AzureOpenAI
 from openai import  AsyncAzureOpenAI
 from approaches.approach import Approach
 from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
 from azure.storage.blob import (
-    AccountSasPermissions,
+    BlobSasPermissions,
     BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
+    generate_blob_sas,
 )
 from text import nonewlines
 from core.modelhelper import get_token_limit
@@ -479,20 +477,20 @@ class ChatReadRetrieveReadApproach(Approach):
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""
         try:
-            sas_token = generate_account_sas(
-                self.blob_client.account_name,
-                self.blob_client.credential.account_key,
-                resource_types=ResourceTypes(object=True, service=True, container=True),
-                permission=AccountSasPermissions(
-                    read=True,
-                    write=True,
-                    list=True,
-                    delete=False,
-                    add=True,
-                    create=True,
-                    update=True,
-                    process=False,
-                ),
+            separator = "/"
+            file_path_w_name_no_cont = separator.join(
+                source_file.split(separator)[4:])
+            container_name = separator.join(
+                source_file.split(separator)[3:4])
+            # Obtain the user delegation key
+            user_delegation_key = self.blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
+
+            sas_token = generate_blob_sas(
+                account_name=self.blob_client.account_name,
+                container_name=container_name,
+                blob_name=file_path_w_name_no_cont,
+                user_delegation_key=user_delegation_key,
+                permission=BlobSasPermissions(read=True),
                 expiry=datetime.utcnow() + timedelta(hours=1),
             )
             return source_file + "?" + sas_token

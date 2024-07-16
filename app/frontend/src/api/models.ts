@@ -67,8 +67,8 @@ export type ChatRequest = {
     thought_chain: { [key: string]: string };
 };
 
-export type BlobClientResponse = {
-    client: any;
+export type BlobClientUrlResponse = {
+    url: string;
     error?: string;
 };
 

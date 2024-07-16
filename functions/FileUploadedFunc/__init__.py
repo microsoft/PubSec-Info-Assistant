@@ -28,6 +28,7 @@ image_enrichment_queue = os.environ["IMAGE_ENRICHMENT_QUEUE"]
 max_seconds_hide_on_upload = int(os.environ["MAX_SECONDS_HIDE_ON_UPLOAD"])
 azure_blob_content_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_upload_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
@@ -121,10 +122,8 @@ def main(myblob: func.InputStream):
         }        
         message_string = json.dumps(message)
         
-        blob_client = BlobServiceClient(
-            account_url=azure_blob_endpoint,
-            credential=azure_credential,
-        )
+        blob_client = BlobServiceClient(azure_blob_endpoint,
+                                        credential=azure_credential)
         myblob_filename = myblob.name.split("/", 1)[1]
 
         # Check if the blob has been marked as 'do not process' and abort if so
@@ -169,12 +168,12 @@ def main(myblob: func.InputStream):
             logging.debug("No items to delete from AI Search index.")        
             
         # write tags to cosmos db once per file/message
-        blob_service_client = BlobServiceClient(account_url=azure_blob_endpoint, credential=azure_credential)
+        blob_service_client = BlobServiceClient(azure_blob_endpoint, credential=azure_credential)
         upload_container_client = blob_service_client.get_container_client(azure_blob_upload_container)
-        tag_list = get_tags_and_upload_to_cosmos(upload_container_client, myblob.name)
+        get_tags_and_upload_to_cosmos(upload_container_client, myblob.name)
         
         # Queue message with a random backoff so as not to put the next function under unnecessary load
-        queue_client = QueueClient(account_url=azure_blob_endpoint,
+        queue_client = QueueClient(account_url=azure_queue_endpoint,
                                queue_name=queue_name,
                                credential=azure_credential,
                                message_encode_policy=TextBase64EncodePolicy())

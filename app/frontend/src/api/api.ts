@@ -77,7 +77,7 @@ export async function getBlobClientUrl(): Promise<string> {
         throw Error(parsedResponse.error || "Unknown error");
     }
 
-    return decodeURIComponent(parsedResponse.url);
+    return parsedResponse.url;
 }
 
 export async function getAllUploadStatus(options: GetUploadStatusRequest): Promise<AllFilesUploadStatus> {

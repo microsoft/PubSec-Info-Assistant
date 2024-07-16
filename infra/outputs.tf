@@ -231,7 +231,3 @@ output "FUNC_STORAGE_CONNECTION_STRING__blobServiceUri" {
 output "AZURE_OPENAI_AUTHORITY_HOST" {
   value = var.azure_openai_authority_host
 }
-
-output "AZURE_QUEUE_STORAGE_ENDPOINT" {
-  value = module.storage.primary_queue_endpoint
-}

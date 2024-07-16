@@ -2,7 +2,6 @@ import json
 import logging
 import os
 
-import azure.ai.vision as visionsdk
 import azure.functions as func
 import requests
 from azure.storage.blob import BlobServiceClient
@@ -38,7 +37,6 @@ cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
 # Cognitive Services
-azure_ai_key = os.environ["AZURE_AI_KEY"]
 azure_ai_endpoint = os.environ["AZURE_AI_ENDPOINT"]
 azure_ai_location = os.environ["AZURE_AI_LOCATION"]
 azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
@@ -62,11 +60,11 @@ token_provider = get_bearer_token_provider(azure_credential,
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
 API_DETECT_ENDPOINT = (
-        f"{azure_ai_endpoint}translator/text/v3.0/detect"
-    )
+    f"{azure_ai_endpoint}translator/text/v3.0/detect"
+)
 API_TRANSLATE_ENDPOINT = (
-        f"{azure_ai_endpoint}translator/text/v3.0/translate"
-    )
+    f"{azure_ai_endpoint}translator/text/v3.0/translate"
+)
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {
@@ -75,15 +73,13 @@ translator_api_headers = {
     "Ocp-Apim-Subscription-Region": azure_ai_location,
 }
 
-# Vision SDK
-vision_service_options = visionsdk.VisionServiceOptions(
-    endpoint=azure_ai_endpoint, key=azure_ai_key
-)
+vison_api_headers = {
+    "Auhorization": f"Bearer {token_provider()}",
+    "Content-type": "application/json",
+}
 
-analysis_options = visionsdk.ImageAnalysisOptions()
-
-# Note that "CAPTION" and "DENSE_CAPTIONS" are only supported in Azure GPU regions (East US, France Central,
-# Korea Central, North Europe, Southeast Asia, West Europe, West US). Remove "CAPTION" and "DENSE_CAPTIONS"
+# Note that "cation" and "denseCaptions" are only supported in Azure GPU regions (East US, France Central,
+# Korea Central, North Europe, Southeast Asia, West Europe, West US). Remove "caption" and "denseCaptions"
 # from the list below if your Computer Vision key is not from one of those regions.
 
 if azure_ai_location in [
@@ -96,23 +92,22 @@ if azure_ai_location in [
     "westus",
 ]:
     GPU_REGION = True
-    analysis_options.features = (
-        visionsdk.ImageAnalysisFeature.CAPTION
-        | visionsdk.ImageAnalysisFeature.DENSE_CAPTIONS
-        | visionsdk.ImageAnalysisFeature.OBJECTS
-        | visionsdk.ImageAnalysisFeature.TEXT
-        | visionsdk.ImageAnalysisFeature.TAGS
+    visual_features = ["caption",
+                       "denseCaptions",
+                       "objects",
+                       "tags",
+                       "read"]
+    API_VISION_ENDPOINT = (
+    f"https://{azure_ai_location}.{azure_ai_endpoint[8:]}vision/v4.0/analyze?visualFeatures={','.join(visual_features)}"
     )
 else:
     GPU_REGION = False
-    analysis_options.features = (
-        visionsdk.ImageAnalysisFeature.OBJECTS
-        | visionsdk.ImageAnalysisFeature.TEXT
-        | visionsdk.ImageAnalysisFeature.TAGS
-    )
-
-analysis_options.model_version = "latest"
-
+    visual_features = ["objects",
+                       "tags",
+                       "read"]
+    API_VISION_ENDPOINT = (
+    f"https://{azure_ai_location}.{azure_ai_endpoint[8:]}vision/v3.2/analyze?visualFeatures={','.join(visual_features)}"
+)
 
 FUNCTION_NAME = "ImageEnrichment"
 
@@ -178,67 +173,69 @@ def main(msg: func.QueueMessage) -> None:
         )
 
         # Run the image through the Computer Vision service
-        file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_path)
+        file_name, file_extension, file_directory = utilities.get_filename_and_extension(
+            blob_path)
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
 
-        vision_source = visionsdk.VisionSource(url=blob_path_plus_sas)
-        image_analyzer = visionsdk.ImageAnalyzer(
-            vision_service_options, vision_source, analysis_options
-        )
-        result = image_analyzer.analyze()
+        data = {"url": blob_path_plus_sas}
 
-        text_image_summary = ""
-        index_content = ""
-        complete_ocr_text = None
+        response = requests.post(API_VISION_ENDPOINT,
+                                 headers=translator_api_headers,
+                                 json=data)
+        if response.status_code == 200:
+            print(response.json())
 
-        if result.reason == visionsdk.ImageAnalysisResultReason.ANALYZED:
+            text_image_summary = ""
+            index_content = ""
+            complete_ocr_text = None
+
             if GPU_REGION:
-                if result.caption is not None:
+                if response.json()["captionResult"] is not None:
                     text_image_summary += "Caption:\n"
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
-                        result.caption.content, result.caption.confidence
+                        response.json()["captionResult"]["text"], response.json()["captionResult"]["confidence"]
                     )
-                    index_content += "Caption: {}\n ".format(result.caption.content)
+                    index_content += "Caption: {}\n ".format(
+                        response.json()["captionResult"]["text"])
 
-                if result.dense_captions is not None:
+                if response.json()["denseCaptionsResult"] is not None:
                     text_image_summary += "Dense Captions:\n"
                     index_content += "DeepCaptions: "
-                    for caption in result.dense_captions:
+                    for caption in response.json()["denseCaptionsResult"]["values"]:
                         text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
-                            caption.content, caption.confidence
+                            caption["text"], caption["confidence"]
                         )
-                        index_content += "{}\n ".format(caption.content)
+                        index_content += "{}\n ".format(caption.text)
 
-            if result.objects is not None:
+            if response.json()["objectsResult"] is not None:
                 text_image_summary += "Objects:\n"
                 index_content += "Descriptions: "
-                for object_detection in result.objects:
+                for object_detection in response.json()["objectsResult"]["values"]:
                     text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
-                        object_detection.name, object_detection.confidence
+                        object_detection["tags"][0]["name"], object_detection["tags"][0]["confidence"]
                     )
-                    index_content += "{}\n ".format(object_detection.name)
+                    index_content += "{}\n ".format(
+                        object_detection["tags"][0]["name"])
 
-            if result.tags is not None:
+            if response.json()["tagsResult"] is not None:
                 text_image_summary += "Tags:\n"
-                for tag in result.tags:
+                for tag in response.json()["tagsResult"]["values"]:
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
-                        tag.name, tag.confidence
+                        tag["name"], tag["confidence"]
                     )
                     index_content += "{}\n ".format(tag.name)
 
-            if result.text is not None:
+            if response.json()["readResult"] is not None:
                 text_image_summary += "Raw OCR Text:\n"
                 complete_ocr_text = ""
-                for line in result.text.lines:
-                    complete_ocr_text += "{}\n".format(line.content)
+                for line in response.json()["readResult"]["blocks"][0]["lines"]:
+                    complete_ocr_text += "{}\n".format(line["text"])
                 text_image_summary += complete_ocr_text
 
         else:
-            error_details = visionsdk.ImageAnalysisErrorDetails.from_result(result)
-
             statusLog.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - Image analysis failed: {error_details.error_code} {error_details.error_code} {error_details.message}",
+                f"{FUNCTION_NAME} - Image analysis failed: {response.status_code} - {response.text}",
                 StatusClassification.ERROR,
                 State.ERROR,
             )
@@ -247,7 +244,8 @@ def main(msg: func.QueueMessage) -> None:
             # Detect language
             output_text = ""
 
-            detected_language, detection_confidence = detect_language(complete_ocr_text)
+            detected_language, detection_confidence = detect_language(
+                complete_ocr_text)
             text_image_summary += f"Raw OCR Text - Detected language: {detected_language}, Confidence: {detection_confidence}\n"
 
             if detected_language != targetTranslationLanguage:
@@ -302,12 +300,15 @@ def main(msg: func.QueueMessage) -> None:
         )
 
     try:
-        file_name, file_extension, file_directory = utilities.get_filename_and_extension(blob_path)
-        
+        file_name, file_extension, file_directory = utilities.get_filename_and_extension(
+            blob_path)
+
         # Get the tags from metadata on the blob
         path = file_directory + file_name + file_extension
-        blob_service_client = BlobServiceClient(account_url=azure_blob_storage_endpoint, credential=azure_credential)
-        blob_client = blob_service_client.get_blob_client(container=azure_blob_drop_storage_container, blob=path)
+        blob_service_client = BlobServiceClient(
+            account_url=azure_blob_storage_endpoint, credential=azure_credential)
+        blob_client = blob_service_client.get_blob_client(
+            container=azure_blob_drop_storage_container, blob=path)
         blob_properties = blob_client.get_blob_properties()
         tags = blob_properties.metadata.get("tags")
         if tags is not None:
@@ -321,9 +322,11 @@ def main(msg: func.QueueMessage) -> None:
         statusLog.update_document_tags(blob_path, tags_list)
 
         # Only one chunk per image currently.
-        chunk_file=utilities.build_chunk_filepath(file_directory, file_name, file_extension, '0')
+        chunk_file = utilities.build_chunk_filepath(
+            file_directory, file_name, file_extension, '0')
 
-        index_section(index_content, file_name, file_directory[:-1], statusLog.encode_document_id(chunk_file), chunk_file, blob_path, blob_uri, tags_list)
+        index_section(index_content, file_name, file_directory[:-1], statusLog.encode_document_id(
+            chunk_file), chunk_file, blob_path, blob_uri, tags_list)
 
         statusLog.upsert_document(
             blob_path,
@@ -338,7 +341,6 @@ def main(msg: func.QueueMessage) -> None:
             StatusClassification.ERROR,
             State.ERROR,
         )
-
 
     statusLog.save_document(blob_path)
 
@@ -364,7 +366,7 @@ def index_section(index_content, file_name, file_directory, chunk_id, chunk_file
     batch.append(index_chunk)
 
     search_client = SearchClient(endpoint=AZURE_SEARCH_SERVICE_ENDPOINT,
-                                    index_name=AZURE_SEARCH_INDEX,
-                                    credential=azure_credential)
+                                 index_name=AZURE_SEARCH_INDEX,
+                                 credential=azure_credential)
 
     search_client.upload_documents(documents=batch)

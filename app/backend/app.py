@@ -345,14 +345,14 @@ async def get_blob_client_url():
     # Obtain the user delegation key
     user_delegation_key = blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
 
-    sas_token = generate_container_sas(account_name=ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
+    sas_token = generate_container_sas(account_name=blob_client.account_name,
                         container_name=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
-                        permission=ContainerSasPermissions(read=True, write=True, delete=False, list=True, tag=True, create=True),
+                        permission=ContainerSasPermissions(read=True, write=True, delete=False, list=True, tag=True),
                         user_delegation_key=user_delegation_key,
                         expiry=datetime.utcnow() + timedelta(hours=2)
     )
     
-    return {"url": f"{blob_client.url}upload?{sas_token}"}
+    return {"url": f"{blob_client.url}upload?{sas_token}&restype=container"}
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):

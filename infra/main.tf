@@ -753,12 +753,12 @@ module "functionApp_StorageQueueDataContributor" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "webApp_StorageBlobDataReader" {
+module "webApp_StorageBlobDataContributor" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.webapp.identityPrincipalId
-  roleDefinitionId = local.azure_roles.StorageBlobDataReader
+  roleDefinitionId = local.azure_roles.StorageBlobDataContributor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id

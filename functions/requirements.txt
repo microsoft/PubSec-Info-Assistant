@@ -14,7 +14,7 @@ azure-cosmos == 4.7.0
 azure-storage-queue == 12.6.0
 nltk == 3.8.1
 tenacity == 8.2.3
-azure-ai-vision == 0.15.1b1
+azure-ai-vision-imageanalysis == 1.0.0b2
 unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.12.5
 pyoo == 1.4
 azure-search-documents == 11.4.0b11

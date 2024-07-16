@@ -15,5 +15,5 @@ output "formPrivateEndpoint" {
 }
 
 output "docIntelligenceIdentity" {
-  value = azurerm_cognitive_account.docIntelligenceAccount.identity
+  value = azurerm_cognitive_account.docIntelligenceAccount.identity[0].principal_id
 }

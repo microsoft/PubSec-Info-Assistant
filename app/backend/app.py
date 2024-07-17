@@ -352,7 +352,7 @@ async def get_blob_client_url():
                         expiry=datetime.utcnow() + timedelta(hours=2)
     )
     
-    return {"url": f"{blob_client.url}upload?{sas_token}&restype=container"}
+    return {"url": f"{blob_client.url}upload?{sas_token}"}
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):

@@ -72,7 +72,6 @@ ENV = {
     "KB_FIELDS_SOURCEFILE": "file_uri",
     "KB_FIELDS_CHUNKFILE": "chunk_file",
     "COSMOSDB_URL": None,
-    "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "QUERY_TERM_LANGUAGE": "English",
@@ -143,7 +142,7 @@ openai.azure_ad_token_provider = token_provider
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
     ENV["COSMOSDB_URL"],
-    ENV["COSMOSDB_KEY"],
+    azure_credential,
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
     ENV["COSMOSDB_LOG_CONTAINER_NAME"]
 )
@@ -380,7 +379,7 @@ async def get_all_upload_status(request: Request):
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key, consistency_level='Session')
+        cosmos_client = CosmosClient(url=statusLog._url, credential=azure_credential, consistency_level='Session')
         database = cosmos_client.get_database_client(statusLog._database_name)
         container = database.get_container_client(statusLog._container_name)
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
@@ -518,7 +517,7 @@ async def get_tags(request: Request):
     try:
         # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key, consistency_level='Session')     
+        cosmos_client = CosmosClient(url=statusLog._url, credential=azure_credential, consistency_level='Session')     
         database = cosmos_client.get_database_client(statusLog._database_name)               
         container = database.get_container_client(statusLog._container_name) 
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  

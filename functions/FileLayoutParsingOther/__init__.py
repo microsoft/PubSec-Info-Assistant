@@ -22,7 +22,6 @@ azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONT
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
@@ -132,7 +131,7 @@ def PartitionFile(file_extension: str, file_url: str):
 
 def main(msg: func.QueueMessage) -> None:
     try:
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
+        statusLog = StatusLog(cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name)
         logging.info('Python queue trigger function processed a queue item: %s',
                     msg.get_body().decode('utf-8'))
 

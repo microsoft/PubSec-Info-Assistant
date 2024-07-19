@@ -15,25 +15,8 @@ if [ -n "${IN_AUTOMATION}" ]; then
     az account set -s "$ARM_SUBSCRIPTION_ID" > /dev/null 2>&1
 fi
 
-secrets="{"
-# Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
-
-# Names of your secrets
-secretNames=("COSMOSDB-KEY")
-
-# Retrieve and export each secret
-for secretName in "${secretNames[@]}"; do
-  secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
-  envVarName=$(echo $secretName | tr '-' '_')
-  secrets+="\"$envVarName\": \"$secretValue\","
-done 
-secrets=${secrets%?} # Remove the trailing comma
-secrets+="}"
-secrets="${secrets%,}"
-
-jq -r --arg secrets "$secrets" '
-        [
+jq -r  '
+    [
         {
             "path": "AZURE_STORAGE_ACCOUNT",
             "env_var": "BLOB_STORAGE_ACCOUNT"
@@ -188,7 +171,7 @@ jq -r --arg secrets "$secrets" '
             "LOCAL_DEBUG": "true",
             "AzureWebJobsStorage": "",
             "STORAGE_CONNECTION_STRING": ""
-            } + ($secrets | fromjson)
+            }
              
     )}
     '

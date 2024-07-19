@@ -33,7 +33,6 @@ local_debug = os.environ.get("LOCAL_DEBUG", False)
 
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
@@ -153,7 +152,7 @@ def main(msg: func.QueueMessage) -> None:
     blob_uri = message_json["blob_uri"]
     try:
         statusLog = StatusLog(
-            cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
+            cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name
         )
         logging.info(
             "Python queue trigger function processed a queue item: %s",

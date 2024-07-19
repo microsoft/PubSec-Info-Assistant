@@ -19,17 +19,11 @@ blob_storage_account_output_container_name = os.environ[
 azure_search_service_endpoint = os.environ["AZURE_SEARCH_SERVICE_ENDPOINT"]
 azure_search_index = os.environ["AZURE_SEARCH_INDEX"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 local_debug = os.environ["LOCAL_DEBUG"] or "false"
 azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
 azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
-
-status_log = StatusLog(cosmosdb_url,
-                       cosmosdb_key,
-                       cosmosdb_log_database_name,
-                       cosmosdb_log_container_name)
 
 if azure_openai_authority_host == "AzureUSGovernment":
     AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
@@ -45,6 +39,11 @@ if local_debug == "true":
     azure_credential = DefaultAzureCredential(authority=AUTHORITY)
 else:
     azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+
+status_log = StatusLog(cosmosdb_url,
+                       azure_credential,
+                       cosmosdb_log_database_name,
+                       cosmosdb_log_container_name)
 
 def chunks(data, size):
     '''max number of blobs to delete in one request is 256, so this breaks

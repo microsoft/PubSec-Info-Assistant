@@ -114,7 +114,6 @@ resource "azurerm_linux_web_app" "app_service" {
       "SCM_DO_BUILD_DURING_DEPLOYMENT"            = lower(tostring(var.scmDoBuildDuringDeployment))
       "ENABLE_ORYX_BUILD"                         = lower(tostring(var.enableOryxBuild))
       "APPLICATIONINSIGHTS_CONNECTION_STRING"     = var.applicationInsightsConnectionString
-      "COSMOSDB_KEY"                              = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
       "BING_SEARCH_KEY"                           = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BINGSEARCH-KEY)"
       "WEBSITE_PULL_IMAGE_OVER_VNET"              = var.is_secure_mode ? "true" : "false"
       "WEBSITES_PORT"                             = "6000"

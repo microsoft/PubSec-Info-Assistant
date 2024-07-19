@@ -179,7 +179,6 @@ resource "azurerm_linux_function_app" "function_app" {
     ENRICHMENT_BACKOFF                          = var.enrichmentBackoff
     ENABLE_DEV_CODE                             = tostring(var.enableDevCode)
     EMBEDDINGS_QUEUE                            = var.EMBEDDINGS_QUEUE
-    COSMOSDB_KEY                                = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT               = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX                          = var.azureSearchIndex
     AZURE_AI_CREDENTIAL_DOMAIN                  = var.azure_ai_credential_domain

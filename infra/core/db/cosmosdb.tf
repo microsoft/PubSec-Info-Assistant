@@ -68,18 +68,6 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   partition_key_path = "/file_name"
 }
 
-module "cosmos_db_key" {
-  source                        = "../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "COSMOSDB-KEY"
-  secret_value                  = azurerm_cosmosdb_account.cosmosdb_account.primary_key
-  alias                         = "cosmoskey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
-}
-
 data "azurerm_subnet" "subnet" {
   count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name

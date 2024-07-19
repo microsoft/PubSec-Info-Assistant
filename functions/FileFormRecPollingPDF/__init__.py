@@ -31,7 +31,6 @@ FR_API_VERSION = os.environ["FR_API_VERSION"]
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
 # Separate each page number or range with a comma.
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
@@ -74,7 +73,7 @@ utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, a
 def main(msg: func.QueueMessage) -> None:
     
     try:
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
+        statusLog = StatusLog(cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name)
         # Receive message from the queue
         message_body = msg.get_body().decode('utf-8')
         message_json = json.loads(message_body)

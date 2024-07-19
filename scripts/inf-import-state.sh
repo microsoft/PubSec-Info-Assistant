@@ -494,9 +494,6 @@ import_resource_if_needed "$module_path" "$resourceId$providers"
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb/containers/statuscontainer"
 module_path="module.cosmosdb.azurerm_cosmosdb_sql_container.log_container"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "COSMOSDB-KEY")
-module_path="module.cosmosdb.azurerm_key_vault_secret.cosmos_db_key"
-import_resource_if_needed "$module_path" "$secret_id"
 
 
 # Search Service

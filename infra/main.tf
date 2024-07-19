@@ -681,6 +681,14 @@ module "userRoles" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
+resource "azurerm_cosmosdb_sql_role_assignment" "user_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = data.azurerm_client_config.current.object_id
+  scope = module.cosmosdb.id
+}
+
 data "azurerm_resource_group" "existing" {
   count = var.useExistingAOAIService ? 1 : 0
   name  = var.azureOpenAIResourceGroup
@@ -806,6 +814,30 @@ module "fuctionApp_StorageBlobDataOwner" {
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "webApp_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = module.webapp.identityPrincipalId
+  scope = module.cosmosdb.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "functionApp_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = module.functions.function_app_identity_principal_id
+  scope = module.cosmosdb.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "enrichmentApp_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = module.enrichmentApp.identityPrincipalId
+  scope = module.cosmosdb.id
 }
 
 module "docIntel_StorageBlobDataReader" {

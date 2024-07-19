@@ -41,7 +41,6 @@ ENV = {
     "AZURE_QUEUE_STORAGE_ENDPOINT": None,
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": None,
     "COSMOSDB_URL": None,
-    "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": None,
     "COSMOSDB_LOG_CONTAINER_NAME": None,
     "MAX_EMBEDDING_REQUEUE_COUNT": 5,
@@ -137,7 +136,7 @@ utilities_helper = UtilitiesHelper(
     credential=azure_credential
 )
 
-statusLog = StatusLog(ENV["COSMOSDB_URL"], ENV["COSMOSDB_KEY"], ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
+statusLog = StatusLog(ENV["COSMOSDB_URL"], azure_credential, ENV["COSMOSDB_LOG_DATABASE_NAME"], ENV["COSMOSDB_LOG_CONTAINER_NAME"])
 # === API Setup ===
 
 start_time = datetime.now()

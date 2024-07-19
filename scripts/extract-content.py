@@ -164,7 +164,6 @@ old_azure_blob_storage_endpoint = get_storage_account_endpoint(old_azure_blob_st
 
 new_search_endpoint = f'https://infoasst-search-{new_random_text}.search.windows.net'
 new_cosmosdb_url = f'https://infoasst-cosmos-{new_random_text}.documents.azure.com:443/'
-new_cosmosdb_key = new_secret_client.get_secret('COSMOSDB-KEY').value
 new_azure_blob_storage_account = f"infoasststore{new_random_text}"
 new_azure_blob_storage_endpoint = get_storage_account_endpoint(new_azure_blob_storage_account)
 
@@ -290,7 +289,7 @@ if skip_cosmos_db == False:
         old_status_container = old_status_database.get_container_client('statuscontainer')
         old_tags_database = old_cosmos_client.get_database_client('tagdb')
         old_tags_container = old_tags_database.get_container_client('tagcontainer')
-        new_cosmos_client = CosmosClient(new_cosmosdb_url, new_cosmosdb_key, consistency_level='Session')
+        new_cosmos_client = CosmosClient(new_cosmosdb_url, DefaultAzureCredential(), consistency_level='Session')
         new_status_database = new_cosmos_client.get_database_client('statusdb')
         new_status_container = new_status_database.get_container_client('statuscontainer')
 

@@ -105,7 +105,6 @@ resource "azurerm_linux_web_app" "enrichmentapp" {
       "SCM_DO_BUILD_DURING_DEPLOYMENT"            = lower(tostring(var.scmDoBuildDuringDeployment))
       "ENABLE_ORYX_BUILD"                         = tostring(var.enableOryxBuild)
       "APPLICATIONINSIGHTS_CONNECTION_STRING"     = var.applicationInsightsConnectionString
-      "COSMOSDB_KEY"                              = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
       "KEY_EXPIRATION_DATE"                       = timeadd(timestamp(), "4320h") # Added expiration date setting for keys
       "WEBSITE_PULL_IMAGE_OVER_VNET"              = var.is_secure_mode ? "true" : "false"
       "WEBSITES_PORT"                             = "6000"

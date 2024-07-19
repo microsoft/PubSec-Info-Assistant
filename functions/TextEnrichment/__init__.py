@@ -25,7 +25,6 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
@@ -43,10 +42,6 @@ azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
 
-
-statusLog = StatusLog(
-    cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
-)
 
 if azure_openai_authority_host == "AzureUSGovernment":
     AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
@@ -71,6 +66,11 @@ utilities = Utilities(
     azure_blob_content_storage_container,
     azure_credential,
 )
+
+statusLog = StatusLog(
+    cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name
+)
+
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
     It will first determine the language, and if this differs from

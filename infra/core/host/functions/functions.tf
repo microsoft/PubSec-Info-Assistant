@@ -93,7 +93,7 @@ resource "azurerm_linux_function_app" "function_app" {
   tags                                = var.tags
   public_network_access_enabled       = var.is_secure_mode ? false : true 
   virtual_network_subnet_id           = var.is_secure_mode ? var.subnetIntegration_id : null
-
+  content_share_force_disabled        = true
 
   site_config {
     application_stack {
@@ -112,6 +112,7 @@ resource "azurerm_linux_function_app" "function_app" {
     cors {
       allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
+    vnet_route_all_enabled = var.is_secure_mode ? true : false
   }
 
   identity {
@@ -119,21 +120,30 @@ resource "azurerm_linux_function_app" "function_app" {
   }
   
   app_settings = {
-    WEBSITE_VNET_ROUTE_ALL                      = "1"  
+    # Network realated settings for secure mode
+    WEBSITE_VNET_ROUTE_ALL                      = var.is_secure_mode ? "1" : "0"  
     WEBSITE_CONTENTOVERVNET                     = var.is_secure_mode ? "1" : "0"
+    WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
+    WEBSITE_SKIP_CONTENTSHARE_VALIDATION        = var.is_secure_mode ? "1" : "0"
+
     SCM_DO_BUILD_DURING_DEPLOYMENT              = "false"
     ENABLE_ORYX_BUILD                           = "false"
+    #Set all connections to use Managed Identity instead of connection strings
     AzureWebJobsStorage                         = ""
     AzureWebJobsStorage__accountName            = var.blobStorageAccountName
     AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
     AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
-    WEBSITE_CONTENTAZUREFILECONNECTIONSTRING    = "DefaultEndpointsProtocol=https;AccountName=${var.blobStorageAccountName};EndpointSuffix=${var.endpointSuffix};AccountKey=${data.azurerm_storage_account.existing_sa.primary_access_key}"
-    WEBSITE_CONTENTSHARE                        = "funcfileshare"
+    STORAGE_CONNECTION_STRING                  = ""
+    STORAGE_CONNECTION_STRING__accountName      = var.blobStorageAccountName
+    STORAGE_CONNECTION_STRING__blobServiceUri  = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
+    STORAGE_CONNECTION_STRING__queueServiceUri  = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
+    
     FUNCTIONS_WORKER_RUNTIME                    = var.runtime
     FUNCTIONS_EXTENSION_VERSION                 = "~4"
     WEBSITE_NODE_DEFAULT_VERSION                = "~14"
     APPLICATIONINSIGHTS_CONNECTION_STRING       = var.appInsightsConnectionString
     APPINSIGHTS_INSTRUMENTATIONKEY              = var.appInsightsInstrumentationKey
+    # Environment variables used by custom Python code
     BLOB_STORAGE_ACCOUNT                        = var.blobStorageAccountName
     BLOB_STORAGE_ACCOUNT_ENDPOINT               = var.blobStorageAccountEndpoint
     BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME  = var.blobStorageAccountUploadContainerName
@@ -161,7 +171,6 @@ resource "azurerm_linux_function_app" "function_app" {
     SUBMIT_REQUEUE_HIDE_SECONDS                 = var.submitRequeueHideSeconds
     POLLING_BACKOFF                             = var.pollingBackoff
     MAX_READ_ATTEMPTS                           = var.maxReadAttempts
-    AZURE_AI_KEY                                = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-AI-KEY)"
     AZURE_AI_ENDPOINT                           = var.enrichmentEndpoint
     ENRICHMENT_NAME                             = var.enrichmentName
     AZURE_AI_LOCATION                           = var.enrichmentLocation
@@ -173,11 +182,6 @@ resource "azurerm_linux_function_app" "function_app" {
     COSMOSDB_KEY                                = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT               = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX                          = var.azureSearchIndex
-    WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
-    STORAGE_CONNECTION_STRING                  = ""
-    STORAGE_CONNECTION_STRING__accountName      = var.blobStorageAccountName
-    STORAGE_CONNECTION_STRING__blobServiceUri  = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
-    STORAGE_CONNECTION_STRING__queueServiceUri  = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
     AZURE_AI_CREDENTIAL_DOMAIN                  = var.azure_ai_credential_domain
   }
 }

@@ -10,18 +10,6 @@ resource "azurerm_cognitive_account" "cognitiveService" {
   local_auth_enabled            = var.is_secure_mode ? false : true
 }
 
-module "search_service_key" {
-  source                        = "../../security/keyvaultSecret"
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  resourceGroupName             = var.resourceGroupName
-  secret_name                   = "AZURE-AI-KEY"
-  secret_value                  = azurerm_cognitive_account.cognitiveService.primary_access_key
-  alias                         = "aisvckey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
-}
-
 data "azurerm_subnet" "subnet" {
   count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name

@@ -20,7 +20,7 @@ secrets="{"
 keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("COSMOSDB-KEY" "AZURE-AI-KEY")
+secretNames=("COSMOSDB-KEY")
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do

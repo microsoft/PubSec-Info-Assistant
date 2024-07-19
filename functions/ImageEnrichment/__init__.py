@@ -4,13 +4,14 @@ import os
 
 import azure.functions as func
 import requests
+from azure.ai.vision.imageanalysis import ImageAnalysisClient
+from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.storage.blob import BlobServiceClient
 from azure.identity import ManagedIdentityCredential, DefaultAzureCredential, get_bearer_token_provider, AzureAuthorityHosts
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities, MediaType
 from azure.search.documents import SearchClient
 from datetime import datetime
-
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_drop_storage_container = os.environ[
@@ -73,11 +74,6 @@ translator_api_headers = {
     "Ocp-Apim-Subscription-Region": azure_ai_location,
 }
 
-vison_api_headers = {
-    "Auhorization": f"Bearer {token_provider()}",
-    "Content-type": "application/json",
-}
-
 # Note that "cation" and "denseCaptions" are only supported in Azure GPU regions (East US, France Central,
 # Korea Central, North Europe, Southeast Asia, West Europe, West US). Remove "caption" and "denseCaptions"
 # from the list below if your Computer Vision key is not from one of those regions.
@@ -92,22 +88,21 @@ if azure_ai_location in [
     "westus",
 ]:
     GPU_REGION = True
-    visual_features = ["caption",
-                       "denseCaptions",
-                       "objects",
-                       "tags",
-                       "read"]
-    API_VISION_ENDPOINT = (
-    f"https://{azure_ai_location}.{azure_ai_endpoint[8:]}vision/v4.0/analyze?visualFeatures={','.join(visual_features)}"
-    )
+    visual_features = [VisualFeatures.CAPTION,
+                          VisualFeatures.DENSE_CAPTIONS,
+                          VisualFeatures.OBJECTS,
+                          VisualFeatures.TAGS,
+                          VisualFeatures.READ]
 else:
     GPU_REGION = False
-    visual_features = ["objects",
-                       "tags",
-                       "read"]
-    API_VISION_ENDPOINT = (
-    f"https://{azure_ai_location}.{azure_ai_endpoint[8:]}vision/v3.2/analyze?visualFeatures={','.join(visual_features)}"
-)
+    visual_features = [VisualFeatures.OBJECTS,
+                       VisualFeatures.TAGS,
+                       VisualFeatures.READ]
+
+vision_client = ImageAnalysisClient(
+        endpoint=azure_ai_endpoint,
+        credential=azure_credential
+    )
 
 FUNCTION_NAME = "ImageEnrichment"
 
@@ -175,70 +170,76 @@ def main(msg: func.QueueMessage) -> None:
         # Run the image through the Computer Vision service
         file_name, file_extension, file_directory = utilities.get_filename_and_extension(
             blob_path)
-        blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
+        path = blob_path.split("/", 1)[1]
 
-        data = {"url": blob_path_plus_sas}
-
-        response = requests.post(API_VISION_ENDPOINT,
-                                 headers=translator_api_headers,
-                                 json=data)
-        if response.status_code == 200:
-            print(response.json())
+        try:
+            blob_service_client = BlobServiceClient(account_url=azure_blob_storage_endpoint,
+                                                    credential=azure_credential)
+            blob_client = blob_service_client.get_blob_client(container=azure_blob_drop_storage_container,
+                                                              blob=path)
+            image_data = blob_client.download_blob().readall()
+            response = vision_client.analyze(image_data=image_data,
+                                             visual_features=visual_features,
+                                             gender_neutral_caption=True)
+            
+            print(response)
 
             text_image_summary = ""
             index_content = ""
             complete_ocr_text = None
 
             if GPU_REGION:
-                if response.json()["captionResult"] is not None:
+                if response.caption is not None:
                     text_image_summary += "Caption:\n"
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
-                        response.json()["captionResult"]["text"], response.json()["captionResult"]["confidence"]
+                        response.caption.text, response.caption.confidence
                     )
                     index_content += "Caption: {}\n ".format(
-                        response.json()["captionResult"]["text"])
+                        response.caption.text)
 
-                if response.json()["denseCaptionsResult"] is not None:
+                if response.dense_captions is not None:
                     text_image_summary += "Dense Captions:\n"
                     index_content += "DeepCaptions: "
-                    for caption in response.json()["denseCaptionsResult"]["values"]:
+                    for caption in response.dense_captions.values:
                         text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
-                            caption["text"], caption["confidence"]
+                            caption.text, caption.confidence
                         )
                         index_content += "{}\n ".format(caption.text)
 
-            if response.json()["objectsResult"] is not None:
+            if response.objects is not None:
                 text_image_summary += "Objects:\n"
                 index_content += "Descriptions: "
-                for object_detection in response.json()["objectsResult"]["values"]:
+                for object_detection in response.objects.values:
                     text_image_summary += "\t'{}', Confidence: {:.4f}\n".format(
-                        object_detection["tags"][0]["name"], object_detection["tags"][0]["confidence"]
+                        object_detection.tags[0].name, object_detection.tags[0].confidence
                     )
                     index_content += "{}\n ".format(
-                        object_detection["tags"][0]["name"])
+                        object_detection.tags[0].name)
 
-            if response.json()["tagsResult"] is not None:
+            if response.tags is not None:
                 text_image_summary += "Tags:\n"
-                for tag in response.json()["tagsResult"]["values"]:
+                for tag in response.tags.values:
                     text_image_summary += "\t'{}', Confidence {:.4f}\n".format(
-                        tag["name"], tag["confidence"]
+                        tag.name, tag.confidence
                     )
                     index_content += "{}\n ".format(tag.name)
 
-            if response.json()["readResult"] is not None:
+            if response.read is not None:
                 text_image_summary += "Raw OCR Text:\n"
                 complete_ocr_text = ""
-                for line in response.json()["readResult"]["blocks"][0]["lines"]:
-                    complete_ocr_text += "{}\n".format(line["text"])
+                for line in response.read.blocks[0].lines:
+                    complete_ocr_text += "{}\n".format(line.text)
                 text_image_summary += complete_ocr_text
 
-        else:
+        except Exception as ex:
+            logging.error(f"{FUNCTION_NAME} - Image analysis failed for {blob_path}: {str(ex)}")
             statusLog.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - Image analysis failed: {response.status_code} - {response.text}",
+                f"{FUNCTION_NAME} - Image analysis failed: {str(ex)}",
                 StatusClassification.ERROR,
                 State.ERROR,
             )
+            raise ex
 
         if complete_ocr_text not in [None, ""]:
             # Detect language

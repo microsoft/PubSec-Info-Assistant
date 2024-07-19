@@ -207,9 +207,9 @@ keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
 if [ -n "${SECURE_MODE}" ]; then
-    secretNames=("COSMOSDB-KEY" "AZURE-AI-KEY")
+    secretNames=("COSMOSDB-KEY")
 else
-    secretNames=("COSMOSDB-KEY" "BINGSEARCH-KEY" "AZURE-AI-KEY")    
+    secretNames=("COSMOSDB-KEY" "BINGSEARCH-KEY")    
 fi
 
 

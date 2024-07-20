@@ -133,6 +133,8 @@ resource "azurerm_linux_function_app" "function_app" {
     AzureWebJobsStorage__accountName            = var.blobStorageAccountName
     AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
     AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
+    AzureWebJobsStorage__tableServiceUri        = "https://${var.blobStorageAccountName}.table.${var.endpointSuffix}"
+    AzureWebJobsStorage__fileServiceUri         = "https://${var.blobStorageAccountName}.file.${var.endpointSuffix}"
     STORAGE_CONNECTION_STRING                  = ""
     STORAGE_CONNECTION_STRING__accountName      = var.blobStorageAccountName
     STORAGE_CONNECTION_STRING__blobServiceUri  = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"

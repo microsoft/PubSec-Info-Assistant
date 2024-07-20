@@ -25,7 +25,7 @@ fi
 search_url="${AZURE_SEARCH_SERVICE_ENDPOINT}"
 
 # Obtain an access token for Azure Search
-access_token=$(az account get-access-token --resource https://search.azure.com --query accessToken -o tsv)
+access_token=$(az account get-access-token --query accessToken -o tsv)
 
 
 # Fetch existing index definition if it exists

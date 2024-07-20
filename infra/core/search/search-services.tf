@@ -6,7 +6,7 @@ resource "azurerm_search_service" "search" {
   sku                           = var.sku["name"]
   tags                          = var.tags
   public_network_access_enabled = var.is_secure_mode ? false : true
-  local_authentication_enabled  = var.is_secure_mode ? false : true
+  local_authentication_enabled  = false
   replica_count                 = 1
   partition_count               = 1
   semantic_search_sku           = var.semanticSearch 

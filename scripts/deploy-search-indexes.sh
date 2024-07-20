@@ -25,8 +25,7 @@ fi
 search_url="${AZURE_SEARCH_SERVICE_ENDPOINT}"
 
 # Obtain an access token for Azure Search
-access_token=$(az account get-access-token --query accessToken -o tsv)
-
+access_token=$(az account get-access-token --resource $TF_VAR_azure_search_scope --query accessToken -o tsv)
 
 # Fetch existing index definition if it exists
 index_vector_json=$(cat ${DIR}/../azure_search/create_vector_index.json | envsubst | tr -d "\n" | tr -d "\r")

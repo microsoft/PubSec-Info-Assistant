@@ -169,8 +169,6 @@ jq -r  '
             "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
             "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue",
             "LOCAL_DEBUG": "true",
-            "AzureWebJobsStorage": "",
-            "STORAGE_CONNECTION_STRING": ""
             }
              
     )}

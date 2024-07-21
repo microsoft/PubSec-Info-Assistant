@@ -720,7 +720,7 @@ module "enrichmentApp_OpenAiRole" {
 module "webApp_CognitiveServicesUser" {
   source = "./core/security/role"
 
-  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  scope            = azurerm_resource_group.rg.id
   principalId      = module.webapp.identityPrincipalId
   roleDefinitionId = local.azure_roles.CognitiveServicesUser
   principalType    = "ServicePrincipal"
@@ -731,7 +731,7 @@ module "webApp_CognitiveServicesUser" {
 module "functionApp_CognitiveServicesUser" {
   source = "./core/security/role"
 
-  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  scope            = azurerm_resource_group.rg.id
   principalId      = module.functions.identityPrincipalId
   roleDefinitionId = local.azure_roles.CognitiveServicesUser
   principalType    = "ServicePrincipal"
@@ -742,7 +742,7 @@ module "functionApp_CognitiveServicesUser" {
 module "enrichmentApp_StorageQueueDataContributor" {
   source = "./core/security/role"
 
-  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  scope            = azurerm_resource_group.rg.id
   principalId      = module.enrichmentApp.identityPrincipalId
   roleDefinitionId = local.azure_roles.StorageQueueDataContributor
   principalType    = "ServicePrincipal"
@@ -753,7 +753,7 @@ module "enrichmentApp_StorageQueueDataContributor" {
 module "functionApp_StorageQueueDataContributor" {
   source = "./core/security/role"
 
-  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  scope            = azurerm_resource_group.rg.id
   principalId      = module.functions.identityPrincipalId
   roleDefinitionId = local.azure_roles.StorageQueueDataContributor
   principalType    = "ServicePrincipal"
@@ -809,7 +809,7 @@ module "fuctionApp_StorageBlobDataOwner" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = module.functions.function_app_identity_principal_id
+  principalId      = module.functions.identityPrincipalId
   roleDefinitionId = local.azure_roles.StorageBlobDataOwner
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
@@ -828,7 +828,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "functionApp_cosmosdb_data_contr
   resource_group_name = azurerm_resource_group.rg.name
   account_name = module.cosmosdb.name
   role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
-  principal_id = module.functions.function_app_identity_principal_id
+  principal_id = module.functions.identityPrincipalId
   scope = module.cosmosdb.id
 }
 

@@ -129,16 +129,13 @@ resource "azurerm_linux_function_app" "function_app" {
     SCM_DO_BUILD_DURING_DEPLOYMENT              = "false"
     ENABLE_ORYX_BUILD                           = "false"
     #Set all connections to use Managed Identity instead of connection strings
-    AzureWebJobsStorage                         = ""
     AzureWebJobsStorage__accountName            = var.blobStorageAccountName
     AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
     AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
     AzureWebJobsStorage__tableServiceUri        = "https://${var.blobStorageAccountName}.table.${var.endpointSuffix}"
     AzureWebJobsStorage__fileServiceUri         = "https://${var.blobStorageAccountName}.file.${var.endpointSuffix}"
-    STORAGE_CONNECTION_STRING                  = ""
-    STORAGE_CONNECTION_STRING__accountName      = var.blobStorageAccountName
-    STORAGE_CONNECTION_STRING__blobServiceUri  = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
-    STORAGE_CONNECTION_STRING__queueServiceUri  = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
+    AzureWebJobsSecretStorageKeyVaultUri        = data.azurerm_key_vault.existing.vault_uri
+    AzureWebJobsSecretStorageType               = "keyvault"
     
     FUNCTIONS_WORKER_RUNTIME                    = var.runtime
     FUNCTIONS_EXTENSION_VERSION                 = "~4"
@@ -184,6 +181,8 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_SEARCH_SERVICE_ENDPOINT               = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX                          = var.azureSearchIndex
     AZURE_AI_CREDENTIAL_DOMAIN                  = var.azure_ai_credential_domain
+    AZURE_OPENAI_AUTHORITY_HOST                 = var.azure_environment
+    LOCAL_DEBUG                                 = "false"
   }
 }
 
@@ -232,7 +231,9 @@ resource "azurerm_key_vault_access_policy" "policy" {
 
   secret_permissions = [
     "Get",
-    "List"
+    "List",
+    "Set",
+    "Delete"
   ]
 }
 

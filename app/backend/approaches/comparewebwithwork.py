@@ -62,7 +62,6 @@ class CompareWebWithWork(Approach):
         target_translation_language: str,
         enrichment_endpoint:str,
         enrichment_key:str,
-        azure_ai_translation_domain: str,
         use_semantic_reranker: bool
     ):
         self.search_client = search_client
@@ -84,7 +83,6 @@ class CompareWebWithWork(Approach):
         self.model_name = model_name
         self.model_version = model_version
         self.enrichment_appservice_url = enrichment_appservice_url
-        self.azure_ai_translation_domain = azure_ai_translation_domain
         self.use_semantic_reranker = use_semantic_reranker
         
           # openai.api_base = oai_endpoint
@@ -126,7 +124,6 @@ class CompareWebWithWork(Approach):
                                     self.target_translation_language,
                                     self.enrichment_endpoint,
                                     self.enrichment_key,
-                                    self.azure_ai_translation_domain,
                                     self.use_semantic_reranker
                                 )
         rrr_response = chat_rrr_approach.run(history, overrides, {}, thought_chain)

@@ -111,7 +111,6 @@ SUBMIT_REQUEUE_HIDE_SECONDS | If a throttling event occurs on upload, the messag
 TARGET_TRANSLATION_LANGUAGE | The target language that the process will translate chunks into
 ENRICHMENT_BACKOFF | The number of seconds a message will be invisible when resubmitted to the enrichment queue after a failure due to throttling. This will increase exponentially for every subsequent time a failure occurs
 MAX_ENRICHMENT_REQUEUE_COUNT | The maximum number of times a message will be pushed to the enrichment queue after a failure in the enrichment function
-TARGET_TRANSLATION_LANGUAGE | The language you wish all chunks to be translated to
 FR_API_VERSION | The API version of [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) which you wish to use
 
 Likewise, below are some configuration values of the App Service that you may wish to adapt to your scenario

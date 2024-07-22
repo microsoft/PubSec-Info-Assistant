@@ -29,7 +29,8 @@ azure_blob_content_storage_container = os.environ[
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-azure_ai_translation_domain = os.environ["AZURE_AI_TRANSLATION_DOMAIN"]
+
+enrichmentEndpoint = os.environ["ENRICHMENT_ENDPOINT"] 
 
 # Cosmos DB
 cosmosdb_url = os.environ["COSMOSDB_URL"]
@@ -51,17 +52,16 @@ SEARCH_CREDS = AzureKeyCredential(os.environ.get("AZURE_SEARCH_SERVICE_KEY"))
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
 API_DETECT_ENDPOINT = (
-        f"https://{azure_ai_translation_domain}/detect?api-version=3.0"
+        f"{enrichmentEndpoint}language/:analyze-text?api-version=2023-04-01"
     )
 API_TRANSLATE_ENDPOINT = (
-        f"https://{azure_ai_translation_domain}/translate?api-version=3.0"
+        f"{enrichmentEndpoint}translator/text/v3.0/translate?api-version=3.0"
     )
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {
     "Ocp-Apim-Subscription-Key": cognitive_services_key,
     "Content-type": "application/json",
-    "Ocp-Apim-Subscription-Region": cognitive_services_account_location,
 }
 
 # Vision SDK
@@ -116,14 +116,25 @@ utilities = Utilities(
 
 
 def detect_language(text):
-    data = [{"text": text[:MAX_CHARS_FOR_DETECTION]}]
+        data = {
+            "kind": "LanguageDetection",
+            "analysisInput":{
+                "documents":[
+                    {
+                        "id":"1",
+                        "text": text[:MAX_CHARS_FOR_DETECTION]
+                    }
+                ]
+            }
+        } 
+
     response = requests.post(
         API_DETECT_ENDPOINT, headers=translator_api_headers, json=data
     )
     if response.status_code == 200:
         print(response.json())
-        detected_language = response.json()[0]["language"]
-        detection_confidence = response.json()[0]["score"]
+        detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
+        detection_confidence = response.json()["results"]["documents"][0]["detectedLanguage"]["confidenceScore"]
 
     return detected_language, detection_confidence
 
@@ -286,7 +297,7 @@ def main(msg: func.QueueMessage) -> None:
     except Exception as error:
         statusLog.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - An error occurred - {str(error)}",
+            f"{FUNCTION_NAME} - 22 An error occurred - {str(error)}",
             StatusClassification.ERROR,
             State.ERROR,
         )

@@ -116,17 +116,17 @@ utilities = Utilities(
 
 
 def detect_language(text):
-        data = {
-            "kind": "LanguageDetection",
-            "analysisInput":{
-                "documents":[
-                    {
-                        "id":"1",
-                        "text": text[:MAX_CHARS_FOR_DETECTION]
-                    }
-                ]
-            }
-        } 
+    data = {
+        "kind": "LanguageDetection",
+        "analysisInput":{
+            "documents":[
+                {
+                    "id":"1",
+                    "text": text[:MAX_CHARS_FOR_DETECTION]
+                }
+            ]
+        }
+    } 
 
     response = requests.post(
         API_DETECT_ENDPOINT, headers=translator_api_headers, json=data
@@ -297,7 +297,7 @@ def main(msg: func.QueueMessage) -> None:
     except Exception as error:
         statusLog.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - 22 An error occurred - {str(error)}",
+            f"{FUNCTION_NAME} - An error occurred - {str(error)}",
             StatusClassification.ERROR,
             State.ERROR,
         )

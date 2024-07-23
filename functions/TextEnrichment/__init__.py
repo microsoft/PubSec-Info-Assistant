@@ -237,7 +237,7 @@ def main(msg: func.QueueMessage) -> None:
     except Exception as error:
         statusLog.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - An error 11 occurred - {str(error)}",
+            f"{FUNCTION_NAME} - An error occurred - {str(error)}",
             StatusClassification.ERROR,
             State.ERROR,
         )

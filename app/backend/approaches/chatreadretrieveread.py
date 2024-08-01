@@ -194,6 +194,8 @@ class ChatReadRetrieveReadApproach(Approach):
                     # max_tokens=32, # setting it too low may cause malformed JSON
                     max_tokens=100,
                 n=1)
+            if not chat_completion or not chat_completion.choices[0].message.content:
+                raise ValueError("No choices returned in chat completion response")
         
         except Exception as e:
             log.error(f"Error generating optimized keyword search: {str(e)}")

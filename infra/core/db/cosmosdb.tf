@@ -35,7 +35,7 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
   kind                          = "GlobalDocumentDB"
   tags                          = var.tags
   public_network_access_enabled = var.is_secure_mode ? false : true
-  #local_authentication_disabled = var.is_secure_mode ? true : false
+  local_authentication_disabled = var.is_secure_mode ? true : false
 
   consistency_policy {
     consistency_level       = var.defaultConsistencyLevel
@@ -65,7 +65,7 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   account_name        = azurerm_cosmosdb_account.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.log_database.name
 
-  partition_key_path = "/file_name"
+  partition_key_paths = ["/file_name"]
 }
 
 data "azurerm_subnet" "subnet" {

@@ -98,21 +98,21 @@ resource "azurerm_linux_function_app" "function_app" {
   site_config {
     application_stack {
       docker {
-        image_name        = "${var.container_registry}/functionapp"
-        image_tag         = "latest"
-        registry_url      = "https://${var.container_registry}"
-        registry_username = var.container_registry_admin_username
-        registry_password = var.container_registry_admin_password
+        image_name                    = "${var.container_registry}/functionapp"
+        image_tag                     = "latest"
+        registry_url                  = "https://${var.container_registry}"
+        registry_username             = var.container_registry_admin_username
+        registry_password             = var.container_registry_admin_password
       }
     }
-    container_registry_use_managed_identity       = true
-    always_on        = true
-    http2_enabled    = true
-    ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
+    container_registry_use_managed_identity = true
+    always_on                               = true
+    http2_enabled                           = true
+    ftps_state                              = var.is_secure_mode ? "Disabled" : var.ftpsState
     cors {
-      allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
+      allowed_origins                       = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
-    vnet_route_all_enabled = var.is_secure_mode ? true : false
+    vnet_route_all_enabled                  = var.is_secure_mode ? true : false
   }
 
   identity {
@@ -136,6 +136,12 @@ resource "azurerm_linux_function_app" "function_app" {
     AzureWebJobsStorage__fileServiceUri         = "https://${var.blobStorageAccountName}.file.${var.endpointSuffix}"
     AzureWebJobsSecretStorageKeyVaultUri        = data.azurerm_key_vault.existing.vault_uri
     AzureWebJobsSecretStorageType               = "keyvault"
+
+    AzureStorageConnection1__accountName            = var.blobStorageAccountName
+    AzureStorageConnection1__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
+    AzureStorageConnection1__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
+    AzureStorageConnection1__tableServiceUri        = "https://${var.blobStorageAccountName}.table.${var.endpointSuffix}"
+    AzureStorageConnection1__fileServiceUri         = "https://${var.blobStorageAccountName}.file.${var.endpointSuffix}"
     
     FUNCTIONS_WORKER_RUNTIME                    = var.runtime
     FUNCTIONS_EXTENSION_VERSION                 = "~4"

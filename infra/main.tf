@@ -739,6 +739,17 @@ module "functionApp_CognitiveServicesUser" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
+module "enrichmentApp_CognitiveServicesUser" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
 module "enrichmentApp_StorageQueueDataContributor" {
   source = "./core/security/role"
 
@@ -799,7 +810,7 @@ module "encrichmentApp_SearchIndexDataReader" {
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.enrichmentApp.identityPrincipalId
-  roleDefinitionId = local.azure_roles.SearchIndexDataReader
+  roleDefinitionId = local.azure_roles.SearchIndexDataContributor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
@@ -811,6 +822,28 @@ module "fuctionApp_StorageBlobDataOwner" {
   scope            = azurerm_resource_group.rg.id
   principalId      = module.functions.identityPrincipalId
   roleDefinitionId = local.azure_roles.StorageBlobDataOwner
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "enrichmentApp_StorageBlobDataOwner" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageBlobDataOwner
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "fuctionApp_StorageAccountContributor" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageAccountContributor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id

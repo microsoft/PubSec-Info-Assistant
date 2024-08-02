@@ -4,6 +4,7 @@ import os
 
 import azure.functions as func
 import requests
+from azure.core.credentials import AzureKeyCredential
 from azure.ai.vision.imageanalysis import ImageAnalysisClient
 from azure.ai.vision.imageanalysis.models import VisualFeatures
 from azure.storage.blob import BlobServiceClient
@@ -37,6 +38,7 @@ cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 
 # Cognitive Services
+azure_ai_key = os.environ["AZURE_AI_KEY"]
 azure_ai_endpoint = os.environ["AZURE_AI_ENDPOINT"]
 azure_ai_location = os.environ["AZURE_AI_LOCATION"]
 azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
@@ -100,7 +102,7 @@ else:
 
 vision_client = ImageAnalysisClient(
         endpoint=azure_ai_endpoint,
-        credential=azure_credential
+        credential=AzureKeyCredential(azure_ai_key)
     )
 
 FUNCTION_NAME = "ImageEnrichment"

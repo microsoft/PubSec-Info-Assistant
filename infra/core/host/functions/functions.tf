@@ -176,6 +176,7 @@ resource "azurerm_linux_function_app" "function_app" {
     SUBMIT_REQUEUE_HIDE_SECONDS                 = var.submitRequeueHideSeconds
     POLLING_BACKOFF                             = var.pollingBackoff
     MAX_READ_ATTEMPTS                           = var.maxReadAttempts
+    AZURE_AI_KEY                                = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-AI-KEY)"
     AZURE_AI_ENDPOINT                           = var.enrichmentEndpoint
     ENRICHMENT_NAME                             = var.enrichmentName
     AZURE_AI_LOCATION                           = var.enrichmentLocation

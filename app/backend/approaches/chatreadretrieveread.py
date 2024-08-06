@@ -394,13 +394,6 @@ class ChatReadRetrieveReadApproach(Approach):
             #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
             #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
             #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-                chat_completion= await self.client.chat.completions.create(
-                    model=self.chatgpt_deployment,
-                    messages=messages,
-                    temperature=float(overrides.get("response_temp")) or 0.6,
-                    n=1,
-                    stream=True
-                )
 
             elif self.model_name.startswith("gpt-4"):
                 messages = self.get_messages_from_history(

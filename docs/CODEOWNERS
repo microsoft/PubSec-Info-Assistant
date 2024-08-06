@@ -5,16 +5,16 @@
 *       @dayland @asbanger @georearl
 
 
-/app/ @dayland @georearl
+/app/ @dayland @wotey
 
-/infra/  @asbanger @dayland 
+/infra/ @dayland @wotey
 
-/artifacts/ @georearl @dayland
+/artifacts/ @dayland
 
-/azure_search/ @dayland @georearl
+/azure_search/ @dayland
 
-/docs/ @dayland @georearl
+/docs/ @dayland @lon-tierney
 
-/scripts/ @dayland @asbanger
+/scripts/ @dayland @wotey
 
-/.devcontrainer/  @asbanger @dayland
+/.devcontrainer/ @dayland

@@ -187,6 +187,17 @@ class CompareWebWithWork(Approach):
             async for chunk in chat_completion:
                 # Check if there is at least one element and the first element has the key 'delta'
                 if len(chunk.choices) > 0:
+                    filter_reasons = []
+                    # Check for content filtering
+                    if chunk.choices[0].finish_reason == 'content_filter':
+                        for category, details in chunk.choices[0].content_filter_results.items():
+                            if details['filtered']:
+                                filter_reasons.append(f"{category} ({details['severity']})")
+
+                    # Raise an error if any filters are triggered
+                    if filter_reasons:
+                        error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                        raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
             # Step 4: Append web citations from the Bing Search approach
             for idx, url in enumerate(work_citations.keys(), start=1):
@@ -214,6 +225,18 @@ class CompareWebWithWork(Approach):
             temperature=0.6,
             n=1
         )
+        filter_reasons = []
+
+        # Check for content filtering
+        if chat_completion.choices[0].finish_reason == 'content_filter':
+            for category, details in chat_completion.choices[0].content_filter_results.items():
+                if details['filtered']:
+                    filter_reasons.append(f"{category} ({details['severity']})")
+
+        # Raise an error if any filters are triggered
+        if filter_reasons:
+            error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+            raise ValueError(error_message)
         return chat_completion.choices[0].message.content
     
     def get_messages_builder(self, system_prompt: str, model_id: str, user_conv: str, few_shots = [dict[str, str]], max_tokens: int = 4096) -> []:

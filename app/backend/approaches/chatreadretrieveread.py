@@ -374,50 +374,18 @@ class ChatReadRetrieveReadApproach(Approach):
         try:
             # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
             #Added conditional block to use different system messages for different models.
-            if self.model_name.startswith("gpt-35-turbo"):
-                messages = self.get_messages_from_history(
-                    system_message,
-                    self.model_name,
-                    history,
-                    history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
-                    self.RESPONSE_PROMPT_FEW_SHOTS,
-                    max_tokens=self.chatgpt_token_limit - 500
-                )
 
-            #Uncomment to debug token usage.
-            #print(messages)
-            #message_string = ""
-            #for message in messages:
-            #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
-            #    message_string += f"{message['role']}: {message['content']}\n"
-            #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
-            #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
-            #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
-            #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-
-            elif self.model_name.startswith("gpt-4"):
-                messages = self.get_messages_from_history(
-                    system_message,
-                    # "Sources:\n" + content + "\n\n" + system_message,
-                    self.model_name,
-                    history,
-                    # history[-1]["user"],
-                    history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
-                    self.RESPONSE_PROMPT_FEW_SHOTS,
-                    max_tokens=self.chatgpt_token_limit
-                )
-
-                #Uncomment to debug token usage.
-                #print(messages)
-                #message_string = ""
-                #for message in messages:
-                #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
-                #    message_string += f"{message['role']}: {message['content']}\n"
-                #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
-                #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
-                #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
-                #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-
+            messages = self.get_messages_from_history(
+                system_message,
+                # "Sources:\n" + content + "\n\n" + system_message,
+                self.model_name,
+                history,
+                # history[-1]["user"],
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
+                self.RESPONSE_PROMPT_FEW_SHOTS,
+                max_tokens=self.chatgpt_token_limit
+            )
+            # Generate the chat completion
             chat_completion= await self.client.chat.completions.create(
                 model=self.chatgpt_deployment,
                 messages=messages,

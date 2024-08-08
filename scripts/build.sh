@@ -25,7 +25,6 @@ rm -rf ${BINARIES_OUTPUT_PATH} && mkdir -p ${BINARIES_OUTPUT_PATH}
 
 #Build the AzLib that contains the JavaScript functions that enable the upload feature
 cd app/frontend
-npm audit fix
 npm install
 npm run build
 

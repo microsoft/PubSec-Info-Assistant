@@ -175,14 +175,6 @@ output "ENABLE_BING_SAFE_SEARCH" {
   value = var.enableBingSafeSearch
 }
 
-output "AZURE_AI_TRANSLATION_DOMAIN" {
-  value = var.azure_ai_translation_domain
-}
-
-output "AZURE_AI_TEXT_ANALYTICS_DOMAIN" {
-  value = var.azure_ai_text_analytics_domain
-}
-
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
 }

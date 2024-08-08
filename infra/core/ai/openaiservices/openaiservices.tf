@@ -88,15 +88,3 @@ resource "azurerm_private_endpoint" "openaiPrivateEndpoint" {
 
   }
 }
-
-module "openaiServiceKeySecret" {
-  source                        = "../../security/keyvaultSecret"
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "AZURE-OPENAI-SERVICE-KEY"
-  secret_value                  = var.useExistingAOAIService ? var.openaiServiceKey : azurerm_cognitive_account.openaiAccount[0].primary_access_key
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  resourceGroupName             = var.resourceGroupName
-  tags                          = var.tags
-  alias                         = "openaikey"
-  kv_secret_expiration          = var.kv_secret_expiration
-}

@@ -4,53 +4,38 @@
 import base64
 import os
 import glob
-import re
 import warnings
-from PIL import Image
 import io
-import pandas as pd
+import tempfile
+from dotenv import load_dotenv
+from PIL import Image
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
 from langchain_openai import AzureChatOpenAI
-from langchain.agents import load_tools
-import matplotlib.pyplot as plt
-import tempfile
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
+
 warnings.filterwarnings('ignore')
-from dotenv import load_dotenv
-
-
-
-#--------------------------------------------------------------------------
-#variables needed for testing
-OPENAI_API_TYPE = "azure"
-OPENAI_API_VERSION = "2024-02-01"
-OPENAI_API_BASE = " "
-OPENAI_API_KEY = " "
-OPENAI_DEPLOYMENT_NAME = " "
-MODEL_NAME = " "
-AZURE_OPENAI_ENDPOINT = ' '
-AZURE_OPENAI_SERVICE_KEY = ' '
-
-os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
-os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
-
-
 load_dotenv()
 
-#Environment variables when integrated into the app
-#_________________________________________________________________________
-
-
-
-azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
-deployment_name = azure_openai_chatgpt_deployment
-OPENAI_DEPLOYMENT_NAME = deployment_name
 OPENAI_API_BASE = os.environ.get("AZURE_OPENAI_ENDPOINT")
-OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
+OPENAI_DEPLOYMENT_NAME =  os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
 
+if os.environ.get("AZURE_OPENAI_AUTHORITY_HOST") == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 
-# Page title
+if os.environ.get("LOCAL_DEBUG") == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential, f'https://{os.environ.get("AZURE_AI_CREDENTIAL_DOMAIN")}/.default')
 
+model = AzureChatOpenAI(
+    azure_ad_token_provider=token_provider,
+    azure_endpoint=OPENAI_API_BASE,
+    openai_api_version="2024-02-01" ,
+    deployment_name=OPENAI_DEPLOYMENT_NAME)
 
 dffinal = None
 pdagent = None
@@ -99,11 +84,6 @@ def save_df(dff):
  
 # function to stream agent response 
 def process_agent_scratch_pad(question, df):
-    chat = AzureChatOpenAI(
-    api_key= OPENAI_API_KEY,
-    azure_endpoint=OPENAI_API_BASE,
-    openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)  
          
     question = save_chart(question)
     # This agent relies on access to a python repl tool which can execute arbitrary code.
@@ -112,7 +92,7 @@ def process_agent_scratch_pad(question, df):
     # which can lead to data breaches, data loss, or other security incidents. You must opt in
     # to use this functionality by setting allow_dangerous_code=True.
     # https://api.python.langchain.com/en/latest/agents/langchain_experimental.agents.agent_toolkits.pandas.base.create_pandas_dataframe_agent.html
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS,allow_dangerous_code=True , agent_executor_kwargs={"handle_parsing_errors": True})
+    pdagent = create_pandas_dataframe_agent(model, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS,allow_dangerous_code=True , agent_executor_kwargs={"handle_parsing_errors": True})
     for chunk in pdagent.stream({"input": question}):
         if "actions" in chunk:
             for action in chunk["actions"]:
@@ -132,15 +112,13 @@ def process_agent_scratch_pad(question, df):
 #Function to stream final output       
 def process_agent_response(question, df):
     question = save_chart(question)
-    
-    chat = AzureChatOpenAI(
-    api_key= OPENAI_API_KEY,
-    azure_endpoint=OPENAI_API_BASE,
-    openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)  
-    
-       
-    pdagent = create_pandas_dataframe_agent(chat, df, verbose=True,agent_type=AgentType.OPENAI_FUNCTIONS, allow_dangerous_code=True, agent_executor_kwargs={"handle_parsing_errors": True})
+
+    pdagent = create_pandas_dataframe_agent(model,
+                                            df,
+                                            verbose=True,
+                                            agent_type=AgentType.OPENAI_FUNCTIONS,
+                                            allow_dangerous_code=True,
+                                            agent_executor_kwargs={"handle_parsing_errors": True})
     for chunk in pdagent.stream({"input": question}):
         if "output" in chunk:
             output = f'Final Output: ```{chunk["output"]}```'

@@ -23,10 +23,6 @@ output "AZURE_STORAGE_ACCOUNT" {
   value = module.storage.name
 }
 
-output "AZURE_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
-}
-
 output "AZURE_STORAGE_CONTAINER" {
   value = var.contentContainerName
 }
@@ -116,11 +112,15 @@ output "ENABLE_DEV_CODE" {
 }
 
 output "AZURE_SUBSCRIPTION_ID" {
-  value = var.subscriptionId
+  value = data.azurerm_client_config.current.subscription_id
 }
 
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage.primary_blob_endpoint
+}
+
+output "AZURE_QUEUE_STORAGE_ENDPOINT" {
+  value = module.storage.primary_queue_endpoint
 }
 
 output "EMBEDDING_VECTOR_SIZE" {
@@ -151,7 +151,7 @@ output "ENRICHMENT_APPSERVICE_URL" {
   value = module.enrichmentApp.uri
 }
 
-output "DEPLOYMENT_KEYVAULT_NAME" {
+output "AZURE_KEYVAULT_NAME" {
   value = module.kvModule.keyVaultName
 }
 
@@ -202,4 +202,32 @@ output "CONTAINER_REGISTRY_PASSWORD" {
 
 output "DNS_PRIVATE_RESOLVER_IP" {
   value = var.is_secure_mode ? module.network[0].dns_private_resolver_ip : ""
+}
+
+output "AZURE_AI_CREDENTIAL_DOMAIN" {
+  value = var.azure_ai_private_link_domain
+}
+
+output "FUNC_AzureWebJobsStorage__accountName" {
+  value = module.functions.AzureWebJobsStorage__accountName
+}
+
+output "FUNC_AzureWebJobsStorage__blobServiceUri" {
+  value = module.functions.AzureWebJobsStorage__blobServiceUri
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__accountName" {
+  value = module.functions.STORAGE_CONNECTION_STRING__accountName
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri" {
+  value = module.functions.STORAGE_CONNECTION_STRING__queueServiceUri
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__blobServiceUri" {
+  value = module.functions.STORAGE_CONNECTION_STRING__blobServiceUri
+}
+
+output "AZURE_OPENAI_AUTHORITY_HOST" {
+  value = var.azure_openai_authority_host
 }

@@ -2,8 +2,12 @@ output "name" {
   value = azurerm_storage_account.storage.name
 }
 
-output "primary_endpoints" {
+output "primary_blob_endpoint" {
   value = azurerm_storage_account.storage.primary_blob_endpoint
+}
+
+output "primary_queue_endpoint" {
+  value = azurerm_storage_account.storage.primary_queue_endpoint
 }
 
 output "storage_account_id" {

@@ -49,7 +49,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
     SUBSCRIPTION_ID | The ID of the subscription that should be deployed to.
     TENANT_ID | The ID of the tenant that should be deployed to.
 	CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
-    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_GPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
+    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_GPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
     environment | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env`
     TF_BACKEND_ACCESS_KEY | Terraform is used to create Infrastructure as Code. This is the key to the Terraform State in a Storage Account.
     TF_BACKEND_CONTAINER | Terraform is used to create Infrastructure as Code. This is the container that the Terraform State is stored within a Storage Account.

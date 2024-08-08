@@ -39,7 +39,15 @@ class CompareWorkWithWeb(Approach):
     
     web_citations = {}
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
+    def __init__(self, model_name: str,
+                 chatgpt_deployment: str,
+                 query_term_language: str,
+                 bing_search_endpoint: str,
+                 bing_search_key: str,
+                 bing_safe_search: bool,
+                 oai_endpoint: str,
+                 azure_ai_token_provider:str
+                 ):
         """
         Initializes the CompareWorkWithWeb approach.
 
@@ -59,14 +67,16 @@ class CompareWorkWithWeb(Approach):
         self.bing_search_endpoint = bing_search_endpoint
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
+        self.oai_endpoint = oai_endpoint
+        self.azure_ai_token_provider = azure_ai_token_provider
         
           # openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_version = "2024-02-01"
         
         self.client = AsyncAzureOpenAI(
-        azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_endpoint = openai.api_base,
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], work_citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -81,7 +91,14 @@ class CompareWorkWithWeb(Approach):
             Any: The result of the comparative analysis.
         """
         # Step 1: Call bing Search Approach for a Bing LLM Response and Citations
-        chat_bing_search = ChatWebRetrieveRead(self.model_name, self.chatgpt_deployment, self.query_term_language, self.bing_search_endpoint, self.bing_search_key, self.bing_safe_search)
+        chat_bing_search = ChatWebRetrieveRead(self.model_name,
+                                               self.chatgpt_deployment,
+                                               self.query_term_language,
+                                               self.bing_search_endpoint,
+                                               self.bing_search_key,
+                                               self.bing_safe_search,
+                                               self.oai_endpoint,
+                                               self.azure_ai_token_provider)
         bing_search_response = chat_bing_search.run(history, overrides, {}, thought_chain)
         
         content = ""

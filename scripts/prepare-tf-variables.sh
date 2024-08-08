@@ -8,12 +8,9 @@ ENV_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # To maintain backward compatibility, we need to convert some of the variables to TF_VAR_ format
 export TF_VAR_environmentName=$WORKSPACE
 export TF_VAR_location=$LOCATION
-export TF_VAR_tenantId=$TENANT_ID
-export TF_VAR_subscriptionId=$SUBSCRIPTION_ID
 export TF_VAR_useExistingAOAIService=$USE_EXISTING_AOAI
 export TF_VAR_azureOpenAIResourceGroup=$AZURE_OPENAI_RESOURCE_GROUP
 export TF_VAR_azureOpenAIServiceName=$AZURE_OPENAI_SERVICE_NAME
-export TF_VAR_azureOpenAIServiceKey=$AZURE_OPENAI_SERVICE_KEY
 export TF_VAR_chatGptDeploymentName=$AZURE_OPENAI_CHATGPT_DEPLOYMENT
 export TF_VAR_chatGptModelName=$AZURE_OPENAI_CHATGPT_MODEL_NAME
 export TF_VAR_chatGptModelVersion=$AZURE_OPENAI_CHATGPT_MODEL_VERSION

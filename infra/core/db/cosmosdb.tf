@@ -47,6 +47,10 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
     location          = var.location
     failover_priority = 0
   }
+
+  capabilities {
+    name = "EnableServerless"
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "log_database" {
@@ -61,23 +65,7 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   account_name        = azurerm_cosmosdb_account.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.log_database.name
 
-  partition_key_path = "/file_name"
-
-  autoscale_settings {
-    max_throughput = var.autoscaleMaxThroughput
-  }
-}
-
-module "cosmos_db_key" {
-  source                        = "../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "COSMOSDB-KEY"
-  secret_value                  = azurerm_cosmosdb_account.cosmosdb_account.primary_key
-  alias                         = "cosmoskey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
+  partition_key_paths = ["/file_name"]
 }
 
 data "azurerm_subnet" "subnet" {

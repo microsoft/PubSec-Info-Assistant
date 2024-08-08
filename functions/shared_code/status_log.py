@@ -38,13 +38,13 @@ class StatusQueryLevel(Enum):
 class StatusLog:
     """ Class for logging status of various processes to Cosmos DB"""
 
-    def __init__(self, url, key, database_name, container_name):
+    def __init__(self, url, azure_credential, database_name, container_name):
         """ Constructor function """
         self._url = url
-        self._key = key
+        self.azure_credential = azure_credential
         self._database_name = database_name
         self._container_name = container_name
-        self.cosmos_client = CosmosClient(url=self._url, credential=self._key)
+        self.cosmos_client = CosmosClient(url=self._url, credential=self.azure_credential, consistency_level='Session')
         self._log_document = {}
 
         # Select a database (will create it if it doesn't exist)
@@ -305,7 +305,7 @@ class StatusLog:
         trc = 'Traceback (most recent call last):\n'
         stackstr = trc + ''.join(traceback.format_list(stack))
         if exc is not None:
-            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+            stackstr += '  ' + traceback.format_exc().lstrip()
         return stackstr
 
     def get_all_tags(self):

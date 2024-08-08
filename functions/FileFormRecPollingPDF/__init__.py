@@ -1,18 +1,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-import azure.functions as func
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 import logging
 import os
 import json
-import requests
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from shared_code.status_log import StatusLog, State, StatusClassification
-from shared_code.utilities import Utilities, MediaType
 import random
 from collections import namedtuple
 import time
+import azure.functions as func
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
+import requests
+from shared_code.status_log import StatusLog, State, StatusClassification
+from shared_code.utilities import Utilities, MediaType
 from requests.exceptions import RequestException
 from tenacity import retry, stop_after_attempt, wait_fixed
 
@@ -21,19 +21,16 @@ def string_to_bool(s):
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
-azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
 FR_API_VERSION = os.environ["FR_API_VERSION"]
 # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
 # Separate each page number or range with a comma.
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 non_pdf_submit_queue = os.environ["NON_PDF_SUBMIT_QUEUE"]
@@ -41,7 +38,6 @@ pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
-FR_key = os.environ["AZURE_FORM_RECOGNIZER_KEY"]
 api_version = os.environ["FR_API_VERSION"]
 max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
 max_polling_requeue_count = int(os.environ["MAX_POLLING_REQUEUE_COUNT"])
@@ -49,18 +45,35 @@ submit_requeue_hide_seconds = int(os.environ["SUBMIT_REQUEUE_HIDE_SECONDS"])
 polling_backoff = int(os.environ["POLLING_BACKOFF"])
 max_read_attempts = int(os.environ["MAX_READ_ATTEMPTS"])
 enableDevCode = string_to_bool(os.environ["ENABLE_DEV_CODE"])
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
 function_name = "FileFormRecPollingPDF"
-utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_blob_storage_key)
 FR_MODEL = "prebuilt-layout"
 
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential, f'https://{os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
 
+utilities = Utilities(azure_blob_storage_account, azure_blob_storage_endpoint, azure_blob_drop_storage_container, azure_blob_content_storage_container, azure_credential)
 
 def main(msg: func.QueueMessage) -> None:
     
     try:
-        statusLog = StatusLog(cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name)
+        statusLog = StatusLog(cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name)
         # Receive message from the queue
         message_body = msg.get_body().decode('utf-8')
         message_json = json.loads(message_body)
@@ -74,7 +87,8 @@ def main(msg: func.QueueMessage) -> None:
         
         # Construct and submmit the polling message to FR
         headers = {
-            'Ocp-Apim-Subscription-Key': FR_key
+            "Content-Type": "application/json",
+            'Authorization': f'Bearer {token_provider()}'
         }
 
         params = {
@@ -105,7 +119,10 @@ def main(msg: func.QueueMessage) -> None:
                 statusLog.upsert_document(blob_name, f'{function_name} - Chunking complete, {chunk_count} chunks created.', StatusClassification.DEBUG)  
                 
                 # submit message to the enrichment queue to continue processing                
-                queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=text_enrichment_queue, message_encode_policy=TextBase64EncodePolicy())
+                queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
+                               queue_name=text_enrichment_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
                 message_json["text_enrichment_queued_count"] = 1
                 message_string = json.dumps(message_json)
                 queue_client.send_message(message_string)
@@ -119,7 +136,10 @@ def main(msg: func.QueueMessage) -> None:
                     queued_count += 1
                     message_json['polling_queue_count'] = queued_count
                     statusLog.upsert_document(blob_name, f"{function_name} - FR has not completed processing, requeuing. Polling back off of attempt {queued_count} of {max_polling_requeue_count} for {backoff} seconds", StatusClassification.DEBUG, State.QUEUED) 
-                    queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queue_name=pdf_polling_queue, message_encode_policy=TextBase64EncodePolicy())
+                    queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
+                               queue_name=pdf_polling_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
                     message_json_str = json.dumps(message_json)  
                     queue_client.send_message(message_json_str, visibility_timeout=backoff)
                 else:
@@ -128,7 +148,10 @@ def main(msg: func.QueueMessage) -> None:
                 # unexpected status returned by FR, such as internal capacity overload, so requeue
                 if submit_queued_count < max_submit_requeue_count:
                     statusLog.upsert_document(blob_name, f'{function_name} - unhandled response from Form Recognizer- code: {response.status_code} status: {response_status} - text: {response.text}. Document will be resubmitted', StatusClassification.ERROR)                  
-                    queue_client = QueueClient.from_connection_string(azure_blob_connection_string, pdf_submit_queue, message_encode_policy=TextBase64EncodePolicy())  
+                    queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
+                               queue_name=pdf_submit_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
                     submit_queued_count += 1
                     message_json["submit_queued_count"] = submit_queued_count
                     message_string = json.dumps(message_json)    

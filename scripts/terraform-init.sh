@@ -39,24 +39,6 @@ function finish {
 }
 trap finish EXIT
 
-# Default to user az cli if not set
-# if [ -z $ARM_SUBSCRIPTION_ID ] || [ -z $ARM_TENANT_ID ];
-# then
-#     printf "$YELLOW\nCredentials for terraform not provided. Do you want to continue using your az login? (Y/n)$RESET\n"
-#     read answer
-#     if [[ "$answer" == "Y" ]];
-#     then 
-#         export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
-#         export ARM_TENANT_ID=$(az account show --query tenantId --output tsv)
-
-#         echo "Using subscription id: $ARM_SUBSCRIPTION_ID"
-#         echo "Using tenant id: $ARM_TENANT_ID"
-#     fi
-    
-# fi
-
-
-
 if [ -n "${IN_AUTOMATION}" ]
 then
     if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then

@@ -24,14 +24,13 @@ fi
 
 search_url="${AZURE_SEARCH_SERVICE_ENDPOINT}"
 
-# Get the Search Admin Key
-search_key=$(az search admin-key show --resource-group $RESOURCE_GROUP_NAME --service-name $AZURE_SEARCH_SERVICE --query primaryKey -o tsv)
-export AZURE_SEARCH_ADMIN_KEY=$search_key
+# Obtain an access token for Azure Search
+access_token=$(az account get-access-token --resource $TF_VAR_azure_search_scope --query accessToken -o tsv)
 
 # Fetch existing index definition if it exists
 index_vector_json=$(cat ${DIR}/../azure_search/create_vector_index.json | envsubst | tr -d "\n" | tr -d "\r")
 index_vector_name=$(echo $index_vector_json | jq -r .name )
-existing_index=$(curl -s --header "api-key: $AZURE_SEARCH_ADMIN_KEY" $search_url/indexes/$index_vector_name?api-version=2024-05-01-preview)
+existing_index=$(curl -s --header "Authorization: Bearer $access_token" $search_url/indexes/$index_vector_name?api-version=2024-05-01-preview)
 
 if [[ "$existing_index" != *"No index with the name"* ]]; then
     existing_dimensions=$(echo "$existing_index" | jq -r '.fields | map(select(.name == "contentVector")) | .[0].dimensions')
@@ -46,7 +45,7 @@ if [[ "$existing_index" != *"No index with the name"* ]]; then
             exit 0
         else
             echo "Deleting the existing index $existing_index_name..."
-            curl -X DELETE --header "api-key: $AZURE_SEARCH_ADMIN_KEY" $search_url/indexes/$existing_index_name?api-version=2024-05-01-preview
+            curl -X DELETE --header "Authorization: Bearer $access_token" $search_url/indexes/$existing_index_name?api-version=2024-05-01-preview
             echo "Index $index_vector_name deleted."
         fi
     fi
@@ -54,7 +53,7 @@ fi
 
 # Create vector index
 echo "Creating index $index_vector_name ..."
-curl -s -X PUT --header "Content-Type: application/json" --header "api-key: $AZURE_SEARCH_ADMIN_KEY" --data "$index_vector_json" $search_url/indexes/$index_vector_name?api-version=2024-05-01-preview
+curl -s -X PUT --header "Content-Type: application/json" --header "Authorization: Bearer $access_token" --data "$index_vector_json" $search_url/indexes/$index_vector_name?api-version=2024-05-01-preview
 
 echo -e "\n"
 echo "Successfully deployed $index_vector_name."

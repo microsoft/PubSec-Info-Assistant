@@ -3,49 +3,36 @@
 
 #Turn warnings off
 #from st_pages import Page, show_pages, add_page_title
-import warnings
-warnings.filterwarnings('ignore')
 import os
-# import openai
+import warnings
 from dotenv import load_dotenv
-
-#--------------------------------------------------------------------------
-#variables needed for testing
-OPENAI_API_TYPE = "azure"
-OPENAI_API_VERSION = "2024-02-01"
-OPENAI_API_BASE = " "
-OPENAI_API_KEY = " "
-OPENAI_DEPLOYMENT_NAME = " "
-MODEL_NAME = " "
-AZURE_OPENAI_ENDPOINT = ' '
-AZURE_OPENAI_SERVICE_KEY = ' '
-
-os.environ["OPENAI_API_TYPE"] = OPENAI_API_TYPE
-os.environ["OPENAI_API_VERSION"] = OPENAI_API_VERSION
-
-
-load_dotenv()
-
-
-azure_openai_chatgpt_deployment = os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT") 
-
-deployment_name = azure_openai_chatgpt_deployment
-OPENAI_DEPLOYMENT_NAME = deployment_name
-
-OPENAI_API_BASE = os.environ.get("AZURE_OPENAI_ENDPOINT")
-OPENAI_API_KEY = os.environ.get("AZURE_OPENAI_SERVICE_KEY")
-OPENAI_DEPLOYMENT_NAME =  azure_openai_chatgpt_deployment
-
 from langchain_openai import AzureChatOpenAI
 from langchain.agents import initialize_agent, load_tools, AgentType
 from langchain.prompts import ChatPromptTemplate
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 
+warnings.filterwarnings('ignore')
+load_dotenv()
+
+OPENAI_API_BASE = os.environ.get("AZURE_OPENAI_ENDPOINT")
+OPENAI_DEPLOYMENT_NAME =  os.getenv("AZURE_OPENAI_CHATGPT_DEPLOYMENT")
+
+if os.environ.get("AZURE_OPENAI_AUTHORITY_HOST") == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+if os.environ.get("LOCAL_DEBUG") == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential, f'https://{os.environ.get("AZURE_AI_CREDENTIAL_DOMAIN")}/.default')
 
 model = AzureChatOpenAI(
-    api_key= OPENAI_API_KEY,
+    azure_ad_token_provider=token_provider,
     azure_endpoint=OPENAI_API_BASE,
-    openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)   
+    openai_api_version="2024-02-01" ,
+    deployment_name=OPENAI_DEPLOYMENT_NAME)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Addition of custom tools
@@ -192,12 +179,7 @@ def process_agent_response( question):
   
 
 #Function to process clues
-def generate_response(question):
-    model = AzureChatOpenAI(
-    api_key= OPENAI_API_KEY,
-    azure_endpoint=OPENAI_API_BASE,
-    openai_api_version=OPENAI_API_VERSION ,
-    deployment_name=OPENAI_DEPLOYMENT_NAME)     
+def generate_response(question):    
     prompt_template = ChatPromptTemplate.from_template(template=prompt)
     messages = prompt_template.format_messages(
     question=question

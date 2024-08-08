@@ -45,11 +45,6 @@ variable "useExistingAOAIService" {
   default = false
 }
 
-variable "openaiServiceKey" {
-  description = "The OpenAI service key"
-  type        = string
-}
-
 variable "is_secure_mode" {
   type = bool
   default = false

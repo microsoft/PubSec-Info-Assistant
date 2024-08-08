@@ -8,7 +8,6 @@
 > * Using an existing Azure OpenAI Services
 > * Web chat (secure endpoints for Bing API services are not yet available)
 > * SharePoint connector (secure endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
-> * Multimedia (secure endpoints for Azure Video Indexer services are not yet available)
 >
 >Secure mode requires a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region. You can reuse an existing DDOS plan in your tenant or Info Assistant can deploy one for you.
 >
@@ -138,7 +137,6 @@ To perform a secure deployment, follow these steps:
    export ENABLE_WEB_CHAT=false
    export USE_EXISTING_AOAI=false
    export ENABLE_SHAREPOINT_CONNECTOR=false
-   export ENABLE_MULTIMEDIA=false
    ```
 
    *Note: Secure mode is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads*

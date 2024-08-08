@@ -214,6 +214,5 @@ export type GetFeatureFlagsResponse = {
     ENABLE_UNGROUNDED_CHAT: boolean;
     ENABLE_MATH_ASSISTANT: boolean;
     ENABLE_TABULAR_DATA_ASSISTANT: boolean;
-    ENABLE_MULTIMEDIA: boolean;
     error?: string;
 }

@@ -70,16 +70,16 @@ class Utilities:
                  azure_blob_storage_endpoint,
                  azure_blob_drop_storage_container,
                  azure_blob_content_storage_container,
-                 azure_blob_storage_key
+                 azure_credential
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
         self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
         self.azure_blob_drop_storage_container = azure_blob_drop_storage_container
         self.azure_blob_content_storage_container = azure_blob_content_storage_container
-        self.azure_blob_storage_key = azure_blob_storage_key
+        self.azure_credential = azure_credential
         self.utilities_helper = UtilitiesHelper(azure_blob_storage_account,
                                                 azure_blob_storage_endpoint,
-                                                azure_blob_storage_key)
+                                                azure_credential)
 
     def write_blob(self, output_container, content, output_filename, folder_set=""):
         """ Function to write a generic blob """
@@ -87,7 +87,8 @@ class Utilities:
         # Get path and file name minus the root container
         blob_service_client = BlobServiceClient(
             self.azure_blob_storage_endpoint,
-            self.azure_blob_storage_key)
+            credential=self.azure_credential
+            )
         block_blob_client = blob_service_client.get_blob_client(
             container=output_container, blob=f'{folder_set}{output_filename}')
         block_blob_client.upload_blob(content, overwrite=True)
@@ -106,50 +107,6 @@ class Utilities:
     def  get_blob_and_sas(self, blob_path):
         """ Function to retrieve the uri and sas token for a given blob in azure storage"""
         return self.utilities_helper.get_blob_and_sas(blob_path)
-
-    # def table_to_html(self, table):
-    #     """ Function to take an output FR table json structure and convert to HTML """
-    #     header_processing_complete = False
-    #     table_html = "<table>"
-    #     rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i],
-    #                    key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
-    #     for row_cells in rows:
-    #         is_row_a_header = False
-    #         row_html = "<tr>"
-    #         for cell in row_cells:
-    #             tag = "td"
-    #             #if hasattr(cell, 'kind'):
-    #             if 'kind' in cell:                      
-    #                 if (cell["kind"] == "columnHeader" or cell["kind"] == "rowHeader"):
-    #                     tag = "th"
-    #                 if (cell["kind"] == "columnHeader"):
-    #                     is_row_a_header = True
-    #             else:
-    #                 # we have encountered a cell that isn't tagged as a header, 
-    #                 # so assume we have now rerached regular table cells
-    #                 header_processing_complete = True
-    #             cell_spans = ""
-    #             #if hasattr(cell, 'columnSpan'):
-    #             if 'columnSpan' in cell:
-    #                 if cell["columnSpan"] > 1:
-    #                     cell_spans += f" colSpan={cell['columnSpan']}"
-    #             #if hasattr(cell, 'rowSpan'):
-    #             if 'rowSpan' in cell:
-    #                 if cell["rowSpan"] > 1:
-    #                     cell_spans += f" rowSpan={cell['rowSpan']}"
-    #             row_html += f"<{tag}{cell_spans}>{html.escape(cell['content'])}</{tag}>"
-    #         row_html += "</tr>"
-            
-    #         if is_row_a_header and header_processing_complete == False:
-    #             row_html = "<thead>" + row_html + "</thead>"     
-    #         table_html += row_html
-    #     table_html += "</table>"
-    #     return table_html
-
-
-
-
-
 
     def table_to_html(self, table):
         """ Function to take an output FR table json structure and convert to HTML """
@@ -370,7 +327,7 @@ class Utilities:
         file_name, file_extension, file_directory = self.get_filename_and_extension(myblob_name)
         blob_service_client = BlobServiceClient(
             self.azure_blob_storage_endpoint,
-            self.azure_blob_storage_key)
+            credential=self.azure_credential)
         json_str = json.dumps(chunk_output, indent=2, ensure_ascii=False)
         block_blob_client = blob_service_client.get_blob_client(
             container=self.azure_blob_content_storage_container,

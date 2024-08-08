@@ -6,7 +6,7 @@
       "type": "blobTrigger",
       "direction": "in",
       "path": "upload",
-      "connection": "BLOB_CONNECTION_STRING"
+      "connection": "AzureStorageConnection1"
     }
   ],
   "retry": {

@@ -44,18 +44,6 @@ resource "azurerm_key_vault_access_policy" "infoasst" {
     ]
 }
 
-module "spClientKeySecret" {
-  source = "../keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = azurerm_key_vault.kv.name
-  secret_name                   = "AZURE-CLIENT-SECRET"
-  secret_value                  = var.spClientSecret
-  tags                          = var.tags
-  alias                         = "clientsecret"
-  kv_secret_expiration          = var.kv_secret_expiration
-}
-
 data "azurerm_subnet" "subnet" {
   count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name

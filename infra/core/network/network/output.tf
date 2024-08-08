@@ -71,6 +71,10 @@ output "snetIntegration_id" {
   value = data.azurerm_subnet.integration.id
 }
 
+output "snetIntegration_name" {
+  value = data.azurerm_subnet.integration.name
+}
+
 output "snetSearch_name" {
   value = data.azurerm_subnet.aiSearch.name
 }

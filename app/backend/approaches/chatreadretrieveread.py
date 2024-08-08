@@ -6,20 +6,18 @@ import re
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
-from typing import Any, AsyncGenerator, Coroutine, Sequence
+from typing import Any, Sequence
 
 import openai
-from openai import AzureOpenAI
 from openai import  AsyncAzureOpenAI
 from approaches.approach import Approach
 from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
 from azure.storage.blob import (
-    AccountSasPermissions,
+    BlobSasPermissions,
     BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
+    generate_blob_sas,
 )
 from text import nonewlines
 from core.modelhelper import get_token_limit
@@ -88,7 +86,6 @@ class ChatReadRetrieveReadApproach(Approach):
         self,
         search_client: SearchClient,
         oai_endpoint: str,
-        oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
         content_field: str,
@@ -103,10 +100,9 @@ class ChatReadRetrieveReadApproach(Approach):
         enrichment_appservice_uri: str,
         target_translation_language: str,
         azure_ai_endpoint:str,
-        azure_ai_key:str,
         azure_ai_location:str,
+        azure_ai_token_provider:str,
         use_semantic_reranker: bool
-        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -122,20 +118,19 @@ class ChatReadRetrieveReadApproach(Approach):
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
         self.azure_ai_endpoint=azure_ai_endpoint
-        self.azure_ai_key=azure_ai_key
         self.azure_ai_location=azure_ai_location
+        self.azure_ai_token_provider=azure_ai_token_provider
         self.oai_endpoint=oai_endpoint
         self.embedding_service_url = enrichment_appservice_uri
         self.use_semantic_reranker=use_semantic_reranker
         
         openai.api_base = oai_endpoint
         openai.api_type = 'azure'
-        openai.api_key = oai_service_key
         openai.api_version = "2024-02-01"
         
         self.client = AsyncAzureOpenAI(
-        azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_endpoint = openai.api_base,
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
                
 
@@ -233,10 +228,10 @@ class ChatReadRetrieveReadApproach(Approach):
             response = requests.post(url, json=data,headers=headers,timeout=60)
             if response.status_code == 200:
                 response_data = response.json()
-                embedded_query_vector =response_data.get('data')          
+                embedded_query_vector =response_data.get('data')
             else:
                 # Generate an error message if the embedding generation fails
-                log.error(f"Error generating embedding:: {response.status_code}")
+                log.error(f"Error generating embedding:: {response.status_code} - {response.text}")
                 yield json.dumps({"error": "Error generating embedding"}) + "\n"
                 return # Go no further
         except Exception as e:
@@ -429,7 +424,7 @@ class ChatReadRetrieveReadApproach(Approach):
         try:
             api_detect_endpoint = f"{self.azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
             headers = {
-                'Ocp-Apim-Subscription-Key': self.azure_ai_key,
+                'Authorization': f'Bearer {self.azure_ai_token_provider()}',
                 'Content-type': 'application/json',
                 'Ocp-Apim-Subscription-Region': self.azure_ai_location
             }
@@ -452,7 +447,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
                 return detected_language
             else:
-                raise Exception(f"Error detecting language: {response.status_code}")
+                raise Exception(f"Error detecting language: {response.status_code} - {response.text}")
         except Exception as e:
             raise Exception(f"An error occurred during language detection: {str(e)}") from e
      
@@ -460,7 +455,7 @@ class ChatReadRetrieveReadApproach(Approach):
         """ Function to translate the response to target language"""
         api_translate_endpoint = f"{self.azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
         headers = {
-            'Ocp-Apim-Subscription-Key': self.azure_ai_key,
+            'Authorization': f'Bearer {self.azure_ai_token_provider()}',
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': self.azure_ai_location
         }
@@ -479,20 +474,20 @@ class ChatReadRetrieveReadApproach(Approach):
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""
         try:
-            sas_token = generate_account_sas(
-                self.blob_client.account_name,
-                self.blob_client.credential.account_key,
-                resource_types=ResourceTypes(object=True, service=True, container=True),
-                permission=AccountSasPermissions(
-                    read=True,
-                    write=True,
-                    list=True,
-                    delete=False,
-                    add=True,
-                    create=True,
-                    update=True,
-                    process=False,
-                ),
+            separator = "/"
+            file_path_w_name_no_cont = separator.join(
+                source_file.split(separator)[4:])
+            container_name = separator.join(
+                source_file.split(separator)[3:4])
+            # Obtain the user delegation key
+            user_delegation_key = self.blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
+
+            sas_token = generate_blob_sas(
+                account_name=self.blob_client.account_name,
+                container_name=container_name,
+                blob_name=file_path_w_name_no_cont,
+                user_delegation_key=user_delegation_key,
+                permission=BlobSasPermissions(read=True),
                 expiry=datetime.utcnow() + timedelta(hours=1),
             )
             return source_file + "?" + sas_token

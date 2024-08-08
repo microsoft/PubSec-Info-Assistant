@@ -13,16 +13,6 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "tenantId" {
-  type    = string
-  default = ""
-}
-
-variable "subscriptionId" {
-  type    = string
-  default = ""
-}
-
 variable "buildNumber" {
   type    = string
   default = "local"
@@ -70,11 +60,6 @@ variable "enableTabularDataAssistant" {
 }
 
 variable "enableSharePointConnector" {
-  type    = bool
-  default = false
-}
-
-variable "enableMultimedia" {
   type    = bool
   default = false
 }
@@ -158,10 +143,6 @@ variable "azure_ai_document_intelligence_domain" {
   type = string
 }
 
-variable "azure_ai_videoindexer_domain" {
-  type = string
-}
-
 variable "azure_bing_search_domain" {
   type = string
 }
@@ -210,11 +191,6 @@ variable "azureOpenAIServiceName" {
 
 variable "azureOpenAIResourceGroup" {
   type = string
-}
-
-variable "azureOpenAIServiceKey" {
-  type      = string
-  sensitive = true
 }
 
 variable "openAIServiceName" {
@@ -477,11 +453,6 @@ variable "functionsAppSkuTier" {
   description = "The tier of the app service plan for the functions app. Must match with the size value in functionsAppSkuSize."
   type = string
   default = "Standard"
-}
-
-variable "videoIndexerName" {
-  type    = string
-  default = ""
 }
 
 variable "searchServicesName" {

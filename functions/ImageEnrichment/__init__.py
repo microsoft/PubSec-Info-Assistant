@@ -60,11 +60,11 @@ token_provider = get_bearer_token_provider(azure_credential,
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 
 API_DETECT_ENDPOINT = (
-    f"{azure_ai_endpoint}translator/text/v3.0/detect"
-)
+        f"{azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
+    )
 API_TRANSLATE_ENDPOINT = (
-    f"{azure_ai_endpoint}translator/text/v3.0/translate"
-)
+        f"{azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
+    )
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {
@@ -73,7 +73,7 @@ translator_api_headers = {
     "Ocp-Apim-Subscription-Region": azure_ai_location,
 }
 
-# Note that "cation" and "denseCaptions" are only supported in Azure GPU regions (East US, France Central,
+# Note that "caption" and "denseCaptions" are only supported in Azure GPU regions (East US, France Central,
 # Korea Central, North Europe, Southeast Asia, West Europe, West US). Remove "caption" and "denseCaptions"
 # from the list below if your Computer Vision key is not from one of those regions.
 
@@ -111,14 +111,25 @@ utilities = Utilities(
 
 
 def detect_language(text):
-    data = [{"text": text[:MAX_CHARS_FOR_DETECTION]}]
+    data = {
+        "kind": "LanguageDetection",
+        "analysisInput":{
+            "documents":[
+                {
+                    "id":"1",
+                    "text": text[:MAX_CHARS_FOR_DETECTION]
+                }
+            ]
+        }
+    } 
+
     response = requests.post(
         API_DETECT_ENDPOINT, headers=translator_api_headers, json=data
     )
     if response.status_code == 200:
         print(response.json())
-        detected_language = response.json()[0]["language"]
-        detection_confidence = response.json()[0]["score"]
+        detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
+        detection_confidence = response.json()["results"]["documents"][0]["detectedLanguage"]["confidenceScore"]
 
     return detected_language, detection_confidence
 

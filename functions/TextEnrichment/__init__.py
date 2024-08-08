@@ -77,8 +77,8 @@ def main(msg: func.QueueMessage) -> None:
     the target language, it will translate the chunks to the target language.'''
 
     try:
-        apiDetectEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/detect"
-        apiTranslateEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/translate"
+        apiTranslateEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
+        apiLanguageEndpoint = f"{azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
         
         message_body = msg.get_body().decode("utf-8")
         message_json = json.loads(message_body)
@@ -127,12 +127,23 @@ def main(msg: func.QueueMessage) -> None:
             'Authorization': f'Bearer {token_provider()}',
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': azure_ai_location
-        }            
-        data = [{"text": chunk_content}]
+        }
+        
+        data = {
+            "kind": "LanguageDetection",
+            "analysisInput":{
+                "documents":[
+                    {
+                        "id":"1",
+                        "text": chunk_content
+                    }
+                ]
+            }
+        } 
 
-        response = requests.post(apiDetectEndpoint, headers=headers, json=data)      
+        response = requests.post(apiLanguageEndpoint, headers=headers, json=data)      
         if response.status_code == 200:
-            detected_language = response.json()[0]['language']
+            detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
             statusLog.upsert_document(
                 blob_path,
                 f"{FUNCTION_NAME} - detected language of text is {detected_language}.",
@@ -144,7 +155,7 @@ def main(msg: func.QueueMessage) -> None:
             requeue(response, message_json)
             statusLog.save_document(blob_path)
             return
-            
+
         # If the language of the document is not equal to target language then translate the generated chunks
         if detected_language != targetTranslationLanguage:
             statusLog.upsert_document(
@@ -186,7 +197,7 @@ def main(msg: func.QueueMessage) -> None:
                     ]
                 }
             }                
-            response = requests.post(azure_ai_endpoint, headers=headers, json=enrich_data, params=params)
+            response = requests.post(apiLanguageEndpoint, headers=headers, json=enrich_data, params=params)
             try:
                 entities = response.json()['results']['documents'][0]['entities']
             except:
@@ -213,7 +224,7 @@ def main(msg: func.QueueMessage) -> None:
                     ]
                 }
             }                
-            response = requests.post(azure_ai_endpoint, headers=headers, json=enrich_data, params=params)
+            response = requests.post(apiLanguageEndpoint, headers=headers, json=enrich_data, params=params)
             try:
                 key_phrases = response.json()['results']['documents'][0]['keyPhrases']
             except:

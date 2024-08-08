@@ -188,6 +188,7 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_OPENAI_AUTHORITY_HOST                 = var.azure_environment
     LOCAL_DEBUG                                 = "false"
   }
+  
 }
 
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_commercial" {

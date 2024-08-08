@@ -187,7 +187,20 @@ class ChatReadRetrieveReadApproach(Approach):
                     # max_tokens=32, # setting it too low may cause malformed JSON
                     max_tokens=100,
                 n=1)
-        
+                # Initialize a list to collect filter reasons
+            filter_reasons = []
+
+            # Check for content filtering
+            if chat_completion.choices[0].finish_reason == 'content_filter':
+                for category, details in chat_completion.choices[0].content_filter_results.items():
+                    if details['filtered']:
+                        filter_reasons.append(f"{category} ({details['severity']})")
+
+            # Raise an error if any filters are triggered
+            if filter_reasons:
+                error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                raise ValueError(error_message)
+    
         except Exception as e:
             log.error(f"Error generating optimized keyword search: {str(e)}")
             yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
@@ -354,57 +367,18 @@ class ChatReadRetrieveReadApproach(Approach):
         try:
             # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
             #Added conditional block to use different system messages for different models.
-            if self.model_name.startswith("gpt-35-turbo"):
-                messages = self.get_messages_from_history(
-                    system_message,
-                    self.model_name,
-                    history,
-                    history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
-                    self.RESPONSE_PROMPT_FEW_SHOTS,
-                    max_tokens=self.chatgpt_token_limit - 500
-                )
 
-            #Uncomment to debug token usage.
-            #print(messages)
-            #message_string = ""
-            #for message in messages:
-            #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
-            #    message_string += f"{message['role']}: {message['content']}\n"
-            #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
-            #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
-            #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
-            #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-                chat_completion= await self.client.chat.completions.create(
-                    model=self.chatgpt_deployment,
-                    messages=messages,
-                    temperature=float(overrides.get("response_temp")) or 0.6,
-                    n=1,
-                    stream=True
-                )
-
-            elif self.model_name.startswith("gpt-4"):
-                messages = self.get_messages_from_history(
-                    system_message,
-                    # "Sources:\n" + content + "\n\n" + system_message,
-                    self.model_name,
-                    history,
-                    # history[-1]["user"],
-                    history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
-                    self.RESPONSE_PROMPT_FEW_SHOTS,
-                    max_tokens=self.chatgpt_token_limit
-                )
-
-                #Uncomment to debug token usage.
-                #print(messages)
-                #message_string = ""
-                #for message in messages:
-                #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
-                #    message_string += f"{message['role']}: {message['content']}\n"
-                #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
-                #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
-                #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
-                #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-
+            messages = self.get_messages_from_history(
+                system_message,
+                # "Sources:\n" + content + "\n\n" + system_message,
+                self.model_name,
+                history,
+                # history[-1]["user"],
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
+                self.RESPONSE_PROMPT_FEW_SHOTS,
+                max_tokens=self.chatgpt_token_limit
+            )
+            # Generate the chat completion
             chat_completion= await self.client.chat.completions.create(
                 model=self.chatgpt_deployment,
                 messages=messages,
@@ -422,11 +396,22 @@ class ChatReadRetrieveReadApproach(Approach):
                               "thought_chain": thought_chain,
                               "work_citation_lookup": citation_lookup,
                               "web_citation_lookup": {}}) + "\n"
-        
+            
             # STEP 4: Format the response
             async for chunk in chat_completion:
                 # Check if there is at least one element and the first element has the key 'delta'
                 if len(chunk.choices) > 0:
+                    filter_reasons = []
+                    # Check for content filtering
+                    if chunk.choices[0].finish_reason == 'content_filter':
+                        for category, details in chunk.choices[0].content_filter_results.items():
+                            if details['filtered']:
+                                filter_reasons.append(f"{category} ({details['severity']})")
+
+                    # Raise an error if any filters are triggered
+                    if filter_reasons:
+                        error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                        raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
         except Exception as e:
             log.error(f"Error generating chat completion: {str(e)}")
@@ -437,17 +422,29 @@ class ChatReadRetrieveReadApproach(Approach):
     def detect_language(self, text: str) -> str:
         """ Function to detect the language of the text"""
         try:
-            api_detect_endpoint = f'{self.azure_ai_endpoint}translator/text/v3.0/detect'
+            api_detect_endpoint = f"{self.azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
             headers = {
                 'Authorization': f'Bearer {self.azure_ai_token_provider()}',
                 'Content-type': 'application/json',
                 'Ocp-Apim-Subscription-Region': self.azure_ai_location
             }
-            data = [{"text": text}]
+
+            data = {
+                "kind": "LanguageDetection",
+                "analysisInput":{
+                    "documents":[
+                        {
+                            "id":"1",
+                            "text": text
+                        }
+                    ]
+                }
+            } 
+
             response = requests.post(api_detect_endpoint, headers=headers, json=data)
 
             if response.status_code == 200:
-                detected_language = response.json()[0]['language']
+                detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
                 return detected_language
             else:
                 raise Exception(f"Error detecting language: {response.status_code} - {response.text}")
@@ -455,8 +452,8 @@ class ChatReadRetrieveReadApproach(Approach):
             raise Exception(f"An error occurred during language detection: {str(e)}") from e
      
     def translate_response(self, response: str, target_language: str) -> str:
-        """ Function to translate the response to target language"""     
-        api_translate_endpoint = f"{self.azure_ai_endpoint}translator/text/v3.0/translate"
+        """ Function to translate the response to target language"""
+        api_translate_endpoint = f"{self.azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
         headers = {
             'Authorization': f'Bearer {self.azure_ai_token_provider()}',
             'Content-type': 'application/json',

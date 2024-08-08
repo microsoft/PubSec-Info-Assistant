@@ -248,10 +248,6 @@ variable "endpointSuffix" {
   default = "core.windows.net"
 }
 
-variable "azure_ai_text_analytics_domain" {
-  type = string
-}
-
 variable "vnet_name" {
   type = string
 }

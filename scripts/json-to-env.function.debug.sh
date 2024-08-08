@@ -20,13 +20,20 @@ secrets="{"
 keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-AI-KEY")
+secretNames=("AZURE-AI-KEY" "AZURE-STORAGE-CONECTION-STRING")
+azWebJobSecretName="AZURE-STORAGE-CONECTION-STRING"
+azWebJobVarName="AzureWebJobsStorage"
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do
   secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
   envVarName=$(echo $secretName | tr '-' '_')
   secrets+="\"$envVarName\": \"$secretValue\","
+
+  if [ "$secretName" == "$azWebJobSecretName" ]; then
+    export $azWebJobVarName=$secretValue
+    secrets+="\"$azWebJobVarName\": \"$secretValue\","
+  fi
 done 
 secrets=${secrets%?} # Remove the trailing comma
 secrets+="}"
@@ -88,15 +95,15 @@ jq -r --arg secrets "$secrets" '
         },
         {
             "path": "FUNC_STORAGE_CONNECTION_STRING__accountName",
-            "env_var": "STORAGE_CONNECTION_STRING__accountName"
+            "env_var": "AzureStorageConnection1__accountName"
         },
         {
             "path": "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri",
-            "env_var": "STORAGE_CONNECTION_STRING__queueServiceUri"
+            "env_var": "AzureStorageConnection1__queueServiceUri"
         },
         {
             "path": "FUNC_STORAGE_CONNECTION_STRING__blobServiceUri",
-            "env_var": "STORAGE_CONNECTION_STRING__blobServiceUri"
+            "env_var": "AzureStorageConnection1__blobServiceUri"
         },
         {
             "path": "AZURE_AI_ENDPOINT",
@@ -186,7 +193,7 @@ jq -r --arg secrets "$secrets" '
             "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
             "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue",
             "LOCAL_DEBUG": "true",
-            }
+            } + ($secrets | fromjson)
              
     )}
     '

@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "storage" {
   enable_https_traffic_only       = true
   public_network_access_enabled   = var.is_secure_mode ? false : true
   allow_nested_items_to_be_public = false
-  shared_access_key_enabled       = var.is_secure_mode ? false : true
+  shared_access_key_enabled       = true #var.is_secure_mode ? false : true # This will need to be enabled once the Azure Functions can support Entra ID auth
 
   network_rules {  
     default_action                = var.is_secure_mode ? "Deny" : "Allow"
@@ -181,6 +181,18 @@ resource "azurerm_resource_group_template_deployment" "queue" {
   # this ensures the keys are up-to-date
   name            = "${var.queueNames[count.index]}-${filemd5(local.queue_arm_file_path)}"
   deployment_mode = "Incremental"
+}
+
+module "storage_connection_string" {
+  source                        = "../security/keyvaultSecret"
+  resourceGroupName             = var.resourceGroupName
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  key_vault_name                = var.key_vault_name
+  secret_name                   = "AZURE-STORAGE-CONECTION-STRING"
+  secret_value                  = azurerm_storage_account.storage.primary_blob_connection_string
+  tags                          = var.tags
+  alias                         = "blobconnstring"
+  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 data "azurerm_subnet" "subnet" {

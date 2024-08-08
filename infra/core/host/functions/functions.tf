@@ -88,12 +88,14 @@ resource "azurerm_linux_function_app" "function_app" {
   resource_group_name                 = var.resourceGroupName
   service_plan_id                     = azurerm_service_plan.funcServicePlan.id
   storage_account_name                = var.blobStorageAccountName
-  storage_uses_managed_identity       = true
+  storage_account_access_key          = data.azurerm_storage_account.existing_sa.primary_access_key
+  #storage_uses_managed_identity       = true
   https_only                          = true
   tags                                = var.tags
   public_network_access_enabled       = var.is_secure_mode ? false : true 
   virtual_network_subnet_id           = var.is_secure_mode ? var.subnetIntegration_id : null
   content_share_force_disabled        = true
+
 
   site_config {
     application_stack {
@@ -121,27 +123,22 @@ resource "azurerm_linux_function_app" "function_app" {
   
   app_settings = {
     # Network realated settings for secure mode
-    WEBSITE_VNET_ROUTE_ALL                      = var.is_secure_mode ? "1" : "0"  
-    WEBSITE_CONTENTOVERVNET                     = var.is_secure_mode ? "1" : "0"
     WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
-    WEBSITE_SKIP_CONTENTSHARE_VALIDATION        = var.is_secure_mode ? "1" : "0"
 
     SCM_DO_BUILD_DURING_DEPLOYMENT              = "false"
     ENABLE_ORYX_BUILD                           = "false"
     #Set all connections to use Managed Identity instead of connection strings
-    AzureWebJobsStorage__accountName            = var.blobStorageAccountName
-    AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
-    AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
-    AzureWebJobsStorage__tableServiceUri        = "https://${var.blobStorageAccountName}.table.${var.endpointSuffix}"
-    AzureWebJobsStorage__fileServiceUri         = "https://${var.blobStorageAccountName}.file.${var.endpointSuffix}"
-    AzureWebJobsSecretStorageKeyVaultUri        = data.azurerm_key_vault.existing.vault_uri
-    AzureWebJobsSecretStorageType               = "keyvault"
+    AzureWebJobsStorage                        = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-STORAGE-CONECTION-STRING)"
+    # These will need to be enabled one Azure Functions has support for Managed Identity
+    #AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
+    #AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
+    #AzureWebJobsStorage__tableServiceUri        = "https://${var.blobStorageAccountName}.table.${var.endpointSuffix}"
+    #AzureWebJobsSecretStorageKeyVaultUri        = data.azurerm_key_vault.existing.vault_uri
+    #AzureWebJobsSecretStorageType               = "keyvault"
 
-    AzureStorageConnection1__accountName            = var.blobStorageAccountName
     AzureStorageConnection1__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
     AzureStorageConnection1__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
     AzureStorageConnection1__tableServiceUri        = "https://${var.blobStorageAccountName}.table.${var.endpointSuffix}"
-    AzureStorageConnection1__fileServiceUri         = "https://${var.blobStorageAccountName}.file.${var.endpointSuffix}"
     
     FUNCTIONS_WORKER_RUNTIME                    = var.runtime
     FUNCTIONS_EXTENSION_VERSION                 = "~4"

@@ -237,7 +237,7 @@ module "storage" {
   containers                      = ["content","website","upload","function","logs","config"]
   queueNames                      = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
   is_secure_mode                  = var.is_secure_mode
-  subnet_name                     = var.is_secure_mode ? module.network[0].snetStorage_name : null
+  subnet_name                     = var.is_secure_mode ? module.network[0].snetFunction_name : null
   vnet_name                       = var.is_secure_mode ? module.network[0].vnet_name : null
   private_dns_zone_ids            = var.is_secure_mode ? [module.privateDnsZoneStorageAccountBlob[0].privateDnsZoneResourceId,
                                        module.privateDnsZoneStorageAccountFile[0].privateDnsZoneResourceId,

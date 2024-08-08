@@ -703,7 +703,7 @@ async def posttd(csv: UploadFile = File(...)):
         global dffinal
             # Read the file into a pandas DataFrame
         content = await csv.read()
-        df = pd.read_csv(StringIO(content.decode('latin-1')))
+        df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
 
         dffinal = df
         # Process the DataFrame...
@@ -715,11 +715,12 @@ async def posttd(csv: UploadFile = File(...)):
     #return {"filename": csv.filename}
 @app.get("/process_td_agent_response")
 async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
+    save_df(dffinal)
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
     for i in range(retries):
         try:
-            results = td_agent_response(question)
+            results = td_agent_response(question,dffinal)
             return results
         except AttributeError as ex:
             log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")

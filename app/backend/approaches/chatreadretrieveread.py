@@ -105,7 +105,6 @@ class ChatReadRetrieveReadApproach(Approach):
         azure_ai_endpoint:str,
         azure_ai_key:str,
         azure_ai_location:str,
-        azure_ai_translation_domain: str,
         use_semantic_reranker: bool
         
     ):
@@ -127,7 +126,6 @@ class ChatReadRetrieveReadApproach(Approach):
         self.azure_ai_location=azure_ai_location
         self.oai_endpoint=oai_endpoint
         self.embedding_service_url = enrichment_appservice_uri
-        self.azure_ai_translation_domain=azure_ai_translation_domain
         self.use_semantic_reranker=use_semantic_reranker
         
         openai.api_base = oai_endpoint
@@ -429,17 +427,29 @@ class ChatReadRetrieveReadApproach(Approach):
     def detect_language(self, text: str) -> str:
         """ Function to detect the language of the text"""
         try:
-            api_detect_endpoint = f"https://{self.azure_ai_translation_domain}/detect?api-version=3.0"
+            api_detect_endpoint = f"{self.azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
             headers = {
                 'Ocp-Apim-Subscription-Key': self.azure_ai_key,
                 'Content-type': 'application/json',
                 'Ocp-Apim-Subscription-Region': self.azure_ai_location
             }
-            data = [{"text": text}]
+
+            data = {
+                "kind": "LanguageDetection",
+                "analysisInput":{
+                    "documents":[
+                        {
+                            "id":"1",
+                            "text": text
+                        }
+                    ]
+                }
+            } 
+
             response = requests.post(api_detect_endpoint, headers=headers, json=data)
 
             if response.status_code == 200:
-                detected_language = response.json()[0]['language']
+                detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
                 return detected_language
             else:
                 raise Exception(f"Error detecting language: {response.status_code}")
@@ -447,8 +457,8 @@ class ChatReadRetrieveReadApproach(Approach):
             raise Exception(f"An error occurred during language detection: {str(e)}") from e
      
     def translate_response(self, response: str, target_language: str) -> str:
-        """ Function to translate the response to target language"""     
-        api_translate_endpoint = f"https://{self.azure_ai_translation_domain}/translate?api-version=3.0"
+        """ Function to translate the response to target language"""
+        api_translate_endpoint = f"{self.azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
         headers = {
             'Ocp-Apim-Subscription-Key': self.azure_ai_key,
             'Content-type': 'application/json',

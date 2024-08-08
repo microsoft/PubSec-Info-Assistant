@@ -141,14 +141,6 @@ jq -r  '
             "env_var": "ENABLE_BING_SAFE_SEARCH"
         },
         {
-            "path": "AZURE_AI_TRANSLATION_DOMAIN",
-            "env_var": "AZURE_AI_TRANSLATION_DOMAIN"
-        },
-        {
-            "path": "AZURE_AI_TEXT_ANALYTICS_DOMAIN",
-            "env_var": "AZURE_AI_TEXT_ANALYTICS_DOMAIN"
-        },
-        {
             "path": "AZURE_ARM_MANAGEMENT_API",
             "env_var": "AZURE_ARM_MANAGEMENT_API"
         },

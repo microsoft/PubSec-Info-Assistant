@@ -401,7 +401,6 @@ module "webapp" {
     AZURE_AI_ENDPOINT                       = module.cognitiveServices.cognitiveServiceEndpoint
     AZURE_AI_LOCATION                       = var.location
     APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
-    AZURE_AI_TRANSLATION_DOMAIN             = var.azure_ai_translation_domain
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
     BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat
@@ -475,8 +474,6 @@ module "functions" {
   azureSearchIndex                      = var.searchIndexName
   azureSearchServiceEndpoint            = module.searchServices.endpoint
   endpointSuffix                        = var.azure_storage_domain
-  azure_ai_text_analytics_domain        = var.azure_ai_text_analytics_domain
-  azure_ai_translation_domain           = var.azure_ai_translation_domain
   logAnalyticsWorkspaceResourceId       = module.logging.logAnalyticsId
   is_secure_mode                        = var.is_secure_mode
   vnet_name                             = var.is_secure_mode ? module.network[0].vnet_name : null

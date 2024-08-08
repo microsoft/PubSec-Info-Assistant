@@ -112,18 +112,16 @@ resource "azurerm_linux_function_app" "function_app" {
     cors {
       allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
+    application_insights_connection_string = var.appInsightsConnectionString
+    application_insights_key = var.appInsightsInstrumentationKey
   }
 
-  identity {
-    type = "SystemAssigned"
-  }
-  
   connection_string {
     name  = "BLOB_CONNECTION_STRING"
     type  = "Custom"
     value = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/BLOB-CONNECTION-STRING)"
   }
-  
+
   app_settings = {
     WEBSITE_VNET_ROUTE_ALL                      = "1"  
     WEBSITE_CONTENTOVERVNET                     = var.is_secure_mode ? "1" : "0"
@@ -179,10 +177,13 @@ resource "azurerm_linux_function_app" "function_app" {
     COSMOSDB_KEY                                = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/COSMOSDB-KEY)"
     AZURE_SEARCH_SERVICE_ENDPOINT               = var.azureSearchServiceEndpoint
     AZURE_SEARCH_INDEX                          = var.azureSearchIndex
-    AZURE_AI_TRANSLATION_DOMAIN                 = var.azure_ai_translation_domain
-    AZURE_AI_TEXT_ANALYTICS_DOMAIN              = var.azure_ai_text_analytics_domain
     WEBSITE_PULL_IMAGE_OVER_VNET                = var.is_secure_mode ? "true" : "false"
   }
+
+  identity {
+    type = "SystemAssigned"
+  }
+  
 }
 
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_commercial" {

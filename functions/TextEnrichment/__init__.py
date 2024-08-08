@@ -29,6 +29,7 @@ cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 azure_ai_endpoint = os.environ["AZURE_AI_ENDPOINT"]
+azure_ai_key = os.environ["AZURE_AI_KEY"]
 targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 enrichment_backoff = int(os.environ["ENRICHMENT_BACKOFF"])
@@ -124,7 +125,7 @@ def main(msg: func.QueueMessage) -> None:
 
         # detect language           
         headers = {
-            'Authorization': f'Bearer {token_provider()}',
+            "Ocp-Apim-Subscription-Key": azure_ai_key,
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': azure_ai_location
         }

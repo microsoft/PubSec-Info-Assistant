@@ -68,7 +68,7 @@ API_TRANSLATE_ENDPOINT = (
 
 MAX_CHARS_FOR_DETECTION = 1000
 translator_api_headers = {
-    "Auhorization": f"Bearer {token_provider()}",
+    "Ocp-Apim-Subscription-Key": azure_ai_key,
     "Content-type": "application/json",
     "Ocp-Apim-Subscription-Region": azure_ai_location,
 }
@@ -186,7 +186,7 @@ def main(msg: func.QueueMessage) -> None:
         files = {"file": image_data}
         response = requests.post(VISION_ENDPOINT, 
                                  headers=vision_api_headers, 
-                                 files=files)
+                                 data=image_data)
     
         if response.status_code == 200:
             result = response.json()

@@ -112,7 +112,7 @@ output "ENABLE_DEV_CODE" {
 }
 
 output "AZURE_SUBSCRIPTION_ID" {
-  value = var.subscriptionId
+  value = data.azurerm_client_config.current.subscription_id
 }
 
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {

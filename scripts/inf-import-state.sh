@@ -335,21 +335,6 @@ module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
 import_resource_if_needed $module_path "$sp_id"
 
 
-# # Video Indexer
-# echo
-# figlet "Video Indexer"
-# # Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
-# # changes in the service in azure.
-# name="infoasststoremedia$random_text"
-# providers="/providers/Microsoft.Storage/storageAccounts/$name"
-# module_path="module.video_indexer.azurerm_storage_account.media_storage"
-# import_resource_if_needed $module_path "$resourceId$providers"
-# name="infoasst-ua-ident-$random_text"
-# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-# module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
-# import_resource_if_needed $module_path "$resourceId$providers"
-
-
 # Form Recognizer
 echo
 figlet "Form Recognizer"

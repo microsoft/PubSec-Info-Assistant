@@ -63,7 +63,6 @@ module "network" {
   snetEnrichmentCIDR              = var.enrichment_app_CIDR
   snetIntegrationCIDR             = var.integration_CIDR
   snetSearchServiceCIDR           = var.search_service_CIDR
-  snetAzureVideoIndexerCIDR       = var.azure_video_indexer_CIDR
   snetBingServiceCIDR             = var.bing_service_CIDR
   snetAzureOpenAICIDR             = var.azure_openAI_CIDR
   snetACRCIDR                     = var.acr_CIDR
@@ -281,7 +280,7 @@ module "enrichmentApp" {
   kind                                      = "linux"
   reserved                                  = true
   resourceGroupName                         = azurerm_resource_group.rg.name
-  storageAccountId                          = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
+  storageAccountId                          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
   scmDoBuildDuringDeployment                = false
   enableOryxBuild                           = false
   managedIdentity                           = true
@@ -356,7 +355,7 @@ module "webapp" {
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
-  tenantId                            = var.tenantId
+  tenantId                            = data.azurerm_client_config.current.tenant_id
   is_secure_mode                      = var.is_secure_mode
   subnet_name                         = var.is_secure_mode ? module.network[0].snetApp_name : null
   vnet_name                           = var.is_secure_mode ? module.network[0].vnet_name : null
@@ -411,7 +410,6 @@ module "webapp" {
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
     ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
     ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
-    ENABLE_MULTIMEDIA                       = var.enableMultimedia
     MAX_CSV_FILE_SIZE                       = var.maxCsvFileSize
     AZURE_AI_CREDENTIAL_DOMAIN               = var.azure_ai_private_link_domain
   }
@@ -632,27 +630,13 @@ module "sharepoint" {
   ]
 }
 
-// Video Indexer is not supported in secure mode
-module "video_indexer" {
-  count                               = var.is_secure_mode ? 0 : var.enableMultimedia ? 1 : 0
-  source                              = "./core/videoindexer"
-  location                            = azurerm_resource_group.rg.location
-  resource_group_name                 = azurerm_resource_group.rg.name
-  subscription_id                     = data.azurerm_client_config.current.subscription_id
-  random_string                       = random_string.random.result
-  tags                                = local.tags
-  azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
-  arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
-  video_indexer_api_version           = var.video_indexer_api_version
-}
-
 module "azMonitor" {
   source            = "./core/logging/monitor"
   logAnalyticsName  = module.logging.logAnalyticsName
   location          = var.location
   logWorkbookName   = "infoasst-lw-${random_string.random.result}"
   resourceGroupName = azurerm_resource_group.rg.name 
-  componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
+  componentResource = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
 }
 
 // Bing Search is not supported in US Government or Secure Mode
@@ -881,17 +865,6 @@ module "docIntel_StorageBlobDataReader" {
   principalType = "ServicePrincipal"
   subscriptionId = data.azurerm_client_config.current.subscription_id
   resourceGroupId = azurerm_resource_group.rg.id
-}
-
-module "aviRoleBackend" {
-  source            = "./core/security/role"
-  count             = var.enableMultimedia ? 1 : 0
-  scope             = module.video_indexer[0].vi_id
-  principalId       = module.webapp.identityPrincipalId
-  roleDefinitionId  = local.azure_roles.Contributor
-  principalType     = "ServicePrincipal"
-  subscriptionId    = data.azurerm_client_config.current.subscription_id
-  resourceGroupId   = azurerm_resource_group.rg.id 
 }
 
 # // MANAGEMENT SERVICE PRINCIPAL ROLES

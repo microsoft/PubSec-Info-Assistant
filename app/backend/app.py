@@ -87,7 +87,6 @@ ENV = {
     "ENABLE_UNGROUNDED_CHAT": "false",
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "ENABLE_MULTIMEDIA": "false",
     "MAX_CSV_FILE_SIZE": "7",
     "LOCAL_DEBUG": "false",
     "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
@@ -849,14 +848,12 @@ async def get_feature_flags():
             - "ENABLE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
             - "ENABLE_MATH_ASSISTANT": Flag indicating whether the math assistant is enabled.
             - "ENABLE_TABULAR_DATA_ASSISTANT": Flag indicating whether the tabular data assistant is enabled.
-            - "ENABLE_MULTIMEDIA": Flag indicating whether multimedia is enabled.
     """
     response = {
         "ENABLE_WEB_CHAT": str_to_bool.get(ENV["ENABLE_WEB_CHAT"]),
         "ENABLE_UNGROUNDED_CHAT": str_to_bool.get(ENV["ENABLE_UNGROUNDED_CHAT"]),
         "ENABLE_MATH_ASSISTANT": str_to_bool.get(ENV["ENABLE_MATH_ASSISTANT"]),
         "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
-        "ENABLE_MULTIMEDIA": str_to_bool.get(ENV["ENABLE_MULTIMEDIA"]),
     }
     return response
 

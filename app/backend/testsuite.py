@@ -309,7 +309,6 @@ def test_get_feature_flags():
         "ENABLE_UNGROUNDED_CHAT": os.getenv("ENABLE_UNGROUNDED_CHAT") == "true",
         "ENABLE_MATH_ASSISTANT": os.getenv("ENABLE_MATH_ASSISTANT") == "true",
         "ENABLE_TABULAR_DATA_ASSISTANT": os.getenv("ENABLE_TABULAR_DATA_ASSISTANT") == "true",
-        "ENABLE_MULTIMEDIA": os.getenv("ENABLE_MULTIMEDIA") == "true",
     }
 
     assert response.json() == expected_response

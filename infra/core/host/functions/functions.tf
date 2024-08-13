@@ -81,6 +81,7 @@ data "azurerm_storage_account" "existing_sa" {
   name                = var.blobStorageAccountName
   resource_group_name = var.resourceGroupName
 }
+
 // Create function app resource
 resource "azurerm_linux_function_app" "function_app" {
   name                                = var.name
@@ -110,7 +111,7 @@ resource "azurerm_linux_function_app" "function_app" {
     container_registry_use_managed_identity = true
     always_on                               = true
     http2_enabled                           = true
-    ftps_state                              = var.is_secure_mode ? "Disabled" : var.ftpsState
+    ftps_state                              = "Disabled"
     cors {
       allowed_origins                       = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }
@@ -128,7 +129,7 @@ resource "azurerm_linux_function_app" "function_app" {
     SCM_DO_BUILD_DURING_DEPLOYMENT              = "false"
     ENABLE_ORYX_BUILD                           = "false"
     #Set all connections to use Managed Identity instead of connection strings
-    AzureWebJobsStorage                        = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-STORAGE-CONECTION-STRING)"
+    AzureWebJobsStorage                        = "@Microsoft.KeyVault(SecretUri=${var.keyVaultUri}secrets/AZURE-STORAGE-CONNECTION-STRING)"
     # These will need to be enabled one Azure Functions has support for Managed Identity
     #AzureWebJobsStorage__blobServiceUri         = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
     #AzureWebJobsStorage__queueServiceUri        = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"

@@ -279,11 +279,6 @@ variable "managedIdentity" {
   default = false
 }
 
-variable "ftpsState" {
-  type = string
-  default = "FtpsOnly"
-}
-
 variable "azure_portal_domain" {
   type = string
 }

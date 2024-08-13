@@ -188,7 +188,7 @@ module "storage_connection_string" {
   resourceGroupName             = var.resourceGroupName
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   key_vault_name                = var.key_vault_name
-  secret_name                   = "AZURE-STORAGE-CONECTION-STRING"
+  secret_name                   = "AZURE-STORAGE-CONNECTION-STRING"
   secret_value                  = azurerm_storage_account.storage.primary_blob_connection_string
   tags                          = var.tags
   alias                         = "blobconnstring"

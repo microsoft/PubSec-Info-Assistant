@@ -20,8 +20,8 @@ secrets="{"
 keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-AI-KEY" "AZURE-STORAGE-CONECTION-STRING")
-azWebJobSecretName="AZURE-STORAGE-CONECTION-STRING"
+secretNames=("AZURE-AI-KEY" "AZURE-STORAGE-CONNECTION-STRING")
+azWebJobSecretName="AZURE-STORAGE-CONNECTION-STRING"
 azWebJobVarName="AzureWebJobsStorage"
 
 # Retrieve and export each secret

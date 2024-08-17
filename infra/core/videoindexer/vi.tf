@@ -15,14 +15,6 @@ resource "azurerm_storage_account" "media_storage" {
   allow_nested_items_to_be_public = false
 }
 
-# Create the VI instance via ARM Template
-data "template_file" "workflow" {
-  template = file(local.arm_file_path)
-  vars = {
-    arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
-  }
-}
-
 resource "azurerm_user_assigned_identity" "vi" {
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -45,7 +37,9 @@ resource "azurerm_resource_group_template_deployment" "vi" {
     "tags"                      = { value = var.tags },
     "apiVersion"                = { value = var.video_indexer_api_version }
   })
-  template_content = data.template_file.workflow.template
+  template_content = templatefile(local.arm_file_path, {
+    arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
+  })
   # The filemd5 forces this to run when the file is changed
   # this ensures the keys are up-to-date
   name            = "avi-${filemd5(local.arm_file_path)}"

@@ -19,6 +19,7 @@ module "cog_service_key" {
   alias                         = "aisvckey"
   tags                          = var.tags
   kv_secret_expiration          = var.kv_secret_expiration
+  contentType                   = "application/vnd.bag-StrongEncPasswordString"
 }
 
 data "azurerm_subnet" "subnet" {

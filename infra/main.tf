@@ -263,7 +263,6 @@ module "kvModule" {
   depends_on                    = [ module.entraObjects, module.privateDnsZoneKeyVault[0] ]
   azure_keyvault_domain         = var.azure_keyvault_domain
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "enrichmentApp" {
@@ -505,7 +504,6 @@ module "openaiServices" {
   private_dns_zone_ids            = var.is_secure_mode ? [module.privateDnsZoneAzureOpenAi[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api    = var.arm_template_schema_mgmt_api
   key_vault_name                  = module.kvModule.keyVaultName
-  kv_secret_expiration            = var.kv_secret_expiration
   logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
 
   deployments = [
@@ -547,7 +545,6 @@ module "aiDocIntelligence" {
   vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "cognitiveServices" {
@@ -580,7 +577,6 @@ module "searchServices" {
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   key_vault_name                = module.kvModule.keyVaultName
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "cosmosdb" {
@@ -597,7 +593,6 @@ module "cosmosdb" {
   vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneCosmosDb[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "acr"{

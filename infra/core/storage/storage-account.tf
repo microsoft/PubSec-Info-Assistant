@@ -193,6 +193,7 @@ module "storage_connection_string" {
   tags                          = var.tags
   alias                         = "blobconnstring"
   kv_secret_expiration          = var.kv_secret_expiration
+  contentType                   = "application/vnd.ms-StorageConnectionString"
 }
 
 data "azurerm_subnet" "subnet" {

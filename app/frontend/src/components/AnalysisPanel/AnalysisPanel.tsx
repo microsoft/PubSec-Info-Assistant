@@ -32,7 +32,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const [activeCitationObj, setActiveCitationObj] = useState<ActiveCitation>();
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
-
+    console.log("answer:", answer);
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points?.length;
     const isDisabledCitationTab: boolean = !activeCitation;
@@ -101,6 +101,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             >
                 <div className={styles.thoughtProcess} dangerouslySetInnerHTML={{ __html: sanitizedThoughts }}></div>
             </PivotItem>
+            {answer.data_points && answer.data_points.length > 0 && (
             <PivotItem
                 itemKey={AnalysisPanelTabs.SupportingContentTab}
                 headerText="Supporting content"
@@ -108,7 +109,8 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             >
                 <SupportingContent supportingContent={answer.data_points} />
             </PivotItem>
-            <PivotItem
+            )}
+            {activeCitationObj && (<PivotItem
                 itemKey={AnalysisPanelTabs.CitationTab}
                 headerText="Citation"
                 headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
@@ -151,6 +153,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                     </PivotItem>
                 </Pivot>
             </PivotItem>
+            )}
         </Pivot>
     );
 };

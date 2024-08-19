@@ -32,7 +32,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const [activeCitationObj, setActiveCitationObj] = useState<ActiveCitation>();
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
-    console.log("answer:", answer);
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points?.length;
     const isDisabledCitationTab: boolean = !activeCitation;

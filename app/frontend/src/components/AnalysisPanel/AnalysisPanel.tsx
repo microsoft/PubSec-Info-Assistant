@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useEffect, useState } from "react";
-import { IPivotItemProps, IRefObject, ITooltipHost, Pivot, PivotItem, Text, TooltipHost, mergeStyles } from "@fluentui/react";
+import { IPivotItemProps, IRefObject, ITooltipHost, Pivot, PivotItem, Text, TooltipHost} from "@fluentui/react";
 import { Label } from '@fluentui/react/lib/Label';
 import { Separator } from '@fluentui/react/lib/Separator';
 import DOMPurify from "dompurify";

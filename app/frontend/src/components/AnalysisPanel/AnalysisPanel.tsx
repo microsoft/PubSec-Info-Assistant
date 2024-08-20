@@ -108,7 +108,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             fetchPlainTextContent();
         }
     }, [sourceFile, sourceFileExt]);
-    console.log(isDisabledCitationTab)
     return (
         <Pivot
             className={className}

@@ -1,33 +1,34 @@
-# Information Assistant Accelerator
+# Information Assistant (IA) accelerator
 
 > [!IMPORTANT]  
 > As of November 15, 2023, Azure Cognitive Search has been renamed to Azure AI Search. Azure Cognitive Services have also been renamed to Azure AI Services.
 
 ## Table of Contents
 
-- [Response Generation Approaches](#response-generation-approaches)
+- [Response generation approaches](#response-generation-approaches)
 - [Features](#features)
 - [Azure account requirements](#azure-account-requirements)
-- [Azure Deployment](./docs/deployment/deployment.md)
-  - [GitHub Codespaces Setup](./docs/deployment/deployment.md#development-environment-configuration)
-  - [Cost Estimation](./docs/deployment/deployment.md#sizing-estimator)
+- [Azure deployment](./docs/deployment/deployment.md)
+  - [GitHub Codespaces setup](./docs/deployment/deployment.md#development-environment-configuration)
+  - [Cost estimation](./docs/deployment/deployment.md#sizing-estimator)
   - [Configuring ENV parameters](./docs/deployment/deployment.md#configure-env-files)
   - [Authenticating to Azure](./docs/deployment/deployment.md#log-into-azure-using-the-azure-cli)
   - [Deploying to Azure](./docs/deployment/deployment.md#deploy-and-configure-azure-resources)
-  - [Troubleshooting Common Issues](./docs/deployment/troubleshooting.md)
-  - [Considerations for Production Adoption](./docs/deployment/considerations_production.md)
-- [Secure-Mode Deployment](./docs/secure_deployment/secure_deployment.md)
+  - [Troubleshooting common issues](./docs/deployment/troubleshooting.md)
+  - [Considerations for production adoption](./docs/deployment/considerations_production.md)
+- [Secure-mode deployment](./docs/secure_deployment/secure_deployment.md)
 - [Enabling optional features](./docs/features/optional_features.md)
 - [Using the app](/docs/deployment/using_ia_first_time.md)
 - [Responsible AI](#responsible-ai)
   - [Transparency Note](#transparency-note)
   - [Content Safety](#content-safety)
 - [Data Collection Notice](#data-collection-notice)
+- [Shared responsibility and customer responsibilities](#shared-responsibility-and-customer-responsibilities)
 - [Resources](#resources)
-  - [Known Issues](./docs/knownissues.md)
-  - [Functional Tests](./tests/README.md)
+  - [Known issues](./docs/knownissues.md)
+  - [Functional tests](./tests/README.md)
   - [Navigating the source code](#navigating-the-source-code)
-  - [Architectural Decisions](/docs/features/architectural_decisions.md)
+  - [Architectural decisions](/docs/features/architectural_decisions.md)
   - [References](#references)
   - [Trademarks](#trademarks)
   - [Code of Conduct](#code-of-conduct)
@@ -36,23 +37,23 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-This industry accelerator showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+Information Assistant (IA) is an industry accelerator that showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
 The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
 Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with this accelerator.
 
-# Response Generation Approaches
+# Response generation approaches
 
-## Work(Grounded)
-It utilizes a retrieval-augmented generation (RAG) pattern to generate responses grounded in specific data sourced from your own dataset. By combining retrieval of relevant information with generative capabilities, It can produce responses that are not only contextually relevant but also grounded in verified data. The RAG pipeline accesses your dataset to retrieve relevant information before generating responses, ensuring accuracy and reliability. Additionally, each response includes a citation to the document chunk from which the answer is derived, providing transparency and allowing users to verify the source. This approach is particularly advantageous in domains where precision and factuality are paramount. Users can trust that the responses generated are based on reliable data sources, enhancing the credibility and usefulness of the application. Specific information on our Grounded (RAG) can be found in [RAG](docs/features/cognitive_search.md#azure-ai-search-integration)
+## Work (Grounded)
+It utilizes a retrieval-augmented generation (RAG) pattern to generate responses grounded in specific data sourced from your own dataset. By combining retrieval of relevant information with generative capabilities, it can produce responses that are not only contextually relevant but also grounded in verified data. The RAG pipeline accesses your dataset to retrieve relevant information before generating responses, ensuring accuracy and reliability. Additionally, each response includes a citation to the document chunk from which the answer is derived, providing transparency and allowing users to verify the source. This approach is particularly advantageous in domains where precision and factuality are paramount. Users can trust that the responses generated are based on reliable data sources, enhancing the credibility and usefulness of the application. Specific information on our Grounded (RAG) can be found in [RAG](docs/features/cognitive_search.md#azure-ai-search-integration).
 
 ## Ungrounded
 It leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. The LLM has been trained on a vast corpus of text data, enabling it to generate coherent and contextually relevant responses solely based on the input provided. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios. It's important to note that the generated responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount.
 
 ## Work and Web 
-It offers 3 response options: one generated through our retrieval-augmented generation (RAG) pipeline, and the other grounded in content directly from the web. When users opt for the RAG response, they receive a grounded answer sourced from your data, complete with citations to document chunks for transparency and verification. Conversely, selecting the web response provides access to a broader range of sources, potentially offering more diverse perspectives. Each web response is grounded in content from the web accompanied by citations of web links, allowing users to explore the original sources for further context and validation. Upon request, It can also generate a final response that compares and contrasts both responses. This comparative analysis allows users to make informed decisions based on the reliability, relevance, and context of the information provided.
-Specific information about our Grounded and Web can be found in [Web](/docs/features/features.md#bing-search-and-compare)
+It offers 2 response options: one generated through our retrieval-augmented generation (RAG) pipeline, and the other grounded in content directly from the web. When users opt for the RAG response, they receive a grounded answer sourced from their data, complete with citations to document chunks for transparency and verification. Conversely, selecting the web response provides access to a broader range of sources, potentially offering more diverse perspectives. Each web response is grounded in content from the web accompanied by citations of web links, allowing users to explore the original sources for further context and validation. Upon request, It can also generate a final response that compares and contrasts both responses. This comparative analysis allows users to make informed decisions based on the reliability, relevance, and context of the information provided.
+Specific information about our Work and Web can be found in [Web](/docs/features/features.md#bing-search-and-compare).
 
 ## Assistants 
 It generates response by using LLM as a reasoning engine. The key strength lies in agent's ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows. This approach allows for a dynamic and adaptive response generation process without predefining set of tasks. It harnesses the capabilities of LLM to understand natural language queries and generate responses tailored to specific tasks. These Agents are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future releases, we plan to work to enhance the safety and robustness of these autonomous reasoning capabilities. Specific information on our preview agents can be found in [Assistants](/docs/features/features.md#autonomous-reasoning-with-assistants-agents).
@@ -69,11 +70,11 @@ The IA Accelerator contains several features, many of which have their own docum
 
 For a detailed review see our [Features](./docs/features/features.md) page.
 
-### Process Flow for Work(Grounded), Ungrounded, and Work and Web
+### Process flow for Work (Grounded), Ungrounded, and Work and Web
 
 ![Process Flow for Chat](/docs/process_flow_chat.png)
 
-### Process Flow for Assistants
+### Process flow for Assistants
 
 ![Process Flow for Assistants](/docs/process_flow_agent.png)
 
@@ -101,7 +102,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 * **Azure account permissions**:
   * Your Azure account must have `Microsoft.Authorization/roleAssignments/write` permissions, such as [Role Based Access Control Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#role-based-access-control-administrator-preview), [User Access Administrator](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#user-access-administrator), or [Owner](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles#owner) on the subscription.
   * Your Azure account also needs `Microsoft.Resources/deployments/write` permissions on the subscription level.
-  * Your Azure account also needs `microsoft.directory/applications/create` and `microsoft.directory/servicePrincipals/create`, such as [Application Administrator](https://learn.microsoft.com/en-us/entra/identity/role-based-access-control/permissions-reference#application-administrator) Entra built-in role.
+  * Your Azure account also needs `microsoft.directory/applications/create` and `microsoft.directory/servicePrincipals/create`, such as [Application Administrator](https://learn.microsoft.com/entra/identity/role-based-access-control/permissions-reference#application-administrator) Entra built-in role.
 * **To have accepted the Azure AI Services Responsible AI Notice** for your subscription. If you have not manually accepted this notice please follow our guide at [Accepting Azure AI Service Responsible AI Notice](./docs/deployment/accepting_responsible_ai_notice.md).
 * (Optional) Have [Visual Studio Code](https://code.visualstudio.com/) installed on your development machine. If your Azure tenant and subscription have conditional access policies or device policies required, you may need to open your GitHub Codespaces in VS Code to satisfy the required polices.
 
@@ -115,17 +116,17 @@ You may choose to **[view the deployment and usage click-through guides](https:/
 
 ## Responsible AI
 
-The Information Assistant (IA) Accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
+The Information Assistant (IA) accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
 
 ### Transparency Note
 
-**Read our [Transparency Note](/docs/transparency.md)**
+**Read our [Transparency Note](/docs/transparency.md).**
 
-Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai)
+Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.com/ai/responsible-ai).
 
 ### Content Safety
 
-Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transparency Note](/docs/transparency.md)
+Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transparency Note](/docs/transparency.md).
 
 By default, the content filters are set to filter out prompts and completions that are detected as medium or high severity for those four harm categories. Content labeled as low or safe severity is not filtered.
 
@@ -135,7 +136,7 @@ The filtering configuration can be customized at the resource level, allowing cu
 
 This provides controls for Azure customers to tailor the content filtering behavior to their needs while aiming to prevent potentially harmful generated content and any copyright violations from public content.
 
-Instructions on how to configure content filters via Azure OpenAI Studio can be found here <https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/content-filters#configuring-content-filters-via-azure-openai-studio-preview>
+Learn how to [configure content filters via Azure OpenAI Studio (preview)](https://learn.microsoft.com/azure/ai-services/openai/how-to/content-filters#configuring-content-filters-via-azure-openai-studio-preview).
 
 ## Data Collection Notice
 
@@ -153,7 +154,7 @@ To disable data collection, follow the instructions in the [Configure ENV files]
 
 ## Resources
 
-### Navigating the Source Code
+### Navigating the source code
 
 This project has the following structure:
 
@@ -183,14 +184,27 @@ README.md | Starting point for this repo. It covers overviews of the Accelerator
 - [Azure AI Search](https://learn.microsoft.com/azure/search/search-what-is-azure-search)
 - [Azure OpenAI Service](https://learn.microsoft.com/azure/cognitive-services/openai/overview)
 
-### Trademarks
+## Shared responsibility and customer responsibilities
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft’s Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
+To ensure your data is secure and your privacy controls are addressed, we recommend that you follow a set of best practices when deploying into Azure:
 
-### Code of Conduct
+- [Azure security best practices and patterns](https://learn.microsoft.com/azure/security/fundamentals/best-practices-and-patterns)
+- [Microsoft Services in Cybersecurity](https://learn.microsoft.com/azure/security/fundamentals/cyber-services)
+
+Protecting your data also requires that all aspects of your security and compliance program include your cloud infrastructure and data. The following guidance can help you to secure your deployment.
+
+## Trademarks
+
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow [Microsoft’s Trademark & Brand Guidelines](https://www.microsoft.com/legal/intellectualproperty/trademarks/usage/general). Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party’s policies.
+
+## Microsoft Legal Notice
+
+**Notice**. The Information Assistant accelerator (the "IA") is PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. The IA may employ lesser or different privacy and security measures than those typically present in Azure Services. Unless otherwise noted, The IA should not be used to process Personal Data or other data that is subject to legal or regulatory compliance requirements. The following terms in the DPA do not apply to the IA: Processing of Personal Data, GDPR, Data Security, and HIPAA Business Associate. We may change or discontinue the IA at any time without notice. The IA (1) is not designed, intended, or made available as legal services, (2) is not intended to substitute for professional legal counsel or judgment, and (3) should not be used in place of consulting with a qualified professional legal professional for your specific needs. Microsoft makes no warranty that the IA is accurate, up-to-date, or complete. You are wholly responsible for ensuring your own compliance with all applicable laws and regulations. 
+
+## Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-### Reporting Security Issues
+## Reporting security issues
 
-For security concerns, please see [Security Guidelines](./SECURITY.md)
+For security concerns, please see [Security Guidelines](./SECURITY.md).

@@ -88,6 +88,11 @@ variable "blobStorageAccountLogContainerName" {
   type        = string
 }
 
+variable "queueStorageAccountEndpoint" {
+  description = "Azure Queue Storage Account Endpoint"
+  type        = string
+}
+
 variable "chunkTargetSize" {
   description = "Chunk Target Size"
   type        = string
@@ -274,11 +279,6 @@ variable "managedIdentity" {
   default = false
 }
 
-variable "ftpsState" {
-  type = string
-  default = "FtpsOnly"
-}
-
 variable "azure_portal_domain" {
   type = string
 }
@@ -313,5 +313,9 @@ variable "logAnalyticsWorkspaceResourceId" {
 }
 
 variable "azure_environment" {
+  type        = string
+}
+
+variable "azure_ai_credential_domain" {
   type        = string
 }

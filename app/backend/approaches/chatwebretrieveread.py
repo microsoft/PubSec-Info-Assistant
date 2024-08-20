@@ -74,7 +74,15 @@ class ChatWebRetrieveRead(Approach):
     citations = {}
     approach_class = ""
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
+    def __init__(self, model_name: str, 
+                 chatgpt_deployment: str, 
+                 query_term_language: str, 
+                 bing_search_endpoint: str, 
+                 bing_search_key: str, 
+                 bing_safe_search: bool,
+                 oai_endpoint: str,
+                 azure_ai_token_provider:str
+                 ):
         self.name = "ChatBingSearch"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
@@ -84,14 +92,14 @@ class ChatWebRetrieveRead(Approach):
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
         
-        # openai.api_base = oai_endpoint
+        openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_version = "2024-02-01"
        
          
         self.client = AsyncAzureOpenAI(
         azure_endpoint = openai.api_base , 
-        api_key=openai.api_key,  
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
         
 

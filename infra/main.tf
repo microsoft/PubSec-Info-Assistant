@@ -2,9 +2,9 @@ locals {
   tags            = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
   azure_roles     = jsondecode(file("${path.module}/azure_roles.json"))
   selected_roles  = ["CognitiveServicesOpenAIUser", 
-                      "StorageBlobDataReader", 
-                      "StorageBlobDataContributor", 
-                      "SearchIndexDataReader", 
+                      "CognitiveServicesUser", 
+                      "StorageBlobDataOwner",
+                      "StorageQueueDataContributor", 
                       "SearchIndexDataContributor"]
 }
 
@@ -63,7 +63,6 @@ module "network" {
   snetEnrichmentCIDR              = var.enrichment_app_CIDR
   snetIntegrationCIDR             = var.integration_CIDR
   snetSearchServiceCIDR           = var.search_service_CIDR
-  snetAzureVideoIndexerCIDR       = var.azure_video_indexer_CIDR
   snetBingServiceCIDR             = var.bing_service_CIDR
   snetAzureOpenAICIDR             = var.azure_openAI_CIDR
   snetACRCIDR                     = var.acr_CIDR
@@ -264,7 +263,6 @@ module "kvModule" {
   depends_on                    = [ module.entraObjects, module.privateDnsZoneKeyVault[0] ]
   azure_keyvault_domain         = var.azure_keyvault_domain
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "enrichmentApp" {
@@ -281,7 +279,7 @@ module "enrichmentApp" {
   kind                                      = "linux"
   reserved                                  = true
   resourceGroupName                         = azurerm_resource_group.rg.name
-  storageAccountId                          = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
+  storageAccountId                          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.Storage/storageAccounts/${module.storage.name}/services/queue/queues/${var.embeddingsQueue}"
   scmDoBuildDuringDeployment                = false
   enableOryxBuild                           = false
   managedIdentity                           = true
@@ -310,7 +308,8 @@ module "enrichmentApp" {
     AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
     AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
-    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_blob_endpoint
+    AZURE_QUEUE_STORAGE_ENDPOINT            = module.storage.primary_queue_endpoint
     COSMOSDB_URL                            = module.cosmosdb.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME              = module.cosmosdb.CosmosDBLogDatabaseName
     COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
@@ -324,6 +323,8 @@ module "enrichmentApp" {
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     EMBEDDING_VECTOR_SIZE                   = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_AI_CREDENTIAL_DOMAIN              = var.azure_ai_private_link_domain
+    AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
   }
 }
 
@@ -353,9 +354,9 @@ module "webapp" {
   applicationInsightsConnectionString = module.logging.applicationInsightsConnectionString
   keyVaultUri                         = module.kvModule.keyVaultUri
   keyVaultName                        = module.kvModule.keyVaultName
-  tenantId                            = var.tenantId
+  tenantId                            = data.azurerm_client_config.current.tenant_id
   is_secure_mode                      = var.is_secure_mode
-  subnet_id                           = var.is_secure_mode ? module.network[0].snetApp_id : null
+  subnet_name                         = var.is_secure_mode ? module.network[0].snetApp_name : null
   vnet_name                           = var.is_secure_mode ? module.network[0].vnet_name : null
   snetIntegration_id                  = var.is_secure_mode ? module.network[0].snetIntegration_id : null
   private_dns_zone_ids                = var.is_secure_mode ? [module.privateDnsZoneApp[0].privateDnsZoneResourceId] : null
@@ -371,7 +372,7 @@ module "webapp" {
   appSettings = {
     APPLICATIONINSIGHTS_CONNECTION_STRING   = module.logging.applicationInsightsConnectionString
     AZURE_BLOB_STORAGE_ACCOUNT              = module.storage.name
-    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_endpoints
+    AZURE_BLOB_STORAGE_ENDPOINT             = module.storage.primary_blob_endpoint
     AZURE_BLOB_STORAGE_CONTAINER            = var.contentContainerName
     AZURE_BLOB_STORAGE_UPLOAD_CONTAINER     = var.uploadContainerName
     AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
@@ -408,8 +409,8 @@ module "webapp" {
     ENABLE_UNGROUNDED_CHAT                  = var.enableUngroundedChat
     ENABLE_MATH_ASSISTANT                   = var.enableMathAssitant
     ENABLE_TABULAR_DATA_ASSISTANT           = var.enableTabularDataAssistant
-    ENABLE_MULTIMEDIA                       = var.enableMultimedia
     MAX_CSV_FILE_SIZE                       = var.maxCsvFileSize
+    AZURE_AI_CREDENTIAL_DOMAIN               = var.azure_ai_private_link_domain
   }
 
   aadClientId = module.entraObjects.azure_ad_web_app_client_id
@@ -438,10 +439,11 @@ module "functions" {
   appInsightsConnectionString           = module.logging.applicationInsightsConnectionString
   appInsightsInstrumentationKey         = module.logging.applicationInsightsInstrumentationKey
   blobStorageAccountName                = module.storage.name
-  blobStorageAccountEndpoint            = module.storage.primary_endpoints
+  blobStorageAccountEndpoint            = module.storage.primary_blob_endpoint
   blobStorageAccountOutputContainerName = var.contentContainerName
   blobStorageAccountUploadContainerName = var.uploadContainerName 
-  blobStorageAccountLogContainerName    = var.functionLogsContainerName 
+  blobStorageAccountLogContainerName    = var.functionLogsContainerName
+  queueStorageAccountEndpoint           = module.storage.primary_queue_endpoint
   formRecognizerEndpoint                = module.aiDocIntelligence.formRecognizerAccountEndpoint
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
@@ -485,6 +487,7 @@ module "functions" {
   container_registry_admin_password     = module.acr.admin_password
   container_registry_id                 = module.acr.acr_id
   azure_environment                     = var.azure_environment
+  azure_ai_credential_domain            = var.azure_ai_private_link_domain
 }
 
 module "openaiServices" {
@@ -493,7 +496,6 @@ module "openaiServices" {
   location                        = var.location
   tags                            = local.tags
   resourceGroupName               = azurerm_resource_group.rg.name
-  openaiServiceKey                = var.azureOpenAIServiceKey
   useExistingAOAIService          = var.useExistingAOAIService
   is_secure_mode                  = var.is_secure_mode
   subnet_name                     = var.is_secure_mode ? module.network[0].snetAzureOpenAI_name : null
@@ -502,7 +504,6 @@ module "openaiServices" {
   private_dns_zone_ids            = var.is_secure_mode ? [module.privateDnsZoneAzureOpenAi[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api    = var.arm_template_schema_mgmt_api
   key_vault_name                  = module.kvModule.keyVaultName
-  kv_secret_expiration            = var.kv_secret_expiration
   logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
 
   deployments = [
@@ -544,7 +545,6 @@ module "aiDocIntelligence" {
   vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneAzureAi[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "cognitiveServices" {
@@ -577,7 +577,6 @@ module "searchServices" {
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneSearchService[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   key_vault_name                = module.kvModule.keyVaultName
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "cosmosdb" {
@@ -594,7 +593,6 @@ module "cosmosdb" {
   vnet_name                     = var.is_secure_mode ? module.network[0].vnet_name : null
   private_dns_zone_ids          = var.is_secure_mode ? [module.privateDnsZoneCosmosDb[0].privateDnsZoneResourceId] : null
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 module "acr"{
@@ -627,27 +625,13 @@ module "sharepoint" {
   ]
 }
 
-// Video Indexer is not supported in secure mode
-module "video_indexer" {
-  count                               = var.is_secure_mode ? 0 : var.enableMultimedia ? 1 : 0
-  source                              = "./core/videoindexer"
-  location                            = azurerm_resource_group.rg.location
-  resource_group_name                 = azurerm_resource_group.rg.name
-  subscription_id                     = data.azurerm_client_config.current.subscription_id
-  random_string                       = random_string.random.result
-  tags                                = local.tags
-  azuread_service_principal_object_id = module.entraObjects.azure_ad_web_app_client_id
-  arm_template_schema_mgmt_api        = var.arm_template_schema_mgmt_api
-  video_indexer_api_version           = var.video_indexer_api_version
-}
-
 module "azMonitor" {
   source            = "./core/logging/monitor"
   logAnalyticsName  = module.logging.logAnalyticsName
   location          = var.location
   logWorkbookName   = "infoasst-lw-${random_string.random.result}"
   resourceGroupName = azurerm_resource_group.rg.name 
-  componentResource = "/subscriptions/${var.subscriptionId}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
+  componentResource = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.OperationalInsights/workspaces/${module.logging.logAnalyticsName}"
 }
 
 // Bing Search is not supported in US Government or Secure Mode
@@ -676,13 +660,21 @@ module "userRoles" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
+resource "azurerm_cosmosdb_sql_role_assignment" "user_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = data.azurerm_client_config.current.object_id
+  scope = module.cosmosdb.id
+}
+
 data "azurerm_resource_group" "existing" {
   count = var.useExistingAOAIService ? 1 : 0
   name  = var.azureOpenAIResourceGroup
 }
 
 # # // SYSTEM IDENTITY ROLES
-module "openAiRoleBackend" {
+module "webApp_OpenAiRole" {
   source = "./core/security/role"
 
   scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
@@ -693,18 +685,84 @@ module "openAiRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "storageRoleBackend" {
+module "enrichmentApp_OpenAiRole" {
   source = "./core/security/role"
 
-  scope            = azurerm_resource_group.rg.id
-  principalId      = module.webapp.identityPrincipalId
-  roleDefinitionId = local.azure_roles.StorageBlobDataReader
+  scope            = var.useExistingAOAIService ? data.azurerm_resource_group.existing[0].id : azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesOpenAIUser
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "searchRoleBackend" {
+module "webApp_CognitiveServicesUser" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.webapp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "functionApp_CognitiveServicesUser" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "enrichmentApp_CognitiveServicesUser" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.CognitiveServicesUser
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "enrichmentApp_StorageQueueDataContributor" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageQueueDataContributor
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "functionApp_StorageQueueDataContributor" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageQueueDataContributor
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "webApp_StorageBlobDataContributor" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.webapp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageBlobDataContributor
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "webApp_SearchIndexDataReader" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
@@ -715,26 +773,93 @@ module "searchRoleBackend" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "storageRoleFunc" {
+module "functionApp_SearchIndexDataReader" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
-  principalId      = module.functions.function_app_identity_principal_id
-  roleDefinitionId = local.azure_roles.StorageBlobDataReader
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.SearchIndexDataReader
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "aviRoleBackend" {
-  source            = "./core/security/role"
-  count             = var.enableMultimedia ? 1 : 0
-  scope             = module.video_indexer[0].vi_id
-  principalId       = module.webapp.identityPrincipalId
-  roleDefinitionId  = local.azure_roles.Contributor
-  principalType     = "ServicePrincipal"
-  subscriptionId    = data.azurerm_client_config.current.subscription_id
-  resourceGroupId   = azurerm_resource_group.rg.id 
+module "encrichmentApp_SearchIndexDataReader" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.SearchIndexDataContributor
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "fuctionApp_StorageBlobDataOwner" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageBlobDataOwner
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "enrichmentApp_StorageBlobDataOwner" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.enrichmentApp.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageBlobDataOwner
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+module "fuctionApp_StorageAccountContributor" {
+  source = "./core/security/role"
+
+  scope            = azurerm_resource_group.rg.id
+  principalId      = module.functions.identityPrincipalId
+  roleDefinitionId = local.azure_roles.StorageAccountContributor
+  principalType    = "ServicePrincipal"
+  subscriptionId   = data.azurerm_client_config.current.subscription_id
+  resourceGroupId  = azurerm_resource_group.rg.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "webApp_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = module.webapp.identityPrincipalId
+  scope = module.cosmosdb.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "functionApp_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = module.functions.identityPrincipalId
+  scope = module.cosmosdb.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "enrichmentApp_cosmosdb_data_contributor" {
+  resource_group_name = azurerm_resource_group.rg.name
+  account_name = module.cosmosdb.name
+  role_definition_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.rg.name}/providers/Microsoft.DocumentDB/databaseAccounts/${module.cosmosdb.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002" #Cosmos DB Built-in Data Contributor
+  principal_id = module.enrichmentApp.identityPrincipalId
+  scope = module.cosmosdb.id
+}
+
+module "docIntel_StorageBlobDataReader" {
+  source = "./core/security/role"
+  scope = azurerm_resource_group.rg.id
+  principalId = module.aiDocIntelligence.docIntelligenceIdentity
+  roleDefinitionId = local.azure_roles.StorageBlobDataReader
+  principalType = "ServicePrincipal"
+  subscriptionId = data.azurerm_client_config.current.subscription_id
+  resourceGroupId = azurerm_resource_group.rg.id
 }
 
 # // MANAGEMENT SERVICE PRINCIPAL ROLES

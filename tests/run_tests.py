@@ -8,12 +8,13 @@ import argparse
 import base64
 import os
 import time
-from datetime import datetime, timedelta, timezone
 from rich.console import Console
 import rich.traceback
 from azure.storage.blob import BlobServiceClient
+from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
+
+azure_credential = DefaultAzureCredential()
 
 rich.traceback.install()
 console = Console()
@@ -49,9 +50,9 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--storage_account_connection_str",
+        "--storage_account_url",
         required=True,
-        help="Storage account connection string (set in extract-env)")
+        help="Storage account endpoint string (set in extract-env)")
     parser.add_argument(
         "--search_service_endpoint",
         required=True,
@@ -60,10 +61,6 @@ def parse_arguments():
         "--search_index",
         required=True,
         help="Azure Search Index")
-    parser.add_argument(
-        "--search_key",
-        required=True,
-        help="Azure Search Key")
     parser.add_argument(
         "--wait_time_seconds",
         required=False,
@@ -141,14 +138,13 @@ def main(blob_service_client, wait_time_seconds, test_file_names):
         raise ex
 
 # Check Search Index for specific content uploaded by test
-def check_index(search_service_endpoint, search_index, search_key ):
+def check_index(search_service_endpoint, search_index):
     """Function to check the index for specific content uploaded by the test"""
     try:
-        azure_search_key_credential = AzureKeyCredential(search_key)
         search_client = SearchClient(
             endpoint=search_service_endpoint,
             index_name=search_index,
-            credential=azure_search_key_credential,
+            credential=azure_credential,
         )
         console.print("Begining index search")
         for extension, query in search_queries.items():
@@ -171,17 +167,16 @@ def check_index(search_service_endpoint, search_index, search_key ):
         console.log(f'[red]❌ {ex}[/red]')
         raise ex
 
-def cleanup_after_test(blob_service_client, search_service_endpoint, search_index, search_key, test_file_names):
+def cleanup_after_test(blob_service_client, search_service_endpoint, search_index, test_file_names):
     """Function to cleanup after tests"""
     console.print("Cleaning up after tests...")
 
     upload_container_client = blob_service_client.get_container_client(UPLOAD_CONTAINER_NAME)
     output_container_client = blob_service_client.get_container_client(OUTPUT_CONTAINER_NAME)
-    azure_search_key_credential = AzureKeyCredential(search_key)
     search_client = SearchClient(
         endpoint=search_service_endpoint,
         index_name=search_index,
-        credential=azure_search_key_credential,
+        credential=azure_credential,
     )
 
     # Cleanup upload container
@@ -226,16 +221,15 @@ def get_files_by_extension(folder_path, extensions):
 if __name__ == '__main__':
     args = parse_arguments()
     try:
-        storage_blob_service_client = BlobServiceClient.from_connection_string(
-            args.storage_account_connection_str)
+        storage_blob_service_client = BlobServiceClient(
+            args.storage_account_url, credential=azure_credential)
         # Get a list of files with specified extensions in the test_data folder
         test_file_names = get_files_by_extension(FILE_PATH, args.file_extensions)
 
         main(storage_blob_service_client, args.wait_time_seconds, test_file_names)
-        check_index(args.search_service_endpoint, args.search_index, args.search_key)
+        check_index(args.search_service_endpoint, args.search_index)
     finally:
         cleanup_after_test(storage_blob_service_client,
                            args.search_service_endpoint,
                            args.search_index,
-                           args.search_key,
                            test_file_names)

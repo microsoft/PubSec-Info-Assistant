@@ -131,7 +131,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                     disabled: isDisabledSupportingContentTab,
                     style: isDisabledSupportingContentTab ?  pivotItemDisabledStyle : undefined,
                 }}
-                onRenderItemLink = {onRenderItemLink("Supporting content is unavailable in compare mode.", tooltipRef2, isDisabledSupportingContentTab)}
+                onRenderItemLink = {onRenderItemLink("Supporting content is unavailable.", tooltipRef2, isDisabledSupportingContentTab)}
             >
                 <SupportingContent supportingContent={answer.data_points} />
             </PivotItem>

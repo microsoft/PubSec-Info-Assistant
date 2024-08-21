@@ -773,18 +773,18 @@ module "webApp_SearchIndexDataReader" {
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "functionApp_SearchIndexDataReader" {
+module "functionApp_SearchIndexDataContributor" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id
   principalId      = module.functions.identityPrincipalId
-  roleDefinitionId = local.azure_roles.SearchIndexDataReader
+  roleDefinitionId = local.azure_roles.SearchIndexDataContributor
   principalType    = "ServicePrincipal"
   subscriptionId   = data.azurerm_client_config.current.subscription_id
   resourceGroupId  = azurerm_resource_group.rg.id
 }
 
-module "encrichmentApp_SearchIndexDataReader" {
+module "encrichmentApp_SearchIndexDataContributor" {
   source = "./core/security/role"
 
   scope            = azurerm_resource_group.rg.id

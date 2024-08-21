@@ -35,4 +35,5 @@ module "bing_search_key" {
   alias                         = "bingkey"
   tags                          = var.tags
   kv_secret_expiration          = var.kv_secret_expiration
+  contentType                   = "application/vnd.bag-StrongEncPasswordString"
 }

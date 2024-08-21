@@ -5,18 +5,18 @@ import os
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
-from azure.storage.blob import generate_blob_sas, BlobSasPermissions
+from azure.storage.blob import generate_blob_sas, BlobSasPermissions, BlobServiceClient
 
 class UtilitiesHelper:
     """ Helper class for utility functions"""
     def __init__(self,
                  azure_blob_storage_account,
                  azure_blob_storage_endpoint,
-                 azure_blob_storage_key
+                 credential
                  ):
         self.azure_blob_storage_account = azure_blob_storage_account
         self.azure_blob_storage_endpoint = azure_blob_storage_endpoint
-        self.azure_blob_storage_key = azure_blob_storage_key
+        self.blob_service_client = BlobServiceClient(azure_blob_storage_endpoint, credential=credential)
         
     def get_filename_and_extension(self, path):
             """ Function to return the file name & type"""
@@ -40,12 +40,15 @@ class UtilitiesHelper:
         container_name = separator.join(
             blob_path.split(separator)[0:1])
 
+        # Obtain the user delegation key
+        user_delegation_key = self.blob_service_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=12))
+
         # Gen SAS token
         sas_token = generate_blob_sas(
             account_name=self.azure_blob_storage_account,
             container_name=container_name,
             blob_name=file_path_w_name_no_cont,
-            account_key=self.azure_blob_storage_key,
+            user_delegation_key=user_delegation_key,
             permission=BlobSasPermissions(read=True),
             expiry=datetime.utcnow() + timedelta(hours=1)
         )

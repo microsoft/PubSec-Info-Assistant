@@ -6,7 +6,7 @@ resource "azurerm_search_service" "search" {
   sku                           = var.sku["name"]
   tags                          = var.tags
   public_network_access_enabled = var.is_secure_mode ? false : true
-  local_authentication_enabled  = var.is_secure_mode ? false : true
+  local_authentication_enabled  = false
   replica_count                 = 1
   partition_count               = 1
   semantic_search_sku           = var.semanticSearch 
@@ -14,18 +14,6 @@ resource "azurerm_search_service" "search" {
   identity {
     type = "SystemAssigned"
   }
-}
-
-module "search_service_key" {
-  source                        = "../security/keyvaultSecret"
-  key_vault_name                = var.key_vault_name
-  resourceGroupName             = var.resourceGroupName
-  secret_name                   = "AZURE-SEARCH-SERVICE-KEY"
-  secret_value                  = azurerm_search_service.search.primary_key
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  alias                         = "searchkey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 data "azurerm_subnet" "subnet" {

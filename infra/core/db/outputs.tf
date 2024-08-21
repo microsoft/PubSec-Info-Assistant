@@ -13,3 +13,11 @@ output "CosmosDBLogContainerName" {
 output "privateEndpointId" {
   value = var.is_secure_mode ? azurerm_private_endpoint.cosmosPrivateEndpoint[0].id : null
 }
+
+output "id" {
+  value = azurerm_cosmosdb_account.cosmosdb_account.id
+}
+
+output "name" {
+  value = azurerm_cosmosdb_account.cosmosdb_account.name
+}

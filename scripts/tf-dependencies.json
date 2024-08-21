@@ -685,7 +685,6 @@
                     "module.logging.azurerm_application_insights.applicationInsights",
                     "module.logging.azurerm_log_analytics_workspace.logAnalytics",
                     "module.searchServices.azurerm_search_service.search",
-                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
                     "module.storage.azurerm_key_vault_secret.storage_key",
                     "module.storage.azurerm_storage_account.storage",
                     "module.storage.azurerm_storage_blob.config",
@@ -725,7 +724,6 @@
                     "module.logging.azurerm_application_insights.applicationInsights",
                     "module.logging.azurerm_log_analytics_workspace.logAnalytics",
                     "module.searchServices.azurerm_search_service.search",
-                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
                     "module.storage.azurerm_key_vault_secret.storage_key",
                     "module.storage.azurerm_storage_account.storage",
                     "module.storage.azurerm_storage_blob.config",
@@ -759,7 +757,6 @@
                     "module.kvModule.azurerm_key_vault.kv",
                     "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
                     "module.kvModule.data.azurerm_client_config.current",
-                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
                     "module.storage.azurerm_key_vault_secret.storage_key",
                     "module.storage.azurerm_storage_account.storage",
                     "module.storage.azurerm_storage_blob.config",
@@ -792,7 +789,6 @@
                     "module.kvModule.azurerm_key_vault.kv",
                     "module.kvModule.azurerm_key_vault_secret.spClientKeySecret",
                     "module.kvModule.data.azurerm_client_config.current",
-                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
                     "module.storage.azurerm_key_vault_secret.storage_key",
                     "module.storage.azurerm_storage_account.storage",
                     "module.storage.azurerm_storage_blob.config",
@@ -1061,26 +1057,6 @@
     {
         "mode": "managed",
         "type": "azurerm_key_vault_secret",
-        "name": "storage_connection_string",
-        "module": "module.storage",
-        "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
-        "instances": [
-            {
-                "dependencies": [
-                    "azurerm_resource_group.rg",
-                    "data.azurerm_client_config.current",
-                    "module.kvModule.azurerm_key_vault.kv",
-                    "module.kvModule.data.azurerm_client_config.current",
-                    "module.storage.azurerm_storage_account.storage",
-                    "random_string.random"
-                ],
-                "index_key": null
-            }
-        ]
-    },
-    {
-        "mode": "managed",
-        "type": "azurerm_key_vault_secret",
         "name": "storage_key",
         "module": "module.storage",
         "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
@@ -1321,7 +1297,6 @@
                     "module.logging.azurerm_application_insights.applicationInsights",
                     "module.logging.azurerm_log_analytics_workspace.logAnalytics",
                     "module.searchServices.azurerm_search_service.search",
-                    "module.storage.azurerm_key_vault_secret.storage_connection_string",
                     "module.storage.azurerm_key_vault_secret.storage_key",
                     "module.storage.azurerm_storage_account.storage",
                     "module.storage.azurerm_storage_blob.config",

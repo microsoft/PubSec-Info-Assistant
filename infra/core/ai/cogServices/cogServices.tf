@@ -7,10 +7,9 @@ resource "azurerm_cognitive_account" "cognitiveService" {
   tags                          = var.tags
   custom_subdomain_name         = var.name
   public_network_access_enabled = var.is_secure_mode ? false : true
-  local_auth_enabled            = var.is_secure_mode ? false : true
 }
 
-module "search_service_key" {
+module "cog_service_key" {
   source                        = "../../security/keyvaultSecret"
   arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
   key_vault_name                = var.key_vault_name
@@ -20,6 +19,7 @@ module "search_service_key" {
   alias                         = "aisvckey"
   tags                          = var.tags
   kv_secret_expiration          = var.kv_secret_expiration
+  contentType                   = "application/vnd.bag-StrongEncPasswordString"
 }
 
 data "azurerm_subnet" "subnet" {

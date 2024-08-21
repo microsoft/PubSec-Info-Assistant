@@ -70,10 +70,6 @@ variable "snetSearchServiceCIDR" {
   type    = string
 }
 
-variable "snetAzureVideoIndexerCIDR" {
-  type    = string
-}
-
 variable "snetBingServiceCIDR" {
   type    = string
 }

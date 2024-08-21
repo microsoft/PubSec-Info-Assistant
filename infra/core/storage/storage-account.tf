@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "storage" {
   enable_https_traffic_only       = true
   public_network_access_enabled   = var.is_secure_mode ? false : true
   allow_nested_items_to_be_public = false
-  shared_access_key_enabled       = var.is_secure_mode ? false : true
+  shared_access_key_enabled       = true #var.is_secure_mode ? false : true # This will need to be enabled once the Azure Functions can support Entra ID auth
 
   network_rules {  
     default_action                = var.is_secure_mode ? "Deny" : "Allow"
@@ -183,6 +183,19 @@ resource "azurerm_resource_group_template_deployment" "queue" {
   deployment_mode = "Incremental"
 }
 
+module "storage_connection_string" {
+  source                        = "../security/keyvaultSecret"
+  resourceGroupName             = var.resourceGroupName
+  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
+  key_vault_name                = var.key_vault_name
+  secret_name                   = "AZURE-STORAGE-CONNECTION-STRING"
+  secret_value                  = azurerm_storage_account.storage.primary_blob_connection_string
+  tags                          = var.tags
+  alias                         = "blobconnstring"
+  kv_secret_expiration          = var.kv_secret_expiration
+  contentType                   = "application/vnd.ms-StorageConnectionString"
+}
+
 data "azurerm_subnet" "subnet" {
   count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name
@@ -277,30 +290,6 @@ resource "azurerm_private_endpoint" "queuePrivateEndpoint" {
     name                 = "${var.name}PrivateDnsZoneGroup"
     private_dns_zone_ids = var.private_dns_zone_ids
   }
-}
-
-module "storage_connection_string" {
-  source                        = "../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "BLOB-CONNECTION-STRING"
-  secret_value                  = azurerm_storage_account.storage.primary_connection_string
-  tags                          = var.tags
-  alias                         = "blobConn"
-  kv_secret_expiration          = var.kv_secret_expiration
-}
-
-module "storage_key" {
-  source                        = "../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "AZURE-BLOB-STORAGE-KEY"
-  secret_value                  = azurerm_storage_account.storage.primary_access_key
-  tags                          = var.tags
-  alias                         = "blobkey"
-  kv_secret_expiration          = var.kv_secret_expiration
 }
 
 // Only create the config blob if we are not in secure mode as SharePoint integration is not supported in secure mode

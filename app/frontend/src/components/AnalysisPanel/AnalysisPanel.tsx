@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { useEffect, useState } from "react";
-import { Pivot, PivotItem, Text } from "@fluentui/react";
+import { IPivotItemProps, IRefObject, ITooltipHost, Pivot, PivotItem, Text, TooltipHost} from "@fluentui/react";
 import { Label } from '@fluentui/react/lib/Label';
 import { Separator } from '@fluentui/react/lib/Separator';
 import DOMPurify from "dompurify";
@@ -14,6 +14,7 @@ import styles from "./AnalysisPanel.module.css";
 import { SupportingContent } from "../SupportingContent";
 import { ChatResponse, ActiveCitation, getCitationObj } from "../../api";
 import { AnalysisPanelTabs } from "./AnalysisPanelTabs";
+import React from "react";
 
 interface Props {
     className: string;
@@ -26,19 +27,39 @@ interface Props {
     answer: ChatResponse;
 }
 
-const pivotItemDisabledStyle = { disabled: true, style: { color: "grey" } };
+const pivotItemDisabledStyle: React.CSSProperties = {
+    color: 'grey'
+    
+};
 
 export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, pageNumber, citationHeight, className, onActiveTabChanged }: Props) => {
     const [activeCitationObj, setActiveCitationObj] = useState<ActiveCitation>();
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
-
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points?.length;
     const isDisabledCitationTab: boolean = !activeCitation;
     // the first split on ? separates the file from the sas token, then the second split on . separates the file extension
     const sourceFileExt: any = sourceFile?.split("?")[0].split(".").pop();
     const sanitizedThoughts = DOMPurify.sanitize(answer.thoughts!);
+
+    const tooltipRef2 = React.useRef<ITooltipHost>(null);
+    const tooltipRef3 = React.useRef<ITooltipHost>(null);
+    
+
+    const onRenderItemLink = (content: string | JSX.Element | JSX.Element[] | undefined, tooltipRef: IRefObject<ITooltipHost> | undefined, shouldRender: boolean) => (properties: IPivotItemProps | undefined,
+        nullableDefaultRenderer?: (props: IPivotItemProps) => JSX.Element | null) => {
+            if (!properties || !nullableDefaultRenderer) {
+                return null; // or handle the undefined case appropriately
+            }
+            return shouldRender ? (
+                <TooltipHost content={content} componentRef={tooltipRef}>
+                    {nullableDefaultRenderer(properties)}
+                </TooltipHost>
+            ) : (
+                nullableDefaultRenderer(properties)
+            );
+    };
 
     async function fetchActiveCitationObj() {
         try {
@@ -87,7 +108,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             fetchPlainTextContent();
         }
     }, [sourceFile, sourceFileExt]);
-
     return (
         <Pivot
             className={className}
@@ -97,27 +117,43 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             <PivotItem
                 itemKey={AnalysisPanelTabs.ThoughtProcessTab}
                 headerText="Thought process"
-                headerButtonProps={isDisabledThoughtProcessTab ? pivotItemDisabledStyle : undefined}
+                headerButtonProps={isDisabledThoughtProcessTab ? { disabled: true, style: pivotItemDisabledStyle } : undefined}
+                
             >
                 <div className={styles.thoughtProcess} dangerouslySetInnerHTML={{ __html: sanitizedThoughts }}></div>
             </PivotItem>
+            
             <PivotItem
                 itemKey={AnalysisPanelTabs.SupportingContentTab}
                 headerText="Supporting content"
-                headerButtonProps={isDisabledSupportingContentTab ? pivotItemDisabledStyle : undefined}
+                
+                headerButtonProps={{
+                    disabled: isDisabledSupportingContentTab,
+                    style: isDisabledSupportingContentTab ?  pivotItemDisabledStyle : undefined,
+                }}
+                onRenderItemLink = {onRenderItemLink("Supporting content is unavailable.", tooltipRef2, isDisabledSupportingContentTab)}
             >
                 <SupportingContent supportingContent={answer.data_points} />
             </PivotItem>
+            
+            
             <PivotItem
                 itemKey={AnalysisPanelTabs.CitationTab}
+                
                 headerText="Citation"
-                headerButtonProps={isDisabledCitationTab ? pivotItemDisabledStyle : undefined}
-            >
+                headerButtonProps={{
+                    disabled: isDisabledCitationTab,
+                    style: isDisabledCitationTab ?  pivotItemDisabledStyle : undefined,
+                }}
+                onRenderItemLink = {onRenderItemLink("No active citation selected. Please select a citation from the citations list on the left.", tooltipRef3, isDisabledCitationTab)}
+            > 
+            
                 <Pivot className={className}>
                     <PivotItem itemKey="indexedFile" headerText="Document Section">
                         {activeCitationObj === undefined ? (
                             <Text>Loading...</Text>
-                        ) : (
+                        ) : 
+                        (
                             <div>
                                 <Separator>Metadata</Separator>
                                 <Label>File Name</Label><Text>{activeCitationObj.file_name}</Text>
@@ -151,6 +187,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                     </PivotItem>
                 </Pivot>
             </PivotItem>
+            
         </Pivot>
     );
 };

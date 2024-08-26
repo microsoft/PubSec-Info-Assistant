@@ -12,6 +12,7 @@ from web_search_client.models import SafeSearch
 from azure.core.credentials import AzureKeyCredential
 import openai
 from openai import AzureOpenAI
+from openai import BadRequestError
 from openai import AsyncAzureOpenAI
 from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
@@ -143,6 +144,10 @@ class ChatWebRetrieveRead(Approach):
         
         try:
             query_resp = await self.make_chat_completion(messages)
+        except BadRequestError as e:
+            log.error(f"Error generating optimized keyword search: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating optimized keyword search: {str(e)}")
             yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"

@@ -310,7 +310,7 @@ class ChatReadRetrieveReadApproach(Approach):
             # add the "FileX" moniker and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = {
                 "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
-                "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
+                "source_path": self.get_source_file_with_sas(urllib.parse.unquote(doc[self.source_file_field])),
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
             

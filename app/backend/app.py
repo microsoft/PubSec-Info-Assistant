@@ -12,7 +12,7 @@ import pandas as pd
 import pydantic
 from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
@@ -24,7 +24,7 @@ from approaches.approach import Approaches
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
-from azure.storage.blob import BlobServiceClient, generate_container_sas, ContainerSasPermissions
+from azure.storage.blob import BlobServiceClient, generate_container_sas, ContainerSasPermissions, ContentSettings
 from approaches.mathassistant import(
     generate_response,
     process_agent_response,
@@ -157,6 +157,7 @@ blob_client = BlobServiceClient(
     credential=azure_credential,
 )
 blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
+blob_upload_container_client = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
 model_name = ''
 model_version = ''
@@ -857,6 +858,37 @@ async def get_feature_flags():
     }
     return response
 
+@app.post("/file")  
+async def upload_file(  
+    file: UploadFile = File(...),   
+    file_path: str = Form(...),
+    tags: str = Form(None)  
+):  
+    """  
+    Upload a file to Azure Blob Storage.  
+    Parameters:  
+    - file: The file to upload.
+    - file_path: The path to save the file in Blob Storage.
+    - tags: The tags to associate with the file.  
+    Returns:  
+    - response: A message indicating the result of the upload.  
+    """  
+    try:          
+        blob_upload_client = blob_upload_container_client.get_blob_client(file_path)  
+  
+        blob_upload_client.upload_blob(
+            file.file,
+            overwrite=True,
+            content_settings=ContentSettings(content_type=file.content_type),
+            metadata= {"tags": tags}
+        )
+  
+        return {"message": f"File '{file.filename}' uploaded successfully"}  
+  
+    except Exception as ex:  
+        log.exception("Exception in /file")  
+        raise HTTPException(status_code=500, detail=str(ex)) from ex  
+    
 app.mount("/", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from typing import Any, Sequence
 
 import openai
 from openai import  AsyncAzureOpenAI
+from openai import BadRequestError
 from approaches.approach import Approach
 from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
@@ -200,7 +201,10 @@ class ChatReadRetrieveReadApproach(Approach):
             if filter_reasons:
                 error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
                 raise ValueError(error_message)
-    
+        except BadRequestError as e:
+            log.error(f"Error generating optimized keyword search: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating optimized keyword search: {str(e)}")
             yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
@@ -413,6 +417,10 @@ class ChatReadRetrieveReadApproach(Approach):
                         error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
                         raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
+        except BadRequestError as e:
+            log.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating chat completion: {str(e)}")
             yield json.dumps({"error": f"Error generating chat completion: {str(e)}"}) + "\n"

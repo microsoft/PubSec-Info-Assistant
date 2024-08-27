@@ -7,7 +7,7 @@ import os
 from typing import Any, Sequence
 import urllib.parse
 import openai
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 from openai import AsyncAzureOpenAI
 from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.approach import Approach
@@ -169,6 +169,10 @@ class CompareWorkWithWeb(Approach):
             # Step 4: Append web citations from the Bing Search approach
             for idx, url in enumerate(self.web_citations.keys(), start=1):
                 yield json.dumps({"content": f"[url{idx}]"}) + "\n"
+        except BadRequestError as e:
+            logging.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             logging.error(f"Error in compare work with web: {e}")
             yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"

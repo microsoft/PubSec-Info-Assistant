@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import Any, Sequence
 
 import openai
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 from openai import AsyncAzureOpenAI
 from approaches.approach import Approach
 
@@ -158,6 +158,10 @@ class GPTDirectApproach(Approach):
                         error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
                         raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
+        except BadRequestError as e:
+            logging.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             logging.error(f"Error in GPTDirectApproach: {e}")
             yield json.dumps({"error": f"An error occurred while generating the completion. {e}"}) + "\n"

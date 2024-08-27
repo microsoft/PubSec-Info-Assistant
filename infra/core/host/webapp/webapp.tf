@@ -82,7 +82,7 @@ resource "azurerm_linux_web_app" "app_service" {
   https_only                          = true
   tags                                = var.tags
   webdeploy_publish_basic_authentication_enabled = false
-  public_network_access_enabled                   = var.is_secure_mode ? false : true
+  public_network_access_enabled                   = true
   virtual_network_subnet_id                       = var.is_secure_mode ? var.snetIntegration_id : null
   
   site_config {

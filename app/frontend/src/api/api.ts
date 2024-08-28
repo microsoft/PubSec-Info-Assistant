@@ -3,7 +3,6 @@
 
 import { ChatResponse, 
     ChatRequest, 
-    BlobClientUrlResponse, 
     AllFilesUploadStatus, 
     GetUploadStatusRequest, 
     GetInfoResponse, 
@@ -62,22 +61,6 @@ export async function chatApi(options: ChatRequest, signal: AbortSignal): Promis
 
 export function getCitationFilePath(citation: string): string {
     return `${encodeURIComponent(citation)}`;
-}
-
-export async function getBlobClientUrl(): Promise<string> {
-    const response = await fetch("/getblobclienturl", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-
-    const parsedResponse: BlobClientUrlResponse = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error(parsedResponse.error || "Unknown error");
-    }
-
-    return parsedResponse.url;
 }
 
 export async function getAllUploadStatus(options: GetUploadStatusRequest): Promise<AllFilesUploadStatus> {

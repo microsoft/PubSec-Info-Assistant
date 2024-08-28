@@ -9,7 +9,6 @@
     "watch": "tsc && vite build --watch"
   },
   "dependencies": {
-    "@azure/storage-blob": "^12.24.0",
     "@fluentui/react": "^8.110.7",
     "@fluentui/react-icons": "^2.0.195",
     "@react-spring/web": "^9.7.1",

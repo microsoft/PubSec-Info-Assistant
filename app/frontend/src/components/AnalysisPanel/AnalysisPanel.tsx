@@ -7,12 +7,11 @@ import { Label } from '@fluentui/react/lib/Label';
 import { Separator } from '@fluentui/react/lib/Separator';
 import DOMPurify from "dompurify";
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm'
 
 import styles from "./AnalysisPanel.module.css";
 
 import { SupportingContent } from "../SupportingContent";
-import { ChatResponse, ActiveCitation, getCitationObj } from "../../api";
+import { ChatResponse, ActiveCitation, getCitationObj, fetchCitationFile } from "../../api";
 import { AnalysisPanelTabs } from "./AnalysisPanelTabs";
 import React from "react";
 
@@ -36,11 +35,12 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const [activeCitationObj, setActiveCitationObj] = useState<ActiveCitation>();
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
+    const [sourceFileBlob, setSourceFileBlob] = useState<Blob>();
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points?.length;
     const isDisabledCitationTab: boolean = !activeCitation;
     // the first split on ? separates the file from the sas token, then the second split on . separates the file extension
-    const sourceFileExt: any = sourceFile?.split("?")[0].split(".").pop();
+    const sourceFileExt: any = sourceFile?.split(".").pop();
     const sanitizedThoughts = DOMPurify.sanitize(answer.thoughts!);
 
     const tooltipRef2 = React.useRef<ITooltipHost>(null);
@@ -82,7 +82,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
         }
         const fetchMarkdownContent = async () => {
             try {
-                const response = await fetch(sourceFile!);
+                const response = await fetch(URL.createObjectURL(sourceFileBlob!));
                 const content = await response.text();
                 setMarkdownContent(content);
             } catch (error) {
@@ -91,12 +91,12 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
         };
 
         fetchMarkdownContent();
-    }, [sourceFile]);
+    }, [sourceFileBlob, sourceFileExt]);
 
     useEffect(() => {
         const fetchPlainTextContent = async () => {
             try {
-                const response = await fetch(sourceFile!);
+                const response = await fetch(URL.createObjectURL(sourceFileBlob!));
                 const content = await response.text();
                 setPlainTextContent(content);
             } catch (error) {
@@ -107,7 +107,15 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
         if (["json", "txt", "xml"].includes(sourceFileExt)) {
             fetchPlainTextContent();
         }
-    }, [sourceFile, sourceFileExt]);
+    }, [sourceFileBlob, sourceFileExt]);
+
+    useEffect(() => {
+        if (sourceFile) {
+            const response = fetchCitationFile(sourceFile);
+            setSourceFileBlob(response?.file_blob);
+        }
+    }, [sourceFile]);
+
     return (
         <Pivot
             className={className}
@@ -170,10 +178,10 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                     <PivotItem itemKey="rawFile" headerText="Document">
                         {["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
                             // Treat other Office formats like "xlsx" for the Office Online Viewer
-                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(sourceFile as string) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
+                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(URL.createObjectURL(sourceFileBlob!)) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
                         ) : sourceFileExt === "pdf" ? (
                             // Use object tag for PDFs because iframe does not support page numbers
-                            <object data={sourceFile + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
+                            <object data={URL.createObjectURL(sourceFileBlob!) + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
                         ) : sourceFileExt === "md" ? (
                             // Render Markdown content using react-markdown
                             <ReactMarkdown>{markdownContent}</ReactMarkdown>
@@ -182,7 +190,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                             <pre>{plainTextContent}</pre>
                         ) : (
                             // Default to iframe for other file types
-                            <iframe title="Source File" src={sourceFile} width="100%" height={citationHeight} />
+                            <iframe title="Source File" src={URL.createObjectURL(sourceFileBlob!)} width="100%" height={citationHeight} />
                         )}
                     </PivotItem>
                 </Pivot>

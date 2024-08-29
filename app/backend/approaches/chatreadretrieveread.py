@@ -304,7 +304,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 f"File{idx} " + "| " + nonewlines(doc[self.content_field])
             )
             data_points.append(
-               "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[4:]
+               "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[1:]
                 ) + "| " + nonewlines(doc[self.content_field])
                 )
             # uncomment to debug size of each search result content_field
@@ -313,8 +313,8 @@ class ChatReadRetrieveReadApproach(Approach):
 
             # add the "FileX" moniker and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = {
-                "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
-                "source_path": self.get_source_file_with_sas(urllib.parse.unquote(doc[self.source_file_field])),
+                "citation": urllib.parse.unquote("https://" + self.blob_client.url.split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
+                "source_path": doc[self.source_file_field],
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
             

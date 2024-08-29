@@ -69,7 +69,7 @@ ENV = {
     "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
     "KB_FIELDS_CONTENT": "content",
     "KB_FIELDS_PAGENUMBER": "pages",
-    "KB_FIELDS_SOURCEFILE": "file_uri",
+    "KB_FIELDS_SOURCEFILE": "file_name",
     "KB_FIELDS_CHUNKFILE": "chunk_file",
     "COSMOSDB_URL": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
@@ -880,3 +880,23 @@ app.mount("/", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     log.info("IA WebApp Starting Up...")
+
+@app.post("/get-file")
+async def get_file(request: Request):
+    data = await request.json()
+    file_path = data['path']
+
+    # Extract container name and blob name from the file path
+    container_name, blob_name = file_path.split('/', 1)
+
+    # Download the blob to a local file
+    
+    citation_blob_client = blob_upload_container_client.get_blob_client(blob=blob_name)
+    stream = citation_blob_client.download_blob().chunks()
+    blob_properties = citation_blob_client.get_blob_properties()
+
+    return StreamingResponse(stream,
+                             media_type=blob_properties.content_settings.content_type, 
+                             headers={"Content-Disposition": f"inline; filename={blob_name}"})
+    
+    

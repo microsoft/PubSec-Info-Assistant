@@ -876,11 +876,6 @@ async def upload_file(
         log.exception("Exception in /file")  
         raise HTTPException(status_code=500, detail=str(ex)) from ex  
 
-app.mount("/", StaticFiles(directory="static"), name="static")
-
-if __name__ == "__main__":
-    log.info("IA WebApp Starting Up...")
-
 @app.post("/get-file")
 async def get_file(request: Request):
     data = await request.json()
@@ -898,5 +893,8 @@ async def get_file(request: Request):
     return StreamingResponse(stream,
                              media_type=blob_properties.content_settings.content_type, 
                              headers={"Content-Disposition": f"inline; filename={blob_name}"})
-    
-    
+
+app.mount("/", StaticFiles(directory="static"), name="static")
+
+if __name__ == "__main__":
+    log.info("IA WebApp Starting Up...")

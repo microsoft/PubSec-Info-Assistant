@@ -11,7 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import styles from "./AnalysisPanel.module.css";
 
 import { SupportingContent } from "../SupportingContent";
-import { ChatResponse, ActiveCitation, getCitationObj, fetchCitationFile } from "../../api";
+import { ChatResponse, ActiveCitation, getCitationObj, fetchCitationFile, FetchCitationFileResponse } from "../../api";
 import { AnalysisPanelTabs } from "./AnalysisPanelTabs";
 import React from "react";
 
@@ -36,6 +36,8 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
     const [sourceFileBlob, setSourceFileBlob] = useState<Blob>();
+    const [sourceFileUrl, setSourceFileUrl] = useState<string>('');
+    const [isFetchingSourceFileBlob, setIsFetchingSourceFileBlob] = useState(false);
     const isDisabledThoughtProcessTab: boolean = !answer.thoughts;
     const isDisabledSupportingContentTab: boolean = !answer.data_points?.length;
     const isDisabledCitationTab: boolean = !activeCitation;
@@ -46,7 +48,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     const tooltipRef2 = React.useRef<ITooltipHost>(null);
     const tooltipRef3 = React.useRef<ITooltipHost>(null);
     
-
     const onRenderItemLink = (content: string | JSX.Element | JSX.Element[] | undefined, tooltipRef: IRefObject<ITooltipHost> | undefined, shouldRender: boolean) => (properties: IPivotItemProps | undefined,
         nullableDefaultRenderer?: (props: IPivotItemProps) => JSX.Element | null) => {
             if (!properties || !nullableDefaultRenderer) {
@@ -60,6 +61,31 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                 nullableDefaultRenderer(properties)
             );
     };
+    
+    let sourceFileBlobPromise: Promise<void> | null = null;
+    async function fetchCitationSourceFile(): Promise<void> {
+        if (sourceFile) {
+            const results = await fetchCitationFile(sourceFile);
+            setSourceFileBlob(results.file_blob);
+            setSourceFileUrl(URL.createObjectURL(results.file_blob));
+        }
+    }
+
+    function getCitationURL() {
+        const fetchSourceFileBlob = async () => {
+            if (sourceFileBlob === undefined) {
+                if (!isFetchingSourceFileBlob) {
+                    setIsFetchingSourceFileBlob(true);
+                    sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
+                        setIsFetchingSourceFileBlob(false);
+                    });
+                }
+                await sourceFileBlobPromise;
+            }
+        };
+        fetchSourceFileBlob();
+        return sourceFileUrl;
+    }
 
     async function fetchActiveCitationObj() {
         try {
@@ -82,7 +108,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
         }
         const fetchMarkdownContent = async () => {
             try {
-                const response = await fetch(URL.createObjectURL(sourceFileBlob!));
+                const response = await fetch(getCitationURL());
                 const content = await response.text();
                 setMarkdownContent(content);
             } catch (error) {
@@ -96,7 +122,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     useEffect(() => {
         const fetchPlainTextContent = async () => {
             try {
-                const response = await fetch(URL.createObjectURL(sourceFileBlob!));
+                const response = await fetch(getCitationURL());
                 const content = await response.text();
                 setPlainTextContent(content);
             } catch (error) {
@@ -108,13 +134,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             fetchPlainTextContent();
         }
     }, [sourceFileBlob, sourceFileExt]);
-
-    useEffect(() => {
-        if (sourceFile) {
-            const response = fetchCitationFile(sourceFile);
-            setSourceFileBlob(response?.file_blob);
-        }
-    }, [sourceFile]);
 
     return (
         <Pivot
@@ -178,10 +197,10 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                     <PivotItem itemKey="rawFile" headerText="Document">
                         {["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
                             // Treat other Office formats like "xlsx" for the Office Online Viewer
-                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(URL.createObjectURL(sourceFileBlob!)) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
+                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(getCitationURL()) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
                         ) : sourceFileExt === "pdf" ? (
                             // Use object tag for PDFs because iframe does not support page numbers
-                            <object data={URL.createObjectURL(sourceFileBlob!) + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
+                            <object data={getCitationURL() + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
                         ) : sourceFileExt === "md" ? (
                             // Render Markdown content using react-markdown
                             <ReactMarkdown>{markdownContent}</ReactMarkdown>
@@ -190,7 +209,7 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                             <pre>{plainTextContent}</pre>
                         ) : (
                             // Default to iframe for other file types
-                            <iframe title="Source File" src={URL.createObjectURL(sourceFileBlob!)} width="100%" height={citationHeight} />
+                            <iframe title="Source File" src={getCitationURL()} width="100%" height={citationHeight} />
                         )}
                     </PivotItem>
                 </Pivot>

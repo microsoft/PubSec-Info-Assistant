@@ -351,6 +351,57 @@ def test_delete_item():
     assert response.status_code == 200
     assert response.json() == True
 
+def test_upload_file_one_tag():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+
+
+def test_uploadfilenotagsnofolder():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": ""}
+        )
+        print(response.json())
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+
+def test_uploadfiletags():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": "test,inventory"}
+        )
+        print(response.json())
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+def test_uploadfilespecificfolder():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "Finance/parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+def test_uploadfilespecificfoldernested():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "Finance/new/parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+
 
 # This test requires some amount of data to be present and processed in IA
 # It is commented out because processing the data takes time and the test will fail if the data is not processed

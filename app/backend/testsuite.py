@@ -331,6 +331,8 @@ def test_upload_blob():
     # Upload the file
     with open(local_file_path, "rb") as data:
         blob_client.upload_blob(data, overwrite=True)
+        
+    return blob_name 
 
 def test_log_status():
     response = client.post("/logstatus", json={
@@ -349,8 +351,20 @@ def test_resubmit_item():
 def test_delete_item():
     response = client.post("/deleteItems", json={"path": "/parts_inventory.csv"})
     assert response.status_code == 200
-    assert response.json() == True
-
+    assert response.json() == True  
+  
+def test_get_file():  
+    blob_name = test_upload_blob()
+      
+    try:  
+        file_path = blob_name  
+        response = client.post("/get-file", json={"path": file_path})  
+          
+        assert response.status_code == 200  
+        assert response.headers["Content-Disposition"] == f"inline; filename=parts_inventory.csv"  
+        assert "text/csv" in response.headers["Content-Type"]  
+    finally:  
+        test_delete_item() 
 
 # This test requires some amount of data to be present and processed in IA
 # It is commented out because processing the data takes time and the test will fail if the data is not processed

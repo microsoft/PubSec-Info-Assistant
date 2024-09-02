@@ -5,6 +5,7 @@ import { ContainerClient } from "@azure/storage-blob";
 import classNames from "classnames";
 import { nanoid } from "nanoid";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { SpinnerIos16Filled } from "@fluentui/react-icons";
 import { DropZone } from "./drop-zone"
 import styles from "./file-picker.module.css";
 import { FilesList } from "./files-list";
@@ -87,63 +88,65 @@ const FilePicker = ({folderPath, tags}: Props) => {
       console.log(error);
     }
   }, [files, folderPath, tags]);
-
-  // set progress to zero when there are no files
-  useEffect(() => {
-    if (files.length < 1) {
-      setProgress(0);
-    }
-  }, [files.length]);
-
-  // set uploadStarted to false when the upload is complete
-  useEffect(() => {
-    if (progress === 100) {
-      setUploadStarted(false);
-    }
-  }, [progress]);
-
-  const uploadComplete = useMemo(() => progress === 100, [progress]);
-
-  return (
-    <div className={styles.wrapper}>
-      {/* canvas */}
-      <div className={styles.canvas_wrapper}>
-        <DropZone onChange={handleOnChange} accept={files} />
-      </div>
-
-      {/* files listing */}
-      {files.length ? (
+  
+  // set progress to zero when there are no files  
+  useEffect(() => {  
+    if (files.length < 1) {  
+      setProgress(0);  
+    }  
+  }, [files.length]);  
+  
+  // set uploadStarted to false when the upload is complete  
+  useEffect(() => {  
+    if (progress === 100) {  
+      setUploadStarted(false);  
+    }  
+  }, [progress]);  
+  
+  const uploadComplete = useMemo(() => progress === 100, [progress]);  
+  
+  return (  
+    <div className={styles.wrapper}>  
+      {/* canvas */}  
+      <div className={styles.canvas_wrapper}>  
+        <DropZone onChange={handleOnChange} accept={files} />  
+      </div>  
+      {/* files listing */}  
+      {files.length ? (  
         <div className={styles.files_list_wrapper}>
-          <FilesList
-            files={files}
-            onClear={handleClearFile}
-            uploadComplete={uploadComplete}
-          />
-        </div>
-      ) : null}
-
-      {/* progress bar */}
-      {canShowProgress ? (
-        <div className={styles.files_list_progress_wrapper}>
-          <progress value={progress} max={100} style={{ width: "100%" }} />
-        </div>
-      ) : null}
-
-      {/* upload button */}
-      {files.length ? (
-        <button
-          onClick={handleUpload}
-          className={classNames(
-            styles.upload_button,
-            uploadComplete || uploadStarted ? styles.disabled : ""
-          )}
-          aria-label="upload files"
-        >
-          {`Upload ${files.length} Files`}
-        </button>
-      ) : null}
-    </div>
-  );
-};
-
-export { FilePicker };
+          {uploadStarted && (
+            <div className={styles.spinner_overlay}>
+              <SpinnerIos16Filled className={styles.spinner} />
+            </div>
+          )}  
+          <FilesList  
+            files={files}  
+            onClear={handleClearFile}  
+            uploadComplete={uploadComplete}  
+          />  
+        </div>  
+      ) : null}  
+      {/* progress bar */}  
+      {canShowProgress ? (  
+        <div className={styles.files_list_progress_wrapper}>  
+          <progress value={progress} max={100} style={{ width: "100%" }} />  
+        </div>  
+      ) : null}  
+      {/* upload button */}  
+      {files.length ? (  
+        <button  
+          onClick={handleUpload}  
+          className={classNames(  
+            styles.upload_button,  
+            uploadComplete || uploadStarted ? styles.disabled : ""  
+          )}  
+          aria-label="upload files"  
+        >  
+          {`Upload ${files.length} Files`}  
+        </button>  
+      ) : null}  
+    </div>  
+  );  
+};  
+  
+export { FilePicker };  

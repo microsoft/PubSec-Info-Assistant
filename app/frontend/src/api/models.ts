@@ -216,3 +216,8 @@ export type GetFeatureFlagsResponse = {
     ENABLE_TABULAR_DATA_ASSISTANT: boolean;
     error?: string;
 }
+
+export type FetchCitationFileResponse = {
+    file_blob: Blob;
+    error?: string;
+}

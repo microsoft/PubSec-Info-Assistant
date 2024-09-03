@@ -6,6 +6,7 @@ from azure.identity import DefaultAzureCredential
 import os
 from fastapi.testclient import TestClient
 from dotenv import load_dotenv
+import io
 
 dir = current_working_directory = os.getcwd()
 # We're running from MAKE file, so we need to change directory to app/backend
@@ -351,7 +352,105 @@ def test_delete_item():
     assert response.status_code == 200
     assert response.json() == True
 
+def test_upload_file_one_tag():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
 
+
+def test_uploadfilenotagsnofolder():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": ""}
+        )
+        print(response.json())
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+
+def test_uploadfiletags():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": "test,inventory"}
+        )
+        print(response.json())
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+def test_uploadfilespecificfolder():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "Finance/parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+def test_uploadfilespecificfoldernested():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "Finance/new/parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+
+def test_upload_file_no_file():
+    response = client.post(
+        "/file",
+        data={"file_path": "parts_inventory.csv", "tags": "test"}
+    )
+    assert response.status_code == 422  # Unprocessable Entity
+
+def test_upload_file_large_file():
+    file_content = b"a" * (10 * 1024 * 1024)  # 10 MB file
+    file = io.BytesIO(file_content)
+    file.name = "large_parts_inventory.csv"
+    
+    response = client.post(
+        "/file",
+        files={"file": (file.name, file, "text/csv")},
+        data={"file_path": "large_parts_inventory.csv", "tags": "test"}
+    )
+    assert response.status_code == 200
+    assert response.json() == {"message": "File 'large_parts_inventory.csv' uploaded successfully"}
+
+def test_upload_file_missing_file_path():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"tags": "test"}
+        )
+        assert response.status_code == 422  # Unprocessable Entity
+def test_upload_file_special_characters_in_file_path():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "Finance/@new/parts_inventory.csv", "tags": "test"}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
+
+def test_upload_file_long_tags():
+    with open("test_data/parts_inventory.csv", "rb") as file:
+        long_tags = ",".join(["tag"] * 1000)  # Very long tags string
+        response = client.post(
+            "/file",
+            files={"file": ("parts_inventory.csv", file, "text/csv")},
+            data={"file_path": "parts_inventory.csv", "tags": long_tags}
+        )
+        assert response.status_code == 200
+        assert response.json() == {"message": "File 'parts_inventory.csv' uploaded successfully"}
 # This test requires some amount of data to be present and processed in IA
 # It is commented out because processing the data takes time and the test will fail if the data is not processed
 # Change the question to a valid question that will produce citations if you want to run this test

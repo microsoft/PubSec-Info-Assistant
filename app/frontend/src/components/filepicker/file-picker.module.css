@@ -11,6 +11,7 @@
     background-color: #d3d3d3;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     border-radius: 4px;
+    position: relative;
   }
   
   .canvas_wrapper {
@@ -54,5 +55,28 @@
       color: #fff;
       cursor: not-allowed;
     }
+  }
+
+  .spinner_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+    z-index: 10; /* Ensure it is above the files list */
+  }
+  
+  .spinner {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
   

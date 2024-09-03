@@ -3,7 +3,8 @@
 
 import classNames from "classnames";  
 import { nanoid } from "nanoid";  
-import { useCallback, useEffect, useMemo, useState } from "react";  
+import { useCallback, useEffect, useMemo, useState } from "react"; 
+import { SpinnerIos16Filled } from "@fluentui/react-icons"; 
 import { DropZone } from "./drop-zone";  
 import styles from "./file-picker.module.css";  
 import { FilesList } from "./files-list";  
@@ -117,7 +118,12 @@ const FilePicker = ({ folderPath, tags }: Props) => {
       </div>  
       {/* files listing */}  
       {files.length ? (  
-        <div className={styles.files_list_wrapper}>  
+        <div className={styles.files_list_wrapper}>
+          {uploadStarted && (
+            <div className={styles.spinner_overlay}>
+              <SpinnerIos16Filled className={styles.spinner} />
+            </div>
+          )}  
           <FilesList  
             files={files}  
             onClear={handleClearFile}  

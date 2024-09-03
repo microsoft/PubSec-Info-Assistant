@@ -3,7 +3,6 @@
 
 import { ChatResponse, 
     ChatRequest, 
-    BlobClientUrlResponse, 
     AllFilesUploadStatus, 
     GetUploadStatusRequest, 
     GetInfoResponse, 
@@ -17,6 +16,7 @@ import { ChatResponse,
     ResubmitItemRequest,
     GetFeatureFlagsResponse,
     getMaxCSVFileSizeType,
+    FetchCitationFileResponse,
     } from "./models";
 
 export async function chatApi(options: ChatRequest, signal: AbortSignal): Promise<Response> {
@@ -62,22 +62,6 @@ export async function chatApi(options: ChatRequest, signal: AbortSignal): Promis
 
 export function getCitationFilePath(citation: string): string {
     return `${encodeURIComponent(citation)}`;
-}
-
-export async function getBlobClientUrl(): Promise<string> {
-    const response = await fetch("/getblobclienturl", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-
-    const parsedResponse: BlobClientUrlResponse = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error(parsedResponse.error || "Unknown error");
-    }
-
-    return parsedResponse.url;
 }
 
 export async function getAllUploadStatus(options: GetUploadStatusRequest): Promise<AllFilesUploadStatus> {
@@ -486,4 +470,21 @@ export async function getFeatureFlags(): Promise<GetFeatureFlagsResponse> {
     }
     console.log(parsedResponse);
     return parsedResponse;
+}
+
+export async function fetchCitationFile(filePath: string) : Promise<FetchCitationFileResponse> {
+    const response = await fetch('/get-file', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: filePath }),
+    });
+
+    if (response.status > 299 || !response.ok) {
+        console.log(response);
+        throw Error('Failed to fetch file' + response.statusText);
+    }
+    const fileResponse : FetchCitationFileResponse = {file_blob : await response.blob()};
+    return fileResponse;
 }

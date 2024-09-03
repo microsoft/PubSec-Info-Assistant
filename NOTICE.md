@@ -113,10 +113,6 @@ From the following locations:
 
 <https://github.com/remix-run/react-router>
 
-### @azure/storage-blob
-
-<https://github.com/Azure/azure-sdk-for-js>
-
 ### classnames
 
 <https://github.com/JedWatson/classnames>

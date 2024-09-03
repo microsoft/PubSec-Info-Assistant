@@ -3,6 +3,7 @@
 
 from io import StringIO
 from typing import Optional
+from datetime import datetime
 import asyncio
 import logging
 import os
@@ -10,9 +11,8 @@ import json
 import urllib.parse
 import pandas as pd
 import pydantic
-from datetime import datetime, timedelta
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
@@ -24,7 +24,7 @@ from approaches.approach import Approaches
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
-from azure.storage.blob import BlobServiceClient, generate_container_sas, ContainerSasPermissions
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from approaches.mathassistant import(
     generate_response,
     process_agent_response,
@@ -69,7 +69,7 @@ ENV = {
     "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
     "KB_FIELDS_CONTENT": "content",
     "KB_FIELDS_PAGENUMBER": "pages",
-    "KB_FIELDS_SOURCEFILE": "file_uri",
+    "KB_FIELDS_SOURCEFILE": "file_name",
     "KB_FIELDS_CHUNKFILE": "chunk_file",
     "COSMOSDB_URL": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
@@ -106,6 +106,7 @@ log.setLevel('DEBUG')
 log.propagate = True
 
 class StatusResponse(pydantic.BaseModel):
+    """The response model for the health check endpoint"""
     status: str
     uptime_seconds: float
     version: str
@@ -114,7 +115,7 @@ start_time = datetime.now()
 
 IS_READY = False
 
-dffinal = None
+DF_FINAL = None
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
@@ -132,9 +133,11 @@ if ENV["LOCAL_DEBUG"] == "true":
     azure_credential = DefaultAzureCredential(authority=AUTHORITY)
 else:
     azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
-# Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
+# Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY
+# environment variable instead
 openai.api_type = "azure_ad"
-token_provider = get_bearer_token_provider(azure_credential, f'https://{ENV["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
+token_provider = get_bearer_token_provider(azure_credential,
+                                           f'https://{ENV["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
 openai.azure_ad_token_provider = token_provider
 #openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
 
@@ -157,9 +160,11 @@ blob_client = BlobServiceClient(
     credential=azure_credential,
 )
 blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
+blob_upload_container_client = blob_client.get_container_client(
+                                    os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
-model_name = ''
-model_version = ''
+MODEL_NAME = ''
+MODEL_VERSION = ''
 
 # Set up OpenAI management client
 openai_mgmt_client = CognitiveServicesManagementClient(
@@ -173,20 +178,20 @@ deployment = openai_mgmt_client.deployments.get(
     account_name=ENV["AZURE_OPENAI_SERVICE"],
     deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
 
-model_name = deployment.properties.model.name
-model_version = deployment.properties.model.version
+MODEL_NAME = deployment.properties.model.name
+MODEL_VERSION = deployment.properties.model.version
 
-if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
+if str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"]):
     embedding_deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
         account_name=ENV["AZURE_OPENAI_SERVICE"],
         deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
 
-    embedding_model_name = embedding_deployment.properties.model.name
-    embedding_model_version = embedding_deployment.properties.model.version
+    EMBEDDING_MODEL_NAME = embedding_deployment.properties.model.name
+    EMBEDDING_MODEL_VERSION = embedding_deployment.properties.model.version
 else:
-    embedding_model_name = ""
-    embedding_model_version = ""
+    EMBEDDING_MODEL_NAME = ""
+    EMBEDDING_MODEL_VERSION = ""
 
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
@@ -200,8 +205,8 @@ chat_approaches = {
                                     ENV["AZURE_BLOB_STORAGE_CONTAINER"],
                                     blob_client,
                                     ENV["QUERY_TERM_LANGUAGE"],
-                                    model_name,
-                                    model_version,
+                                    MODEL_NAME,
+                                    MODEL_VERSION,
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
                                     ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -211,7 +216,7 @@ chat_approaches = {
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
     Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
-                                    model_name,
+                                    MODEL_NAME,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
@@ -220,8 +225,8 @@ chat_approaches = {
                                     ENV["AZURE_OPENAI_ENDPOINT"],
                                     token_provider
                                 ),
-    Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
-                                    model_name,
+    Approaches.CompareWorkWithWeb: CompareWorkWithWeb(
+                                    MODEL_NAME,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
@@ -241,8 +246,8 @@ chat_approaches = {
                                     ENV["AZURE_BLOB_STORAGE_CONTAINER"],
                                     blob_client,
                                     ENV["QUERY_TERM_LANGUAGE"],
-                                    model_name,
-                                    model_version,
+                                    MODEL_NAME,
+                                    MODEL_VERSION,
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
                                     ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
@@ -255,8 +260,8 @@ chat_approaches = {
                                 token_provider,
                                 ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                 ENV["QUERY_TERM_LANGUAGE"],
-                                model_name,
-                                model_version,
+                                MODEL_NAME,
+                                MODEL_VERSION,
                                 ENV["AZURE_OPENAI_ENDPOINT"]
     )
 }
@@ -315,42 +320,24 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        
-        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
+
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or
+            Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            r = impl.run(json_body.get("history", []),
+                         json_body.get("overrides", {}),
+                         json_body.get("citation_lookup", {}),
+                         json_body.get("thought_chain", {}))
         else:
-            r = impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
-       
+            r = impl.run(json_body.get("history", []),
+                         json_body.get("overrides", {}),
+                         {},
+                         json_body.get("thought_chain", {}))
+
         return StreamingResponse(r, media_type="application/x-ndjson")
 
     except Exception as ex:
-        log.error(f"Error in chat:: {ex}")
+        log.error("Error in chat:: %s", ex)
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-
-    
-
-@app.get("/getblobclienturl")
-async def get_blob_client_url():
-    """Get a URL for a file in Blob Storage with SAS token.
-
-    This function generates a Shared Access Signature (SAS) token for accessing a file in Blob Storage.
-    The generated URL includes the SAS token as a query parameter.
-
-    Returns:
-        dict: A dictionary containing the URL with the SAS token.
-    """
-    # Obtain the user delegation key
-    user_delegation_key = blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
-
-    sas_token = generate_container_sas(account_name=blob_client.account_name,
-                        container_name=ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"],
-                        permission=ContainerSasPermissions(read=True, write=True, delete=False, list=True, tag=True),
-                        user_delegation_key=user_delegation_key,
-                        expiry=datetime.utcnow() + timedelta(hours=2)
-    )
-    
-    return {"url": f"{blob_client.url}upload?{sas_token}"}
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):
@@ -367,40 +354,41 @@ async def get_all_upload_status(request: Request):
     timeframe = json_body.get("timeframe")
     state = json_body.get("state")
     folder = json_body.get("folder")
-    tag = json_body.get("tag")   
+    tag = json_body.get("tag")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, 
-            State[state], 
-            folder, 
+        results = statusLog.read_files_status_by_timeframe(timeframe,
+            State[state],
+            folder,
             tag,
             os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
-        items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=azure_credential, consistency_level='Session')
+        items = []
+        cosmos_client = CosmosClient(url=statusLog._url,
+                                     credential=azure_credential,
+                                     consistency_level='Session')
         database = cosmos_client.get_database_client(statusLog._database_name)
         container = database.get_container_client(statusLog._container_name)
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
         items = list(container.query_items(
             query=query_string,
             enable_cross_partition_query=True
-        ))           
+        ))
 
         # Extract and split tags
         unique_tags = set()
         for item in items:
             tags = item.split(',')
-            unique_tags.update(tags)        
+            unique_tags.update(tags)
 
-        
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
 @app.post("/getfolders")
-async def get_folders(request: Request):
+async def get_folders():
     """
     Get all folders.
 
@@ -588,16 +576,16 @@ async def get_info_data():
     """
     response = {
         "AZURE_OPENAI_CHATGPT_DEPLOYMENT": ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-        "AZURE_OPENAI_MODEL_NAME": f"{model_name}",
-        "AZURE_OPENAI_MODEL_VERSION": f"{model_version}",
+        "AZURE_OPENAI_MODEL_NAME": f"{MODEL_NAME}",
+        "AZURE_OPENAI_MODEL_VERSION": f"{MODEL_VERSION}",
         "AZURE_OPENAI_SERVICE": ENV["AZURE_OPENAI_SERVICE"],
         "AZURE_SEARCH_SERVICE": ENV["AZURE_SEARCH_SERVICE"],
         "AZURE_SEARCH_INDEX": ENV["AZURE_SEARCH_INDEX"],
         "TARGET_LANGUAGE": ENV["QUERY_TERM_LANGUAGE"],
         "USE_AZURE_OPENAI_EMBEDDINGS": ENV["USE_AZURE_OPENAI_EMBEDDINGS"],
         "EMBEDDINGS_DEPLOYMENT": ENV["EMBEDDING_DEPLOYMENT_NAME"],
-        "EMBEDDINGS_MODEL_NAME": f"{embedding_model_name}",
-        "EMBEDDINGS_MODEL_VERSION": f"{embedding_model_version}",
+        "EMBEDDINGS_MODEL_NAME": f"{EMBEDDING_MODEL_NAME}",
+        "EMBEDDINGS_MODEL_VERSION": f"{EMBEDDING_MODEL_VERSION}",
     }
     return response
 
@@ -699,12 +687,12 @@ async def getHint(question: Optional[str] = None):
 @app.post("/posttd")
 async def posttd(csv: UploadFile = File(...)):
     try:
-        global dffinal
+        global DF_FINAL
             # Read the file into a pandas DataFrame
         content = await csv.read()
         df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
 
-        dffinal = df
+        DF_FINAL = df
         # Process the DataFrame...
         save_df(df)
     except Exception as ex:
@@ -714,12 +702,12 @@ async def posttd(csv: UploadFile = File(...)):
     #return {"filename": csv.filename}
 @app.get("/process_td_agent_response")
 async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
-    save_df(dffinal)
+    save_df(DF_FINAL)
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
     for i in range(retries):
         try:
-            results = td_agent_response(question,dffinal)
+            results = td_agent_response(question,DF_FINAL)
             return results
         except AttributeError as ex:
             log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
@@ -739,14 +727,14 @@ async def process_td_agent_response(retries=3, delay=1000, question: Optional[st
 
 @app.get("/getTdAnalysis")
 async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
-    global dffinal
+    global DF_FINAL
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
         
     for i in range(retries):
         try:
-            save_df(dffinal)
-            results = td_agent_scratch_pad(question, dffinal)
+            save_df(DF_FINAL)
+            results = td_agent_scratch_pad(question, DF_FINAL)
             return results
         except AttributeError as ex:
             log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
@@ -796,11 +784,11 @@ async def stream_response(question: str):
 
 @app.get("/tdstream")
 async def td_stream_response(question: str):
-    save_df(dffinal)
+    save_df(DF_FINAL)
     
 
     try:
-        stream = td_agent_scratch_pad(question, dffinal)
+        stream = td_agent_scratch_pad(question, DF_FINAL)
         return StreamingResponse(stream, media_type="text/event-stream")
     except Exception as ex:
         log.exception("Exception in /stream")
@@ -856,6 +844,55 @@ async def get_feature_flags():
         "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
     }
     return response
+
+@app.post("/file")  
+async def upload_file(  
+    file: UploadFile = File(...),   
+    file_path: str = Form(...),
+    tags: str = Form(None)  
+):  
+    """  
+    Upload a file to Azure Blob Storage.  
+    Parameters:  
+    - file: The file to upload.
+    - file_path: The path to save the file in Blob Storage.
+    - tags: The tags to associate with the file.  
+    Returns:  
+    - response: A message indicating the result of the upload.  
+    """  
+    try:          
+        blob_upload_client = blob_upload_container_client.get_blob_client(file_path)  
+  
+        blob_upload_client.upload_blob(
+            file.file,
+            overwrite=True,
+            content_settings=ContentSettings(content_type=file.content_type),
+            metadata= {"tags": tags}
+        )
+  
+        return {"message": f"File '{file.filename}' uploaded successfully"}  
+  
+    except Exception as ex:  
+        log.exception("Exception in /file")  
+        raise HTTPException(status_code=500, detail=str(ex)) from ex  
+
+@app.post("/get-file")
+async def get_file(request: Request):
+    data = await request.json()
+    file_path = data['path']
+
+    # Extract container name and blob name from the file path
+    container_name, blob_name = file_path.split('/', 1)
+
+    # Download the blob to a local file
+    
+    citation_blob_client = blob_upload_container_client.get_blob_client(blob=blob_name)
+    stream = citation_blob_client.download_blob().chunks()
+    blob_properties = citation_blob_client.get_blob_properties()
+
+    return StreamingResponse(stream,
+                             media_type=blob_properties.content_settings.content_type, 
+                             headers={"Content-Disposition": f"inline; filename={blob_name}"})
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

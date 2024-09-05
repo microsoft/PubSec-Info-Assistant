@@ -208,18 +208,6 @@ output "AZURE_AI_CREDENTIAL_DOMAIN" {
   value = var.azure_ai_private_link_domain
 }
 
-output "FUNC_AzureWebJobsStorage__accountName" {
-  value = module.functions.AzureWebJobsStorage__accountName
-}
-
-output "FUNC_AzureWebJobsStorage__blobServiceUri" {
-  value = module.functions.AzureWebJobsStorage__blobServiceUri
-}
-
-output "FUNC_STORAGE_CONNECTION_STRING__accountName" {
-  value = module.functions.STORAGE_CONNECTION_STRING__accountName
-}
-
 output "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri" {
   value = module.functions.STORAGE_CONNECTION_STRING__queueServiceUri
 }

@@ -1,17 +1,6 @@
-# Secure Deployment
+# Secure Mode Deployment
 
-> [!IMPORTANT]  
-> The Information Assistant "**secure mode**" option assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable users to access its capabilities. In addition there are other key considerations:
->
->Secure mode is not compatible with the following IA features:
->
-> * Using an existing Azure OpenAI Services
-> * Web chat (secure endpoints for Bing API services are not yet available)
-> * SharePoint connector (secure endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
->
->Secure mode requires a DDOS Protection Plan for Virtual Network Protection. There is a limit of 1 DDOS protection plan for a subscription in a region. You can reuse an existing DDOS plan in your tenant or Info Assistant can deploy one for you.
->
-
+* [Getting Started](#getting-started)
 * [Additional Azure account requirements](#additional-azure-account-requirements)
 * [Overview](#overview)
 * [Architecture](#architecture)
@@ -26,25 +15,41 @@
   * [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration)
   * [Secure Communication to Azure](#secure-communication-to-azure)
   * [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov)
-  
+
+## Getting Started
+
+It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant to become familiar with the deployment process before starting the "secure mode" deployment. The documentation provided below builds upon the stardard deployment and assumes you are familiar with the deployment process.
+
+[!IMPORTANT]  
+> The Information Assistant "**secure mode**" option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). In addition to those it also...
+>
+> Assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed. (i.e. Azure Express Route, Azure VPN Gateway)
+>
+>Secure mode is not compatible with the following IA features:
+>
+> * Using an existing Azure OpenAI Services
+> * Web chat (secure endpoints for Bing API services are not yet available)
+> * SharePoint connector (secure endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
+>
+>It is recommended to use secure mode with a DDOS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDOS protection plan for a subscription in a region. You can reuse an existing DDOS plan in your tenant, Info Assistant can deploy one for you, or you can choose to not use a DDOS Protection Plan on your virtual network.
+
 ## Additional Azure account requirements
 
 In order to deploy the "secure mode" of Information Assistant, you will need the following in addition to the standard [Azure account requirements](/README.md#azure-account-requirements):
 
-* Your GitHub Codespace machine type must be at least **4-core**.
-![alt text](image.png).
-* If you are going to use an existing DDOS that resides in another subscription, you will need to have `TBD` permission on the subscription where the DDOS Protection Plan exists to allow associating to the vnet when it is created.
+* **Azure account permissions**:
+  * If you are going to use an existing DDOS that resides in another subscription, you will need to have `Microsoft.Network/ddosProtectionPlans/join/action` permission on the subscription where the DDOS Protection Plan exists to allow associating to the virtual network when it is created. This permission can be provided with the [Network Contributor](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/networking#network-contributor) role.
 
 ## Overview
 
-Information Assistant secure mode is essential when heightened levels of security are necessary. Secure mode is recommended for all production systems. Key features of secure mode include:
+Information Assistant secure mode is essential when heightened levels of infrastructure security are necessary. Key features of secure mode include:
 
-* __Disabling Public Network Access__: Restrict external access to safeguard sensitive data.
-* __Virtual Network Protection__: Shield your system within a secure virtual network.
-* __Data Encryption at Rest and in Transit__: Ensure confidentiality by encrypting data when stored and during transmission.
-* __Integration via Private Endpoints__: All Azure services connect exclusively through private endpoints within a virtual network
+* **Disabling Public Network Access**: Restrict external access to safeguard public access.
+* **Virtual Network Protection**: Integrate your Azure services within a secure virtual network.
+* **Data Encryption at Rest and in Transit**: Ensure encryption of data when stored and during transmission.
+* **Integration via Private Endpoints**: All Azure services connect exclusively through private endpoints within a virtual network
 
-The secure mode adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
+"Secure mode" adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
 * Azure Monitor
 * Virtual Network (VNet)
@@ -57,13 +62,15 @@ The secure mode adds several new Azure resources and will likely require additio
 
 ## Architecture
 
-Secure mode builds on the Single Virtual Network Pattern in which all components of your workload are inside a single virtual network (VNet). This pattern is possible if you're operating in a single region, as a virtual network can't span multiple regions. The virtual network isolates your resources and traffic from other VNets and provides a boundary for applying security policies. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data.
+"Secure mode" builds on the [Single Virtual Network Pattern](https://learn.microsoft.com/en-us/azure/architecture/networking/guide/network-level-segmentation#pattern-1-single-virtual-network) in which all components of your workload are inside a single virtual network (VNet). This pattern is only possible if you're operating in a single region, as a virtual network can't span multiple regions. The virtual network isolates your resources and traffic from other VNets and provides a boundary for applying security policies. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data.
+
+Additionally, "secure mode" isolates each Azure Service type into subnets to allow further protection to be applied via Network Security Groups (NSGs) if you want to extend the provided configuration. 
 
 ### High Level Architecture
 
 ![Secure mode - High level architecture](../images/secure-deploy-high-level-architecture.png)
 
-The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication.
+The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication. In this example, an organizations enterprise networking configuration can be peered with the virtual network deployed by Information Assistant "secure mode" to allow users access to the application.
 
 ### Detailed Architecture
 
@@ -81,20 +88,21 @@ Deploying a dedicated Azure service into your virtual network provides the follo
 * The Azure service fully manages service instances in a virtual network. This management includes monitoring the health of the resources and scaling with load.
 * Private endpoints allow ingress of traffic from your virtual network to an Azure resource securely.
 
-The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpressRoute or S2S VPN for user access to the Virtual Network (vNet) on the left of the diagram below.
+The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpressRoute or S2S VPN for user access to the enterprise virtual Network on the left of the diagram below that is then peered with the Information Assistants virtual network.
 
 ![Secure mode - Detailed Architecture](../images/secure-deploy-detail-architecture.png)
 
 ## Front End Architecture
 
-The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through VNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) in the App Subnet.
+The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through vNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private vNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) from any network peered with the Information Assistant virtual network.
 
 The front-end application uses VNet integration to connect to the private network and private DNS zones to access the appropriate services such as:
 
-* __Azure Storage Account (Blob Storage)__: Used for file uploads.
-* __Azure OpenAI__: Enables prompt submissions.
-* __Azure AI Search__: Facilitates content discovery from uploaded files.
-* __Cosmos DB__: Provides visibility into the status of uploaded files.
+* **Azure Storage Account (Blob Storage)**: Used for file uploads.
+* **Azure OpenAI**: Enables prompt submissions.
+* **Azure AI Search**: Facilitates content discovery from uploaded files.
+* **Cosmos DB**: Provides visibility into the status of uploaded files.
+* **Azure Container Registry**: Where the Azure App Service pulls it's source image from to host the application.
 
 ![Secure mode - Front End Architecture](../images/secure-deploy-frontend-architecture.png)
 

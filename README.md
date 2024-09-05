@@ -128,7 +128,7 @@ Find out more with Microsoft's [Responsible AI resources](https://www.microsoft.
 
 ### Content Safety
 
-Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a content filtering system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high).These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transparency Note](/docs/transparency.md).
+Content safety is provided through Azure OpenAI service. The Azure OpenAI Service includes a [content filtering](https://learn.microsoft.com/azure/ai-services/openai/concepts/content-filter) system that runs alongside the core AI models. This system uses an ensemble of classification models to detect four categories of potentially harmful content (violence, hate, sexual, and self-harm) at four severity levels (safe, low, medium, high). These 4 categories may not be sufficient for all use cases, especially for minors. Please read our [Transparency Note](/docs/transparency.md).
 
 By default, the content filters are set to filter out prompts and completions that are detected as medium or high severity for those four harm categories. Content labeled as low or safe severity is not filtered.
 

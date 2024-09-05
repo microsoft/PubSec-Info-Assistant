@@ -86,18 +86,6 @@ jq -r --arg secrets "$secrets" '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "FUNC_AzureWebJobsStorage__accountName",
-            "env_var": "AzureWebJobsStorage__accountName"
-        },
-        {
-            "path": "FUNC_AzureWebJobsStorage__blobServiceUri",
-            "env_var": "AzureWebJobsStorage__blobServiceUri"
-        },
-        {
-            "path": "FUNC_STORAGE_CONNECTION_STRING__accountName",
-            "env_var": "AzureStorageConnection1__accountName"
-        },
-        {
             "path": "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri",
             "env_var": "AzureStorageConnection1__queueServiceUri"
         },

@@ -14,18 +14,6 @@ output "identityPrincipalId" {
   value = azurerm_linux_function_app.function_app.identity.0.principal_id
 }
 
-output "AzureWebJobsStorage__accountName" {
-  value = var.blobStorageAccountName
-}
-
-output "AzureWebJobsStorage__blobServiceUri" {
-  value = "https://${var.blobStorageAccountName}.blob.${var.endpointSuffix}"
-}
-
-output "STORAGE_CONNECTION_STRING__accountName" {
-  value = var.blobStorageAccountName
-}
-
 output "STORAGE_CONNECTION_STRING__queueServiceUri" {
   value = "https://${var.blobStorageAccountName}.queue.${var.endpointSuffix}"
 }

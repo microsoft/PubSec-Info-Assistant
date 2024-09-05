@@ -1,17 +1,19 @@
-# Setting up Azure DevOps CI/CD Pipeline for setting up Sandbox Environment
+# Setting up Azure DevOps Pipeline for deploying Sandbox Environment
 
-The process of setting up a CI/CD pipeline for the Information Assistant Accelerator requires the use of Azure DevOps to host and run the pipeline and deployment environment.
+The process of setting up a Azure DevOps pipeline for the Information Assistant Accelerator requires the use of Azure DevOps to host and run the pipeline and deployment environment.
 
-This process involves:
+An example process involves:
+
+:warning: The provided example pipelines will deploy an instance of the Information Assistant Accelerator, but it is not fully functional without manual changes to the pipeline. The types of changes are covered in the [Configuring Azure Entra Objects](#configuring-azure-entra-objects) section.
 
 - Setting up an Azure DevOps project
 - Configuring an Azure DevOps pipeline
-- Configuring Azure Active Directory Objects
+- Manually Configuring Azure Entra Objects
 - Running and testing the Azure DevOps pipeline
 
 ## Setting up an Azure DevOps Project
 
-The CI/CD pipeline process for Information Assistant requires the use of an Azure DevOps project. Follow these steps to set up your Azure DevOps project:
+The Azure DevOps pipeline process for Information Assistant requires the use of an Azure DevOps project. Follow these steps to set up your Azure DevOps project:
 
 1. **Create a new Azure DevOps project:** Sign in to your Azure DevOps account and create a new project. Give it a meaningful name and choose the appropriate version control option (Git).
 
@@ -19,7 +21,7 @@ The CI/CD pipeline process for Information Assistant requires the use of an Azur
 
 ## Configuring an Azure DevOps Pipeline
 
-To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub repository, follow these steps:
+To set up an Azure DevOps pipeline for deploying code from a GitHub repository, follow these steps:
 
 1. **Create a new pipeline:** In your Azure DevOps project, go to **Pipelines** and click on **New Pipeline**.
 
@@ -29,7 +31,7 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
    3. Under **Configure your pipeline:** select **Existing Azure Pipelines YAML file**
 
-      ![pipeline_configuration](./docs/images/sandbox_environment_build_pipeline_configuration.png)
+      ![pipeline_configuration](/docs/images/sandbox_environment_build_pipeline_configuration.png)
 
    4. In the popup window, Select the branch you wish to pull the pipeline definition from. Then select the path at `/pipelines/demo.yml`
 
@@ -43,65 +45,32 @@ To set up an Azure DevOps CI/CD pipeline for deploying code from a GitHub reposi
 
    6. Next **Configure variables :** To Configure the deployment, please add the following variables to the build pipeline and populate with values for your target Azure subscription. Then save the pipeline variables.
 
+   :warning: These are the variables required for the example pipelines provided. You may require additional variables to deploy a fully functioning Information Assistant deployment. Use of Azure DevOps pipeline variable assist in preventing secrets, keys, and other sensitive information from being included in the source tree. 
+
     VARIABLE | DESCRIPTION
     ---|---
     CLIENT_ID<br />CLIENT_SECRET<br />SERVICE_PRINCIPAL_ID | These are used for the deployment scripts to login to Azure. This is typically a service principal and will need Contributor and User Access Administrator roles.
     SUBSCRIPTION_ID | The ID of the subscription that should be deployed to.
     TENANT_ID | The ID of the tenant that should be deployed to.
-	CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
-    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_GPT_DEPLOYMENT | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
+    CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
+    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
     environment | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env`
     TF_BACKEND_ACCESS_KEY | Terraform is used to create Infrastructure as Code. This is the key to the Terraform State in a Storage Account.
     TF_BACKEND_CONTAINER | Terraform is used to create Infrastructure as Code. This is the container that the Terraform State is stored within a Storage Account.
     TF_BACKEND_RESOURCE_GROUP | Terraform is used to create Infrastructure as Code. This is the resource group that the Terraform State is stored within a Storage Account.
     TF_BACKEND_STORAGE_ACCOUNT | Terraform is used to create Infrastructure as Code. This is the storage account that the Terraform State is stored.
-    AD_MGMT_SERVICE_PRINCIPAL_ID<br />AD_MGMTAPP_CLIENT_ID<br />AD_MGMTAPP_CLIENT_SECRET | These are for an Azure AD App Registration and Enterprise Application that will be used to query details about the Azure OpenAI deployments you target. 
-    AD_WEBAPP_CLIENT_ID | This will be the Azure AD App Registration that will be used for authentication in the Azure App Service that host the Information Assistant Web Application
 
 2. **Save your pipeline:** After updating the variable, save your pipeline configuration.
 
-## Configuring Azure Active Directory Objects
+## Configuring Azure Entra Objects
 
-The CI/CD pipelines run under a "Service Connection" that leverages an Azure Active Directory Service Principal. This Service Principal will not have rights to create additional Azure Active Directory objects. This requires an Administrative user to manually create the objects before running the pipeline. Follow these steps to configure the Azure AD Objects:
+The Azure DevOps pipelines run under a "Service Connection" that leverages an Azure Entra Service Principal (the CLIENT_ID and SERVICE_PRINCIPAL_ID parameters above). This Service Principal will not have rights to create additional Azure Entra objects, so an Administrative user needs to manually create the Azure Entra objects required for the Information Assistant environment before running the pipeline. Information on the Azure Entra objects required can be found in our [Manual App Registration Creation Guide](docs/deployment/manual_app_registration.md) and [GitHub Discussion #457](https://github.com/microsoft/PubSec-Info-Assistant/discussions/457)
 
-1. In a **Terminal** Window from your DevOps Codespace for Information Assistant, log into Azure using the `az login` command.
-
-2. Navigate to the `/scripts` folder and run the `create-ad-objs-for-deployment.sh` script manually.
-
-   - The script will prompt for the following parameters:
-
-        Parameter | Definition
-        ---|---
-        WORKSPACE |This will need to be the same value used in the .env file for your pipeline deployment.
-        Azure Storage Account Name | This will be an Azure Storage Account where the CI/CD state files will be store for automation pipelines.
-        Azure Storage Account Key | Provide one of the Administrative keys for the Azure Storage Account specified above.
-        Enforce security assignment for the website | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
-
-    ``` bash
-    cd scripts
-    bash create-ad-objs-for-deployment.sh
-
-    Please enter your WORKSPACE:
-    Please enter the Azure Storage Account for CI/CD State management:
-    Please enter the Azure Storage Account Key for CI/CD State management:
-    Would you like users to have to be explicitly assigned to the app? (y/n):
-      ____                _            _    ____  
-     / ___|_ __ ___  __ _| |_ ___     / \  |  _ \ 
-    | |   | '__/ _ \/ _` | __/ _ \   / _ \ | | | |
-    | |___| | |  __/ (_| | ||  __/  / ___ \| |_| |
-     \____|_|  \___|\__,_|\__\___| /_/   \_\____/ 
-
-      ___  _     _           _       
-     / _ \| |__ (_) ___  ___| |_ ___ 
-    | | | | '_ \| |/ _ \/ __| __/ __|
-    | |_| | |_) | |  __/ (__| |_\__ \
-     \___/|_.__// |\___|\___|\__|___/
-              |__/                   
-    ```
+:warning: The provided example Azure DevOps pipeline currently does NOT configure the accelerator to use the custom Azure Entra objects on when deploying an environment as they are not required for running the functional tests. The example pipelines will need to be extended to apply the custom Azure Entra objects to deploy a fully functioning Information Assistant environment.
 
 ## Running and testing the Azure DevOps pipeline
 
-Once you have set up the pipeline configuration and the Azure AD objects you are ready to start the pipeline manually for the first time.
+Once you have set up the pipeline configuration and the Azure Entra objects you are ready to start the pipeline manually for the first time.
 
 1. Open the pipeline in Azure DevOps and click on **Run**.
 

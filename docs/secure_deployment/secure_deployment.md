@@ -11,7 +11,7 @@
 * [Private virtual network and endpoint architecture](#private-virtual-network-and-endpoint-architecture)
 * [Sizing estimator](#sizing-estimator)
 * [How to deploy "secure mode"](#how-to-deploy-secure-mode)
-* [Additional considerations for "secure mode" deployment](#additional-considerations-for-secure-deployment)
+* [Additional considerations for "secure mode" deployment](#additional-considerations-for-secure-mode-deployment)
   * [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration)
   * [Secure Communication to Azure](#secure-communication-to-azure)
   * [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty)
@@ -29,7 +29,7 @@ It is recommended that you start with a [standard deployment](/docs/deployment/d
 >
 > * Using an existing Azure OpenAI services
 > * Web chat (private endpoints for Bing API services are not available)
-> * SharePoint connector (secure endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
+> * SharePoint connector (private endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
 >
 >It is recommended to use "secure mode" with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
 >
@@ -49,7 +49,7 @@ Information Assistant "secure mode" is essential when heightened levels of infra
 * **Disabling public network access**: Restrict external access to safeguard public access.
 * **Virtual network protection**: Integrate your Azure services within a secure virtual network.
 * **Data encryption at rest and in transit**: Ensure encryption of data when stored and during transmission.
-* **Integration via private endpoints**: All Azure services connect exclusively through private endpoints within a virtual network
+* **Integration via private endpoints**: Azure services connect exclusively through private endpoints within a virtual network where available.
 
 "Secure mode" adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
@@ -367,11 +367,11 @@ This will ensure that the Azure DNS private resolver set up by the Information A
 
 ### Secure communication with Microsoft Cloud for Sovereignty
 
-The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering that provides opinionated infrastructure-as-code automation for deploying workloads. Microsoft Cloud for Sovereignty enables governments and public sector organizations to deploy workloads in Microsoft Cloud while helping meet their specific sovereignty, compliance, security, and policy requirements. Microsoft Cloud for Sovereignty creates software boundaries in the cloud to establish the extra protection that governments require, using cloud guardrails, policy, hardware-based confidentiality and encryption controls. 
+The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering that provides opinionated infrastructure-as-code automation for deploying workloads. Microsoft Cloud for Sovereignty enables governments and public sector organizations to deploy workloads in Microsoft Cloud while helping meet their specific sovereignty, compliance, security, and policy requirements. Microsoft Cloud for Sovereignty creates software boundaries in the cloud to establish the extra protection that governments require, using cloud guardrails, policy, hardware-based confidentiality and encryption controls.
 
 For a detailed overview of an SLZ and all its capabilities, see [Sovereign Landing Zone](https://github.com/Azure/sovereign-landing-zone) documentation on GitHub.
 
-Information Assistant accelerator is compatible with the *Online* landing zone. Within a SLZ setup, you can find an established Connectivity management group  where an existing virtual network and infrastructure already exist.
+Information Assistant accelerator is compatible with the *Online* landing zone. Within a SLZ setup, you can find an established Connectivity management group where an existing virtual network and infrastructure already exist.
 
 >We recommend that connectivity to Information Assistant in the *Online* landing zone be made accessible by peering the Information Assistant virtual network with the existing virtual network within the SLZ Connectivity management group.
 

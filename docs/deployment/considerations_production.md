@@ -46,11 +46,11 @@ Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontd
 
 **Recommendation:** Private Endpoints are now offered as part of our "secure-mode". Learn more about it [here](/docs/deployment/secure_deployment.md)
 
-### Secure Mode
+### "Secure Mode"
 
 **Consideration:** Safeguarding your IA application from cyber threats is crucial for protecting sensitive data and maintaining user trust.
 
-**Recommendation:** Many security policies have been followed in our "secure-mode". You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
+**Recommendation:** Many security policies have been followed in our "secure mode". You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
 
 ### Proactive Monitoring
 

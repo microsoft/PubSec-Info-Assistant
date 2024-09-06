@@ -32,6 +32,8 @@ const pivotItemDisabledStyle: React.CSSProperties = {
 };
 
 export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, pageNumber, citationHeight, className, onActiveTabChanged }: Props) => {
+    
+    const [innerPivotTab, setInnerPivotTab] = useState<string>('indexedFile');
     const [activeCitationObj, setActiveCitationObj] = useState<ActiveCitation>();
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
@@ -99,6 +101,9 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
     }
 
     useEffect(() => {
+        if (activeCitation) {
+            setInnerPivotTab('indexedFile');
+        }
         fetchActiveCitationObj();
     }, [activeCitation]);
 
@@ -175,7 +180,14 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                 onRenderItemLink = {onRenderItemLink("No active citation selected. Please select a citation from the citations list on the left.", tooltipRef3, isDisabledCitationTab)}
             > 
             
-                <Pivot className={className}>
+                <Pivot className={className} selectedKey={innerPivotTab} onLinkClick={(item) => {
+                    if (item) {
+                        setInnerPivotTab(item.props.itemKey!);
+                    } else {
+                        // Handle the case where item is undefined
+                        console.warn('Item is undefined');
+                    }
+                }}>
                     <PivotItem itemKey="indexedFile" headerText="Document Section">
                         {activeCitationObj === undefined ? (
                             <Text>Loading...</Text>

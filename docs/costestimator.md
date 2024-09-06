@@ -1,14 +1,12 @@
-# IA Accelerator, version 1.1.2 - Estimation
+# IA Accelerator - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 1.1.2, and provides cost estimates based on the chosen configurations.
-
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator, version 1.2, and provides cost estimates based on the chosen configurations.
 
 | Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA Accelerator, version 1.1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/55c61add4bac4c1fb3a09e53a61b8940) | 
+| IA Accelerator, version 1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/55c61add4bac4c1fb3a09e53a61b8940) |
 
----
-### Azure Services
+## Azure Services
 
 The following list of Azure Services will be deployed for IA Accelerator, version 1.1:
 

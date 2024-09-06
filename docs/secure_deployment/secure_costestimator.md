@@ -1,16 +1,16 @@
-# IA Accelerator, version 1.1.2 - Secure Mode - Estimation
+# IA Accelerator "Secure Mode" - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator - secure mode and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator "secure mode" and provides cost estimates based on the chosen configurations.
 
 | Solution            | Mode | Environment  |    Azure Pricing Calculator Link  |
 | :------------------:|:---------:|:---------------:|:-------------------:|
-| IA Accelerator, version 1.1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/bc968e77261149f09d1dd770aa5d0867) | 
+| IA Accelerator, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/1492bd09c422421186d820ff23dc1f2f) |
 
 ---
 
 ## Azure Services
 
-The following list of Azure Services will be deployed for IA Accelerator, version 1.1.2 secure mode:
+The following list of Azure Services will be deployed for IA Accelerator "secure mode":
 
 - App Service (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Application Insights [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)
@@ -29,6 +29,11 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 - Azure DNS Resolver [:link:](https://azure.microsoft.com/en-ca/pricing/details/dns/)
 - Azure Private Link [:link:](https://azure.microsoft.com/en-ca/pricing/details/private-link/)
 - Azure Container Registry[:link:](https://azure.microsoft.com/en-ca/pricing/details/container-registry/)
+- Azure Network Interface[:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
+- Azure Network Security Group[:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
+- Azure Private DNS Zone[:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
+- Azure Private Endpoints[:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
+- Azure Virtual Network[:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
 
 ---
 
@@ -37,7 +42,7 @@ The following list of Azure Services will be deployed for IA Accelerator, versio
 - The cost estimation provided is based on the Sandbox environment and may vary for different customers.
 - For detailed pricing information on Azure OpenAI Service, please refer to [this link](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing).
 - Customers with latency-sensitive scenarios can choose to use provisioned throughput, which allows them to reserve model processing capacity. For more information, please read [this document](/docs/deployment/considerations_production.md#gpt-model---throttling).
-- Please note that the pricing of VPN Gateway and Codespaces is not covered as they are not part of the deployment.
+- Please note that the pricing of VPN Gateway and GitHub Codespace is not covered as they are not part of the deployment.
 
 ---
 

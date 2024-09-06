@@ -84,7 +84,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 **IMPORTANT:** In order to deploy and run this example, you'll need:
 
 * **Azure account**. If you're new to Azure, [get an Azure account for free](https://azure.microsoft.com/free/cognitive-search/) and you'll get some free Azure credits to get started.
-* **Azure subscription with access enabled for the Azure OpenAI service**. You can request access with [this form](https://aka.ms/oaiapply).
+* **Azure subscription with Azure OpenAI service**. Learn more about [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview)
   * **Access to one of the following Azure OpenAI models**:
 
     Model Name | Supported Versions
@@ -95,7 +95,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
     gpt-4-32k | current version
     **gpt-4o** | current version
 
-    **Important:** Gpt-4o (2024-05-13) is recommended. GPT-4 models may achieve better results but slower performance than gpt-35 models when used with Information Assistant.
+    **Important:** Gpt-4o (2024-05-13) is recommended. The gpt-4 models may achieve better results but slower performance than gpt-35 models when used with Information Assistant.
   * (Optional) **Access to-- the following Azure OpenAI model for embeddings**. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using the following Azure OpenAI embedding model.
 
     Model Name | Supported Versions

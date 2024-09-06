@@ -349,7 +349,7 @@ export TF_VAR_dns_CIDR="10.0.8.176/29"
 
 ### Secure communication to Azure
 
-If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes only. To implement this for deployment purposes, you’ll need to add a virtual network and VPN Gateway to your Azure subscription by a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (VNet). You will also need to then peer you virtual network where your VPN is to the Information Assistant virtual network.
+If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes only. To implement this for deployment purposes, you’ll need to add a virtual network and VPN Gateway to your Azure subscription by a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (VNet). You will also need to then peer your virtual network where your VPN is to the Information Assistant virtual network.
 
 For more information, see [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support) and [create and manage a VPN Gateway using the Azure portal](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal).
 

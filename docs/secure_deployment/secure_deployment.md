@@ -1,55 +1,55 @@
 # "Secure Mode" Deployment
 
-* [Getting Started](#getting-started)
+* [Getting started](#getting-started)
 * [Additional Azure account requirements](#additional-azure-account-requirements)
 * [Overview](#overview)
 * [Architecture](#architecture)
-  * [High Level Architecture](#high-level-architecture)
-  * [Detailed Architecture](#detailed-architecture)
-* [Front End Architecture](#front-end-architecture)
-* [Back End Service Architecture](#back-end-service-architecture)
-* [Private Virtual Network and Endpoint Architecture](#private-virtual-network-and-endpoint-architecture)
-* [Sizing Estimator](#sizing-estimator)
-* [How to Deploy "Secure Mode"](#how-to-deploy-secure-mode)
-* [Additional Considerations for Secure Deployment](#additional-considerations-for-secure-deployment)
+  * [High level architecture](#high-level-architecture)
+  * [Detailed architecture](#detailed-architecture)
+* [Front end architecture](#front-end-architecture)
+* [Back end service architecture](#back-end-service-architecture)
+* [Private virtual network and endpoint architecture](#private-virtual-network-and-endpoint-architecture)
+* [Sizing estimator](#sizing-estimator)
+* [How to deploy "secure mode"](#how-to-deploy-secure-mode)
+* [Additional considerations for "secure mode" deployment](#additional-considerations-for-secure-deployment)
   * [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration)
   * [Secure Communication to Azure](#secure-communication-to-azure)
-  * [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov)
+  * [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty)
 
-## Getting Started
+## Getting started
 
-It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant to become familiar with the deployment process before starting the "secure mode" deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
+It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant (IA) to become familiar with the deployment process before starting the "secure mode" deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
 
 [!IMPORTANT]  
 > The Information Assistant "**secure mode**" option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). In addition to those it also...
 >
-> Assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed. (i.e. Azure Express Route, Azure VPN Gateway)
+> Assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed (e.g., Azure ExpressRoute, Azure VPN Gateway).
 >
 >"Secure mode" is not compatible with the following IA features:
 >
-> * Using an existing Azure OpenAI Services
-> * Web chat (secure endpoints for Bing API services are not yet available)
+> * Using an existing Azure OpenAI services
+> * Web chat (private endpoints for Bing API services are not available)
 > * SharePoint connector (secure endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
 >
->It is recommended to use "secure mode" with a DDOS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDOS protection plan for a subscription in a region. You can reuse an existing DDOS plan in your tenant, Info Assistant can deploy one for you, or you can choose to not use a DDOS Protection Plan on your virtual network.
+>It is recommended to use "secure mode" with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
 >
->"Secure mode" is also compatible with the [Microsoft Cloud for Sovereignty (MCfSov)](https://www.microsoft.com/en-us/industry/sovereignty/cloud?msockid=2c184bec2fa06797090458562e5b66c4). It is currently only compatible with the Online Landing Zone and not with the Corporate Landing Zone. See the [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov) section below for more details.
+>"Secure mode" is also compatible with the [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud?msockid=2c184bec2fa06797090458562e5b66c4). It is currently only compatible with the *Online* Landing Zone and not with the *Corp* (corporate) Landing Zone. See the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section below for more details.
 
 ## Additional Azure account requirements
 
 In order to deploy the "secure mode" of Information Assistant, you will need the following in addition to the standard [Azure account requirements](/README.md#azure-account-requirements):
 
 * **Azure account permissions**:
-  * If you are going to use an existing DDOS that resides in another subscription, you will need to have `Microsoft.Network/ddosProtectionPlans/join/action` permission on the subscription where the DDOS Protection Plan exists to allow associating to the virtual network when it is created. This permission can be provided with the [Network Contributor](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/networking#network-contributor) role.
+  * If you are going to use an existing DDoS that resides in another subscription, you will need to have `Microsoft.Network/ddosProtectionPlans/join/action` permission on the subscription where the DDoS Protection Plan exists to allow associating to the virtual network when it is created. This permission can be provided with the [Network Contributor](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/networking#network-contributor) role.
 
 ## Overview
 
 Information Assistant "secure mode" is essential when heightened levels of infrastructure security are necessary. Key features of "secure mode" include:
 
-* **Disabling Public Network Access**: Restrict external access to safeguard public access.
-* **Virtual Network Protection**: Integrate your Azure services within a secure virtual network.
-* **Data Encryption at Rest and in Transit**: Ensure encryption of data when stored and during transmission.
-* **Integration via Private Endpoints**: All Azure services connect exclusively through private endpoints within a virtual network
+* **Disabling public network access**: Restrict external access to safeguard public access.
+* **Virtual network protection**: Integrate your Azure services within a secure virtual network.
+* **Data encryption at rest and in transit**: Ensure encryption of data when stored and during transmission.
+* **Integration via private endpoints**: All Azure services connect exclusively through private endpoints within a virtual network
 
 "Secure mode" adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
@@ -68,18 +68,18 @@ Information Assistant "secure mode" is essential when heightened levels of infra
 
 Additionally, "secure mode" isolates each Azure Service type into subnets to allow further protection to be applied via Network Security Groups (NSGs) if you want to extend the provided configuration.
 
-### High Level Architecture
+### High level architecture
 
 !["Secure mode" - High level architecture](../images/secure-deploy-high-level-architecture.png)
 
 The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication. In this example, an organizations enterprise networking configuration can be peered with the virtual network deployed by Information Assistant "secure mode" to allow users access to the application.
 
-### Detailed Architecture
+### Detailed architecture
 
-The detailed architecture diagram below shows the VNet is subdivided into subnets that further segment network resources. This allows more granular control of network traffic and security rules. These subnets contain Private Endpoints, network interfaces that connect privately and securely to Azure Services. By using a Private IP address from your VNet, a Private Endpoint enables secure communications with Azure Services from your VNet, reducing exposure to the public internet. This improves network security through:
+The detailed architecture diagram below shows the VNet is subdivided into subnets that further segment network resources. This allows more granular control of network traffic and security rules. These subnets contain private endpoints, network interfaces that connect privately and securely to Azure services. By using a private IP address from your VNet, a private endpoint enables secure communications with Azure services from your VNet, reducing exposure to the public internet. This improves network security through:
 
 1. Network isolation: VNets and Subnets provide a segregated environment where only authorized resources can communicate with each other.
-2. Reduced Attack Surface: Private Endpoints ensure that Azure services are accessed via the private IP space of your VNet, not over the public network, which significantly reduces the risk of external attacks.
+2. Reduced Attack Surface: Private endpoints ensure that Azure services are accessed via the private IP space of your VNet, not over the public network, which significantly reduces the risk of external attacks.
 3. Granular Access Control: Network Security Groups (NSGs) can be associated with VNets, subnets and network interfaces to filter network traffic to and from resources within a VNet. This allows for fine-tuned control over access and security policies.
 
 Deploying a dedicated Azure service into your virtual network provides the following capabilities:
@@ -90,13 +90,13 @@ Deploying a dedicated Azure service into your virtual network provides the follo
 * The Azure service fully manages service instances in a virtual network. This management includes monitoring the health of the resources and scaling with load.
 * Private endpoints allow ingress of traffic from your virtual network to an Azure resource securely.
 
-The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpressRoute or S2S VPN for user access to the enterprise virtual Network on the left of the diagram below that is peered with the Information Assistants virtual network.
+The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpressRoute or VPN Gateway for user access to the enterprise virtual Network on the left of the diagram below that is peered with the Information Assistants virtual network.
 
 !["Secure mode" - Detailed Architecture](../images/secure-deploy-detail-architecture.png)
 
-## Front End Architecture
+## Front end architecture
 
-The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through vNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private vNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) from a network peered with the Information Assistant virtual network.
+The user experience is provided by a front-end application deployed as an App Service and associated with an App Service Plan. When the front-end application needs to securely communicate with resources in the VNet, the outbound calls from the front-end application are enabled through VNet integration ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses. The diagram below shows user's securely connecting to the VNet to interact with the Information Assistant user experience (UX) from a network peered with the Information Assistant virtual network.
 
 The front-end application uses VNet integration to connect to the private network and private DNS zones to access the appropriate services such as:
 
@@ -108,22 +108,22 @@ The front-end application uses VNet integration to connect to the private networ
 
 !["Secure mode" - Front End Architecture](../images/secure-deploy-frontend-architecture.png)
 
-## Back End Service Architecture
+## Back end service architecture
 
-Back-end processing handles processing of your private data, performs document extraction and enrichment leveraging Azure AI Services, and performs embedding and indexing leveraging Azure OpenAI and Azure AI Search. All public network access to the backend processing system is disallowed including the Azure Portal. Data can be loaded into the secured process in two ways:
+Back-end processing handles processing of your private data, performs document extraction and enrichment leveraging Azure AI services, and performs embedding and indexing leveraging Azure OpenAI and Azure AI Search. All public network access to the back-end processing system is disallowed including the Azure Portal. Data can be loaded into the secured process in two ways:
 
 * Through the Information Assistant Content Management UX feature
 * Data can be added to the Azure Storage Account from a device that is on a virtual network peered to the Information Assistant virtual network
 
-All of the services in the back-end are integrated through private endpoints ensuring that traffic is sent over the private network where private DNS zones resolve names to private vNet IP addresses as illustrated in the following diagram:
+All of the services in the back-end are integrated through private endpoints ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses as illustrated in the following diagram:
 
 !["Secure mode" - Function Architecture](../images/secure-deploy-function-architecture.png)
 
-### Private virtual network and endpoint Architecture
+### Private virtual network and endpoint architecture
 
-The tables below contains additional details on Private Endpoints and Private Links. A Private Link provides access to services over the Private Endpoint network interface. Private Endpoint uses a private IP address from your virtual network. Traffic between your virtual network and the service that you're accessing travels across the Azure network backbone. As a result, you no longer access the service over a public endpoint, effectively reducing exposure and enhancing security.
+The tables below contains additional details on private endpoints and Private Links. A Private Link provides access to services over the private endpoint network interface. Private endpoint uses a private IP address from your virtual network. Traffic between your virtual network and the service that you're accessing travels across the Azure network backbone. As a result, you no longer access the service over a public endpoint, effectively reducing exposure and enhancing security.
 
-#### Information Assistant Virtual Network Configuration for Azure Commercial
+#### Information Assistant virtual network configuration for Azure Commercial
 
 Information Assistant Virtual Network CIDR: x.x.x0/24
 
@@ -143,7 +143,7 @@ azureOpenAi | x.x.x.120/29 | privatelink.openai.azure.com | Azure Open AI
 acr | x.x.x.128/29 | privatelink.azurecr.io | Azure Container Registry
 dns | x.x.x.176/28 | N/A | Azure DNS Private Resolver
 
-#### Information Assistant Virtual Network Configuration for Azure USGovernment
+#### Information Assistant virtual network configuration for Azure USGovernment
 
 Information Assistant Virtual Network CIDR: x.x.x0/24
 
@@ -165,17 +165,17 @@ dns | x.x.x.176/28 | N/A | Azure DNS Private Resolver
 
 See [Virtual network and subnet CIDRs](#network-and-subnet-cidr-configuration) section for customizing the values for your network.
 
-## Sizing Estimator
+## Sizing estimator
 
-The IA Accelerator "secure mode" needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
+The IA Accelerator "secure mode" needs to be sized appropriately based on your use case. Please review our [sizing estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
 
 To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
 
-Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the How to Deploy "Secure Mode" step.
+Once you have completed the sizing estimator and sized your deployment appropriately, please move on to the How to deploy "secure mode" step.
 
-## How to Deploy "Secure Mode"
+## How to deploy "Secure Mode"
 
-To perform a secure deployment, follow these steps:
+To perform a "secure mode" deployment, follow these steps:
 
 1. Open your forked repository in VSCode.
 2. Navigate to the `scripts/environments/local.env` file
@@ -189,19 +189,19 @@ To perform a secure deployment, follow these steps:
    export ENABLE_SHAREPOINT_CONNECTOR=false
    ```
 
-   *Note: "Secure mode" is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads*
+   *Note: "Secure mode" is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads.*
 
 5. Review the network and subnet CIDRs for  your deployment. See the section [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration) for more details.
-6. Decide your approach for DDOS protection for your Info Assistant virtual network. If you simply don't want to use a DDOS protection plan simply leave the `ENABLE_DDOS_PROTECTION_PLAN` flag set to false. If you plan to use a DDOS protection plan, you need to enable it by setting the `ENABLE_DDOS_PROTECTION_PLAN` flag set to true and then you can select a specific DDOS protection plan in one of two ways:
-   * **RECOMMENDED:** You can manually provide the DDOS plan ID in your `local.env` file using the following parameter. Be sure to update the subscription id, resource group name, and DDOS plan name values.
+6. Decide your approach for DDoS protection for your Information Assistant virtual network. If you simply don't want to use a DDoS protection plan simply leave the `ENABLE_DDOS_PROTECTION_PLAN` flag set to false. If you plan to use a DDoS protection plan, you need to enable it by setting the `ENABLE_DDOS_PROTECTION_PLAN` flag set to true and then you can select a specific DDoS protection plan in one of two ways:
+   * **RECOMMENDED:** You can manually provide the DDoS plan ID in your `local.env` file using the following parameter. Be sure to update the subscription id, resource group name, and DDoS plan name values.
 
        ```bash
        export ENABLE_DDOS_PROTECTION_PLAN=true
        export DDOS_PLAN_ID="/subscriptions/{subscription id}/resourceGroups/{resource group name}/providers/Microsoft.Network/ddosProtectionPlans/{ddos plan name}"`
        ```
 
-   * You can let the deployment choose a DDOS protection plan at deployment time. If you do not provide the parameter above, the deployment scripts will prompt you with a choice to use the first found existing DDOS plan in your subscription or Info Assistant will create one automatically.
-   ***IMPORTANT: The script can only detect DDOS protection plans in the same Azure subscription you are logged into***
+   * You can let the deployment choose a DDoS protection plan at deployment time. If you do not provide the parameter above, the deployment scripts will prompt you with a choice to use the first found existing DDoS plan in your subscription or Information Assistant will create one automatically.
+   ***IMPORTANT: The script can only detect DDoS protection plans in the same Azure subscription you are logged into.***
 
       The prompt will appear like the following when running `make deploy`:
 
@@ -210,13 +210,13 @@ To perform a secure deployment, follow these steps:
       Do you want to use this existing DDOS Protection Plan (y/n)? 
       ```
 
-      Or if no DDOS plan is found in the subscription the script will simply ouput
+      Or if no DDoS plan is found in the subscription the script will simply ouput:
 
       ```bash
       No existing DDOS protection plan found. Terraform will create a new one.
       ```
 
-7. Determine your plan for network connectivity to the Info Assistant virtual network. This is required to complete the deployment. When you run `make deploy` it will now stop after the infrastructure is deployed and provide the following prompt:
+7. Determine your plan for network connectivity to the Information Assistant virtual network. This is required to complete the deployment. When you run `make deploy` it will now stop after the infrastructure is deployed and provide the following prompt:
 
     ```text
       ____ _               _    
@@ -239,11 +239,11 @@ To perform a secure deployment, follow these steps:
 
     Here are the three types of connectivity we recommend for Information Assistant "secure mode":
 
-    * Establish virtual network peering with your corporate network to the Information Assistant virtual network, and private access via Express Route.
-    * Establish a Point-to-Site (P2S) VPN for your development workstation. See [Secure Communication to Azure](#secure-communication-to-azure) section.
-    * If using Microsoft's Cloud for Sovereignty (MCfSov), there are additional considerations you can find in the [Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)](#secure-communication-with-microsoft-cloud-for-sovereignty-mcfsov) section.
+    * Establish virtual network peering with your corporate network to the Information Assistant virtual network, and private access via ExpressRoute.
+    * Establish a Point-to-Site (P2S) VPN Gateway for your development workstation. See [Secure Communication to Azure](#secure-communication-to-azure) section.
+    * If using Microsoft's Cloud for Sovereignty, there are additional considerations you can find in the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section.
 
-8. If you are choosing to use a P2S VPN to connect to the Info Assistant virtual network, then follow these steps. Otherwise, skip to Step 18.
+8. If you are choosing to use a P2S VPN to connect to the Information Assistant virtual network, then follow these steps. Otherwise, skip to Step 18.
 
     :warning: *You will need your VPN configuration and client certificate that matches your Azure VPN Gateway to continue*
 
@@ -315,7 +315,7 @@ To perform a secure deployment, follow these steps:
 
 Once deployed only the Azure App Service named like, *infoasst-web-xxxxx*, will be accessible without the VPN established. You can share the URL of the website with users to start using the Information Assistant accelerator.
 
-## Additional Considerations for Secure Deployment
+## Additional considerations for "Secure Mode" deployment
 
 ### Network and subnet CIDR configuration
 
@@ -347,13 +347,11 @@ export TF_VAR_dns_CIDR="10.0.8.176/29"
 * *integration requires at least a /26 range*
 * *dns requires at least a /28 range*
 
-### Secure Communication to Azure
+### Secure communication to Azure
 
-If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes only. To implement this for deployment purposes, you’ll need to add a virtual network and VPN Gateway to your Azure subscription by a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (vNet). You will also need to then peer you virtual network where your VPN is to the Information Assistant virtual network.
+If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes only. To implement this for deployment purposes, you’ll need to add a virtual network and VPN Gateway to your Azure subscription by a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (VNet). You will also need to then peer you virtual network where your VPN is to the Information Assistant virtual network.
 
-More information on [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support)
-
-Detailed information on how to [create and manage a VPN Gateway is available at learn.microsoft.com](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal)
+For more information, see [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support) and [create and manage a VPN Gateway using the Azure portal](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal).
 
 **** Peering your network with the Information Assistant virtual network
 
@@ -361,19 +359,23 @@ When peering your virtual network with the Information Assistant virtual network
 
 * Allow gateway or route server in '*my VPN virtual network*' to forward traffic to '*infoasst-vnet-xxxxx*'
 
-and the reciprocal setting of
+and the reciprocal setting of:
 
 * Enable '*infoasst-vnet-xxxxx*' to use '*my VPN virtual network's*' remote gateway or route server
 
 This will ensure that the Azure DNS private resolver set up by the Information Assistant accelerator can resolve traffic properly to your VPN connection.
 
-### Secure Communication with Microsoft Cloud for Sovereignty (MCfSov)
+### Secure communication with Microsoft Cloud for Sovereignty
 
-Information Assistant accelerator is compatible with the Online Landing Zone (LZ) of the Microsoft Cloud for Sovereignty (MCfSov). Within a MCfSov setup, you can find an established Connectivity management group and LZ where an existing virtual network and infrastructure already exist.
+The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering that provides opinionated infrastructure-as-code automation for deploying workloads. Microsoft Cloud for Sovereignty enables governments and public sector organizations to deploy workloads in Microsoft Cloud while helping meet their specific sovereignty, compliance, security, and policy requirements. Microsoft Cloud for Sovereignty creates software boundaries in the cloud to establish the extra protection that governments require, using cloud guardrails, policy, hardware-based confidentiality and encryption controls. 
 
->We recommend that connectivity to Information Assistant in the Online LZ be made accessible by peering the Information Assistant virtual network with the existing MCfSov Connectivity LZ virtual network.
+For a detailed overview of an SLZ and all its capabilities, see [Sovereign Landing Zone](https://github.com/Azure/sovereign-landing-zone) documentation on GitHub.
 
-At this time the current release of Information Assistant is not compatible with the MCfSov Corporate LZ for the following reasons:
+Information Assistant accelerator is compatible with the *Online* landing zone. Within a SLZ setup, you can find an established Connectivity management group  where an existing virtual network and infrastructure already exist.
 
-* Azure Functions require use of an Azure Storage Account to store function keys and state files for scalable Azure Function Plans. Currently we are unable to use both Azure Entra authentication and Azure Private Links for Azure Storage together with Azure Function Apps. This configuration violates one of the policy definitions in the MCfSov Corp LZ policies that prevent deployment.
-* Azure AI Services currently do not support Azure Entra authentication when using Azure Private Links. This configuration violates one of the policy definitions in the MCfSov Corp LZ policies that prevent deployment.
+>We recommend that connectivity to Information Assistant in the *Online* landing zone be made accessible by peering the Information Assistant virtual network with the existing virtual network within the SLZ Connectivity management group.
+
+At this time the current release of Information Assistant is not compatible with the default policies for the SLZ *Corp* (corporate) landing zone for the following reasons:
+
+* Azure Functions require use of an Azure Storage Account to store function keys and state files for scalable Azure Function Plans. Currently we are unable to use both Azure Entra authentication and Azure Private Links for Azure Storage together with Azure Function Apps. This configuration violates one of the policy definitions in the SLZ *Corp* landing zone that prevent deployment.
+* Azure AI services currently do not support Azure Entra authentication when using Azure Private Links. This configuration violates one of the policy definitions in the SLZ *Corp* landing zone that prevent deployment.

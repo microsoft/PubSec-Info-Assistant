@@ -41,3 +41,7 @@ variable "keyVaultId" {
 variable "azure_search_domain" {
   type = string  
 }
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}

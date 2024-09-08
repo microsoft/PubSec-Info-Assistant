@@ -10,6 +10,17 @@ resource "azurerm_service_plan" "funcServicePlan" {
   tags = var.tags
 }
 
+resource "azurerm_monitor_diagnostic_setting" "funcServicePlan" {
+  name                       = var.plan_name
+  target_resource_id         = azurerm_service_plan.funcServicePlan.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_monitor_autoscale_setting" "scaleout" {
   name                = azurerm_service_plan.funcServicePlan.name
   resource_group_name = var.resourceGroupName
@@ -165,6 +176,22 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  name                            = var.name
+  target_resource_id              = azurerm_linux_function_app.function_app.id
+  log_analytics_workspace_id      = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "FunctionAppLogs"
+  }
+  enabled_log {
+    category = "AppServiceAuthenticationLogs"
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
 
 resource "azurerm_key_vault_access_policy" "policy" {
   key_vault_id = data.azurerm_key_vault.existing_kv.id

@@ -247,3 +247,7 @@ variable "endpointSuffix" {
   type    = string
   default = "core.windows.net"
 }
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}

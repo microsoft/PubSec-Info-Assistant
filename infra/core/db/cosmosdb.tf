@@ -52,6 +52,45 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
   tags = var.tags
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  name                       = lower(var.name)
+  target_resource_id         = azurerm_cosmosdb_account.cosmosdb_account.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "DataPlaneRequests"
+  }
+  enabled_log {
+    category = "MongoRequests"
+  }
+  enabled_log {
+    category = "QueryRuntimeStatistics"
+  }
+  enabled_log {
+    category = "PartitionKeyStatistics"
+  }
+  enabled_log {
+    category = "PartitionKeyRUConsumption"
+  }
+  enabled_log {
+    category = "ControlPlaneRequests"
+  }
+  enabled_log {
+    category = "CassandraRequests"
+  }
+  enabled_log {
+    category = "GremlinRequests"
+  }
+  enabled_log {
+    category = "TableApiRequests"
+  }
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_cosmosdb_sql_database" "log_database" {
   name                = var.logDatabaseName
   resource_group_name = var.resourceGroupName

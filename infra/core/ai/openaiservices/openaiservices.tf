@@ -9,6 +9,27 @@ resource "azurerm_cognitive_account" "account" {
   tags = var.tags
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  count                           = var.useExistingAOAIService ? 0 : 1
+  name                            = var.name
+  target_resource_id              = azurerm_cognitive_account.account[0].id
+  log_analytics_workspace_id      = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "Audit"
+  }
+  enabled_log {
+    category = "RequestResponse"
+  }
+  enabled_log {
+    category = "Trace"
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_cognitive_deployment" "deployment" {
   count                 = var.useExistingAOAIService ? 0 : length(var.deployments)
   name                  = var.deployments[count.index].name

@@ -48,3 +48,7 @@ variable "resourceGroupName" {
   type    = string
   default = ""
 }
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}

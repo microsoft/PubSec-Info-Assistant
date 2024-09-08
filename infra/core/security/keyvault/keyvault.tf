@@ -12,7 +12,23 @@ resource "azurerm_key_vault" "kv" {
   purge_protection_enabled    = true
 }
 
- 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  name                            = var.name
+  target_resource_id              = azurerm_key_vault.kv.id
+  log_analytics_workspace_id      = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "AuditEvent"
+  }
+  enabled_log {
+    category = "AzurePolicyEvaluationDetails"
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_key_vault_access_policy" "infoasst" {
   depends_on  = [
     azurerm_key_vault.kv

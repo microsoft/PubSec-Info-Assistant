@@ -48,3 +48,7 @@ variable "resourceGroupName" {
 variable "keyVaultId" { 
   type = string
 }
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}

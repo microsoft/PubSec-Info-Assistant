@@ -12,6 +12,17 @@ resource "azurerm_service_plan" "appServicePlan" {
   tags = var.tags
 }
 
+resource "azurerm_monitor_diagnostic_setting" "appServicePlan" {
+  name                       = var.plan_name
+  target_resource_id         = azurerm_service_plan.appServicePlan.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_monitor_autoscale_setting" "scaleout" {
   name                = azurerm_service_plan.appServicePlan.name
   resource_group_name = var.resourceGroupName
@@ -179,7 +190,6 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   enabled_log {
     category = "AppServiceConsoleLogs"
   }
-
   metric {
     category = "AllMetrics"
     enabled  = true

@@ -54,3 +54,7 @@ variable "openaiServiceKey" {
   description = "The OpenAI service key"
   type        = string
 }
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}

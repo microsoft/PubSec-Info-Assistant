@@ -16,6 +16,20 @@ resource "azurerm_search_service" "search" {
   semantic_search_sku           = var.semanticSearch 
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  name                            = var.name
+  target_resource_id              = azurerm_search_service.search.id
+  log_analytics_workspace_id      = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "OperationLogs"
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "AZURE-SEARCH-SERVICE-KEY"
   value        = data.azurerm_search_service.search.primary_key

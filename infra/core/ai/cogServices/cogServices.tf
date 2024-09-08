@@ -7,6 +7,26 @@ resource "azurerm_cognitive_account" "cognitiveService" {
   tags                     = var.tags
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_setting" {
+  name                       = var.name
+  target_resource_id         = azurerm_cognitive_account.cognitiveService.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "Audit"
+  }
+  enabled_log {
+    category = "RequestResponse"
+  }
+  enabled_log {
+    category = "Trace"
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+  }
+}
+
 resource "azurerm_key_vault_secret" "search_service_key" {
   name         = "ENRICHMENT-KEY"
   value        = azurerm_cognitive_account.cognitiveService.primary_access_key

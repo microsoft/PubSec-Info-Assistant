@@ -37,7 +37,116 @@ resource "azurerm_storage_account" "storage" {
     }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
+  name                       = var.name
+  target_resource_id         = azurerm_storage_account.storage.id
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
 
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transaction"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_file" {
+  name                       = var.name
+  target_resource_id         = "${azurerm_storage_account.storage.id}/fileServices/default"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transaction"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_table" {
+  name                       = var.name
+  target_resource_id         = "${azurerm_storage_account.storage.id}/tableServices/default"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transaction"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_queue" {
+  name                       = var.name
+  target_resource_id         = "${azurerm_storage_account.storage.id}/queueServices/default"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transaction"
+    enabled  = true
+  }
+}
+
+resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_blob" {
+  name                       = var.name
+  target_resource_id         = "${azurerm_storage_account.storage.id}/blobServices/default"
+  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
+
+  enabled_log {
+    category = "StorageRead"
+  }
+  enabled_log {
+    category = "StorageWrite"
+  }
+  enabled_log {
+    category = "StorageDelete"
+  }
+  metric {
+    category = "Capacity"
+    enabled  = true
+  }
+  metric {
+    category = "Transaction"
+    enabled  = true
+  }
+}
 
 resource "azurerm_storage_container" "container" {
   count = length(var.containers)

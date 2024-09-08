@@ -61,6 +61,7 @@ module "storage" {
   }
   containers            = ["content","website","upload","function","logs","config"]
   queueNames            = ["pdf-submit-queue","pdf-polling-queue","non-pdf-submit-queue","media-submit-queue","text-enrichment-queue","image-enrichment-queue","embeddings-queue"]
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
   depends_on = [
     module.kvModule
   ]
@@ -197,6 +198,7 @@ module "openaiServices" {
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId
   openaiServiceKey = var.azureOpenAIServiceKey
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
   useExistingAOAIService = var.useExistingAOAIService
 
   deployments = [
@@ -237,6 +239,8 @@ module "formrecognizer" {
   customSubDomainName = "infoasst-fr-${random_string.random.result}"
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId 
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
+
   depends_on = [
     module.kvModule
   ]
@@ -250,6 +254,8 @@ module "cognitiveServices" {
   tags     = local.tags
   keyVaultId = module.kvModule.keyVaultId 
   resourceGroupName = azurerm_resource_group.rg.name
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
+
   depends_on = [
     module.kvModule
   ]
@@ -267,6 +273,7 @@ module "searchServices" {
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId = module.kvModule.keyVaultId
   azure_search_domain = var.azure_search_domain
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
 
   depends_on = [
     module.kvModule
@@ -283,7 +290,8 @@ module "cosmosdb" {
   logContainerName  = "statuscontainer"
   resourceGroupName = azurerm_resource_group.rg.name
   keyVaultId        = module.kvModule.keyVaultId  
-  
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
+
   depends_on = [
     module.kvModule
   ]
@@ -347,6 +355,7 @@ module "functions" {
   azureSearchIndex                      = var.searchIndexName
   azureSearchServiceEndpoint            = module.searchServices.endpoint
   endpointSuffix                        = var.azure_storage_domain
+  logAnalyticsWorkspaceResourceId       = module.logging.logAnalyticsId
 
   depends_on = [
     module.storage,
@@ -486,6 +495,7 @@ module "kvModule" {
   source            = "./core/security/keyvault" 
   name              = "infoasst-kv-${random_string.random.result}"
   location          = var.location
+  logAnalyticsWorkspaceResourceId = module.logging.logAnalyticsId
   kvAccessObjectId  = data.azurerm_client_config.current.object_id 
   spClientSecret    = module.entraObjects.azure_ad_mgmt_app_secret 
   subscriptionId    = var.subscriptionId

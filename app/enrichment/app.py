@@ -49,10 +49,10 @@ ENV = {
     "AZURE_OPENAI_ENDPOINT": None,
     "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": None,
     "AZURE_SEARCH_INDEX": None,
-    "AZURE_SEARCH_SERVICE": None,
     "TARGET_EMBEDDINGS_MODEL": None,
     "EMBEDDING_VECTOR_SIZE": None,
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
+    "AZURE_SEARCH_AUDIENCE": None,
     "LOCAL_DEBUG": "false",
     "AZURE_AI_CREDENTIAL_DOMAIN": None,
     "AZURE_OPENAI_AUTHORITY_HOST": None
@@ -271,7 +271,8 @@ def index_sections(chunks):
     """    
     search_client = SearchClient(endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
                                     index_name=ENV["AZURE_SEARCH_INDEX"],
-                                    credential=azure_credential)    
+                                    credential=azure_credential,
+                                    audience=ENV["AZURE_SEARCH_AUDIENCE"])
 
     results = search_client.upload_documents(documents=chunks)
     succeeded = sum([1 for r in results if r.succeeded])
@@ -346,6 +347,7 @@ def poll_queue() -> None:
 
         try:  
             statusLog.upsert_document(blob_path, f'Embeddings process started with model {target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
+            log.debug("Processing file: %s", blob_path)
             file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
             chunk_folder_path = file_directory + file_name + file_extension
             blob_service_client = BlobServiceClient(ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
@@ -355,13 +357,15 @@ def poll_queue() -> None:
                                     
             # get tags to apply to the chunk
             tag_list = get_tags(blob_path)
+            log.debug("Successfully pulled tags for %s. %d tags found.", blob_path, len(tag_list))
 
             # Iterate over the chunks in the container
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             chunks = list(chunk_list)
             i = 0
-                            
+            log.debug("Processing %d chunks", len(chunks))         
             for chunk in chunks:
+                log.debug("Processing chunk %s", chunk.name)
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.INDEXING)
                 # statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.PROCESSING
                 # open the file and extract the content
@@ -423,11 +427,13 @@ def poll_queue() -> None:
                 
                 # push batch of content to index, rather than each individual chunk
                 if i % 200 == 0:
+                    log.debug("Indexing %d chunks", i)
                     index_sections(index_chunks)
                     index_chunks = []
 
             # push remainder chunks content to index
             if len(index_chunks) > 0:
+                log.debug("Indexing last %d chunks", len(index_chunks))
                 index_sections(index_chunks)
 
             statusLog.upsert_document(blob_path,
@@ -435,6 +441,7 @@ def poll_queue() -> None:
                                       StatusClassification.INFO, State.COMPLETE)
 
         except Exception as error:
+            log.debug("An error occurred: %s", str(error))
             # Dequeue message and update the embeddings queued count to limit the max retries
             try:
                 requeue_count = message_json['embeddings_queued_count']

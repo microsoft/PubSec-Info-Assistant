@@ -81,13 +81,14 @@ const FilePicker = ({ folderPath, tags }: Props) => {
             state: StatusLogState.Uploaded,  
           };  
           await logStatus(logEntry);
-          // Increment the counter for successfully uploaded files
-          uploadedFilesCount++;
-          setProgress((uploadedFilesCount / files.length) * 100);
-  
+          
         } catch (error) {  
           console.log("Unable to upload file " + filePath + " : Error: " + error);  
-        }        
+        }  
+        // Increment the counter for successfully uploaded files
+        uploadedFilesCount++;
+        setProgress((uploadedFilesCount / files.length) * 100);
+      
       });
   
       await Promise.all(uploadPromises);  

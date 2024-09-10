@@ -1,4 +1,4 @@
-# Deploying IA Accelerator to Azure
+# Deploying Information Assistant (IA) accelerator to Azure
 
 :warning: **IMPORTANT**: Please ensure you have met the [Azure account requirements](../../README.md#azure-account-requirements) before continuing.
 
@@ -8,7 +8,7 @@ If you prefer to have a more guided experience, you may choose to [view the clic
 
 ## Development Environment Configuration
 
-The deployment process for the IA Accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container or dev container hosted on a virtual machine using GitHub Codespaces.
+The deployment process for the IA accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container or dev container hosted on a virtual machine using GitHub Codespaces.
 
 Begin by first forking the Information Assistant repository into your own repository. This can be useful for managing any changes you may require for your local environment. It will also enable you to accept and merge changes from the Information Assistant repo as future releases and hotfixes are made available.
 
@@ -19,23 +19,23 @@ Once you have forked the repo, you can then use the following button to open the
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=false&ref=main&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json)
 
-Begin by setting up your own GitHub Codespaces using our  [Developing in Codespaces](/docs/deployment/developing_in_a_GitHub_Codespaces.md) documentation.
+Begin by setting up your own GitHub Codespaces using our [Developing in Codespaces](/docs/deployment/developing_in_a_GitHub_Codespaces.md) documentation.
 
 *If you want to configure your local desktop for development container or you do not have access to GitHub Codespaces, follow our [Configuring your System for Development Containers](/docs/deployment/configure_local_dev_environment.md) guide. More information can be found at [Developing inside a Container](https://code.visualstudio.com/docs/remote/containers).*
 
-Once you have the completed setting up a GitHub Codespaces, please move on to the Sizing Estimation step.
+Once you have completed setting up a GitHub Codespaces, please move on to the Sizing Estimation step.
 
-## Sizing Estimator
+## Sizing estimator
 
  The IA Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
 
  To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
 
-Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the Configuring your Environment step.
+Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the Configuring your environment step.
 
-## Upgrading or Migrating from 1.0
+## Upgrading or migrating from 1.0
 
-If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing processed data to a newly deployed instance, review the [Upgrade & Migrate documentation](/docs/deployment/move_or_migrate.md)
+If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing processed data to a newly deployed instance, review the [upgrade & migrate documentation](/docs/deployment/move_or_migrate.md).
 
 ## Configure ENV files
 
@@ -87,7 +87,7 @@ ENTRA_OWNERS | No | Defaults to "". Additional user id's you wish to assign as o
 SERVICE_MANAGEMENT_REFERENCE | No | Defaults to "". Sets the service management reference value on Azure Entra objects created by Information Assistant if required by your organization.
 MAX_CSV_FILE_SIZE | Yes | Defaults to 20. This value limits the size of CSV files in MBs that will be supported for upload in the Tabular Data Assistant UX feature.
 PASSWORD_LIFETIME | No | Defaults to 365. The number of days that passwords associated with created identities are set to expire after creation. Change this setting if needed to conform to you policy requirements
-ENABLE_DDOS_PROTECTION_PLAN | Yes | Defaults to false. This setting is only used in "secure-mode" and will determine if the private vnet that is deployed is assicated to a DDOS protection plan or not. When true, this setting can be used in conjunction with `DDOS_PLAN_ID` to specify a specfic DDOS protection plan ID or if omitted the scripts will prompt during deployment to select an available DDOS protection plan.
+ENABLE_DDOS_PROTECTION_PLAN | Yes | Defaults to false. This setting is only used in "secure-mode" and will determine if the private vnet that is deployed is associated to a DDoS protection plan or not. When true, this setting can be used in conjunction with `DDOS_PLAN_ID` to specify a specific DDOS protection plan ID or if omitted the scripts will prompt during deployment to select an available DDOS protection plan.
 
 ## Log into Azure using the Azure CLI
 

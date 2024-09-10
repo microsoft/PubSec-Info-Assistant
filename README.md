@@ -16,7 +16,7 @@
   - [Deploying to Azure](./docs/deployment/deployment.md#deploy-and-configure-azure-resources)
   - [Troubleshooting common issues](./docs/deployment/troubleshooting.md)
   - [Considerations for production adoption](./docs/deployment/considerations_production.md)
-- ["Secure mode" deployment](./docs/secure_deployment/secure_deployment.md)
+- [Secure mode deployment](./docs/secure_deployment/secure_deployment.md)
   - [Cost estimation](./docs/secure_deployment/secure_costestimator.md)
 - [Enabling optional features](./docs/features/optional_features.md)
 - [Using the app](/docs/deployment/using_ia_first_time.md)

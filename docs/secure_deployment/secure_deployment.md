@@ -21,7 +21,7 @@
 It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant (IA) to become familiar with the deployment process before starting the secure mode deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
 
 [!IMPORTANT]  
-> The Information Assistant "**secure mode**" option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). In addition to those it also...
+> The Information Assistant **secure mode** option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). In addition to those it also...
 >
 > Assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed (e.g., Azure ExpressRoute, Azure VPN Gateway).
 >

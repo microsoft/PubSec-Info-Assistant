@@ -44,7 +44,7 @@ Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontd
 
 **Consideration:** Enhancing the security posture of your deployment is crucial, especially when dealing with sensitive data or services.
 
-**Recommendation:** Private Endpoints are now offered as part of our "secure-mode". Learn more about it [here](/docs/deployment/secure_deployment.md)
+**Recommendation:** Private Endpoints are now offered as part of our secure mode. Learn more about it [here](/docs/deployment/secure_deployment.md)
 
 ### Secure Mode
 
@@ -78,7 +78,7 @@ Learn more [here](https://learn.microsoft.com/en-us/azure/defender-for-cloud/def
 **Recommendation:** Leverage Azure Monitor to gain insights into the performance and health of your entire IA ecosystem. Set up custom alerts based on key performance indicators and metrics. Utilize Azure Log Analytics for in-depth analysis and troubleshooting. Integrate Azure Security Center to monitor and respond to security threats in real-time.
 Learn more [here](https://azure.microsoft.com/en-us/products/monitor/?ef_id=_k_2bb24bd93ec91aeba1fe2e4c90190298_k_&OCID=AIDcmm5edswduu_SEM__k_2bb24bd93ec91aeba1fe2e4c90190298_k_&msclkid=2bb24bd93ec91aeba1fe2e4c90190298).
 
-Diagnostic settings have been enabled in IA as part of our "secure-mode". You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
+Diagnostic settings have been enabled in IA as part of our secure mode. You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
 
 ## Document Ingestion Limitations
 

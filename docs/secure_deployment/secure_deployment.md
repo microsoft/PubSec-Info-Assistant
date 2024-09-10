@@ -1,4 +1,4 @@
-# "Secure Mode" Deployment
+# Secure mode deployment
 
 * [Getting started](#getting-started)
 * [Additional Azure account requirements](#additional-azure-account-requirements)
@@ -10,48 +10,48 @@
 * [Back end service architecture](#back-end-service-architecture)
 * [Private virtual network and endpoint architecture](#private-virtual-network-and-endpoint-architecture)
 * [Sizing estimator](#sizing-estimator)
-* [How to deploy "secure mode"](#how-to-deploy-secure-mode)
-* [Additional considerations for "secure mode" deployment](#additional-considerations-for-secure-mode-deployment)
+* [How to deploy secure mode](#how-to-deploy-secure-mode)
+* [Additional considerations for secure mode deployment](#additional-considerations-for-secure-mode-deployment)
   * [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration)
   * [Secure Communication to Azure](#secure-communication-to-azure)
   * [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty)
 
 ## Getting started
 
-It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant (IA) to become familiar with the deployment process before starting the "secure mode" deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
+It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant (IA) to become familiar with the deployment process before starting the secure mode deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
 
 [!IMPORTANT]  
 > The Information Assistant "**secure mode**" option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). In addition to those it also...
 >
 > Assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed (e.g., Azure ExpressRoute, Azure VPN Gateway).
 >
->"Secure mode" is not compatible with the following IA features:
+>Secure mode is not compatible with the following IA features:
 >
 > * Using an existing Azure OpenAI services
 > * Web chat (private endpoints for Bing API services are not available)
 > * SharePoint connector (private endpoints for Azure Logic Apps and SharePoint connector for Logic Apps are not yet available)
 >
->It is recommended to use "secure mode" with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
+>It is recommended to use secure mode with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
 >
->"Secure mode" is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* management group scope. See the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section below for more details.
+>Secure mode is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* management group scope. See the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section below for more details.
 
 ## Additional Azure account requirements
 
-In order to deploy the "secure mode" of Information Assistant, you will need the following in addition to the standard [Azure account requirements](/README.md#azure-account-requirements):
+In order to deploy the secure mode of Information Assistant, you will need the following in addition to the standard [Azure account requirements](/README.md#azure-account-requirements):
 
 * **Azure account permissions**:
   * If you are going to use an existing DDoS that resides in another subscription, you will need to have `Microsoft.Network/ddosProtectionPlans/join/action` permission on the subscription where the DDoS Protection Plan exists to allow associating to the virtual network when it is created. This permission can be provided with the [Network Contributor](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/networking#network-contributor) role.
 
 ## Overview
 
-Information Assistant "secure mode" is for scenarios where infrastructure security and privacy are essential, like those in public sector and regulated industries. Key features of "secure mode" include:
+Information Assistant secure mode is for scenarios where infrastructure security and privacy are essential, like those in public sector and regulated industries. Key features of secure mode include:
 
 * **Disabling public network access**: Restrict external access to safeguard public access.
 * **Virtual network protection**: Deploy your Azure services within a secure virtual network.
 * **Private endpoints**: The deployed Azure services connect exclusively through private endpoints within a virtual network where available.
 * **Data encryption at rest and in transit**: Ensure encryption of data when stored and during transmission.
 
-"Secure mode" adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
+Secure mode adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
 * Azure Monitor
 * Virtual Network (VNet)
@@ -65,15 +65,15 @@ Information Assistant "secure mode" is for scenarios where infrastructure securi
 
 ## Architecture
 
-"Secure mode" builds on the [Single Virtual Network Pattern](https://learn.microsoft.com/en-us/azure/architecture/networking/guide/network-level-segmentation#pattern-1-single-virtual-network) in which all components of your workload are inside a single virtual network (VNet). This pattern is only possible if you're operating in a single region, as a virtual network can't span multiple regions. The virtual network isolates your resources and traffic from other VNets and provides a boundary for applying security policies. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data.
+Secure mode builds on the [Single Virtual Network Pattern](https://learn.microsoft.com/en-us/azure/architecture/networking/guide/network-level-segmentation#pattern-1-single-virtual-network) in which all components of your workload are inside a single virtual network (VNet). This pattern is only possible if you're operating in a single region, as a virtual network can't span multiple regions. The virtual network isolates your resources and traffic from other VNets and provides a boundary for applying security policies. Services deployed within the same virtual network communicate securely. This additional level of isolation helps prevent unauthorized external access to services and helps protect your data.
 
-Additionally, "secure mode" isolates each Azure Service type into subnets to allow further protection to be applied via Network Security Groups (NSGs) if you want to extend the provided configuration.
+Additionally, secure mode isolates each Azure Service type into subnets to allow further protection to be applied via Network Security Groups (NSGs) if you want to extend the provided configuration.
 
 ### High level architecture
 
-!["Secure mode" - High level architecture](../images/secure-deploy-high-level-architecture.png)
+![Secure mode - High level architecture](../images/secure-deploy-high-level-architecture.png)
 
-The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication. In this example, an organizations enterprise networking configuration can be peered with the virtual network deployed by Information Assistant "secure mode" to allow users access to the application.
+The secure communication mechanism is represented in this high level architecture diagram with ExpressRoute although there are other options for securely communicating with Azure. Azure ExpressRoute helps protect data during communication. In this example, an organizations enterprise networking configuration can be peered with the virtual network deployed by Information Assistant secure mode to allow users access to the application.
 
 ### Detailed architecture
 
@@ -93,7 +93,7 @@ Deploying a dedicated Azure service into your virtual network provides the follo
 
 The Information Assistant deploys to a resource group within a subscription in your tenant. The deployment requires a secure communication channel to complete successfully, as illustrated by the ExpressRoute or VPN Gateway for user access to the enterprise virtual Network on the left of the diagram below that is peered with the Information Assistants virtual network.
 
-!["Secure mode" - Detailed Architecture](../images/secure-deploy-detail-architecture.png)
+![Secure mode - Detailed Architecture](../images/secure-deploy-detail-architecture.png)
 
 ## Front end architecture
 
@@ -107,7 +107,7 @@ The front-end application uses VNet integration to connect to the private networ
 * **Cosmos DB**: Provides visibility into the status of uploaded files.
 * **Azure Container Registry**: Where the Azure App Service pulls its source image from to host the application.
 
-!["Secure mode" - Front End Architecture](../images/secure-deploy-frontend-architecture.png)
+![Secure mode - Front End Architecture](../images/secure-deploy-frontend-architecture.png)
 
 ## Back end service architecture
 
@@ -118,7 +118,7 @@ Back-end processing handles processing of your private data, performs document e
 
 All of the services in the back-end are integrated through private endpoints ensuring that traffic is sent over the private network where private DNS zones resolve names to private VNet IP addresses as illustrated in the following diagram:
 
-!["Secure mode" - Function Architecture](../images/secure-deploy-function-architecture.png)
+![Secure mode - Function Architecture](../images/secure-deploy-function-architecture.png)
 
 ### Private virtual network and endpoint architecture
 
@@ -168,15 +168,15 @@ See [Virtual network and subnet CIDRs](#network-and-subnet-cidr-configuration) s
 
 ## Sizing estimator
 
-The IA Accelerator "secure mode" needs to be sized appropriately based on your use case. Please review our [sizing estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
+The IA Accelerator secure mode needs to be sized appropriately based on your use case. Please review our [sizing estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
 
 To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
 
-Once you have completed the sizing estimator and sized your deployment appropriately, please move on to the How to deploy "secure mode" step.
+Once you have completed the sizing estimator and sized your deployment appropriately, please move on to the How to deploy secure mode step.
 
-## How to deploy "Secure Mode"
+## How to deploy secure mode
 
-To perform a "secure mode" deployment, follow these steps:
+To perform a secure mode deployment, follow these steps:
 
 1. Open your forked repository in VSCode.
 2. Navigate to the `scripts/environments/local.env` file
@@ -190,7 +190,7 @@ To perform a "secure mode" deployment, follow these steps:
    export ENABLE_SHAREPOINT_CONNECTOR=false
    ```
 
-   *Note: "Secure mode" is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads.*
+   *Note: Secure mode is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads.*
 
 5. Review the network and subnet CIDRs for your deployment. See the section [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration) for more details.
 6. Decide your approach for DDoS protection for your Information Assistant virtual network. If you simply don't want to use a DDoS protection plan simply leave the `ENABLE_DDOS_PROTECTION_PLAN` flag set to false. If you plan to use a DDoS protection plan, you need to enable it by setting the `ENABLE_DDOS_PROTECTION_PLAN` flag set to true and then you can select a specific DDoS protection plan in one of two ways:
@@ -238,7 +238,7 @@ To perform a "secure mode" deployment, follow these steps:
     Are you ready to continue (y/n)? 
     ```
 
-    Here are the three types of connectivity we recommend for Information Assistant "secure mode":
+    Here are the three types of connectivity we recommend for Information Assistant secure mode:
 
     * Establish virtual network peering with your corporate network to the Information Assistant virtual network, and private access via ExpressRoute.
     * Establish a Point-to-Site (P2S) VPN Gateway for your development workstation. See [Secure Communication to Azure](#secure-communication-to-azure) section.
@@ -316,11 +316,11 @@ To perform a "secure mode" deployment, follow these steps:
 
 Once deployed only the Azure App Service named like, *infoasst-web-xxxxx*, will be accessible without the VPN established. You can share the URL of the website with users to start using the Information Assistant accelerator.
 
-## Additional considerations for "Secure Mode" deployment
+## Additional considerations for secure mode deployment
 
 ### Network and subnet CIDR configuration
 
-"Secure mode" creates a virtual network and multiple subnets, improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classes Inter-Domain Routing (CIDR)s are available as Terraform parameters. To avoid any IP address conflicts with your existing network(s), update the virtual network IP Addresses or CIDRs, then copy this block of variables into your `scripts/environments/local.env` file (*values shown are default values*)
+Secure mode creates a virtual network and multiple subnets, improving network isolation and data protection. Internet Protocol (IP) addresses and the corresponding Classes Inter-Domain Routing (CIDR)s are available as Terraform parameters. To avoid any IP address conflicts with your existing network(s), update the virtual network IP Addresses or CIDRs, then copy this block of variables into your `scripts/environments/local.env` file (*values shown are default values*)
 
 ```bash
 export TF_VAR_virtual_network_CIDR="10.0.8.0/24"
@@ -381,7 +381,7 @@ At this time the current release of Information Assistant is not compatible with
 * Azure Functions require use of an Azure Storage Account to store function keys and state files for scalable Azure Function Plans. Currently we are unable to use both Azure Entra authentication and Azure Private Links for Azure Storage together with Azure Function Apps. This configuration violates one of the policy definitions in the SLZ *Corp* management group scope that prevent deployment.
 * Azure AI services currently do not support Azure Entra authentication when using Azure Private Links. This configuration violates one of the policy definitions in the SLZ *Corp* management group scope that prevent deployment.
 
-"Secure mode" is also compliant with the Azure Policy built-in [Sovereignty Baseline Global Policy Initiative](https://learn.microsoft.com/en-us/azure/governance/policy/samples/mcfs-baseline-global) to help enforce data residency requirements. This policy initiative is deployed with the SLZ, but can be assigned to your environment at the management group, subscription or resource group outside of an SLZ deployment.
+Secure mode is also compliant with the Azure Policy built-in [Sovereignty Baseline Global Policy Initiative](https://learn.microsoft.com/en-us/azure/governance/policy/samples/mcfs-baseline-global) to help enforce data residency requirements. This policy initiative is deployed with the SLZ, but can be assigned to your environment at the management group, subscription or resource group outside of an SLZ deployment.
 
 Customers interested in operator transparency can also take advantage of [Transparency logs (preview)](https://learn.microsoft.com/industry/sovereignty/transparency-logs) by onboarding their tenant at no additional cost.
 

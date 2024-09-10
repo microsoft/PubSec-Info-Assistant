@@ -1,6 +1,6 @@
-# IA Accelerator "Secure Mode" - Estimation
+# IA Accelerator Secure Mode - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator "secure mode" and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator secure mode and provides cost estimates based on the chosen configurations.
 
 | Solution            | Mode | Environment  |    Azure Pricing Calculator Link  |
 | :------------------:|:---------:|:---------------:|:-------------------:|
@@ -10,7 +10,7 @@ The Azure pricing calculator helps estimate costs by considering the amount of d
 
 ## Azure Services
 
-The following list of Azure Services will be deployed for IA Accelerator "secure mode":
+The following list of Azure Services will be deployed for IA Accelerator secure mode:
 
 - App Service (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Application Insights [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)

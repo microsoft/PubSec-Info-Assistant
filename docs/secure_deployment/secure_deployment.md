@@ -44,12 +44,12 @@ In order to deploy the "secure mode" of Information Assistant, you will need the
 
 ## Overview
 
-Information Assistant "secure mode" is essential when heightened levels of infrastructure security are necessary. Key features of "secure mode" include:
+Information Assistant "secure mode" is for scenarios where infrastructure security and privacy are essential, like those in public sector and regulated industries. Key features of "secure mode" include:
 
 * **Disabling public network access**: Restrict external access to safeguard public access.
-* **Virtual network protection**: Integrate your Azure services within a secure virtual network.
+* **Virtual network protection**: Deploy your Azure services within a secure virtual network.
+* **Private endpoints**: The deployed Azure services connect exclusively through private endpoints within a virtual network where available.
 * **Data encryption at rest and in transit**: Ensure encryption of data when stored and during transmission.
-* **Integration via private endpoints**: Azure services connect exclusively through private endpoints within a virtual network where available.
 
 "Secure mode" adds several new Azure resources and will likely require additional Azure permissions. New resources will include:
 
@@ -61,6 +61,7 @@ Information Assistant "secure mode" is essential when heightened levels of infra
 * Private Endpoints
 * Private Links
 * DNS Private Resolver
+* DDoS Protection Plan (optional configuration)
 
 ## Architecture
 
@@ -104,7 +105,7 @@ The front-end application uses VNet integration to connect to the private networ
 * **Azure OpenAI**: Enables prompt submissions.
 * **Azure AI Search**: Facilitates content discovery from uploaded files.
 * **Cosmos DB**: Provides visibility into the status of uploaded files.
-* **Azure Container Registry**: Where the Azure App Service pulls it's source image from to host the application.
+* **Azure Container Registry**: Where the Azure App Service pulls its source image from to host the application.
 
 !["Secure mode" - Front End Architecture](../images/secure-deploy-frontend-architecture.png)
 
@@ -121,7 +122,7 @@ All of the services in the back-end are integrated through private endpoints ens
 
 ### Private virtual network and endpoint architecture
 
-The tables below contains additional details on private endpoints and Private Links. A Private Link provides access to services over the private endpoint network interface. Private endpoint uses a private IP address from your virtual network. Traffic between your virtual network and the service that you're accessing travels across the Azure network backbone. As a result, you no longer access the service over a public endpoint, effectively reducing exposure and enhancing security.
+The tables below contain additional details on private endpoints and Private Links. A Private Link provides access to services over the private endpoint network interface. Private endpoint uses a private IP address from your virtual network. Traffic between your virtual network and the service that you're accessing travels across the Azure network backbone. As a result, you no longer access the service over a public endpoint, effectively reducing exposure and enhancing security.
 
 #### Information Assistant virtual network configuration for Azure Commercial
 
@@ -191,7 +192,7 @@ To perform a "secure mode" deployment, follow these steps:
 
    *Note: "Secure mode" is blocked when using an existing Azure OpenAI service. We have blocked this scenario to prevent updating a shared instance of Azure OpenAI that may be in use by other workloads.*
 
-5. Review the network and subnet CIDRs for  your deployment. See the section [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration) for more details.
+5. Review the network and subnet CIDRs for your deployment. See the section [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration) for more details.
 6. Decide your approach for DDoS protection for your Information Assistant virtual network. If you simply don't want to use a DDoS protection plan simply leave the `ENABLE_DDOS_PROTECTION_PLAN` flag set to false. If you plan to use a DDoS protection plan, you need to enable it by setting the `ENABLE_DDOS_PROTECTION_PLAN` flag set to true and then you can select a specific DDoS protection plan in one of two ways:
    * **RECOMMENDED:** You can manually provide the DDoS plan ID in your `local.env` file using the following parameter. Be sure to update the subscription id, resource group name, and DDoS plan name values.
 
@@ -379,3 +380,9 @@ At this time the current release of Information Assistant is not compatible with
 
 * Azure Functions require use of an Azure Storage Account to store function keys and state files for scalable Azure Function Plans. Currently we are unable to use both Azure Entra authentication and Azure Private Links for Azure Storage together with Azure Function Apps. This configuration violates one of the policy definitions in the SLZ *Corp* landing zone that prevent deployment.
 * Azure AI services currently do not support Azure Entra authentication when using Azure Private Links. This configuration violates one of the policy definitions in the SLZ *Corp* landing zone that prevent deployment.
+
+"Secure mode" is also compliant with the Azure Policy built-in [Sovereignty Baseline Global Policy Initiative](https://learn.microsoft.com/en-us/azure/governance/policy/samples/mcfs-baseline-global) to help enforce data residency requirements. This policy initiative is deployed with the SLZ, but can be assigned to your environment at the management group, subscription or resource group outside of an SLZ deployment.
+
+Customers interested in operator transparency can also take advantage of [Transparency logs (preview)](https://learn.microsoft.com/industry/sovereignty/transparency-logs) by onboarding their tenant at no additional cost.
+
+Learn more about how Cloud for Sovereignty can help enforce sovereignty concerns within the [product documentation](https://learn.microsoft.com/industry/sovereignty/) and by exploring the [getting started learning path](https://learn.microsoft.com/training/paths/get-started-sovereignty/).

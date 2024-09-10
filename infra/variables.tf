@@ -96,6 +96,10 @@ variable "azure_search_domain" {
   type = string
 }
 
+variable "azure_search_scope" {
+  type = string
+}
+
 variable "azure_acr_domain" {
   type = string
 }

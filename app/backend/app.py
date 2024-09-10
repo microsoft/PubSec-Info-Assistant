@@ -51,6 +51,7 @@ ENV = {
     "AZURE_SEARCH_SERVICE": "gptkb",
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
     "AZURE_SEARCH_INDEX": "gptkbindex",
+    "AZURE_SEARCH_AUDIENCE": None,
     "USE_SEMANTIC_RERANKER": "true",
     "AZURE_OPENAI_SERVICE": "myopenai",
     "AZURE_OPENAI_RESOURCE_GROUP": "",
@@ -154,7 +155,9 @@ search_client = SearchClient(
     endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
     index_name=ENV["AZURE_SEARCH_INDEX"],
     credential=azure_credential,
+    audience=ENV["AZURE_SEARCH_AUDIENCE"]
 )
+
 blob_client = BlobServiceClient(
     account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
     credential=azure_credential,

@@ -46,6 +46,7 @@ const FilePicker = ({ folderPath, tags }: Props) => {
       const data = new FormData();  
       console.log("files", files);  
       setUploadStarted(true);  
+      let uploadedFilesCount = 0;
   
       const uploadPromises = files.map(async (indexedFile:any, index:any) => {  
         const file = indexedFile.file as File;  
@@ -79,12 +80,14 @@ const FilePicker = ({ folderPath, tags }: Props) => {
             status_classification: StatusLogClassification.Info,  
             state: StatusLogState.Uploaded,  
           };  
-          await logStatus(logEntry);  
+          await logStatus(logEntry);
+          // Increment the counter for successfully uploaded files
+          uploadedFilesCount++;
+          setProgress((uploadedFilesCount / files.length) * 100);
+  
         } catch (error) {  
           console.log("Unable to upload file " + filePath + " : Error: " + error);  
-        }  
-  
-        setProgress(((index + 1) / files.length) * 100);  
+        }        
       });
   
       await Promise.all(uploadPromises);  

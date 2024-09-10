@@ -207,7 +207,9 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                         )}
                     </PivotItem>
                     <PivotItem itemKey="rawFile" headerText="Document">
-                        {["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
+                        {getCitationURL() === '' ? (
+                            <Text>Loading...</Text>
+                        ) : ["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
                             // Treat other Office formats like "xlsx" for the Office Online Viewer
                             <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(getCitationURL()) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
                         ) : sourceFileExt === "pdf" ? (

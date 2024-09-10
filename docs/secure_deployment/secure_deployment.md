@@ -33,7 +33,7 @@ It is recommended that you start with a [standard deployment](/docs/deployment/d
 >
 >It is recommended to use "secure mode" with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
 >
->"Secure mode" is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* landing zone. See the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section below for more details.
+>"Secure mode" is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* management group scope. See the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section below for more details.
 
 ## Additional Azure account requirements
 
@@ -372,14 +372,14 @@ The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for
 
 For a detailed overview of an SLZ and all its capabilities, see [Sovereign Landing Zone](https://github.com/Azure/sovereign-landing-zone) documentation on GitHub.
 
-Information Assistant accelerator is compatible with the *Online* landing zone. Within a SLZ setup, you can find an established Connectivity management group where an existing virtual network and infrastructure already exist.
+Information Assistant accelerator is compatible with the *Online* management group scope. Within a SLZ deployment, you can find an established Connectivity management group where an existing virtual network and infrastructure already exist.
 
->We recommend that connectivity to Information Assistant in the *Online* landing zone be made accessible by peering the Information Assistant virtual network with the existing virtual network within the SLZ Connectivity management group.
+>We recommend that connectivity to Information Assistant in the *Online* management group be made accessible by peering the Information Assistant virtual network with the existing virtual network within the SLZ Connectivity management group.
 
-At this time the current release of Information Assistant is not compatible with the default policies for the SLZ *Corp* (corporate) landing zone for the following reasons:
+At this time the current release of Information Assistant is not compatible with the default policies for the SLZ *Corp* (corporate) management group scope for the following reasons:
 
-* Azure Functions require use of an Azure Storage Account to store function keys and state files for scalable Azure Function Plans. Currently we are unable to use both Azure Entra authentication and Azure Private Links for Azure Storage together with Azure Function Apps. This configuration violates one of the policy definitions in the SLZ *Corp* landing zone that prevent deployment.
-* Azure AI services currently do not support Azure Entra authentication when using Azure Private Links. This configuration violates one of the policy definitions in the SLZ *Corp* landing zone that prevent deployment.
+* Azure Functions require use of an Azure Storage Account to store function keys and state files for scalable Azure Function Plans. Currently we are unable to use both Azure Entra authentication and Azure Private Links for Azure Storage together with Azure Function Apps. This configuration violates one of the policy definitions in the SLZ *Corp* management group scope that prevent deployment.
+* Azure AI services currently do not support Azure Entra authentication when using Azure Private Links. This configuration violates one of the policy definitions in the SLZ *Corp* management group scope that prevent deployment.
 
 "Secure mode" is also compliant with the Azure Policy built-in [Sovereignty Baseline Global Policy Initiative](https://learn.microsoft.com/en-us/azure/governance/policy/samples/mcfs-baseline-global) to help enforce data residency requirements. This policy initiative is deployed with the SLZ, but can be assigned to your environment at the management group, subscription or resource group outside of an SLZ deployment.
 

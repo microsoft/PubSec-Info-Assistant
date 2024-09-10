@@ -155,6 +155,10 @@ jq -r  '
         {
             "path": "AZURE_AI_CREDENTIAL_DOMAIN",
             "env_var": "AZURE_AI_CREDENTIAL_DOMAIN"
+        },
+        {
+            "path": "AZURE_SEARCH_AUDIENCE",
+            "env_var": "AZURE_SEARCH_AUDIENCE"
         }
     ]
         as $env_vars_to_extract
@@ -191,6 +195,7 @@ jq -r  '
     echo "ENABLE_MATH_ASSISTANT=$ENABLE_MATH_ASSISTANT"
     echo "ENABLE_TABULAR_DATA_ASSISTANT=$ENABLE_TABULAR_DATA_ASSISTANT"
     echo "LOCAL_DEBUG=true"
+    echo "USE_SEMANTIC_RERANKER=$TF_VAR_use_semantic_reranker"
 
 if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then

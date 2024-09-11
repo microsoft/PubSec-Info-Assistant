@@ -33,7 +33,7 @@ echo "Please read the following terms carefully. You must accept the terms to pr
 echo
 echo "This script will import the existing resources into the Terraform state."
 echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
-echo "of the accelerator while maintaining your existing resources and processed data."
+echo "of the copilot template while maintaining your existing resources and processed data."
 echo
 echo "If you have modified the infrastructure base this process will fail."
 echo "The simplest approach to deploy the latest version would be to perform"

@@ -1,4 +1,4 @@
-# Information Assistant (IA) accelerator
+# Information Assistant (IA) copilot template
 
 > [!IMPORTANT]  
 > As of November 15, 2023, Azure Cognitive Search has been renamed to Azure AI Search. Azure Cognitive Services have also been renamed to Azure AI Services.
@@ -38,22 +38,26 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-Information Assistant (IA) is an industry accelerator that showcases integration between Azure and OpenAI's large language models. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the Retrieval Augmented Generation (RAG) design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+Information Assistant (IA) copilot template provides a starting point for organizations to build their own custom generative AI capability to extend the power of Azure OpenAI. It showcases a common scenario using large language models (LLMs) to “chat with your own data” through the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview). This pattern lets you use the reasoning abilities of LLMs to generate responses based on your domain data without fine-tuning the model. 
 
-The accelerator adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
+Information Assistant copilot template is an end-to-end solution which is a comprehensive reference sample including documentation, source code, and deployment to allow you to take and extend for your own purposes.
 
-Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with this accelerator.
+This copilot template showcases integration between Azure and OpenAI's LLMs. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the RAG design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+
+The copilot adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
+
+Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with Information Assistant copilot template.
 
 # Response generation approaches
 
 ## Work (Grounded)
-It utilizes a retrieval-augmented generation (RAG) pattern to generate responses grounded in specific data sourced from your own dataset. By combining retrieval of relevant information with generative capabilities, it can produce responses that are not only contextually relevant but also grounded in verified data. The RAG pipeline accesses your dataset to retrieve relevant information before generating responses, ensuring accuracy and reliability. Additionally, each response includes a citation to the document chunk from which the answer is derived, providing transparency and allowing users to verify the source. This approach is particularly advantageous in domains where precision and factuality are paramount. Users can trust that the responses generated are based on reliable data sources, enhancing the credibility and usefulness of the application. Specific information on our Grounded (RAG) can be found in [RAG](docs/features/cognitive_search.md#azure-ai-search-integration).
+It utilizes a Retrieval Augmented Generation (RAG) pattern to generate responses grounded in specific data sourced from your own dataset. By combining retrieval of relevant information with generative capabilities, it can produce responses that are not only contextually relevant but also grounded in verified data. The RAG pipeline accesses your dataset to retrieve relevant information before generating responses, ensuring accuracy and reliability. Additionally, each response includes a citation to the document chunk from which the answer is derived, providing transparency and allowing users to verify the source. This approach is particularly advantageous in domains where precision and factuality are paramount. Users can trust that the responses generated are based on reliable data sources, enhancing the credibility and usefulness of the application. Specific information on our Grounded (RAG) can be found in [RAG](docs/features/cognitive_search.md#azure-ai-search-integration).
 
 ## Ungrounded
 It leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. The LLM has been trained on a vast corpus of text data, enabling it to generate coherent and contextually relevant responses solely based on the input provided. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios. It's important to note that the generated responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount.
 
 ## Work and Web 
-It offers 2 response options: one generated through our retrieval-augmented generation (RAG) pipeline, and the other grounded in content directly from the web. When users opt for the RAG response, they receive a grounded answer sourced from their data, complete with citations to document chunks for transparency and verification. Conversely, selecting the web response provides access to a broader range of sources, potentially offering more diverse perspectives. Each web response is grounded in content from the web accompanied by citations of web links, allowing users to explore the original sources for further context and validation. Upon request, It can also generate a final response that compares and contrasts both responses. This comparative analysis allows users to make informed decisions based on the reliability, relevance, and context of the information provided.
+It offers 2 response options: one generated through our Retrieval Augmented Generation (RAG) pipeline, and the other grounded in content directly from the web. When users opt for the RAG response, they receive a grounded answer sourced from their data, complete with citations to document chunks for transparency and verification. Conversely, selecting the web response provides access to a broader range of sources, potentially offering more diverse perspectives. Each web response is grounded in content from the web accompanied by citations of web links, allowing users to explore the original sources for further context and validation. Upon request, It can also generate a final response that compares and contrasts both responses. This comparative analysis allows users to make informed decisions based on the reliability, relevance, and context of the information provided.
 Specific information about our Work and Web can be found in [Web](/docs/features/features.md#bing-search-and-compare).
 
 ## Assistants 
@@ -62,7 +66,7 @@ It generates response by using LLM as a reasoning engine. The key strength lies 
 
 ## Features
 
-The IA Accelerator contains several features, many of which have their own documentation.
+The Information Assistant copilot template contains several features, many of which have their own documentation.
 
 - Examples of custom Retrieval Augmented Generation (RAG), Prompt Engineering, and Document Pre-Processing
 - Azure AI Search Integration to include text search of both text documents and images
@@ -96,7 +100,7 @@ For a detailed review see our [Features](./docs/features/features.md) page.
     **gpt-4o** | current version
 
     **Important:** Gpt-4o (2024-05-13) is recommended. The gpt-4 models may achieve better results but slower performance than gpt-35 models when used with Information Assistant.
-  * (Optional) **Access to-- the following Azure OpenAI model for embeddings**. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using the following Azure OpenAI embedding model.
+  * (Optional) **Access to the following Azure OpenAI model for embeddings**. Some open source embedding models may perform better for your specific data or use case. For the use case and data Information Assistant was tested for we recommend using the following Azure OpenAI embedding model.
 
     Model Name | Supported Versions
     ---|---
@@ -110,15 +114,15 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 
 ## Deployment
 
-Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the IA Accelerator in your Azure subscription.
+Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the Information Assistant copilot template in your Azure subscription.
 
-Once completed, follow the [instructions for using IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md).
+Once completed, follow the [instructions for using Information Assistant copilot template for the first time](/docs/deployment/using_ia_first_time.md).
 
 You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssist/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
 
 ## Responsible AI
 
-The Information Assistant (IA) accelerator and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
+The Information Assistant (IA) copilot template and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
 
 ### Transparency Note
 
@@ -146,7 +150,7 @@ The software may collect information about you and your use of the software and 
 
 ### About Data Collection
 
-Data collection by the software in this repository is used by Microsoft solely to help justify the efforts of the teams who build and maintain this accelerator for our customers. It is your choice to leave this enabled, or to disable data collection.
+Data collection by the software in this repository is used by Microsoft solely to help justify the efforts of the teams who build and maintain this copilot template for our customers. It is your choice to leave this enabled, or to disable data collection.
 
 Data collection is implemented by the presence of a tracking GUID in the environment variables at deployment time. The GUID is associated with each Azure resource deployed by the installation scripts. This GUID is used by Microsoft to track the Azure consumption this open source solution generates.
 
@@ -172,13 +176,13 @@ docs/deployment/ | Detailed documentation on how to deploy and start using Infor
 docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
 docs/ | Other supporting documentation that is primarily linked to from the other markdown files.
 functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
-infra/ | The Terraform scripts that deploy the entire IA Accelerator. The overall accelerator is orchestrated via the `main.tf` file but most of the resource deployments are modularized under the **core** folder.
-pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the accelerator.
+infra/ | The Terraform scripts that deploy the entire IA copilot template. The overall copilot template is orchestrated via the `main.tf` file but most of the resource deployments are modularized under the **core** folder.
+pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the copilot template.
 scripts/environments/ | Deployment configuration files. This is where all external configuration values will be set.
 scripts/ | Supporting scripts that perform the various deployment tasks such as infrastructure deployment, Azure WebApp and Function deployments, building of the webapp and functions source code, etc. These scripts align to the available commands in the `Makefile`.
 tests/ | Functional Test scripts that are used to validate a deployed Information Assistant's document processing pipelines are working as expected.
 Makefile | Deployment command definitions and configurations. You can use `make help` to get more details on available commands.
-README.md | Starting point for this repo. It covers overviews of the Accelerator, Responsible AI, Environment, Deployment, and Usage of the Accelerator.
+README.md | Starting point for this repo. It covers overviews of the copilot template, Responsible AI, Environment, Deployment, and Usage of the copilot template.
 
 ### References
 
@@ -201,7 +205,7 @@ This project may contain trademarks or logos for projects, products, or services
 
 ## Microsoft Legal Notice
 
-**Notice**. The Information Assistant accelerator (the "IA") is PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. The IA may employ lesser or different privacy and security measures than those typically present in Azure Services. Unless otherwise noted, The IA should not be used to process Personal Data or other data that is subject to legal or regulatory compliance requirements. The following terms in the DPA do not apply to the IA: Processing of Personal Data, GDPR, Data Security, and HIPAA Business Associate. We may change or discontinue the IA at any time without notice. The IA (1) is not designed, intended, or made available as legal services, (2) is not intended to substitute for professional legal counsel or judgment, and (3) should not be used in place of consulting with a qualified professional legal professional for your specific needs. Microsoft makes no warranty that the IA is accurate, up-to-date, or complete. You are wholly responsible for ensuring your own compliance with all applicable laws and regulations. 
+**Notice**. The Information Assistant copilot template (the "IA") is PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. The IA may employ lesser or different privacy and security measures than those typically present in Azure Services. Unless otherwise noted, The IA should not be used to process Personal Data or other data that is subject to legal or regulatory compliance requirements. The following terms in the DPA do not apply to the IA: Processing of Personal Data, GDPR, Data Security, and HIPAA Business Associate. We may change or discontinue the IA at any time without notice. The IA (1) is not designed, intended, or made available as legal services, (2) is not intended to substitute for professional legal counsel or judgment, and (3) should not be used in place of consulting with a qualified professional legal professional for your specific needs. Microsoft makes no warranty that the IA is accurate, up-to-date, or complete. You are wholly responsible for ensuring your own compliance with all applicable laws and regulations. 
 
 ## Code of Conduct
 

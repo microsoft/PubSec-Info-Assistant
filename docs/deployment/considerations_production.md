@@ -1,6 +1,6 @@
 # Considerations For Adopting Into Production
 
-This documentation highlights key considerations for transitioning from an Information Assistant (IA) accelerator to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT Model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
+This documentation highlights key considerations for transitioning from an Information Assistant (IA) copilot template to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT Model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
 
 ## Scalability and High Availability
 
@@ -82,7 +82,7 @@ Diagnostic settings have been enabled in IA as part of our secure mode. You can 
 
 ## Document Ingestion Limitations
 
-**Consideration:** This accelerator uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes they can handle. The page limit and document size limits for PDFs on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
+**Consideration:** This copilot template uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes they can handle. The page limit and document size limits for PDFs on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
 
 More info on unstructured.io for other supported document types can be found [here](https://unstructured-io.github.io/unstructured/introduction.html).
 
@@ -107,4 +107,4 @@ This can be achieved by modifying the currently provided UI by making a couple o
 
 ## In Summary
 
- Ensure that your IA accelerator seamlessly integrates into your existing ecosystem, considering compatibility and interoperability. Use the IA accelerator as a blueprint to plan integration into your ecosystem.
+ Ensure that your IA copilot template seamlessly integrates into your existing ecosystem, considering compatibility and interoperability. Use the IA copilot template as a blueprint to plan integration into your ecosystem.

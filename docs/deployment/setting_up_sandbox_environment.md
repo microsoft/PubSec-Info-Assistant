@@ -1,6 +1,6 @@
 # Setting up Azure DevOps CI/CD Pipeline for setting up Sandbox Environment
 
-The process of setting up a CI/CD pipeline for the Information Assistant Accelerator requires the use of Azure DevOps to host and run the pipeline and deployment environment.
+The process of setting up a CI/CD pipeline for the Information Assistant copilot template requires the use of Azure DevOps to host and run the pipeline and deployment environment.
 
 This process involves:
 

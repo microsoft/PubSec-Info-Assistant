@@ -1,39 +1,39 @@
-# IA Accelerator Secure Mode - Estimation
+# Information Assistant (IA) copilot template Secure Mode - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA Accelerator secure mode and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA copilot template secure mode and provides cost estimates based on the chosen configurations.
 
 | Solution            | Mode | Environment  |    Azure Pricing Calculator Link  |
 | :------------------:|:---------:|:---------------:|:-------------------:|
-| IA Accelerator, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/1492bd09c422421186d820ff23dc1f2f) |
+| IA copilot template, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/1492bd09c422421186d820ff23dc1f2f) |
 
 ---
 
 ## Azure Services
 
-The following list of Azure Services will be deployed for IA Accelerator secure mode:
+The following list of Azure Services will be deployed for IA copilot template secure mode:
 
 - App Service (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Application Insights [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)
 - Azure AI Services [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/)
 - Azure Cosmos DB [:link:](https://azure.microsoft.com/en-ca/pricing/details/cosmos-db/autoscale-provisioned/)
 - Azure AI Document Intelligence [:link:](https://azure.microsoft.com/en-ca/pricing/details/form-recognizer/#pricing)
-- Azure Function(App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/functions/#pricing)
+- Azure Function (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/functions/#pricing)
 - Azure Key Vault [:link:](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
 - Log Analytics workspace [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)
 - Azure AI Search [:link:](https://azure.microsoft.com/en-ca/pricing/details/search/#pricing)
 - Azure OpenAI [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/openai-service/)
-- Storage account  [:link:](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
+- Storage account [:link:](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
 - Azure Active Directory [:link:](https://www.microsoft.com/en-sg/security/business/microsoft-entra-pricing?rtc=1)
 - Azure DDOS Standard Protection [:link:](https://azure.microsoft.com/en-ca/pricing/details/ddos-protection/)
 - Azure Container Registry [:link:](https://azure.microsoft.com/en-ca/pricing/details/container-registry/)
 - Azure DNS Resolver [:link:](https://azure.microsoft.com/en-ca/pricing/details/dns/)
 - Azure Private Link [:link:](https://azure.microsoft.com/en-ca/pricing/details/private-link/)
-- Azure Container Registry[:link:](https://azure.microsoft.com/en-ca/pricing/details/container-registry/)
-- Azure Network Interface[:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
-- Azure Network Security Group[:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
-- Azure Private DNS Zone[:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
-- Azure Private Endpoints[:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
-- Azure Virtual Network[:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
+- Azure Container Registry [:link:](https://azure.microsoft.com/en-ca/pricing/details/container-registry/)
+- Azure Network Interface [:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
+- Azure Network Security Group [:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
+- Azure Private DNS Zone [:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
+- Azure Private Endpoints [:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
+- Azure Virtual Network [:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
 
 ---
 

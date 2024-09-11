@@ -1,14 +1,14 @@
-# Deploying Information Assistant (IA) accelerator to Azure
+# Deploying Information Assistant (IA) copilot template to Azure
 
 :warning: **IMPORTANT**: Please ensure you have met the [Azure account requirements](../../README.md#azure-account-requirements) before continuing.
 
-Follow these steps to get the accelerator up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
+Follow these steps to get the copilot template up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
 
-If you prefer to have a more guided experience, you may choose to [view the click-through deployment guide](https://aka.ms/InfoAssist/deploy) for this accelerator.  
+If you prefer to have a more guided experience, you may choose to [view the click-through deployment guide](https://aka.ms/InfoAssist/deploy) for this copilot template.  
 
 ## Development Environment Configuration
 
-The deployment process for the IA accelerator, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container or dev container hosted on a virtual machine using GitHub Codespaces.
+The deployment process for the IA copilot template, uses a concept of **Developing inside a Container** to containerize all the necessary pre-requisite component without requiring them to be installed on the local machine. The environment you will work in will be created using a development container or dev container hosted on a virtual machine using GitHub Codespaces.
 
 Begin by first forking the Information Assistant repository into your own repository. This can be useful for managing any changes you may require for your local environment. It will also enable you to accept and merge changes from the Information Assistant repo as future releases and hotfixes are made available.
 
@@ -27,7 +27,7 @@ Once you have completed setting up a GitHub Codespaces, please move on to the Si
 
 ## Sizing estimator
 
- The IA Accelerator needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
+ The IA copilot template needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
 
  To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
 
@@ -202,12 +202,12 @@ Once deployed, you can find the URL of your installation by:
 
 ## Next steps
 
-At this point deployment is complete. Please go to the [Using the IA Accelerator for the first time](/docs/deployment/using_ia_first_time.md) section and complete the following steps.
+At this point deployment is complete. Please go to the [Using the IA copilot template for the first time](/docs/deployment/using_ia_first_time.md) section and complete the following steps.
 
 
 ## Additional Considerations for a Production Adoption
 
-There are considerations for adopting the Information Assistant (IA) accelerator into a production environment. [See this documentation](/docs/deployment/considerations_production.md).
+There are considerations for adopting the Information Assistant (IA) copilot template into a production environment. [See this documentation](/docs/deployment/considerations_production.md).
 
 
 ## Need Help?
@@ -215,4 +215,4 @@ There are considerations for adopting the Information Assistant (IA) accelerator
 Check these [troubleshooting methods](/docs/deployment/troubleshooting.md).
 
 
-If you need assistance with deployment or configuration of this accelerator, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.
+If you need assistance with deployment or configuration of this copilot template, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

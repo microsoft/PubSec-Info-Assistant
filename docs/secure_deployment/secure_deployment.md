@@ -370,7 +370,8 @@ This will ensure that the Azure DNS private resolver set up by the Information A
 
 The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering that provides opinionated infrastructure-as-code automation for deploying workloads. Microsoft Cloud for Sovereignty enables governments and public sector organizations to deploy workloads in Microsoft Cloud while helping meet their specific sovereignty, compliance, security, and policy requirements. Microsoft Cloud for Sovereignty creates software boundaries in the cloud to establish the extra protection that governments require, using cloud guardrails, policy, hardware-based confidentiality and encryption controls.
 
-For a detailed overview of an SLZ and all its capabilities, see [Sovereign Landing Zone](https://github.com/Azure/sovereign-landing-zone) documentation on GitHub.
+For a detailed overview of an SLZ and all its capabilities, see [Sovereign Landing Zone](https://github.com/Azure/sovereign-landing-zone) documentation on GitHub. Also, [review the sample reference architecutre and guidance for deploying LLMs and Azure OpenAI in Retrieval Augmented Generation (RAG) pattern for implementations with the SLZ](https://learn.microsoft.com/industry/sovereignty/architecture/AIwithLLM/overview-ai-llm-configuration).
+
 
 Information Assistant copilot template is compatible with the *Online* management group scope. Within a SLZ deployment, you can find an established Connectivity management group where an existing virtual network and infrastructure already exist.
 

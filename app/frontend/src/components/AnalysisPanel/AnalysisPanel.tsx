@@ -100,12 +100,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
         }
     }
 
-    useEffect(() => {
-        if (activeCitation) {
-            setInnerPivotTab('indexedFile');
-        }
-        fetchActiveCitationObj();
-    }, [activeCitation]);
 
     useEffect(() => {
         if (!sourceFile) {
@@ -139,6 +133,26 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             fetchPlainTextContent();
         }
     }, [sourceFileBlob, sourceFileExt]);
+
+    useEffect(() => {
+        if (activeCitation) {
+            setInnerPivotTab('indexedFile');
+        }
+        fetchActiveCitationObj();
+        const fetchSourceFileBlob = async () => {
+            
+                if (!isFetchingSourceFileBlob) {
+                    setIsFetchingSourceFileBlob(true);
+                    sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
+                        setIsFetchingSourceFileBlob(false);
+                    });
+                }
+                await sourceFileBlobPromise;
+            
+        };
+        fetchSourceFileBlob();
+        
+    }, [activeCitation]);
 
     return (
         <Pivot

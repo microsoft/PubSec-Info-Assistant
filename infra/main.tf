@@ -319,10 +319,10 @@ module "enrichmentApp" {
     AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME  = var.azureOpenAIEmbeddingDeploymentName
     AZURE_SEARCH_INDEX                      = var.searchIndexName
-    AZURE_SEARCH_SERVICE                    = module.searchServices.name
+    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_SEARCH_AUDIENCE                   = var.azure_search_scope
     TARGET_EMBEDDINGS_MODEL                 = var.useAzureOpenAIEmbeddings ? "azure-openai_${var.azureOpenAIEmbeddingDeploymentName}" : var.sentenceTransformersModelName
     EMBEDDING_VECTOR_SIZE                   = var.useAzureOpenAIEmbeddings ? 1536 : var.sentenceTransformerEmbeddingVectorSize
-    AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
     AZURE_AI_CREDENTIAL_DOMAIN              = var.azure_ai_private_link_domain
     AZURE_OPENAI_AUTHORITY_HOST             = var.azure_openai_authority_host
   }
@@ -383,6 +383,7 @@ module "webapp" {
     AZURE_SEARCH_INDEX                      = var.searchIndexName
     AZURE_SEARCH_SERVICE                    = module.searchServices.name
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint
+    AZURE_SEARCH_AUDIENCE                   = var.azure_search_scope
     AZURE_OPENAI_CHATGPT_DEPLOYMENT         = var.chatGptDeploymentName != "" ? var.chatGptDeploymentName : (var.chatGptModelName != "" ? var.chatGptModelName : "gpt-35-turbo-16k")
     AZURE_OPENAI_CHATGPT_MODEL_NAME         = var.chatGptModelName
     AZURE_OPENAI_CHATGPT_MODEL_VERSION      = var.chatGptModelVersion

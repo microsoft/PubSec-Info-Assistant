@@ -32,6 +32,8 @@ const pivotItemDisabledStyle: React.CSSProperties = {
 };
 
 export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, pageNumber, citationHeight, className, onActiveTabChanged }: Props) => {
+    
+    const [innerPivotTab, setInnerPivotTab] = useState<string>('indexedFile');
     const [activeCitationObj, setActiveCitationObj] = useState<ActiveCitation>();
     const [markdownContent, setMarkdownContent] = useState('');
     const [plainTextContent, setPlainTextContent] = useState('');
@@ -98,9 +100,6 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
         }
     }
 
-    useEffect(() => {
-        fetchActiveCitationObj();
-    }, [activeCitation]);
 
     useEffect(() => {
         if (!sourceFile) {
@@ -134,6 +133,26 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             fetchPlainTextContent();
         }
     }, [sourceFileBlob, sourceFileExt]);
+
+    useEffect(() => {
+        if (activeCitation) {
+            setInnerPivotTab('indexedFile');
+        }
+        fetchActiveCitationObj();
+        const fetchSourceFileBlob = async () => {
+            
+                if (!isFetchingSourceFileBlob) {
+                    setIsFetchingSourceFileBlob(true);
+                    sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
+                        setIsFetchingSourceFileBlob(false);
+                    });
+                }
+                await sourceFileBlobPromise;
+            
+        };
+        fetchSourceFileBlob();
+        
+    }, [activeCitation]);
 
     return (
         <Pivot
@@ -175,7 +194,14 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                 onRenderItemLink = {onRenderItemLink("No active citation selected. Please select a citation from the citations list on the left.", tooltipRef3, isDisabledCitationTab)}
             > 
             
-                <Pivot className={className}>
+                <Pivot className={className} selectedKey={innerPivotTab} onLinkClick={(item) => {
+                    if (item) {
+                        setInnerPivotTab(item.props.itemKey!);
+                    } else {
+                        // Handle the case where item is undefined
+                        console.warn('Item is undefined');
+                    }
+                }}>
                     <PivotItem itemKey="indexedFile" headerText="Document Section">
                         {activeCitationObj === undefined ? (
                             <Text>Loading...</Text>
@@ -195,7 +221,9 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                         )}
                     </PivotItem>
                     <PivotItem itemKey="rawFile" headerText="Document">
-                        {["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
+                        {getCitationURL() === '' ? (
+                            <Text>Loading...</Text>
+                        ) : ["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
                             // Treat other Office formats like "xlsx" for the Office Online Viewer
                             <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(getCitationURL()) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
                         ) : sourceFileExt === "pdf" ? (

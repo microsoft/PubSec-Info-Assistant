@@ -9,7 +9,7 @@ fastapi-utils == 0.2.1
 uvicorn == 0.23.2
 azure-storage-queue == 12.6.0
 azure-storage-blob==12.16.0
-azure.search.documents==11.4.0b11
+azure.search.documents==11.5.1
 azure-cosmos == 4.7.0
 azure-core == 1.30.2
 azure-identity==1.16.1

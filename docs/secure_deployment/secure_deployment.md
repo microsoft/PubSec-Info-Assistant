@@ -198,7 +198,7 @@ To perform a secure mode deployment, follow these steps:
 
        ```bash
        export ENABLE_DDOS_PROTECTION_PLAN=true
-       export DDOS_PLAN_ID="/subscriptions/{subscription id}/resourceGroups/{resource group name}/providers/Microsoft.Network/ddosProtectionPlans/{ddos plan name}"`
+       export DDOS_PLAN_ID="/subscriptions/{subscription id}/resourceGroups/{resource group name}/providers/Microsoft.Network/ddosProtectionPlans/{ddos plan name}"
        ```
 
    * You can let the deployment choose a DDoS protection plan at deployment time. If you do not provide the parameter above, the deployment scripts will prompt you with a choice to use the first found existing DDoS plan in your subscription or Information Assistant will create one automatically.
@@ -333,12 +333,11 @@ export TF_VAR_key_vault_CIDR="10.0.8.72/29"
 export TF_VAR_functions_CIDR="10.0.8.80/29"
 export TF_VAR_enrichment_app_CIDR="10.0.8.88/29"
 export TF_VAR_search_service_CIDR="10.0.8.96/29"
-export TF_VAR_azure_video_indexer_CIDR="10.0.8.104/29"
 export TF_VAR_bing_service_CIDR="10.0.8.112/29"
 export TF_VAR_azure_openAI_CIDR="10.0.8.120/29"
 export TF_VAR_integration_CIDR="10.0.8.192/26"
 export TF_VAR_acr_CIDR="10.0.8.128/29"
-export TF_VAR_dns_CIDR="10.0.8.176/29"
+export TF_VAR_dns_CIDR="10.0.8.176/28"
 ```
 
 *NOTE: The following subnets require a minimum size:*

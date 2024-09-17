@@ -1,7 +1,7 @@
 #### Any version change made here should also be made and tested for the enrichment and function apps in /functions and /app/enrichment
 azure-identity==1.16.1
 Flask==2.3.2
-langchain==0.2.9
+langchain==0.2.10
 azure-mgmt-cognitiveservices==13.5.0
 openai==1.24.0
 # azure-search-documents==11.4.0

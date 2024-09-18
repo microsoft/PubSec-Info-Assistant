@@ -138,6 +138,7 @@ The following resource providers must be registered within your subscription pri
 * Microsoft.Storage
 * Microsoft.OperationalInsights
 * Microsoft.KeyVault
+* Microsoft.AlertsManagement
 
 The following command lists all the subscription's resource providers that are Registered. 
 ``` bash
@@ -155,6 +156,7 @@ az provider register --namespace Microsoft.Network
 az provider register --namespace Microsoft.Storage
 az provider register --namespace Microsoft.OperationalInsights
 az provider register --namespace Microsoft.KeyVault
+az provider register --namespace Microsoft.AlertsManagement
 ```
 
 Confirm all the resource providers have been registered before proceeding with the deployment.

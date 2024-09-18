@@ -33,7 +33,7 @@ It is recommended that you start with a [standard deployment](/docs/deployment/d
 >
 >It is recommended to use secure mode with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
 >
->Secure mode is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* management group scope. See the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section below for more details.
+>Secure mode is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* management group scope. See the [deploy with Microsoft Cloud for Sovereignty](#deploying-with-microsoft-cloud-for-sovereignty) section below for more details.
 
 ## Additional Azure account requirements
 

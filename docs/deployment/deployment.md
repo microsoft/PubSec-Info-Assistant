@@ -125,6 +125,47 @@ From this output, grab the Subscription ID of the subscription you intend to dep
     az account set --subscription mysubscriptionID
 ```
 
+## Azure resource provider registration
+
+The following resource providers must be registered within your subscription prior to beginning the deployment to prevent deployment errors: 
+
+
+* Microsoft.ContainerRegistry
+* Microsoft.DocumentDB
+* Microsoft.Search
+* Microsoft.Web
+* Microsoft.Network
+* Microsoft.Storage
+* Microsoft.OperationalInsights
+* Microsoft.KeyVault
+
+The following command lists all the subscription's resource providers that are Registered. 
+``` bash
+az provider list --query "[?registrationState=='Registered']" --output table
+```
+
+Register the resource providers required with the az provider register command.
+
+``` bash
+az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.DocumentDB
+az provider register --namespace Microsoft.Search
+az provider register --namespace Microsoft.Web
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.Storage
+az provider register --namespace Microsoft.OperationalInsights
+az provider register --namespace Microsoft.KeyVault
+```
+
+Confirm all the resource providers have been registered before proceeding with the deployment.
+
+Get the registration status for a specific resource provider:
+
+``` bash
+az provider list --query "[?namespace=='Microsoft.Web']" --output table
+```
+
+
 ## Deploy and Configure Azure resources
 
 Now that your GitHub Codespaces/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.

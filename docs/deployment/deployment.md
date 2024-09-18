@@ -178,7 +178,7 @@ To deploy everything run the following command from the GitHub Codespaces/Dev Co
 
 This will deploy the infrastructure and the application code.
 
-*This command can be run as many times as needed in the event you encounter any errors. A set of known issues and their workarounds that we have found can be found in [Known Issues](/docs/knownissues.md)*
+*This command can be run as many times as needed in the event you encounter any errors. A set of known issues and their workarounds that we have found can be found in [Known Issues](/docs/knownissues.md).*
 
 ### Additional Information
 

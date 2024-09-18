@@ -357,9 +357,17 @@ For more information, see [using an Azure VPN Gateway Point-to-Site VPN](https:/
 
 When peering your virtual network with the Information Assistant virtual network, you will need to ensure the following settings are enabled on your peering configuration:
 
+* Allow '*my VPN virtual network*' to access '*infoasst-vnet-xxxxx*'
+
+* Allow '*my VPN virtual network*' to receive forwarded traffic from '*infoasst-vnet-xxxxx*'
+
 * Allow gateway or route server in '*my VPN virtual network*' to forward traffic to '*infoasst-vnet-xxxxx*'
 
 and the reciprocal setting of:
+
+* Allow '*infoasst-vnet-xxxxx*' to access '*my VPN virtual network's*'
+
+* Allow '*infoasst-vnet-xxxxx*' to receive forwarded traffic from '*my VPN virtual network's*'
 
 * Enable '*infoasst-vnet-xxxxx*' to use '*my VPN virtual network's*' remote gateway or route server
 

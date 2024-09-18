@@ -14,7 +14,7 @@
 * [Additional considerations for secure mode deployment](#additional-considerations-for-secure-mode-deployment)
   * [Network and subnet CIDR configuration](#network-and-subnet-cidr-configuration)
   * [Secure Communication to Azure](#secure-communication-to-azure)
-  * [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty)
+  * [Deploying with Microsoft Cloud for Sovereignty](#deploying-with-microsoft-cloud-for-sovereignty)
 
 ## Getting started
 
@@ -365,7 +365,7 @@ and the reciprocal setting of:
 
 This will ensure that the Azure DNS private resolver set up by the Information Assistant copilot template can resolve traffic properly to your VPN connection.
 
-### Secure communication with Microsoft Cloud for Sovereignty
+### Deploying with Microsoft Cloud for Sovereignty
 
 The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering that provides opinionated infrastructure-as-code automation for deploying workloads. Microsoft Cloud for Sovereignty enables governments and public sector organizations to deploy workloads in Microsoft Cloud while helping meet their specific sovereignty, compliance, security, and policy requirements. Microsoft Cloud for Sovereignty creates software boundaries in the cloud to establish the extra protection that governments require, using cloud guardrails, policy, hardware-based confidentiality and encryption controls.
 

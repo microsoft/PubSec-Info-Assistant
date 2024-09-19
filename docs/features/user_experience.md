@@ -1,6 +1,6 @@
 # User Experience
 
-The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
+The end user leverages the web interface as the primary method to engage with the Information Assistant (IA) copilot template, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
 
 ## Having a conversation with your data
 
@@ -113,7 +113,7 @@ Once a file has been uploaded the user can select an example query or enter thie
 
 ## Manage Content
 
-When you engage with IA Accelerator in the "Manage Content" method, the system allows you to add new content and see the status of processing for content previously loaded into the IA Accelerator.
+When you engage with IA copilot template in the "Manage Content" method, the system allows you to add new content and see the status of processing for content previously loaded into the IA copilot template.
 
 > You may activate the Manage Content engagement pattern by choosing the "Manage Content" link at the top of the page
 > ![Manage Content Link](/docs/images/manage-content-ui.png)

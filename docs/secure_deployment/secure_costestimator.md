@@ -42,7 +42,7 @@ The following list of Azure Services will be deployed for IA copilot template se
 - The cost estimation provided is based on the Sandbox environment and may vary for different customers.
 - For detailed pricing information on Azure OpenAI Service, please refer to [this link](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/#pricing).
 - Customers with latency-sensitive scenarios can choose to use provisioned throughput, which allows them to reserve model processing capacity. For more information, please read [this document](/docs/deployment/considerations_production.md#gpt-model---throttling).
-- Please note that the pricing of VPN Gateway and GitHub Codespace is not covered as they are not part of the deployment.
+- Please note that the pricing of VPN Gateway and GitHub Codespaces is not covered as they are not part of the deployment.
 
 ---
 

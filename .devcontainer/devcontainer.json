@@ -11,7 +11,7 @@
 	},
 	"forwardPorts": [ 7071 ],
 	"runArgs": [
-		"--network", "host" // use host networking so that the dev container can access the API when running the container locally
+		"--network", "host", "--cap-add", "NET_ADMIN" // use host networking so that the dev container can access the API when running the container locally
 	],
 
 	"mounts": [

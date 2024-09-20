@@ -1,19 +1,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
+
 from io import StringIO
 from typing import Optional
+from datetime import datetime
 import asyncio
-#from sse_starlette.sse import EventSourceResponse
-#from starlette.responses import StreamingResponse
-from starlette.responses import Response
 import logging
 import os
 import json
 import urllib.parse
 import pandas as pd
-from datetime import datetime, time, timedelta
+import pydantic
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
 from approaches.comparewebwithwork import CompareWebWithWork
@@ -22,19 +21,12 @@ from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.gpt_direct_approach import GPTDirectApproach
 from approaches.approach import Approaches
-from azure.core.credentials import AzureKeyCredential
-from azure.identity import DefaultAzureCredential, AzureAuthorityHosts
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
-from azure.storage.blob import (
-    AccountSasPermissions,
-    BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
-)
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from approaches.mathassistant import(
     generate_response,
-    process_agent_scratch_pad,
     process_agent_response,
     stream_agent_responses
 )
@@ -44,9 +36,8 @@ from approaches.tabulardataassistant import (
     process_agent_response as td_agent_response,
     process_agent_scratch_pad as td_agent_scratch_pad,
     get_images_in_temp
-
 )
-from shared_code.status_log import State, StatusClassification, StatusLog, StatusQueryLevel
+from shared_code.status_log import State, StatusClassification, StatusLog
 from azure.cosmos import CosmosClient
 
 
@@ -55,13 +46,12 @@ from azure.cosmos import CosmosClient
 ENV = {
     "AZURE_BLOB_STORAGE_ACCOUNT": None,
     "AZURE_BLOB_STORAGE_ENDPOINT": None,
-    "AZURE_BLOB_STORAGE_KEY": None,
     "AZURE_BLOB_STORAGE_CONTAINER": "content",
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
     "AZURE_SEARCH_SERVICE": "gptkb",
     "AZURE_SEARCH_SERVICE_ENDPOINT": None,
-    "AZURE_SEARCH_SERVICE_KEY": None,
     "AZURE_SEARCH_INDEX": "gptkbindex",
+    "AZURE_SEARCH_AUDIENCE": None,
     "USE_SEMANTIC_RERANKER": "true",
     "AZURE_OPENAI_SERVICE": "myopenai",
     "AZURE_OPENAI_RESOURCE_GROUP": "",
@@ -74,25 +64,23 @@ ENV = {
     "EMBEDDING_DEPLOYMENT_NAME": "",
     "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "",
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
-    "AZURE_OPENAI_SERVICE_KEY": None,
     "AZURE_SUBSCRIPTION_ID": None,
     "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
     "CHAT_WARNING_BANNER_TEXT": "",
     "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
     "KB_FIELDS_CONTENT": "content",
     "KB_FIELDS_PAGENUMBER": "pages",
-    "KB_FIELDS_SOURCEFILE": "file_uri",
+    "KB_FIELDS_SOURCEFILE": "file_name",
     "KB_FIELDS_CHUNKFILE": "chunk_file",
     "COSMOSDB_URL": None,
-    "COSMOSDB_KEY": None,
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "QUERY_TERM_LANGUAGE": "English",
     "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
     "ENRICHMENT_APPSERVICE_URL": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
-    "ENRICHMENT_ENDPOINT": None,
-    "ENRICHMENT_KEY": None,
+    "AZURE_AI_ENDPOINT": None,
+    "AZURE_AI_LOCATION": "",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
     "ENABLE_BING_SAFE_SEARCH": "true",
@@ -100,8 +88,9 @@ ENV = {
     "ENABLE_UNGROUNDED_CHAT": "false",
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "ENABLE_MULTIMEDIA": "false",
-    "MAX_CSV_FILE_SIZE": "7"
+    "MAX_CSV_FILE_SIZE": "7",
+    "LOCAL_DEBUG": "false",
+    "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
 
 for key, value in ENV.items():
@@ -117,7 +106,17 @@ log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
 
-dffinal = None
+class StatusResponse(pydantic.BaseModel):
+    """The response model for the health check endpoint"""
+    status: str
+    uptime_seconds: float
+    version: str
+
+start_time = datetime.now()
+
+IS_READY = False
+
+DF_FINAL = None
 # Used by the OpenAI SDK
 openai.api_type = "azure"
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
@@ -126,39 +125,49 @@ if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
 else:
     AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 openai.api_version = "2024-02-01"
-# Use the current user identity to authenticate with Azure OpenAI, Cognitive Search and Blob Storage (no secrets needed,
-# just use 'az login' locally, and managed identity when deployed on Azure). If you need to use keys, use separate AzureKeyCredential instances with the
-# keys for each service
-# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
-azure_credential = DefaultAzureCredential(authority=AUTHORITY)
-# Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY environment variable instead
-# openai.api_type = "azure_ad"
-# openai_token = azure_credential.get_token("https://cognitiveservices.azure.com/.default")
-openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if ENV["LOCAL_DEBUG"] == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+# Comment these two lines out if using keys, set your API key in the OPENAI_API_KEY
+# environment variable instead
+openai.api_type = "azure_ad"
+token_provider = get_bearer_token_provider(azure_credential,
+                                           f'https://{ENV["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
+openai.azure_ad_token_provider = token_provider
+#openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
 
 # Setup StatusLog to allow access to CosmosDB for logging
 statusLog = StatusLog(
     ENV["COSMOSDB_URL"],
-    ENV["COSMOSDB_KEY"],
+    azure_credential,
     ENV["COSMOSDB_LOG_DATABASE_NAME"],
     ENV["COSMOSDB_LOG_CONTAINER_NAME"]
 )
 
-azure_search_key_credential = AzureKeyCredential(ENV["AZURE_SEARCH_SERVICE_KEY"])
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
     endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
     index_name=ENV["AZURE_SEARCH_INDEX"],
-    credential=azure_search_key_credential,
+    credential=azure_credential,
+    audience=ENV["AZURE_SEARCH_AUDIENCE"]
 )
+
 blob_client = BlobServiceClient(
     account_url=ENV["AZURE_BLOB_STORAGE_ENDPOINT"],
-    credential=ENV["AZURE_BLOB_STORAGE_KEY"],
+    credential=azure_credential,
 )
 blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
+blob_upload_container_client = blob_client.get_container_client(
+                                    os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
-model_name = ''
-model_version = ''
+MODEL_NAME = ''
+MODEL_VERSION = ''
 
 # Set up OpenAI management client
 openai_mgmt_client = CognitiveServicesManagementClient(
@@ -172,26 +181,25 @@ deployment = openai_mgmt_client.deployments.get(
     account_name=ENV["AZURE_OPENAI_SERVICE"],
     deployment_name=ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"])
 
-model_name = deployment.properties.model.name
-model_version = deployment.properties.model.version
+MODEL_NAME = deployment.properties.model.name
+MODEL_VERSION = deployment.properties.model.version
 
-if (str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"])):
+if str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"]):
     embedding_deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
         account_name=ENV["AZURE_OPENAI_SERVICE"],
         deployment_name=ENV["EMBEDDING_DEPLOYMENT_NAME"])
 
-    embedding_model_name = embedding_deployment.properties.model.name
-    embedding_model_version = embedding_deployment.properties.model.version
+    EMBEDDING_MODEL_NAME = embedding_deployment.properties.model.name
+    EMBEDDING_MODEL_VERSION = embedding_deployment.properties.model.version
 else:
-    embedding_model_name = ""
-    embedding_model_version = ""
+    EMBEDDING_MODEL_NAME = ""
+    EMBEDDING_MODEL_VERSION = ""
 
 chat_approaches = {
     Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
                                     search_client,
                                     ENV["AZURE_OPENAI_ENDPOINT"],
-                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
                                     ENV["KB_FIELDS_CONTENT"],
@@ -200,35 +208,39 @@ chat_approaches = {
                                     ENV["AZURE_BLOB_STORAGE_CONTAINER"],
                                     blob_client,
                                     ENV["QUERY_TERM_LANGUAGE"],
-                                    model_name,
-                                    model_version,
+                                    MODEL_NAME,
+                                    MODEL_VERSION,
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
                                     ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
-                                    ENV["ENRICHMENT_ENDPOINT"],
-                                    ENV["ENRICHMENT_KEY"],
+                                    ENV["AZURE_AI_ENDPOINT"],
+                                    ENV["AZURE_AI_LOCATION"],
+                                    token_provider,
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
     Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
-                                    model_name,
+                                    MODEL_NAME,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
                                     ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
-    ),
-    Approaches.CompareWorkWithWeb: CompareWorkWithWeb( 
-                                    model_name,
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
+                                    token_provider
+                                ),
+    Approaches.CompareWorkWithWeb: CompareWorkWithWeb(
+                                    MODEL_NAME,
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
                                     ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"])
-    ),
+                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
+                                    ENV["AZURE_OPENAI_ENDPOINT"],
+                                    token_provider
+                                ),
     Approaches.CompareWebWithWork: CompareWebWithWork(
                                     search_client,
                                     ENV["AZURE_OPENAI_ENDPOINT"],
-                                    ENV["AZURE_OPENAI_SERVICE_KEY"],
                                     ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                     ENV["KB_FIELDS_SOURCEFILE"],
                                     ENV["KB_FIELDS_CONTENT"],
@@ -237,25 +249,27 @@ chat_approaches = {
                                     ENV["AZURE_BLOB_STORAGE_CONTAINER"],
                                     blob_client,
                                     ENV["QUERY_TERM_LANGUAGE"],
-                                    model_name,
-                                    model_version,
+                                    MODEL_NAME,
+                                    MODEL_VERSION,
                                     ENV["TARGET_EMBEDDINGS_MODEL"],
                                     ENV["ENRICHMENT_APPSERVICE_URL"],
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
-                                    ENV["ENRICHMENT_ENDPOINT"],
-                                    ENV["ENRICHMENT_KEY"],
+                                    ENV["AZURE_AI_ENDPOINT"],
+                                    ENV["AZURE_AI_LOCATION"],
+                                    token_provider,
                                     str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
                                 ),
     Approaches.GPTDirect: GPTDirectApproach(
-                                ENV["AZURE_OPENAI_SERVICE"],
-                                ENV["AZURE_OPENAI_SERVICE_KEY"],
+                                token_provider,
                                 ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
                                 ENV["QUERY_TERM_LANGUAGE"],
-                                model_name,
-                                model_version,
+                                MODEL_NAME,
+                                MODEL_VERSION,
                                 ENV["AZURE_OPENAI_ENDPOINT"]
     )
 }
+
+IS_READY = True
 
 # Create API
 app = FastAPI(
@@ -270,6 +284,25 @@ async def root():
     """Redirect to the index.html page"""
     return RedirectResponse(url="/index.html")
 
+@app.get("/health", response_model=StatusResponse, tags=["health"])
+def health():
+    """Returns the health of the API
+
+    Returns:
+        StatusResponse: The health of the API
+    """
+
+    uptime = datetime.now() - start_time
+    uptime_seconds = uptime.total_seconds()
+
+    output = {"status": None, "uptime_seconds": uptime_seconds, "version": app.version}
+
+    if IS_READY:
+        output["status"] = "ready"
+    else:
+        output["status"] = "loading"
+
+    return output
 
 @app.post("/chat")
 async def chat(request: Request):
@@ -290,48 +323,24 @@ async def chat(request: Request):
         impl = chat_approaches.get(Approaches(int(approach)))
         if not impl:
             return {"error": "unknown approach"}, 400
-        
-        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = impl.run(json_body.get("history", []), json_body.get("overrides", {}), json_body.get("citation_lookup", {}), json_body.get("thought_chain", {}))
+
+        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or
+            Approaches(int(approach)) == Approaches.CompareWebWithWork):
+            r = impl.run(json_body.get("history", []),
+                         json_body.get("overrides", {}),
+                         json_body.get("citation_lookup", {}),
+                         json_body.get("thought_chain", {}))
         else:
-            r = impl.run(json_body.get("history", []), json_body.get("overrides", {}), {}, json_body.get("thought_chain", {}))
-       
+            r = impl.run(json_body.get("history", []),
+                         json_body.get("overrides", {}),
+                         {},
+                         json_body.get("thought_chain", {}))
+
         return StreamingResponse(r, media_type="application/x-ndjson")
 
     except Exception as ex:
-        log.error(f"Error in chat:: {ex}")
+        log.error("Error in chat:: %s", ex)
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-
-    
-
-@app.get("/getblobclienturl")
-async def get_blob_client_url():
-    """Get a URL for a file in Blob Storage with SAS token.
-
-    This function generates a Shared Access Signature (SAS) token for accessing a file in Blob Storage.
-    The generated URL includes the SAS token as a query parameter.
-
-    Returns:
-        dict: A dictionary containing the URL with the SAS token.
-    """
-    sas_token = generate_account_sas(
-        ENV["AZURE_BLOB_STORAGE_ACCOUNT"],
-        ENV["AZURE_BLOB_STORAGE_KEY"],
-        resource_types=ResourceTypes(object=True, service=True, container=True),
-        permission=AccountSasPermissions(
-            read=True,
-            write=True,
-            list=True,
-            delete=False,
-            add=True,
-            create=True,
-            update=True,
-            process=False,
-        ),
-        expiry=datetime.utcnow() + timedelta(hours=1),
-    )
-    return {"url": f"{blob_client.url}?{sas_token}"}
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):
@@ -348,40 +357,41 @@ async def get_all_upload_status(request: Request):
     timeframe = json_body.get("timeframe")
     state = json_body.get("state")
     folder = json_body.get("folder")
-    tag = json_body.get("tag")   
+    tag = json_body.get("tag")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe, 
-            State[state], 
-            folder, 
+        results = statusLog.read_files_status_by_timeframe(timeframe,
+            State[state],
+            folder,
             tag,
             os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
 
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
-        items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)
+        items = []
+        cosmos_client = CosmosClient(url=statusLog._url,
+                                     credential=azure_credential,
+                                     consistency_level='Session')
         database = cosmos_client.get_database_client(statusLog._database_name)
         container = database.get_container_client(statusLog._container_name)
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
         items = list(container.query_items(
             query=query_string,
             enable_cross_partition_query=True
-        ))           
+        ))
 
         # Extract and split tags
         unique_tags = set()
         for item in items:
             tags = item.split(',')
-            unique_tags.update(tags)        
+            unique_tags.update(tags)
 
-        
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
 @app.post("/getfolders")
-async def get_folders(request: Request):
+async def get_folders():
     """
     Get all folders.
 
@@ -459,8 +469,15 @@ async def resubmit_Items(request: Request):
         blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
         # Read the blob content into memory
         blob_data = blob_container.download_blob(path).readall()
-        # Overwrite the blob with the modified data
-        blob_container.upload_blob(name=path, data=blob_data, overwrite=True)  
+        
+        submitted_blob_client = blob_container.get_blob_client(blob=path)
+        blob_properties = submitted_blob_client.get_blob_properties()
+        metadata = blob_properties.metadata
+        blob_container.upload_blob(name=path, data=blob_data, overwrite=True, metadata=metadata)   
+       
+        
+        
+
         # add the container to the path to avoid adding another doc in the status db
         full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
         statusLog.upsert_document(document_path=full_path,
@@ -490,7 +507,7 @@ async def get_tags(request: Request):
     try:
         # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=statusLog._key)     
+        cosmos_client = CosmosClient(url=statusLog._url, credential=azure_credential, consistency_level='Session')     
         database = cosmos_client.get_database_client(statusLog._database_name)               
         container = database.get_container_client(statusLog._container_name) 
         query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  
@@ -562,16 +579,16 @@ async def get_info_data():
     """
     response = {
         "AZURE_OPENAI_CHATGPT_DEPLOYMENT": ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-        "AZURE_OPENAI_MODEL_NAME": f"{model_name}",
-        "AZURE_OPENAI_MODEL_VERSION": f"{model_version}",
+        "AZURE_OPENAI_MODEL_NAME": f"{MODEL_NAME}",
+        "AZURE_OPENAI_MODEL_VERSION": f"{MODEL_VERSION}",
         "AZURE_OPENAI_SERVICE": ENV["AZURE_OPENAI_SERVICE"],
         "AZURE_SEARCH_SERVICE": ENV["AZURE_SEARCH_SERVICE"],
         "AZURE_SEARCH_INDEX": ENV["AZURE_SEARCH_INDEX"],
         "TARGET_LANGUAGE": ENV["QUERY_TERM_LANGUAGE"],
         "USE_AZURE_OPENAI_EMBEDDINGS": ENV["USE_AZURE_OPENAI_EMBEDDINGS"],
         "EMBEDDINGS_DEPLOYMENT": ENV["EMBEDDING_DEPLOYMENT_NAME"],
-        "EMBEDDINGS_MODEL_NAME": f"{embedding_model_name}",
-        "EMBEDDINGS_MODEL_VERSION": f"{embedding_model_version}",
+        "EMBEDDINGS_MODEL_NAME": f"{EMBEDDING_MODEL_NAME}",
+        "EMBEDDINGS_MODEL_VERSION": f"{EMBEDDING_MODEL_VERSION}",
     }
     return response
 
@@ -673,26 +690,27 @@ async def getHint(question: Optional[str] = None):
 @app.post("/posttd")
 async def posttd(csv: UploadFile = File(...)):
     try:
-        global dffinal
+        global DF_FINAL
             # Read the file into a pandas DataFrame
         content = await csv.read()
-        df = pd.read_csv(StringIO(content.decode('latin-1')))
+        df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
 
-        dffinal = df
+        DF_FINAL = df
         # Process the DataFrame...
         save_df(df)
     except Exception as ex:
-            raise HTTPException(status_code=500, detail=str(ex)) from ex
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
     
     
     #return {"filename": csv.filename}
 @app.get("/process_td_agent_response")
 async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
+    save_df(DF_FINAL)
     if question is None:
         raise HTTPException(status_code=400, detail="Question is required")
     for i in range(retries):
         try:
-            results = td_agent_response(question)
+            results = td_agent_response(question,DF_FINAL)
             return results
         except AttributeError as ex:
             log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
@@ -712,14 +730,14 @@ async def process_td_agent_response(retries=3, delay=1000, question: Optional[st
 
 @app.get("/getTdAnalysis")
 async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
-    global dffinal
+    global DF_FINAL
     if question is None:
-            raise HTTPException(status_code=400, detail="Question is required")
+        raise HTTPException(status_code=400, detail="Question is required")
         
     for i in range(retries):
         try:
-            save_df(dffinal)
-            results = td_agent_scratch_pad(question, dffinal)
+            save_df(DF_FINAL)
+            results = td_agent_scratch_pad(question, DF_FINAL)
             return results
         except AttributeError as ex:
             log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
@@ -769,11 +787,11 @@ async def stream_response(question: str):
 
 @app.get("/tdstream")
 async def td_stream_response(question: str):
-    save_df(dffinal)
+    save_df(DF_FINAL)
     
 
     try:
-        stream = td_agent_scratch_pad(question, dffinal)
+        stream = td_agent_scratch_pad(question, DF_FINAL)
         return StreamingResponse(stream, media_type="text/event-stream")
     except Exception as ex:
         log.exception("Exception in /stream")
@@ -806,7 +824,7 @@ async def stream_agent_response(question: str):
         results = process_agent_response(question)
     except Exception as e:
         print(f"Error processing agent response: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
     return results
 
 
@@ -821,16 +839,63 @@ async def get_feature_flags():
             - "ENABLE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
             - "ENABLE_MATH_ASSISTANT": Flag indicating whether the math assistant is enabled.
             - "ENABLE_TABULAR_DATA_ASSISTANT": Flag indicating whether the tabular data assistant is enabled.
-            - "ENABLE_MULTIMEDIA": Flag indicating whether multimedia is enabled.
     """
     response = {
         "ENABLE_WEB_CHAT": str_to_bool.get(ENV["ENABLE_WEB_CHAT"]),
         "ENABLE_UNGROUNDED_CHAT": str_to_bool.get(ENV["ENABLE_UNGROUNDED_CHAT"]),
         "ENABLE_MATH_ASSISTANT": str_to_bool.get(ENV["ENABLE_MATH_ASSISTANT"]),
         "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
-        "ENABLE_MULTIMEDIA": str_to_bool.get(ENV["ENABLE_MULTIMEDIA"]),
     }
     return response
+
+@app.post("/file")  
+async def upload_file(  
+    file: UploadFile = File(...),   
+    file_path: str = Form(...),
+    tags: str = Form(None)  
+):  
+    """  
+    Upload a file to Azure Blob Storage.  
+    Parameters:  
+    - file: The file to upload.
+    - file_path: The path to save the file in Blob Storage.
+    - tags: The tags to associate with the file.  
+    Returns:  
+    - response: A message indicating the result of the upload.  
+    """  
+    try:          
+        blob_upload_client = blob_upload_container_client.get_blob_client(file_path)  
+  
+        blob_upload_client.upload_blob(
+            file.file,
+            overwrite=True,
+            content_settings=ContentSettings(content_type=file.content_type),
+            metadata= {"tags": tags}
+        )
+  
+        return {"message": f"File '{file.filename}' uploaded successfully"}  
+  
+    except Exception as ex:  
+        log.exception("Exception in /file")  
+        raise HTTPException(status_code=500, detail=str(ex)) from ex  
+
+@app.post("/get-file")
+async def get_file(request: Request):
+    data = await request.json()
+    file_path = data['path']
+
+    # Extract container name and blob name from the file path
+    container_name, blob_name = file_path.split('/', 1)
+
+    # Download the blob to a local file
+    
+    citation_blob_client = blob_upload_container_client.get_blob_client(blob=blob_name)
+    stream = citation_blob_client.download_blob().chunks()
+    blob_properties = citation_blob_client.get_blob_properties()
+
+    return StreamingResponse(stream,
+                             media_type=blob_properties.content_settings.content_type, 
+                             headers={"Content-Disposition": f"inline; filename={blob_name}"})
 
 app.mount("/", StaticFiles(directory="static"), name="static")
 

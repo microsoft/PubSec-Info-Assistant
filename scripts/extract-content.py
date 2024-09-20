@@ -13,8 +13,7 @@ from azure.cosmos import CosmosClient, PartitionKey, exceptions
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from azure.search.documents import SearchClient
-from azure.core.credentials import AzureKeyCredential
-from azure.storage.blob import BlobServiceClient, ContainerClient
+from azure.storage.blob import BlobServiceClient
 from azure.storage.blob import generate_container_sas, ContainerSasPermissions
 from datetime import datetime, timedelta
 import urllib.parse
@@ -24,7 +23,6 @@ skip_search_index = False
 skip_cosmos_db = False
 skip_upload_container = False
 skip_content_container = False
-
 
 # Helper function for getting the appropriate Azure CLI Vault URL
 def get_keyvault_url(keyvault_name, resource_group=None):
@@ -161,25 +159,18 @@ new_secret_client = SecretClient(vault_url=new_key_vault_url, credential=credent
 old_cosmosdb_url = f'https://infoasst-cosmos-{old_random_text}.documents.azure.com:443/'
 old_cosmosdb_key = old_secret_client.get_secret('COSMOSDB-KEY').value
 old_search_endpoint = f'https://infoasst-search-{old_random_text}.search.windows.net'
-old_blob_connection_string = old_secret_client.get_secret('BLOB-CONNECTION-STRING').value
-old_search_key = old_secret_client.get_secret('AZURE-SEARCH-SERVICE-KEY').value 
 old_azure_blob_storage_account = f"infoasststore{old_random_text}"
-old_azure_blob_storage_key = old_secret_client.get_secret('AZURE-BLOB-STORAGE-KEY').value 
 old_azure_blob_storage_endpoint = get_storage_account_endpoint(old_azure_blob_storage_account)
 
-new_search_key = new_secret_client.get_secret('AZURE-SEARCH-SERVICE-KEY').value
 new_search_endpoint = f'https://infoasst-search-{new_random_text}.search.windows.net'
 new_cosmosdb_url = f'https://infoasst-cosmos-{new_random_text}.documents.azure.com:443/'
-new_cosmosdb_key = new_secret_client.get_secret('COSMOSDB-KEY').value
-new_blob_connection_string = new_secret_client.get_secret('BLOB-CONNECTION-STRING').value
 new_azure_blob_storage_account = f"infoasststore{new_random_text}"
-new_azure_blob_storage_key = new_secret_client.get_secret('AZURE-BLOB-STORAGE-KEY').value 
 new_azure_blob_storage_endpoint = get_storage_account_endpoint(new_azure_blob_storage_account)
 
 index_name = 'vector-index'
 
-old_search_client = SearchClient(endpoint=old_search_endpoint, index_name=index_name, credential=AzureKeyCredential(old_search_key))
-new_search_client = SearchClient(endpoint=new_search_endpoint, index_name=index_name, credential=AzureKeyCredential(new_search_key))
+old_search_client = SearchClient(endpoint=old_search_endpoint, index_name=index_name, credential=credential)
+new_search_client = SearchClient(endpoint=new_search_endpoint, index_name=index_name, credential=credential)
 
 error_guidance = 'If you re-run the process, you can skip sections that completed successfully by setting the corresponding skip flag to True. Read more details her' 
 
@@ -188,7 +179,7 @@ error_guidance = 'If you re-run the process, you can skip sections that complete
 # Migrate Search
 if skip_search_index == False:
     print(f.renderText('Search Index'))
-    blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
+    blob_service_client = BlobServiceClient(old_azure_blob_storage_endpoint, credential=credential)
     container_name = "content"
     container_client = blob_service_client.get_container_client(container_name)
 
@@ -293,12 +284,12 @@ if skip_cosmos_db == False:
         max_item_count = 1
 
         # Get old status docs
-        old_cosmos_client = CosmosClient(old_cosmosdb_url, old_cosmosdb_key)
+        old_cosmos_client = CosmosClient(old_cosmosdb_url, old_cosmosdb_key, consistency_level='Session')
         old_status_database = old_cosmos_client.get_database_client('statusdb')
         old_status_container = old_status_database.get_container_client('statuscontainer')
         old_tags_database = old_cosmos_client.get_database_client('tagdb')
         old_tags_container = old_tags_database.get_container_client('tagcontainer')
-        new_cosmos_client = CosmosClient(new_cosmosdb_url, new_cosmosdb_key)
+        new_cosmos_client = CosmosClient(new_cosmosdb_url, DefaultAzureCredential(), consistency_level='Session')
         new_status_database = new_cosmos_client.get_database_client('statusdb')
         new_status_container = new_status_database.get_container_client('statuscontainer')
 
@@ -377,9 +368,9 @@ if skip_upload_container == False:
     download_and_install_azcopy()
     upload_container_error = ""
     container_name = "upload"
-    old_blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
+    old_blob_service_client = BlobServiceClient(old_azure_blob_storage_endpoint, credential=credential)
     old_container_client = old_blob_service_client.get_container_client(container_name)
-    new_blob_service_client = BlobServiceClient.from_connection_string(new_blob_connection_string)
+    new_blob_service_client = BlobServiceClient(new_azure_blob_storage_endpoint, credential=credential)
     new_container_client = new_blob_service_client.get_container_client(container_name)
     file_count = 0
 
@@ -388,21 +379,27 @@ if skip_upload_container == False:
         blobs_processed_count = 0
         for blob in blob_list:
 
+            # Obtain the user delegation key
+            old_user_delegation_key = old_blob_service_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=12))
+
             # Generate SAS token for old blob
             old_sas_token = generate_container_sas(
                 account_name=old_azure_blob_storage_account,
                 container_name=container_name,
-                account_key=old_azure_blob_storage_key,
+                user_delegation_key=old_user_delegation_key,
                 permission=ContainerSasPermissions(read=True, write=False, delete=False, list=True),  # Adjust permissions as needed
-                expiry=datetime.utcnow() + timedelta(hours=12)  
+                expiry=datetime.utcnow() + timedelta(hours=12)
             )
             source_url = f"https://{old_azure_blob_storage_account}.blob.core.windows.net/{container_name}/{urllib.parse.quote(blob.name)}?{old_sas_token}"
+
+            # Obtain the user delegation key
+            new_user_delegation_key = new_blob_service_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=12))
 
             # Generate SAS token for new blob
             new_sas_token = generate_container_sas(
                 account_name=new_azure_blob_storage_account,
                 container_name=container_name,
-                account_key=new_azure_blob_storage_key,
+                user_delegation_key=new_user_delegation_key,
                 permission=ContainerSasPermissions(read=True, write=True, delete=False, list=True),  # Adjust permissions as needed
                 expiry=datetime.utcnow() + timedelta(hours=12)
             )
@@ -434,9 +431,9 @@ if skip_content_container == False:
     print(f.renderText('Storage content container'))
     container_name = "content"
     content_container_error = ""
-    old_blob_service_client = BlobServiceClient.from_connection_string(old_blob_connection_string)
+    old_blob_service_client = BlobServiceClient(old_azure_blob_storage_endpoint, credential=credential)
     old_container_client = old_blob_service_client.get_container_client(container_name)
-    new_blob_service_client = BlobServiceClient.from_connection_string(new_blob_connection_string)
+    new_blob_service_client = BlobServiceClient(new_azure_blob_storage_endpoint, credential=credential)
     new_container_client = new_blob_service_client.get_container_client(container_name)
     chunks_processed_count = 0
 

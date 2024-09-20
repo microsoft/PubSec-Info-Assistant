@@ -1,5 +1,5 @@
 # Debugging the Azure Functions Locally in VSCode
-If you wish to debug any of the functions that are part of this accelerator, you can do this locally in VSCode and step through the logic. To do this you will need create a virtual environment. When you open your dev container, you will see a prompt notification in the bottom right of the VS Code window that will do this automatically for you. Click the 'Create virtual environment' button.
+If you wish to debug any of the functions that are part of this copilot template, you can do this locally in VSCode and step through the logic. To do this you will need create a virtual environment. When you open your dev container, you will see a prompt notification in the bottom right of the VS Code window that will do this automatically for you. Click the 'Create virtual environment' button.
 
 ![Process Flow](images/virtual_env.jpg)
 
@@ -20,16 +20,12 @@ Next you will need to create local configuration values that are used by the fun
     "BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME": "logs",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
-    "COSMOSDB_KEY": "<YOUR AZURE VALUE>",
     "COSMOSDB_URL": "<YOUR AZURE VALUE>",
     "AZURE_FORM_RECOGNIZER_ENDPOINT": "<YOUR AZURE VALUE>",
-    "AZURE_FORM_RECOGNIZER_KEY": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": "content",
-    "AZURE_BLOB_STORAGE_KEY": "<YOUR AZURE VALUE>",
     "CHUNK_TARGET_SIZE": "750",
     "FR_API_VERSION": "2023-02-28-preview",
-    "BLOB_CONNECTION_STRING": "<YOUR AZURE VALUE>",
     "CHUNK_TARGET_SIZE": "750",
     "FR_API_VERSION": "2022-08-31",
     "MAX_POLLING_REQUEUE_COUNT": "10",

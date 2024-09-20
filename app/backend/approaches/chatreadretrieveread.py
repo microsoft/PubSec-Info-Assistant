@@ -6,20 +6,19 @@ import re
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
-from typing import Any, AsyncGenerator, Coroutine, Sequence
+from typing import Any, Sequence
 
 import openai
-from openai import AzureOpenAI
 from openai import  AsyncAzureOpenAI
+from openai import BadRequestError
 from approaches.approach import Approach
 from azure.search.documents import SearchClient  
 from azure.search.documents.models import RawVectorQuery
 from azure.search.documents.models import QueryType
 from azure.storage.blob import (
-    AccountSasPermissions,
+    BlobSasPermissions,
     BlobServiceClient,
-    ResourceTypes,
-    generate_account_sas,
+    generate_blob_sas,
 )
 from text import nonewlines
 from core.modelhelper import get_token_limit
@@ -88,7 +87,6 @@ class ChatReadRetrieveReadApproach(Approach):
         self,
         search_client: SearchClient,
         oai_endpoint: str,
-        oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
         content_field: str,
@@ -102,10 +100,10 @@ class ChatReadRetrieveReadApproach(Approach):
         target_embedding_model: str,
         enrichment_appservice_uri: str,
         target_translation_language: str,
-        enrichment_endpoint:str,
-        enrichment_key:str,
+        azure_ai_endpoint:str,
+        azure_ai_location:str,
+        azure_ai_token_provider:str,
         use_semantic_reranker: bool
-        
     ):
         self.search_client = search_client
         self.chatgpt_deployment = chatgpt_deployment
@@ -120,20 +118,20 @@ class ChatReadRetrieveReadApproach(Approach):
         #escape target embeddiong model name
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
-        self.enrichment_endpoint=enrichment_endpoint
-        self.enrichment_key=enrichment_key
+        self.azure_ai_endpoint=azure_ai_endpoint
+        self.azure_ai_location=azure_ai_location
+        self.azure_ai_token_provider=azure_ai_token_provider
         self.oai_endpoint=oai_endpoint
         self.embedding_service_url = enrichment_appservice_uri
         self.use_semantic_reranker=use_semantic_reranker
         
         openai.api_base = oai_endpoint
         openai.api_type = 'azure'
-        openai.api_key = oai_service_key
         openai.api_version = "2024-02-01"
         
         self.client = AsyncAzureOpenAI(
-        azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_endpoint = openai.api_base,
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
                
 
@@ -190,7 +188,23 @@ class ChatReadRetrieveReadApproach(Approach):
                     # max_tokens=32, # setting it too low may cause malformed JSON
                     max_tokens=100,
                 n=1)
-        
+                # Initialize a list to collect filter reasons
+            filter_reasons = []
+
+            # Check for content filtering
+            if chat_completion.choices[0].finish_reason == 'content_filter':
+                for category, details in chat_completion.choices[0].content_filter_results.items():
+                    if details['filtered']:
+                        filter_reasons.append(f"{category} ({details['severity']})")
+
+            # Raise an error if any filters are triggered
+            if filter_reasons:
+                error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                raise ValueError(error_message)
+        except BadRequestError as e:
+            log.error(f"Error generating optimized keyword search: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating optimized keyword search: {str(e)}")
             yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
@@ -218,10 +232,10 @@ class ChatReadRetrieveReadApproach(Approach):
             response = requests.post(url, json=data,headers=headers,timeout=60)
             if response.status_code == 200:
                 response_data = response.json()
-                embedded_query_vector =response_data.get('data')          
+                embedded_query_vector =response_data.get('data')
             else:
                 # Generate an error message if the embedding generation fails
-                log.error(f"Error generating embedding:: {response.status_code}")
+                log.error(f"Error generating embedding:: {response.status_code} - {response.text}")
                 yield json.dumps({"error": "Error generating embedding"}) + "\n"
                 return # Go no further
         except Exception as e:
@@ -290,7 +304,7 @@ class ChatReadRetrieveReadApproach(Approach):
                 f"File{idx} " + "| " + nonewlines(doc[self.content_field])
             )
             data_points.append(
-               "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[4:]
+               "/".join(urllib.parse.unquote(doc[self.source_file_field]).split("/")[1:]
                 ) + "| " + nonewlines(doc[self.content_field])
                 )
             # uncomment to debug size of each search result content_field
@@ -299,8 +313,8 @@ class ChatReadRetrieveReadApproach(Approach):
 
             # add the "FileX" moniker and full file name to the citation lookup
             citation_lookup[f"File{idx}"] = {
-                "citation": urllib.parse.unquote("https://" + doc[self.source_file_field].split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
-                "source_path": self.get_source_file_with_sas(doc[self.source_file_field]),
+                "citation": urllib.parse.unquote("https://" + self.blob_client.url.split("/")[2] + f"/{self.content_storage_container}/" + doc[self.chunk_file_field]),
+                "source_path": doc[self.source_file_field],
                 "page_number": str(doc[self.page_number_field][0]) or "0",
              }
             
@@ -357,57 +371,18 @@ class ChatReadRetrieveReadApproach(Approach):
         try:
             # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
             #Added conditional block to use different system messages for different models.
-            if self.model_name.startswith("gpt-35-turbo"):
-                messages = self.get_messages_from_history(
-                    system_message,
-                    self.model_name,
-                    history,
-                    history[-1]["user"] + "Sources:\n" + content + "\n\n", # 3.5 has recency Bias that is why this is here
-                    self.RESPONSE_PROMPT_FEW_SHOTS,
-                    max_tokens=self.chatgpt_token_limit - 500
-                )
 
-            #Uncomment to debug token usage.
-            #print(messages)
-            #message_string = ""
-            #for message in messages:
-            #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
-            #    message_string += f"{message['role']}: {message['content']}\n"
-            #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
-            #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
-            #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
-            #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-                chat_completion= await self.client.chat.completions.create(
-                    model=self.chatgpt_deployment,
-                    messages=messages,
-                    temperature=float(overrides.get("response_temp")) or 0.6,
-                    n=1,
-                    stream=True
-                )
-
-            elif self.model_name.startswith("gpt-4"):
-                messages = self.get_messages_from_history(
-                    system_message,
-                    # "Sources:\n" + content + "\n\n" + system_message,
-                    self.model_name,
-                    history,
-                    # history[-1]["user"],
-                    history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
-                    self.RESPONSE_PROMPT_FEW_SHOTS,
-                    max_tokens=self.chatgpt_token_limit
-                )
-
-                #Uncomment to debug token usage.
-                #print(messages)
-                #message_string = ""
-                #for message in messages:
-                #    # enumerate the messages and add the role and content elements of the dictoinary to the message_string
-                #    message_string += f"{message['role']}: {message['content']}\n"
-                #print("Content Tokens: ", self.num_tokens_from_string("Sources:\n" + content + "\n\n", "cl100k_base"))
-                #print("System Message Tokens: ", self.num_tokens_from_string(system_message, "cl100k_base"))
-                #print("Few Shot Tokens: ", self.num_tokens_from_string(self.response_prompt_few_shots[0]['content'], "cl100k_base"))
-                #print("Message Tokens: ", self.num_tokens_from_string(message_string, "cl100k_base"))
-
+            messages = self.get_messages_from_history(
+                system_message,
+                # "Sources:\n" + content + "\n\n" + system_message,
+                self.model_name,
+                history,
+                # history[-1]["user"],
+                history[-1]["user"] + "Sources:\n" + content + "\n\n", # GPT 4 starts to degrade with long system messages. so moving sources here 
+                self.RESPONSE_PROMPT_FEW_SHOTS,
+                max_tokens=self.chatgpt_token_limit
+            )
+            # Generate the chat completion
             chat_completion= await self.client.chat.completions.create(
                 model=self.chatgpt_deployment,
                 messages=messages,
@@ -425,12 +400,27 @@ class ChatReadRetrieveReadApproach(Approach):
                               "thought_chain": thought_chain,
                               "work_citation_lookup": citation_lookup,
                               "web_citation_lookup": {}}) + "\n"
-        
+            
             # STEP 4: Format the response
             async for chunk in chat_completion:
                 # Check if there is at least one element and the first element has the key 'delta'
                 if len(chunk.choices) > 0:
+                    filter_reasons = []
+                    # Check for content filtering
+                    if chunk.choices[0].finish_reason == 'content_filter':
+                        for category, details in chunk.choices[0].content_filter_results.items():
+                            if details['filtered']:
+                                filter_reasons.append(f"{category} ({details['severity']})")
+
+                    # Raise an error if any filters are triggered
+                    if filter_reasons:
+                        error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                        raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
+        except BadRequestError as e:
+            log.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating chat completion: {str(e)}")
             yield json.dumps({"error": f"Error generating chat completion: {str(e)}"}) + "\n"
@@ -440,10 +430,11 @@ class ChatReadRetrieveReadApproach(Approach):
     def detect_language(self, text: str) -> str:
         """ Function to detect the language of the text"""
         try:
-            api_detect_endpoint = f"{self.enrichment_endpoint}language/:analyze-text?api-version=2023-04-01"
+            api_detect_endpoint = f"{self.azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
             headers = {
-                'Ocp-Apim-Subscription-Key': self.enrichment_key,
+                'Authorization': f'Bearer {self.azure_ai_token_provider()}',
                 'Content-type': 'application/json',
+                'Ocp-Apim-Subscription-Region': self.azure_ai_location
             }
 
             data = {
@@ -464,16 +455,17 @@ class ChatReadRetrieveReadApproach(Approach):
                 detected_language = response.json()["results"]["documents"][0]["detectedLanguage"]["iso6391Name"]
                 return detected_language
             else:
-                raise Exception(f"Error detecting language: {response.status_code}")
+                raise Exception(f"Error detecting language: {response.status_code} - {response.text}")
         except Exception as e:
             raise Exception(f"An error occurred during language detection: {str(e)}") from e
      
     def translate_response(self, response: str, target_language: str) -> str:
         """ Function to translate the response to target language"""
-        api_translate_endpoint = f"{self.enrichment_endpoint}translator/text/v3.0/translate?api-version=3.0"
+        api_translate_endpoint = f"{self.azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
         headers = {
-            'Ocp-Apim-Subscription-Key': self.enrichment_key,
+            'Authorization': f'Bearer {self.azure_ai_token_provider()}',
             'Content-type': 'application/json',
+            'Ocp-Apim-Subscription-Region': self.azure_ai_location
         }
         params={'to': target_language }
         data = [{
@@ -490,20 +482,20 @@ class ChatReadRetrieveReadApproach(Approach):
     def get_source_file_with_sas(self, source_file: str) -> str:
         """ Function to return the source file with a SAS token"""
         try:
-            sas_token = generate_account_sas(
-                self.blob_client.account_name,
-                self.blob_client.credential.account_key,
-                resource_types=ResourceTypes(object=True, service=True, container=True),
-                permission=AccountSasPermissions(
-                    read=True,
-                    write=True,
-                    list=True,
-                    delete=False,
-                    add=True,
-                    create=True,
-                    update=True,
-                    process=False,
-                ),
+            separator = "/"
+            file_path_w_name_no_cont = separator.join(
+                source_file.split(separator)[4:])
+            container_name = separator.join(
+                source_file.split(separator)[3:4])
+            # Obtain the user delegation key
+            user_delegation_key = self.blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
+
+            sas_token = generate_blob_sas(
+                account_name=self.blob_client.account_name,
+                container_name=container_name,
+                blob_name=file_path_w_name_no_cont,
+                user_delegation_key=user_delegation_key,
+                permission=BlobSasPermissions(read=True),
                 expiry=datetime.utcnow() + timedelta(hours=1),
             )
             return source_file + "?" + sas_token

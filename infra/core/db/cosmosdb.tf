@@ -1,5 +1,3 @@
-
-
 locals {
   consistencyPolicy = {
     Eventual = {
@@ -29,14 +27,15 @@ locals {
   ]
 }
 
-
-
 resource "azurerm_cosmosdb_account" "cosmosdb_account" {
-  name                = lower(var.name)
-  location            = var.location
-  resource_group_name = var.resourceGroupName
-  offer_type          = "Standard"
-  kind                = "GlobalDocumentDB"
+  name                          = lower(var.name)
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  offer_type                    = "Standard"
+  kind                          = "GlobalDocumentDB"
+  tags                          = var.tags
+  public_network_access_enabled = var.is_secure_mode ? false : true
+  local_authentication_disabled = var.is_secure_mode ? true : false
 
   consistency_policy {
     consistency_level       = var.defaultConsistencyLevel
@@ -49,7 +48,9 @@ resource "azurerm_cosmosdb_account" "cosmosdb_account" {
     failover_priority = 0
   }
 
-  tags = var.tags
+  capabilities {
+    name = "EnableServerless"
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "log_database" {
@@ -64,27 +65,33 @@ resource "azurerm_cosmosdb_sql_container" "log_container" {
   account_name        = azurerm_cosmosdb_account.cosmosdb_account.name
   database_name       = azurerm_cosmosdb_sql_database.log_database.name
 
-  partition_key_path = "/file_name"
+  partition_key_paths = ["/file_name"]
+}
 
-  autoscale_settings {
-    max_throughput = var.autoscaleMaxThroughput
+data "azurerm_subnet" "subnet" {
+  count                = var.is_secure_mode ? 1 : 0
+  name                 = var.subnet_name
+  virtual_network_name = var.vnet_name
+  resource_group_name  = var.resourceGroupName
+}
+
+resource "azurerm_private_endpoint" "cosmosPrivateEndpoint" {
+  count                         = var.is_secure_mode ? 1 : 0
+  name                          = "${var.name}-private-endpoint"
+  location                      = var.location
+  resource_group_name           = var.resourceGroupName
+  subnet_id                     = data.azurerm_subnet.subnet[0].id
+  custom_network_interface_name = "infoasstcosmosnic"
+
+  private_service_connection {
+    name                           = "${var.name}-private-link-service-connection"
+    private_connection_resource_id = azurerm_cosmosdb_account.cosmosdb_account.id
+    is_manual_connection           = false
+    subresource_names              = ["SQL"]
+    
   }
-}
-
-resource "azurerm_key_vault_secret" "cosmos_db_key" {
-  name         = "COSMOSDB-KEY"
-  value        = azurerm_cosmosdb_account.cosmosdb_account.primary_key
-  key_vault_id = var.keyVaultId
-}
-
-output "CosmosDBEndpointURL" {
-  value = azurerm_cosmosdb_account.cosmosdb_account.endpoint
-}
-
-output "CosmosDBLogDatabaseName" {
-  value = azurerm_cosmosdb_sql_database.log_database.name
-}
-
-output "CosmosDBLogContainerName" {
-  value = azurerm_cosmosdb_sql_container.log_container.name
+  private_dns_zone_group {
+    name                 = "${var.name}PrivateDnsZoneGroup"
+    private_dns_zone_ids = var.private_dns_zone_ids
+  }
 }

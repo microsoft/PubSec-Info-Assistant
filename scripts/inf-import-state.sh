@@ -33,7 +33,7 @@ echo "Please read the following terms carefully. You must accept the terms to pr
 echo
 echo "This script will import the existing resources into the Terraform state."
 echo "You may then run a MAKE DEPLOY on this environment to deploy the latest version"
-echo "of the accelerator while maintaining your existing resources and processed data."
+echo "of the copilot template while maintaining your existing resources and processed data."
 echo
 echo "If you have modified the infrastructure base this process will fail."
 echo "The simplest approach to deploy the latest version would be to perform"
@@ -335,21 +335,6 @@ module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
 import_resource_if_needed $module_path "$sp_id"
 
 
-# # Video Indexer
-# echo
-# figlet "Video Indexer"
-# # Pelase note: we do not import vi state as a hotfix was pushed to main to not deploy vi due to
-# # changes in the service in azure.
-# name="infoasststoremedia$random_text"
-# providers="/providers/Microsoft.Storage/storageAccounts/$name"
-# module_path="module.video_indexer.azurerm_storage_account.media_storage"
-# import_resource_if_needed $module_path "$resourceId$providers"
-# name="infoasst-ua-ident-$random_text"
-# providers="/providers/Microsoft.ManagedIdentity/userAssignedIdentities/$name"
-# module_path="module.video_indexer.azurerm_user_assigned_identity.vi"
-# import_resource_if_needed $module_path "$resourceId$providers"
-
-
 # Form Recognizer
 echo
 figlet "Form Recognizer"
@@ -357,10 +342,6 @@ name="infoasst-fr-$random_text"
 providers="/providers/Microsoft.CognitiveServices/accounts/$name"
 module_path="module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-FORM-RECOGNIZER-KEY")
-module_path="module.formrecognizer.azurerm_key_vault_secret.docIntelligenceKey"
-import_resource_if_needed "$module_path" "$secret_id"
-
 
 # Cognitive Services 
 echo
@@ -369,10 +350,9 @@ name="infoasst-enrichment-cog-$random_text"
 providers="/providers/Microsoft.CognitiveServices/accounts/$name"
 module_path="module.cognitiveServices.azurerm_cognitive_account.cognitiveService"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "ENRICHMENT-KEY")
+secret_id=$(get_secret "AZURE-AI-KEY")
 module_path="module.cognitiveServices.azurerm_key_vault_secret.search_service_key"
 import_resource_if_needed "$module_path" "$secret_id"
-
 
 # Key Vault
 echo
@@ -381,9 +361,6 @@ keyVaultId="infoasst-kv-$random_text"
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId"
 module_path="module.kvModule.azurerm_key_vault.kv"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-CLIENT-SECRET")
-module_path="module.kvModule.azurerm_key_vault_secret.spClientKeySecret"
-import_resource_if_needed "$module_path" "$secret_id"
 current_user_id=$(az ad signed-in-user show --query id -o tsv)
 providers="/providers/Microsoft.KeyVault/vaults/$keyVaultId/objectId/$current_user_id"
 module_path="module.kvModule.azurerm_key_vault_access_policy.infoasst"
@@ -492,14 +469,6 @@ import_resource_if_needed "$module_path[5]" "$url"
 url="https://$name.queue.core.windows.net/embeddings-queue"
 import_resource_if_needed "$module_path[6]" "$url"
 
-secret_id=$(get_secret "BLOB-CONNECTION-STRING")
-module_path="module.storage.azurerm_key_vault_secret.storage_connection_string"
-import_resource_if_needed "$module_path" "$secret_id"
-secret_id=$(get_secret "AZURE-BLOB-STORAGE-KEY")
-module_path="module.storage.azurerm_key_vault_secret.storage_key"
-import_resource_if_needed "$module_path" "$secret_id"
-
-
 # Cosmos DB 
 echo
 figlet "Cosmos DB"
@@ -513,9 +482,6 @@ import_resource_if_needed "$module_path" "$resourceId$providers"
 providers="/providers/Microsoft.DocumentDB/databaseAccounts/$name/sqlDatabases/statusdb/containers/statuscontainer"
 module_path="module.cosmosdb.azurerm_cosmosdb_sql_container.log_container"
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "COSMOSDB-KEY")
-module_path="module.cosmosdb.azurerm_key_vault_secret.cosmos_db_key"
-import_resource_if_needed "$module_path" "$secret_id"
 
 
 # Search Service
@@ -525,10 +491,6 @@ name="infoasst-search-$random_text"
 providers="/providers/Microsoft.Search/searchServices/$name"
 module_path="module.searchServices.azurerm_search_service.search" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
-secret_id=$(get_secret "AZURE-SEARCH-SERVICE-KEY")
-module_path="module.searchServices.azurerm_key_vault_secret.search_service_key" 
-import_resource_if_needed "$module_path" "$secret_id"
-
 
 # Output log on imported services
 echo

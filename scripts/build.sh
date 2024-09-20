@@ -31,26 +31,14 @@ npm run build
 # copy the shared_code files from functions to the webapp
 cd ../backend
 mkdir -p ./shared_code
-cp  ../../functions/shared_code/status_log.py ./shared_code
-cp  ../../functions/shared_code/__init__.py ./shared_code
-
-# zip the webapp content from app/backend to the ./artifacts folders
-zip -q -r ${BINARIES_OUTPUT_PATH}/webapp.zip .
+cp  -u ../../functions/shared_code/status_log.py ./shared_code
+cp  -u ../../functions/shared_code/__init__.py ./shared_code
 cd $DIR
-echo "Successfully zipped webapp"
-echo -e "\n"
-
-# Build the Azure Functions
-cd ${FUNCTIONS_ROOT_PATH}
-zip -q -r ${BINARIES_OUTPUT_PATH}/functions.zip .
-echo "Successfully zipped functions"
-echo -e "\n"
 
 # zip the enrichment app content from app/enrichments to the .artifacts folders
 cd ${ENRICHMENT_ROOT_PATH}
 mkdir -p ./shared_code
-cp  ../../functions/shared_code/status_log.py ./shared_code
-cp  ../../functions/shared_code/utilities_helper.py ./shared_code
-zip -q -r ${BINARIES_OUTPUT_PATH}/enrichment.zip . -x "models/*" @
-echo "Successfully zipped enrichment app"
+cp  -u ../../functions/shared_code/status_log.py ./shared_code
+cp  -u ../../functions/shared_code/utilities_helper.py ./shared_code
+echo "Successfully prepared enrichment app code"
 echo -e "\n"

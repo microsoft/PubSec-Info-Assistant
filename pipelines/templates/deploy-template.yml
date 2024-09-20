@@ -50,7 +50,6 @@ steps:
     displayName: 'Build'
     makeCommand: 'build'
 
-
 - ${{ if eq(parameters.fullBuild, true) }}:
   - template: make-command.yml
     parameters:
@@ -64,14 +63,14 @@ steps:
 
   - template: make-command.yml
     parameters:
-      displayName: 'Deploy Enrichments'
-      makeCommand: 'deploy-enrichments'
-
-  - template: make-command.yml
-    parameters:
       displayName: 'Deploy search indexes'
       makeCommand: 'deploy-search-indexes'
       
+  - template: make-command.yml
+    parameters:
+      displayName: 'Deploy Azure Functions'
+      makeCommand: 'deploy-functions'   
+  
   - template: make-command.yml
     parameters:
       displayName: 'Deploy Web App'
@@ -79,6 +78,5 @@ steps:
 
   - template: make-command.yml
     parameters:
-      displayName: 'Deploy Azure Functions'
-      makeCommand: 'deploy-functions'   
-  
+      displayName: 'Deploy Enrichments'
+      makeCommand: 'deploy-enrichments'

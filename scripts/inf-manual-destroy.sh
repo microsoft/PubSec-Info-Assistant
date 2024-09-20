@@ -33,10 +33,10 @@ echo "Please enter the name of the resource group you wish to destroy:"
 reset_text_color
 read rg_name
 echo ""
-#Prompt the user for oa_ai resource group
+# Prompt the user for aoai resource group
 set_yellow_text
 echo ""
-echo "Please enter the name of the open ai resource group your resource group is connected to:"
+echo "If you are using a shared OpenAI instance enter the name of the resource group of this shared service, or hit enter:"
 reset_text_color
 read oa_ai_rg_name
 echo ""
@@ -87,14 +87,41 @@ random_text=${storage_account_name: -5}
 echo "Resource group: $rg_name"
 echo "Random text: $random_text"
 
-#delete ao_ai connection
-echo "Deleting open ai connection..."
-appid=$(az ad sp list --all --query "[?displayName=='infoasst-web-$random_text'].appId" -o tsv)
-echo "Deleting role assignment for app id: $appid"
-role_assignment_id=$(az role assignment list --resource-group $oa_ai_rg_name --query "[?principalName=='$appid'].id" -o tsv)
-echo "Role assignment id: $role_assignment_id"
-az role assignment delete --ids $role_assignment_id
-echo "Role assignment deleted."
+echo "aoai name: " $oa_ai_rg_name
+
+# Delete shared ao_ai role assignment
+if [ -z "$oa_ai_rg_name" ]; then
+    echo "No shared Azure OpenAI role assignment found."
+else
+    echo "Deleting shared Azure OpanAI role assignment..."
+    appid=$(az ad sp list --filter "displayname eq 'infoasst-web-$random_text'" --output json | jq -r '.[].appId')
+    echo "Deleting role assignment for app id: $appid"
+    role_assignment_id=$(az role assignment list --resource-group $oa_ai_rg_name --query "[?principalName=='$appid'].id" -o tsv)
+    echo "Role assignment id: $role_assignment_id"
+    az role assignment delete --ids $role_assignment_id
+    echo "Role assignment deleted."
+fi
+
+
+# Delete models in the RG being deleted as a pre-step to the RG delete
+# Sometimes there is an error if this step isn't executed
+if [ -z "$oa_ai_rg_name" ]; then
+    echo "Deleting models deployed in your RG"
+    oa_ai_service_name="infoasst-aoai-$random_text"
+    # List all deployments in the cognitive services account
+    deployments=$(az cognitiveservices account deployment list --resource-group $rg_name --name $oa_ai_service_name --query "[].name" -o tsv)
+    echo $deployments
+
+    # Iterate through the deployments and delete each one
+    for deployment in $deployments; do
+        echo "Deleting deployment: $deployment"
+        az cognitiveservices account deployment delete --name $oa_ai_service_name --resource-group $rg_name --deployment-name $deployment
+        echo "Deleted deployment: $deployment"
+    done
+
+    echo "All deployments have been deleted."
+fi
+
 
 # Delete RG
 az group delete \
@@ -105,8 +132,7 @@ echo "Resource group is being deleted."
 echo "Continuing..."
 
 
-
-# Delete app regitsrations
+# Delete app registrations
 app_name="infoasst_mgmt_access_$random_text"
 app_id=$(az ad app list --display-name $app_name --query "[].appId" -o tsv)
 if [ -z "$app_id" ]; then

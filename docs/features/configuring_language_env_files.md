@@ -1,10 +1,10 @@
 # Configuring your own language ENV file
 
-Within the IA Accelerator you can customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. To do this you must create a language ENV file in the `scripts/environments/languages` folder. This documentation will explain how to set up your own language file.
+Within the IA copilot template you can customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. To do this you must create a language ENV file in the `scripts/environments/languages` folder. This documentation will explain how to set up your own language file.
 
 ## Mapping to your custom language ENV file for deployment
 
-The first step in configuring a language for the IA Accelerator is to create a new language ENV file in the `scripts/environments/languages` folder. Simply add a new file in this folder and remember the name of the file you create. In this example, we have created a language ENV file for the Greek language (`el.env`).
+The first step in configuring a language for the IA copilot template is to create a new language ENV file in the `scripts/environments/languages` folder. Simply add a new file in this folder and remember the name of the file you create. In this example, we have created a language ENV file for the Greek language (`el.env`).
 
 ![Example language file for Greek language](../images/custom_language_file.png)
 

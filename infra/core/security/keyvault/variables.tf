@@ -1,23 +1,3 @@
-
-
-variable "principalType" {
-  type = string
-  default = "ServicePrincipal"
-  validation {
-    condition     = contains(["Device", "ForeignGroup", "Group", "ServicePrincipal", "User"], var.principalType)
-    error_message = "The principalType must be one of the following: Device, ForeignGroup, Group, ServicePrincipal, User."
-  }
-}
-
-variable "resourceGroupId" {
-  type = string
-}
-
-variable "subscriptionId" {
-  type = string
-}
-
-
 variable "name" {
   description = "The name"
   type        = string
@@ -47,4 +27,34 @@ variable "spClientSecret" {
 variable "resourceGroupName" {
   type    = string
   default = ""
+}
+
+variable "is_secure_mode" {
+  description = "Specifies whether to deploy in secure mode"
+  type        = bool
+  default     = false
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
+  type = string  
+}
+
+variable "subnet_id" {
+  type = string
+}
+
+variable "azure_keyvault_domain" {
+  type = string
+}
+
+variable "arm_template_schema_mgmt_api" {
+  type = string
 }

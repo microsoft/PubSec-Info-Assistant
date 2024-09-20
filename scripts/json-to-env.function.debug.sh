@@ -17,11 +17,11 @@ fi
 
 secrets="{"
 # Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-FORM-RECOGNIZER-KEY" "ENRICHMENT-KEY")
-azWebJobSecretName="BLOB-CONNECTION-STRING"
+secretNames=("AZURE-AI-KEY" "AZURE-STORAGE-CONNECTION-STRING")
+azWebJobSecretName="AZURE-STORAGE-CONNECTION-STRING"
 azWebJobVarName="AzureWebJobsStorage"
 
 # Retrieve and export each secret
@@ -40,7 +40,7 @@ secrets+="}"
 secrets="${secrets%,}"
 
 jq -r --arg secrets "$secrets" '
-        [
+    [
         {
             "path": "AZURE_STORAGE_ACCOUNT",
             "env_var": "BLOB_STORAGE_ACCOUNT"
@@ -86,12 +86,16 @@ jq -r --arg secrets "$secrets" '
             "env_var": "COSMOSDB_LOG_CONTAINER_NAME"
         },
         {
-            "path": "AzureWebJobsStorage",
-            "env_var": "AzureWebJobsStorage"
+            "path": "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri",
+            "env_var": "AzureStorageConnection1__queueServiceUri"
         },
         {
-            "path": "ENRICHMENT_ENDPOINT",
-            "env_var": "ENRICHMENT_ENDPOINT"
+            "path": "FUNC_STORAGE_CONNECTION_STRING__blobServiceUri",
+            "env_var": "AzureStorageConnection1__blobServiceUri"
+        },
+        {
+            "path": "AZURE_AI_ENDPOINT",
+            "env_var": "AZURE_AI_ENDPOINT"
         },
         {
             "path": "ENRICHMENT_NAME",
@@ -110,8 +114,12 @@ jq -r --arg secrets "$secrets" '
             "env_var": "BLOB_STORAGE_ACCOUNT_ENDPOINT"
         },
         {
+            "path": "AZURE_QUEUE_STORAGE_ENDPOINT",
+            "env_var": "AZURE_QUEUE_STORAGE_ENDPOINT"
+        },
+        {
             "path": "AZURE_LOCATION",
-            "env_var": "ENRICHMENT_LOCATION"
+            "env_var": "AZURE_AI_LOCATION"
         },
         {
             "path": "AZURE_SEARCH_INDEX",
@@ -122,8 +130,16 @@ jq -r --arg secrets "$secrets" '
             "env_var": "AZURE_SEARCH_SERVICE_ENDPOINT"
         },
         {
-            "path": "DEPLOYMENT_KEYVAULT_NAME",
-            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
+            "path": "AZURE_AI_LOCATION",
+            "env_var": "AZURE_AI_LOCATION"
+        },
+        {
+            "path": "AZURE_AI_CREDENTIAL_DOMAIN",
+            "env_var": "AZURE_AI_CREDENTIAL_DOMAIN"
+        },
+        {
+            "path": "AZURE_OPENAI_AUTHORITY_HOST",
+            "env_var": "AZURE_OPENAI_AUTHORITY_HOST"
         }
     ] 
         as $env_vars_to_extract
@@ -144,7 +160,7 @@ jq -r --arg secrets "$secrets" '
         |
         reduce .[] as $item ({}; .[$item.key] = $item.value)
         |
-    {"IsEncrypted": false, "Values": (. + {"FUNCTIONS_WORKER_RUNTIME": "python", 
+    {"IsEncrypted": false, "Values": (. + {"FUNCTIONS_WORKER_RUNTIME": "python",
             "AzureWebJobs.parse_html_w_form_rec.Disabled": "true", 
             "MAX_SECONDS_HIDE_ON_UPLOAD": "30", 
             "MAX_SUBMIT_REQUEUE_COUNT": "10",
@@ -164,6 +180,7 @@ jq -r --arg secrets "$secrets" '
             "EMBEDDINGS_QUEUE": "embeddings-queue",
             "TEXT_ENRICHMENT_QUEUE": "text-enrichment-queue",
             "IMAGE_ENRICHMENT_QUEUE": "image-enrichment-queue",
+            "LOCAL_DEBUG": "true",
             } + ($secrets | fromjson)
              
     )}

@@ -26,6 +26,6 @@ For more information on how to use Cosmos, look [here](https://learn.microsoft.c
 WebApp logs, Function logs and App Service logs can be found in Log Analytics Workspace.
 
 There exist in this solution a workbook with default queries that can be used to explore and troubleshoot further.
-Check out the section [Workbook Usage](/docs/deployment/worbook_usage.md).
+Check out the section [Workbook Usage](/docs/deployment/workbook_usage.md).
 
 For more information on log analytics and kusto query language, look [here](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/queries?tabs=groupby).

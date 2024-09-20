@@ -89,6 +89,10 @@ jq -r  '
             "env_var": "AZURE_BLOB_STORAGE_ENDPOINT"
         },
         {
+            "path": "AZURE_QUEUE_STORAGE_ENDPOINT",
+            "env_var": "AZURE_QUEUE_STORAGE_ENDPOINT"
+        },
+        {
             "path": "TARGET_EMBEDDINGS_MODEL",
             "env_var": "TARGET_EMBEDDINGS_MODEL"
         },
@@ -113,16 +117,12 @@ jq -r  '
             "env_var": "ENRICHMENT_APPSERVICE_URL"
         },
         {
-            "path": "DEPLOYMENT_KEYVAULT_NAME",
-            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
-        },
-        {
             "path": "AZURE_OPENAI_CHATGPT_MODEL_NAME",
             "env_var": "AZURE_OPENAI_CHATGPT_MODEL_NAME"
         },
         {
-            "path": "ENRICHMENT_ENDPOINT",
-            "env_var": "ENRICHMENT_ENDPOINT"
+            "path": "AZURE_AI_ENDPOINT",
+            "env_var": "AZURE_AI_ENDPOINT"
         },
         {
             "path": "AZURE_OPENAI_ENDPOINT",
@@ -147,6 +147,18 @@ jq -r  '
         {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"
+        },
+        {
+            "path": "AZURE_AI_LOCATION",
+            "env_var": "AZURE_AI_LOCATION"
+        },
+        {
+            "path": "AZURE_AI_CREDENTIAL_DOMAIN",
+            "env_var": "AZURE_AI_CREDENTIAL_DOMAIN"
+        },
+        {
+            "path": "AZURE_SEARCH_AUDIENCE",
+            "env_var": "AZURE_SEARCH_AUDIENCE"
         }
     ]
         as $env_vars_to_extract
@@ -182,7 +194,8 @@ jq -r  '
     echo "ENABLE_UNGROUNDED_CHAT=$ENABLE_UNGROUNDED_CHAT"
     echo "ENABLE_MATH_ASSISTANT=$ENABLE_MATH_ASSISTANT"
     echo "ENABLE_TABULAR_DATA_ASSISTANT=$ENABLE_TABULAR_DATA_ASSISTANT"
-    echo "ENABLE_MULTIMEDIA=$ENABLE_MULTIMEDIA"
+    echo "LOCAL_DEBUG=true"
+    echo "USE_SEMANTIC_RERANKER=$TF_VAR_use_semantic_reranker"
 
 if [ -n "${IN_AUTOMATION}" ]; then
     if [ -n "${AZURE_ENVIRONMENT}" ] && [[ "$AZURE_ENVIRONMENT" == "AzureUSGovernment" ]]; then
@@ -194,10 +207,15 @@ if [ -n "${IN_AUTOMATION}" ]; then
 fi    
 
 # Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
+keyVaultName=$(cat inf_output.json | jq -r .AZURE_KEYVAULT_NAME.value)
 
 # Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "BINGSEARCH-KEY" "AZURE-OPENAI-SERVICE-KEY" "AZURE-CLIENT-SECRET" "ENRICHMENT-KEY")
+if [ -n "${SECURE_MODE}" ]; then
+    secretNames=("AZURE-AI-KEY")
+else
+    secretNames=("BINGSEARCH-KEY" "AZURE-AI-KEY")    
+fi
+
 
 # Retrieve and export each secret
 for secretName in "${secretNames[@]}"; do

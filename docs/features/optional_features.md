@@ -1,6 +1,6 @@
-# IA Accelerator Optional Features
+# Information Assistant (IA) copilot template optional features
 
-Please see below sections for coverage of IA Accelerator optional features.
+Please see below sections for coverage of IA copilot template optional features.
 
 * [Configuring your own language ENV file](#configuring-your-own-language-env-file)
 * [Debugging functions](#debugging-functions)
@@ -9,12 +9,13 @@ Please see below sections for coverage of IA Accelerator optional features.
 * [Build pipeline for Sandbox](#build-pipeline-for-sandbox)
 * [Customer Usage Attribution](#customer-usage-attribution)
 * [Sovereign Region Deployment](#sovereign-region-deployment)
+* [Secure Deployment](#secure-deployment)
 * [Configure REST API access](#configure-rest-api-access)
 * [Customize Autoscale and App Service SKU's](#customize-autoscale)
 
 ## Configuring your own language ENV file
 
-At deployment time, you can alter the behavior of the IA Accelerator to use a language of your choosing across it's Azure AI Search and Azure OpenAI prompting. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
+At deployment time, you can alter the behavior of the IA copilot template to use a language of your choosing across it's Azure AI Search and Azure OpenAI prompting. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
 
 ## Debugging functions
 
@@ -34,13 +35,17 @@ Setting up a pipeline to deploy a new Sandbox environment requires some manual c
 
 ## Customer Usage Attribution
 
-A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant Accelerator.
+A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant copilot template.
 
 Check out how to [enable Customer Usage Attribution](/docs/features/enable_customer_usage_attribution.md)
 
 ## Sovereign Region Deployment
 
 Check out how to [setup Sovereign Region Deployment](/docs/deployment/enable_sovereign_deployment.md)
+
+## Secure Deployment
+
+Learn more about secure deployments and how to [enable a Secure Deployment](/docs/secure_deployment/secure_deployment.md)
 
 ## Configure REST API access
 

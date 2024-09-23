@@ -27,6 +27,7 @@ provider "azurerm" {
       recover_soft_deleted_key_vaults = true
     }
   }
+  resource_provider_registrations = "none"
   storage_use_azuread = true
   environment = var.azure_environment == "AzureUSGovernment" ? "usgovernment" : "public"
 }

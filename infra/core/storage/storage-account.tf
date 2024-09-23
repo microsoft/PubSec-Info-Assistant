@@ -48,10 +48,6 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
     category = "Transaction"
     enabled  = true
   }
-  metric {
-    category = "Capacity"
-    enabled  = true
-  }
 }
 
 resource "azurerm_monitor_diagnostic_setting" "blob_diagnostic_logs" {
@@ -69,10 +65,6 @@ resource "azurerm_monitor_diagnostic_setting" "blob_diagnostic_logs" {
   }
   metric {
     category = "Transaction"
-    enabled  = true
-  }
-  metric {
-    category = "Capacity"
     enabled  = true
   }
 }

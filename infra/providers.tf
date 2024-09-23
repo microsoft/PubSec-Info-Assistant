@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.113.0"
+      version = "~> 4.3.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -27,7 +27,7 @@ provider "azurerm" {
       recover_soft_deleted_key_vaults = true
     }
   }
-  skip_provider_registration = true
+  resource_provider_registrations = "none"
   storage_use_azuread = true
   environment = var.azure_environment == "AzureUSGovernment" ? "usgovernment" : "public"
 }

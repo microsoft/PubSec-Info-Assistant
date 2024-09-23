@@ -50,6 +50,7 @@ Variable | Required | Description
 --- | --- | ---
 LOCATION | Yes | The location (West Europe is the default). The Terraform templates use this value. To get a list of all the current Azure regions you can run `az account list-locations -o table`. The value here needs to be the *Name* value and not *Display Name*.
 WORKSPACE | Yes  | The workspace name (use something simple and unique to you). This will appended to infoasst-????? as the name of the resource group created in your subscription.
+SUBSCRIPTION_ID | Yes | The GUID of the Azure Subscription you plan to deploy IA into. This is required in the latest versions of Terraform.
 AZURE_ENVIRONMENT | Yes | This will determine the Azure cloud environment the deployment will target. Information Assistant currently supports, AzureCloud and AzureUSGovernment. Info available at [Azure cloud environments](https://docs.microsoft.com/en-us/cli/azure/manage-clouds-azure-cli?toc=/cli/azure/toc.json&bc=/cli/azure/breadcrumb/toc.json). If you are targeting "AzureUSGovernment" please see our [sovereign deployment support documentation](/docs/deployment/enable_sovereign_deployment.md).
 SECURE_MODE | Yes | Defaults to `false`. This feature flag will determine if the Information Assistant deploys it's Azure Infrastructure in a secure mode or not.</br>:warning: Before enabling secure mode please read the extra instructions on [Enabling Secure Deployment](/docs/secure_deployment/secure_deployment.md)
 ENABLE_WEB_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to use Web Search results as a data source for generating answers from the LLM. This feature will also deploy a Bing v7 Search instance in Azure to retrieve web results from, however Bing v7 Search is not available in AzureUSGovernment regions, so this feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
@@ -127,8 +128,7 @@ From this output, grab the Subscription ID of the subscription you intend to dep
 
 ## Azure resource provider registration
 
-The following resource providers must be registered within your subscription prior to beginning the deployment to prevent deployment errors: 
-
+The following resource providers must be registered within your subscription prior to beginning the deployment to prevent deployment errors:
 
 * Microsoft.ContainerRegistry
 * Microsoft.DocumentDB
@@ -140,7 +140,8 @@ The following resource providers must be registered within your subscription pri
 * Microsoft.KeyVault
 * Microsoft.AlertsManagement
 
-The following command lists all the subscription's resource providers that are Registered. 
+The following command lists all the subscription's resource providers that are Registered.
+
 ``` bash
 az provider list --query "[?registrationState=='Registered']" --output table
 ```
@@ -166,7 +167,6 @@ Get the registration status for a specific resource provider:
 ``` bash
 az provider list --query "[?namespace=='Microsoft.Web']" --output table
 ```
-
 
 ## Deploy and Configure Azure resources
 
@@ -247,15 +247,12 @@ Once deployed, you can find the URL of your installation by:
 
 At this point deployment is complete. Please go to the [Using the IA copilot template for the first time](/docs/deployment/using_ia_first_time.md) section and complete the following steps.
 
-
 ## Additional Considerations for a Production Adoption
 
 There are considerations for adopting the Information Assistant (IA) copilot template into a production environment. [See this documentation](/docs/deployment/considerations_production.md).
 
-
 ## Need Help?
 
 Check these [troubleshooting methods](/docs/deployment/troubleshooting.md).
-
 
 If you need assistance with deployment or configuration of this copilot template, please leverage the Discussion forum in this repository, or reach out to your Microsoft Unified Support account manager.

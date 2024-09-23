@@ -105,4 +105,7 @@ export TF_VAR_resource_group_name="infoasst-$WORKSPACE"
 # The default key that is used in the remote state
 export TF_BACKEND_STATE_KEY="shared.infoasst.tfstate"
 
+# Subscription ID mandatory for Terraform AzureRM provider 4.x.x https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/4.0-upgrade-guide#specifying-subscription-id-is-now-mandatory
+export ARM_SUBSCRIPTION_ID="$SUBSCRIPTION_ID"
+
 echo -e "\n\e[32m🎯 Target Resource Group: \e[33m$TF_VAR_resource_group_name\e[0m\n"

@@ -92,12 +92,13 @@ resource "azurerm_linux_web_app" "app_service" {
       docker_registry_username  = var.container_registry_admin_username
       docker_registry_password  = var.container_registry_admin_password
     }
-    container_registry_use_managed_identity       = true
-    always_on                      = var.alwaysOn
-    ftps_state                     = var.is_secure_mode ? "Disabled" : var.ftpsState
-    app_command_line               = var.appCommandLine
-    health_check_path              = var.healthCheckPath
-    
+    container_registry_use_managed_identity = true
+    always_on                               = var.alwaysOn
+    ftps_state                              = var.is_secure_mode ? "Disabled" : var.ftpsState
+    app_command_line                        = var.appCommandLine
+    health_check_path                       = var.healthCheckPath
+    health_check_eviction_time_in_min       = 10
+
     cors {
       allowed_origins = concat([var.azure_portal_domain, "https://ms.portal.azure.com"], var.allowedOrigins)
     }

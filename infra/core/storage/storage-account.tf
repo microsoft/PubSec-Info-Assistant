@@ -45,11 +45,11 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
   target_resource_id         = azurerm_storage_account.storage.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
   metric {
-    category = "Capacity"
+    category = "Transaction"
     enabled  = true
   }
   metric {
-    category = "Transaction"
+    category = "Capacity"
     enabled  = true
   }
 }
@@ -68,11 +68,11 @@ resource "azurerm_monitor_diagnostic_setting" "blob_diagnostic_logs" {
     category = "StorageDelete"
   }
   metric {
-    category = "Capacity"
+    category = "Transaction"
     enabled  = true
   }
   metric {
-    category = "Transaction"
+    category = "Capacity"
     enabled  = true
   }
 }

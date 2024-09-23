@@ -3,16 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "storageAccountName": {
-            "type": "string"
+            "type": "String"
         },
         "location": {
-            "type": "string"
+            "type": "String"
         },
         "queueName": {
-            "type": "string"
+            "type": "String"
         },
         "publicNetworkAccess": {
-            "type": "string",
+            "type": "String",
             "defaultValue": "Disabled",
             "allowedValues": [
                 "Enabled",

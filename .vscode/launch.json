@@ -86,8 +86,8 @@
             "request": "launch",
             "program": "debug_tests.py",
             "args": [
-                "--storage_account_connection_str",
-                "${env:STORAGE_ACCOUNT_CONNECTION_STR},",
+                "--storage_account_url",
+                "${env:AZURE_BLOB_STORAGE_ENDPOINT},",
                 "--search_service_endpoint",
                 "${env:SEARCH_SERVICE_ENDPOINT}",
                 "--search_index",
@@ -98,10 +98,9 @@
                 "60"
             ],
             "env": {
-                "STORAGE_ACCOUNT_CONNECTION_STR": "${env:BLOB_CONNECTION_STRING}",
+                "storage_account_url": "${env:AZURE_BLOB_STORAGE_ENDPOINT}",
                 "SEARCH_SERVICE_ENDPOINT": "${env:AZURE_SEARCH_SERVICE_ENDPOINT}",
-                "SEARCH_INDEX": "${env:AZURE_SEARCH_INDEX}",
-                "SEARCH_KEY": "${env:AZURE_SEARCH_SERVICE_KEY}"
+                "SEARCH_INDEX": "${env:AZURE_SEARCH_INDEX}"
             },
             "cwd": "${workspaceFolder}/tests",
             "envFile": "${workspaceFolder}/scripts/environments/infrastructure.debug.env",

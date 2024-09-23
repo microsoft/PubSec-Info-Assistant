@@ -8,7 +8,7 @@ import re
 import urllib.parse
 from typing import Any, Sequence
 import openai
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 from openai import  AsyncAzureOpenAI
 from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
 from approaches.approach import Approach
@@ -46,7 +46,6 @@ class CompareWebWithWork(Approach):
         self,
         search_client: SearchClient,
         oai_service_name: str,
-        oai_service_key: str,
         chatgpt_deployment: str,
         source_file_field: str,
         content_field: str,
@@ -60,8 +59,9 @@ class CompareWebWithWork(Approach):
         target_embedding_model: str,
         enrichment_appservice_url: str,
         target_translation_language: str,
-        enrichment_endpoint:str,
-        enrichment_key:str,
+        azure_ai_endpoint:str,
+        azure_ai_location: str,
+        azure_ai_token_provider: str,
         use_semantic_reranker: bool
     ):
         self.search_client = search_client
@@ -76,10 +76,10 @@ class CompareWebWithWork(Approach):
         self.chatgpt_token_limit = get_token_limit(model_name)
         self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
         self.target_translation_language=target_translation_language
-        self.enrichment_endpoint=enrichment_endpoint
-        self.enrichment_key=enrichment_key
+        self.azure_ai_endpoint=azure_ai_endpoint
+        self.azure_ai_location = azure_ai_location
+        self.azure_ai_token_provider=azure_ai_token_provider
         self.oai_service_name = oai_service_name
-        self.oai_service_key = oai_service_key
         self.model_name = model_name
         self.model_version = model_version
         self.enrichment_appservice_url = enrichment_appservice_url
@@ -91,7 +91,7 @@ class CompareWebWithWork(Approach):
                
         self.client = AsyncAzureOpenAI(
         azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_ad_token_provider=azure_ai_token_provider,  
         api_version=openai.api_version)
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], web_citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -108,7 +108,6 @@ class CompareWebWithWork(Approach):
         chat_rrr_approach = ChatReadRetrieveReadApproach(
                                     self.search_client,
                                     self.oai_service_name,
-                                    self.oai_service_key,
                                     self.chatgpt_deployment,
                                     self.source_file_field,
                                     self.content_field,
@@ -122,8 +121,9 @@ class CompareWebWithWork(Approach):
                                     self.escaped_target_model,
                                     self.enrichment_appservice_url,
                                     self.target_translation_language,
-                                    self.enrichment_endpoint,
-                                    self.enrichment_key,
+                                    self.azure_ai_endpoint,
+                                    self.azure_ai_location,
+                                    self.azure_ai_token_provider,
                                     self.use_semantic_reranker
                                 )
         rrr_response = chat_rrr_approach.run(history, overrides, {}, thought_chain)
@@ -181,10 +181,25 @@ class CompareWebWithWork(Approach):
             async for chunk in chat_completion:
                 # Check if there is at least one element and the first element has the key 'delta'
                 if len(chunk.choices) > 0:
+                    filter_reasons = []
+                    # Check for content filtering
+                    if chunk.choices[0].finish_reason == 'content_filter':
+                        for category, details in chunk.choices[0].content_filter_results.items():
+                            if details['filtered']:
+                                filter_reasons.append(f"{category} ({details['severity']})")
+
+                    # Raise an error if any filters are triggered
+                    if filter_reasons:
+                        error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                        raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
             # Step 4: Append web citations from the Bing Search approach
             for idx, url in enumerate(work_citations.keys(), start=1):
                 yield json.dumps({"content": f"[File{idx}]"}) + "\n"
+        except BadRequestError as e:
+            logging.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             logging.error(f"Error in compare web with work: {e}")
             yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"
@@ -208,6 +223,18 @@ class CompareWebWithWork(Approach):
             temperature=0.6,
             n=1
         )
+        filter_reasons = []
+
+        # Check for content filtering
+        if chat_completion.choices[0].finish_reason == 'content_filter':
+            for category, details in chat_completion.choices[0].content_filter_results.items():
+                if details['filtered']:
+                    filter_reasons.append(f"{category} ({details['severity']})")
+
+        # Raise an error if any filters are triggered
+        if filter_reasons:
+            error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+            raise ValueError(error_message)
         return chat_completion.choices[0].message.content
     
     def get_messages_builder(self, system_prompt: str, model_id: str, user_conv: str, few_shots = [dict[str, str]], max_tokens: int = 4096) -> []:

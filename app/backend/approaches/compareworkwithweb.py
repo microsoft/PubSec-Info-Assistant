@@ -7,7 +7,7 @@ import os
 from typing import Any, Sequence
 import urllib.parse
 import openai
-from openai import AzureOpenAI
+from openai import AzureOpenAI, BadRequestError
 from openai import AsyncAzureOpenAI
 from approaches.chatwebretrieveread import ChatWebRetrieveRead
 from approaches.approach import Approach
@@ -39,7 +39,15 @@ class CompareWorkWithWeb(Approach):
     
     web_citations = {}
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
+    def __init__(self, model_name: str,
+                 chatgpt_deployment: str,
+                 query_term_language: str,
+                 bing_search_endpoint: str,
+                 bing_search_key: str,
+                 bing_safe_search: bool,
+                 oai_endpoint: str,
+                 azure_ai_token_provider:str
+                 ):
         """
         Initializes the CompareWorkWithWeb approach.
 
@@ -59,14 +67,16 @@ class CompareWorkWithWeb(Approach):
         self.bing_search_endpoint = bing_search_endpoint
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
+        self.oai_endpoint = oai_endpoint
+        self.azure_ai_token_provider = azure_ai_token_provider
         
           # openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_version = "2024-02-01"
         
         self.client = AsyncAzureOpenAI(
-        azure_endpoint = openai.api_base, 
-        api_key=openai.api_key,  
+        azure_endpoint = openai.api_base,
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
 
     async def run(self, history: Sequence[dict[str, str]], overrides: dict[str, Any], work_citation_lookup: dict[str, Any], thought_chain: dict[str, Any]) -> Any:
@@ -81,7 +91,14 @@ class CompareWorkWithWeb(Approach):
             Any: The result of the comparative analysis.
         """
         # Step 1: Call bing Search Approach for a Bing LLM Response and Citations
-        chat_bing_search = ChatWebRetrieveRead(self.model_name, self.chatgpt_deployment, self.query_term_language, self.bing_search_endpoint, self.bing_search_key, self.bing_safe_search)
+        chat_bing_search = ChatWebRetrieveRead(self.model_name,
+                                               self.chatgpt_deployment,
+                                               self.query_term_language,
+                                               self.bing_search_endpoint,
+                                               self.bing_search_key,
+                                               self.bing_safe_search,
+                                               self.oai_endpoint,
+                                               self.azure_ai_token_provider)
         bing_search_response = chat_bing_search.run(history, overrides, {}, thought_chain)
         
         content = ""
@@ -137,10 +154,25 @@ class CompareWorkWithWeb(Approach):
             async for chunk in chat_completion:
                 # Check if there is at least one element and the first element has the key 'delta'
                 if len(chunk.choices) > 0:
+                    filter_reasons = []
+                    # Check for content filtering
+                    if chunk.choices[0].finish_reason == 'content_filter':
+                        for category, details in chunk.choices[0].content_filter_results.items():
+                            if details['filtered']:
+                                filter_reasons.append(f"{category} ({details['severity']})")
+
+                    # Raise an error if any filters are triggered
+                    if filter_reasons:
+                        error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                        raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
             # Step 4: Append web citations from the Bing Search approach
             for idx, url in enumerate(self.web_citations.keys(), start=1):
                 yield json.dumps({"content": f"[url{idx}]"}) + "\n"
+        except BadRequestError as e:
+            logging.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             logging.error(f"Error in compare work with web: {e}")
             yield json.dumps({"error": "An error occurred while generating the completion."}) + "\n"
@@ -160,6 +192,18 @@ class CompareWorkWithWeb(Approach):
             temperature=0.6,
             n=1
         )
+        filter_reasons = []
+
+        # Check for content filtering
+        if chat_completion.choices[0].finish_reason == 'content_filter':
+            for category, details in chat_completion.choices[0].content_filter_results.items():
+                if details['filtered']:
+                    filter_reasons.append(f"{category} ({details['severity']})")
+
+        # Raise an error if any filters are triggered
+        if filter_reasons:
+            error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+            raise ValueError(error_message)
         return chat_completion.choices[0].message.content
     
     def get_messages_builder(self, system_prompt: str, model_id: str, user_conv: str, few_shots = [dict[str, str]], max_tokens: int = 4096,) -> []:

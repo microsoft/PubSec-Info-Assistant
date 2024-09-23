@@ -23,10 +23,6 @@ output "AZURE_STORAGE_ACCOUNT" {
   value = module.storage.name
 }
 
-output "AZURE_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
-}
-
 output "AZURE_STORAGE_CONTAINER" {
   value = var.contentContainerName
 }
@@ -36,11 +32,11 @@ output "AZURE_STORAGE_UPLOAD_CONTAINER" {
 }
 
 output "BACKEND_URI" {
-  value = module.backend.uri
+  value = module.webapp.uri
 }
 
 output "BACKEND_NAME" {
-  value = module.backend.web_app_name 
+  value = module.webapp.web_app_name 
 }
 
 output "RESOURCE_GROUP_NAME" {
@@ -72,7 +68,7 @@ output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
 }
 
 output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.formrecognizer.formRecognizerAccountEndpoint
+  value = module.aiDocIntelligence.formRecognizerAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -95,8 +91,12 @@ output "TARGET_PAGES" {
   value = var.targetPages
 }
 
-output "ENRICHMENT_ENDPOINT" {
+output "AZURE_AI_ENDPOINT" {
   value = module.cognitiveServices.cognitiveServiceEndpoint
+}
+
+output "AZURE_AI_LOCATION" {
+  value = var.location
 }
 
 output "ENRICHMENT_NAME" {
@@ -112,11 +112,15 @@ output "ENABLE_DEV_CODE" {
 }
 
 output "AZURE_SUBSCRIPTION_ID" {
-  value = var.subscriptionId
+  value = data.azurerm_client_config.current.subscription_id
 }
 
 output "BLOB_STORAGE_ACCOUNT_ENDPOINT" {
-  value = module.storage.primary_endpoints
+  value = module.storage.primary_blob_endpoint
+}
+
+output "AZURE_QUEUE_STORAGE_ENDPOINT" {
+  value = module.storage.primary_queue_endpoint
 }
 
 output "EMBEDDING_VECTOR_SIZE" {
@@ -147,7 +151,7 @@ output "ENRICHMENT_APPSERVICE_URL" {
   value = module.enrichmentApp.uri
 }
 
-output "DEPLOYMENT_KEYVAULT_NAME" {
+output "AZURE_KEYVAULT_NAME" {
   value = module.kvModule.keyVaultName
 }
 
@@ -164,11 +168,11 @@ output "AZURE_ENVIRONMENT" {
 }
 
 output "BING_SEARCH_ENDPOINT" {
-  value = var.enableWebChat ? module.bingSearch.endpoint : ""
+  value = var.enableWebChat ? module.bingSearch[0].endpoint : ""
 }
 
 output "BING_SEARCH_KEY" {
-  value = var.enableWebChat ? module.bingSearch.key : ""
+  value = var.enableWebChat ? module.bingSearch[0].key : ""
 }
 
 output "ENABLE_BING_SAFE_SEARCH" {
@@ -178,6 +182,44 @@ output "ENABLE_BING_SAFE_SEARCH" {
 output "AZURE_ARM_MANAGEMENT_API" {
   value = var.azure_arm_management_api
 }
+
 output "MAX_CSV_FILE_SIZE" {
   value = var.maxCsvFileSize
+}
+
+output "CONTAINER_REGISTRY" {
+  value = module.acr.login_server
+}
+
+output "CONTAINER_REGISTRY_USERNAME" {
+  value = module.acr.admin_username
+}
+
+output "CONTAINER_REGISTRY_PASSWORD" {
+  sensitive = true
+  value = module.acr.admin_password
+}
+
+output "DNS_PRIVATE_RESOLVER_IP" {
+  value = var.is_secure_mode ? module.network[0].dns_private_resolver_ip : ""
+}
+
+output "AZURE_AI_CREDENTIAL_DOMAIN" {
+  value = var.azure_ai_private_link_domain
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__queueServiceUri" {
+  value = module.functions.STORAGE_CONNECTION_STRING__queueServiceUri
+}
+
+output "FUNC_STORAGE_CONNECTION_STRING__blobServiceUri" {
+  value = module.functions.STORAGE_CONNECTION_STRING__blobServiceUri
+}
+
+output "AZURE_OPENAI_AUTHORITY_HOST" {
+  value = var.azure_openai_authority_host
+}
+
+output "AZURE_SEARCH_AUDIENCE" {
+  value = var.azure_search_scope
 }

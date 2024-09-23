@@ -63,15 +63,6 @@ jq -r  '
             "env_var": "AZURE_FUNCTION_APP_NAME"
         },
         {
-            "path": "CONTAINER_REGISTRY_NAME",
-            "env_var": "CONTAINER_REGISTRY_NAME"
-        },
-        {
-            "path": "CONTAINER_APP_SERVICE",
-            "env_var": "CONTAINER_APP_SERVICE"
-
-        },
-        {
             "path": "embeddingsqueue",
             "env_var": "EMBEDDINGS_QUEUE"
         },
@@ -112,16 +103,28 @@ jq -r  '
             "env_var": "ENRICHMENT_APPSERVICE_NAME"
         },
         {
-            "path": "DEPLOYMENT_KEYVAULT_NAME",
-            "env_var": "DEPLOYMENT_KEYVAULT_NAME"
-        },
-        {
             "path": "MAX_CSV_FILE_SIZE",
             "env_var": "MAX_CSV_FILE_SIZE"
         },
         {
             "path": "SERVICE_MANAGEMENT_REFERENCE",
             "env_var": "SERVICE_MANAGEMENT_REFERENCE"
+        },
+        {
+            "path": "CONTAINER_REGISTRY",
+            "env_var": "CONTAINER_REGISTRY"
+        },
+        {
+            "path": "CONTAINER_REGISTRY_USERNAME",
+            "env_var": "CONTAINER_REGISTRY_USERNAME"
+        },
+        {
+            "path": "CONTAINER_REGISTRY_PASSWORD",
+            "env_var": "CONTAINER_REGISTRY_PASSWORD"
+        },
+        {
+            "path": "DNS_PRIVATE_RESOLVER_IP",
+            "env_var": "DNS_PRIVATE_RESOLVER_IP"
         }
     ]
         as $env_vars_to_extract
@@ -142,25 +145,4 @@ jq -r  '
     |
     .[]
     ' | sed "s/\"/'/g" # replace double quote with single quote to handle special chars
-
-if [ -n "${IN_AUTOMATION}" ]; then
-    if [ -n "${AZURE_ENVIRONMENT}" ] && [[ $AZURE_ENVIRONMENT == "AzureUSGovernment" ]]; then
-        az cloud set --name AZUReUSGovernment > /dev/null 2>&1
-    fi
-
-    az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" > /dev/null 2>&1
-    az account set -s "$ARM_SUBSCRIPTION_ID" > /dev/null 2>&1
-fi
-
-# Name of your Key Vault
-keyVaultName=$(cat inf_output.json | jq -r .DEPLOYMENT_KEYVAULT_NAME.value)
-# Names of your secrets
-secretNames=("AZURE-SEARCH-SERVICE-KEY" "AZURE-BLOB-STORAGE-KEY" "BLOB-CONNECTION-STRING" "COSMOSDB-KEY" "AZURE-OPENAI-SERVICE-KEY")
-
-# Retrieve and export each secret
-for secretName in "${secretNames[@]}"; do
-  secretValue=$(az keyvault secret show --name $secretName --vault-name $keyVaultName --query value -o tsv)
-  envVarName=$(echo $secretName | tr '-' '_')
-  echo export $envVarName=\'$secretValue\'
-done
     

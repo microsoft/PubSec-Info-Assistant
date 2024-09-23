@@ -61,7 +61,7 @@ To customize the App Service Plan Autoscale settings, modify the parameters ment
 
 ### Overview
 
-The SKU settings for all Service Plans are defined in the file located at `/infra/variables.tf`.  The SKU (Stock Keeping Unit) represents the pricing tier or plan for your App Service. It defines the performance, features, and capacity of the App Service. 
+The SKU settings for all Service Plans are defined in the file located at `/infra/variables.tf`.  The SKU (Stock Keeping Unit) represents the pricing tier or plan for your App Service. It defines the performance, features, and capacity of the App Service.
 More information can be found [here.](https://azure.microsoft.com/en-us/pricing/details/app-service/windows/#purchase-options)
 
 ## Web App Service Plan SKU

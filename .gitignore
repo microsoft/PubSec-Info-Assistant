@@ -401,3 +401,7 @@ infra/sp_config/config.json
 scripts/upgrade_repoint.config.json
 azcopy.tar.gz
 azcopy_dir
+
+#Openvpn setting
+openvpn/*
+!openvpn/info.txt

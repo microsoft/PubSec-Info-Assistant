@@ -1,6 +1,7 @@
 import logging
 import azure.functions as func
 from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.storage.blob import BlobServiceClient
 from shared_code.utilities import Utilities
 import os
@@ -14,44 +15,62 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
+azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
 azure_blob_drop_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
 ]
 azure_blob_content_storage_container = os.environ[
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
 ]
-azure_blob_storage_key = os.environ["AZURE_BLOB_STORAGE_KEY"]
-azure_blob_connection_string = os.environ["BLOB_CONNECTION_STRING"]
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
 cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_key = os.environ["COSMOSDB_KEY"]
 cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
 cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
-enrichmentKey =  os.environ["ENRICHMENT_KEY"]
-enrichmentEndpoint = os.environ["ENRICHMENT_ENDPOINT"] 
-targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"] 
+azure_ai_endpoint = os.environ["AZURE_AI_ENDPOINT"]
+azure_ai_key = os.environ["AZURE_AI_KEY"]
+targetTranslationLanguage = os.environ["TARGET_TRANSLATION_LANGUAGE"]
 max_requeue_count = int(os.environ["MAX_ENRICHMENT_REQUEUE_COUNT"])
 enrichment_backoff = int(os.environ["ENRICHMENT_BACKOFF"])
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 queueName = os.environ["EMBEDDINGS_QUEUE"]
+azure_ai_location = os.environ["AZURE_AI_LOCATION"]
+local_debug = os.environ["LOCAL_DEBUG"]
+azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
+azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
 
+
+if azure_openai_authority_host == "AzureUSGovernment":
+    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
+else:
+    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
+
+# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
+# Use managed identity when deployed on Azure.
+# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
+# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
+if local_debug == "true":
+    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
+else:
+    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
+token_provider = get_bearer_token_provider(azure_credential, f'https://{azure_ai_credential_domain}/.default')
 
 utilities = Utilities(
     azure_blob_storage_account,
     azure_blob_storage_endpoint,
     azure_blob_drop_storage_container,
     azure_blob_content_storage_container,
-    azure_blob_storage_key,
+    azure_credential,
 )
 
 statusLog = StatusLog(
-    cosmosdb_url, cosmosdb_key, cosmosdb_log_database_name, cosmosdb_log_container_name
-)     
+    cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name
+)
 
 def main(msg: func.QueueMessage) -> None:
     '''This function is triggered by a message in the text-enrichment-queue.
@@ -59,8 +78,8 @@ def main(msg: func.QueueMessage) -> None:
     the target language, it will translate the chunks to the target language.'''
 
     try:
-        apiTranslateEndpoint = f"{enrichmentEndpoint}translator/text/v3.0/translate?api-version=3.0"
-        apiLanguageEndpoint = f"{enrichmentEndpoint}language/:analyze-text?api-version=2023-04-01"
+        apiTranslateEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
+        apiLanguageEndpoint = f"{azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
         
         message_body = msg.get_body().decode("utf-8")
         message_json = json.loads(message_body)
@@ -82,7 +101,10 @@ def main(msg: func.QueueMessage) -> None:
         
         # Detect language of the document
         chunk_content = ''        
-        blob_service_client = BlobServiceClient.from_connection_string(azure_blob_connection_string)
+        blob_service_client = BlobServiceClient(
+            account_url=azure_blob_storage_endpoint,
+            credential=azure_credential,
+        )
         container_client = blob_service_client.get_container_client(azure_blob_content_storage_container)
         # Iterate over the chunks in the container, retrieving up to the max number of chars required
         chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
@@ -103,8 +125,9 @@ def main(msg: func.QueueMessage) -> None:
 
         # detect language           
         headers = {
-            'Ocp-Apim-Subscription-Key': enrichmentKey,
-            'Content-type': 'application/json'
+            "Ocp-Apim-Subscription-Key": azure_ai_key,
+            'Content-type': 'application/json',
+            'Ocp-Apim-Subscription-Region': azure_ai_location
         }
         
         data = {
@@ -131,6 +154,7 @@ def main(msg: func.QueueMessage) -> None:
         else:
             # error or requeue
             requeue(response, message_json)
+            statusLog.save_document(blob_path)
             return
 
         # If the language of the document is not equal to target language then translate the generated chunks
@@ -157,11 +181,7 @@ def main(msg: func.QueueMessage) -> None:
             for field in fields_to_enrich:
                 translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
                                 
-            # Extract entities for index    
-            enrich_headers = {
-                'Ocp-Apim-Subscription-Key': enrichmentKey,
-                'Content-type': 'application/json'
-            }        
+            # Extract entities for index           
             target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
             enrich_data = {
                 "kind": "EntityRecognition",
@@ -178,7 +198,7 @@ def main(msg: func.QueueMessage) -> None:
                     ]
                 }
             }                
-            response = requests.post(apiLanguageEndpoint, headers=enrich_headers, json=enrich_data, params=params)
+            response = requests.post(apiLanguageEndpoint, headers=headers, json=enrich_data, params=params)
             try:
                 entities = response.json()['results']['documents'][0]['entities']
             except:
@@ -189,10 +209,6 @@ def main(msg: func.QueueMessage) -> None:
             chunk_dict[f"entities"] = entities_collection
                         
             # Extract key phrases for index    
-            enrich_headers = {
-                'Ocp-Apim-Subscription-Key': enrichmentKey,
-                'Content-type': 'application/json'
-            }        
             target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
             enrich_data = {
                 "kind": "KeyPhraseExtraction",
@@ -209,7 +225,7 @@ def main(msg: func.QueueMessage) -> None:
                     ]
                 }
             }                
-            response = requests.post(apiLanguageEndpoint, headers=enrich_headers, json=enrich_data, params=params)
+            response = requests.post(apiLanguageEndpoint, headers=headers, json=enrich_data, params=params)
             try:
                 key_phrases = response.json()['results']['documents'][0]['keyPhrases']
             except:
@@ -222,7 +238,10 @@ def main(msg: func.QueueMessage) -> None:
             block_blob_client.upload_blob(json_str, overwrite=True)
                 
         # Queue message to embeddings queue for downstream processing
-        queue_client = QueueClient.from_connection_string(azure_blob_connection_string, queueName, message_encode_policy=TextBase64EncodePolicy())
+        queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
+                               queue_name=queueName,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
         embeddings_queue_backoff =  random.randint(1, 60)
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string, visibility_timeout = embeddings_queue_backoff)
@@ -292,11 +311,10 @@ def requeue(response, message_json):
             )
             queued_count += 1
             message_json["text_enrichment_queued_count"] = queued_count
-            queue_client = QueueClient.from_connection_string(
-                azure_blob_connection_string,
-                queue_name=text_enrichment_queue,
-                message_encode_policy=TextBase64EncodePolicy(),
-            )
+            queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
+                               queue_name=text_enrichment_queue,
+                               credential=azure_credential,
+                               message_encode_policy=TextBase64EncodePolicy())
             message_json_str = json.dumps(message_json)
             queue_client.send_message(message_json_str, visibility_timeout=backoff)
             statusLog.upsert_document(
@@ -310,7 +328,8 @@ def requeue(response, message_json):
         statusLog.upsert_document(
             blob_path,
             f"{FUNCTION_NAME} - Error on language detection - {response.status_code} - {response.reason}",
-            StatusClassification.ERROR
+            StatusClassification.ERROR,
+            State.ERROR
         )     
         
 

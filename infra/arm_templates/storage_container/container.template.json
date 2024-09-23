@@ -1,0 +1,44 @@
+{
+    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "containerName": {
+            "type": "string"
+        },
+        "publicNetworkAccess": {
+            "type": "string",
+            "defaultValue": "Disabled",
+            "allowedValues": [
+                "Enabled",
+                "Disabled"
+            ],
+            "metadata": {
+                "description": "Specifies whether the storage account allows access from public networks. If the value is Enabled, public network access is allowed. If the value is Disabled, public network access is disallowed."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2023-01-01",
+            "name": "[concat(parameters('storageAccountName'), '/default')]"
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('containerName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        }
+    ]
+}

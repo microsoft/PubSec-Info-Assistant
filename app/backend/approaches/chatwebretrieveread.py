@@ -12,6 +12,7 @@ from web_search_client.models import SafeSearch
 from azure.core.credentials import AzureKeyCredential
 import openai
 from openai import AzureOpenAI
+from openai import BadRequestError
 from openai import AsyncAzureOpenAI
 from approaches.approach import Approach
 from core.messagebuilder import MessageBuilder
@@ -74,7 +75,15 @@ class ChatWebRetrieveRead(Approach):
     citations = {}
     approach_class = ""
 
-    def __init__(self, model_name: str, chatgpt_deployment: str, query_term_language: str, bing_search_endpoint: str, bing_search_key: str, bing_safe_search: bool):
+    def __init__(self, model_name: str, 
+                 chatgpt_deployment: str, 
+                 query_term_language: str, 
+                 bing_search_endpoint: str, 
+                 bing_search_key: str, 
+                 bing_safe_search: bool,
+                 oai_endpoint: str,
+                 azure_ai_token_provider:str
+                 ):
         self.name = "ChatBingSearch"
         self.model_name = model_name
         self.chatgpt_deployment = chatgpt_deployment
@@ -84,14 +93,14 @@ class ChatWebRetrieveRead(Approach):
         self.bing_search_key = bing_search_key
         self.bing_safe_search = bing_safe_search
         
-        # openai.api_base = oai_endpoint
+        openai.api_base = oai_endpoint
         openai.api_type = 'azure'
         openai.api_version = "2024-02-01"
        
          
         self.client = AsyncAzureOpenAI(
         azure_endpoint = openai.api_base , 
-        api_key=openai.api_key,  
+        azure_ad_token_provider=azure_ai_token_provider,
         api_version=openai.api_version)
         
 
@@ -135,6 +144,10 @@ class ChatWebRetrieveRead(Approach):
         
         try:
             query_resp = await self.make_chat_completion(messages)
+        except BadRequestError as e:
+            log.error(f"Error generating optimized keyword search: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating optimized keyword search: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating optimized keyword search: {str(e)}")
             yield json.dumps({"error": f"Error generating optimized keyword search: {str(e)}"}) + "\n"
@@ -187,8 +200,22 @@ class ChatWebRetrieveRead(Approach):
             async for chunk in resp:
                 # Check if there is at least one element and the first element has the key 'delta'
                 if len(chunk.choices) > 0:
+                    filter_reasons = []
+                    # Check for content filtering
+                    if chunk.choices[0].finish_reason == 'content_filter':
+                        for category, details in chunk.choices[0].content_filter_results.items():
+                            if details['filtered']:
+                                filter_reasons.append(f"{category} ({details['severity']})")
+
+                    # Raise an error if any filters are triggered
+                    if filter_reasons:
+                        error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+                        raise ValueError(error_message)
                     yield json.dumps({"content": chunk.choices[0].delta.content}) + "\n"
-        
+        except BadRequestError as e:
+            log.error(f"Error generating chat completion: {str(e.body['message'])}")
+            yield json.dumps({"error": f"Error generating chat completion: {str(e.body['message'])}"}) + "\n"
+            return
         except Exception as e:
             log.error(f"Error generating chat completion: {str(e)}")
             yield json.dumps({"error": f"Error generating chat completion: {str(e)}"}) + "\n"
@@ -257,6 +284,18 @@ class ChatWebRetrieveRead(Approach):
             temperature=0.6,
             n=1
         )
+        filter_reasons = []
+
+        # Check for content filtering
+        if chat_completion.choices[0].finish_reason == 'content_filter':
+            for category, details in chat_completion.choices[0].content_filter_results.items():
+                if details['filtered']:
+                    filter_reasons.append(f"{category} ({details['severity']})")
+
+        # Raise an error if any filters are triggered
+        if filter_reasons:
+            error_message = "The generated content was filtered due to triggering Azure OpenAI's content filtering system. Reason(s): The response contains content flagged as " + ", ".join(filter_reasons)
+            raise ValueError(error_message)
         return chat_completion.choices[0].message.content
     
     def get_messages_builder(

@@ -22,11 +22,6 @@ variable "kind" {
   default = "OpenAI"
 }
 
-variable "publicNetworkAccess" {
-  type    = string
-  default = "Enabled"
-}
-
 variable "sku" {
   type = object({
     name = string
@@ -41,7 +36,7 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "keyVaultId" { 
+variable "key_vault_name" { 
   type = string
 }
 
@@ -50,7 +45,43 @@ variable "useExistingAOAIService" {
   default = false
 }
 
-variable "openaiServiceKey" {
-  description = "The OpenAI service key"
-  type        = string
+variable "is_secure_mode" {
+  type = bool
+  default = false
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
+  type = string
+}
+
+variable "subnet_id" {
+  type = string
+  
+}
+
+variable "outbound_network_access_restricted" {
+  type    = bool
+  default = false
+}
+
+variable "network_acls_ip_rules" {
+  type        = list(string)
+  description = "One or more IP Addresses, or CIDR Blocks which should be able to access the Cognitive Account."
+  default     = []
+}
+
+variable "arm_template_schema_mgmt_api" {
+  type = string
+}
+
+variable "logAnalyticsWorkspaceResourceId" {
+  type = string
 }

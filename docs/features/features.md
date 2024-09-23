@@ -1,6 +1,6 @@
-# IA Accelerator Features
+# Information Assistant (IA) copilot template features
 
-Please see below sections for coverage of IA Accelerator features.
+Please see below sections for coverage of IA copilot template features.
 
 * [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
 * [Prompt Engineering](/docs/features/features.md#prompt-engineering)
@@ -55,11 +55,11 @@ Images | jpg, jpeg, png, gif, bmp, tif, tiff
 * creating a standard JSON representation of all a documents text-based content
 * chunking and saving metadata into manageable sizes to be used in the RAG pattern
 
-The Information Assistant Accelerator [pre-processes](/docs/features/document_pre_processing.md) certain document types to allow better understanding of large complex documents.
+The Information Assistant copilot template [pre-processes](/docs/features/document_pre_processing.md) certain document types to allow better understanding of large complex documents.
 
 We also log the status of the pre-processing in Azure Cosmos DB. View our [Status Logging](/functions/shared_code/status_log.md) page for more details.
 
-Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](/docs/functions_flow.md)
+Additionally, there are many configuration values that can be altered to effect the performance and behaviors of the chunking patterns. More details on the deployment configurations can be found in our [Function Flow documentation](/docs/features/document_pre_processing.md)
 
 ## SharePoint Connector
 
@@ -71,7 +71,7 @@ The Information Assistant now supports integrating your SharePoint document libr
 The latter, "Bing Compare," takes a grounded LLM response and performs a second Bing search, integrating citations from both sources for a comprehensive answer.
 
 Additionally, a "Switch to Web" button in the subtitle bar allows users to transition between "Work" and "Web" workspaces, directing prompts either to the grounded LLM with access to Bing-related functionalities or behaving as if the "Search Bing" button was pressed.
- In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses. 
+ In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses.
  These features empower users to seamlessly access and validate information across various sources within the chat interface.
  More information can be found in the [markdown here](/docs/features/bing_search.md)
 
@@ -89,7 +89,7 @@ Image Search is only available in regions that support dense captions. For a ful
 
 ## Azure AI Search Integration
 
-This accelerator employs Vector Hybrid Search which combines vector similarity with keyword matching to enhance search accuracy. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
+This copilot template employs Vector Hybrid Search which combines vector similarity with keyword matching to enhance search accuracy. This approach empowers you to find relevant information efficiently by combining the strengths of both semantic vectors and keywords.
 
 To learn more, please visit the [Cognitive Search](/docs/features/cognitive_search.md) feature page.
 
@@ -111,7 +111,7 @@ Do not use this code with untrusted inputs, with elevated permissions, or withou
 
 ## Enhanced AI Interaction
 
-**Simple File Upload and Status:** We have put uploading of files into the Accelerator in the hands of the users by providing a simple drag-and-drop user interface for adding new content and a status page for monitoring document pre-processing.
+**Simple File Upload and Status:** We have put uploading of files into the copilot template in the hands of the users by providing a simple drag-and-drop user interface for adding new content and a status page for monitoring document pre-processing.
 
 **Visualizing Thought Process:** Gain insights into the AI's decision-making process by visualizing how it arrives at answers, providing transparency and control.
 
@@ -125,11 +125,11 @@ Do not use this code with untrusted inputs, with elevated permissions, or withou
 
 ![Chat screen](/docs/images/info-assist-chat-ui.png)
 
-The end user leverages the web interface as the primary method to engage with the IA Accelerator, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page.
+The end user leverages the web interface as the primary method to engage with the IA copilot template, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined on the [User Experience](/docs/features/user_experience.md) page.
 
 ## Document Deletion
 
-There are multiple options to for deleting documents in the IA Accelerator. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure. Document deletions are not instantaneous and can take up to ten minutes to propogate through all components of the system.
+There are multiple options to for deleting documents in the IA copilot template. Most users will perform document deletion in the UI, while experience technical users may opt for deleting files through the underlying infrastructure. Document deletions are not instantaneous and can take up to ten minutes to propagate through all components of the system.
 
 ### File Deletion in the UI
 
@@ -148,5 +148,3 @@ We've starting with text-based image retrieval, but in the future, we have plans
 ### Adding Evaluation Guidance and Metrics
 
 To ensure transparency and accountability, we are researching comprehensive evaluation guidance and metrics. This will assist users in assessing the performance and trustworthiness of AI-generated responses, fostering confidence in the platform.
-
-

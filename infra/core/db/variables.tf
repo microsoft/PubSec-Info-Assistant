@@ -61,6 +61,27 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "keyVaultId" { 
+variable "key_vault_name" { 
+  type = string
+}
+
+variable "is_secure_mode" {
+  type    = bool
+  default = false
+}
+
+variable "private_dns_zone_ids" {
+  type = set(string)
+}
+
+variable "vnet_name" {
+  type = string
+}
+
+variable "subnet_name" {
+  type = string
+}
+
+variable "arm_template_schema_mgmt_api" {
   type = string
 }

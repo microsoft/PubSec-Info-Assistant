@@ -18,9 +18,8 @@ import { ITextFieldStyleProps, ITextFieldStyles, TextField } from '@fluentui/rea
 import { ILabelStyles, ILabelStyleProps } from '@fluentui/react/lib/Label';
 import { IIconProps } from '@fluentui/react';
 import { IButtonProps } from '@fluentui/react/lib/Button';
-import { BlobServiceClient } from "@azure/storage-blob";
 
-import { getBlobClientUrl } from "../../api";
+import { getFolders } from "../../api";
 import styles from "./FolderPicker.module.css";
 
 var allowNewFolders = false;
@@ -85,27 +84,13 @@ export const FolderPicker = ({allowFolderCreation, onSelectedKeyChange, preSelec
 
     async function fetchBlobFolderData() {
         try {
-            const blobClientUrl = await getBlobClientUrl();
-            const blobServiceClient = new BlobServiceClient(blobClientUrl);
-            var containerClient = blobServiceClient.getContainerClient("upload");
-            const delimiter = "/";
-            const prefix = "";
-            var newOptions: IComboBoxOption[] = allowNewFolders ? [] : [
+            const newOptions: IComboBoxOption[] = allowNewFolders ? [] : [
                 { key: 'selectAll', text: 'Select All', itemType: SelectableOptionMenuItemType.SelectAll },
                 { key: 'FolderHeader', text: 'Folders', itemType: SelectableOptionMenuItemType.Header }];
-            for await (const item of containerClient.listBlobsByHierarchy(delimiter, {
-                prefix,
-              })) {
-                // Check if the item is a folder
-                if (item.kind === "prefix") {
-                  // Get the folder name and add to the dropdown list
-                  var folderName = item.name.slice(0,-1);
-                  
-                  newOptions.push({key: folderName, text: folderName});
-                  setOptions(newOptions);
-                }
-              }
-              if (!allowNewFolders) {
+            const folders = await getFolders();
+            newOptions.push(...folders.map((folder: string) => ({ key: folder, text: folder })));
+            setOptions(newOptions);
+            if (!allowNewFolders) {
                 var filteredOptions = newOptions.filter(
                     option =>
                       (option.itemType === SelectableOptionMenuItemType.Normal || option.itemType === undefined) && !option.disabled,

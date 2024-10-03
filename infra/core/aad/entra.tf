@@ -39,13 +39,6 @@ resource "azuread_application" "aad_mgmt_app" {
   service_management_reference = var.serviceManagementReference
 }
 
-resource "azuread_application_password" "aad_mgmt_app_password" {
-  count           = var.isInAutomation ? 0 : 1
-  application_id  = azuread_application.aad_mgmt_app[0].id
-  display_name    = "infoasst-mgmt"
-  end_date_relative = "${var.password_lifetime * 24}h"
-}
-
 resource "azuread_service_principal" "aad_mgmt_sp" {
   count     = var.isInAutomation ? 0 : 1
   client_id = azuread_application.aad_mgmt_app[0].client_id
@@ -65,9 +58,4 @@ output "azure_ad_mgmt_app_client_id" {
 output "azure_ad_mgmt_sp_id" {
   value       = var.isInAutomation ? var.aadMgmtServicePrincipalId : azuread_service_principal.aad_mgmt_sp[0].id
   description = "Service Principal ID of the Azure AD Management App"
-}
-
-output "azure_ad_mgmt_app_secret" {
-  value       = var.isInAutomation ? var.aadMgmtClientSecret : azuread_application_password.aad_mgmt_app_password[0].value
-  description = "Secret of the Azure AD Management App"
 }

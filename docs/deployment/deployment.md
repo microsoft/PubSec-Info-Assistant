@@ -55,7 +55,7 @@ AZURE_ENVIRONMENT | Yes | This will determine the Azure cloud environment the de
 SECURE_MODE | Yes | Defaults to `false`. This feature flag will determine if the Information Assistant deploys it's Azure Infrastructure in a secure mode or not.</br>:warning: Before enabling secure mode please read the extra instructions on [Enabling Secure Deployment](/docs/secure_deployment/secure_deployment.md)
 ENABLE_WEB_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to use Web Search results as a data source for generating answers from the LLM. This feature will also deploy a Bing v7 Search instance in Azure to retrieve web results from, however Bing v7 Search is not available in AzureUSGovernment regions, so this feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
 Note: If you have set SECURE_MODE to `true` you will have to set ENABLE_WEB_CHAT to `false` as this feature is not compatible with secure mode deployment. 
-ENABLE_BING_SAFE_SEARCH | No | Defaults to `true`. If you are using the `ENABLE_WEB_CHAT`feature you can set the following values to enable safe search on the Bing v7 Search APIs.
+ENABLE_BING_SAFE_SEARCH | No | Defaults to `true`. If you are using the `ENABLE_WEB_CHAT`feature you can set the following values to enable safe search on the Bing v7 Search APIs. Bing safe search is a Bing setting that filters out inappropriate web content.
 ENABLE_UNGROUNDED_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to interact directly with an LLM. This experience will be similar to the Azure OpenAI Playground
 ENABLE_MATH_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Math Assistant tab in the Information Assistant website. Read more information on the [Math Assistant](/docs/features/features.md)
 ENABLE_TABULAR_DATA_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Tabular Data Assistant tab in the Information Assistant website. Read more information about the [Tabular Data Assistant](/docs/features/features.md). Read the security warnings on the Tabular Data Assistant feature page when deploying this feature.
@@ -65,9 +65,11 @@ REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whethe
 SECRET_EXPIRATION_DAYS | Yes | Defaults to `730`. Use this setting to set the secret expiration to the current day plus the number of days specified. Key Vault secrets require an expiration date to be compatible with Microsoft's recommended guardrails for Azure Key Vault policy. We have NOT included automatic secret rotation in this deployment. Go [here](https://learn.microsoft.com/en-us/azure/key-vault/keys/how-to-configure-key-rotation) for more information on enabling cryptographic key auto-rotation.
 SKIP_PLAN_CHECK | No | If this value is set to 1, then the Terraform deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
 USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and Terraform will create a new Azure Open AI service instance in your resource group.
+Note: If you have set SECURE_MODE to `true` you will have to set USE_EXISTING_AOAI to `false` as using an existing Azure OpenAI resource is not compatible with secure mode. 
+
 AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the resource group that hosts the Azure Open AI service instance in your subscription.
 AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
-AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the "gpt-35-turbo" model in the Azure Open AI service instance in your subscription.
+AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the gpt model in the Azure Open AI service instance in your subscription.
 USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to "true". When set to "true" this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to "false", Information Assistant will use the open source language model that is provided in the values below.
 AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_AZURE_OPENAI_EMBEDDINGS** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
 OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
@@ -140,6 +142,7 @@ The following resource providers must be registered within your subscription pri
 * Microsoft.OperationalInsights
 * Microsoft.KeyVault
 * Microsoft.AlertsManagement
+* Microsoft.Insights
 
 The following command lists all the subscription's resource providers that are Registered.
 

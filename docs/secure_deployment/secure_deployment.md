@@ -20,7 +20,7 @@
 
 It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant (IA) to become familiar with the deployment process before starting the secure mode deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
 
-### Prerequisite 
+### Prerequisites
  
 1. The Information Assistant **secure mode** option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). 
 
@@ -295,11 +295,12 @@ To perform a secure mode deployment, follow these steps:
 
     `sudo nano /etc/resolv.conf`
 
-    Add the following entry in your `resolv.conf` file:
+    Add the following entry at the top in your `resolv.conf` file:
 
     ```text
     nameserver XXX.XXX.XXX.XXX
     ```
+    Note: make sure the nameserver entry is at the top of the file. 
 
 19. Save the `/etc/resolv.conf` file.
 20. Connect to the VPN using the filled in VPN configuration file. Open a second bash prompt in VSCode and use the following commands:

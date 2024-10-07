@@ -20,11 +20,16 @@
 
 It is recommended that you start with a [standard deployment](/docs/deployment/deployment.md) of Information Assistant (IA) to become familiar with the deployment process before starting the secure mode deployment. The documentation provided below builds upon the standard deployment and assumes you are familiar with the deployment process.
 
-[!IMPORTANT]  
-> The Information Assistant **secure mode** option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). In addition to those it also...
->
-> Assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed (e.g., Azure ExpressRoute, Azure VPN Gateway).
->
+### Prerequisite 
+ 
+1. The Information Assistant **secure mode** option requires all the [parameters and configuration of a standard deployment](/docs/deployment/deployment.md#configure-env-files). 
+
+2. **Secure communication channel to Azure cloud**: assumes clients have or will establish secure communications from their enterprise to the Azure cloud that will enable it to be deployed (e.g., Azure ExpressRoute, Azure VPN Gateway). If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes. See [Secure Communication to Azure](#secure-communication-to-azure) section below for more details.
+
+3. If you are planning to deploy Information Assistant **secure mode** with [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud), you have to first set up and deploy a [Sovereign Landing Zone (SLZ)](https://aka.ms/slz). 
+Note that Information Assistant *secure mode* is currently only compatible with the *Online* management group scope. See the [deploy with Microsoft Cloud for Sovereignty](#deploying-with-microsoft-cloud-for-sovereignty) section below for more details.
+
+[!IMPORTANT] 
 >Secure mode is not compatible with the following IA features:
 >
 > * Using an existing Azure OpenAI services
@@ -33,7 +38,7 @@ It is recommended that you start with a [standard deployment](/docs/deployment/d
 >
 >It is recommended to use secure mode with a DDoS Protection Plan for Virtual Network Protection, but it is not required. There is a limit of 1 DDoS protection plan for a subscription in a region. You can reuse an existing DDoS plan in your tenant, Information Assistant can deploy one for you, or you can choose to not use a DDoS Protection Plan on your virtual network.
 >
->Secure mode is also compatible with the [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) which is a [Microsoft Cloud for Sovereignty](https://www.microsoft.com/industry/sovereignty/cloud) offering. It is currently only compatible with the *Online* management group scope. See the [deploy with Microsoft Cloud for Sovereignty](#deploying-with-microsoft-cloud-for-sovereignty) section below for more details.
+
 
 ## Additional Azure account requirements
 

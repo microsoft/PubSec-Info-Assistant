@@ -4,7 +4,7 @@ The Azure pricing calculator helps estimate costs by considering the amount of d
 
 | Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA copilot template, version 1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/55c61add4bac4c1fb3a09e53a61b8940) |
+| IA copilot template, version 1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/bd6e516bb0b549abb6d39cce088af684) |
 
 ## Azure Services
 

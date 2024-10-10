@@ -250,9 +250,9 @@ To perform a secure mode deployment, follow these steps:
 
     * Establish virtual network peering with your corporate network to the Information Assistant virtual network, and private access via ExpressRoute.
     * Establish a Point-to-Site (P2S) VPN Gateway for your development workstation. See [Secure Communication to Azure](#secure-communication-to-azure) section.
-    * If using Microsoft's Cloud for Sovereignty, there are additional considerations you can find in the [Secure communication with Microsoft Cloud for Sovereignty](#secure-communication-with-microsoft-cloud-for-sovereignty) section.
+    * If using Microsoft's Cloud for Sovereignty, there are additional considerations you can find in the [Deploying with Microsoft Cloud for Sovereignty](#deploying-with-microsoft-cloud-for-sovereignty) section.
 
-8. If you are choosing to use a P2S VPN to connect to the Information Assistant virtual network, then follow these steps. Otherwise, skip to Step 18.
+8. If you are choosing to use a P2S VPN to connect to the Information Assistant virtual network, then follow steps 9 - 15 for the initial configuration. Otherwise, skip to Step 16.
 
     :warning: *You will need your VPN configuration and client certificate that matches your Azure VPN Gateway to continue*
 
@@ -285,16 +285,9 @@ To perform a secure mode deployment, follow these steps:
     ```
 
 15. Don't change any other fields. Save the VPN config file.
-16. Next run the following commands to enable the tunnel on the Codespace
 
-    ```bash
-    sudo mkdir -p /dev/net
-    sudo mknod /dev/net/tun c 10 200
-    sudo chmod 600 /dev/net/tun
-    ```
-
-17. Now perform the rest of the normal [Deployment](/docs/deployment/deployment.md) configuration and start `make deploy`. When you encounter the connectivity prompt come back here and resume at Step 18.
-18. Once the deployment stops to prompt you for connectivity you will need to add the DNS Private Resolver IP address to your GitHub Codespace configuration. The DNS Private Resolver IP was output to your VSCode Terminal for you in the prompt to confirm connectivity. Do this by running the following command:
+16. Now perform the rest of the normal [Deployment](/docs/deployment/deployment.md) configuration and start `make deploy`. When you encounter the connectivity prompt come back here and resume at Step 17. Note: You must repeat steps 17 - 22 each time your Codespace stops during a deployment.
+17. Once the deployment stops to prompt you for connectivity you will need to add the DNS Private Resolver IP address to your GitHub Codespace configuration. The DNS Private Resolver IP was output to your VSCode Terminal for you in the prompt to confirm connectivity. Do this by running the following command:
 
     `sudo nano /etc/resolv.conf`
 
@@ -304,8 +297,14 @@ To perform a secure mode deployment, follow these steps:
     nameserver XXX.XXX.XXX.XXX
     ```
     Note: make sure the nameserver entry is at the top of the file. 
+18. Save the `/etc/resolv.conf` file.
+19. Now run the following commands to enable the tunnel on the Codespace
 
-19. Save the `/etc/resolv.conf` file.
+    ```bash
+    sudo mkdir -p /dev/net
+    sudo mknod /dev/net/tun c 10 200
+    sudo chmod 600 /dev/net/tun
+    ```
 20. Connect to the VPN using the filled in VPN configuration file. Open a second bash prompt in VSCode and use the following commands:
 
     * To connect using the command line, type the following command:

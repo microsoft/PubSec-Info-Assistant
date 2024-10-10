@@ -4,7 +4,7 @@ The Azure pricing calculator helps estimate costs by considering the amount of d
 
 | Solution            | Mode | Environment  |    Azure Pricing Calculator Link  |
 | :------------------:|:---------:|:---------------:|:-------------------:|
-| IA copilot template, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/1492bd09c422421186d820ff23dc1f2f) |
+| IA copilot template, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/bd6e516bb0b549abb6d39cce088af684) |
 
 ---
 
@@ -24,15 +24,15 @@ The following list of Azure Services will be deployed for IA copilot template se
 - Azure OpenAI [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/openai-service/)
 - Storage account [:link:](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
 - Azure Active Directory [:link:](https://www.microsoft.com/en-sg/security/business/microsoft-entra-pricing?rtc=1)
-- Azure DDOS Standard Protection [:link:](https://azure.microsoft.com/en-ca/pricing/details/ddos-protection/)
+- Azure DDOS Standard Protection (recommended) [:link:](https://azure.microsoft.com/en-ca/pricing/details/ddos-protection/)
 - Azure Container Registry [:link:](https://azure.microsoft.com/en-ca/pricing/details/container-registry/)
-- Azure DNS Resolver [:link:](https://azure.microsoft.com/en-ca/pricing/details/dns/)
+- Azure DNS Private Resolver [:link:](https://azure.microsoft.com/en-ca/pricing/details/dns/)
+- Azure DNS Private Zones [:link:](https://azure.microsoft.com/en-us/pricing/details/dns/)
 - Azure Private Link [:link:](https://azure.microsoft.com/en-ca/pricing/details/private-link/)
+- Azure Private Endpoints [:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
 - Azure Container Registry [:link:](https://azure.microsoft.com/en-ca/pricing/details/container-registry/)
 - Azure Network Interface [:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
 - Azure Network Security Group [:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
-- Azure Private DNS Zone [:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
-- Azure Private Endpoints [:link:](https://azure.microsoft.com/en-us/pricing/details/private-link/)
 - Azure Virtual Network [:link:](https://azure.microsoft.com/en-us/pricing/details/virtual-network/)
 
 ---

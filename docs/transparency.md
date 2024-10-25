@@ -1,6 +1,6 @@
 
 <!-- TOC ignore:true -->
-# Transparency Note: Information Assistant (IA) copilot template
+# Transparency Note: Information Assistant (IA) agent template
 
 Updated 25 Mar 2024
 
@@ -9,7 +9,7 @@ Updated 25 Mar 2024
 <!-- TOC -->
 
 - [What is a Transparency Note?](#what-is-a-transparency-note)
-- [The basics of IA copilot template](#the-basics-of-ia-copilot-template)
+- [The basics of IA agent template](#the-basics-of-ia-agent-template)
     - [Introduction](#introduction)
     - [Key Terms](#key-terms)
 - [Capabilities](#capabilities)
@@ -37,7 +37,7 @@ Updated 25 Mar 2024
     - [Considerations when choosing a use case](#considerations-when-choosing-a-use-case)
         - [Identity Applications](#identity-applications)
         - [Age Appropriateness/Exposure to Minors](#age-appropriatenessexposure-to-minors)
-- [Limitations of IA copilot template](#limitations-of-ia-copilot-template)
+- [Limitations of IA agent template](#limitations-of-ia-agent-template)
     - [Qualitative limitations, human oversight requirements](#qualitative-limitations-human-oversight-requirements)
         - [Confidence Scoring](#confidence-scoring)
         - [Accuracy](#accuracy)
@@ -48,15 +48,15 @@ Updated 25 Mar 2024
 - [System performance](#system-performance)
     - [Grounded experiences](#grounded-experiences)
     - [Ungrounded experiences](#ungrounded-experiences)
-- [Evaluation of IA copilot template](#evaluation-of-ia-copilot-template)
-    - [Evaluating and Integrating IA copilot template for your use](#evaluating-and-integrating-ia-copilot-template-for-your-use)
+- [Evaluation of IA agent template](#evaluation-of-ia-agent-template)
+    - [Evaluating and Integrating IA agent template for your use](#evaluating-and-integrating-ia-agent-template-for-your-use)
         - [Human-in-the-loop](#human-in-the-loop)
         - [Data Quality Evaluation](#data-quality-evaluation)
         - [Evaluation of system performance](#evaluation-of-system-performance)
         - [Use technical documentation](#use-technical-documentation)
 - [Technical limitations, operational factors and ranges](#technical-limitations-operational-factors-and-ranges)
 - [Learn more about responsible AI](#learn-more-about-responsible-ai)
-- [Learn more about the IA copilot template](#learn-more-about-the-ia-copilot-template)
+- [Learn more about the IA agent template](#learn-more-about-the-ia-agent-template)
 - [Contact us](#contact-us)
     - [About this document](#about-this-document)
 
@@ -67,15 +67,15 @@ An AI system includes not only the technology, but also the people who will use 
 
 Microsoft’s Transparency Notes are part of a broader effort at Microsoft to put our AI Principles into practice. To find out more, see the [Microsoft AI principles](https://www.microsoft.com/ai/responsible-ai).
 
-# The basics of IA copilot template
+# The basics of IA agent template
 
 ## Introduction
 
-The IA copilot template is a system built on top of Azure OpenAI service, Azure AI Search and other Azure services. This system showcases capabilites possible with the emerging technologies related to Generative AI and how they may be applied for specific functionality. This copilot template has been designed with Public Sector applications in mind, but has been found to be applicable to additional industries and applications. The user should be aware that Microsoft has evaluated this copilot template for a limited set of use cases. Use cases outside of those which have been evaluated need to be considered and evaluated by those using this copilot template for their intended use cases. 
+The IA agent template is a system built on top of Azure OpenAI service, Azure AI Search and other Azure services. This system showcases capabilites possible with the emerging technologies related to Generative AI and how they may be applied for specific functionality. This agent template has been designed with Public Sector applications in mind, but has been found to be applicable to additional industries and applications. The user should be aware that Microsoft has evaluated this agent template for a limited set of use cases. Use cases outside of those which have been evaluated need to be considered and evaluated by those using this agent template for their intended use cases. 
 
-At its core, the IA copilot template is an implementation of the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the copilot template is referencing.
+At its core, the IA agent template is an implementation of the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the agent template is referencing.
 
-The 1.1 release of the IA copilot template introduces new technologies and use cases on top of the original scope which are covered in this updated Transparency Note. Become familiar with these new system capabilities and use cases to understand their responsible application to your intended use cases before proceeding. This release adds in Bing Web Search API for LLM results to enable grounding via content from the Internet, support for SharePoint as a document source, ability to interact directly with LLMs for purely generative capabilities (ungrounded), and preview agent-based features enabled through the use of [LangChain](https://www.langchain.com/) toolkit. 
+The 1.1 release of the IA agent template introduces new technologies and use cases on top of the original scope which are covered in this updated Transparency Note. Become familiar with these new system capabilities and use cases to understand their responsible application to your intended use cases before proceeding. This release adds in Bing Web Search API for LLM results to enable grounding via content from the Internet, support for SharePoint as a document source, ability to interact directly with LLMs for purely generative capabilities (ungrounded), and preview agent-based features enabled through the use of [LangChain](https://www.langchain.com/) toolkit. 
 
 The system aims to provide the functionality mentioned above while also focusing on the following key areas:
 
@@ -140,7 +140,7 @@ This system is primarily tuned for accuracy of response based on the data provid
 ### Overview
 This capability is implemented with [Bing Web Search for LLMs API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) and Azure OpenAI service. The system allows the end user to ask questions in natural language via the Azure OpenAI service, and grounds the answer via responses to the question from Bing Web Search. This allows end users to "have a conversation" with data from recent information found on the public Internet. The system cites the web sites from which it generates answers, allowing the end user to verify the results for accuracy. This system does not use Bing "Answers" which are curated facts available through the Bing web interface and potentially other non-LLM APIs. 
 
-This system behavior is similar to Copilot in Bing. We suggest reviewing their [Transparency Note](https://support.microsoft.com/en-us/topic/copilot-in-bing-our-approach-to-responsible-ai-45b5eae8-7466-43e1-ae98-b48f8ff8fd44) as well when considering if you want to deploy this solution for your end users. From their Transparency Note you can read about what the Copilot in Bing team has done from a Responsible AI perspective, and what you may want to consider doing to help improve the safety of your solution.
+This system behavior is similar to Copilot in Bing. We suggest reviewing their [Transparency Note](https://support.microsoft.com/en-us/topic/Copilot-in-bing-our-approach-to-responsible-ai-45b5eae8-7466-43e1-ae98-b48f8ff8fd44) as well when considering if you want to deploy this solution for your end users. From their Transparency Note you can read about what the Copilot in Bing team has done from a Responsible AI perspective, and what you may want to consider doing to help improve the safety of your solution.
 
 The system differentiates the externally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded. 
 
@@ -221,31 +221,31 @@ Note that there are several potential security concerns with LangChain and the a
 
 This system is intended for the purpose of exploring LLM capabilities across several data sources (internal and exteral) and engagement methods. Engagement methods range from heavily controlled to completely uncontrolled, sometimes leveraging prompt engineering to limit the creativity of the model(s) and citations to help the end user determine when answers are factual, while other times being minimally controlling (ungrounded responses). As such, much care has been taken to build the system with best practices in mind as a means to help the end user understand what it happening when they see responses from the system. 
 
-As features in this copilot template may be turned on/off at deployment time, it allows customizability for the design of the system which will be presented to the end user (the solution). Additionally this copilot template leverages many core product features such as Bing Web Search API for LLMs and Content Safety (filtering) to allow varying levels of control in the system which can not be accounted for in this Transparency Note. It is imperative to consider your specific use case when combining features, along with the resources available in the [Responsible AI guideance](#learn-more-about-responsible-ai) as you prepare your individual solution. 
+As features in this agent template may be turned on/off at deployment time, it allows customizability for the design of the system which will be presented to the end user (the solution). Additionally this agent template leverages many core product features such as Bing Web Search API for LLMs and Content Safety (filtering) to allow varying levels of control in the system which can not be accounted for in this Transparency Note. It is imperative to consider your specific use case when combining features, along with the resources available in the [Responsible AI guideance](#learn-more-about-responsible-ai) as you prepare your individual solution. 
 
 ## Considerations when choosing a use case
 
 ### Identity Applications
-**Avoid using IA copilot template for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
+**Avoid using IA agent template for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
 
 ### Age Appropriateness/Exposure to Minors
 
-This copilot template contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to Generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology **systems available at the time of this writing are unable to mitigate all potential harms and meet all legal limitations. This copilot template does not address these concerns.**
+This agent template contains features which have been requested by our Education industry leaders and customers. Microsoft is aware that **there are significant potential harms when exposing minors to Generative AI and Internet content** (as may be provided via Bing Web Search API for LLMs). Microsoft is also aware that there are regional legal limitations which may govern the application of these technologies, especially when delivered to minors. The technology **systems available at the time of this writing are unable to mitigate all potential harms and meet all legal limitations. This agent template does not address these concerns.**
 
-**At this time, these capabilities SHOULD NOT be targeted to minors.** The capabilities in this copilot template should only be targeted to adult users.
+**At this time, these capabilities SHOULD NOT be targeted to minors.** The capabilities in this agent template should only be targeted to adult users.
 
 Current known limitations with respect to minors:
 * Bing Safe Search is limited to filtering Adult Content in text and image form
 * Content Safety features may be enabled but are not comprehensive enough to limit all potential harms related to self harm, hate speech, racism, terrorism and violence
 * Content Safety does not support some regional legal requirements including ability to limit religious content and content related to sexual oreintation 
-* Age-adaptive prompting is not implemented in this copilot template
-* This copilot template does not have age awareness
-* This copilot template does not utilize, collect or store guardian consent
-* This copilot template does not store user interaction history in any form including user identifiers, queries or responses
-*  This copilot template may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
-# Limitations of IA copilot template
+* Age-adaptive prompting is not implemented in this agent template
+* This agent template does not have age awareness
+* This agent template does not utilize, collect or store guardian consent
+* This agent template does not store user interaction history in any form including user identifiers, queries or responses
+*  This agent template may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
+# Limitations of IA agent template
 
-In this section we describe several known limitations of the IA copilot template system.
+In this section we describe several known limitations of the IA agent template system.
 
 ## Qualitative limitations, human oversight requirements
 
@@ -261,7 +261,7 @@ This system provides citations for all grounded answers given. All answers, grou
 
 ### Non-Production Status
 
-This software is a copilot template codebase that is not configured for production use. Effort MUST BE taken to ensure that appropriate data security practices are followed to be compliant with local regulations in alignment with the classification of data intended to be used with this system.
+This software is a agent template codebase that is not configured for production use. Effort MUST BE taken to ensure that appropriate data security practices are followed to be compliant with local regulations in alignment with the classification of data intended to be used with this system.
 
 **Microsoft does not provide technical support for this codebase in a production setting.**
 
@@ -271,13 +271,13 @@ This software is not intended for real-time data processing. This is a batch-pro
 
 ### Request Throttling
 
-The Azure OpenAI API and other systems may be subject to throttling. As such this copilot template may have performance limitations and should not be placed into a mission-critical operation without confirmed provisioned throughput (PTU) or appropriate service agreements in place.
+The Azure OpenAI API and other systems may be subject to throttling. As such this agent template may have performance limitations and should not be placed into a mission-critical operation without confirmed provisioned throughput (PTU) or appropriate service agreements in place.
 
 # System performance
 
 ## Grounded experiences
 
-The central part of IA copilot template (the system) is to produce answers to questions with the data provided, either by the end user or web results (grounded). This relies on several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
+The central part of IA agent template (the system) is to produce answers to questions with the data provided, either by the end user or web results (grounded). This relies on several conditions for accuracy in the response to any given question. At a minimum accurate responses rely on:
 
 - documents with the answers available to the system
 - submitted documents having been successfully processed
@@ -299,15 +299,15 @@ During web-grounded interactions, human oversight is required to verify the vail
 
 ## Ungrounded experiences
 
-There have been no performance criteria established for the ungrounded experiences presented in this copilot template. Performance criteria SHOULD BE established for your intended use case.
+There have been no performance criteria established for the ungrounded experiences presented in this agent template. Performance criteria SHOULD BE established for your intended use case.
 
-# Evaluation of IA copilot template
+# Evaluation of IA agent template
 
-At the time of this writing, this copilot template is in a **Released state with Preview features**. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated.
+At the time of this writing, this agent template is in a **Released state with Preview features**. Microsoft has evaluated this codebase to be fit for purpose to a degree where we are comfortable to start engaging 3rd Party organizations and users to help with the evaluation of the system to determine if it is fit for their purposes. There are several backlog features targeted for future sprints which should help address confidence scoring and improve relevance of answers. As these and additional features are developed they, and the system, will continue to be evaluated.
 
-## Evaluating and Integrating IA copilot template for your use
+## Evaluating and Integrating IA agent template for your use
 
-This section outlines best practices for using IA copilot template responsibly to achieve best performance from the system.
+This section outlines best practices for using IA agent template responsibly to achieve best performance from the system.
 
 ### Human-in-the-loop
 
@@ -325,13 +325,13 @@ The system outcomes need to be evaluated by the user to determine the accuracy o
 
 The technical documentation provided with this system should be used to achieve the best outcomes. Care should be used when tuning, especially in the form of prompt engineering. Trade-offs between accuracy versus creativity should be understood when choices are made.
 
-You can find the technical documentation in our [Using IA copilot template for the first time](../README.md#using-IA-for-the-first-time) section.
+You can find the technical documentation in our [Using IA agent template for the first time](../README.md#using-IA-for-the-first-time) section.
 
 # Technical limitations, operational factors and ranges
 
 **This system has not been evaluated for its intended purpose against your data!**
 
-This system makes no claim for precision or accuracy. The behavior and performance of IA copilot template depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA copilot template for your purposes.
+This system makes no claim for precision or accuracy. The behavior and performance of IA agent template depends on the type, volume and quality of data ingested to it. This data will differ across end users, and therefore it is not possible to make a generic evaluation of IA agent template for your purposes.
 
 # Learn more about responsible AI
 
@@ -342,10 +342,10 @@ This system makes no claim for precision or accuracy. The behavior and performan
 
 [Microsoft Azure Learning courses on responsible AI](https://docs.microsoft.com/en-us/learn/paths/responsible-ai-business-principles/)
 
-# Learn more about the IA copilot template
+# Learn more about the IA agent template
 
 
-[Information Assistant copilot template](https://github.com/microsoft/PubSec-Info-Assistant)
+[Information Assistant agent template](https://github.com/microsoft/PubSec-Info-Assistant)
 
 
 # Contact us

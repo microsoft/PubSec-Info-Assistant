@@ -1,6 +1,6 @@
-# Enhancing IA copilot template: Architectural Decisions
+# Enhancing IA agent template: Architectural Decisions
 
-We've focused our architectural decisions on the unique requirements of IA copilot template for Public Sector customers. Our exploration and investigation efforts have been tailored to address the specific nuances of this use case. We've investigated the merits of different approaches across our solution, ensuring our architectural decisions are not just informed but fine-tuned for the unique demands of public sector customers. our findings and decisions may not be applicable to all Generative AI use cases.
+We've focused our architectural decisions on the unique requirements of IA agent template for Public Sector customers. Our exploration and investigation efforts have been tailored to address the specific nuances of this use case. We've investigated the merits of different approaches across our solution, ensuring our architectural decisions are not just informed but fine-tuned for the unique demands of public sector customers. our findings and decisions may not be applicable to all Generative AI use cases.
 
 ## Document Processing
 

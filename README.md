@@ -1,4 +1,4 @@
-# Information Assistant (IA) copilot template
+# Information Assistant (IA) agent template
 
 > [!IMPORTANT]  
 > As of November 15, 2023, Azure Cognitive Search has been renamed to Azure AI Search. Azure Cognitive Services have also been renamed to Azure AI Services.
@@ -38,15 +38,15 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=601652366&machine=basicLinux32gb&devcontainer_path=.devcontainer%2Fdevcontainer.json&location=eastus)
 
-Information Assistant (IA) copilot template provides a starting point for organizations to build their own custom generative AI capability to extend the power of Azure OpenAI. It showcases a common scenario using large language models (LLMs) to “chat with your own data” through the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview). This pattern lets you use the reasoning abilities of LLMs to generate responses based on your domain data without fine-tuning the model. 
+Information Assistant (IA) agent template provides a starting point for organizations to build their own custom generative AI capability to extend the power of Azure OpenAI. It showcases a common scenario using large language models (LLMs) to “chat with your own data” through the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview). This pattern lets you use the reasoning abilities of LLMs to generate responses based on your domain data without fine-tuning the model. 
 
-Information Assistant copilot template is an end-to-end solution which is a comprehensive reference sample including documentation, source code, and deployment to allow you to take and extend for your own purposes.
+Information Assistant agent template is an end-to-end solution which is a comprehensive reference sample including documentation, source code, and deployment to allow you to take and extend for your own purposes.
 
-This copilot template showcases integration between Azure and OpenAI's LLMs. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the RAG design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
+This agent template showcases integration between Azure and OpenAI's LLMs. It leverages Azure AI Search for data retrieval and ChatGPT-style Q&A interactions. Using the RAG design pattern with Azure OpenAI's GPT models, it provides a natural language interaction to discover relevant responses to user queries. Azure AI Search simplifies data ingestion, transformation, indexing, and multilingual translation.
 
-The copilot adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
+The agent adapts prompts based on the model type for enhanced performance. Users can customize settings like temperature and persona for personalized AI interactions. It offers features like explainable thought processes, referenceable citations, and direct content for verification.
 
-Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with Information Assistant copilot template.
+Please [see this video](https://aka.ms/InfoAssist/video) for use cases that may be achievable with Information Assistant agent template.
 
 # Response generation approaches
 
@@ -66,7 +66,7 @@ It generates response by using LLM as a reasoning engine. The key strength lies 
 
 ## Features
 
-The Information Assistant copilot template contains several features, many of which have their own documentation.
+The Information Assistant agent template contains several features, many of which have their own documentation.
 
 - Examples of custom Retrieval Augmented Generation (RAG), Prompt Engineering, and Document Pre-Processing
 - Azure AI Search Integration to include text search of both text documents and images
@@ -115,15 +115,15 @@ For a detailed review see our [Features](./docs/features/features.md) page.
 
 ## Deployment
 
-Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the Information Assistant copilot template in your Azure subscription.
+Please follow the instructions in [the deployment guide](/docs/deployment/deployment.md) to install the Information Assistant agent template in your Azure subscription.
 
-Once completed, follow the [instructions for using Information Assistant copilot template for the first time](/docs/deployment/using_ia_first_time.md).
+Once completed, follow the [instructions for using Information Assistant agent template for the first time](/docs/deployment/using_ia_first_time.md).
 
 You may choose to **[view the deployment and usage click-through guides](https://aka.ms/InfoAssist/deploy)** to see the steps in action. These videos may be useful to help clarify specific steps or actions in the instructions.
 
 ## Responsible AI
 
-The Information Assistant (IA) copilot template and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
+The Information Assistant (IA) agent template and Microsoft are committed to the advancement of AI driven by ethical principles that put people first.
 
 ### Transparency Note
 
@@ -151,7 +151,7 @@ The software may collect information about you and your use of the software and 
 
 ### About Data Collection
 
-Data collection by the software in this repository is used by Microsoft solely to help justify the efforts of the teams who build and maintain this copilot template for our customers. It is your choice to leave this enabled, or to disable data collection.
+Data collection by the software in this repository is used by Microsoft solely to help justify the efforts of the teams who build and maintain this agent template for our customers. It is your choice to leave this enabled, or to disable data collection.
 
 Data collection is implemented by the presence of a tracking GUID in the environment variables at deployment time. The GUID is associated with each Azure resource deployed by the installation scripts. This GUID is used by Microsoft to track the Azure consumption this open source solution generates.
 
@@ -177,13 +177,13 @@ docs/deployment/ | Detailed documentation on how to deploy and start using Infor
 docs/features/ | Detailed documentation of specific features and development level configuration for Information Assistant.
 docs/ | Other supporting documentation that is primarily linked to from the other markdown files.
 functions/ | The pipeline of Azure Functions that handle the document extraction and chunking as well as the custom CosmosDB logging.
-infra/ | The Terraform scripts that deploy the entire IA copilot template. The overall copilot template is orchestrated via the `main.tf` file but most of the resource deployments are modularized under the **core** folder.
-pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the copilot template.
+infra/ | The Terraform scripts that deploy the entire IA agent template. The overall agent template is orchestrated via the `main.tf` file but most of the resource deployments are modularized under the **core** folder.
+pipelines/ | Azure DevOps pipelines that can be used to enable CI/CD deployments of the agent template.
 scripts/environments/ | Deployment configuration files. This is where all external configuration values will be set.
 scripts/ | Supporting scripts that perform the various deployment tasks such as infrastructure deployment, Azure WebApp and Function deployments, building of the webapp and functions source code, etc. These scripts align to the available commands in the `Makefile`.
 tests/ | Functional Test scripts that are used to validate a deployed Information Assistant's document processing pipelines are working as expected.
 Makefile | Deployment command definitions and configurations. You can use `make help` to get more details on available commands.
-README.md | Starting point for this repo. It covers overviews of the copilot template, Responsible AI, Environment, Deployment, and Usage of the copilot template.
+README.md | Starting point for this repo. It covers overviews of the agent template, Responsible AI, Environment, Deployment, and Usage of the agent template.
 
 ### References
 
@@ -206,7 +206,7 @@ This project may contain trademarks or logos for projects, products, or services
 
 ## Microsoft Legal Notice
 
-**Notice**. The Information Assistant copilot template (the "IA") is PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. The IA may employ lesser or different privacy and security measures than those typically present in Azure Services. Unless otherwise noted, The IA should not be used to process Personal Data or other data that is subject to legal or regulatory compliance requirements. The following terms in the DPA do not apply to the IA: Processing of Personal Data, GDPR, Data Security, and HIPAA Business Associate. We may change or discontinue the IA at any time without notice. The IA (1) is not designed, intended, or made available as legal services, (2) is not intended to substitute for professional legal counsel or judgment, and (3) should not be used in place of consulting with a qualified professional legal professional for your specific needs. Microsoft makes no warranty that the IA is accurate, up-to-date, or complete. You are wholly responsible for ensuring your own compliance with all applicable laws and regulations. 
+**Notice**. The Information Assistant agent template (the "IA") is PROVIDED "AS-IS," "WITH ALL FAULTS," AND "AS AVAILABLE," AND ARE EXCLUDED FROM THE SERVICE LEVEL AGREEMENTS AND LIMITED WARRANTY. The IA may employ lesser or different privacy and security measures than those typically present in Azure Services. Unless otherwise noted, The IA should not be used to process Personal Data or other data that is subject to legal or regulatory compliance requirements. The following terms in the DPA do not apply to the IA: Processing of Personal Data, GDPR, Data Security, and HIPAA Business Associate. We may change or discontinue the IA at any time without notice. The IA (1) is not designed, intended, or made available as legal services, (2) is not intended to substitute for professional legal counsel or judgment, and (3) should not be used in place of consulting with a qualified professional legal professional for your specific needs. Microsoft makes no warranty that the IA is accurate, up-to-date, or complete. You are wholly responsible for ensuring your own compliance with all applicable laws and regulations. 
 
 ## Code of Conduct
 

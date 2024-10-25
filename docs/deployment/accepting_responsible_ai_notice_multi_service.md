@@ -1,6 +1,6 @@
 # Accepting Azure AI Services Multi-service Account Responsible AI Notice
 
-To be able to install the Information Assistant copilot template, you must have manually accepted the Azure AI Services Multi-service Account Responsible AI Notice once for your subscription. To do this follow these steps:
+To be able to install the Information Assistant agent template, you must have manually accepted the Azure AI Services Multi-service Account Responsible AI Notice once for your subscription. To do this follow these steps:
 
 ## Manually create an "Azure AI Services Multi-service Account" in your Azure subscription and accept "Responsible AI Notice"
 

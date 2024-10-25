@@ -1,6 +1,6 @@
-# Information Assistant (IA) copilot template optional features
+# Information Assistant (IA) agent template optional features
 
-Please see below sections for coverage of IA copilot template optional features.
+Please see below sections for coverage of IA agent template optional features.
 
 * [Configuring your own language ENV file](#configuring-your-own-language-env-file)
 * [Debugging functions](#debugging-functions)
@@ -15,7 +15,7 @@ Please see below sections for coverage of IA copilot template optional features.
 
 ## Configuring your own language ENV file
 
-At deployment time, you can alter the behavior of the IA copilot template to use a language of your choosing across it's Azure AI Search and Azure OpenAI prompting. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
+At deployment time, you can alter the behavior of the IA agent template to use a language of your choosing across it's Azure AI Search and Azure OpenAI prompting. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
 
 ## Debugging functions
 
@@ -35,7 +35,7 @@ Setting up a pipeline to deploy a new Sandbox environment requires some manual c
 
 ## Customer Usage Attribution
 
-A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant copilot template.
+A feature offered within Azure, "Customer Usage Attribution" associates usage from Azure resources in customer subscriptions created while deploying your IP with you as a partner. Forming these associations in internal Microsoft systems brings greater visibility to the Azure footprint running the Information Assistant agent template.
 
 Check out how to [enable Customer Usage Attribution](/docs/features/enable_customer_usage_attribution.md)
 

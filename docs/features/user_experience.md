@@ -1,6 +1,6 @@
 # User Experience
 
-The end user leverages the web interface as the primary method to engage with the Information Assistant (IA) copilot template, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
+The end user leverages the web interface as the primary method to engage with the Information Assistant (IA) agent template, and the Azure OpenAI service. The user interface is very similar to that of the OpenAI ChatGPT interface, though it provides different and additional functionality which is outlined below.
 
 ## Having a conversation with your data
 
@@ -10,7 +10,7 @@ When you use the "Chat" capabilities, the system maintains a history for your co
 
 > ![Chat Link](/docs/images/info-assist-chat-ui.png)
 
-There are new modes that extend the Information Assistant user experience. Similar to COPILOT, Information Assistant has a Work and a Web Mode called Work Only and Work + Web respectfully. There is also a Generative mode enabling user interaction with the LLM without grounding the response in their data.
+There are new modes that extend the Information Assistant user experience. Similar to Copilot, Information Assistant has a Work and a Web Mode called Work Only and Work + Web respectfully. There is also a Generative mode enabling user interaction with the LLM without grounding the response in their data.
 
 ## Work Only
 
@@ -113,7 +113,7 @@ Once a file has been uploaded the user can select an example query or enter thie
 
 ## Manage Content
 
-When you engage with IA copilot template in the "Manage Content" method, the system allows you to add new content and see the status of processing for content previously loaded into the IA copilot template.
+When you engage with IA agent template in the "Manage Content" method, the system allows you to add new content and see the status of processing for content previously loaded into the IA agent template.
 
 > You may activate the Manage Content engagement pattern by choosing the "Manage Content" link at the top of the page
 > ![Manage Content Link](/docs/images/manage-content-ui.png)

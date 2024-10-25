@@ -1,6 +1,6 @@
 # Configure Azure resources
 
-## Deploying the Information Assistant (IA) copilot template
+## Deploying the Information Assistant (IA) agent template
 
 Now that your Codespace/Dev Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
 
@@ -60,4 +60,4 @@ Once deployed, you can find the URL of your installation by:
 
 ## Next steps
 
-At this point deployment is complete. Please go to the [Using the IA copilot template for the first time](../README.md#using-ia-copilot-template-for-the-first-time) section and complete the following steps.
+At this point deployment is complete. Please go to the [Using the IA agent template for the first time](../README.md#using-ia-agent-template-for-the-first-time) section and complete the following steps.

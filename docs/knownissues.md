@@ -1,6 +1,6 @@
 # Known Issues
 
-Here are some commonly encountered issues when deploying the  Information Assistant copilot template.
+Here are some commonly encountered issues when deploying the  Information Assistant agent template.
 
 ## This subscription cannot create AzureAIServices until you agree to Responsible AI terms for this resource
 
@@ -57,7 +57,7 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ## Errors due to throttling or overloading Form Recognizer
 
-Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later or an internal error was returned by AI Document Intelligence in the FileFormRecPollingPDF function. This indicates the service has encountered internal capacity issues. Both of these situations will occur under heavy load, but the copilot template is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
+Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later or an internal error was returned by AI Document Intelligence in the FileFormRecPollingPDF function. This indicates the service has encountered internal capacity issues. Both of these situations will occur under heavy load, but the agent template is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
 
 ### Solution
 

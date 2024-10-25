@@ -48,7 +48,7 @@ const Content = () => {
                             <SparkleFilled fontSize={"60px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Supported File Types" />
                             <h1 className={styles.EmptyStateTitle}>Supported file types</h1>
                             <span className={styles.EmptyObjectives}>
-                                The Information Assistant copilot template currently supports the following file types:
+                                The Information Assistant agent template currently supports the following file types:
                             </span>
                             <span className={styles.EmptyObjectivesList}>
                                 <span className={styles.EmptyObjectivesListItem}>

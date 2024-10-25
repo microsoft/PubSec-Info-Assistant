@@ -1,16 +1,16 @@
-# Information Assistant (IA) copilot template Secure Mode - Estimation
+# Information Assistant (IA) agent template Secure Mode - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA copilot template secure mode and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA agent template secure mode and provides cost estimates based on the chosen configurations.
 
 | Solution            | Mode | Environment  |    Azure Pricing Calculator Link  |
 | :------------------:|:---------:|:---------------:|:-------------------:|
-| IA copilot template, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/192838582a644d02bd03bd07da650517) |
+| IA agent template, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/192838582a644d02bd03bd07da650517) |
 
 ---
 
 ## Azure Services
 
-The following list of Azure Services will be deployed for IA copilot template secure mode:
+The following list of Azure Services will be deployed for IA agent template secure mode:
 
 - App Service (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Application Insights [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)

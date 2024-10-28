@@ -60,4 +60,4 @@ Once deployed, you can find the URL of your installation by:
 
 ## Next steps
 
-At this point deployment is complete. Please go to the [Using the IA agent template for the first time](../README.md#using-ia-agent-template-for-the-first-time) section and complete the following steps.
+At this point deployment is complete. Please follow the [instructions for using the IA agent template for the first time](/docs/deployment/using_ia_first_time.md).

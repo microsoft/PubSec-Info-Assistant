@@ -1,14 +1,14 @@
-# Information Assistant (IA) copilot template - Estimation
+# Information Assistant (IA) agent template - Estimation
 
-The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for Information Assistant copilot template, version 1.2, and provides cost estimates based on the chosen configurations.
+The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for Information Assistant agent template, version 1.2, and provides cost estimates based on the chosen configurations.
 
 | Solution            | Environment  |    Azure Pricing Calculator Link                                          |
 | :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA copilot template, version 1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/bd6e516bb0b549abb6d39cce088af684) |
+| IA agent template, version 1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/bd6e516bb0b549abb6d39cce088af684) |
 
 ## Azure Services
 
-The following list of Azure Services will be deployed for IA copilot template, version 1.2:
+The following list of Azure Services will be deployed for IA agent template, version 1.2:
 
 - App Service (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/app-service/linux/)
 - Application Insights [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)

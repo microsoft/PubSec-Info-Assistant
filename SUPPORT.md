@@ -10,7 +10,7 @@ Please provide as much information as possible when filing an issue (please reda
 
 For help and questions about using this project, please use the [Discussion](https://github.com/microsoft/PubSec-Info-Assistant/discussions) forums on our GitHub repo page.
 
-For customer support deploying Information Assistant copilot template, please reach out to your local Microsoft representative or email the [Public Sector Industries & Regulated Products Accelerators Team](mailto:isat-support@microsoft.com).
+For customer support deploying Information Assistant agent template, please reach out to your local Microsoft representative or email the [Public Sector Industries & Regulated Products Accelerators Team](mailto:isat-support@microsoft.com).
 
 ## Providing feedback
 

@@ -88,7 +88,7 @@ In your Ubuntu 22.04(WSL) terminal from the previous step, follow the directions
 
 ## Configure Local Development Environment
 
-Follow these steps to get the copilot template up and running in a subscription of your choice.
+Follow these steps to get the agent template up and running in a subscription of your choice.
 
 ### Clone Repo
 

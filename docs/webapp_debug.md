@@ -1,6 +1,6 @@
 # Debugging the Information Assistant Web App in VS Code
 
-If you wish to debug the user interface, or web app that as part of this copilot template, you can do this locally in VS Code and step through the logic. 
+If you wish to debug the user interface, or web app that as part of this agent template, you can do this locally in VS Code and step through the logic. 
 
 The app consists of two layers, namely the frontend user interface components and the backend logic components. As a user interacts with the user interface, they are engaging with the frontend code, and control is passed to the back end code as needed, for example to make calls to the Azure OpenAI service.
 

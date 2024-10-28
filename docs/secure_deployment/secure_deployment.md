@@ -176,7 +176,7 @@ See [Virtual network and subnet CIDRs](#network-and-subnet-cidr-configuration) s
 
 ## Sizing estimator
 
-The IA copilot template secure mode needs to be sized appropriately based on your use case. Please review our [sizing estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
+The IA agent template secure mode needs to be sized appropriately based on your use case. Please review our [sizing estimator](/docs/secure_deployment/secure_costestimator.md) to help find the configuration that fits your needs.
 
 To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
 
@@ -322,7 +322,7 @@ To perform a secure mode deployment, follow these steps:
 21. You should now be able to verify you can resolve the private IP of the Information Assistant. `nslookup` is installed in the Codespace for this use.
 22. Now answer `y` to the connectivity prompt and let the deployment complete. If your deployment has stopped, you can simply run `make deploy` again to get back to the connectivity prompt.
 
-Once deployed only the Azure App Service named like, *infoasst-web-xxxxx*, will be accessible without the VPN established. You can share the URL of the website with users to start using the Information Assistant copilot template.
+Once deployed only the Azure App Service named like, *infoasst-web-xxxxx*, will be accessible without the VPN established. You can share the URL of the website with users to start using the Information Assistant agent template.
 
 ## Additional considerations for secure mode deployment
 
@@ -379,7 +379,7 @@ and the reciprocal setting of:
 
 * Enable '*infoasst-vnet-xxxxx*' to use '*my VPN virtual network's*' remote gateway or route server
 
-This will ensure that the Azure DNS private resolver set up by the Information Assistant copilot template can resolve traffic properly to your VPN connection.
+This will ensure that the Azure DNS private resolver set up by the Information Assistant agent template can resolve traffic properly to your VPN connection.
 
 ### Deploying with Microsoft Cloud for Sovereignty
 
@@ -388,7 +388,7 @@ The [Sovereign Landing Zone (SLZ)](https://aka.ms/slz) is a [Microsoft Cloud for
 For a detailed overview of an SLZ and all its capabilities, see [Sovereign Landing Zone](https://github.com/Azure/sovereign-landing-zone) documentation on GitHub. Also, [review the sample reference architecutre and guidance for deploying LLMs and Azure OpenAI in Retrieval Augmented Generation (RAG) pattern for implementations with the SLZ](https://learn.microsoft.com/industry/sovereignty/architecture/AIwithLLM/overview-ai-llm-configuration).
 
 
-Information Assistant copilot template is compatible with the *Online* management group scope. Within a SLZ deployment, you can find an established Connectivity management group where an existing virtual network and infrastructure already exist.
+Information Assistant agent template is compatible with the *Online* management group scope. Within a SLZ deployment, you can find an established Connectivity management group where an existing virtual network and infrastructure already exist.
 
 >We recommend that connectivity to Information Assistant in the *Online* management group be made accessible by peering the Information Assistant virtual network with the existing virtual network within the SLZ Connectivity management group.
 

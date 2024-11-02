@@ -1,5 +1,5 @@
 # Use the official Python image from Microsoft for Azure App Service
-FROM mcr.microsoft.com/devcontainers/python:3.10
+FROM mcr.microsoft.com/devcontainers/python:3.12
 
 # Set the working directory
 WORKDIR /app

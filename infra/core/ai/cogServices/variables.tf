@@ -3,26 +3,22 @@ variable "name" {
 }
 
 variable "location" {
-  type    = string
-  default = "" 
+  type = string
+  default = ""
 }
 
 variable "tags" {
-  type    = map(string)
+  type = map(string)
   default = {}
 }
 
 variable "sku" {
-  type = object({
-    name = string
-  })
-  default = {
-    name = "S0"
-  }
+  type = string
+  default = "standard"
 }
 
 variable "resourceGroupName" {
-  type    = string
+  type = string
   default = ""
 }
 
@@ -49,13 +45,13 @@ variable "arm_template_schema_mgmt_api" {
 
 variable "kv_secret_expiration" {
   type = string
-  description = "The value for key vault secret expiration in  seconds since 1970-01-01T00:00:00Z"
+  description = "The value for key vault secret expiration in seconds since 1970-01-01T00:00:00Z"
 }
 
 variable "subnet_name" {
-  type    = string
+  type = string
 }
 
 variable "vnet_name" {
-  type    = string
+  type = string
 }

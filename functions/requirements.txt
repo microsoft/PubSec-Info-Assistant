@@ -4,18 +4,46 @@
 
 #### Any version change made here should also be made and tested for the web apps in /app/backend and /app/enrichment
 
+# Azure Functions dependencies (replace with on-premises equivalents if needed)
 azure-functions == 1.17.0
+
+# Tokenization library
 tiktoken==0.7.0
-azure.ai.formrecognizer==3.2.1
-azure-storage-blob==12.20.0
-azure-core == 1.30.2
-lxml == 4.9.2
-azure-cosmos == 4.7.0
-azure-storage-queue == 12.6.0
+
+# Replace Azure Form Recognizer with Tesseract or other OCR library
+pytesseract==0.3.8
+
+# Replace Azure Storage Blob with MinIO or other storage library
+minio==7.1.0
+
+# Core libraries for on-premises services
+requests==2.26.0
+
+# Replace Azure Cosmos DB with MongoDB or PostgreSQL
+pymongo==3.12.0
+SQLAlchemy==1.4.25
+psycopg2-binary==2.9.1
+
+# Replace Azure Storage Queue with RabbitMQ or other queue service
+pika==1.2.0
+
+# Natural Language Toolkit
 nltk == 3.9.1
+
+# Retry library
 tenacity == 8.2.3
+
+# Unstructured data processing library
 unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.15.9
+
+# Python OpenOffice library
 pyoo == 1.4
-azure-search-documents == 11.4.0b11
+
+# Replace Azure Search Documents with Elasticsearch or Apache Solr
+elasticsearch==7.14.0
+
+# Beautiful Soup for web scraping
 beautifulsoup4 == 4.12.2
-azure-identity==1.17.1
+
+# Replace Azure Identity with on-premises identity management
+python-dotenv==0.19.0

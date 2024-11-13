@@ -1,28 +1,78 @@
 #### Any version change made here should also be made and tested for the enrichment and function apps in /functions and /app/enrichment
-azure-identity==1.16.1
+
+# Replace Azure Identity with on-premises identity management
+python-dotenv==0.19.0
+
+# Flask web framework
 Flask==2.3.2
+
+# LangChain library
 langchain==0.2.10
-azure-mgmt-cognitiveservices==13.5.0
-openai==1.35.8
-# azure-search-documents==11.4.0
-azure-search-documents==11.4.0b11
-azure-storage-blob==12.20.0
-azure-cosmos == 4.7.0
+
+# Replace Azure Cognitive Services Management with on-premises equivalents
+requests==2.26.0
+
+# Replace OpenAI API client with open-source models
+transformers==4.11.3
+
+# Replace Azure Search Documents with Elasticsearch or Apache Solr
+elasticsearch==7.14.0
+
+# Replace Azure Storage Blob with MinIO or other storage library
+minio==7.1.0
+
+# Replace Azure Cosmos DB with MongoDB or PostgreSQL
+pymongo==3.12.0
+SQLAlchemy==1.4.25
+psycopg2-binary==2.9.1
+
+# Tokenization library
 tiktoken == 0.7.0
+
+# FastAPI web framework
 fastapi == 0.109.1
+
+# FastAPI utilities
 fastapi-utils == 0.2.1
+
+# Uvicorn ASGI server
 uvicorn == 0.23.2
+
+# Numerical expression library
 numexpr == 2.10.0
+
+# LangChain experimental features
 langchain-experimental==0.0.62
+
+# Microsoft Bing Web Search API client
 microsoft-bing-websearch==1.0.0
+
+# Tabulate library for pretty-printing tabular data
 tabulate==0.9.0
+
+# Matplotlib for plotting
 matplotlib==3.8.3
+
+# Python-dotenv for loading environment variables from a .env file
 python-dotenv==1.0.1
+
+# Pandas for data manipulation
 pandas==2.2.1
+
+# Python Multipart for handling file uploads
 python-multipart==0.0.9
+
+# Python Imaging Library
 Pillow==10.3.0
+
+# Wikipedia API client
 wikipedia==1.4.0
+
+# LangChain OpenAI integration
 langchain-openai == 0.1.14
+
+# Pytest for testing
 pytest==8.2.1
-python-dotenv==1.0.1
-langchain-community==0.2.9 
+
+# LangChain community features
+langchain-community==0.2.9

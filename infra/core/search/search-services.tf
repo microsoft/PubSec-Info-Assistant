@@ -1,45 +1,126 @@
-
-resource "azurerm_search_service" "search" {
-  name                          = var.name
-  location                      = var.location
-  resource_group_name           = var.resourceGroupName
-  sku                           = var.sku["name"]
-  tags                          = var.tags
-  public_network_access_enabled = var.is_secure_mode ? false : true
-  local_authentication_enabled  = false
-  replica_count                 = 1
-  partition_count               = 1
-  semantic_search_sku           = var.semanticSearch 
-
-  identity {
-    type = "SystemAssigned"
+# Kubernetes namespace for the search service
+resource "kubernetes_namespace" "search" {
+  metadata {
+    name = "search"
   }
 }
 
-data "azurerm_subnet" "subnet" {
-  count                = var.is_secure_mode ? 1 : 0
-  name                 = var.subnet_name
-  virtual_network_name = var.vnet_name
-  resource_group_name  = var.resourceGroupName
-}
-
-resource "azurerm_private_endpoint" "searchPrivateEndpoint" {
-  count                         = var.is_secure_mode ? 1 : 0
-  name                          = "${var.name}-private-endpoint"
-  location                      = var.location
-  resource_group_name           = var.resourceGroupName
-  subnet_id                     = data.azurerm_subnet.subnet[0].id
-  custom_network_interface_name = "infoasstsearchnic"
-
-  private_service_connection {
-    name                           = "${var.name}-private-link-service-connection"
-    private_connection_resource_id = azurerm_search_service.search.id
-    is_manual_connection           = false
-    subresource_names              = ["searchService"]
+# Kubernetes deployment for the search service
+resource "kubernetes_deployment" "elasticsearch" {
+  metadata {
+    name      = "elasticsearch"
+    namespace = kubernetes_namespace.search.metadata[0].name
   }
 
-  private_dns_zone_group {
-    name                 = "${var.name}PrivateDnsZoneGroup"
-    private_dns_zone_ids = var.private_dns_zone_ids
+  spec {
+    replicas = 3
+
+    selector {
+      match_labels = {
+        app = "elasticsearch"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "elasticsearch"
+        }
+      }
+
+      spec {
+        container {
+          name  = "elasticsearch"
+          image = "localhost:5000/searchapp:latest"
+
+          ports {
+            container_port = 9200
+          }
+
+          env {
+            name  = "discovery.type"
+            value = "single-node"
+          }
+        }
+
+        volume_mount {
+          name       = "search-storage"
+          mount_path = "/usr/share/elasticsearch/data"
+        }
+      }
+
+      volume {
+        name = "search-storage"
+
+        host_path {
+          path = "/mnt/data"
+        }
+      }
+    }
+  }
+}
+
+# Kubernetes service for the search service
+resource "kubernetes_service" "elasticsearch" {
+  metadata {
+    name      = "elasticsearch-service"
+    namespace = kubernetes_namespace.search.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "elasticsearch"
+    }
+
+    port {
+      port        = 9200
+      target_port = 9200
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+# Kubernetes role assignment for container registry pull
+resource "kubernetes_role_binding" "acr_pull_role" {
+  metadata {
+    name      = "acr-pull-role"
+    namespace = kubernetes_namespace.search.metadata[0].name
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "system:registry"
+  }
+
+  subjects {
+    kind      = "ServiceAccount"
+    name      = "default"
+    namespace = kubernetes_namespace.search.metadata[0].name
+  }
+}
+
+# Kubernetes secret for storage account access key
+resource "kubernetes_secret" "storage_account" {
+  metadata {
+    name      = "storage-account-secret"
+    namespace = kubernetes_namespace.search.metadata[0].name
+  }
+
+  data = {
+    storage_account_access_key = base64encode("your_storage_account_access_key")
+  }
+}
+
+# Kubernetes config map for search service settings
+resource "kubernetes_config_map" "search_settings" {
+  metadata {
+    name      = "search-settings"
+    namespace = kubernetes_namespace.search.metadata[0].name
+  }
+
+  data = {
+    discovery.type = "single-node"
   }
 }

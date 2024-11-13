@@ -1,264 +1,263 @@
-// Create Enrichment App Service Plan 
-resource "azurerm_service_plan" "appServicePlan" {
-  name                          = var.plan_name
-  location                      = var.location
-  resource_group_name           = var.resourceGroupName
-  sku_name                      = var.sku["size"]
-  worker_count                  = var.sku["capacity"]
-  os_type                       = "Linux"
-  tags                          = var.tags
-  per_site_scaling_enabled      = false
-  zone_balancing_enabled        = false
+# Kubernetes namespace for the enrichment app
+resource "kubernetes_namespace" "enrichment" {
+  metadata {
+    name = "enrichment"
+  }
 }
 
-resource "azurerm_monitor_autoscale_setting" "scaleout" {
-  name                = azurerm_service_plan.appServicePlan.name
-  resource_group_name = var.resourceGroupName
-  location            = var.location
-  target_resource_id  = azurerm_service_plan.appServicePlan.id
+# Kubernetes deployment for the enrichment app
+resource "kubernetes_deployment" "enrichment_app" {
+  metadata {
+    name      = "enrichment-app"
+    namespace = kubernetes_namespace.enrichment.metadata[0].name
+  }
 
-  profile {
-    name = "Scale out condition"
-    capacity {
-      default = 1
-      minimum = 1
-      maximum = 5
-    }
+  spec {
+    replicas = 2
 
-    rule {
-      metric_trigger {
-        metric_name         = "CpuPercentage"
-        metric_resource_id  = azurerm_service_plan.appServicePlan.id
-        time_grain          = "PT1M"
-        statistic           = "Average"
-        time_window         = "PT5M"
-        time_aggregation    = "Average"
-        operator            = "GreaterThan"
-        threshold           = 60
-      }
-
-      scale_action {
-        direction = "Increase"
-        type      = "ChangeCount"
-        value     = "1"
-        cooldown  = "PT5M"
+    selector {
+      match_labels = {
+        app = "enrichment-app"
       }
     }
 
-    rule {
-      metric_trigger {
-        metric_name         = "CpuPercentage"
-        metric_resource_id  = azurerm_service_plan.appServicePlan.id
-        time_grain          = "PT1M"
-        statistic           = "Average"
-        time_window         = "PT10M"
-        time_aggregation    = "Average"
-        operator            = "LessThan"
-        threshold           = 20
+    template {
+      metadata {
+        labels = {
+          app = "enrichment-app"
+        }
       }
 
-      scale_action {
-        direction = "Decrease"
-        type      = "ChangeCount"
-        value     = "1"
-        cooldown  = "PT15M"
+      spec {
+        container {
+          name  = "enrichment-app"
+          image = "localhost:5000/enrichmentapp:latest"
+
+          ports {
+            container_port = 80
+          }
+
+          env {
+            name  = "FUNCTIONS_WORKER_RUNTIME"
+            value = "python"
+          }
+
+          env {
+            name  = "WEBSITE_RUN_FROM_PACKAGE"
+            value = "1"
+          }
+
+          env {
+            name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
+            value = "your_application_insights_connection_string"
+          }
+
+          env {
+            name  = "APPINSIGHTS_INSTRUMENTATIONKEY"
+            value = "your_application_insights_instrumentation_key"
+          }
+
+          env {
+            name  = "BLOB_STORAGE_ACCOUNT"
+            value = "minio"
+          }
+
+          env {
+            name  = "BLOB_STORAGE_ACCOUNT_ENDPOINT"
+            value = "http://minio-service:9000"
+          }
+
+          env {
+            name  = "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
+            value = "upload"
+          }
+
+          env {
+            name  = "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
+            value = "output"
+          }
+
+          env {
+            name  = "BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"
+            value = "logs"
+          }
+
+          env {
+            name  = "AZURE_QUEUE_STORAGE_ENDPOINT"
+            value = "http://minio-service:9000"
+          }
+
+          env {
+            name  = "CHUNK_TARGET_SIZE"
+            value = "500"
+          }
+
+          env {
+            name  = "TARGET_PAGES"
+            value = "10"
+          }
+
+          env {
+            name  = "FR_API_VERSION"
+            value = "v2.1"
+          }
+
+          env {
+            name  = "AZURE_FORM_RECOGNIZER_ENDPOINT"
+            value = "http://tesseract-service:80"
+          }
+
+          env {
+            name  = "COSMOSDB_URL"
+            value = "mongodb://mongodb-service:27017"
+          }
+
+          env {
+            name  = "COSMOSDB_LOG_DATABASE_NAME"
+            value = "logdb"
+          }
+
+          env {
+            name  = "COSMOSDB_LOG_CONTAINER_NAME"
+            value = "logcontainer"
+          }
+
+          env {
+            name  = "PDF_SUBMIT_QUEUE"
+            value = "pdfsubmitqueue"
+          }
+
+          env {
+            name  = "PDF_POLLING_QUEUE"
+            value = "pdfpollingqueue"
+          }
+
+          env {
+            name  = "NON_PDF_SUBMIT_QUEUE"
+            value = "nonpdfsubmitqueue"
+          }
+
+          env {
+            name  = "MEDIA_SUBMIT_QUEUE"
+            value = "mediasubmitqueue"
+          }
+
+          env {
+            name  = "TEXT_ENRICHMENT_QUEUE"
+            value = "textenrichmentqueue"
+          }
+
+          env {
+            name  = "IMAGE_ENRICHMENT_QUEUE"
+            value = "imageenrichmentqueue"
+          }
+
+          env {
+            name  = "MAX_SECONDS_HIDE_ON_UPLOAD"
+            value = "60"
+          }
+
+          env {
+            name  = "MAX_SUBMIT_REQUEUE_COUNT"
+            value = "5"
+          }
+
+          env {
+            name  = "POLL_QUEUE_SUBMIT_BACKOFF"
+            value = "30"
+          }
+
+          env {
+            name  = "PDF_SUBMIT_QUEUE_BACKOFF"
+            value = "30"
+          }
+        }
+
+        volume_mount {
+          name       = "enrichment-storage"
+          mount_path = "/data"
+        }
+      }
+
+      volume {
+        name = "enrichment-storage"
+
+        host_path {
+          path = "/mnt/data"
+        }
       }
     }
   }
 }
 
-# Create the Enrichment App Service
-resource "azurerm_linux_web_app" "enrichmentapp" {
-  name                                            = var.name
-  location                                        = var.location
-  resource_group_name                             = var.resourceGroupName
-  service_plan_id                                 = azurerm_service_plan.appServicePlan.id
-  https_only                                      = true
-  tags                                            = var.tags
-  webdeploy_publish_basic_authentication_enabled  = false
-  client_affinity_enabled                         = false
-  enabled                                         = true
-  public_network_access_enabled                   = var.is_secure_mode ? false : true
-  virtual_network_subnet_id                       = var.is_secure_mode ? var.subnetIntegration_id : null
-  site_config {
-    always_on                                     = var.alwaysOn
-    app_command_line                              = var.appCommandLine
-    ftps_state                                    = var.ftpsState
-    health_check_path                             = var.healthCheckPath
-    health_check_eviction_time_in_min             = 10
-    http2_enabled                                 = true
-    use_32_bit_worker                             = false
-    worker_count                                  = 1
-    container_registry_use_managed_identity       = true
+# Kubernetes service for the enrichment app
+resource "kubernetes_service" "enrichment_app" {
+  metadata {
+    name      = "enrichment-app-service"
+    namespace = kubernetes_namespace.enrichment.metadata[0].name
+  }
 
-    application_stack {
-      docker_image_name         = "${var.container_registry}/enrichmentapp:latest"
-      docker_registry_url       = "https://${var.container_registry}"
-      docker_registry_username  = var.container_registry_admin_username
-      docker_registry_password  = var.container_registry_admin_password
+  spec {
+    selector = {
+      app = "enrichment-app"
     }
-  }
 
-  app_settings = merge(
-    var.appSettings,
-    {
-      "SCM_DO_BUILD_DURING_DEPLOYMENT"            = lower(tostring(var.scmDoBuildDuringDeployment))
-      "ENABLE_ORYX_BUILD"                         = tostring(var.enableOryxBuild)
-      "APPLICATIONINSIGHTS_CONNECTION_STRING"     = var.applicationInsightsConnectionString
-      "KEY_EXPIRATION_DATE"                       = timeadd(timestamp(), "4320h") # Added expiration date setting for keys
-      "WEBSITE_PULL_IMAGE_OVER_VNET"              = var.is_secure_mode ? "true" : "false"
-      "WEBSITES_PORT"                             = "6000"
-      "WEBSITES_CONTAINER_START_TIME_LIMIT"       = "1600"
-      "WEBSITES_ENABLE_APP_SERVICE_STORAGE"       = "false"
+    port {
+      port        = 80
+      target_port = 80
     }
-  )
 
-  identity {
-    type = var.managedIdentity ? "SystemAssigned" : null
-  }
-
-  logs {
-    application_logs {
-      file_system_level = "Verbose"
-    }
-    http_logs {
-      file_system {
-        retention_in_days = 1
-        retention_in_mb   = 35
-      }
-    }
-    failed_request_tracing = true
-  }
-
-}
-
-resource "azurerm_role_assignment" "acr_pull_role" {
-  principal_id         = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
-  role_definition_name = "AcrPull"
-  scope                = var.container_registry_id
-}
-
-resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_commercial" {
-  count                      = var.azure_environment == "AzureUSGovernment" ? 0 : 1
-  name                       = azurerm_linux_web_app.enrichmentapp.name
-  target_resource_id         = azurerm_linux_web_app.enrichmentapp.id
-  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
-
-  enabled_log  {
-    category = "AppServiceAppLogs"
-  }
-
-  enabled_log {
-    category = "AppServicePlatformLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceConsoleLogs"
-  }
-  
-  enabled_log {
-    category = "AppServiceIPSecAuditLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceHTTPLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceAuditLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceAuthenticationLogs"
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
+    type = "LoadBalancer"
   }
 }
 
-resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs_usgov" {
-  count                      = var.azure_environment == "AzureUSGovernment" ? 1 : 0
-  name                       = azurerm_linux_web_app.enrichmentapp.name
-  target_resource_id         = azurerm_linux_web_app.enrichmentapp.id
-  log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
-
-  enabled_log  {
-    category = "AppServiceAppLogs"
+# Kubernetes role assignment for container registry pull
+resource "kubernetes_role_binding" "acr_pull_role" {
+  metadata {
+    name      = "acr-pull-role"
+    namespace = kubernetes_namespace.enrichment.metadata[0].name
   }
 
-  enabled_log {
-    category = "AppServicePlatformLogs"
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "system:registry"
   }
 
-  enabled_log {
-    category = "AppServiceConsoleLogs"
-  }
-  
-  enabled_log {
-    category = "AppServiceIPSecAuditLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceHTTPLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceAuditLogs"
-  }
-
-  enabled_log {
-    category = "AppServiceFileAuditLogs"
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
+  subjects {
+    kind      = "ServiceAccount"
+    name      = "default"
+    namespace = kubernetes_namespace.enrichment.metadata[0].name
   }
 }
 
-data "azurerm_subnet" "subnet" {
-  count                = var.is_secure_mode ? 1 : 0
-  name                 = var.subnet_name
-  virtual_network_name = var.vnet_name
-  resource_group_name  = var.resourceGroupName
-}
-
-resource "azurerm_private_endpoint" "privateEnrichmentEndpoint" {
-  count                         = var.is_secure_mode ? 1 : 0
-  name                          = "${var.name}-private-endpoint"
-  location                      = var.location
-  resource_group_name           = var.resourceGroupName
-  subnet_id                     = data.azurerm_subnet.subnet[0].id
-  custom_network_interface_name = "infoasstenrichnic"
-
-  private_dns_zone_group {
-    name = "privatednszonegroup"
-    private_dns_zone_ids = var.private_dns_zone_ids
+# Kubernetes secret for storage account access key
+resource "kubernetes_secret" "storage_account" {
+  metadata {
+    name      = "storage-account-secret"
+    namespace = kubernetes_namespace.enrichment.metadata[0].name
   }
 
-  private_service_connection {
-    name = "enrichementprivateendpointconnection"
-    private_connection_resource_id = azurerm_linux_web_app.enrichmentapp.id
-    subresource_names = ["sites"]
-    is_manual_connection = false
+  data = {
+    storage_account_access_key = base64encode("your_storage_account_access_key")
   }
 }
 
-data "azurerm_key_vault" "existing" {
-  name                = var.keyVaultName
-  resource_group_name = var.resourceGroupName
-}
+# Kubernetes config map for enrichment app settings
+resource "kubernetes_config_map" "enrichment_app_settings" {
+  metadata {
+    name      = "enrichment-app-settings"
+    namespace = kubernetes_namespace.enrichment.metadata[0].name
+  }
 
-resource "azurerm_key_vault_access_policy" "policy" {
-  key_vault_id = data.azurerm_key_vault.existing.id
-
-  tenant_id = azurerm_linux_web_app.enrichmentapp.identity.0.tenant_id
-  object_id = azurerm_linux_web_app.enrichmentapp.identity.0.principal_id
-
-  secret_permissions = [
-    "Get",
-    "List"
-  ]
+  data = {
+    SCM_DO_BUILD_DURING_DEPLOYMENT            = "false"
+    ENABLE_ORYX_BUILD                         = "false"
+    APPLICATIONINSIGHTS_CONNECTION_STRING     = "your_application_insights_connection_string"
+    KEY_EXPIRATION_DATE                       = "4320h"
+    WEBSITE_PULL_IMAGE_OVER_VNET              = "false"
+    WEBSITES_PORT                             = "6000"
+    WEBSITES_CONTAINER_START_TIME_LIMIT       = "1600"
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE       = "false"
+  }
 }

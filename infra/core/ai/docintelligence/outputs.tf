@@ -1,19 +1,9 @@
-output "formRecognizerAccountName" {
-  value = azurerm_cognitive_account.docIntelligenceAccount.name
+output "docintelligence_container_id" {
+  value       = docker_container.docintelligence.id
+  description = "The ID of the Docker container running Tesseract for Document Intelligence"
 }
 
-output "formRecognizerAccountEndpoint" {
-  value = azurerm_cognitive_account.docIntelligenceAccount.endpoint
-}
-
-output "formRecognizerAccount" {
-  value = azurerm_cognitive_account.docIntelligenceAccount.id
-}
-
-output "formPrivateEndpoint" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.docintPrivateEndpoint[0].id : null
-}
-
-output "docIntelligenceIdentity" {
-  value = azurerm_cognitive_account.docIntelligenceAccount.identity[0].principal_id
+output "docintelligence_container_endpoint" {
+  value       = "http://${docker_container.docintelligence.name}:${docker_container.docintelligence.ports[0].external}"
+  description = "The endpoint of the Docker container running Tesseract for Document Intelligence"
 }

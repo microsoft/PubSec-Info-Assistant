@@ -1,21 +1,33 @@
+/* # Copyright (c) DataReason.
+### Code for On-Premises Deployment.*/
+
 {
-    "azureFunctions.deploySubpath": "functions",
-    "azureFunctions.scmDoBuildDuringDeployment": true,
-    "azureFunctions.pythonVenv": ".venv",
-    "azureFunctions.projectLanguage": "Python",
-    "azureFunctions.projectRuntime": "~4",
-    "debug.internalConsoleOptions": "neverOpen",
-    "spellright.language": [
-        "en"
-    ],
-    "spellright.documentTypes": [
-        "markdown",
-        "latex",
-        "plaintext",
-        "shellscript"
-    ],
-    "cSpell.words": [
-        "Codespaces",
-        "referenceable"
-    ]
+  "python.pythonPath": ".venv/bin/python",
+  "python.languageServer": "Pylance",
+  "python.formatting.provider": "black",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/*/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true
+  },
+  "docker.dockerComposeBuild": true,
+  "docker.dockerComposeUp": true
 }
+
+#Explanation
+#Python Path: Setting the Python path to the virtual environment.
+#Language Server: Using Pylance for Python language support.
+#Formatting: Using Black for code formatting.
+#Format on Save: Enabling format on save.
+#Code Actions on Save: Enabling ESLint fixes on save.
+#File Exclusions: Excluding __pycache__ and .pyc files.
+#Watcher Exclusions: Excluding node_modules and .git directories.
+#Docker: Enabling Docker Compose build and up commands.

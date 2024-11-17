@@ -1,11 +1,10 @@
-output "id" {
-  value = jsondecode(azurerm_resource_group_template_deployment.bing_search.output_content).id.value
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+output "bing_search_index_name" {
+  value = elasticsearch_index.bing_search.name
 }
 
-output "endpoint" {
-  value = jsondecode(azurerm_resource_group_template_deployment.bing_search.output_content).endpoint.value
-}
-
-output "key" {
-  value = jsondecode(azurerm_resource_group_template_deployment.bing_search.output_content).key1.value
+output "bing_search_key_index_name" {
+  value = elasticsearch_index.bing_search_key.name
 }

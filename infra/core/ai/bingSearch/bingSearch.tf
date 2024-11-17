@@ -1,34 +1,47 @@
-locals {
-  arm_file_path = "arm_templates/bing_search/bing.template.json"
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+provider "elasticsearch" {
+  url = var.elasticsearch_url
 }
 
-resource "azurerm_resource_group_template_deployment" "bing_search" {
-  resource_group_name = var.resourceGroupName
-  parameters_content = jsonencode({
-    "name"                      = { value = "${var.name}" },
-    "location"                  = { value = "Global" },
-    "sku"                       = { value = "${var.sku}" },
-    "tags"                      = { value = var.tags },
-  })
-  
-  template_content = templatefile(local.arm_file_path, {
-    arm_template_schema_mgmt_api = var.arm_template_schema_mgmt_api
-  })
-  # The filemd5 forces this to run when the file is changed
-  # this ensures the keys are up-to-date
-  name            = "bingsearch-${filemd5(local.arm_file_path)}"
-  deployment_mode = "Incremental"
+resource "elasticsearch_index" "bing_search" {
+  name = "bingsearch-${var.randomString}"
+  settings = <<SETTINGS
+{
+  "index": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  }
+}
+SETTINGS
+  mappings = <<MAPPINGS
+{
+  "properties": {
+    "name": { "type": "text" },
+    "location": { "type": "text" },
+    "sku": { "type": "text" },
+    "tags": { "type": "object" }
+  }
+}
+MAPPINGS
 }
 
-module "bing_search_key" {
-  source                        = "../../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "BINGSEARCH-KEY"
-  secret_value                  = jsondecode(azurerm_resource_group_template_deployment.bing_search.output_content).key1.value
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  alias                         = "bingkey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
-  contentType                   = "application/vnd.bag-StrongEncPasswordString"
+resource "elasticsearch_index" "bing_search_key" {
+  name = "bingsearch-key-${var.randomString}"
+  settings = <<SETTINGS
+{
+  "index": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  }
+}
+SETTINGS
+  mappings = <<MAPPINGS
+{
+  "properties": {
+    "key": { "type": "text" }
+  }
+}
+MAPPINGS
 }

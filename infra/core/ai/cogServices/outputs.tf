@@ -1,23 +1,10 @@
-output "cognitiveServicerAccountName" {
-  value = azurerm_cognitive_account.cognitiveService.name
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+output "cog_services_config_file" {
+  value = local_file.cog_services_config.filename
 }
 
-output "cognitiveServiceID" {
-  value = azurerm_cognitive_account.cognitiveService.id
-}
-
-output "cognitiveServiceEndpoint" {
-  value = azurerm_cognitive_account.cognitiveService.endpoint
-}
-
-output "privateEndpointName" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.accountPrivateEndpoint[0].name : null
-}
-
-output "privateEndpointId" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.accountPrivateEndpoint[0].id : null
-}
-
-output "privateEndpointIp" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.accountPrivateEndpoint[0].private_service_connection[0].private_ip_address : null
+output "cog_services_key_file" {
+  value = local_file.cog_services_key.filename
 }

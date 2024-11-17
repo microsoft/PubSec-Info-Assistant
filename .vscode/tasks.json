@@ -1,14 +1,16 @@
+/* # Copyright (c) DataReason.
+### Code for On-Premises Deployment. */
 {
   "version": "2.0.0",
-  "tasks": [    
+  "tasks": [
     {
-      "label": "pip_install",
+      "label": "pip install",
       "type": "shell",
       "command": "pip",
       "args": [
         "install",
         "-r",
-        "${workspaceFolder}/app/backend/requirements.txt"
+        "${workspaceFolder}/requirements.txt"
       ],
       "presentation": {
         "echo": true,
@@ -20,13 +22,12 @@
       }
     },
     {
-      "label": "pip_install_enrichment",
+      "label": "docker-compose up",
       "type": "shell",
-      "command": "pip",
+      "command": "docker-compose",
       "args": [
-        "install",
-        "-r",
-        "${workspaceFolder}/app/enrichment/requirements.txt"
+        "up",
+        "--build"
       ],
       "presentation": {
         "echo": true,
@@ -38,17 +39,12 @@
       }
     },
     {
-      "label": "pip_install_func_tests",
+      "label": "docker-compose down",
       "type": "shell",
-      "command": "pip",
+      "command": "docker-compose",
       "args": [
-        "install",
-        "-r",
-        "${workspaceFolder}/tests/requirements.txt"
+        "down"
       ],
-      "options": {
-        "cwd": "${workspaceFolder}/tests",
-      },
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -56,35 +52,12 @@
         "panel": "shared",
         "showReuseMessage": true,
         "clear": false
-      }
-    },
-    {
-      "type": "func",
-      "label": "func host start",
-      "command": "host start",
-      "problemMatcher": "$func-python-watch",
-      "isBackground": true,
-      "dependsOn": "pip install (functions)",
-      "options": {
-        "cwd": "${workspaceFolder}/functions"
-      }
-    },
-    {
-      "label": "pip install (functions)",
-      "type": "shell",
-      "osx": {
-        "command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
-      },
-      "windows": {
-        "command": "${config:azureFunctions.pythonVenv}/Scripts/python -m pip install -r requirements.txt"
-      },
-      "linux": {
-        "command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
-      },
-      "problemMatcher": [],
-      "options": {
-        "cwd": "${workspaceFolder}/functions"
       }
     }
   ]
 }
+
+#Explanation
+#Pip Install: Task for installing Python dependencies.
+#Docker Compose Up: Task for starting the Docker Compose services.
+#Docker Compose Down: Task for stopping the Docker Compose services.

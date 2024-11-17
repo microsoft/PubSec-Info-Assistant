@@ -1,7 +1,11 @@
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
 FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bookworm
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
+
 # To make it easier for build and release pipelines to run apt-get,
 # configure apt to not require confirmation (assume the -y argument by default)
 RUN echo "APT::Get::Assume-Yes \"true\";" > /etc/apt/apt.conf.d/90assumeyes
@@ -18,11 +22,9 @@ RUN bash "/tmp/non-root-user.sh" "${USERNAME}" "${USER_UID}" "${USER_GID}"
 ENV DEVCONTAINER=true
 
 # Configure apt, install packages and general tools
-RUN sudo apt-get update \
-    && sudo apt-get -y install --no-install-recommends apt-utils dialog nano bash-completion sudo bsdmainutils cmake \
-    #
-    # Verify git, process tools, lsb-release (common in install instructions for CLIs) installed
-    && sudo apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-utils dialog nano bash-completion sudo bsdmainutils cmake \
+    && apt-get -y install git iproute2 procps lsb-release figlet build-essential dnsutils openvpn
 
 # Save command line history
 RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/home/$USERNAME/.bashrc" \
@@ -31,14 +33,13 @@ RUN echo "export HISTFILE=/home/$USERNAME/commandhistory/.bash_history" >> "/hom
     && touch /home/$USERNAME/commandhistory/.bash_history \
     && chown -R $USERNAME /home/$USERNAME/commandhistory
 
-# docker-client
-RUN sudo apt-get update \
-    # libgl dependencies and install Docker CE CLI
-    && sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release -y \
-    && curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null \
-    && sudo apt-get update -y \
-    && sudo apt-get install -y docker-ce-cli
+# Install Docker CLI
+RUN apt-get update \
+    && apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
+    && apt-get update -y \
+    && apt-get install -y docker-ce-cli
 
 ARG DOCKER_GROUP_ID
 COPY ./scripts/docker-client.sh /tmp/
@@ -48,7 +49,7 @@ RUN /tmp/docker-client.sh $USERNAME
 RUN git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt --depth=1 \
     && echo "if [ -f \"$HOME/.bash-git-prompt/gitprompt.sh\" ]; then GIT_PROMPT_ONLY_IN_REPO=1 && source $HOME/.bash-git-prompt/gitprompt.sh; fi" >> "/home/$USERNAME/.bashrc"
 
-# terraform + tflint
+# Install Terraform and TFLint
 ARG TERRAFORM_VERSION=1.8.5
 ARG TFLINT_VERSION=0.44.1
 RUN mkdir -p /tmp/docker-downloads \
@@ -57,13 +58,12 @@ RUN mkdir -p /tmp/docker-downloads \
     && mv terraform /usr/local/bin \
     && rm /tmp/docker-downloads/terraform.zip \
     && echo "alias tf=terraform" >> "/home/$USERNAME/.bashrc"
-
 RUN curl -sSL -o /tmp/docker-downloads/tflint.zip https://github.com/wata727/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_amd64.zip \
     && unzip /tmp/docker-downloads/tflint.zip \
     && mv tflint /usr/local/bin \
     && rm /tmp/docker-downloads/tflint.zip
 
-# azure-cli
+# Install Azure CLI
 COPY ./scripts/azure-cli.sh /tmp/
 RUN /tmp/azure-cli.sh
 
@@ -75,32 +75,41 @@ RUN echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian
     && apt-get update \
     && apt-get install -y azure-functions-core-tools-4
 
-#Install npm and nodejs in the Docker dev container
+# Install Node.js and npm
 COPY ./scripts/nodejs.sh /tmp/
 RUN /tmp/nodejs.sh
 
-# Sync timezone (if TZ value not already present on host it defaults to Europe/London)
-# Note: if running on WSL (Windows) you can add the below to your $profile so your tz is automatically synced
-# $tz =  [Windows.Globalization.Calendar,Windows.Globalization,ContentType=WindowsRuntime]::New().GetTimeZone()
-# [Environment]::SetEnvironmentVariable("TZ",$tz, "User")
-RUN if [ -z "$TZ" ]; then TZ="Europe/London"; fi && sudo ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ | sudo tee /etc/timezone > /dev/null
+# Sync timezone
+RUN if [ -z "$TZ" ]; then TZ="Europe/London"; fi && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install gettext-base so that we have envsubst
-RUN sudo apt-get update \
-    && sudo apt-get -y install gettext-base
+# Install gettext-base for envsubst
+RUN apt-get update \
+    && apt-get -y install gettext-base
 
-# Install python packages for migration
-RUN pip install azure-cosmos
-RUN pip install pyfiglet
-RUN pip install azure-identity
-RUN pip install azure-keyvault-secrets
+# Install Python packages for migration
+RUN pip install azure-cosmos pyfiglet azure-identity azure-keyvault-secrets
 
-# Python Package for Backend Testing
+# Install Python package for backend testing
 RUN pip install pytest
 
-# Install skopeo - This must be at the end due to pulling from trixie
-RUN sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install usrmerge
+# Install skopeo
+RUN DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install usrmerge \
+    && echo 'deb http://ftp.debian.org/debian trixie main' | tee /etc/apt/sources.list.d/debian.trixie.list \
+    && apt-get update \
+    && apt-get install skopeo
 
-RUN echo 'deb http://ftp.debian.org/debian trixie main' | sudo tee /etc/apt/sources.list.d/debian.trixie.list \
-    && sudo apt-get update \
-    && sudo apt-get install skopeo
+#Explanation
+#Base Image: Using the official VSCode Python devcontainer image.
+#Non-Interactive Mode: Setting DEBIAN_FRONTEND to noninteractive to avoid prompts during package installation.
+#Non-Root User: Setting up a non-root user.
+#Command Line History: Configuring command line history.
+#Docker CLI: Installing Docker CLI.
+#Git Prompt: Installing Git command prompt.
+#Terraform and TFLint: Installing Terraform and TFLint.
+#Azure CLI: Installing Azure CLI.
+#Azure Functions Core Tools: Installing Azure Functions Core Tools.
+#Node.js and npm: Installing Node.js and npm.
+#Timezone Sync: Syncing timezone.
+#Gettext: Installing gettext-base for envsubst.
+#Python Packages: Installing necessary Python packages.
+#Skopeo: Installing skopeo for container image management.

@@ -1,44 +1,29 @@
-{
-    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "storageAccountName": {
-            "type": "String"
-        },
-        "location": {
-            "type": "String"
-        },
-        "containerName": {
-            "type": "String"
-        },
-        "publicNetworkAccess": {
-            "type": "String",
-            "defaultValue": "Disabled",
-            "allowedValues": [
-                "Enabled",
-                "Disabled"
-            ],
-            "metadata": {
-                "description": "Specifies whether the storage account allows access from public networks. If the value is Enabled, public network access is allowed. If the value is Disabled, public network access is disallowed."
-            }
-        }
-    },
-    "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts/blobServices",
-            "apiVersion": "2023-01-01",
-            "name": "[concat(parameters('storageAccountName'), '/default')]"
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2019-06-01",
-            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('containerName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccountName'), 'default')]"
-            ],
-            "properties": {
-                "publicAccess": "None"
-            }
-        }
-    ]
-}
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+version: '3.8'
+
+services:
+  minio:
+    image: minio/minio
+    container_name: minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  minio_data:
+    driver: local
+
+#Explanation
+#1.	MinIO Service: This service runs a MinIO instance, which is an on-premises alternative to Azure Blob Storage.
+#2. Environment Variables: MINIO_ROOT_USER and MINIO_ROOT_PASSWORD are used to set the root user and password for MinIO.
+#3. Command: The server /data command starts the MinIO server with the data directory.
+#4. Ports: The service maps port 9000 on the host to port 9000 on the container.
+#5. Volumes: The minio_data volume is used to persist data.
+#This Docker Compose file sets up a MinIO instance to handle object storage, similar to how Azure Blob Storage would be used in the original ARM template.

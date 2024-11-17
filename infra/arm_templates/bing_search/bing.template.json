@@ -1,45 +1,77 @@
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
 {
-    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "name": {
-            "type": "string"
-        },
-        "location": {
-            "type": "string"
-        },
-        "sku": {
-            "type": "string"
-        },
-        "tags": {
-            "type": "object"
-        }
-    },
-    "resources": [
-        {
-            "apiVersion": "2020-06-10",
-            "name": "[parameters('name')]",
-            "location": "[parameters('location')]",
-            "type": "Microsoft.Bing/accounts",
-            "kind": "Bing.Search.v7",
-            "tags": "[parameters('tags')]",
-            "sku": {
-                "name": "[parameters('sku')]"
-            }
-        }
-    ],
-    "outputs": {
-        "id": {
-            "value": "[resourceId('Microsoft.Bing/accounts',parameters('name'))]",
-            "type": "string"
-        },
-        "endpoint": {
-            "value": "[reference(resourceId('Microsoft.Bing/accounts',parameters('name'))).endpoint]",
-            "type": "string"
-        },
-        "key1": {
-            "value": "[listKeys(resourceId('Microsoft.Bing/accounts',parameters('name')),'2020-06-10').key1]",
-            "type": "string"
-        }
+  "version": "1.0",
+  "services": {
+    "elasticsearch": {
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:7.10.1",
+      "container_name": "elasticsearch",
+      "environment": {
+        "discovery.type": "single-node",
+        "ES_JAVA_OPTS": "-Xms512m -Xmx512m"
+      },
+      "ports": [
+        "9200:9200",
+        "9300:9300"
+      ],
+      "volumes": [
+        "esdata:/usr/share/elasticsearch/data"
+      ]
     }
+  },
+  "volumes": {
+    "esdata": {
+      "driver": "local"
+    }
+  }
 }
+
+#Summary of Changes
+#1. Bing Search: Replaced with Elasticsearch in a Docker Compose file.
+---------------------------------------------------------
+2. infra/arm_templates/kv_secret/kv_secret.template.json
+----------------------------------------------
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+provider "vault" {
+  address = "http://127.0.0.1:8200"
+}
+
+resource "vault_generic_secret" "example" {
+  path = "secret/data/${var.keyVaultName}/${var.secretName}"
+  data_json = jsonencode({
+    value       = var.value
+    tags        = var.tags
+    expiration  = var.expiration
+    contentType = var.contentType
+  })
+}
+
+variable "keyVaultName" {
+  type = string
+}
+
+variable "secretName" {
+  type = string
+}
+
+variable "value" {
+  type = string
+}
+
+variable "tags" {
+  type = map(string)
+}
+
+variable "expiration" {
+  type = string
+}
+
+variable "contentType" {
+  type = string
+}
+
+#Summary of Changes
+#1. Key Vault Secrets: Replaced with HashiCorp Vault using Terraform.

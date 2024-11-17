@@ -1,288 +1,44 @@
-{
-    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "name": {
-            "type": "string"
-        },
-        "location": {
-            "type": "string"
-        },
-        "tags": {
-            "type": "object"
-        },
-        "ddos_plan_id": {
-            "type": "string"
-        },
-        "nsg_name": {
-            "type": "string"
-        },
-        "vnet_CIDR": {
-            "type": "string"
-        },
-        "subnet_AzureMonitor_CIDR": {
-            "type": "string"
-        },
-        "subnet_AzureStorage_CIDR": {
-            "type": "string"
-        },
-        "subnet_AzureCosmosDB_CIDR": {
-            "type": "string"
-        },
-        "subnet_AzureAi_CIDR": {
-            "type": "string"
-        },
-        "subnet_KeyVault_CIDR": {
-            "type": "string"
-        },
-        "subnet_App_CIDR": {
-            "type": "string"
-        },
-        "subnet_Function_CIDR": {
-            "type": "string"
-        },
-        "subnet_Enrichment_CIDR": {
-            "type": "string"
-        },
-        "subnet_Integration_CIDR": {
-            "type": "string"
-        },
-        "subnet_AiSearch_CIDR": {
-            "type": "string"
-        },
-        "subnet_AzureOpenAI_CIDR": {
-            "type": "string"
-        },
-        "subnet_Acr_CIDR": {
-            "type": "string"
-        },
-        "subnet_Dns_CIDR": {
-            "type": "string"
-        },
-        "privateEndpointNetworkPoliciesStatus": {
-            "type": "string"
-        },
-        "privateLinkServiceNetworkPoliciesStatus": {
-            "type": "string"
-        }
-    },
-    "resources": [
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2023-11-01",
-            "name": "[parameters('name')]",
-            "location": "[parameters('location')]",
-            "tags": "[parameters('tags')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [ "[parameters('vnet_CIDR')]" ]
-                },
-                "enableDdosProtection": "false",
-                "subnets": [
-                    {
-                        "name": "ampls",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AzureMonitor_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "storageAccount",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AzureStorage_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "cosmosDb",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AzureCosmosDB_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "azureAi",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AzureAi_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.CognitiveServices" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "keyVault",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_KeyVault_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.KeyVault" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "app",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_App_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "function",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Function_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.Storage" }, { "service": "Microsoft.KeyVault" }]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "enrichment",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Enrichment_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "integration",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Integration_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [
-                                {
-                                    "name": "integrationDelegation",
-                                    "properties": {
-                                        "serviceName": "Microsoft.Web/serverFarms"
-                                    },
-                                    "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
-                                }
-                            ],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "aiSearch",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AiSearch_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "azureOpenAI",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AzureOpenAI_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.CognitiveServices" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "acr",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Acr_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "dns",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Dns_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [
-                                {
-                                    "name": "dnsDelegation",
-                                    "properties": {
-                                        "serviceName": "Microsoft.Network/dnsResolvers"
-                                    },
-                                    "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
-                                }
-                            ],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    }
-                ]
-            }
-        }
-    ],
-    "outputs": {
-        "id": {
-            "value": "[resourceId('Microsoft.Network/virtualNetworks',parameters('name'))]",
-            "type": "string"
-        },
-        "dnsSubnetId": {  
-            "value": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('name'), 'dns')]",  
-            "type": "string"  
-        }
-    }
-}
+/* # Copyright (c) DataReason.
+### Code for On-Premises Deployment. */
+
+version: '3.8'
+
+services:
+  network:
+    image: alpine
+    container_name: network
+    command: [
+  "sh",
+  "-c",
+  "while :; do sleep 10; done"
+]
+    networks:
+      vnet:
+        ipv4_address: 172.16.0.2
+
+networks:
+  vnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/16
+          gateway: 172.16.0.1
+          aux_addresses:
+            ampls: 172.16.1.1
+            storageAccount: 172.16.2.1
+            cosmosDb: 172.16.3.1
+            azureAi: 172.16.4.1
+            keyVault: 172.16.5.1
+            app: 172.16.6.1
+            function: 172.16.7.1
+            enrichment: 172.16.8.1
+            integration: 172.16.9.1
+            aiSearch: 172.16.10.1
+            azureOpenAI: 172.16.11.1
+            acr: 172.16.12.1
+            dns: 172.16.13.1
+            
+#Explanation
+#1. Virtual Network: Replaced Azure Virtual Network with a Docker Compose network configuration.
+#2. Subnets: Defined subnets within the Docker Compose network configuration, each with a specific IP address.
+#This configuration sets up a virtual network with various subnets, similar to the original ARM template but adapted for on-premises deployment using Docker Compose. Each subnet is assigned a specific IP address within the defined network range.

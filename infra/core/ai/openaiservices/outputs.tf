@@ -1,11 +1,10 @@
-output "name" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.openaiAccount[0].name
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+output "openai_services_config_file" {
+  value = local_file.openai_services_config.filename
 }
 
-output "endpoint" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.openaiAccount[0].endpoint
-}
-
-output "id" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.openaiAccount[0].id
+output "openai_services_key_file" {
+  value = local_file.openai_services_key.filename
 }

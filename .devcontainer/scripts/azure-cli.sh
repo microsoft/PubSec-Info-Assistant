@@ -1,33 +1,33 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
 
-#!/bin/bash 
+#!/bin/bash
 set -e
 
 CMD=az
 NAME="Azure CLI"
-
 echo -e "\e[34m»»» 📦 \e[32mInstalling \e[33m$NAME\e[0m ..."
 
-# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt#option-2-step-by-step-installation-instructions
+# Install prerequisites
+apt-get update
+apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
 
-sudo apt-get update
-sudo apt-get install ca-certificates curl apt-transport-https lsb-release gnupg
-
-curl -sL https://packages.microsoft.com/keys/microsoft.asc |
-    gpg --dearmor |
-    sudo tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
-
+# Add the Microsoft signing key and repository
+curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
 AZ_REPO=$(lsb_release -cs)
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" |
-    sudo tee /etc/apt/sources.list.d/azure-cli.list
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list
 
-sudo apt-get update
-sudo apt-get install azure-cli
+# Install the Azure CLI
+apt-get update
+apt-get install -y azure-cli
 
-# Install cli extension(s)
+# Install CLI extensions
 echo -e "\n\e[34m»»» 🔐 \e[32mAdding webapp authV2 extension"
 az extension add --name authV2 --system
 
 echo -e "\n\e[34m»»» 💾 \e[32mInstalled to: \e[33m$(which $CMD)"
 echo -e "\e[34m»»» 💡 \e[32mVersion details: \e[39m$($CMD --version)"
+
+#Explanation
+#Azure CLI Installation: Installing the Azure CLI and adding the necessary repository and signing key.
+#CLI Extensions: Adding the authV2 extension.

@@ -1,10 +1,12 @@
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
 ---
 name: Feature request
 about: Suggest an idea for this project
 title: ''
 labels: ''
 assignees: ''
-
 ---
 
 **Is your feature request related to a problem? Please describe.**
@@ -18,3 +20,10 @@ A clear and concise description of any alternative solutions or features you've 
 
 **Additional context**
 Add any other context or screenshots about the feature request here.
+
+
+#Explanation
+#Problem Description: Section for describing the problem related to the feature request.
+#Solution Description: Section for describing the desired solution.
+#Alternatives Considered: Section for describing alternative solutions or features considered.
+#Additional Context: Section for additional context or screenshots.

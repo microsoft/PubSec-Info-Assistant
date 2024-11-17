@@ -1,6 +1,25 @@
+/* # Copyright (c) DataReason.
+### Code for On-Premises Deployment. */
+
 {
   "recommendations": [
+    "ms-python.python",
+    "ms-azuretools.vscode-docker",
     "ms-azuretools.vscode-azurefunctions",
-    "ms-python.python"
+    "ms-vscode-remote.remote-containers",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "redhat.vscode-yaml",
+    "hashicorp.terraform"
   ]
 }
+
+#Explanation
+#Python: ms-python.python for Python development.
+#Docker: ms-azuretools.vscode-docker for Docker support.
+#Azure Functions: ms-azuretools.vscode-azurefunctions for Azure Functions support.
+#Remote Containers: ms-vscode-remote.remote-containers for developing inside a container.
+#Prettier: esbenp.prettier-vscode for code formatting.
+#ESLint: dbaeumer.vscode-eslint for JavaScript/TypeScript linting.
+#YAML: redhat.vscode-yaml for YAML support.
+#Terraform: hashicorp.terraform for Terraform support.

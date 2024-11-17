@@ -1,17 +1,32 @@
-# Use the official Python image
-FROM python:3.10
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
 
-# Set the working directory
+# Use the official Python image from the Docker Hub
+FROM python:3.10-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Create and set the working directory
 WORKDIR /app
 
-# Copy the application code
-COPY app/enrichment /app
+# Copy the requirements file into the container
+COPY requirements.txt /app/
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# Install the dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port the app runs on
-EXPOSE 6000
+# Copy the rest of the application code into the container
+COPY . /app/
 
-# Run the application
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "6000"]
+# Command to run the application
+CMD ["python", "-m", "functions"]
+
+#Explanation
+#Base Image: Using the official Python 3.10 slim image.
+#Environment Variables: Setting PYTHONUNBUFFERED to ensure the output is sent straight to the terminal without being buffered.
+#Working Directory: Creating and setting the working directory to /app.
+#Copy Requirements: Copying the requirements.txt file into the container.
+#Install Dependencies: Installing the dependencies listed in requirements.txt.
+#Copy Application Code: Copying the rest of the application code into the container.
+#Command: Setting the default command to run the application.

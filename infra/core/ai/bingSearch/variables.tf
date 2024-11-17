@@ -1,31 +1,10 @@
-variable "resourceGroupName" {
-  type    = string
-  default = ""
-}
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
 
-variable "name" {
+variable "elasticsearch_url" {
   type = string
 }
 
-variable "tags" {
-  type    = map(string)
-  default = {}
-}
-
-variable "sku" {
+variable "randomString" {
   type = string
-}
-
-variable "arm_template_schema_mgmt_api" {
-  type = string
-}
-
-variable "key_vault_name" { 
-  type = string
-  sensitive   = true
-}
-
-variable "kv_secret_expiration" {
-  type = string
-  description = "The value for key vault secret expiration in  seconds since 1970-01-01T00:00:00Z"
 }

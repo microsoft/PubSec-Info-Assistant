@@ -1,44 +1,28 @@
-{
-    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "storageAccountName": {
-            "type": "String"
-        },
-        "location": {
-            "type": "String"
-        },
-        "queueName": {
-            "type": "String"
-        },
-        "publicNetworkAccess": {
-            "type": "String",
-            "defaultValue": "Disabled",
-            "allowedValues": [
-                "Enabled",
-                "Disabled"
-            ],
-            "metadata": {
-                "description": "Specifies whether the storage account allows access from public networks. If the value is Enabled, public network access is allowed. If the value is Disabled, public network access is disallowed."
-            }
-        }
-    },
-    "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts/queueServices",
-            "apiVersion": "2023-01-01",
-            "name": "[concat(parameters('storageAccountName'), '/default')]"
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
-            "apiVersion": "2023-01-01",
-            "name": "[concat(parameters('storageAccountName'), '/default/', parameters('queueName'))]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts/queueServices', parameters('storageAccountName'), 'default')]"
-            ],
-            "properties": {
-                "publicAccess": "None"
-            }
-        }
-    ]
-}
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq_data:
+    driver: local
+
+#Explanation
+#1. RabbitMQ Service: This service runs a RabbitMQ instance, which is an on-premises alternative to Azure Queue Storage.
+#2. Environment Variables: RABBITMQ_DEFAULT_USER and RABBITMQ_DEFAULT_PASS are used to set the default user and password for RabbitMQ.
+#3. Ports: The service maps port 5672 (RabbitMQ) and port 15672 (RabbitMQ Management) on the host to the corresponding ports on the container.
+#4. Volumes: The rabbitmq_data volume is used to persist data.
+#5. This Docker Compose file sets up a RabbitMQ instance to handle message queuing, similar to how Azure Queue Storage would be used in the original ARM template.

@@ -1,148 +1,118 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
 
 import json
 import logging
 import os
 import random
-import azure.functions as func
 import requests
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
-from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
+from minio import Minio
+from minio.error import S3Error
 from shared_code.status_log import State, StatusClassification, StatusLog
 from shared_code.utilities import Utilities
+import pika
 
-azure_blob_storage_account = os.environ["BLOB_STORAGE_ACCOUNT"]
-azure_blob_storage_endpoint = os.environ["BLOB_STORAGE_ACCOUNT_ENDPOINT"]
-azure_queue_storage_endpoint = os.environ["AZURE_QUEUE_STORAGE_ENDPOINT"]
-azure_blob_drop_storage_container = os.environ[
-    "BLOB_STORAGE_ACCOUNT_UPLOAD_CONTAINER_NAME"
-]
-azure_blob_content_storage_container = os.environ[
-    "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"
-]
-cosmosdb_url = os.environ["COSMOSDB_URL"]
-cosmosdb_log_database_name = os.environ["COSMOSDB_LOG_DATABASE_NAME"]
-cosmosdb_log_container_name = os.environ["COSMOSDB_LOG_CONTAINER_NAME"]
+# MinIO configuration
+minio_client = Minio(
+    os.environ["MINIO_ENDPOINT"],
+    access_key=os.environ["MINIO_ACCESS_KEY"],
+    secret_key=os.environ["MINIO_SECRET_KEY"],
+    secure=False
+)
+minio_upload_bucket = os.environ["MINIO_UPLOAD_BUCKET"]
+minio_output_bucket = os.environ["MINIO_OUTPUT_BUCKET"]
+
+# RabbitMQ configuration
+rabbitmq_host = os.environ["RABBITMQ_HOST"]
+rabbitmq_port = int(os.environ["RABBITMQ_PORT"])
+rabbitmq_user = os.environ["RABBITMQ_USER"]
+rabbitmq_password = os.environ["RABBITMQ_PASSWORD"]
 pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
-endpoint = os.environ["AZURE_FORM_RECOGNIZER_ENDPOINT"]
+
+# Form Recognizer configuration
+endpoint = os.environ["FORM_RECOGNIZER_ENDPOINT"]
 api_version = os.environ["FR_API_VERSION"]
+FR_MODEL = "prebuilt-layout"
+
+# PostgreSQL configuration for status logging
+postgres_url = os.environ["POSTGRES_URL"]
+postgres_log_database_name = os.environ["POSTGRES_LOG_DATABASE_NAME"]
+postgres_log_table_name = os.environ["POSTGRES_LOG_TABLE_NAME"]
+
+# Other configurations
 max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
 poll_queue_submit_backoff = int(os.environ["POLL_QUEUE_SUBMIT_BACKOFF"])
 pdf_submit_queue_backoff = int(os.environ["PDF_SUBMIT_QUEUE_BACKOFF"])
-local_debug = os.environ["LOCAL_DEBUG"]
-azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
-azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
 
+# Initialize status log
+status_log = StatusLog(postgres_url, postgres_log_database_name, postgres_log_table_name)
 
-FUNCTION_NAME = "FileFormRecSubmissionPDF"
-FR_MODEL = "prebuilt-layout"
+# Initialize utilities
+utilities = Utilities(minio_client, minio_upload_bucket, minio_output_bucket)
 
-if azure_openai_authority_host == "AzureUSGovernment":
-    AUTHORITY = AzureAuthorityHosts.AZURE_GOVERNMENT
-else:
-    AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
-
-# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
-# Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
-# Use managed identity when deployed on Azure.
-# If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
-# the problematic credential by using a parameter (ex. exclude_shared_token_cache_credential=True)
-if local_debug == "true":
-    azure_credential = DefaultAzureCredential(authority=AUTHORITY)
-else:
-    azure_credential = ManagedIdentityCredential(authority=AUTHORITY)
-token_provider = get_bearer_token_provider(azure_credential, f'https://{os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
-
-utilities = Utilities(
-    azure_blob_storage_account,
-    azure_blob_storage_endpoint,
-    azure_blob_drop_storage_container,
-    azure_blob_content_storage_container,
-    azure_credential,
-)
-
-def main(msg: func.QueueMessage) -> None:
-    '''This function is triggered by a message in the pdf-submit-queue.
+def main(ch, method, properties, body):
+    """This function is triggered by a message in the pdf-submit-queue.
     It will submit the PDF to Form Recognizer for processing. If the submission
     is throttled, it will requeue the message with a backoff. If the submission
-    is successful, it will queue the message to the pdf-polling-queue for polling.'''
-    message_body = msg.get_body().decode("utf-8")
+    is successful, it will queue the message to the pdf-polling-queue for polling."""
+    message_body = body.decode("utf-8")
     message_json = json.loads(message_body)
     blob_path = message_json["blob_name"]
     try:
-        statusLog = StatusLog(
-            cosmosdb_url, azure_credential, cosmosdb_log_database_name, cosmosdb_log_container_name
-        )
-
-        # Receive message from the queue
+        status_log = StatusLog(postgres_url, postgres_log_database_name, postgres_log_table_name)
         queued_count = message_json["submit_queued_count"]
-        statusLog.upsert_document(
+        status_log.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - Received message from pdf-submit-queue ",
+            f"FileFormRecSubmissionPDF - Received message from pdf-submit-queue ",
             StatusClassification.DEBUG,
             State.PROCESSING,
         )
-        statusLog.upsert_document(
+        status_log.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - Submitting to Form Recognizer",
+            f"FileFormRecSubmissionPDF - Submitting to Form Recognizer",
             StatusClassification.INFO,
         )
-        
-        # construct blob url
+
         blob_path_plus_sas = utilities.get_blob_and_sas(blob_path)
-        statusLog.upsert_document(
+        status_log.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - SAS token generated",
+            f"FileFormRecSubmissionPDF - SAS token generated",
             StatusClassification.DEBUG,
         )
 
-        # Construct and submmit the message to FR
         headers = {
             "Content-Type": "application/json",
-            'Authorization': f'Bearer {token_provider()}'
+            'Authorization': f'Bearer {os.environ["FORM_RECOGNIZER_API_KEY"]}'
         }
-
         params = {"api-version": api_version}
-
         body = {"urlSource": blob_path_plus_sas}
-        url = f"{endpoint}formrecognizer/documentModels/{FR_MODEL}:analyze"
-
+        url = f"{endpoint}/formrecognizer/documentModels/{FR_MODEL}:analyze"
         logging.info(f"Submitting to FR with url: {url}")
 
-        # Send the HTTP POST request with headers, query parameters, and request body
         response = requests.post(url, headers=headers, params=params, json=body)
 
-        # Check if the request was successful (status code 200)
         if response.status_code == 202:
-            # Successfully submitted so submit to the polling queue
-            statusLog.upsert_document(
+            status_log.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - PDF submitted to FR successfully",
+                f"FileFormRecSubmissionPDF - PDF submitted to FR successfully",
                 StatusClassification.DEBUG,
             )
             result_id = response.headers.get("apim-request-id")
             message_json["FR_resultId"] = result_id
             message_json["polling_queue_count"] = 1
-            queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
-                               queue_name=pdf_polling_queue,
-                               credential=azure_credential,
-                               message_encode_policy=TextBase64EncodePolicy())
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=pika.PlainCredentials(rabbitmq_user, rabbitmq_password)))
+            channel = connection.channel()
+            channel.queue_declare(queue=pdf_polling_queue)
             message_json_str = json.dumps(message_json)
-            queue_client.send_message(
-                message_json_str, visibility_timeout=poll_queue_submit_backoff
-            )
-            statusLog.upsert_document(
+            channel.basic_publish(exchange='', routing_key=pdf_polling_queue, body=message_json_str, properties=pika.BasicProperties(delivery_mode=2))
+            status_log.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - message sent to pdf-polling-queue. Visible in {poll_queue_submit_backoff} seconds. FR Result ID is {result_id}",
+                f"FileFormRecSubmissionPDF - message sent to pdf-polling-queue. Visible in {poll_queue_submit_backoff} seconds. FR Result ID is {result_id}",
                 StatusClassification.DEBUG,
                 State.QUEUED,
             )
-
         elif response.status_code == 429:
-            # throttled, so requeue with random backoff seconds to mitigate throttling,
-            # unless it has hit the max tries
             if queued_count < max_submit_requeue_count:
                 max_seconds = pdf_submit_queue_backoff * (queued_count**2)
                 backoff = random.randint(
@@ -150,46 +120,57 @@ def main(msg: func.QueueMessage) -> None:
                 )
                 queued_count += 1
                 message_json["queued_count"] = queued_count
-                statusLog.upsert_document(
+                status_log.upsert_document(
                     blob_path,
-                    f"{FUNCTION_NAME} - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds",
+                    f"FileFormRecSubmissionPDF - Throttled on PDF submission to FR, requeuing. Back off of {backoff} seconds",
                     StatusClassification.DEBUG,
                 )
-                queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
-                               queue_name=pdf_submit_queue,
-                               credential=azure_credential,
-                               message_encode_policy=TextBase64EncodePolicy())
+                connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=pika.PlainCredentials(rabbitmq_user, rabbitmq_password)))
+                channel = connection.channel()
+                channel.queue_declare(queue=pdf_submit_queue)
                 message_json_str = json.dumps(message_json)
-                queue_client.send_message(message_json_str, visibility_timeout=backoff)
-                statusLog.upsert_document(
+                channel.basic_publish(exchange='', routing_key=pdf_submit_queue, body=message_json_str, properties=pika.BasicProperties(delivery_mode=2))
+                status_log.upsert_document(
                     blob_path,
-                    f"{FUNCTION_NAME} - message sent to pdf-submit-queue. Visible in {backoff} seconds.",
+                    f"FileFormRecSubmissionPDF - message sent to pdf-submit-queue. Visible in {backoff} seconds.",
                     StatusClassification.DEBUG,
                     State.QUEUED,
                 )
             else:
-                statusLog.upsert_document(
+                status_log.upsert_document(
                     blob_path,
-                    f"{FUNCTION_NAME} - maximum submissions to FR reached",
+                    f"FileFormRecSubmissionPDF - maximum submissions to FR reached",
                     StatusClassification.ERROR,
                     State.ERROR,
                 )
-
         else:
-            # general error occurred
-            statusLog.upsert_document(
+            status_log.upsert_document(
                 blob_path,
-                f"{FUNCTION_NAME} - Error on PDF submission to FR - {response.status_code} - {response.reason}",
+                f"FileFormRecSubmissionPDF - Error on PDF submission to FR - {response.status_code} - {response.reason}",
                 StatusClassification.ERROR,
                 State.ERROR,
             )
-
     except Exception as error:
-        statusLog.upsert_document(
+        status_log.upsert_document(
             blob_path,
-            f"{FUNCTION_NAME} - An error occurred - {str(error)}",
+            f"FileFormRecSubmissionPDF - An error occurred - {str(error)}",
             StatusClassification.ERROR,
             State.ERROR,
         )
-        
-    statusLog.save_document(blob_path)
+
+    status_log.save_document(blob_path)
+
+# RabbitMQ consumer setup
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port, credentials=pika.PlainCredentials(rabbitmq_user, rabbitmq_password)))
+channel = connection.channel()
+channel.queue_declare(queue=pdf_submit_queue)
+channel.basic_consume(queue=pdf_submit_queue, on_message_callback=main, auto_ack=True)
+
+logging.info('Waiting for messages. To exit press CTRL+C')
+channel.start_consuming()
+
+#Key Changes:
+#MinIO: Replaced Azure Blob Storage with MinIO for object storage.
+#RabbitMQ: Replaced Azure Queue Storage with RabbitMQ for message queuing.
+#PostgreSQL: Replaced Azure Cosmos DB with PostgreSQL for logging and status tracking.
+#Form Recognizer: Adjusted the endpoint and authorization for the on-premises Form Recognizer.

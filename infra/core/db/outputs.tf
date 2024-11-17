@@ -1,23 +1,14 @@
-output "CosmosDBEndpointURL" {
-  value = azurerm_cosmosdb_account.cosmosdb_account.endpoint
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
+
+output "postgresql_log_database_name" {
+  value = postgresql_database.log_database.name
 }
 
-output "CosmosDBLogDatabaseName" {
-  value = azurerm_cosmosdb_sql_database.log_database.name
+output "postgresql_log_schema_name" {
+  value = postgresql_schema.log_schema.name
 }
 
-output "CosmosDBLogContainerName" {
-  value = azurerm_cosmosdb_sql_container.log_container.name
-}
-
-output "privateEndpointId" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.cosmosPrivateEndpoint[0].id : null
-}
-
-output "id" {
-  value = azurerm_cosmosdb_account.cosmosdb_account.id
-}
-
-output "name" {
-  value = azurerm_cosmosdb_account.cosmosdb_account.name
+output "postgresql_log_table_name" {
+  value = postgresql_table.log_table.name
 }

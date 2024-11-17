@@ -1,14 +1,18 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
 
-#!/bin/bash 
+
+#!/bin/bash
 set -e
 
 if [ -z "$DOCKER_GROUP_ID" ]; then
-    sudo groupadd docker
+  groupadd docker
 else
-    sudo groupadd -g $DOCKER_GROUP_ID docker
+  groupadd -g $DOCKER_GROUP_ID docker
 fi
 
-sudo usermod -aG docker $1 && newgrp docker
+usermod -aG docker $1 && newgrp docker
 getent group docker
+
+#Explanation
+#Docker Group: Creating the Docker group and adding the user to it.

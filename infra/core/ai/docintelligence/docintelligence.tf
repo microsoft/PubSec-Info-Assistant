@@ -1,26 +1,29 @@
-resource "docker_container" "docintelligence" {
-  name  = "tesseract"
-  image = "tesseractshadow/tesseract4re"
+# Copyright (c) DataReason.
+### Code for On-Premises Deployment.
 
-  ports {
-    internal = 80
-    external = 8080
-  }
+provider "local" {}
 
-  volumes {
-    host_path      = "/path/to/local/data"
-    container_path = "/data"
+resource "local_file" "doc_intelligence_config" {
+  content = <<-EOT
+  {
+    "services": {
+      "form_recognizer": {
+        "provider": "tesseract",
+        "config": {
+          "version": "4.1.1"
+        }
+      }
+    }
   }
-
-  env {
-    TESSDATA_PREFIX = "/usr/share/tesseract-ocr/4.00/tessdata"
-  }
+  EOT
+  filename = "${path.module}/doc_intelligence_config.json"
 }
 
-resource "docker_network" "docintelligence_network" {
-  name = "docintelligence_network"
-}
-
-resource "docker_volume" "docintelligence_volume" {
-  name = "docintelligence_volume"
+resource "local_file" "doc_intelligence_key" {
+  content = <<-EOT
+  {
+    "key": "${var.doc_intelligence_key}"
+  }
+  EOT
+  filename = "${path.module}/doc_intelligence_key.json"
 }

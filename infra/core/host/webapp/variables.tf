@@ -119,7 +119,7 @@ variable "allowedOrigins" {
 
 variable "runtimeVersion" {
   type    = string
-  default = "3.10"
+  default = "3.12"
 }
 
 variable "is_secure_mode" {

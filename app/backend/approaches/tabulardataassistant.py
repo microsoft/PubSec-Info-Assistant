@@ -12,6 +12,7 @@ from PIL import Image
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
 from langchain_openai import AzureChatOpenAI
+from langchain_community.agent_toolkits.load_tools import load_tools
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 
 warnings.filterwarnings('ignore')

@@ -341,7 +341,7 @@ module "webapp" {
   resourceGroupName                   = azurerm_resource_group.rg.name
   location                            = var.location
   tags                                = merge(local.tags, { "azd-service-name" = "backend" })
-  runtimeVersion                      = "3.10" 
+  runtimeVersion                      = "3.12" 
   scmDoBuildDuringDeployment          = false
   managedIdentity                     = true
   alwaysOn                            = true

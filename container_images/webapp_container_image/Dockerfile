@@ -1,5 +1,5 @@
 # Use the official Node.js image
-FROM mcr.microsoft.com/devcontainers/python:3.10
+FROM mcr.microsoft.com/devcontainers/python:3.12
 
 # Set the working directory
 WORKDIR /home/site/wwwroot

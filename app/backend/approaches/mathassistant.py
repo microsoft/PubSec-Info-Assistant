@@ -121,7 +121,6 @@ If you cannot find a solution through your tools, then offer explanation or meth
 In handling math queries, try using your tools initially. If no solution is found, then attempt to solve the problem on your own.
 """
 
-llm_math_tool = load_tools(["llm-math"], llm=model)
 # Initialize the agent with a single input tool
 # You can choose which of the tools to use or create separate agents for different tools
 zero_shot_agent_math = initialize_agent(

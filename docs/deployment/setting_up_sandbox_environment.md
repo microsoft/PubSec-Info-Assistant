@@ -37,28 +37,28 @@ To set up an Azure DevOps pipeline for deploying code from a GitHub repository, 
 
    5. Finally **Review your pipeline YAML** to ensure it is what you want.
 
-       1. In the provided pipeline configuration, steps for building sandbox environment are already defined
+      1. In the provided pipeline configuration, steps for building sandbox environment are already defined
 
-       2. **Configure continuous integration (CI):**  CI trigger has been turned off, requiring the pipeline to be triggered manually.
+      2. **Configure continuous integration (CI):** CI trigger has been turned off, requiring the pipeline to be triggered manually.
 
-       3. **Add deployment stages:** In this sandbox environment setup, there is option to select red/blue deployment which represents an environment (e.g., development, staging) and you can define specific tasks for deploying your code to those environments.
+      3. **Add deployment stages:** In this sandbox environment setup, there is option to select red/blue deployment which represents an environment (e.g., development, staging) and you can define specific tasks for deploying your code to those environments.
 
    6. Next **Configure variables :** To Configure the deployment, please add the following variables to the build pipeline and populate with values for your target Azure subscription. Then save the pipeline variables.
 
-   :warning: These are the variables required for the example pipelines provided. You may require additional variables to deploy a fully functioning Information Assistant deployment. Use of Azure DevOps pipeline variable assist in preventing secrets, keys, and other sensitive information from being included in the source tree. 
+   :warning: These are the variables required for the example pipelines provided. You may require additional variables to deploy a fully functioning Information Assistant deployment. Use of Azure DevOps pipeline variable assist in preventing secrets, keys, and other sensitive information from being included in the source tree.
 
-    VARIABLE | DESCRIPTION
-    ---|---
-    CLIENT_ID<br />CLIENT_SECRET<br />SERVICE_PRINCIPAL_ID | These are used for the deployment scripts to login to Azure. This is typically a service principal and will need Contributor and User Access Administrator roles.
-    SUBSCRIPTION_ID | The ID of the subscription that should be deployed to.
-    TENANT_ID | The ID of the tenant that should be deployed to.
-    CONTAINER_REGISTRY_ADDRESS | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs
-    AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.
-    environment | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env`
-    TF_BACKEND_ACCESS_KEY | Terraform is used to create Infrastructure as Code. This is the key to the Terraform State in a Storage Account.
-    TF_BACKEND_CONTAINER | Terraform is used to create Infrastructure as Code. This is the container that the Terraform State is stored within a Storage Account.
-    TF_BACKEND_RESOURCE_GROUP | Terraform is used to create Infrastructure as Code. This is the resource group that the Terraform State is stored within a Storage Account.
-    TF_BACKEND_STORAGE_ACCOUNT | Terraform is used to create Infrastructure as Code. This is the storage account that the Terraform State is stored.
+   | VARIABLE                                                                                                                               | DESCRIPTION                                                                                                                                                                                                                          |
+   | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+   | CLIENT_ID<br />CLIENT_SECRET<br />SERVICE_PRINCIPAL_ID                                                                                 | These are used for the deployment scripts to login to Azure. This is typically a service principal and will need Contributor and User Access Administrator roles.                                                                    |
+   | SUBSCRIPTION_ID                                                                                                                        | The ID of the subscription that should be deployed to.                                                                                                                                                                               |
+   | TENANT_ID                                                                                                                              | The ID of the tenant that should be deployed to.                                                                                                                                                                                     |
+   | CONTAINER_REGISTRY_ADDRESS                                                                                                             | Azure Container Registry where the Info Assistant development container will be cached during pipeline runs                                                                                                                          |
+   | AZURE_OPENAI_SERVICE_NAME<br/>AZURE_OPENAI_SERVICE_KEY<br/>AZURE_OPENAI_CHATGPT_DEPLOYMENT<br/>AZURE_OPENAI_EMBEDDINGS_DEPLOYMENT_NAME | It is recommended to point the pipeline to an existing installation of Azure OpenAI. These values will be used to target that instance.                                                                                              |
+   | environment                                                                                                                            | The environment name that matches an environment variable file located in `./scripts/environments`. For example if the pipeline parameter is set to "demo" there needs to be a corresponding file at `/scripts/environment/demo.env` |
+   | TF_BACKEND_ACCESS_KEY                                                                                                                  | Terraform is used to create Infrastructure as Code. This is the key to the Terraform State in a Storage Account.                                                                                                                     |
+   | TF_BACKEND_CONTAINER                                                                                                                   | Terraform is used to create Infrastructure as Code. This is the container that the Terraform State is stored within a Storage Account.                                                                                               |
+   | TF_BACKEND_RESOURCE_GROUP                                                                                                              | Terraform is used to create Infrastructure as Code. This is the resource group that the Terraform State is stored within a Storage Account.                                                                                          |
+   | TF_BACKEND_STORAGE_ACCOUNT                                                                                                             | Terraform is used to create Infrastructure as Code. This is the storage account that the Terraform State is stored.                                                                                                                  |
 
 2. **Save your pipeline:** After updating the variable, save your pipeline configuration.
 

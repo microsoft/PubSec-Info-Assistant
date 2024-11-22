@@ -7,24 +7,22 @@ To perform an upgrade, ideally review the sample code and test in a sandbox reso
 
 ```json
 {
-"old_env":
-    {
-        "resource_group": "",
-        "random_text": ""
-    },
-"new_env":
-    {
-        "resource_group": "",
-        "random_text": ""
-    }
+  "old_env": {
+    "resource_group": "",
+    "random_text": ""
+  },
+  "new_env": {
+    "resource_group": "",
+    "random_text": ""
+  }
 }
 ```
 
 3. Before deploying version 1.1 you will need to ensure you have the correct permissions to update the existing resources. Be sure to log in to Azure within VS Code using the same user that performed the original deployment of 1.0. If you can't do this, then run the command below. This will assign the required permissions to the user account performing the upgrade. (i.e. rights to read secrets from Key Vault and assigning the user as owners of the various application registrations) To do this the account you are using will need the Microsoft Entra role of Application Administrator or request the user account to be made owner of the app registrations:
 
->- infoasst-enrichmentweb-<random_text_suffix>
->- infoasst-web-<random_text_suffix>
->- infoasst-func-<random_text_suffix>
+> - infoasst-enrichmentweb-<random_text_suffix>
+> - infoasst-web-<random_text_suffix>
+> - infoasst-func-<random_text_suffix>
 
 ```bash
 make prep-env
@@ -38,7 +36,7 @@ make merge-databases
 
 5. Next we need to review the deployed 1.0 services and build a Terraform state file, so Terraform understand the existing deployment and can determine which services need to be upgraded, deleted or left untouched when we upgrade to 1.1. To do this run the command:
 
-*IMPORTANT: Before you run `make import-state` ensure your `local.env` is correctly configured to match your 1.0 resource group and deployment settings.*
+_IMPORTANT: Before you run `make import-state` ensure your `local.env` is correctly configured to match your 1.0 resource group and deployment settings._
 
 ```bash
 make import-state

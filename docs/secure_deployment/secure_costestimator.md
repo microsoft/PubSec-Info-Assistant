@@ -2,9 +2,9 @@
 
 The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for IA agent template secure mode and provides cost estimates based on the chosen configurations.
 
-| Solution            | Mode | Environment  |    Azure Pricing Calculator Link  |
-| :------------------:|:---------:|:---------------:|:-------------------:|
-| IA agent template, version 1.2 | Secure | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/192838582a644d02bd03bd07da650517) |
+|            Solution            |  Mode  | Environment |                          Azure Pricing Calculator Link                          |
+| :----------------------------: | :----: | :---------: | :-----------------------------------------------------------------------------: |
+| IA agent template, version 1.2 | Secure |   Sandbox   | [Sample Azure Estimation](https://azure.com/e/192838582a644d02bd03bd07da650517) |
 
 ---
 

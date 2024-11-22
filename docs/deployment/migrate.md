@@ -7,16 +7,14 @@ Before you perform a migration, we recommend you review the sample code and test
 
 ```json
 {
-"old_env":
-    {
-        "resource_group": "",
-        "random_text": ""
-    },
-"new_env":
-    {
-        "resource_group": "",
-        "random_text": ""
-    }
+  "old_env": {
+    "resource_group": "",
+    "random_text": ""
+  },
+  "new_env": {
+    "resource_group": "",
+    "random_text": ""
+  }
 }
 ```
 
@@ -42,7 +40,7 @@ Once complete, the new deployment of 1.1 should be functional and contain the pr
 
 ## Re-running a migration
 
-If you encounter a failure  while running the migration, you can re-run the process, but you have the option to skip steps to avoid repetition. You have the option of setting these values to True in the file `/scripts/extract-content.py`:
+If you encounter a failure while running the migration, you can re-run the process, but you have the option to skip steps to avoid repetition. You have the option of setting these values to True in the file `/scripts/extract-content.py`:
 
 ```bash
 skip_search_index = False

@@ -1,4 +1,5 @@
 # Debugging the Azure Functions Locally in VSCode
+
 If you wish to debug any of the functions that are part of this agent template, you can do this locally in VSCode and step through the logic. To do this you will need create a virtual environment. When you open your dev container, you will see a prompt notification in the bottom right of the VS Code window that will do this automatically for you. Click the 'Create virtual environment' button.
 
 ![Process Flow](images/virtual_env.jpg)
@@ -10,6 +11,7 @@ You will then be prompted to select a python interpreter. Select the latest vers
 This will create a folder under the Functions folder called .venv, which is git ignored.
 
 ## Setting local configurations
+
 Next you will need to create local configuration values that are used by the function, which include items such as the details on the storage containers used and the instance of Form Recognizer. You can create this manually, but we have provided a utility to generate this file for you, If you run a command 'make extract-env-debug-functions' this will generate a json file that includes these values called local.settings.json in the Functions folder. An example is shown below…
 
 ```json
@@ -45,8 +47,10 @@ Next you will need to create local configuration values that are used by the fun
   }
 }
 ```
+
 ## Stepping through the code
-Now you are ready to debug the functions locally. Select the Run & Debug option from left menu bar and the click the play button after ensuring you have selected 'Attach to Python Functions' from the dropdown menu. 
+
+Now you are ready to debug the functions locally. Select the Run & Debug option from left menu bar and the click the play button after ensuring you have selected 'Attach to Python Functions' from the dropdown menu.
 
 ![Attach to function](images/function_attach.png)
 

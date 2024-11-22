@@ -1,13 +1,13 @@
 # 3rd Party Open Source Software Notice
 
-This project depends on 3rd Party Open Source Software. Below is a list of known 3rd Party Open Source Software dependencies. 
+This project depends on 3rd Party Open Source Software. Below is a list of known 3rd Party Open Source Software dependencies.
 
 ## Python packages
 
 From the following locations:
 
-* app/backend/requirements.txt
-* functions/requirements.txt
+- app/backend/requirements.txt
+- functions/requirements.txt
 
 ### NodeJS
 
@@ -73,17 +73,15 @@ From the following locations:
 
 <https://github.com/Azure/azure-sdk-for-python>
 
-
 ### tenacity
 
 <https://github.com/jd/tenacity>
-
 
 ## NPM Modules
 
 From the following locations:
 
-* app/frontend/package.json
+- app/frontend/package.json
 
 ### @fluentui/react
 

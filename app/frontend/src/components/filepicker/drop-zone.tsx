@@ -5,7 +5,7 @@ import { array, func } from "prop-types";
 import React from "react";
 import styles from "./drop-zone.module.css";
 
-const Banner = ({ onClick, onDrop }: {onClick: any, onDrop: any}) => {
+const Banner = ({ onClick, onDrop }: { onClick: any; onDrop: any }) => {
   const handleDragOver = (ev: any) => {
     ev.preventDefault();
     ev.stopPropagation();
@@ -19,12 +19,7 @@ const Banner = ({ onClick, onDrop }: {onClick: any, onDrop: any}) => {
   };
 
   return (
-    <div
-      className={styles.banner}
-      onClick={onClick}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-    >
+    <div className={styles.banner} onClick={onClick} onDragOver={handleDragOver} onDrop={handleDrop}>
       <span className={styles.banner_text}>Click to Add files</span>
       <span className={styles.banner_text}>Or</span>
       <span className={styles.banner_text}>Drag and Drop files here</span>
@@ -32,7 +27,7 @@ const Banner = ({ onClick, onDrop }: {onClick: any, onDrop: any}) => {
   );
 };
 
-const DropZone = ({ onChange, accept = ["*"] }: {onChange: any, accept: string[]}) => {
+const DropZone = ({ onChange, accept = ["*"] }: { onChange: any; accept: string[] }) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
@@ -50,22 +45,14 @@ const DropZone = ({ onChange, accept = ["*"] }: {onChange: any, accept: string[]
   return (
     <div className={styles.wrapper}>
       <Banner onClick={handleClick} onDrop={handleDrop} />
-      <input
-        type="file"
-        aria-label="add files"
-        className={styles.input}
-        ref={inputRef}
-        multiple={true}
-        onChange={handleChange}
-        accept={accept.join(",")}
-      />
+      <input type="file" aria-label="add files" className={styles.input} ref={inputRef} multiple={true} onChange={handleChange} accept={accept.join(",")} />
     </div>
   );
 };
 
 DropZone.propTypes = {
   accept: array,
-  onChange: func,
+  onChange: func
 };
 
 export { DropZone };

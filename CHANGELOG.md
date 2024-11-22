@@ -1,13 +1,17 @@
 ## [project-title] Changelog
 
 <a name="x.y.z"></a>
+
 # x.y.z (yyyy-mm-dd)
 
-*Features*
-* ...
+_Features_
 
-*Bug Fixes*
-* ...
+- ...
 
-*Breaking Changes*
-* ...
+_Bug Fixes_
+
+- ...
+
+_Breaking Changes_
+
+- ...

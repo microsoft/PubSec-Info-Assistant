@@ -1,68 +1,71 @@
-
 <!-- TOC ignore:true -->
+
 # Transparency Note: Information Assistant (IA) agent template
 
 Updated 25 Mar 2024
 
 <!-- TOC ignore:true -->
+
 ## Table of Contents
+
 <!-- TOC -->
 
 - [What is a Transparency Note?](#what-is-a-transparency-note)
 - [The basics of IA agent template](#the-basics-of-ia-agent-template)
-    - [Introduction](#introduction)
-    - [Key Terms](#key-terms)
+  - [Introduction](#introduction)
+  - [Key Terms](#key-terms)
 - [Capabilities](#capabilities)
-    - [System behavior: Internal Document-based RAG](#system-behavior-internal-document-based-rag)
-        - [Overview](#overview)
-        - [Data Preparation](#data-preparation)
-        - [Prompt Engineering](#prompt-engineering)
-    - [System behavior: External Web-based RAG](#system-behavior-external-web-based-rag)
-        - [Overview](#overview)
-        - [Data Preparation](#data-preparation)
-        - [Content Controls](#content-controls)
-    - [System behavior: Compare Internally- to Externally-grounded RAG](#system-behavior-compare-internally--to-externally-grounded-rag)
-        - [Overview](#overview)
-        - [Data Preparation](#data-preparation)
-        - [Prompt Engineering](#prompt-engineering)
-    - [System behavior: Ungrounded Chat](#system-behavior-ungrounded-chat)
-        - [Overview](#overview)
-        - [Data Preparation](#data-preparation)
-        - [Prompt Engineering](#prompt-engineering)
-    - [System behavior: PREVIEW - Autonomous Agents](#system-behavior-preview---autonomous-agents)
-        - [Overview](#overview)
-        - [Math Assistant](#math-assistant)
-        - [Tabular Data Assistant](#tabular-data-assistant)
+  - [System behavior: Internal Document-based RAG](#system-behavior-internal-document-based-rag)
+    - [Overview](#overview)
+    - [Data Preparation](#data-preparation)
+    - [Prompt Engineering](#prompt-engineering)
+  - [System behavior: External Web-based RAG](#system-behavior-external-web-based-rag)
+    - [Overview](#overview)
+    - [Data Preparation](#data-preparation)
+    - [Content Controls](#content-controls)
+  - [System behavior: Compare Internally- to Externally-grounded RAG](#system-behavior-compare-internally--to-externally-grounded-rag)
+    - [Overview](#overview)
+    - [Data Preparation](#data-preparation)
+    - [Prompt Engineering](#prompt-engineering)
+  - [System behavior: Ungrounded Chat](#system-behavior-ungrounded-chat)
+    - [Overview](#overview)
+    - [Data Preparation](#data-preparation)
+    - [Prompt Engineering](#prompt-engineering)
+  - [System behavior: PREVIEW - Autonomous Agents](#system-behavior-preview---autonomous-agents)
+    - [Overview](#overview)
+    - [Math Assistant](#math-assistant)
+    - [Tabular Data Assistant](#tabular-data-assistant)
 - [Intended uses](#intended-uses)
-    - [Considerations when choosing a use case](#considerations-when-choosing-a-use-case)
-        - [Identity Applications](#identity-applications)
-        - [Age Appropriateness/Exposure to Minors](#age-appropriatenessexposure-to-minors)
+  - [Considerations when choosing a use case](#considerations-when-choosing-a-use-case)
+    - [Identity Applications](#identity-applications)
+    - [Age Appropriateness/Exposure to Minors](#age-appropriatenessexposure-to-minors)
 - [Limitations of IA agent template](#limitations-of-ia-agent-template)
-    - [Qualitative limitations, human oversight requirements](#qualitative-limitations-human-oversight-requirements)
-        - [Confidence Scoring](#confidence-scoring)
-        - [Accuracy](#accuracy)
-    - [Technical limitations, operational factors and ranges](#technical-limitations-operational-factors-and-ranges)
-        - [Non-Production Status](#non-production-status)
-        - [Non-Real Time Usage](#non-real-time-usage)
-        - [Request Throttling](#request-throttling)
+  - [Qualitative limitations, human oversight requirements](#qualitative-limitations-human-oversight-requirements)
+    - [Confidence Scoring](#confidence-scoring)
+    - [Accuracy](#accuracy)
+  - [Technical limitations, operational factors and ranges](#technical-limitations-operational-factors-and-ranges)
+    - [Non-Production Status](#non-production-status)
+    - [Non-Real Time Usage](#non-real-time-usage)
+    - [Request Throttling](#request-throttling)
 - [System performance](#system-performance)
-    - [Grounded experiences](#grounded-experiences)
-    - [Ungrounded experiences](#ungrounded-experiences)
+  - [Grounded experiences](#grounded-experiences)
+  - [Ungrounded experiences](#ungrounded-experiences)
 - [Evaluation of IA agent template](#evaluation-of-ia-agent-template)
-    - [Evaluating and Integrating IA agent template for your use](#evaluating-and-integrating-ia-agent-template-for-your-use)
-        - [Human-in-the-loop](#human-in-the-loop)
-        - [Data Quality Evaluation](#data-quality-evaluation)
-        - [Evaluation of system performance](#evaluation-of-system-performance)
-        - [Use technical documentation](#use-technical-documentation)
+  - [Evaluating and Integrating IA agent template for your use](#evaluating-and-integrating-ia-agent-template-for-your-use)
+    - [Human-in-the-loop](#human-in-the-loop)
+    - [Data Quality Evaluation](#data-quality-evaluation)
+    - [Evaluation of system performance](#evaluation-of-system-performance)
+    - [Use technical documentation](#use-technical-documentation)
 - [Technical limitations, operational factors and ranges](#technical-limitations-operational-factors-and-ranges)
 - [Learn more about responsible AI](#learn-more-about-responsible-ai)
 - [Learn more about the IA agent template](#learn-more-about-the-ia-agent-template)
 - [Contact us](#contact-us)
-    - [About this document](#about-this-document)
+  - [About this document](#about-this-document)
 
 <!-- /TOC -->
 
 # What is a Transparency Note?
+
 An AI system includes not only the technology, but also the people who will use it, the people who will be affected by it, and the environment in which it is deployed. Creating a system that is fit for its intended purpose requires an understanding of how the technology works, what its capabilities and limitations are, and how to achieve the best performance. Microsoft’s Transparency Notes are intended to help you understand how our AI technology works, the choices system owners can make that influence system performance and behavior, and the importance of thinking about the whole system, including the technology, the people, and the environment. You can use Transparency Notes when developing or deploying your own system, or share them with the people who will use or be affected by your system.
 
 Microsoft’s Transparency Notes are part of a broader effort at Microsoft to put our AI Principles into practice. To find out more, see the [Microsoft AI principles](https://www.microsoft.com/ai/responsible-ai).
@@ -71,11 +74,11 @@ Microsoft’s Transparency Notes are part of a broader effort at Microsoft to pu
 
 ## Introduction
 
-The IA agent template is a system built on top of Azure OpenAI service, Azure AI Search and other Azure services. This system showcases capabilites possible with the emerging technologies related to Generative AI and how they may be applied for specific functionality. This agent template has been designed with Public Sector applications in mind, but has been found to be applicable to additional industries and applications. The user should be aware that Microsoft has evaluated this agent template for a limited set of use cases. Use cases outside of those which have been evaluated need to be considered and evaluated by those using this agent template for their intended use cases. 
+The IA agent template is a system built on top of Azure OpenAI service, Azure AI Search and other Azure services. This system showcases capabilites possible with the emerging technologies related to Generative AI and how they may be applied for specific functionality. This agent template has been designed with Public Sector applications in mind, but has been found to be applicable to additional industries and applications. The user should be aware that Microsoft has evaluated this agent template for a limited set of use cases. Use cases outside of those which have been evaluated need to be considered and evaluated by those using this agent template for their intended use cases.
 
 At its core, the IA agent template is an implementation of the [Retrieval Augmented Generation (RAG) pattern](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) and is intended to create a system that allows the end user to ‘have an accurate conversation’ with their data. By uploading supported document types the system makes the data available to the Azure OpenAI service to support a conversational engagement with the data. The system aims to allow the end user to have some controls over how Azure OpenAI service responds, understand how the response was generated (transparency), and verify the response with citations to the specific data the agent template is referencing.
 
-The 1.1 release of the IA agent template introduces new technologies and use cases on top of the original scope which are covered in this updated Transparency Note. Become familiar with these new system capabilities and use cases to understand their responsible application to your intended use cases before proceeding. This release adds in Bing Web Search API for LLM results to enable grounding via content from the Internet, support for SharePoint as a document source, ability to interact directly with LLMs for purely generative capabilities (ungrounded), and preview agent-based features enabled through the use of [LangChain](https://www.langchain.com/) toolkit. 
+The 1.1 release of the IA agent template introduces new technologies and use cases on top of the original scope which are covered in this updated Transparency Note. Become familiar with these new system capabilities and use cases to understand their responsible application to your intended use cases before proceeding. This release adds in Bing Web Search API for LLM results to enable grounding via content from the Internet, support for SharePoint as a document source, ability to interact directly with LLMs for purely generative capabilities (ungrounded), and preview agent-based features enabled through the use of [LangChain](https://www.langchain.com/) toolkit.
 
 The system aims to provide the functionality mentioned above while also focusing on the following key areas:
 
@@ -98,19 +101,19 @@ The system aims to provide the functionality mentioned above while also focusing
 
 ## Key Terms
 
-Terminology | Definition
----|---
-[Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/#overview) | Collection of large-scale generative AI models available as a service via Azure. 
-[ChatGPT](https://en.wikipedia.org/wiki/ChatGPT) | "ChatGPT is an artificial intelligence chatbot developed by OpenAI based on the company's Generative Pre-trained Transformer (GPT) series of large language models (LLMs)."
-[Chunking](https://learn.microsoft.com/en-us/samples/azure-samples/azure-search-power-skills/azure-open-ai-embeddings-generator/) | Chunking is a strategy of breaking down large documents into smaller pieces which satisfy the token limits of OpenAI models. 
-[Fabrications (aka Hallucinations)](https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)) | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data". The term "Fabrication" is preferred as the term "hallucination" may be offensive to people with certain disabilities. 
-[Generative AI](https://en.wikipedia.org/wiki/Generative_artificial_intelligence) | "A type of artificial intelligence (AI) system capable of generating text, images, or other media in response to prompts."
-[Grounding](https://www.expert.ai/glossary-of-ai-terms/grounding/) | "The ability of generative applications to map the factual information contained in a generative output or completion. It links generative applications to available factual sources — for example, documents or knowledge bases — as a direct citation, or it searches for new links."
-[Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering) | "A concept in artificial intelligence, particularly natural language processing. In prompt engineering, the description of the task that the AI is supposed to accomplish is embedded in the input, e.g. as a question, instead of it being explicitly given. Prompt engineering typically works by converting one or more tasks to a prompt-based dataset and training a language model with what has been called "prompt-based learning" or just "prompt learning"."
-[RAG](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) | Retrieval Augmented Generation; a pattern where data is retrieved (such as from a search system) and sent to Generative AI with a prompt to provide specific data to answer a question. 
-[Semantic Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview) | "A collection of query-related capabilities that bring semantic relevance and language understanding to textual search results."
-[Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them) | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant.
-[Vector Search](https://learn.microsoft.com/en-us/azure/search/vector-search-overview) | "Vector search is an approach in information retrieval that stores numeric representations of content for search scenarios. Because the content is numeric rather than plain text, the search engine matches on vectors that are the most similar to the query, with no requirement for matching on exact terms."
+| Terminology                                                                                                                       | Definition                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Azure OpenAI](https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/#overview)                            | Collection of large-scale generative AI models available as a service via Azure.                                                                                                                                                                                                                                                                                                                                                                                       |
+| [ChatGPT](https://en.wikipedia.org/wiki/ChatGPT)                                                                                  | "ChatGPT is an artificial intelligence chatbot developed by OpenAI based on the company's Generative Pre-trained Transformer (GPT) series of large language models (LLMs)."                                                                                                                                                                                                                                                                                            |
+| [Chunking](https://learn.microsoft.com/en-us/samples/azure-samples/azure-search-power-skills/azure-open-ai-embeddings-generator/) | Chunking is a strategy of breaking down large documents into smaller pieces which satisfy the token limits of OpenAI models.                                                                                                                                                                                                                                                                                                                                           |
+| [Fabrications (aka Hallucinations)](<https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)>)                      | "A hallucination or artificial hallucination (also occasionally called confabulation or delusion) is a confident response by an AI that does not seem to be justified by its training data". The term "Fabrication" is preferred as the term "hallucination" may be offensive to people with certain disabilities.                                                                                                                                                     |
+| [Generative AI](https://en.wikipedia.org/wiki/Generative_artificial_intelligence)                                                 | "A type of artificial intelligence (AI) system capable of generating text, images, or other media in response to prompts."                                                                                                                                                                                                                                                                                                                                             |
+| [Grounding](https://www.expert.ai/glossary-of-ai-terms/grounding/)                                                                | "The ability of generative applications to map the factual information contained in a generative output or completion. It links generative applications to available factual sources — for example, documents or knowledge bases — as a direct citation, or it searches for new links."                                                                                                                                                                                |
+| [Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering)                                                            | "A concept in artificial intelligence, particularly natural language processing. In prompt engineering, the description of the task that the AI is supposed to accomplish is embedded in the input, e.g. as a question, instead of it being explicitly given. Prompt engineering typically works by converting one or more tasks to a prompt-based dataset and training a language model with what has been called "prompt-based learning" or just "prompt learning"." |
+| [RAG](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview)                                     | Retrieval Augmented Generation; a pattern where data is retrieved (such as from a search system) and sent to Generative AI with a prompt to provide specific data to answer a question.                                                                                                                                                                                                                                                                                |
+| [Semantic Search](https://learn.microsoft.com/en-us/azure/search/semantic-search-overview)                                        | "A collection of query-related capabilities that bring semantic relevance and language understanding to textual search results."                                                                                                                                                                                                                                                                                                                                       |
+| [Token](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them)                                        | Input into an OpenAI model is broken down in to tokens. The model has a limit on the number of tokens it can accept. Tokenization is language-dependant.                                                                                                                                                                                                                                                                                                               |
+| [Vector Search](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)                                            | "Vector search is an approach in information retrieval that stores numeric representations of content for search scenarios. Because the content is numeric rather than plain text, the search engine matches on vectors that are the most similar to the query, with no requirement for matching on exact terms."                                                                                                                                                      |
 
 # Capabilities
 
@@ -119,9 +122,10 @@ Terminology | Definition
 ## System behavior: Internal Document-based RAG
 
 ### Overview
+
 This capability is implemented primarily on top of Azure OpenAI service and Azure AI Search service. The system allows the end user to upload documents in specific formats either via direct upload or via integration with SharePoint connector. These documents are processed and made searchable via natural language by leveraging Azure AI Search and GPT via Azure AI Services. This allows end users to "have a conversation" with their data. The system cites the documents from which it generates answers, allowing the end user to verify the results for accuracy.
 
-The system differentiates the internally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded. 
+The system differentiates the internally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded.
 
 By design this system should not provide answers that are not available in the data available to it. **The relevance of the answers to the questions asked will depend directly on the data which has been uploaded and successfully processed by the system.**
 
@@ -133,16 +137,17 @@ The system receives and process files from the end user. Data is chunked with va
 
 This system is primarily tuned for accuracy of response based on the data provided to the system. As such, much work has gone in to prompt engineering to prevent fabrications. The prompt engineering is visible to the end user when looking at the "Thought process" tab (directly from icon, or via Citation view).
 
-**NOTE:** Fabrications may not always be preventable via prompt engineering. End users MUST always validate results with citations provided. 
+**NOTE:** Fabrications may not always be preventable via prompt engineering. End users MUST always validate results with citations provided.
 
 ## System behavior: External Web-based RAG
 
 ### Overview
-This capability is implemented with [Bing Web Search for LLMs API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) and Azure OpenAI service. The system allows the end user to ask questions in natural language via the Azure OpenAI service, and grounds the answer via responses to the question from Bing Web Search. This allows end users to "have a conversation" with data from recent information found on the public Internet. The system cites the web sites from which it generates answers, allowing the end user to verify the results for accuracy. This system does not use Bing "Answers" which are curated facts available through the Bing web interface and potentially other non-LLM APIs. 
+
+This capability is implemented with [Bing Web Search for LLMs API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) and Azure OpenAI service. The system allows the end user to ask questions in natural language via the Azure OpenAI service, and grounds the answer via responses to the question from Bing Web Search. This allows end users to "have a conversation" with data from recent information found on the public Internet. The system cites the web sites from which it generates answers, allowing the end user to verify the results for accuracy. This system does not use Bing "Answers" which are curated facts available through the Bing web interface and potentially other non-LLM APIs.
 
 This system behavior is similar to Copilot in Bing. We suggest reviewing their [Transparency Note](https://support.microsoft.com/en-us/topic/Copilot-in-bing-our-approach-to-responsible-ai-45b5eae8-7466-43e1-ae98-b48f8ff8fd44) as well when considering if you want to deploy this solution for your end users. From their Transparency Note you can read about what the Copilot in Bing team has done from a Responsible AI perspective, and what you may want to consider doing to help improve the safety of your solution.
 
-The system differentiates the externally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded. 
+The system differentiates the externally-grounded answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded.
 
 Due to the nature of the content available on the public Internet, it is likely that most questions will have one or more responses and that those responses will change over time. This is especially important for web-based results which are subject to real-time changes due to current events. **The relevance and accuracy of the answers to the questions asked will need to be evaluated at all times by the end user.**
 
@@ -151,11 +156,13 @@ Due to the nature of the content available on the public Internet, it is likely 
 The system receives and process top responses from Bing Web Search each time a question is asked; the system does NOT cache response for reuse. Due to the nature of the public Internet and continuous search indexing by the Bing service, it should be expected that answers to questions will change over time as new, potentially more relevant or updated results are returned from the Bing Web Search service.
 
 ### Content Controls
+
 The [Bing Web Search for LLM API](https://www.microsoft.com/en-us/bing/apis/llm) (Bing Web Search) supports the Bing "Safe Search" content filtering features, which can be configured for the system at deployment time. The feature currently supports three settings {Off, Moderate, Strict} which **apply ONLY to Adult content**. At the time of this writing there is no ability within the Bing Web Search API to filter or restrict content further. This fact should be considered when evaluating your specific use case. **Microsoft does not believe that the current content controls on Bing Web Search are sufficient for minors; this capability SHOULD NOT be exposed to minors at this time**.
 
 ## System behavior: Compare Internally- to Externally-grounded RAG
 
 ### Overview
+
 This capability is implemented by composing the [internally-grounded](#system-behavior-internal-document-based-rag) and [externally-grounded](#system-behavior-external-web-based-rag) features to answer a question, then compare the answers via a prompt made to the LLM. To implement this feature, the system makes separate calls to both features (internal and external), then creates a prompt to compare the answers. This answer is displayed to the end user.
 
 The system differentiates the compared answers from the other answers provided by the system via visual cues and system messages presented to the end user. If modifying the user experience, care should be taken to ensure that end users can easily distinguish where the grounding is coming from, or if the answer is ungrounded.
@@ -175,6 +182,7 @@ This capability leverages the individual prompts for internally-grounded and ext
 ## System behavior: Ungrounded Chat
 
 ### Overview
+
 This capability leverages the capabilities of a large language model (LLM) to generate responses in an ungrounded manner, without relying on external data sources or retrieval-augmented generation techniques. This approach allows for open-ended and creative generation, making it suitable for tasks such as ideation, brainstorming, and exploring hypothetical scenarios.
 
 As users may ask questions in the ungrounded experience, ungrounded responses are not grounded in specific factual data and should be evaluated critically, especially in domains where accuracy and verifiability are paramount. Ungrounded responses will NOT have citations avaiable for verification.
@@ -194,6 +202,7 @@ There is minimal propmt engineering provided by the system for this capability. 
 ## System behavior: PREVIEW - Autonomous Agents
 
 ### Overview
+
 These capabilities include tabular data processing and a math assistant which generate responses by using an LLM as a reasoning engine. The key strength lies in agent's ability to autonomously reason about tasks, decompose them into steps, and determine the appropriate tools and data sources to leverage, all without the need for predefined task definitions or rigid workflows. This approach allows for a dynamic and adaptive response generation process.
 
 These agents are being **released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning**, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future releases, we plan to work to enhance the safety and robustness of these autonomous reasoning capabilities. Specific information on our preview agents can be found in [Autonomous Agents](/docs/features/features.md#autonomous-reasoning-with-agents).
@@ -205,9 +214,10 @@ These agents are being **released in preview mode as we continue to evaluate and
 This capability leverages the LangChain technology to enable LLMs to assist with math questions. This is an experimental feature which is primarily intended for younger audiences. **Care MUST BE taken with building a solution targeted to minors. Please see the section below that discusses [age appropriatness](#age-appropriatenessexposure-to-minors)**.
 
 This capability presents several potential real harms to students in particular which should be mitigated if used in an education setting. At a minimum, this system may have the following harms:
-1) Incorrect Answers - This capability may generate incorrect answers which may have follow-on impact on a student's grades. Establishing a system verification process would be critical for use in an education setting.
-2) Incorrect process - As this capability is able to show the steps to generate an answer, there is a real possibility that it generates processes which are incorrect. This may have a follow-on impact to students who learn an incorrect process for answering similar types of math problems.
-3) Undefined resolution process - Educators should establish an agreed upon resolution process for incorrect answers and incorrect process trainings before using this capability in a production setting. This system does not capture questions or responses, and at a minimum the solution should keep records for verification of incorrect answers or incorrect process delivered to an individual student. 
+
+1. Incorrect Answers - This capability may generate incorrect answers which may have follow-on impact on a student's grades. Establishing a system verification process would be critical for use in an education setting.
+2. Incorrect process - As this capability is able to show the steps to generate an answer, there is a real possibility that it generates processes which are incorrect. This may have a follow-on impact to students who learn an incorrect process for answering similar types of math problems.
+3. Undefined resolution process - Educators should establish an agreed upon resolution process for incorrect answers and incorrect process trainings before using this capability in a production setting. This system does not capture questions or responses, and at a minimum the solution should keep records for verification of incorrect answers or incorrect process delivered to an individual student.
 
 Note that there are several potential security concerns with LangChain and the ability for agents to enable unintended consequences. Usage of this feature should be carefully evaluated.
 
@@ -219,13 +229,14 @@ Note that there are several potential security concerns with LangChain and the a
 
 # Intended uses
 
-This system is intended for the purpose of exploring LLM capabilities across several data sources (internal and exteral) and engagement methods. Engagement methods range from heavily controlled to completely uncontrolled, sometimes leveraging prompt engineering to limit the creativity of the model(s) and citations to help the end user determine when answers are factual, while other times being minimally controlling (ungrounded responses). As such, much care has been taken to build the system with best practices in mind as a means to help the end user understand what it happening when they see responses from the system. 
+This system is intended for the purpose of exploring LLM capabilities across several data sources (internal and exteral) and engagement methods. Engagement methods range from heavily controlled to completely uncontrolled, sometimes leveraging prompt engineering to limit the creativity of the model(s) and citations to help the end user determine when answers are factual, while other times being minimally controlling (ungrounded responses). As such, much care has been taken to build the system with best practices in mind as a means to help the end user understand what it happening when they see responses from the system.
 
-As features in this agent template may be turned on/off at deployment time, it allows customizability for the design of the system which will be presented to the end user (the solution). Additionally this agent template leverages many core product features such as Bing Web Search API for LLMs and Content Safety (filtering) to allow varying levels of control in the system which can not be accounted for in this Transparency Note. It is imperative to consider your specific use case when combining features, along with the resources available in the [Responsible AI guideance](#learn-more-about-responsible-ai) as you prepare your individual solution. 
+As features in this agent template may be turned on/off at deployment time, it allows customizability for the design of the system which will be presented to the end user (the solution). Additionally this agent template leverages many core product features such as Bing Web Search API for LLMs and Content Safety (filtering) to allow varying levels of control in the system which can not be accounted for in this Transparency Note. It is imperative to consider your specific use case when combining features, along with the resources available in the [Responsible AI guideance](#learn-more-about-responsible-ai) as you prepare your individual solution.
 
 ## Considerations when choosing a use case
 
 ### Identity Applications
+
 **Avoid using IA agent template for identification or verification of identities or processing of biometric information.** Any use cases that seek to incorporate end consumer or citizen data should be carefully evaluated per Microsoft’s Responsible AI guidelines.
 
 ### Age Appropriateness/Exposure to Minors
@@ -235,14 +246,16 @@ This agent template contains features which have been requested by our Education
 **At this time, these capabilities SHOULD NOT be targeted to minors.** The capabilities in this agent template should only be targeted to adult users.
 
 Current known limitations with respect to minors:
-* Bing Safe Search is limited to filtering Adult Content in text and image form
-* Content Safety features may be enabled but are not comprehensive enough to limit all potential harms related to self harm, hate speech, racism, terrorism and violence
-* Content Safety does not support some regional legal requirements including ability to limit religious content and content related to sexual oreintation 
-* Age-adaptive prompting is not implemented in this agent template
-* This agent template does not have age awareness
-* This agent template does not utilize, collect or store guardian consent
-* This agent template does not store user interaction history in any form including user identifiers, queries or responses
-*  This agent template may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
+
+- Bing Safe Search is limited to filtering Adult Content in text and image form
+- Content Safety features may be enabled but are not comprehensive enough to limit all potential harms related to self harm, hate speech, racism, terrorism and violence
+- Content Safety does not support some regional legal requirements including ability to limit religious content and content related to sexual oreintation
+- Age-adaptive prompting is not implemented in this agent template
+- This agent template does not have age awareness
+- This agent template does not utilize, collect or store guardian consent
+- This agent template does not store user interaction history in any form including user identifiers, queries or responses
+- This agent template may not have adequeate features to prevent "jailbraking" of the system to bypass harm mitigations
+
 # Limitations of IA agent template
 
 In this section we describe several known limitations of the IA agent template system.
@@ -267,7 +280,7 @@ This software is a agent template codebase that is not configured for production
 
 ### Non-Real Time Usage
 
-This software is not intended for real-time data processing. This is a batch-processing system, intended for offline data analysis.  
+This software is not intended for real-time data processing. This is a batch-processing system, intended for offline data analysis.
 
 ### Request Throttling
 
@@ -286,14 +299,14 @@ The central part of IA agent template (the system) is to produce answers to ques
 The system outcomes are evaluated as follows:
 Outcomes | Examples
 ---|---
-True Positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
-False Positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents do not answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Tennessee". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited. 
+True Positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited.
+False Positive | The user asks a question and the most relevant documents are found and returned for the system to summarize and cite. The documents do not answer the question asked.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Tennessee". A document that discusses fresh water availability in Georgia exists, is found, is summarized and cited.
 False Negative | The user asks a question and the system does not find any document available to answer yet the document was available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was uploaded, but failed processing. It is not found, summarized or cited.
 True Negative | The user asks a question and the system does not find any document available to answer and there was no document available to the system.<br/><br/>Example: A question is asked "Tell me about fresh water supply in Georgia". A document that discusses fresh water availability in Georgia was never uploaded. It is not found, summarized or cited. The system responds that it is unable to answer the question.
 
 All documents submitted to the system should be confirmed to have successfully processed to help eliminate False Negative outcomes. False Positive and True Negative outcomes may be reduced by ensuring that relevant documents are submitted and successfully processed by the system. False Positive outcomes may be mitigated by human review of citations.
 
-During web-grounded interactions, human oversight is required to verify the vailidity of the source data; web content should not be inately trusted. 
+During web-grounded interactions, human oversight is required to verify the vailidity of the source data; web content should not be inately trusted.
 
 **NOTE:** Due to generative AI's capability to fabricate, end users should always leverage citations to verify results.
 
@@ -335,7 +348,6 @@ This system makes no claim for precision or accuracy. The behavior and performan
 
 # Learn more about responsible AI
 
-
 [Microsoft AI principles](https://www.microsoft.com/en-us/ai/responsible-ai)
 
 [Microsoft responsible AI resources](https://www.microsoft.com/en-us/ai/responsible-ai-resources)
@@ -344,9 +356,7 @@ This system makes no claim for precision or accuracy. The behavior and performan
 
 # Learn more about the IA agent template
 
-
 [Information Assistant agent template](https://github.com/microsoft/PubSec-Info-Assistant)
-
 
 # Contact us
 

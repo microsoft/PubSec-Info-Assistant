@@ -2,19 +2,19 @@
 
 Please see below sections for coverage of IA agent template features.
 
-* [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
-* [Prompt Engineering](/docs/features/features.md#prompt-engineering)
-* [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
-* [SharePoint Connector](/docs/features/features.md#sharepoint-connector)
-* [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
-* [Image Search](/docs/features/features.md#image-search)
-* [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
-* [Assistants (Preview)](/docs/features/features.md#autonomous-reasoning-with-assistants-agents)
-* [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
-* [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
-* [User Experience](/docs/features/features.md#user-experience)
-* [Document Deletion](/docs/features/features.md#document-deletion)
-* [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
+- [Retrieval Augmented Generation (RAG)](/docs/features/features.md#retrieval-augmented-generation-rag)
+- [Prompt Engineering](/docs/features/features.md#prompt-engineering)
+- [Document Pre-Processing](/docs/features/features.md#document-pre-processing)
+- [SharePoint Connector](/docs/features/features.md#sharepoint-connector)
+- [Bing Search And Compare](/docs/features/features.md#bing-search-and-compare)
+- [Image Search](/docs/features/features.md#image-search)
+- [Azure AI Search Integration](/docs/features/features.md#azure-ai-search-integration)
+- [Assistants (Preview)](/docs/features/features.md#autonomous-reasoning-with-assistants-agents)
+- [Customization and Personalization](/docs/features/features.md#customization-and-personalization)
+- [Enhanced AI Interaction](/docs/features/features.md#enhanced-ai-interaction)
+- [User Experience](/docs/features/features.md#user-experience)
+- [Document Deletion](/docs/features/features.md#document-deletion)
+- [Works in Progress](/docs/features/features.md#works-in-progress-future-releases)
 
 ## Retrieval Augmented Generation (RAG)
 
@@ -42,18 +42,18 @@ Go here for more information on [Prompt engineering techniques](https://learn.mi
 
 Information Assistant supports the following document types:
 
-Pipeline | File Types
---- | ---
-Text-based | pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg
-Images | jpg, jpeg, png, gif, bmp, tif, tiff
+| Pipeline   | File Types                                                          |
+| ---------- | ------------------------------------------------------------------- |
+| Text-based | pdf, docx, html, htm, csv, md, pptx, txt, json, xlsx, xml, eml, msg |
+| Images     | jpg, jpeg, png, gif, bmp, tif, tiff                                 |
 
 **Custom Document Chunking:** The Azure OpenAI GPT models have a maximum token limit, which includes both input and output tokens. Tokens are units of text which can represent a single word, a part of a word, or even a character, depending on the specific language and text encoding being used. Consequently the model will not be able to process a 500 page text based document. Likewise, the models will not be able to process complex file types, such as PDF. This is why we pre-process these documents, before passing these to our search capability to then be exposed by the RAG pattern. Our process focused on
 
-* content extraction from text-based documents
-  * [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) for PDFs
-  * [Unstructure.io](https://unstructured.io/) for all other text-based types
-* creating a standard JSON representation of all a documents text-based content
-* chunking and saving metadata into manageable sizes to be used in the RAG pattern
+- content extraction from text-based documents
+  - [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) for PDFs
+  - [Unstructure.io](https://unstructured.io/) for all other text-based types
+- creating a standard JSON representation of all a documents text-based content
+- chunking and saving metadata into manageable sizes to be used in the RAG pattern
 
 The Information Assistant agent template [pre-processes](/docs/features/document_pre_processing.md) certain document types to allow better understanding of large complex documents.
 
@@ -67,13 +67,13 @@ The Information Assistant now supports integrating your SharePoint document libr
 
 ## Bing Search And Compare
 
-"Bing Search" and "Bing Compare." The former enables users to seamlessly perform Bing searches, with the retrieved results processed by the LLM and enriched with URL citations for more informative responses. 
+"Bing Search" and "Bing Compare." The former enables users to seamlessly perform Bing searches, with the retrieved results processed by the LLM and enriched with URL citations for more informative responses.
 The latter, "Bing Compare," takes a grounded LLM response and performs a second Bing search, integrating citations from both sources for a comprehensive answer.
 
 Additionally, a "Switch to Web" button in the subtitle bar allows users to transition between "Work" and "Web" workspaces, directing prompts either to the grounded LLM with access to Bing-related functionalities or behaving as if the "Search Bing" button was pressed.
- In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses.
- These features empower users to seamlessly access and validate information across various sources within the chat interface.
- More information can be found in the [markdown here](/docs/features/bing_search.md)
+In the "Web" workspace, a "Compare Data" button facilitates the comparison of Bing search results with grounded LLM responses.
+These features empower users to seamlessly access and validate information across various sources within the chat interface.
+More information can be found in the [markdown here](/docs/features/bing_search.md)
 
 ## Image Search
 
@@ -120,8 +120,6 @@ Do not use this code with untrusted inputs, with elevated permissions, or withou
 **Image Captioning**: The platform can generate captions for images, providing additional context for the user. **NOTE**:"CAPTION" and "DENSE_CAPTIONS" are only supported in Azure GPU regions (East US, France Central, Korea Central, North Europe, Southeast Asia, West Europe, West US)
 
 ## User Experience
-
-
 
 ![Chat screen](/docs/images/info-assist-chat-ui.png)
 

@@ -111,7 +111,7 @@ llm_math_tool = load_tools(["llm-math"], llm=model)
 llm_wiki_tool = load_tools(["wikipedia"], llm=model)
 # Examples of custom tools
 llm_pythag_tool = [PythagorasTool()]
-llm_pythag_tool = [CircumferenceTool()]
+llm_circumference_tool = [CircumferenceTool()]
 
 
 PREFIX = """Act as a math tutor that helps students solve a wide array of mathematical challenges, including arithmetic problems, algebraic equations, geometric proofs, calculus, and statistical analysis, as well as word problems.

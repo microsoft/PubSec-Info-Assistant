@@ -2,16 +2,16 @@
 --extra-index-url https://download.pytorch.org/whl/cpu
 azure-core==1.31.0
 azure-cosmos==4.7.0
-azure-storage-blob==12.23.1
+azure-storage-blob==12.23.0
 azure-storage-queue==12.12.0
 azure-search-documents==11.5.1
 azure-identity==1.18.0
 fastapi==0.115.0
 fastapi-utils==0.7.0
-openai==1.50.2
+openai==1.55.3
 sentence-transformers==3.1.1
 tenacity==9.0.0
 torch
 torchvision
 torchaudio
-uvicorn==0.31.0
+uvicorn==0.30.6

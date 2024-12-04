@@ -18,52 +18,46 @@ Work Only mode provides the natural language conversation with your data that yo
 
 ## Work + Web
 
-The Work + Web mode experience starts similar to Work Only mode. It provides new options in the response enabling the user to __Searh Web__ to see if there is newer information available or __Compare with Web__ to compare the response from their data with information available on the web. In this mode the user can choose to ask questions and have the grounding data be either sourced from private data they upload or web search results from the Bing Search service. The default grounding mode can be changed in the Adjust settings located on the top right just below the Assistants preview links.
+The Work + Web mode experience starts similar to Work Only mode. It provides new options in the response enabling the user to **Searh Web** to see if there is newer information available or **Compare with Web** to compare the response from their data with information available on the web. In this mode the user can choose to ask questions and have the grounding data be either sourced from private data they upload or web search results from the Bing Search service. The default grounding mode can be changed in the Adjust settings located on the top right just below the Assistants preview links.
 
 ![Chat Link](/docs/images/work-plus-web-ui.png)
 
-Selecting the __Search Web__ or __Compare with Web__ options changes the user experience as follows:
+Selecting the **Search Web** or **Compare with Web** options changes the user experience as follows:
 
 ### Search Web
 
-Selecting __Search Web__ from a Work Only response asks the same question on the web. The UI color scheme changes to reflect the user is searching a different source.
+Selecting **Search Web** from a Work Only response asks the same question on the web. The UI color scheme changes to reflect the user is searching a different source.
 
 ![Chat Link](/docs/images/work-plus-web-search-web.png)
 
-Options in the __Search Web__ response include __Search Work__ and __Compare with Work__.
+Options in the **Search Web** response include **Search Work** and **Compare with Work**.
 
-The __Search Work__ option in the Web response works similar to the __Search Web__ option found in the Work Only response. When using the __Work + Web__ mode users can choose to ground in either Work or the Web by default. Default grounding can be changed in the Adjust settings located on the top right just below the Assistants preview links.
+The **Search Work** option in the Web response works similar to the **Search Web** option found in the Work Only response. When using the **Work + Web** mode users can choose to ground in either Work or the Web by default. Default grounding can be changed in the Adjust settings located on the top right just below the Assistants preview links.
 
 ![Chat Link](/docs/images/adjust-settings-ui.png)
 ![Chat Link](/docs/images/configure-answer-generation.png)
 
-
-
 ### Compare with Web
 
-Selecting __Compare with Web__ from a Work Only response asks the same question on the web then compares your data response with the response from the web. The UI color scheme changes to reflect the user is comparing Work with Web
+Selecting **Compare with Web** from a Work Only response asks the same question on the web then compares your data response with the response from the web. The UI color scheme changes to reflect the user is comparing Work with Web
 
 ![Chat Link](/docs/images/work-plus-web-compare-with-web.png)
 
-
-With different grounding settings in the __Work + Web__ mode, the compare option can be Work compared to Web or Web compared to Work.
+With different grounding settings in the **Work + Web** mode, the compare option can be Work compared to Web or Web compared to Work.
 
 ![Chat Link](/docs/images/work-plus-web-compare-with-work.png)
 
-The __Compare__ response includes both work and web citations. Selecting a citation activates the analysis panel.
-
+The **Compare** response includes both work and web citations. Selecting a citation activates the analysis panel.
 
 ## Analysis Panel
 
 The Analysis Panel in the UX allows the user to explore the details about the answer to their question:
 
-* Thought Process
-* Supporting Content
-* [Citations](/docs/features/ux_analysispanel.md#citations)
+- Thought Process
+- Supporting Content
+- [Citations](/docs/features/ux_analysispanel.md#citations)
 
 View the details of the [Analysis Panel](/docs/features/ux_analysispanel.md) feature or you can click on each section to get more specifics of that detail tab.
-
-
 
 ## Generative
 
@@ -124,8 +118,8 @@ You can upload documents in the [supported formats](/docs/features/features.md#d
 
 > 1. Click on the Manage Content link in the top of the interface
 > 1. Then click on the "Upload files" tab.
-> ![Upload Link](/docs/images/manage-content-upload-files.png)
-> 1. Select a folder, add some tags, and drag files to the user interface, or click the box to open a browse window, select file(s) then click the __Upload Files__ button.
+>    ![Upload Link](/docs/images/manage-content-upload-files.png)
+> 1. Select a folder, add some tags, and drag files to the user interface, or click the box to open a browse window, select file(s) then click the **Upload Files** button.
 
 > ![Upload Files Link](/docs/images/manage-content-upload-files-1.png)
 
@@ -134,22 +128,21 @@ You can upload documents in the [supported formats](/docs/features/features.md#d
 You can view the status of files that have been uploaded to the system through the user interface. To do so:
 
 > 1. Click on the Manage Content link in the top of the interface
-> ![Manage Content](/docs/images/manage-content-ui.png)
+>    ![Manage Content](/docs/images/manage-content-ui.png)
 > 1. Then click on the "Upload Status" tab.
-> ![Upload Status Link](/docs/images/manage-content-upload-status.png)
-> 1. At the top of the page you can filter your list of files by the folder they are in, the tags you applied during upload, or by the time frame of when they were uploaded from '4 hours' minimum to 'All' which will show all files. By clicking 'Refresh' after selecting your desired filters, the documents matching your criteria will be displayed. In the table of documents you can see the high level file state, a status detail message, the folder it is hosted in and the applied tags. 
+>    ![Upload Status Link](/docs/images/manage-content-upload-status.png)
+> 1. At the top of the page you can filter your list of files by the folder they are in, the tags you applied during upload, or by the time frame of when they were uploaded from '4 hours' minimum to 'All' which will show all files. By clicking 'Refresh' after selecting your desired filters, the documents matching your criteria will be displayed. In the table of documents you can see the high level file state, a status detail message, the folder it is hosted in and the applied tags.
 
 ### Delete Content
 
 Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. If you wish to delete some files, select a file, multiple files or all files using the selection options on the left column of the table. Then click delete and confirm. You will then see a message in the bottom right of the screen indicating that this process can take up to 10 minutes, so refresh the screen and track progress. Follow the steps outlined below to delete files:
 
-1. __Access the Manage Content UI__: Select the __Manage Content__ tab located at the top right.
-2. __Filter Your Files__: On the left, select __Upload Status__ then use the dropdown lists to apply any desired filters.
-3. __Refresh the List__: Click the __Refresh__ icon to update the list of files based on your filters.
-4. __Delete a File__: Once the filtered list appears, select the file you want to delete. Then, click the __Delete__ link located to the right of the Refresh link.
+1. **Access the Manage Content UI**: Select the **Manage Content** tab located at the top right.
+2. **Filter Your Files**: On the left, select **Upload Status** then use the dropdown lists to apply any desired filters.
+3. **Refresh the List**: Click the **Refresh** icon to update the list of files based on your filters.
+4. **Delete a File**: Once the filtered list appears, select the file you want to delete. Then, click the **Delete** link located to the right of the Refresh link.
 
 > ![Upload Status Options and Refresh Links](/docs/images/manage-content-delete.png)
-
 
 ### Using sample data - optional
 
@@ -157,5 +150,4 @@ Referring to the manage content sections above for [Upload files](/docs/images/u
 
 > 1. Microsoft financial statements are available at the SEC Filings site. This dataset enables the user to ask questions such as "What are Microsoft sources of revenue?". You can optionally load Microsoft's [SEC Filings at gcs-web.com](https://microsoft.gcs-web.com/financial-information/sec-filings)
 > 2. An Ice Cream data set is available at kaggle.com. This dataset enables the user to ask questions such ase "What are flavors of breyers?" You can optionally load the [Ice Cream Dataset from kaggle.com](https://www.kaggle.com/datasets/tysonpo/ice-cream-dataset)
->
 > 3. Education Policy documents from US FERPA guidelines. This dataset enables the user to ask "How is strengthening student data privacy accomplished?". You can optionally load [US FERPA Policy documents](https://studentprivacy.ed.gov/node/548/)

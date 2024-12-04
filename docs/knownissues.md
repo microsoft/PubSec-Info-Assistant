@@ -1,6 +1,6 @@
 # Known Issues
 
-Here are some commonly encountered issues when deploying the  Information Assistant agent template.
+Here are some commonly encountered issues when deploying the Information Assistant agent template.
 
 ## This subscription cannot create AzureAIServices until you agree to Responsible AI terms for this resource
 
@@ -19,7 +19,7 @@ Manually create a "Azure AI services" in your Azure Subscription and Accept "Res
 4. Review and accept the terms "Responsible AI Notice".
 5. Create the Azure AI Service.
 
-***IMPORTANT:*** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
+**_IMPORTANT:_** In some instances, an older subscription that has already had the "Responsible AI Notice" accepted for the old "Cognitive Services multi-service account" may require this process to be repeated for the new "Azure AI Service".
 
 ---
 
@@ -35,23 +35,23 @@ By default Information Assistant deploys the webapp to require users to be a mem
 
 Add the user to the Azure Active Directory Enterprise Application.
 
->1. Log into the Azure Portal
->2. Navigate to the App Service object in your resource group, named *infoasst-web-xxxxx*.
->3. View the **Authentication** tab. Select the "Identity Provider" link.
-![Image of identity provider link](./images/authentication_identity_provider_identification.jpg)
->4. In the **Overview** tab, Select the link under the "Essentials" section labeled "Managed application in..." that should have a value like *infoasst_web_access_xxxxx*.
-![Image of identity provider link](./images/authentication_managed_application.jpg)
->5. Select the **Users and Groups** tab and use the **Add user/group** to add the user to the Azure Active Directory Enterprise Application.
+> 1.  Log into the Azure Portal
+> 2.  Navigate to the App Service object in your resource group, named _infoasst-web-xxxxx_.
+> 3.  View the **Authentication** tab. Select the "Identity Provider" link.
+>     ![Image of identity provider link](./images/authentication_identity_provider_identification.jpg)
+> 4.  In the **Overview** tab, Select the link under the "Essentials" section labeled "Managed application in..." that should have a value like _infoasst_web_access_xxxxx_.
+>     ![Image of identity provider link](./images/authentication_managed_application.jpg)
+> 5.  Select the **Users and Groups** tab and use the **Add user/group** to add the user to the Azure Active Directory Enterprise Application.
 
 #### Option 2
 
 Turn off the option to require membership for the Azure Active Directory Enterprise Application.
 
->1. Log into the Azure Portal
->2. Navigate to the App Service object in your resource group, named *infoasst-web-xxxxx*.
->3. View the **Authentication** tab. Select the "Identity Provider" link named *infoasst_web_access_xxxxx*.
->4. In the **Overview** tab, Select the link under the "Essentials" section labeled "Managed application in..." that should have a value like *infoasst_web_access_xxxxx*.
->5. Select the **Properties** tab. Change the value for **Assignment Required** to No. Click **Save**.
+> 1.  Log into the Azure Portal
+> 2.  Navigate to the App Service object in your resource group, named _infoasst-web-xxxxx_.
+> 3.  View the **Authentication** tab. Select the "Identity Provider" link named _infoasst_web_access_xxxxx_.
+> 4.  In the **Overview** tab, Select the link under the "Essentials" section labeled "Managed application in..." that should have a value like _infoasst_web_access_xxxxx_.
+> 5.  Select the **Properties** tab. Change the value for **Assignment Required** to No. Click **Save**.
 
 ---
 
@@ -78,6 +78,7 @@ The back off and retry parameter values are surfaced as configuration settings i
 ```
 
 These variables can also be updated prior to deployment by changing the following Terraform variables
+
 ```text
 maxPollingRequeueCount
 maxReadAttempts
@@ -123,7 +124,7 @@ If you see a jq parse error while running a deployment, it means one of the make
 
 ### Solution
 
-To resolve, carefully check your local.env file for any missing but required values. There are rare times output values are not written. In which case simply double check your configuration and rerun the ```make deploy``` command to regenerate the inf_output.json file the Makefile scripts parse for variables.
+To resolve, carefully check your local.env file for any missing but required values. There are rare times output values are not written. In which case simply double check your configuration and rerun the `make deploy` command to regenerate the inf_output.json file the Makefile scripts parse for variables.
 
 ---
 
@@ -170,12 +171,12 @@ You receive the following error message during `make deploy`
 #### Option 1 : Request a quota increase in your subscription and region
 
 To submit a quota increase do the following:
->
->1. Log into the Azure Portal
->2. Navigate to your target subscription
->3. Select the **Usage + Quotas** tab on the left
->4. On the **Usage + Quotas** blade, change the filter for ***Provider: Compute*** to ***Provider: App Services**
->5. Find the SKU and region you desire and use the **Edit** or **Submit Service Request** button to request a change.
+
+> 1.  Log into the Azure Portal
+> 2.  Navigate to your target subscription
+> 3.  Select the **Usage + Quotas** tab on the left
+> 4.  On the **Usage + Quotas** blade, change the filter for **_Provider: Compute_** to **\*Provider: App Services**
+> 5.  Find the SKU and region you desire and use the **Edit** or **Submit Service Request** button to request a change.
 
 #### Option 2 : Use Terraform parameters to select a new SKU size
 
@@ -199,11 +200,13 @@ export TF_VAR_enrichmentAppServiceSkuTier="PremiumV3"
 ## My image search is not working and returning "I'm sorry, but I don't have any information about..."
 
 ### Solution
+
 Image search is currently only supported with regions that support dense captions. You will need to deploy Information Assistant to one of the regions that supports dense captioning. A full list of regions that support dense captioning can be found [here](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-describe-images-40?tabs=dense)
 
 ## There are errors in the SharePoint Logic App Designer
 
 ### Solution
+
 These are only in the Logic App Preview Designer. Switching to the Generally Available Designer will resolve these errors. They are purely visual errors in the Preview Designer and have no impact on how the Logic App functions.
 
 ![Image of Logic App Error](./images/sharepoint-preview-designer-known-issue.png)
@@ -211,10 +214,12 @@ These are only in the Logic App Preview Designer. Switching to the Generally Ava
 ---
 
 ## Error: CredentialInvalidLifetimeAsPerAppPolicy: Credential lifetime exceeds the max value allowed as per assigned
+
 ### Solution
+
 Your organization's policy places a limit on the lifetime of an identities password. In your copy of Local.env there is a setting called PASSWORD_LIFETIME. This value is used when creating or updating the identity password and has a default value of the number of days the password will exist before expiring. Change this value to a number of days that your organization allows.
 
-To view the value after deploying go the Microsoft Entra ID page from the Azure Portal home page. Then search your tenant for infoasst_mgmt_access_<your-5-character-suffix> as shown in the image below.
+To view the value after deploying go the Microsoft Entra ID page from the Azure Portal home page. Then search your tenant for infoasst*mgmt_access*<your-5-character-suffix> as shown in the image below.
 
 ![Image of Entra App Registration](./images/credential-lifespan.png)
 

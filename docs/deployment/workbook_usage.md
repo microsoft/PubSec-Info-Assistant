@@ -5,22 +5,24 @@
 The Azure Workbook template `infoasst-lw-xxxx` is designed for log analysis, providing insights into different types of logs within your Azure environment. The template is organized into three sections:
 
 1. **Application Logs (Last 6 Hours)**
+
    - Application logs are retrieved from the `AppServiceConsoleLogs`.
    - Default Query:
      ```kql
-     AppServiceConsoleLogs 
-     | project TimeGenerated, ResultDescription, _ResourceId 
-     | where TimeGenerated > ago(6h) 
+     AppServiceConsoleLogs
+     | project TimeGenerated, ResultDescription, _ResourceId
+     | where TimeGenerated > ago(6h)
      | order by TimeGenerated desc
      ```
 
 2. **Function Logs (Last 6 Hours)**
+
    - Function logs are obtained from the `AppTraces`.
    - Default Query:
      ```kql
-     AppTraces 
-     | project TimeGenerated, Message, Properties 
-     | where TimeGenerated > ago(6h) 
+     AppTraces
+     | project TimeGenerated, Message, Properties
+     | where TimeGenerated > ago(6h)
      | order by TimeGenerated desc
      ```
 
@@ -28,9 +30,9 @@ The Azure Workbook template `infoasst-lw-xxxx` is designed for log analysis, pro
    - App service and deployment logs are sourced from `AppServicePlatformLogs`.
    - Default Query:
      ```kql
-     AppServicePlatformLogs 
-     | project TimeGenerated, Level, Message, _ResourceId 
-     | where TimeGenerated > ago(6h) 
+     AppServicePlatformLogs
+     | project TimeGenerated, Level, Message, _ResourceId
+     | where TimeGenerated > ago(6h)
      | order by TimeGenerated desc
      ```
 
@@ -38,10 +40,8 @@ The Azure Workbook template `infoasst-lw-xxxx` is designed for log analysis, pro
 
 To effectively use this template, follow these steps:
 
-
->1. From the Azure Portal Resource Group Open the resource >`infoasst-lw-xxxx`
->
->2. Explore log data using the predefined queries, or modify them in the portal by clicking Edit in the workbook to troubleshoot specific issues. Adjust the time range and filters as needed.
+> 1.  From the Azure Portal Resource Group Open the resource >`infoasst-lw-xxxx`
+> 2.  Explore log data using the predefined queries, or modify them in the portal by clicking Edit in the workbook to troubleshoot specific issues. Adjust the time range and filters as needed.
 
 ## Customization
 

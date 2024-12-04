@@ -4,7 +4,7 @@ As you move from 1.0 to the 1.1 release, you may have the the desire to maintain
 
 :warning: **Our recommended approach to onboarding to the 1.1 version would be to create a new deployment in a new resource group**.
 
-If you need to maintain your content without reprocessing we have provided sample code to enable you to do this in one of two ways 
+If you need to maintain your content without reprocessing we have provided sample code to enable you to do this in one of two ways
 
 - Migrate your 1.0 deployment data to a 1.1 deployment.
 - Upgrade your 1.0 deployment to 1.1.
@@ -49,7 +49,7 @@ The benefits are:
 
 - Users will use the same resources, and so they will not have to change URLs where they access the service
 
-Find out more about the upgrade path  [here](upgrade.md).
+Find out more about the upgrade path [here](upgrade.md).
 
 ## Summary
 

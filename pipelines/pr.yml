@@ -7,26 +7,25 @@ trigger: none
 pr:
   autoCancel: true
   branches:
-    exclude: [ master ]
+    exclude: [master]
   paths:
-    exclude: 
+    exclude:
       - docs/*
       - "*.md"
   drafts: false
 
 stages:
-- stage: Deploy
-  jobs:
-
-  - deployment: Tmp
-    environment: $(environment)
-    timeoutInMinutes: 120
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-        runOnce:    #rolling, canary are the other strategies that are supported
-          deploy:
-            steps:
-            - template: templates/deploy-template.yml
-            - template: templates/testing-template.yml
-            - template: templates/destroy-template.yml
+  - stage: Deploy
+    jobs:
+      - deployment: Tmp
+        environment: $(environment)
+        timeoutInMinutes: 120
+        pool:
+          vmImage: "ubuntu-latest"
+        strategy:
+          runOnce: #rolling, canary are the other strategies that are supported
+            deploy:
+              steps:
+                - template: templates/deploy-template.yml
+                - template: templates/testing-template.yml
+                - template: templates/destroy-template.yml

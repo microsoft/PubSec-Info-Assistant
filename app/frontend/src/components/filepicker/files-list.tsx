@@ -6,7 +6,7 @@ import CheckIcon from "./check";
 import ClearIcon from "./clear";
 import styles from "./files-list.module.css";
 
-const FilesListItem = ({ name, id, onClear, uploadComplete }: {name: any, id: any, onClear: any, uploadComplete: any}) => {
+const FilesListItem = ({ name, id, onClear, uploadComplete }: { name: any; id: any; onClear: any; uploadComplete: any }) => {
   const handleClear = useCallback(() => {
     onClear(id);
   }, []);
@@ -15,12 +15,7 @@ const FilesListItem = ({ name, id, onClear, uploadComplete }: {name: any, id: an
     <li className={styles.files_list_item}>
       <span className={styles.files_list_item_name}>{name}</span>
       {!uploadComplete ? (
-        <span
-          className={styles.files_list_item_clear}
-          role="button"
-          aria-label="remove file"
-          onClick={handleClear}
-        >
+        <span className={styles.files_list_item_clear} role="button" aria-label="remove file" onClick={handleClear}>
           <ClearIcon />
         </span>
       ) : (
@@ -32,17 +27,11 @@ const FilesListItem = ({ name, id, onClear, uploadComplete }: {name: any, id: an
   );
 };
 
-const FilesList = ({ files, onClear, uploadComplete }: {files: any, onClear: any, uploadComplete: any}) => {
+const FilesList = ({ files, onClear, uploadComplete }: { files: any; onClear: any; uploadComplete: any }) => {
   return (
     <ul className={styles.files_list}>
-      {files.map(({ file, id }:{file: any, id: any}) => (
-        <FilesListItem
-          name={file.name}
-          key={id}
-          id={id}
-          onClear={onClear}
-          uploadComplete={uploadComplete}
-        />
+      {files.map(({ file, id }: { file: any; id: any }) => (
+        <FilesListItem name={file.name} key={id} id={id} onClear={onClear} uploadComplete={uploadComplete} />
       ))}
     </ul>
   );

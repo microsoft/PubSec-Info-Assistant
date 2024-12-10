@@ -14,7 +14,7 @@
     "@react-spring/web": "^9.7.1",
     "classnames": "^2.3.1",
     "dompurify": "^3.1.2",
-    "nanoid": "3.3.4",
+    "nanoid": "3.3.8",
     "ndjson-readablestream": "^1.2.0",
     "papaparse": "^5.4.1",
     "prop-types": "15.8.1",

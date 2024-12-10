@@ -352,35 +352,33 @@ const Chat = () => {
                         <div className={styles.chatEmptyState}>
                             {activeChatMode == ChatMode.WorkOnly ? 
                                 <div>
-                                    <div className={styles.chatEmptyStateHeader}> 
-                                        <BuildingMultipleFilled fontSize={"100px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Chat with your Work Data logo" />
-                                        </div>
-                                    <h1 className={styles.chatEmptyStateTitle}>Chat with your work data</h1>
+                                    <h1 className={styles.chatEmptyStateTitle}>Ask anything or try an example</h1>
+                                    <br/>
                                 </div>
                             : activeChatMode == ChatMode.WorkPlusWeb ?
                                 <div>
-                                    <div className={styles.chatEmptyStateHeader}> 
-                                        <BuildingMultipleFilled fontSize={"80px"} primaryFill={"rgba(27, 74, 239, 1)"} aria-hidden="true" aria-label="Chat with your Work and Web Data logo" /><AddFilled fontSize={"50px"} primaryFill={"rgba(0, 0, 0, 0.7)"} aria-hidden="true" aria-label=""/><GlobeFilled fontSize={"80px"} primaryFill={"rgba(24, 141, 69, 1)"} aria-hidden="true" aria-label="" />
-                                    </div>
                                     <h1 className={styles.chatEmptyStateTitle}>Chat with your work and web data</h1>
                                 </div>
                             : //else Ungrounded
                                 <div>
-                                    <div className={styles.chatEmptyStateHeader}> 
-                                        <ChatSparkleFilled fontSize={"80px"} primaryFill={"rgba(0, 0, 0, 0.35)"} aria-hidden="true" aria-label="Chat logo" />
-                                    </div>
                                     <h1 className={styles.chatEmptyStateTitle}>Chat directly with a LLM</h1>
                                 </div>
                             }
-                            <span className={styles.chatEmptyObjectives}>
-                                <i>Information Assistant uses AI. Check for mistakes.   </i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a>
-                            </span>
                             {activeChatMode != ChatMode.Ungrounded &&
                                 <div>
-                                    <h2 className={styles.chatEmptyStateSubtitle}>Ask anything or try an example</h2>
+                                    <br/>
                                     <ExampleList onExampleClicked={onExampleClicked} />
                                 </div>
                             }
+                            <div className={styles.chatInput}>
+                                <span className={styles.chatEmptyStateSubtitle}>
+                                    <strong>Reminder: </strong>By using this application, you acknowledge that the information contained in this document is highly confidential.
+                                    Unauthorized access, use, disclosure, or distribution of this information is strictly prohibited. All individuals handling this data
+                                    must adhere to the highest standards of data protection and privacy as outlined in <strong>Office Order No. 2018-3907</strong>.
+                                    Any breach to these protocols may result in disciplinary actions in accordance to the 2017 Rules on Administrative Cases in the Civil Service,
+                                    existing Civil Service rules and regulations, and other applicable laws.
+                                </span>
+                            </div>
                         </div>
                     ) : (
                         <div className={styles.chatMessageStream}>
@@ -438,7 +436,7 @@ const Chat = () => {
                         )}
                         <QuestionInput
                             clearOnSend
-                            placeholder="Type a new question (e.g. Who are Microsoft's top executives, provided as a table?)"
+                            placeholder="Type a new question (e.g. What is health services quota?)"
                             disabled={isLoading}
                             onSend={question => makeApiRequest(question, defaultApproach, {}, {}, {})}
                             onAdjustClick={() => setIsConfigPanelOpen(!isConfigPanelOpen)}
@@ -448,6 +446,9 @@ const Chat = () => {
                             onRegenerateClick={() => makeApiRequest(lastQuestionRef.current, defaultApproach, {}, {}, {})}
                         />
                     </div>
+                    <span className={styles.chatEmptyObjectives}>
+                        <i>Information Assistant uses AI. Check for mistakes.   </i><a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a>
+                    </span>
                 </div>
 
                 {answers.length > 0 && activeAnalysisPanelTab && (

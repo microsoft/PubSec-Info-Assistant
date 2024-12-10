@@ -67,7 +67,7 @@ ENV = {
     "AZURE_SUBSCRIPTION_ID": None,
     "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
     "CHAT_WARNING_BANNER_TEXT": "",
-    "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
+    "APPLICATION_TITLE": "BSP HealthCare Plan 2024",
     "KB_FIELDS_CONTENT": "content",
     "KB_FIELDS_PAGENUMBER": "pages",
     "KB_FIELDS_SOURCEFILE": "file_name",

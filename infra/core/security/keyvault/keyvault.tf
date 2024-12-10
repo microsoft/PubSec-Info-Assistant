@@ -15,7 +15,7 @@ resource "azurerm_key_vault" "kv" {
   tags                            = var.tags
   enabled_for_template_deployment = true
   soft_delete_retention_days      = 7
-  purge_protection_enabled        = true
+  purge_protection_enabled        = false
   public_network_access_enabled   = var.is_secure_mode ? false : true
 
   network_acls {

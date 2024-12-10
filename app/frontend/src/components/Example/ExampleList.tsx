@@ -10,10 +10,11 @@ export type ExampleModel = {
     value: string;
 };
 
+
 const EXAMPLES: ExampleModel[] = [
-    { text: "Are there any radio telescopes in Australia?", value: "Are there any radio telescopes in Australia?" },
-    { text: "What are Microsoft's primary sources of revenue?", value: "What are Microsoft's primary sources of revenue?" },
-    { text: "What are some flavors of Breyers?", value: "What are some flavors of Breyers?" }
+    { text: "What is health services quota?", value: "What is health services quota?" },
+    { text: "Would there be no limit in terms of privileges under the plan?", value: "Would there be no limit in terms of privileges under the plan?" },
+    { text: "Who are covered by the mandatory AME?", value: "Who are covered by the mandatory AME?" }
 ];
 
 interface Props {

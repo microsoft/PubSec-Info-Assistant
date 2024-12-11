@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 import { Outlet, NavLink, Link } from "react-router-dom";
+import bsp from "../../assets/bsp.png";
 import hwd from "../../assets/hwd.png";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
@@ -32,8 +33,8 @@ export const Layout = () => {
                 <WarningBanner />
                 <div className={styles.headerContainer}>
                     <div className={styles.headerTitleContainer}>
-                        <img src={hwd} alt="BSP HealthCare Plan 2024" className={styles.headerLogo} />
-                        <h3 className={styles.headerTitle}><Title /></h3>
+                        <img src={bsp} alt="BSP HealthCare Plan 2024" className={styles.headerLogo} />
+                        <h1 className={styles.headerTitle}><Title /></h1>
                     </div>
                 </div>
             </header>
@@ -42,6 +43,11 @@ export const Layout = () => {
 
             <footer>
                 <WarningBanner />
+                <div className={styles.headerContainer}>
+                    <div className={styles.headerTitleContainer}>
+                        <img src={hwd} alt="BSP HealthCare Plan 2024" className={styles.headerLogo} />
+                    </div>
+                </div>
             </footer>
         </div>
     );

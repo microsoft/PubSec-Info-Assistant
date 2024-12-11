@@ -8,9 +8,118 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BSP HealthCare Plan</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+      /* Additional styling for the modal */
+      .modal {
+          display: none;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+          background-color: rgba(0,0,0,0.4);
+          padding-top: 60px;
+      }
+      .modal-content {
+          background-color: #fefefe;
+          margin: 5% auto;
+          padding: 20px;
+          border: 1px solid #888;
+          width: 50%;
+          max-width: 100px; /* Limit the width for larger screens */
+      }
+      .close {
+          color: white;
+          float: right;
+          font-size: 14px;
+          font-weight: bold;
+      }
+      .close:hover,
+      .close:focus {
+          color: black;
+          text-decoration: none;
+          cursor: pointer;
+      }
+      .buttons {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 20px;
+      }
+    </style>
+
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="w3-modal">
+    
+      <!-- Modal content -->
+    <div class="w3-modal-content w3-animate-top w3-card-4">
+    <header class="w3-container w3-blue"> 
+    <span class="w3-button w3-display-topright close">&times;</span>
+    <h3>Reminder</h3>
+    </header>
+    <div class="w3-container">
+    <p>By using this application, you acknowledge that the information contained within this document is highly confidential. Unauthorized access, use, disclosure, or distribution of this information is strictly prohibited. All individuals handling this data must adhere to the highest standards of data protection and privacy as outlined in <strong>Office Order No. 2018-3907</strong>. 
+    Any breach of these protocols may result in disciplinary actions in accordance to the 2017 Rules on Administrative Cases in the Civil Service, existing Civil Service rules and regulations, and other applicable laws.</p>
+    <div class="buttons">
+    <button id="cancelBtn" class="w3-button w3-gray">Cancel</button>
+    <button id="agreeBtn" class="w3-button w3-blue">Agree</button>
+    </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <script>
+        // Get the modal
+        var modal = document.getElementById("myModal");
+    
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+    
+        // Get the buttons
+        var cancelBtn = document.getElementById("cancelBtn");
+        var agreeBtn = document.getElementById("agreeBtn");
+    
+        // Check if the user has already agreed and if the agreement is still valid
+        var agreedTimestamp = localStorage.getItem("agreedTimestamp");
+        var currentTime = new Date().getTime();
+        var expiryTime = 1000; // 1 sec
+    
+        if (!agreedTimestamp || (currentTime - agreedTimestamp) > expiryTime) {
+            // Show the modal if not agreed or if the agreement has expired
+            modal.style.display = "block";
+        }
+    
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          window.location.href = "https://bspgovph.sharepoint.com/sites/WeKnow";
+        }
+    
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+              window.location.href = "https://bspgovph.sharepoint.com/sites/WeKnow";
+            }
+        }
+    
+        // When the user clicks on "Cancel", redirect to Google
+        cancelBtn.onclick = function() {
+            window.location.href = "https://bspgovph.sharepoint.com/sites/WeKnow";
+        }
+    
+        // When the user clicks on "Agree", save the current timestamp to local storage
+        agreeBtn.onclick = function() {
+            localStorage.setItem("agreedTimestamp", new Date().getTime());
+            modal.style.display = "none";
+        }
+    </script>
+
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

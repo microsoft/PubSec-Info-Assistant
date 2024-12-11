@@ -30,7 +30,7 @@
     justify-content: space-around;
     margin-right: 12px;
     margin-left: 12px;
-    padding: 18px;
+    padding: 14px;
 }
 
 .headerTitleContainer {
@@ -48,6 +48,37 @@
 .headerTitle {
     margin-left: 12px;
     font-weight: 600;
+}
+
+.footer {
+    background-color: #006cbf;
+    color: #f2f2f2;
+}
+
+.footerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-right: 12px;
+    margin-left: 12px;
+}
+
+.footerTitleContainer {
+    display: flex;
+    align-items: center;
+    margin-right: 40px;
+    color: #f2f2f2;
+    text-decoration: none;
+}
+
+.footerLogo {
+    height: 40px;
+}
+
+.footerTitle {
+    margin-left: 12px;
+    font-weight: 600;
+    font-size: 2rem;
 }
 
 .headerNavList {

@@ -53,7 +53,7 @@
 
 .chatEmptyStateTitle {
     display: contents;
-    font-size: 1rem;
+    font-size: 2rem;
     font-weight: 500;
     margin-top: 0;
     margin-bottom: 10px;
@@ -99,7 +99,7 @@
     }
 
     .chatEmptyStateTitle {
-        font-size: 3rem;
+        font-size: 2rem;
         margin-bottom: 0px;
     }
 }

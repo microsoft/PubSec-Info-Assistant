@@ -448,7 +448,7 @@ const Chat = () => {
                             <span className={styles.chatEmptyStateSubtitle}>
                                 <strong>Disclaimer: </strong>Please be aware that this AI is still in pilot and its output may not always be accurate or complete.
                                 It is highly recommended to exercise user discretion when interpreting and utilizing the information provided.
-                                Check for mistakes. <a href="https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/transparency.md" target="_blank" rel="noopener noreferrer">Transparency Note</a>
+                                For concerns, you may reach HWD through email: hwd_healthcareplan@bsp.gov.ph
                             </span>
                         </div>
                     </div>

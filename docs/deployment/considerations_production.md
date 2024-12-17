@@ -10,15 +10,15 @@ These recommendations offer options for load balancing and high availability, ca
 
 **Consideration:** As the load on the App Server increases, scaling becomes crucial to handle varying levels of traffic efficiently.
 
-**Recommendation:** Learn more about Azure Monitor based app service scaling [here](https://learn.microsoft.com/en-us/azure/app-service/manage-automatic-scaling?tabs=azure-portal). Alternatively, you can modify the existing Auto scaling rules. See this documentation on the explanation of the [existing auto scaling rules](/docs/deployment/autoscale_sku.md). Configure autoscaling rules to automatically adjust the number of instances in response to changes in load. You can also adjust the sku to scale vertically and adjust the number of workers in the app server. Alternatively, you could  consider deploying the App to a container orchestration platform like Azure Kubernetes Service (AKS) for management and scaling.
+**Recommendation:** Learn more about Azure Monitor based app service scaling [here](https://learn.microsoft.com/en-us/azure/app-service/manage-automatic-scaling?tabs=azure-portal). Alternatively, you can modify the existing Auto scaling rules. See this documentation on the explanation of the [existing auto scaling rules](/docs/deployment/autoscale_sku.md). Configure autoscaling rules to automatically adjust the number of instances in response to changes in load. You can also adjust the sku to scale vertically and adjust the number of workers in the app server. Alternatively, you could consider deploying the App to a container orchestration platform like Azure Kubernetes Service (AKS) for management and scaling.
 
 ### App Gateway
 
 **Consideration:** Ensure App Gateway handles increased traffic and maintains high availability. Learn more about App Gateway [here](https://learn.microsoft.com/en-us/azure/application-gateway/overview).
 
 **Recommendation:**
-    Explore horizontal scaling with multiple instances.
-    Use Azure Traffic Manager for global distribution.
+Explore horizontal scaling with multiple instances.
+Use Azure Traffic Manager for global distribution.
 
 ### Load Balancing - Distribution of Workload
 
@@ -107,4 +107,4 @@ This can be achieved by modifying the currently provided UI by making a couple o
 
 ## In Summary
 
- Ensure that your IA agent template seamlessly integrates into your existing ecosystem, considering compatibility and interoperability. Use the IA agent template as a blueprint to plan integration into your ecosystem.
+Ensure that your IA agent template seamlessly integrates into your existing ecosystem, considering compatibility and interoperability. Use the IA agent template as a blueprint to plan integration into your ecosystem.

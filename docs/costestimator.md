@@ -2,9 +2,9 @@
 
 The Azure pricing calculator helps estimate costs by considering the amount of data to be processed and stored, as well as the expected performance level. It allows users to customize and combine different Azure services for Information Assistant agent template, version 1.2, and provides cost estimates based on the chosen configurations.
 
-| Solution            | Environment  |    Azure Pricing Calculator Link                                          |
-| :------------------:|:-----------------------------:|:------------------------------------------------:|
-| IA agent template, version 1.2 | Sandbox  |  [Sample Azure Estimation](https://azure.com/e/bd6e516bb0b549abb6d39cce088af684) |
+|            Solution            | Environment |                          Azure Pricing Calculator Link                          |
+| :----------------------------: | :---------: | :-----------------------------------------------------------------------------: |
+| IA agent template, version 1.2 |   Sandbox   | [Sample Azure Estimation](https://azure.com/e/bd6e516bb0b549abb6d39cce088af684) |
 
 ## Azure Services
 
@@ -23,10 +23,11 @@ The following list of Azure Services will be deployed for IA agent template, ver
 - Azure Logic App [:link:](https://azure.microsoft.com/en-us/pricing/details/logic-apps/)
 - Azure AI Search [:link:](https://azure.microsoft.com/en-ca/pricing/details/search/#pricing)
 - Azure OpenAI [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/openai-service/)
-- Storage account  [:link:](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
+- Storage account [:link:](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview)
 - Azure Active Directory [:link:](https://www.microsoft.com/en-sg/security/business/microsoft-entra-pricing?rtc=1)
 
 ---
+
 **NOTE:**
 
 - The proposed the cost estimation prepared based on Sandbox environment, estimation may vary customer to customer.

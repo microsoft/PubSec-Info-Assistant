@@ -18,24 +18,24 @@ import { Tda } from "./pages/tda/Tda";
 initializeIcons();
 
 export default function App() {
-    const [toggle, setToggle] = React.useState('Work');
-    return (
-        <HashRouter>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<Chat />} />
-                    <Route path="content" element={<Content />} />
-                    <Route path="*" element={<NoPage />} />
-                    <Route path="tutor" element={<Tutor />} />
-                    <Route path="tda" element={<Tda folderPath={""} tags={[]} />} />
-            </Route>
-            </Routes>
-        </HashRouter>    
-    );
+  const [toggle, setToggle] = React.useState("Work");
+  return (
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Chat />} />
+          <Route path="content" element={<Content />} />
+          <Route path="*" element={<NoPage />} />
+          <Route path="tutor" element={<Tutor />} />
+          <Route path="tda" element={<Tda folderPath={""} tags={[]} />} />
+        </Route>
+      </Routes>
+    </HashRouter>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );

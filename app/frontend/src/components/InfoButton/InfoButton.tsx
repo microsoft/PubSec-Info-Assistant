@@ -6,15 +6,15 @@ import { Info24Regular } from "@fluentui/react-icons";
 import styles from "./InfoButton.module.css";
 
 interface Props {
-    className?: string;
-    onClick: () => void;
+  className?: string;
+  onClick: () => void;
 }
 
 export const InfoButton = ({ className, onClick }: Props) => {
-    return (
-        <div className={`${styles.container} ${className ?? ""}`} onClick={onClick}>
-            <Info24Regular />
-            <Text>{"Info"}</Text>
-        </div>
-    );
+  return (
+    <div className={`${styles.container} ${className ?? ""}`} onClick={onClick}>
+      <Info24Regular />
+      <Text>{"Info"}</Text>
+    </div>
+  );
 };

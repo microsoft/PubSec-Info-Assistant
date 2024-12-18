@@ -18,6 +18,10 @@
 .chatRoot {
     flex: 1;
     display: flex;
+    background-image: url('https://www.bsp.gov.ph/SiteAssets/Icon_InclusiveFinancial_Suggestion.png');
+    background-size: auto 80%; /* Sets the height of the image to 80% of the div's height */
+    background-position: center;
+    background-repeat: no-repeat; /* Prevents the image from repeating */
 }
 
 .chatContainer {

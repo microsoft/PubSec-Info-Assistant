@@ -10,6 +10,7 @@ import { ITag } from '@fluentui/react/lib/Pickers';
 import styles from "./Chat.module.css";
 import rlbgstyles from "../../components/ResponseLengthButtonGroup/ResponseLengthButtonGroup.module.css";
 import rtbgstyles from "../../components/ResponseTempButtonGroup/ResponseTempButtonGroup.module.css";
+import avatar from "../../assets/hwd.png";
 
 import { chatApi, Approaches, ChatResponse, ChatRequest, ChatTurn, ChatMode, getFeatureFlags, GetFeatureFlagsResponse } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
@@ -350,6 +351,12 @@ const Chat = () => {
                 <div className={styles.chatContainer}>
                     {!lastQuestionRef.current ? (
                         <div className={styles.chatEmptyState}>
+                            <div className={styles.headerContainer}>
+                                <div className={styles.headerTitleContainer}>
+                                    <img src={avatar} alt="BSP HealthCare Avatar" className={styles.headerLogo} />
+                                </div>
+                            </div>
+
                             {activeChatMode == ChatMode.WorkOnly ? 
                                 <div>
                                     <h1 className={styles.chatEmptyStateTitle}>Ask Doc</h1>

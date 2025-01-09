@@ -1,9 +1,8 @@
 # Troubleshooting
 
-
 ## Infrastructure Deployment
-Please see below sections for troubleshooting the solution depending on what area of the process that is giving issue.
 
+Please see below sections for troubleshooting the solution depending on what area of the process that is giving issue.
 
 If you are having issues with infrastructure deployment then the errors should be apparent in the make deploy output.
 
@@ -19,7 +18,6 @@ If you encounter issues processing file(s) then you will want to look at CosmosD
 Check out this section for more details [CosmosDB Usage](/docs/deployment/statusdb_cosmos.md).
 
 For more information on how to use Cosmos, look [here](https://learn.microsoft.com/en-us/azure/cosmos-db/data-explorer).
-
 
 ## Log Analytics Workbook
 

@@ -1,6 +1,6 @@
 # Enable Sovereign Region Deployment
 
-Follow these steps to enable a Sovereign region deployment.  If you need access to AOAI in a UsGov region please fill out this form <https://aka.ms/AOAIgovaccess>.
+Follow these steps to enable a Sovereign region deployment. If you need access to AOAI in a UsGov region please fill out this form <https://aka.ms/AOAIgovaccess>.
 
 Only Sovereign regions / models supported are listed here: <https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#azure-government-regions>
 
@@ -29,6 +29,6 @@ To enable a Sovereign region deployment, you need to update the local.env file w
    export ENABLE_SHAREPOINT_CONNECTOR=false
    ```
 
-4. Set **USE_EXISTING_AOAI** parameter to `true` if you have a existing AOAI instance deployed.  If you want to create Azure Open AI resource during deployment then set this parameter to `false`
+4. Set **USE_EXISTING_AOAI** parameter to `true` if you have a existing AOAI instance deployed. If you want to create Azure Open AI resource during deployment then set this parameter to `false`
 
-5. Consider setting **CHAT_WARNING_BANNER_TEXT**  with `DEV / UNCLASSIFIED / NO CUI` or something similar if deployment is IL2.
+5. Consider setting **CHAT_WARNING_BANNER_TEXT** with `DEV / UNCLASSIFIED / NO CUI` or something similar if deployment is IL2.

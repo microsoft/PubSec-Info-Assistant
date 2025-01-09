@@ -6,8 +6,7 @@ We've focused our architectural decisions on the unique requirements of IA agent
 
 We looked into Azure AI Search's formerly known as "Azure Cognitive Search" text splitter skillset but it was not able to extract unstructured data from docs such as tables. Instead, we decided to go with Azure AI Document Intelligence formally known as "Form recognizer" and Unstructured.io (https://unstructured.io/) for document processing and document chunking. With powerful OCR capabilities, Azure AI Document Intelligence extracts text, numbers, dates, and tables making it a robust solution for document processing. In particular for PDF, we chose Azure Document Intelligence Analyze API vs Read API as it did perform better for tables in PDF files and complex layouts. Azure Document Intelligence Read API performed nearly the same as Unstructured.io so we went with Unstructured.io for uniformity and community supported approach to multiple document types. Unstructured.io is open source so it gave us customizations, transparency, flexibility benefits that come with open-source software.
 
-With Azure Document Intelligence and Unstructured.io we extended file type support to total of 20 different file types where data exists in difficult-to-use formats such as HTML, csv, docx etc. Older file types such as doc and ppt won't be supported in this release due to issue of processing them. 
-
+With Azure Document Intelligence and Unstructured.io we extended file type support to total of 20 different file types where data exists in difficult-to-use formats such as HTML, csv, docx etc. Older file types such as doc and ppt won't be supported in this release due to issue of processing them.
 
 ## Document Chunking
 

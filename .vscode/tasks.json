@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "tasks": [    
+  "tasks": [
     {
       "label": "pip_install",
       "type": "shell",
@@ -41,13 +41,9 @@
       "label": "pip_install_func_tests",
       "type": "shell",
       "command": "pip",
-      "args": [
-        "install",
-        "-r",
-        "${workspaceFolder}/tests/requirements.txt"
-      ],
+      "args": ["install", "-r", "${workspaceFolder}/tests/requirements.txt"],
       "options": {
-        "cwd": "${workspaceFolder}/tests",
+        "cwd": "${workspaceFolder}/tests"
       },
       "presentation": {
         "echo": true,

@@ -12,13 +12,13 @@ To deploy everything run the following command from the Codespace/Dev Container 
 
 This will deploy the infrastructure and the application code.
 
-*This command can be run as many times as needed in the event you encounter any errors. A set of known issues and their workarounds that we have found can be found in [Known Issues](./docs/knownissues.md)*
+_This command can be run as many times as needed in the event you encounter any errors. A set of known issues and their workarounds that we have found can be found in [Known Issues](./docs/knownissues.md)_
 
 ### Additional Information
 
 For a full set of Makefile rules, run `make help`.
 
-``` bash
+```bash
 vscode ➜ /workspaces/<accelerator> (main ✗) $ make help
 help                         Show this help
 deploy                       Deploy infrastructure and application code
@@ -43,7 +43,7 @@ manual-inf-destroy           A command triggered by a user to destroy a resource
 
 ## Configure authentication and authorization
 
-If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](./docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure. 
+If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](./docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure.
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
 
@@ -51,12 +51,11 @@ If you have chosen to enable authentication and authorization for your deploymen
 
 Once deployed, you can find the URL of your installation by:
 
-1) Browse to your new Resource Group at https://portal.azure.com and locate the "App Service"
-![Location of App Service in Portal](./docs/images/deployment_app_service_location.jpg)
+1. Browse to your new Resource Group at https://portal.azure.com and locate the "App Service"
+   ![Location of App Service in Portal](./docs/images/deployment_app_service_location.jpg)
 
-2) After clicking on the App Service, you will see the "Default domain" listed. This is the link to your installation.
-![Default Domain of App Service in Portal](./docs/images/deployment_default_domain.jpg)
-
+2. After clicking on the App Service, you will see the "Default domain" listed. This is the link to your installation.
+   ![Default Domain of App Service in Portal](./docs/images/deployment_default_domain.jpg)
 
 ## Next steps
 

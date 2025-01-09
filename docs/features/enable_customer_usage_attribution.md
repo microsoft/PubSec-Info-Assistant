@@ -17,5 +17,5 @@ To enable customer usage attribution, you need to update the local.env file with
 
 > **Note**:
 >
->- Customer usage attribution is for new deployments and does not support tracking resources that have already been deployed.
->- Detailed information can be found [here](https://learn.microsoft.com/azure/marketplace/azure-partner-customer-usage-attribution).
+> - Customer usage attribution is for new deployments and does not support tracking resources that have already been deployed.
+> - Detailed information can be found [here](https://learn.microsoft.com/azure/marketplace/azure-partner-customer-usage-attribution).

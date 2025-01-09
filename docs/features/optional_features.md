@@ -2,16 +2,16 @@
 
 Please see below sections for coverage of IA agent template optional features.
 
-* [Configuring your own language ENV file](#configuring-your-own-language-env-file)
-* [Debugging functions](#debugging-functions)
-* [Debugging the web app](#debugging-the-web-app)
-* [Debugging the enrichment web app](#debugging-the-enrichment-web-app)
-* [Build pipeline for Sandbox](#build-pipeline-for-sandbox)
-* [Customer Usage Attribution](#customer-usage-attribution)
-* [Sovereign Region Deployment](#sovereign-region-deployment)
-* [Secure Deployment](#secure-deployment)
-* [Configure REST API access](#configure-rest-api-access)
-* [Customize Autoscale and App Service SKU's](#customize-autoscale)
+- [Configuring your own language ENV file](#configuring-your-own-language-env-file)
+- [Debugging functions](#debugging-functions)
+- [Debugging the web app](#debugging-the-web-app)
+- [Debugging the enrichment web app](#debugging-the-enrichment-web-app)
+- [Build pipeline for Sandbox](#build-pipeline-for-sandbox)
+- [Customer Usage Attribution](#customer-usage-attribution)
+- [Sovereign Region Deployment](#sovereign-region-deployment)
+- [Secure Deployment](#secure-deployment)
+- [Configure REST API access](#configure-rest-api-access)
+- [Customize Autoscale and App Service SKU's](#customize-autoscale)
 
 ## Configuring your own language ENV file
 

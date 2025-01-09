@@ -78,82 +78,115 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
             if (sourceFileBlob === undefined) {
                 if (!isFetchingSourceFileBlob) {
                     setIsFetchingSourceFileBlob(true);
-                    sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
+                    if (sourceFileUrl !== undefined) {
+                        sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
+                            setIsFetchingSourceFileBlob(false);
+                        });
+                    } else {
+                        console.error("sourceFileUrl is undefined");
                         setIsFetchingSourceFileBlob(false);
-                    });
+                    }
                 }
                 await sourceFileBlobPromise;
-            }
-        };
-        fetchSourceFileBlob();
-        return sourceFileUrl;
-    }
-
-    async function fetchActiveCitationObj() {
-        try {
-            const citationObj = await getCitationObj(activeCitation as string);
-            setActiveCitationObj(citationObj);
-            console.log(citationObj);
-        } catch (error) {
-            // Handle the error here
-            console.log(error);
-        }
-    }
-
-
-    useEffect(() => {
-        if (!sourceFile) {
-            return;
-        }
-        const fetchMarkdownContent = async () => {
-            try {
-                const response = await fetch(getCitationURL());
-                const content = await response.text();
-                setMarkdownContent(content);
-            } catch (error) {
-                console.error('Error fetching Markdown content:', error);
-            }
-        };
-
-        fetchMarkdownContent();
-    }, [sourceFileBlob, sourceFileExt]);
-
-    useEffect(() => {
-        const fetchPlainTextContent = async () => {
-            try {
-                const response = await fetch(getCitationURL());
-                const content = await response.text();
-                setPlainTextContent(content);
-            } catch (error) {
-                console.error('Error fetching plain text content:', error);
             }
         };
     
-        if (["json", "txt", "xml"].includes(sourceFileExt)) {
-            fetchPlainTextContent();
-        }
-    }, [sourceFileBlob, sourceFileExt]);
-
-    useEffect(() => {
-        if (activeCitation) {
-            setInnerPivotTab('indexedFile');
-        }
-        fetchActiveCitationObj();
-        const fetchSourceFileBlob = async () => {
+        if (sourceFileBlob !== undefined) {
+            fetchSourceFileBlob();
             
-                if (!isFetchingSourceFileBlob) {
-                    setIsFetchingSourceFileBlob(true);
-                    sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
-                        setIsFetchingSourceFileBlob(false);
-                    });
-                }
-                await sourceFileBlobPromise;
-            
-        };
-        fetchSourceFileBlob();
-        
-    }, [activeCitation]);
+        }
+        return sourceFileUrl ?? '';
+    }
 
+async function fetchActiveCitationObj() {
+    try {
+        if (!activeCitation) {
+            console.warn('Active citation is undefined');
+            setActiveCitationObj(undefined);
+            return;
+        }
+        const citationObj = await getCitationObj(activeCitation);
+        setActiveCitationObj(citationObj);
+        console.log(citationObj);
+    } catch (error) {
+        // Handle the error here
+        console.log(error);
+    }
+}
+
+useEffect(() => {
+    const fetchMarkdownContent = async () => {
+        try {
+            if (!sourceFile) {
+                console.error('Source file is undefined');
+                return;
+            }
+            const citationURL = getCitationURL();
+            if (!citationURL) {
+                throw new Error('Citation URL is undefined');
+            }
+            const response = await fetch(citationURL);
+            const content = await response.text();
+            setMarkdownContent(content);
+        } catch (error) {
+            console.error('Error fetching Markdown content:', error);
+        }
+    };
+
+    fetchMarkdownContent();
+}, [sourceFileBlob, sourceFileExt]);
+
+useEffect(() => {
+    const fetchPlainTextContent = async () => {
+        try {
+            if (!sourceFile) {
+                console.error('Source file is undefined');
+                return;
+            }
+
+            const citationURL = getCitationURL();
+            if (!citationURL) {
+                throw new Error('Citation URL is undefined');
+            }
+            const response = await fetch(citationURL);
+            const content = await response.text();
+            setPlainTextContent(content);
+        } catch (error) {
+            console.error('Error fetching plain text content:', error);
+        }
+    };
+
+    if (["json", "txt", "xml"].includes(sourceFileExt)) {
+        fetchPlainTextContent();
+    }
+}, [sourceFileBlob, sourceFileExt]);
+
+useEffect(() => {
+    if (activeCitation) {
+        setInnerPivotTab('indexedFile');
+    } else {
+        console.warn('Active citation is undefined');
+        setActiveCitationObj(undefined);
+    }
+
+    fetchActiveCitationObj();
+
+    const fetchSourceFileBlob = async () => {
+        if (!sourceFile) {
+            console.error('Source file is undefined');
+            return;
+        }
+        if (!isFetchingSourceFileBlob) {
+            setIsFetchingSourceFileBlob(true);
+            sourceFileBlobPromise = fetchCitationSourceFile().finally(() => {
+                setIsFetchingSourceFileBlob(false);
+            });
+        }
+        await sourceFileBlobPromise;
+    };
+
+    fetchSourceFileBlob();
+}, [activeCitation]);
     return (
         <Pivot
             className={className}
@@ -221,11 +254,11 @@ export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, p
                         )}
                     </PivotItem>
                     <PivotItem itemKey="rawFile" headerText="Document">
-                        {getCitationURL() === '' ? (
+                        {getCitationURL() === '' ?  (
                             <Text>Loading...</Text>
                         ) : ["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
                             // Treat other Office formats like "xlsx" for the Office Online Viewer
-                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(getCitationURL()) + "&action=embedview&wdStartOn=" + pageNumber} width="100%" height={citationHeight} />
+                            <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(getCitationURL()) + "&action=embedview&wdStartOn=" + (pageNumber ?? '')} width="100%" height={citationHeight} />
                         ) : sourceFileExt === "pdf" ? (
                             // Use object tag for PDFs because iframe does not support page numbers
                             <object data={getCitationURL() + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />

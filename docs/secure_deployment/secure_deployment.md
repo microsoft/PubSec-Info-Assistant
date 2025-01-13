@@ -254,15 +254,22 @@ To perform a secure mode deployment, follow these steps:
 
 8. If you are choosing to use a P2S VPN to connect to the Information Assistant virtual network, then follow steps 9 - 15 for the initial configuration. Otherwise, skip to Step 16.
 
-    :warning: *You will need your VPN configuration and client certificate that matches your Azure VPN Gateway to continue*
+    :warning: *You will need your VPN configuration and client certificate that matches your Azure VPN Gateway to continue* For Point-to-Site (P2S) VPN Gateway setup see [Establish a Point-to-Site \(P2S\) VPN Gateway](#establish-a-point-to-site-vpn-gateway) section.
 
-9. Copy your `vpnconfig.ovpn` and PFX certificate file into the `/workspace/openvpn` folder in the GitHub Codespace.
-10. Extract the private key and the base64 thumbprint from the .pfx. There are multiple ways to do this. Using OpenSSL on your computer is one way.
+### Connecting to the P2S VPN
 
-    `openssl pkcs12 -in "filename.pfx" -nodes -out "profileinfo.txt"`
+9. Copy your `vpnconfig.ovpn` and PFX certificate (optional) file into the `/workspace/openvpn` folder in the GitHub Codespace or `/openvpn` folder in the devcontainer working tree.
+10. Extract the private key and the base64 client certificate thumbprint
 
-    The profileinfo.txt file will contain the private key and the thumbprint for the CA, and the Client certificate. Be sure to use the thumbprint of the client certificate.
-11. Open `profileinfo.txt` in a text editor. To get the thumbprint of the client (child) certificate, select the text including and between "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----" for the child certificate and copy it. You can identify the child certificate by looking at the subject=/ line.
+    a. If importing from a.pfx, there are multiple ways to do this. Using OpenSSL on your computer is one way.
+
+      `openssl pkcs12 -in "filename.pfx" -nodes -out "profileinfo.txt"`
+
+      The profileinfo.txt file will contain the private key and the thumbprint for the CA, and the Client certificate. Be sure to use the thumbprint of the client certificate.
+
+    b. If following the instructions in [Establish a Point-to-Site \(P2S\) VPN Gateway](#establish-a-point-to-site-vpn-gateway), the client certificate can be found in `DEPLOYMENTCert.pem` and the private key can be found in `DEPLOYMENTKey.pem`
+
+11. To get the thumbprint of the client (child) certificate, select the text including and between "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----" for the child certificate and copy it. You can identify the child certificate by looking at the subject=/ line.
 12. Open the `vpnconfig.ovpn` file and find the section shown below. Replace everything between "cert" and "/cert".
 
     ```text
@@ -273,7 +280,7 @@ To perform a secure mode deployment, follow these steps:
     </cert>
     ```
 
-13. Open the profileinfo.txt in a text editor. To get the private key, select the text including and between "-----BEGIN PRIVATE KEY-----" and "-----END PRIVATE KEY-----" and copy it.
+13. To get the private key, select the text including and between "-----BEGIN PRIVATE KEY-----" and "-----END PRIVATE KEY-----" and copy it.
 14. Open the `vpnconfig.ovpn` file in a text editor and find this section. Paste the private key replacing everything between "key" and "/key".
 
     ```text
@@ -287,7 +294,7 @@ To perform a secure mode deployment, follow these steps:
 15. Don't change any other fields. Save the VPN config file.
 
 16. Now perform the rest of the normal [Deployment](/docs/deployment/deployment.md) configuration and start `make deploy`. When you encounter the connectivity prompt come back here and resume at Step 17. Note: You must repeat steps 17 - 22 each time your Codespace stops during a deployment.
-17. Once the deployment stops to prompt you for connectivity you will need to add the DNS Private Resolver IP address to your GitHub Codespace configuration. The DNS Private Resolver IP was output to your VSCode Terminal for you in the prompt to confirm connectivity. Do this by running the following command:
+17. Once the deployment stops to prompt you for connectivity you will need to add the DNS Private Resolver IP address to your GitHub Codespace configuration or within your development devcontainer. The DNS Private Resolver IP was output to your VSCode Terminal for you in the prompt to confirm connectivity. Do this by running the following command:
 
     `sudo nano /etc/resolv.conf`
 
@@ -357,29 +364,134 @@ export TF_VAR_dns_CIDR="10.0.8.176/28"
 
 ### Secure communication to Azure
 
-If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes only. To implement this for deployment purposes, you’ll need to add a virtual network and VPN Gateway to your Azure subscription by a VPN Gateway then downloading a VPN client and connecting it to the VPN Gateway to access resources on the virtual network (VNet). You will also need to then peer your virtual network where your VPN is to the Information Assistant virtual network.
+If your enterprise does not have an existing secure communication channel to the Azure cloud, consider setting up a Point-to-Site (P2S) Virtual Private Network (VPN) for deployment purposes only. To implement this for deployment purposes, you’ll need to follow the steps below to [add a virtual network and VPN Gateway](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal), [generate the required certificates](https://learn.microsoft.com/en-us/azure/vpn-gateway/point-to-site-certificate-gateway) to connect to the VPN Gateway, then create and download a VPN client which will enable you to connect to the VPN Gateway to access resources on the virtual network (VNet). Finally, you will need to then peer your virtual network where your VPN is to the Information Assistant virtual network.
 
-For more information, see [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support) and [create and manage a VPN Gateway using the Azure portal](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal).
+For more information on creating and peering a virtual network for deployment, see [using an Azure VPN Gateway Point-to-Site VPN](https://learn.microsoft.com/en-us/azure/vpn-gateway/work-remotely-support) and [create and manage a VPN Gateway using the Azure portal](https://learn.microsoft.com/en-us/azure/vpn-gateway/tutorial-create-gateway-portal).  Example values below are consistent with a default deployment of Info Assist in Secure mode.
 
-**** Peering your network with the Information Assistant virtual network
+#### Establish a Point-to-Site VPN Gateway
 
-When peering your virtual network with the Information Assistant virtual network, you will need to ensure the following settings are enabled on your peering configuration:
+1. Creating a Virtual Network
 
-* Allow '*my VPN virtual network*' to access '*infoasst-vnet-xxxxx*'
+    When creating or using an existing VNet, ensure you meet the following settings:
 
-* Allow '*my VPN virtual network*' to receive forwarded traffic from '*infoasst-vnet-xxxxx*'
+    * Resource group: '*Your RG name (does not have to be the same as the Info Assist RG)*'
+    * Name: '*Your VNet name (ex: VNet1)*'
+    * Region: Region of your choosing
+    * IPv4 address space: 10.0.0.0/23 (**NOTE:** ensure this address space does not conflict with the address space in the Info Assist VNet! Collisions will disable peering.)
+    * Subnet name: Use the default name, or specify a name.
+    * Subnet address space: 10.0.0.0/24
 
-* Allow gateway or route server in '*my VPN virtual network*' to forward traffic to '*infoasst-vnet-xxxxx*'
+1. Create the VPN Gateway Subnet within the VNet
 
-and the reciprocal setting of:
+    If you don't have a subnet named GatewaySubnet, when you create your VPN gateway, it will fail.
+    * On the page for your virtual network, on the left pane, select Subnets to open the Subnets page.
+    * At the top of the page, select + Gateway subnet to open the Add subnet pane.
+    * IP address range: 10.0.0.0/23 (or another valid range within your VNet)
 
-* Allow '*infoasst-vnet-xxxxx*' to access '*my VPN virtual network's*'
+1. Establish VPN Gateway
 
-* Allow '*infoasst-vnet-xxxxx*' to receive forwarded traffic from '*my VPN virtual network's*'
+    After creating the VNet, create a Virtual Network Gateway and ensure you meet the following settings:
+    * Name: '*Your VPN Gateway name (ex: VNet1GW)*'
+    * Gateway type: VPN
+    * SKU: VpnGw2AZ
+    * Generation: Generation 2
+    * Virtual network: '*Your VNet name (ex: VNet1)*'
+    * Gateway subnet address range: 10.1.255.0/27
+    * Public IP address: Create new
+    * Public IP address name: VNet1GWpip1
+    * Public IP address SKU: Standard
+    * Assignment: Static
+    * Second Public IP address name: VNet1GWpip2
 
-* Enable '*infoasst-vnet-xxxxx*' to use '*my VPN virtual network's*' remote gateway or route server
+1. Generating Certificates
 
-This will ensure that the Azure DNS private resolver set up by the Information Assistant agent template can resolve traffic properly to your VPN connection.
+    Instructions below assume users will generate a self signed certificate with OpenSSL, for alternative certificate generation methods, see [Configure server settings for P2S VPN Gateway certificate authentication](https://learn.microsoft.com/en-us/azure/vpn-gateway/point-to-site-certificate-gateway)
+
+    1. Generate the Root Certificate
+
+        You will need to generate the Root Certificate in order to configure your P2S VPN in Azure.  Run the following commands from within your deployment devcontainer.
+
+        ```bash
+        openssl genrsa -out caKey.pem 2048
+        openssl req -x509 -new -nodes -key caKey.pem -subj "/CN=VPN CA" -days 3650 -out caCert.pem
+        ```
+
+        Print the self-signed root certificate public data in base64 format. You will need to upload this certificate to Azure as part of your P2S configuration steps later on.
+
+        ```bash
+        openssl x509 -in caCert.pem -outform der | base64 -w0 && echo
+        ```
+
+    1. Cofigure the Point to Site settings in the VPN Gateway
+
+        **NOTE:** *This step may take up to 45 minutes*
+
+        1. On the page for your gateway, in the left pane, select Point-to-site configuration.
+        1. Click Configure now to open the configuration page.
+        1. Ensure you meet the following settings:
+            * Address Pool: 172.16.20.0/28
+            * Tunnel Type: OpenVPN (SSL)
+            * Authentication Type: Azure certificate
+        1. Under Root Certificates, upload the public certificate data as shown below:
+            * Name: P2SRootCertificate
+            * Public Certificate data: '*Your root certificate (Only the text between -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- as shown below)*'
+
+            ![Secure mode - Root Certificate data](../images/secure-deploy-root-certificate-data.png)
+
+
+    1.  Generate Client Certificates
+        
+        You will need the client certificates to connect to the VPN gateway in later steps.  These will be used to connect to your P2S Gateway.  Execute the following commands within your deployment devcontainer.
+
+        ```bash
+        export PASSWORD="password"
+        export USERNAME="DEPLOYMENT"
+
+        # Generate a private key
+        openssl genrsa -out "${USERNAME}Key.pem" 2048
+
+        # Generate a CSR (Certificate Sign Request)
+        openssl req -new -key "${USERNAME}Key.pem" -out "${USERNAME}Req.pem" -subj "/CN=${USERNAME}"
+
+        # Sign the CSR using the CA certificate and CA key
+        openssl x509 -req -days 365 -in "${USERNAME}Req.pem" -CA caCert.pem -CAkey caKey.pem -CAcreateserial -out "${USERNAME}Cert.pem" -extfile <(echo -e "subjectAltName=DNS:${USERNAME}\nextendedKeyUsage=clientAuth")
+        ```
+
+
+
+1. Peering your network with the Information Assistant virtual network
+
+    When peering your virtual network with the Information Assistant virtual network, you will need to ensure the following settings are enabled on your peering configuration:
+
+    * Allow '*my VPN virtual network*' to access '*infoasst-vnet-xxxxx*'
+
+    * Allow '*my VPN virtual network*' to receive forwarded traffic from '*infoasst-vnet-xxxxx*'
+
+    * Allow gateway or route server in '*my VPN virtual network*' to forward traffic to '*infoasst-vnet-xxxxx*'
+
+    and the reciprocal setting of:
+
+    * Allow '*infoasst-vnet-xxxxx*' to access '*my VPN virtual network's*'
+
+    * Allow '*infoasst-vnet-xxxxx*' to receive forwarded traffic from '*my VPN virtual network's*'
+
+    * Enable '*infoasst-vnet-xxxxx*' to use '*my VPN virtual network's*' remote gateway or route server
+
+    This will ensure that the Azure DNS private resolver set up by the Information Assistant agent template can resolve traffic properly to your VPN connection.
+
+1. Connect to the P2S gateway
+
+    1. Download the VPN Client
+
+        1. On the virtual network gateway page, select Point-to-site configuration to open the Point-to-site configuration page.
+        1. At the top of the Point-to-site configuration page, select Download VPN client.
+
+        **NOTE** This action may take several minutes.
+
+        ![Secure mode - Download VPN Client](../images/secure-deploy-vpn-client.png)
+
+    1. Unzip the file to view the folders.
+    1. Continue at [connecting to the P2S VPN](#connecting-to-the-p2s-vpn)
 
 ### Deploying with Microsoft Cloud for Sovereignty
 

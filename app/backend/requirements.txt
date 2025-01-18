@@ -19,10 +19,10 @@ numexpr==2.10.1
 openai==1.55.3
 pandas==2.2.3
 Pillow==10.4.0
-PyJWT==2.10.0
+PyJWT==2.10.1
 pytest==8.3.3
 python-dotenv==1.0.1
-python-multipart==0.0.10
+python-multipart==0.0.18
 tabulate==0.9.0
 tiktoken==0.7.0
 uvicorn==0.30.6

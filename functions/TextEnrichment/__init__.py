@@ -39,6 +39,7 @@ azure_ai_location = os.environ["AZURE_AI_LOCATION"]
 local_debug = os.environ["LOCAL_DEBUG"]
 azure_ai_credential_domain = os.environ["AZURE_AI_CREDENTIAL_DOMAIN"]
 azure_openai_authority_host = os.environ["AZURE_OPENAI_AUTHORITY_HOST"]
+azure_openai_api_version = os.environ["AZURE_OPENAI_API_VERSION"]
 
 FUNCTION_NAME = "TextEnrichment"
 MAX_CHARS_FOR_DETECTION = 1000
@@ -80,11 +81,11 @@ def main(msg: func.QueueMessage) -> None:
     try:
         apiTranslateEndpoint = f"{azure_ai_endpoint}translator/text/v3.0/translate?api-version=3.0"
         apiLanguageEndpoint = f"{azure_ai_endpoint}language/:analyze-text?api-version=2023-04-01"
-        
+
         message_body = msg.get_body().decode("utf-8")
         message_json = json.loads(message_body)
-        blob_path = message_json["blob_name"]       
-   
+        blob_path = message_json["blob_name"]
+
         logging.info(
             "Python queue trigger function processed a queue item: %s",
             msg.get_body().decode("utf-8"),
@@ -98,9 +99,9 @@ def main(msg: func.QueueMessage) -> None:
         )
         file_name, file_extension, file_directory  = utilities.get_filename_and_extension(blob_path)
         chunk_folder_path = file_directory + file_name + file_extension
-        
+
         # Detect language of the document
-        chunk_content = ''        
+        chunk_content = ''
         blob_service_client = BlobServiceClient(
             account_url=azure_blob_storage_endpoint,
             credential=azure_credential,
@@ -114,7 +115,7 @@ def main(msg: func.QueueMessage) -> None:
             blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
             response = requests.get(blob_path_plus_sas)
             response.raise_for_status()
-            chunk_dict = json.loads(response.text)   
+            chunk_dict = json.loads(response.text)
             if len(chunk_content) + len(chunk_dict["content"]) <= MAX_CHARS_FOR_DETECTION:
                  chunk_content = chunk_content + " " + chunk_dict["content"]
             else:
@@ -123,13 +124,13 @@ def main(msg: func.QueueMessage) -> None:
                 chunk_content = chunk_content + " " + trim_content(chunk_dict["content"], remaining_chars)
                 break
 
-        # detect language           
+        # detect language
         headers = {
             "Ocp-Apim-Subscription-Key": azure_ai_key,
             'Content-type': 'application/json',
             'Ocp-Apim-Subscription-Region': azure_ai_location
         }
-        
+
         data = {
             "kind": "LanguageDetection",
             "analysisInput":{
@@ -140,7 +141,7 @@ def main(msg: func.QueueMessage) -> None:
                     }
                 ]
             }
-        } 
+        }
 
         response = requests.post(apiLanguageEndpoint, headers=headers, json=data)      
         if response.status_code == 200:
@@ -150,7 +151,7 @@ def main(msg: func.QueueMessage) -> None:
                 f"{FUNCTION_NAME} - detected language of text is {detected_language}.",
                 StatusClassification.DEBUG,
                 State.PROCESSING
-            )             
+            )
         else:
             # error or requeue
             requeue(response, message_json)
@@ -164,25 +165,29 @@ def main(msg: func.QueueMessage) -> None:
                 f"{FUNCTION_NAME} - Non-target language detected",
                 StatusClassification.DEBUG,
                 State.PROCESSING
-            )      
-               
+            )
+
         # regenerate the iterator to reset it to the first chunk
         chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
         for i, chunk in enumerate(chunk_list):
             # open the file and extract the content
             blob_path_plus_sas = utilities.get_blob_and_sas(azure_blob_content_storage_container + '/' + chunk.name)
             # exported to a def to allow retry if error encountered in getting response
-            response = get_chunk_blob(blob_path_plus_sas)            
+            response = get_chunk_blob(blob_path_plus_sas)
             chunk_dict = json.loads(response.text)
-            params = {'to': targetTranslationLanguage}              
+            params = {'to': targetTranslationLanguage}
 
             # Translate content, title, subtitle, and section if required
             fields_to_enrich = ["content", "title", "subtitle", "section"]
             for field in fields_to_enrich:
-                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)                 
-                                
-            # Extract entities for index           
-            target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
+                translate_and_set(field, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint)
+
+            # Extract entities for index
+            # Use original content if using latest GPT version, otherwise use translated content
+            if azure_openai_api_version >= "2024-10-21":
+                target_content = chunk_dict['title'] + " " + chunk_dict['subtitle'] + " " + chunk_dict['section'] + " " + chunk_dict['content']
+            else:
+                target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content']
             enrich_data = {
                 "kind": "EntityRecognition",
                 "parameters": {
@@ -197,7 +202,7 @@ def main(msg: func.QueueMessage) -> None:
                         }
                     ]
                 }
-            }                
+            }
             response = requests.post(apiLanguageEndpoint, headers=headers, json=enrich_data, params=params)
             try:
                 entities = response.json()['results']['documents'][0]['entities']
@@ -205,11 +210,15 @@ def main(msg: func.QueueMessage) -> None:
                 entities = []
             entities_collection = []
             for entity in entities:
-                entities_collection.append(entity['text'])            
+                entities_collection.append(entity['text'])
             chunk_dict[f"entities"] = entities_collection
-                        
-            # Extract key phrases for index    
-            target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content'] 
+
+            # Extract key phrases for index
+            # Use original content if using latest GPT version, otherwise use translated content
+            if azure_openai_api_version >= "2024-10-21":
+                target_content = chunk_dict['title'] + " " + chunk_dict['subtitle'] + " " + chunk_dict['section'] + " " + chunk_dict['content']
+            else:
+                target_content = chunk_dict['translated_title'] + " " + chunk_dict['translated_subtitle'] + " " + chunk_dict['translated_section'] + " " + chunk_dict['translated_content']
             enrich_data = {
                 "kind": "KeyPhraseExtraction",
                 "parameters": {
@@ -224,19 +233,19 @@ def main(msg: func.QueueMessage) -> None:
                         }
                     ]
                 }
-            }                
+            }
             response = requests.post(apiLanguageEndpoint, headers=headers, json=enrich_data, params=params)
             try:
                 key_phrases = response.json()['results']['documents'][0]['keyPhrases']
             except:
                 key_phrases = []
-            chunk_dict[f"key_phrases"] = key_phrases           
-                                            
+            chunk_dict[f"key_phrases"] = key_phrases
+
             # Get path and file name minus the root container
             json_str = json.dumps(chunk_dict, indent=2, ensure_ascii=False)
             block_blob_client = blob_service_client.get_blob_client(container=azure_blob_content_storage_container, blob=chunk.name)
             block_blob_client.upload_blob(json_str, overwrite=True)
-                
+
         # Queue message to embeddings queue for downstream processing
         queue_client = QueueClient(account_url=azure_queue_storage_endpoint,
                                queue_name=queueName,
@@ -245,14 +254,14 @@ def main(msg: func.QueueMessage) -> None:
         embeddings_queue_backoff =  random.randint(1, 60)
         message_string = json.dumps(message_json)
         queue_client.send_message(message_string, visibility_timeout = embeddings_queue_backoff)
-   
+
         statusLog.upsert_document(
             blob_path,
             f"{FUNCTION_NAME} - Text enrichment is complete, message sent to embeddings queue",
             StatusClassification.DEBUG,
             State.QUEUED,
         )
-   
+
     except Exception as error:
         statusLog.upsert_document(
             blob_path,
@@ -260,27 +269,33 @@ def main(msg: func.QueueMessage) -> None:
             StatusClassification.ERROR,
             State.ERROR,
         )
-        
+
     statusLog.save_document(blob_path)
 
 def translate_and_set(field_name, chunk_dict, headers, params, message_json, detected_language, targetTranslationLanguage, apiTranslateEndpoint):
     '''Translate text if it is not in target language'''
+    # Skip translation if using latest GPT version (2024-10-21 or newer)
+    if azure_openai_api_version >= "2024-10-21":
+        chunk_dict[f"translated_{field_name}"] = chunk_dict[f"{field_name}"]
+        return
+
+    # For older versions, perform translation if needed
     if detected_language != targetTranslationLanguage:
         data = [{"text": chunk_dict[field_name]}]
         response = requests.post(apiTranslateEndpoint, headers=headers, json=data, params=params)
-        
+
         if response.status_code == 200:
             translated_content = response.json()[0]['translations'][0]['text']
             chunk_dict[f"translated_{field_name}"] = translated_content
         else:
             # error so requeue
             requeue(response, message_json)
-            return   
+            return
     else:
         chunk_dict[f"translated_{field_name}"] = chunk_dict[f"{field_name}"]
         return
 
-    
+
 def trim_content(sentence, n):
     '''This function trims a sentence to w max char count and a word boundary'''
     if len(sentence) <= n:
@@ -322,7 +337,7 @@ def requeue(response, message_json):
                 f"{FUNCTION_NAME} - message resent to text enrichment-queue. Visible in {backoff} seconds.",
                 StatusClassification.DEBUG,
                 State.QUEUED,
-            )       
+            )
     else:
         # general error occurred
         statusLog.upsert_document(
@@ -330,12 +345,12 @@ def requeue(response, message_json):
             f"{FUNCTION_NAME} - Error on language detection - {response.status_code} - {response.reason}",
             StatusClassification.ERROR,
             State.ERROR
-        )     
-        
+        )
+
 
 @retry(stop=stop_after_attempt(5), wait=wait_fixed(1))
 def get_chunk_blob(blob_path_plus_sas):
-    '''This function wraps retrieving a blob from storage to allow 
+    '''This function wraps retrieving a blob from storage to allow
     retries if throttled or error occurs'''
     response = requests.get(blob_path_plus_sas)
     response.raise_for_status()

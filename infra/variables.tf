@@ -395,13 +395,13 @@ variable "appServicePlanName" {
 variable "appServiceSkuSize" {
   description = "The size of the app service plan for the IA website. Must match with the tier value in appServiceSkuTier."
   type = string
-  default = "S1"
+  default = "B1"
 }
 
 variable "appServiceSkuTier" {
   description = "The tier of the app service plan for the IA website. Must match with the size value in appServiceSkuSize."
   type = string
-  default = "Standard"
+  default = "Basic"
   
 }
 
@@ -413,13 +413,13 @@ variable "enrichmentAppServicePlanName" {
 variable "enrichmentAppServiceSkuSize" {
   description = "The size of the app service plan for the enrichment service. Must match with the tier value in enrichmentAppServiceSkuTier."
   type = string
-  default = "P2v3"
+  default = "B1"
 }
 
 variable "enrichmentAppServiceSkuTier" {
   description = "The tier of the app service plan for the enrichment service. Must match with the size value in enrichmentAppServiceSkuSize."
   type = string
-  default = "PremiumV3"
+  default = "Basic"
 }
 
 variable "logAnalyticsName" {
@@ -450,7 +450,7 @@ variable "functionsAppName" {
 variable "functionsAppSkuSize" {
   description = "The size of the app service plan for the functions app. Must match with the tier value in functionsAppSkuTier."
   type = string
-  default = "S2"
+  default = "S1"
 }
 
 variable "functionsAppSkuTier" {

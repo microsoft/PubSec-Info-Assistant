@@ -20,4 +20,4 @@ nltk==3.9.1
 pyoo==1.4
 tenacity==9.0.0
 tiktoken==0.7.0
-unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.15.13
+unstructured[csv,doc,docx,email,html,md,msg,ppt,pptx,text,xlsx,xml] == 0.16.17

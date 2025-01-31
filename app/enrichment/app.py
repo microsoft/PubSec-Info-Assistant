@@ -55,7 +55,8 @@ ENV = {
     "AZURE_SEARCH_AUDIENCE": None,
     "LOCAL_DEBUG": "false",
     "AZURE_AI_CREDENTIAL_DOMAIN": None,
-    "AZURE_OPENAI_AUTHORITY_HOST": None
+    "AZURE_OPENAI_AUTHORITY_HOST": None,
+    "AZURE_OPENAI_API_VERSION": None
 }
 
 for key, value in ENV.items():
@@ -64,7 +65,7 @@ for key, value in ENV.items():
         ENV[key] = new_value
     elif value is None:
         raise ValueError(f"Environment variable {key} not set")
-    
+
 openai.api_base = ENV["AZURE_OPENAI_ENDPOINT"]
 openai.api_type = "azure"
 if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
@@ -98,7 +99,7 @@ class AzOAIEmbedding(object):
     """A wrapper for a Azure OpenAI Embedding model"""
     def __init__(self, deployment_name) -> None:
         self.deployment_name = deployment_name
-    
+
     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
     def encode(self, texts):
         """Embeds a list of texts using a given model"""
@@ -107,21 +108,20 @@ class AzOAIEmbedding(object):
         input=texts
         )
         return response
-    
-   
+
 
 class STModel(object):
     """A wrapper for a sentence-transformers model"""
     def __init__(self, deployment_name) -> None:
         self.deployment_name = deployment_name
-        
+
     @retry(wait=wait_random_exponential(multiplier=1, max=10), stop=stop_after_attempt(5))
     def encode(self, texts) -> None:
         """Embeds a list of texts using a given model"""
         model = SentenceTransformer(self.deployment_name)
         response = model.encode(texts)
         return response
-    
+
 # === Get Logger ===
 
 log = logging.getLogger("uvicorn")
@@ -247,7 +247,7 @@ def embed_texts(model: str, texts: List[str]):
         if model.startswith("azure-openai_"):
             embeddings = model_obj.encode(texts)
             embeddings= embeddings.data[0].embedding
-            
+
         else:
             embeddings = model_obj.encode(texts)
             embeddings = embeddings.tolist()[0]
@@ -257,7 +257,7 @@ def embed_texts(model: str, texts: List[str]):
             "model_info": model_info[model],
             "data": embeddings
         }
-    
+
     except Exception as error:
         logging.error(f"Failed to embed: {str(error)}")
         raise HTTPException(status_code=500, detail=f"Failed to embed: {str(error)}") from error
@@ -268,7 +268,7 @@ def embed_texts(model: str, texts: List[str]):
 
 def index_sections(chunks):
     """ Pushes a batch of content to the search index
-    """    
+    """
     search_client = SearchClient(endpoint=ENV["AZURE_SEARCH_SERVICE_ENDPOINT"],
                                     index_name=ENV["AZURE_SEARCH_INDEX"],
                                     credential=azure_credential,
@@ -278,7 +278,7 @@ def index_sections(chunks):
     succeeded = sum([1 for r in results if r.succeeded])
     log.debug(f"\tIndexed {len(results)} chunks, {succeeded} succeeded")
 
-@app.on_event("startup") 
+@app.on_event("startup")
 def startup_event():
     poll_thread = threading.Thread(target=poll_queue_thread)
     poll_thread.daemon = True
@@ -287,11 +287,11 @@ def startup_event():
 def poll_queue_thread():
     while True:
         poll_queue()
-        time.sleep(5)     
-        
+        time.sleep(5)
+
 def get_tags(blob_path):
     """ Retrieves tags from the upload container blob
-    """     
+    """
     # Remove the container prefix
     path_parts = blob_path.split('/')
     blob_path = '/'.join(path_parts[1:])
@@ -316,11 +316,11 @@ def get_tags(blob_path):
 
 def poll_queue() -> None:
     """Polls the queue for messages and embeds them"""
-    
+
     if IS_READY == False:
         log.debug("Skipping poll_queue call, models not yet loaded")
         return
-    
+
     queue_client = QueueClient(account_url=ENV["AZURE_QUEUE_STORAGE_ENDPOINT"],
                                queue_name=ENV["EMBEDDINGS_QUEUE"],
                                credential=azure_credential)
@@ -339,13 +339,13 @@ def poll_queue() -> None:
     # Remove from queue to prevent duplicate processing from any additional instances
     for message in messages:
         queue_client.delete_message(message)
-    
-    for message in messages:       
+
+    for message in messages:
         message_b64 = message.content
         message_json = json.loads(base64.b64decode(message_b64))
         blob_path = message_json["blob_name"]
 
-        try:  
+        try:
             statusLog.upsert_document(blob_path, f'Embeddings process started with model {target_embeddings_model}', StatusClassification.INFO, State.PROCESSING)
             log.debug("Processing file: %s", blob_path)
             file_name, file_extension, file_directory  = utilities_helper.get_filename_and_extension(blob_path)
@@ -354,7 +354,7 @@ def poll_queue() -> None:
                                             credential=azure_credential)
             container_client = blob_service_client.get_container_client(ENV["AZURE_BLOB_STORAGE_CONTAINER"])
             index_chunks = []
-                                    
+
             # get tags to apply to the chunk
             tag_list = get_tags(blob_path)
             log.debug("Successfully pulled tags for %s. %d tags found.", blob_path, len(tag_list))
@@ -363,7 +363,7 @@ def poll_queue() -> None:
             chunk_list = container_client.list_blobs(name_starts_with=chunk_folder_path)
             chunks = list(chunk_list)
             i = 0
-            log.debug("Processing %d chunks", len(chunks))         
+            log.debug("Processing %d chunks", len(chunks))
             for chunk in chunks:
                 log.debug("Processing chunk %s", chunk.name)
                 statusLog.update_document_state( blob_path, f"Indexing {i+1}/{len(chunks)}", State.INDEXING)
@@ -376,28 +376,38 @@ def poll_queue() -> None:
                 chunk_dict = json.loads(response.text)
 
                 # create the json to be indexed
-                try:
-                    text = (
-                        chunk_dict["translated_title"] + " \n " +
-                        chunk_dict["translated_subtitle"] + " \n " +
-                        chunk_dict["translated_section"] + " \n " +
-                        chunk_dict["translated_content"]
-                    )
-                except KeyError:
+                # Skip translation fields if using latest GPT version which handles multilingual content
+                if ENV["AZURE_OPENAI_API_VERSION"] >= "2024-10-21":
                     text = (
                         chunk_dict["title"] + " \n " +
                         chunk_dict["subtitle"] + " \n " +
                         chunk_dict["section"] + " \n " +
                         chunk_dict["content"]
                     )
+                else:
+                    # For older versions, try translated fields first
+                    try:
+                        text = (
+                            chunk_dict["translated_title"] + " \n " +
+                            chunk_dict["translated_subtitle"] + " \n " +
+                            chunk_dict["translated_section"] + " \n " +
+                            chunk_dict["translated_content"]
+                        )
+                    except KeyError:
+                        text = (
+                            chunk_dict["title"] + " \n " +
+                            chunk_dict["subtitle"] + " \n " +
+                            chunk_dict["section"] + " \n " +
+                            chunk_dict["content"]
+                        )
 
                 try:
                     # try first to read the embedding from the chunk, in case it was already created
                     embedding_data = chunk_dict['contentVector']
-                except KeyError:      
+                except KeyError:
                     # create embedding
                     embedding = embed_texts(target_embeddings_model, [text])
-                    embedding_data = embedding['data']      
+                    embedding_data = embedding['data']
 
                 # Prepare the index schema based representation of the chunk with the embedding
                 index_chunk = {}
@@ -424,7 +434,7 @@ def poll_queue() -> None:
                 block_blob_client = blob_service_client.get_blob_client(container=ENV["AZURE_BLOB_STORAGE_CONTAINER"], blob=chunk.name)
                 block_blob_client.upload_blob(json_str, overwrite=True)
                 i += 1
-                
+
                 # push batch of content to index, rather than each individual chunk
                 if i % 200 == 0:
                     log.debug("Indexing %d chunks", i)
@@ -474,5 +484,3 @@ def poll_queue() -> None:
                 )
 
         statusLog.save_document(blob_path)
-
-

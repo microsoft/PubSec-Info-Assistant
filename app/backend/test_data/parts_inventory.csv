@@ -1,0 +1,201 @@
+Description,Stock Level,ROP,ROQ,Avg Turnover,Avg Lead Time,Average Price,ABC Analysis,XYZ Analysis,Location
+Track Fixture APC Tank,65,10,10,9.468324575,2,$163.97 ,C,X,Camp Bastion
+Engine Mount M1 Abrams,54,1,6,6.742598697,10,$170.73 ,C,Y,Camp Pendleton
+Transmission Gear HMMWV,81,9,10,3.729956219,6,$254.67 ,B,X,Fort Bragg
+Gun Barrel M2 Bradley,53,5,10,1.036060324,9,$243.37 ,A,Z,Tobruk Barracks
+Armor Plate Stryker,51,5,1,1.847967483,9,$107.86 ,C,X,Camp Pendleton
+Radio Antenna M3 Scout,22,2,9,6.780131936,3,$219.85 ,A,Y,Camp Bastion
+Tire Assembly MRAP,22,4,8,5.675553661,10,$136.33 ,B,Z,Tobruk Barracks
+Fuel Pump LAV,38,7,2,6.952469745,5,$125.86 ,C,Y,Fort Bragg
+Hydraulic Cylinder M109 Paladin,30,2,1,6.224571477,9,$217.66 ,C,Z,Camp Bastion
+Exhaust System AAV7,75,8,1,6.6604452,9,$127.65 ,B,Z,Tobruk Barracks
+Brake Pad FMTV,32,7,8,7.602753642,2,$146.89 ,A,X,Tobruk Barracks
+Cooling Fan M-ATV,36,9,4,1.471206729,6,$182.73 ,A,Y,Camp Bastion
+Weapon Station LAV,54,2,5,9.55192854,5,$201.50 ,B,X,Camp Pendleton
+Radar System PATRIOT,92,7,9,8.809966861,3,$201.20 ,C,Z,Camp Pendleton
+Fire Control System IFV,56,1,1,7.077154451,4,$275.47 ,C,Y,Fort Bragg
+Tow Hitch HEMTT,9,2,9,9.071266804,5,$294.38 ,A,Z,Camp Bastion
+Suspension System M88 Hercules,78,6,9,8.679894935,8,$175.79 ,A,X,Camp Bastion
+Turret Mechanism M1126 Stryker,29,1,4,1.011054031,8,$293.16 ,B,Y,Camp Pendleton
+Air Filter JLTV,65,4,4,7.88274641,2,$177.02 ,C,Z,Tobruk Barracks
+Battery Pack M113,13,7,9,5.241318519,6,$175.62 ,A,X,Camp Bastion
+Command Console M1A2 Abrams,65,9,4,2.948235761,10,$231.33 ,A,Z,Tobruk Barracks
+GPS Unit M3A3 Bradley,82,2,9,5.418570222,6,$110.28 ,C,Z,Camp Bastion
+Laser Rangefinder M1128 MGS,46,1,2,9.549730098,3,$299.73 ,B,X,Tobruk Barracks
+Periscope Assembly M2A3 Bradley,98,4,6,5.36721759,5,$145.67 ,B,Y,Fort Bragg
+Seats HMMWV,84,10,5,5.291892028,8,$277.80 ,B,Y,Camp Bastion
+Windshield M1151,26,9,5,8.643355121,6,$128.84 ,C,X,Camp Pendleton
+Drive Shaft M1083,84,3,3,8.171342363,6,$199.15 ,A,Y,Camp Bastion
+Gun Mount MRAP,50,2,10,3.462825413,8,$190.97 ,C,Z,Fort Bragg
+Armor Plating M1A1 Abrams,87,4,7,8.551457276,10,$230.40 ,A,X,Tobruk Barracks
+Night Vision System M2A2 Bradley,82,9,1,5.205269935,2,$167.04 ,C,X,Tobruk Barracks
+Water Pump M88A2 Hercules,38,3,9,7.158035285,7,$280.94 ,B,Y,Camp Pendleton
+Transmission Fluid M923,11,4,5,4.465366783,6,$102.73 ,C,X,Camp Bastion
+Oil Filter M997,23,7,7,3.747322982,7,$272.97 ,C,Z,Camp Bastion
+Tire Assembly M1078,66,3,6,1.940941731,4,$289.28 ,A,Z,Fort Bragg
+Steering Gear LMTV,8,3,7,9.997602761,5,$162.60 ,A,Y,Tobruk Barracks
+Fuel Tank M35A2,71,4,3,4.373563424,5,$138.25 ,A,Y,Tobruk Barracks
+Hydraulic Pump M109A6 Paladin,58,8,1,3.333995697,9,$167.70 ,B,X,Tobruk Barracks
+Brake System M939,23,7,5,2.42694164,6,$121.85 ,B,X,Fort Bragg
+Cooling System MRAP,61,2,6,4.15801261,4,$289.84 ,C,X,Camp Bastion
+Weapon Mount M240,2,4,10,2.130275678,2,$245.28 ,B,X,Camp Pendleton
+Navigation System HET,26,7,3,5.300521272,4,$126.80 ,C,Z,Camp Bastion
+Hydraulic System HMMWV,22,6,4,1.565722422,6,$164.41 ,B,X,Fort Bragg
+Engine Assembly M1 Abrams,56,8,3,1.36115908,9,$142.70 ,C,Y,Fort Bragg
+Transmission System Stryker,50,3,8,3.388817182,3,$215.44 ,B,Z,Camp Bastion
+Gun Sight M2 Bradley,74,2,10,3.106594758,1,$132.74 ,C,Z,Fort Bragg
+Armor Kit M1 Abrams,62,3,10,3.080042026,7,$222.15 ,B,Y,Camp Bastion
+Radio System LAV,6,9,3,8.58559019,4,$292.22 ,B,Z,Tobruk Barracks
+Weapon System M777 Howitzer,83,7,7,7.58418161,10,$232.03 ,C,X,Camp Bastion
+Control Unit M1 Abrams,1,1,6,7.266624658,3,$243.43 ,A,X,Camp Pendleton
+Track Fixture APC Tank,91,10,9,1.365094517,7,$126.15 ,C,Y,Camp Pendleton
+Engine Mount M1 Abrams,21,8,9,6.277662622,1,$218.93 ,A,Y,Camp Pendleton
+Transmission Gear HMMWV,91,9,6,4.744838648,4,$231.81 ,C,X,Fort Bragg
+Gun Barrel M2 Bradley,58,8,10,9.831796431,5,$150.76 ,B,Y,Tobruk Barracks
+Armor Plate Stryker,49,7,10,4.017213517,9,$204.34 ,B,Y,Fort Bragg
+Radio Antenna M3 Scout,95,7,9,8.23681156,7,$184.99 ,A,Z,Camp Bastion
+Tire Assembly MRAP,51,3,1,9.920932404,8,$247.02 ,A,Y,Fort Bragg
+Fuel Pump LAV,69,2,2,5.953285369,10,$241.04 ,A,Y,Fort Bragg
+Hydraulic Cylinder M109 Paladin,31,2,2,5.70803003,6,$228.00 ,B,Y,Fort Bragg
+Exhaust System AAV7,39,7,2,9.595550174,5,$266.76 ,B,X,Fort Bragg
+Brake Pad FMTV,60,9,10,3.700253189,10,$157.26 ,C,Z,Camp Bastion
+Cooling Fan M-ATV,35,9,6,3.535288816,5,$204.97 ,C,X,Fort Bragg
+Weapon Station LAV,59,10,9,4.665214081,8,$230.46 ,A,Z,Camp Bastion
+Radar System PATRIOT,49,10,8,6.565834485,7,$295.10 ,C,Z,Camp Pendleton
+Fire Control System IFV,93,5,4,5.049242934,3,$107.21 ,C,X,Camp Pendleton
+Tow Hitch HEMTT,54,10,6,6.032591699,6,$197.04 ,C,Z,Camp Bastion
+Suspension System M88 Hercules,67,2,3,5.822819596,8,$118.60 ,B,Y,Camp Bastion
+Turret Mechanism M1126 Stryker,100,8,2,7.101863587,5,$298.29 ,C,Z,Tobruk Barracks
+Air Filter JLTV,100,10,9,8.177258295,7,$235.93 ,B,Y,Camp Pendleton
+Battery Pack M113,88,10,5,7.235121741,8,$208.39 ,B,Z,Camp Bastion
+Command Console M1A2 Abrams,77,7,6,1.382807459,7,$212.26 ,B,X,Camp Pendleton
+GPS Unit M3A3 Bradley,5,4,5,2.993192193,3,$173.33 ,B,X,Camp Bastion
+Laser Rangefinder M1128 MGS,81,7,1,3.838001102,1,$256.12 ,B,Z,Camp Pendleton
+Periscope Assembly M2A3 Bradley,50,7,1,9.551815171,9,$245.82 ,A,Y,Tobruk Barracks
+Seats HMMWV,1,7,5,1.526823411,1,$176.47 ,A,X,Camp Bastion
+Windshield M1151,74,1,1,1.702597595,5,$120.85 ,C,Y,Camp Pendleton
+Drive Shaft M1083,71,7,9,2.602950634,7,$118.35 ,C,Z,Fort Bragg
+Gun Mount MRAP,64,8,2,1.22939191,10,$256.62 ,A,Y,Camp Bastion
+Armor Plating M1A1 Abrams,57,6,5,9.506792416,7,$103.66 ,A,Y,Fort Bragg
+Night Vision System M2A2 Bradley,3,8,7,4.659715211,1,$215.16 ,B,Y,Fort Bragg
+Water Pump M88A2 Hercules,98,5,9,1.412012849,9,$258.18 ,B,X,Fort Bragg
+Transmission Fluid M923,24,10,10,5.56443933,8,$217.35 ,C,Y,Fort Bragg
+Oil Filter M997,49,4,4,7.923084555,7,$156.78 ,C,X,Camp Pendleton
+Tire Assembly M1078,41,10,3,9.804830447,9,$254.28 ,B,X,Camp Pendleton
+Steering Gear LMTV,76,6,8,4.126344337,3,$218.37 ,A,X,Tobruk Barracks
+Fuel Tank M35A2,39,1,5,3.372299862,1,$253.24 ,C,Y,Camp Pendleton
+Hydraulic Pump M109A6 Paladin,55,8,2,6.112780858,4,$249.57 ,B,X,Camp Pendleton
+Brake System M939,88,3,10,1.358263235,10,$146.53 ,B,Z,Camp Bastion
+Cooling System MRAP,2,1,4,1.402028808,5,$199.04 ,B,Y,Fort Bragg
+Weapon Mount M240,67,5,7,8.083923662,2,$176.01 ,C,Y,Tobruk Barracks
+Navigation System HET,18,2,3,6.384711427,8,$227.77 ,B,Z,Fort Bragg
+Hydraulic System HMMWV,76,8,2,2.920096928,8,$204.51 ,C,Y,Tobruk Barracks
+Engine Assembly M1 Abrams,33,10,9,5.974422698,3,$231.89 ,C,X,Fort Bragg
+Transmission System Stryker,92,5,7,1.69248827,3,$214.48 ,B,X,Fort Bragg
+Gun Sight M2 Bradley,53,8,2,9.5801769,7,$137.64 ,B,Y,Fort Bragg
+Armor Kit M1 Abrams,88,1,6,6.430443455,2,$169.71 ,C,X,Fort Bragg
+Radio System LAV,59,4,4,6.033068143,3,$157.62 ,B,Z,Camp Bastion
+Weapon System M777 Howitzer,3,2,3,5.199071689,7,$182.68 ,B,X,Camp Pendleton
+Control Unit M1 Abrams,1,5,8,6.328431939,9,$146.20 ,C,Y,Camp Bastion
+Track Fixture APC Tank,85,4,6,7.591145062,4,$192.76 ,C,Y,Camp Pendleton
+Engine Mount M1 Abrams,28,6,1,3.127097288,9,$123.87 ,C,X,Camp Bastion
+Transmission Gear HMMWV,63,3,3,3.424911701,5,$204.05 ,A,Y,Fort Bragg
+Gun Barrel M2 Bradley,76,7,1,4.431595545,10,$275.90 ,C,Y,Camp Pendleton
+Armor Plate Stryker,41,8,7,1.539097019,9,$137.20 ,B,Y,Camp Bastion
+Radio Antenna M3 Scout,66,2,6,9.619211146,9,$150.75 ,A,Y,Fort Bragg
+Tire Assembly MRAP,62,4,7,9.28034386,8,$203.79 ,B,X,Camp Bastion
+Fuel Pump LAV,98,6,10,3.097015817,3,$262.01 ,A,X,Camp Pendleton
+Hydraulic Cylinder M109 Paladin,62,8,9,1.384900834,3,$161.19 ,A,Y,Camp Pendleton
+Exhaust System AAV7,8,7,9,6.913227958,6,$255.75 ,C,X,Camp Pendleton
+Brake Pad FMTV,36,1,8,8.277443445,8,$294.81 ,B,Y,Camp Bastion
+Cooling Fan M-ATV,21,5,9,3.907327604,10,$169.11 ,C,Y,Fort Bragg
+Weapon Station LAV,80,9,8,3.361414198,9,$218.23 ,A,Z,Fort Bragg
+Radar System PATRIOT,77,7,3,4.369548302,9,$200.00 ,A,X,Camp Bastion
+Fire Control System IFV,59,7,3,7.722075001,8,$169.38 ,B,X,Tobruk Barracks
+Tow Hitch HEMTT,64,2,5,7.770328251,6,$116.34 ,B,Z,Camp Bastion
+Suspension System M88 Hercules,47,2,3,4.285864757,10,$280.73 ,A,Z,Camp Pendleton
+Turret Mechanism M1126 Stryker,48,1,10,2.1313133,1,$224.72 ,C,Z,Camp Bastion
+Air Filter JLTV,41,8,3,1.919656646,1,$109.46 ,A,Y,Camp Bastion
+Battery Pack M113,90,4,8,9.863610053,9,$160.15 ,B,X,Camp Pendleton
+Command Console M1A2 Abrams,38,9,8,6.492640005,6,$228.75 ,B,Y,Camp Bastion
+GPS Unit M3A3 Bradley,75,7,1,4.983575195,10,$231.47 ,B,Z,Camp Bastion
+Laser Rangefinder M1128 MGS,13,8,9,6.07203395,10,$144.13 ,A,Y,Tobruk Barracks
+Periscope Assembly M2A3 Bradley,88,8,10,3.31177523,4,$205.04 ,A,Z,Tobruk Barracks
+Seats HMMWV,94,7,9,5.633933506,2,$250.30 ,A,Z,Camp Bastion
+Windshield M1151,63,2,10,6.646692118,3,$161.18 ,B,X,Tobruk Barracks
+Drive Shaft M1083,95,6,8,2.124987382,8,$110.46 ,C,X,Fort Bragg
+Gun Mount MRAP,24,10,4,5.671522473,2,$172.18 ,B,X,Fort Bragg
+Armor Plating M1A1 Abrams,13,7,10,8.447110102,7,$274.71 ,B,Z,Camp Bastion
+Night Vision System M2A2 Bradley,20,5,9,3.507075877,9,$258.48 ,C,Z,Camp Bastion
+Water Pump M88A2 Hercules,13,6,3,1.351202378,3,$181.52 ,B,Z,Camp Bastion
+Transmission Fluid M923,37,7,8,9.079804744,3,$139.68 ,C,X,Tobruk Barracks
+Oil Filter M997,40,6,6,5.887906688,3,$248.12 ,C,Z,Tobruk Barracks
+Tire Assembly M1078,98,10,4,4.658739433,7,$182.30 ,A,Z,Fort Bragg
+Steering Gear LMTV,89,1,8,5.868956875,7,$225.32 ,B,X,Camp Bastion
+Fuel Tank M35A2,10,1,7,6.900432849,3,$186.48 ,C,Y,Camp Pendleton
+Hydraulic Pump M109A6 Paladin,23,3,6,1.064624011,5,$267.96 ,A,X,Camp Pendleton
+Brake System M939,10,8,8,3.262276201,3,$239.81 ,B,Y,Camp Pendleton
+Cooling System MRAP,87,9,2,5.550142109,4,$248.08 ,A,Z,Tobruk Barracks
+Weapon Mount M240,4,1,6,9.321407122,2,$240.85 ,B,Z,Camp Pendleton
+Navigation System HET,10,10,10,7.827514461,10,$268.68 ,C,Z,Camp Pendleton
+Hydraulic System HMMWV,49,8,10,9.26440253,10,$113.88 ,A,X,Fort Bragg
+Engine Assembly M1 Abrams,42,8,9,5.603245426,8,$137.94 ,A,Y,Tobruk Barracks
+Transmission System Stryker,27,5,1,7.640020323,4,$131.80 ,B,Z,Camp Bastion
+Gun Sight M2 Bradley,76,3,1,4.729487904,1,$271.02 ,C,Z,Camp Bastion
+Armor Kit M1 Abrams,32,8,7,8.243663369,10,$248.70 ,A,Z,Camp Bastion
+Radio System LAV,5,2,6,2.570570013,5,$176.59 ,C,X,Tobruk Barracks
+Weapon System M777 Howitzer,27,7,7,5.818917418,3,$122.35 ,A,X,Camp Bastion
+Control Unit M1 Abrams,89,5,2,3.741162437,4,$280.94 ,B,Y,Camp Bastion
+Track Fixture APC Tank,80,4,2,3.34651128,3,$247.66 ,B,Z,Fort Bragg
+Engine Mount M1 Abrams,61,2,3,3.671866864,1,$228.35 ,C,X,Fort Bragg
+Transmission Gear HMMWV,61,6,1,1.712200486,8,$234.90 ,B,Y,Fort Bragg
+Gun Barrel M2 Bradley,18,1,4,5.469365363,3,$147.42 ,B,X,Camp Pendleton
+Armor Plate Stryker,53,7,3,7.303554912,3,$182.66 ,B,X,Tobruk Barracks
+Radio Antenna M3 Scout,51,9,1,3.639092704,10,$133.68 ,A,X,Tobruk Barracks
+Tire Assembly MRAP,9,10,1,5.670411043,5,$178.22 ,B,Z,Fort Bragg
+Fuel Pump LAV,82,1,8,9.357423462,10,$152.81 ,B,Y,Camp Pendleton
+Hydraulic Cylinder M109 Paladin,81,2,2,4.401343103,6,$284.54 ,A,Y,Fort Bragg
+Exhaust System AAV7,56,9,5,1.613587555,1,$219.56 ,A,Z,Camp Bastion
+Brake Pad FMTV,56,5,2,1.276131729,3,$111.11 ,B,X,Camp Pendleton
+Cooling Fan M-ATV,88,7,10,1.490421048,5,$281.75 ,B,Y,Tobruk Barracks
+Weapon Station LAV,73,7,1,4.889275009,3,$283.87 ,C,Z,Camp Pendleton
+Radar System PATRIOT,1,5,4,9.837614662,8,$291.09 ,C,Y,Camp Pendleton
+Fire Control System IFV,78,6,10,8.067242335,7,$108.06 ,C,Y,Camp Bastion
+Tow Hitch HEMTT,95,1,3,6.414999874,10,$164.02 ,C,Y,Camp Pendleton
+Suspension System M88 Hercules,0,1,7,2.877384607,10,$189.12 ,C,Z,Camp Pendleton
+Turret Mechanism M1126 Stryker,96,9,3,5.659712283,9,$259.55 ,C,Z,Tobruk Barracks
+Air Filter JLTV,15,4,5,5.06758843,8,$213.55 ,B,X,Fort Bragg
+Battery Pack M113,84,3,7,5.282975046,1,$262.71 ,A,Z,Tobruk Barracks
+Command Console M1A2 Abrams,20,4,6,8.422001995,5,$207.22 ,C,Z,Fort Bragg
+GPS Unit M3A3 Bradley,60,4,3,6.988079824,8,$156.95 ,A,Y,Fort Bragg
+Laser Rangefinder M1128 MGS,30,9,10,9.32780887,2,$140.01 ,A,Y,Camp Pendleton
+Periscope Assembly M2A3 Bradley,11,9,1,3.496474683,7,$294.22 ,A,Z,Camp Pendleton
+Seats HMMWV,34,1,1,5.363020536,5,$240.44 ,A,X,Tobruk Barracks
+Windshield M1151,16,4,7,9.769534255,10,$100.15 ,B,X,Fort Bragg
+Drive Shaft M1083,95,1,8,2.925133504,8,$109.11 ,B,X,Tobruk Barracks
+Gun Mount MRAP,34,5,8,7.156312035,5,$200.63 ,C,Y,Fort Bragg
+Armor Plating M1A1 Abrams,50,3,8,4.43596952,1,$160.86 ,B,Y,Tobruk Barracks
+Night Vision System M2A2 Bradley,6,7,5,3.673030979,10,$113.67 ,C,Z,Camp Bastion
+Water Pump M88A2 Hercules,40,4,4,3.115335725,10,$285.70 ,A,X,Fort Bragg
+Transmission Fluid M923,24,7,10,6.818948243,8,$241.43 ,B,X,Camp Bastion
+Oil Filter M997,43,2,6,5.455842484,8,$166.20 ,B,Z,Camp Bastion
+Tire Assembly M1078,89,2,9,8.20017553,8,$137.56 ,C,X,Camp Pendleton
+Steering Gear LMTV,2,8,6,8.061140348,9,$198.59 ,A,Z,Camp Bastion
+Fuel Tank M35A2,54,6,8,8.904316201,7,$195.97 ,C,Z,Tobruk Barracks
+Hydraulic Pump M109A6 Paladin,69,9,10,3.706496639,9,$147.04 ,C,X,Camp Bastion
+Brake System M939,60,1,4,5.34397168,6,$119.84 ,C,X,Tobruk Barracks
+Cooling System MRAP,98,5,6,7.226433085,8,$255.86 ,B,X,Tobruk Barracks
+Weapon Mount M240,65,1,1,2.628664906,9,$131.11 ,A,Y,Tobruk Barracks
+Navigation System HET,53,8,10,4.188858727,4,$266.62 ,A,Z,Camp Bastion
+Hydraulic System HMMWV,7,2,5,4.306299116,10,$150.32 ,A,Z,Fort Bragg
+Engine Assembly M1 Abrams,45,1,8,6.590254381,9,$231.63 ,A,X,Fort Bragg
+Transmission System Stryker,26,4,7,9.797832615,5,$289.97 ,B,Z,Tobruk Barracks
+Gun Sight M2 Bradley,55,4,8,9.638165404,7,$139.90 ,B,Z,Tobruk Barracks
+Armor Kit M1 Abrams,55,8,6,9.658176782,8,$207.78 ,B,Y,Tobruk Barracks
+Radio System LAV,46,9,4,1.378050421,6,$238.76 ,C,X,Camp Pendleton
+Weapon System M777 Howitzer,43,7,4,5.00903293,2,$236.52 ,B,Y,Tobruk Barracks
+Control Unit M1 Abrams,59,4,4,6.49590499,1,$247.29 ,A,X,Camp Bastion
+Track Fixture APC Tank,71,10,7,4.512206653,6,$270.18 ,C,Z,Tobruk Barracks
+Engine Mount M1 Abrams,57,5,9,5.411870925,5,$245.48 ,B,X,Tobruk Barracks
+Transmission Gear HMMWV,73,10,10,1.014919504,4,$234.49 ,A,Y,Camp Pendleton
+Gun Barrel M2 Bradley,100,4,1,4.612049349,9,$208.57 ,B,Z,Camp Pendleton

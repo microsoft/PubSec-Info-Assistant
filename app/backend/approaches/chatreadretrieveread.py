@@ -2,7 +2,6 @@
 # Licensed under the MIT license.
 
 import json
-import re
 import logging
 import urllib.parse
 from datetime import datetime, timedelta
@@ -10,9 +9,9 @@ from typing import Any, Sequence
 
 import openai
 from openai import  AsyncAzureOpenAI
-from openai import BadRequestError
+from openai import BadRequestError, OpenAIError
 from approaches.approach import Approach
-from azure.search.documents import SearchClient  
+from azure.search.documents import SearchClient
 from azure.search.documents.models import VectorizedQuery
 from azure.search.documents.models import QueryType
 from azure.storage.blob import (
@@ -52,7 +51,6 @@ class ChatReadRetrieveReadApproach(Approach):
     -Identify the language of the user's question and translate the final response to that language.if the final answer is " I am not sure" then also translate it to the language of the user's question and then display translated response only. nothing else.
 
     {follow_up_questions_prompt}
-    {injected_prompt}
     """
 
     FOLLOW_UP_QUESTIONS_PROMPT_CONTENT = """ALWAYS generate three very brief unordered follow-up questions surrounded by triple chevrons (<<<Are there exclusions for prescriptions?>>>) that the user would likely ask next about their agencies data. 
@@ -116,7 +114,7 @@ class ChatReadRetrieveReadApproach(Approach):
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
         #escape target embeddiong model name
-        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
+        self.target_model = target_embedding_model
         self.target_translation_language=target_translation_language
         self.azure_ai_endpoint=azure_ai_endpoint
         self.azure_ai_location=azure_ai_location
@@ -218,26 +216,25 @@ class ChatReadRetrieveReadApproach(Approach):
 
         thought_chain["work_search_term"] = generated_query
         
-        # Generate embedding using REST API
-        url = f'{self.embedding_service_url}/models/{self.escaped_target_model}/embed'
-        data = [f'"{generated_query}"']
-        
-        headers = {
-                'Accept': 'application/json',  
-                'Content-Type': 'application/json',
-            }
-
+        # Generate embedding using Azure OpenAI API and the target model
         embedded_query_vector = None
         try:
-            response = requests.post(url, json=data,headers=headers,timeout=60)
-            if response.status_code == 200:
-                response_data = response.json()
-                embedded_query_vector =response_data.get('data')
+            response = await self.client.embeddings.create(
+                input=generated_query,
+                model=f"{self.target_model}")
+            #check if successful response and data is present
+            if response and response.data:
+                embedded_query_vector = response.data[0].embedding
+                log.info(f"Generated embeddings")
             else:
                 # Generate an error message if the embedding generation fails
                 log.error(f"Error generating embedding:: {response.status_code} - {response.text}")
                 yield json.dumps({"error": "Error generating embedding"}) + "\n"
                 return # Go no further
+        except OpenAIError as e:
+            log.error(f"OpenAI API error: {str(e)}")
+            yield json.dumps({"error": f"OpenAI API error: {str(e)}"}) + "\n"
+            return # Go no further
         except Exception as e:
             # Timeout or other error has occurred
             log.error(f"Error generating embedding: {str(e)}")
@@ -332,42 +329,17 @@ class ChatReadRetrieveReadApproach(Approach):
             else ""
         )
 
-        # Allow client to replace the entire prompt, or to inject into the existing prompt using >>>
-        prompt_override = overrides.get("prompt_template")
+        
+        system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
+            query_term_language=self.query_term_language,
 
-        if prompt_override is None:
-            system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
-                query_term_language=self.query_term_language,
-                injected_prompt="",
-                follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_response_length_prompt_text(
-                    response_length
-                ),
-                userPersona=user_persona,
-                systemPersona=system_persona,
-            )
-        elif prompt_override.startswith(">>>"):
-            system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
-                query_term_language=self.query_term_language,
-                injected_prompt=prompt_override[3:] + "\n ",
-                follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_response_length_prompt_text(
-                    response_length
-                ),
-                userPersona=user_persona,
-                systemPersona=system_persona,
-            )
-        else:
-            system_message = self.SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
-                query_term_language=self.query_term_language,
-                follow_up_questions_prompt=follow_up_questions_prompt,
-                response_length_prompt=self.get_response_length_prompt_text(
-                    response_length
-                ),
-                userPersona=user_persona,
-                systemPersona=system_persona,
-            )
-            
+            follow_up_questions_prompt=follow_up_questions_prompt,
+            response_length_prompt=self.get_response_length_prompt_text(
+                response_length
+            ),
+            userPersona=user_persona,
+            systemPersona=system_persona,
+        )
         try:
             # STEP 3: Generate a contextual and content-specific answer using the search results and chat history.
             #Added conditional block to use different system messages for different models.
@@ -488,7 +460,7 @@ class ChatReadRetrieveReadApproach(Approach):
             container_name = separator.join(
                 source_file.split(separator)[3:4])
             # Obtain the user delegation key
-            user_delegation_key = self.blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(hours=2))
+            user_delegation_key = self.blob_client.get_user_delegation_key(key_start_time=datetime.utcnow(), key_expiry_time=datetime.utcnow() + timedelta(minutes=10))
 
             sas_token = generate_blob_sas(
                 account_name=self.blob_client.account_name,

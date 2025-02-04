@@ -55,40 +55,6 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ---
 
-## Errors due to throttling or overloading Form Recognizer
-
-Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later or an internal error was returned by AI Document Intelligence in the FileFormRecPollingPDF function. This indicates the service has encountered internal capacity issues. Both of these situations will occur under heavy load, but the agent template is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
-
-### Solution
-
-The back off and retry parameter values are surfaced as configuration settings in the Azure function and can be revised through the Azure portal in the Function App Configuration or in the functions local.settings.json file which is used when debugging a function in VS Code. The names and values are as follows...
-
-```text
-| Name                        | Value | Description                                                                                                               |
-|-----------------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
-| MAX_POLLING_REQUEUE_COUNT   | 10    | Max times to retry submission due to throttling or internal errors in FR                                                  |
-| MAX_READ_ATTEMPTS           | 5     | Number of times to retry reading a processed document from FR                                                             |
-| MAX_SECONDS_HIDE_ON_UPLOAD  | 30    | Max number of seconds between uploading a file and submitting it to FR                                                    |
-| MAX_SUBMIT_REQUEUE_COUNT    | 10    | Max number of times a file can be resubmitted to FR for throttling or capacity limitations                                |
-| PDF_SUBMIT_QUEUE_BACKOFF    | 60    | Number of seconds a message sleeps before resubmitting due to throttling request from FR                                   |
-| POLL_QUEUE_SUBMIT_BACKOFF   | 60    | Number of seconds a message sleeps before we poll for FR completion                                                       |
-| POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to FR still processing a file. This value escalates exponentially |
-| SUBMIT_REQUEUE_HIDE_SECONDS | 1200  | Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error                       |
-
-```
-
-These variables can also be updated prior to deployment by changing the following Terraform variables
-```text
-maxPollingRequeueCount
-maxReadAttempts
-maxSecondsHideOnUpload
-maxSubmitRequeueCount
-pdfSubmitQueueBackoff
-pollQueueSubmitBackoff
-pollingBackoff
-submitRequeueHideSeconds
-```
-
 ---
 
 ## Error : Error due to service unavailability
@@ -100,7 +66,7 @@ InsufficientQuota: This operation require xxx new capacity in quota  'Tokens Per
 
 ### Solution
 
-This means that you have exceeded the quota assigned to your deployment for the GPT or embeddings model. The quota is the maximum number of tokens per minute (thousands) that you can use with this model. You can check your current quota and usage in the Azure portal. To increase the quota review [learn more](https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits)
+This means that you have exceeded the quota assigned to your deployment for the GPT or embeddings model. The quota is the maximum number of tokens per minute (thousands) that you can use with this model. You can check your current quota and usage in the Azure portal. To increase the quota review [learn more](https://learn.microsoft.com/azure/ai-services/openai/quotas-limits)
 
 ---
 
@@ -113,7 +79,7 @@ InvalidApiSetId - The account type 'OpenAI' is either invalid or unavailable in 
 
 ### Solution
 
-Deploy Azure OpenAI Service only in the supported regions. Review the local.env file and update the location as per supported models and [region availability](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability)
+Deploy Azure OpenAI Service only in the supported regions. Review the local.env file and update the location as per supported models and [region availability](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability)
 
 ---
 
@@ -153,7 +119,7 @@ make: *** [Makefile:18: infrastructure] Error 1
 
 ### Solution
 
-You will need to open your Codespace in VSCode on your managed device. Please read more about opening your [CodeSpace using VSCode](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
+You will need to open your Codespace in VS Code on your managed device. Please read more about opening your [CodeSpace using VS Code](/docs/deployment/developing_in_a_codespaces.md#using-github-codespaces-in-visual-studio-code).
 
 ---
 
@@ -182,31 +148,18 @@ To submit a quota increase do the following:
 We have made variable available in the terraform scripts to allow you to override the SKU size and tier for the following:
 
 - Backend App Service Plan: This plan hosts the Information Assistant web site
-- Enrichment App Service Plan: This plan hosts the services that provide Azure OpenAI embeddings support
-- Functions App Service Plan: This plan hosts the functions that process files on upload to extract, chunk, and index the files.
 
 You can add the following parameters to your local.env file to override the default values.
 
 ```bash
-export TF_VAR_functionsAppSkuSize="S2"
-export TF_VAR_functionsAppSkuTier="Standard"
 export TF_VAR_appServiceSkuSize="S1"
 export TF_VAR_appServiceSkuTier="Standard"
-export TF_VAR_enrichmentAppServiceSkuSize="P1v3"
-export TF_VAR_enrichmentAppServiceSkuTier="PremiumV3"
 ```
 
 ## My image search is not working and returning "I'm sorry, but I don't have any information about..."
 
 ### Solution
-Image search is currently only supported with regions that support dense captions. You will need to deploy Information Assistant to one of the regions that supports dense captioning. A full list of regions that support dense captioning can be found [here](https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/concept-describe-images-40?tabs=dense)
-
-## There are errors in the SharePoint Logic App Designer
-
-### Solution
-These are only in the Logic App Preview Designer. Switching to the Generally Available Designer will resolve these errors. They are purely visual errors in the Preview Designer and have no impact on how the Logic App functions.
-
-![Image of Logic App Error](./images/sharepoint-preview-designer-known-issue.png)
+Image search is currently only supported with regions that support dense captions. You will need to deploy Information Assistant to one of the regions that supports dense captioning. A full list of regions that support dense captioning can be found [here](https://learn.microsoft.com/azure/ai-services/computer-vision/concept-describe-images-40?tabs=dense)
 
 ---
 

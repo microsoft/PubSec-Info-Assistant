@@ -88,7 +88,7 @@ export const TagPickerInline = ({allowNewTags, onSelectedTagsChange, preSelected
       noResultsFoundText: allowAddNew ? 'Press Enter to add as a new tag' : 'No matching tag found',
     };
 
-    async function fetchTagsfromCosmos() {
+    async function fetchTagsFromCosmos() {
       try {
         const response = await getAllTags();
         var newTags: ITag[] = [];
@@ -122,7 +122,7 @@ export const TagPickerInline = ({allowNewTags, onSelectedTagsChange, preSelected
     };
 
     useEffect(() => {
-      fetchTagsfromCosmos();
+      fetchTagsFromCosmos();
   }, []);
     
     return (

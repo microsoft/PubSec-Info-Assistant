@@ -7,7 +7,6 @@ This project depends on 3rd Party Open Source Software. Below is a list of known
 From the following locations:
 
 * app/backend/requirements.txt
-* functions/requirements.txt
 
 ### NodeJS
 
@@ -21,9 +20,9 @@ From the following locations:
 
 <https://github.com/pallets/flask/>
 
-### langchain
+### azure-mgmt-cognitiveservices
 
-<https://github.com/hwchase17/langchain>
+<https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/cognitiveservices/azure-mgmt-cognitiveservices>
 
 ### openai
 
@@ -37,47 +36,29 @@ From the following locations:
 
 <https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/storage/azure-storage-blob>
 
-### azure-functions
-
-<https://github.com/Azure/azure-functions-python-library>
-
 ### tiktoken
 
 <https://github.com/openai/tiktoken>
 
-### azure.ai.formrecognizer
+### fastapi
 
-<https://github.com/Azure/azure-sdk-for-python>
+<https://github.com/fastapi/fastapi>
 
-### nltk
+### fastapi-utils
 
-<https://github.com/nltk/nltk>
+<https://github.com/dmontagu/fastapi-utils>
 
-### azure-core
+### uvicorn
 
-<https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/core/azure-core>
+<https://github.com/encode/uvicorn>
 
-### beautifulsoup4
+### microsoft-bing-websearch
 
-<https://code.launchpad.net/beautifulsoup>
+<https://github.com/microsoft/bing-search-sdk-for-python/tree/main>
 
-### lxml
+### pytest
 
-<https://github.com/lxml/lxml>
-
-### mammoth
-
-<https://github.com/mwilliamson/python-mammoth>
-
-### azure-cosmos
-
-<https://github.com/Azure/azure-sdk-for-python>
-
-
-### tenacity
-
-<https://github.com/jd/tenacity>
-
+<https://github.com/pytest-dev/pytest>
 
 ## NPM Modules
 

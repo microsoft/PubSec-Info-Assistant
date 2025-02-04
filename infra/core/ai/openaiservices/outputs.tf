@@ -1,11 +1,11 @@
 output "name" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.openaiAccount[0].name
+  value = azurerm_cognitive_account.openaiAccount.name
 }
 
 output "endpoint" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.openaiAccount[0].endpoint
+  value = azurerm_cognitive_account.openaiAccount.endpoint
 }
 
 output "id" {
-  value = var.useExistingAOAIService ? "" : azurerm_cognitive_account.openaiAccount[0].id
+  value = azurerm_cognitive_account.openaiAccount.id
 }

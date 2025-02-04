@@ -116,9 +116,9 @@ class CompareWorkWithWeb(Approach):
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
-        # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
+        # Step 2: Construct the comparative system message with passed Rag response and Bing Search Response from above approach
         bing_compare_query = user_query + "Work internal documents:\n" + rag_answer + "\n\n" + " Web search results:\n" + content + "\n\n"
-        thought_chain["work_to_web_compairison_query"] = bing_compare_query
+        thought_chain["work_to_web_comparison_query"] = bing_compare_query
         messages = self.get_messages_builder(
             self.COMPARATIVE_SYSTEM_MESSAGE_CHAT_CONVERSATION.format(
                 query_term_language=self.query_term_language,
@@ -145,7 +145,7 @@ class CompareWorkWithWeb(Approach):
                 stream=True)
 
             yield json.dumps({"data_points": {},
-                            "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+                            "thoughts": "Searched for:<br>A Comparative Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
                             "thought_chain": thought_chain,
                             "work_citation_lookup": work_citation_lookup,
                             "web_citation_lookup": self.web_citations}) + "\n"

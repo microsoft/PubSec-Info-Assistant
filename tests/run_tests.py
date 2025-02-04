@@ -146,7 +146,7 @@ def check_index(search_service_endpoint, search_index):
             index_name=search_index,
             credential=azure_credential,
         )
-        console.print("Begining index search")
+        console.print("Beginning index search")
         for extension, query in search_queries.items():
             search_results = search_client.search(query, top=20)
 
@@ -205,7 +205,7 @@ def cleanup_after_test(blob_service_client, search_service_endpoint, search_inde
     console.print("Finished cleaning up after tests.")
 
 def encode_document_id(document_id):
-    """ encode a path/file name to remove unsafe chars for a cosmos db id """
+    """ encode a path/file name to remove unsafe chars ai search document id """
     safe_id = base64.urlsafe_b64encode(document_id.encode()).decode()
     return safe_id
 

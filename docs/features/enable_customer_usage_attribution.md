@@ -4,16 +4,14 @@ Customer usage attribution associates usage from Azure resources in customer sub
 
 ## Enable Customer Usage Attribution
 
-To enable customer usage attribution, you need to update the local.env file with the following values
+To enable customer usage attribution, you need to update these azd variables
 
-1. Navigate to your `local.env` and update:
+1. Set **USE_CUSTOMER_USAGE_ATTRIBUTION** parameter to `true` and provide your tracking GUID for **CUSTOMER_USAGE_ATTRIBUTION_ID**.
 
    ```bash
-   export ENABLE_CUSTOMER_USAGE_ATTRIBUTION=true
-   export CUSTOMER_USAGE_ATTRIBUTION_ID="00000000-0000-0000-0000-000000000000"
+   azd env set USE_CUSTOMER_USAGE_ATTRIBUTION true
+   azd env set CUSTOMER_USAGE_ATTRIBUTION_ID "{CUA GUID}"
    ```
-
-2. Set **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** parameter to `true` and provide your tracking GUID for **CUSTOMER_USAGE_ATTRIBUTION_ID**.
 
 > **Note**:
 >

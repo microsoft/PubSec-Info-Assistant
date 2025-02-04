@@ -6,35 +6,21 @@ resource "azurerm_cognitive_account" "cognitiveService" {
   sku_name                      = var.sku["name"]
   tags                          = var.tags
   custom_subdomain_name         = var.name
-  public_network_access_enabled = var.is_secure_mode ? false : true
-}
-
-module "cog_service_key" {
-  source                        = "../../security/keyvaultSecret"
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  key_vault_name                = var.key_vault_name
-  resourceGroupName             = var.resourceGroupName
-  secret_name                   = "AZURE-AI-KEY"
-  secret_value                  = azurerm_cognitive_account.cognitiveService.primary_access_key
-  alias                         = "aisvckey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
-  contentType                   = "application/vnd.bag-StrongEncPasswordString"
+  public_network_access_enabled = false
+  local_auth_enabled            = false
 }
 
 data "azurerm_subnet" "subnet" {
-  count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name
   virtual_network_name = var.vnet_name
   resource_group_name  = var.resourceGroupName
 }
 
 resource "azurerm_private_endpoint" "accountPrivateEndpoint" {
-  count                         = var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = data.azurerm_subnet.subnet[0].id
+  subnet_id                     = data.azurerm_subnet.subnet.id
   custom_network_interface_name = "infoasstazureainic"
 
 

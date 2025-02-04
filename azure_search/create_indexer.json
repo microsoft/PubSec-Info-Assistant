@@ -1,0 +1,17 @@
+{
+    "name": "indexer",
+    "dataSourceName": "infoasst-azureblob-datasource",
+    "targetIndexName": "vector-index",
+    "skillsetName": "infoasst-skillset",
+    "schedule": {
+        "interval": "PT30M",
+        "startTime": "2025-01-13T18:19:26.259Z"
+    },
+    "parameters": {
+        "configuration": {
+            "executionEnvironment": "private",
+            "allowSkillsetToReadFileData": true
+        }
+    },
+    "fieldMappings": []
+}

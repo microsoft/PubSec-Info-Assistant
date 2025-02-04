@@ -9,7 +9,7 @@ import { FilePicker } from "../../components/filepicker/file-picker";
 import { FileStatus } from "../../components/FileStatus/FileStatus";
 import { TagPickerInline } from "../../components/TagPicker/TagPicker"
 import { FolderPicker } from '../../components/FolderPicker/FolderPicker';
-import { SparkleFilled, DocumentPdfFilled, DocumentDataFilled, GlobePersonFilled, MailFilled, StoreMicrosoftFilled } from "@fluentui/react-icons";
+import { SparkleFilled, DocumentPdfFilled, DocumentDataFilled, GlobePersonFilled, MailFilled, StoreMicrosoftFilled, AlbumFilled } from "@fluentui/react-icons";
 import styles from "./Content.module.css";
 
 export interface IButtonExampleProps {
@@ -66,7 +66,7 @@ const Content = () => {
                                 <span className={styles.EmptyObjectivesListItem}>
                                     <DocumentPdfFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="PDF" />
                                     <span className={styles.EmptyObjectivesListItemText}><b>PDF</b><br />
-                                    For page count maximum check documentation  <a href="https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/concept-layout?view=doc-intel-4.0.0#input-requirements">
+                                    For page count maximum check documentation  <a href="https://learn.microsoft.com/azure/ai-services/document-intelligence/concept-layout?view=doc-intel-4.0.0#input-requirements">
                                         here</a> 
                                     </span>
                                 </span>
@@ -80,6 +80,12 @@ const Content = () => {
                                     <MailFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Email" />
                                     <span className={styles.EmptyObjectivesListItemText}><b>Email</b><br />
                                         eml & msg
+                                    </span>
+                                </span>
+                                <span className={styles.EmptyObjectivesListItem}>
+                                    <AlbumFilled fontSize={"40px"} primaryFill={"rgba(115, 118, 225, 1)"} aria-hidden="true" aria-label="Images" />
+                                    <span className={styles.EmptyObjectivesListItemText}><b>Images</b><br />
+                                        png, jpg, jpeg
                                     </span>
                                 </span>
                             </span>

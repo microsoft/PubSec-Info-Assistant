@@ -136,7 +136,6 @@ export type GetInfoResponse = {
     AZURE_SEARCH_SERVICE: string;
     AZURE_SEARCH_INDEX: string;
     TARGET_LANGUAGE: string;
-    USE_AZURE_OPENAI_EMBEDDINGS: boolean;
     EMBEDDINGS_DEPLOYMENT: string;
     EMBEDDINGS_MODEL_NAME: string;
     EMBEDDINGS_MODEL_VERSION: string;
@@ -160,10 +159,6 @@ export type GetWarningBanner = {
     error?: string;
 };
 
-export type getMaxCSVFileSizeType = {
-    MAX_CSV_FILE_SIZE: string;
-    error?: string;
-};
 
 // These keys need to match case with the defined Enum in the 
 // shared code (functions/shared_code/status_log.py)
@@ -210,10 +205,8 @@ export type GetTagsResponse = {
 }
 
 export type GetFeatureFlagsResponse = {
-    ENABLE_WEB_CHAT: boolean;
-    ENABLE_UNGROUNDED_CHAT: boolean;
-    ENABLE_MATH_ASSISTANT: boolean;
-    ENABLE_TABULAR_DATA_ASSISTANT: boolean;
+    USE_WEB_CHAT: boolean;
+    USE_UNGROUNDED_CHAT: boolean;
     error?: string;
 }
 

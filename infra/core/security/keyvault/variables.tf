@@ -10,6 +10,7 @@ variable "location" {
 }
 
 variable "tags" {
+  description = "Tags for the resources"
   type    = map(string)
   default = {}
 }
@@ -22,12 +23,6 @@ variable "kvAccessObjectId" {
 variable "resourceGroupName" {
   type    = string
   default = ""
-}
-
-variable "is_secure_mode" {
-  description = "Specifies whether to deploy in secure mode"
-  type        = bool
-  default     = false
 }
 
 variable "private_dns_zone_ids" {
@@ -51,5 +46,35 @@ variable "azure_keyvault_domain" {
 }
 
 variable "arm_template_schema_mgmt_api" {
+  type = string
+}
+
+variable "deployment_machine_ip" {
+  description = "The public IP address of the deployment machine"
+  type = string
+}
+
+variable "expiration_date" {
+  description = "The expiration time for the Key Vault secret"
+  type        = string
+}
+
+variable "bing_secret_value" {
+  type = string
+}
+
+variable "useNetworkSecurityPerimeter" {
+  type    = bool
+}
+
+variable "nsp_name" {
+  type = string
+}
+
+variable "nsp_assoc_name" {
+  type = string
+}
+
+variable "nsp_profile_id" {
   type = string
 }

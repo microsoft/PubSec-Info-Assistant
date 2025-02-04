@@ -4,12 +4,10 @@
 from io import StringIO
 from typing import Optional
 from datetime import datetime
-import asyncio
 import logging
 import os
 import json
 import urllib.parse
-import pandas as pd
 import pydantic
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile, Form
@@ -25,20 +23,8 @@ from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, Defau
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient, ContentSettings
-from approaches.mathassistant import(
-    generate_response,
-    process_agent_response,
-    stream_agent_responses
-)
-from approaches.tabulardataassistant import (
-    refreshagent,
-    save_df,
-    process_agent_response as td_agent_response,
-    process_agent_scratch_pad as td_agent_scratch_pad,
-    get_images_in_temp
-)
-from shared_code.status_log import State, StatusClassification, StatusLog
-from azure.cosmos import CosmosClient
+
+
 
 
 # === ENV Setup ===
@@ -60,7 +46,6 @@ ENV = {
     "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "gpt-35-turbo-16k",
     "AZURE_OPENAI_CHATGPT_MODEL_NAME": "",
     "AZURE_OPENAI_CHATGPT_MODEL_VERSION": "",
-    "USE_AZURE_OPENAI_EMBEDDINGS": "false",
     "EMBEDDING_DEPLOYMENT_NAME": "",
     "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "",
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
@@ -72,23 +57,15 @@ ENV = {
     "KB_FIELDS_PAGENUMBER": "pages",
     "KB_FIELDS_SOURCEFILE": "file_name",
     "KB_FIELDS_CHUNKFILE": "chunk_file",
-    "COSMOSDB_URL": None,
-    "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
-    "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "QUERY_TERM_LANGUAGE": "English",
-    "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
-    "ENRICHMENT_APPSERVICE_URL": "enrichment",
     "TARGET_TRANSLATION_LANGUAGE": "en",
     "AZURE_AI_ENDPOINT": None,
     "AZURE_AI_LOCATION": "",
     "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
     "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true",
-    "ENABLE_WEB_CHAT": "false",
-    "ENABLE_UNGROUNDED_CHAT": "false",
-    "ENABLE_MATH_ASSISTANT": "false",
-    "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "MAX_CSV_FILE_SIZE": "7",
+    "USE_BING_SAFE_SEARCH": "true",
+    "USE_WEB_CHAT": "false",
+    "USE_UNGROUNDED_CHAT": "false",
     "LOCAL_DEBUG": "false",
     "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
@@ -125,7 +102,7 @@ if ENV["AZURE_OPENAI_AUTHORITY_HOST"] == "AzureUSGovernment":
 else:
     AUTHORITY = AzureAuthorityHosts.AZURE_PUBLIC_CLOUD
 openai.api_version = "2024-02-01"
-# When debugging in VSCode, use the current user identity to authenticate with Azure OpenAI,
+# When debugging in VS Code, use the current user identity to authenticate with Azure OpenAI,
 # Cognitive Search and Blob Storage (no secrets needed, just use 'az login' locally)
 # Use managed identity when deployed on Azure.
 # If you encounter a blocking error during a DefaultAzureCredntial resolution, you can exclude
@@ -141,14 +118,6 @@ token_provider = get_bearer_token_provider(azure_credential,
                                            f'https://{ENV["AZURE_AI_CREDENTIAL_DOMAIN"]}/.default')
 openai.azure_ad_token_provider = token_provider
 #openai.api_key = ENV["AZURE_OPENAI_SERVICE_KEY"]
-
-# Setup StatusLog to allow access to CosmosDB for logging
-statusLog = StatusLog(
-    ENV["COSMOSDB_URL"],
-    azure_credential,
-    ENV["COSMOSDB_LOG_DATABASE_NAME"],
-    ENV["COSMOSDB_LOG_CONTAINER_NAME"]
-)
 
 # Set up clients for Cognitive Search and Storage
 search_client = SearchClient(
@@ -183,8 +152,7 @@ deployment = openai_mgmt_client.deployments.get(
 
 MODEL_NAME = deployment.properties.model.name
 MODEL_VERSION = deployment.properties.model.version
-
-if str_to_bool.get(ENV["USE_AZURE_OPENAI_EMBEDDINGS"]):
+if (ENV["EMBEDDING_DEPLOYMENT_NAME"] != ""):
     embedding_deployment = openai_mgmt_client.deployments.get(
         resource_group_name=ENV["AZURE_OPENAI_RESOURCE_GROUP"],
         account_name=ENV["AZURE_OPENAI_SERVICE"],
@@ -210,8 +178,8 @@ chat_approaches = {
                                     ENV["QUERY_TERM_LANGUAGE"],
                                     MODEL_NAME,
                                     MODEL_VERSION,
-                                    ENV["TARGET_EMBEDDINGS_MODEL"],
-                                    ENV["ENRICHMENT_APPSERVICE_URL"],
+                                    ENV["EMBEDDING_DEPLOYMENT_NAME"],
+                                    "",
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["AZURE_AI_ENDPOINT"],
                                     ENV["AZURE_AI_LOCATION"],
@@ -224,7 +192,7 @@ chat_approaches = {
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
                                     ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
+                                    str_to_bool.get(ENV["USE_BING_SAFE_SEARCH"]),
                                     ENV["AZURE_OPENAI_ENDPOINT"],
                                     token_provider
                                 ),
@@ -234,7 +202,7 @@ chat_approaches = {
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["BING_SEARCH_ENDPOINT"],
                                     ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
+                                    str_to_bool.get(ENV["USE_BING_SAFE_SEARCH"]),
                                     ENV["AZURE_OPENAI_ENDPOINT"],
                                     token_provider
                                 ),
@@ -251,8 +219,8 @@ chat_approaches = {
                                     ENV["QUERY_TERM_LANGUAGE"],
                                     MODEL_NAME,
                                     MODEL_VERSION,
-                                    ENV["TARGET_EMBEDDINGS_MODEL"],
-                                    ENV["ENRICHMENT_APPSERVICE_URL"],
+                                    "",
+                                    "",
                                     ENV["TARGET_TRANSLATION_LANGUAGE"],
                                     ENV["AZURE_AI_ENDPOINT"],
                                     ENV["AZURE_AI_LOCATION"],
@@ -354,36 +322,12 @@ async def get_all_upload_status(request: Request):
     - results: The status of all file uploads in the specified timeframe.
     """
     json_body = await request.json()
-    timeframe = json_body.get("timeframe")
-    state = json_body.get("state")
-    folder = json_body.get("folder")
-    tag = json_body.get("tag")
     try:
-        results = statusLog.read_files_status_by_timeframe(timeframe,
-            State[state],
-            folder,
-            tag,
-            os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
+        results = ""
 
         # retrieve tags for each file
          # Initialize an empty list to hold the tags
         items = []
-        cosmos_client = CosmosClient(url=statusLog._url,
-                                     credential=azure_credential,
-                                     consistency_level='Session')
-        database = cosmos_client.get_database_client(statusLog._database_name)
-        container = database.get_container_client(statusLog._container_name)
-        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"
-        items = list(container.query_items(
-            query=query_string,
-            enable_cross_partition_query=True
-        ))
-
-        # Extract and split tags
-        unique_tags = set()
-        for item in items:
-            tags = item.split(',')
-            unique_tags.update(tags)
 
     except Exception as ex:
         log.exception("Exception in /getalluploadstatus")
@@ -436,13 +380,7 @@ async def delete_Items(request: Request):
     path = full_path.split("/", 1)[1]
     try:
         blob_container = blob_client.get_container_client(os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
-        blob_container.delete_blob(path)
-        statusLog.upsert_document(document_path=full_path,
-            status='Delete intiated',
-            status_classification=StatusClassification.INFO,
-            state=State.DELETING,
-            fresh_start=False)
-        statusLog.save_document(document_path=full_path)   
+        blob_container.delete_blob(path) 
 
     except Exception as ex:
         log.exception("Exception in /delete_Items")
@@ -473,19 +411,7 @@ async def resubmit_Items(request: Request):
         submitted_blob_client = blob_container.get_blob_client(blob=path)
         blob_properties = submitted_blob_client.get_blob_properties()
         metadata = blob_properties.metadata
-        blob_container.upload_blob(name=path, data=blob_data, overwrite=True, metadata=metadata)   
-       
-        
-        
-
-        # add the container to the path to avoid adding another doc in the status db
-        full_path = os.environ["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
-        statusLog.upsert_document(document_path=full_path,
-                    status='Resubmitted to the processing pipeline',
-                    status_classification=StatusClassification.INFO,
-                    state=State.QUEUED,
-                    fresh_start=False)
-        statusLog.save_document(document_path=full_path)   
+        blob_container.upload_blob(name=path, data=blob_data, overwrite=True, metadata=metadata)
 
     except Exception as ex:
         log.exception("Exception in /resubmitItems")
@@ -507,14 +433,7 @@ async def get_tags(request: Request):
     try:
         # Initialize an empty list to hold the tags
         items = []              
-        cosmos_client = CosmosClient(url=statusLog._url, credential=azure_credential, consistency_level='Session')     
-        database = cosmos_client.get_database_client(statusLog._database_name)               
-        container = database.get_container_client(statusLog._container_name) 
-        query_string = "SELECT DISTINCT VALUE t FROM c JOIN t IN c.tags"  
-        items = list(container.query_items(
-            query=query_string,
-            enable_cross_partition_query=True
-        ))           
+        items = list("TBD")           
 
         # Extract and split tags
         unique_tags = set()
@@ -530,7 +449,7 @@ async def get_tags(request: Request):
 @app.post("/logstatus")
 async def logstatus(request: Request):
     """
-    Log the status of a file upload to CosmosDB.
+    Log the status of a file upload.
 
     Parameters:
     - request: Request object containing the HTTP request data.
@@ -541,17 +460,6 @@ async def logstatus(request: Request):
     """
     try:
         json_body = await request.json()
-        path = json_body.get("path")
-        status = json_body.get("status")
-        status_classification = StatusClassification[json_body.get("status_classification").upper()]
-        state = State[json_body.get("state").upper()]
-
-        statusLog.upsert_document(document_path=path,
-                                  status=status,
-                                  status_classification=status_classification,
-                                  state=state,
-                                  fresh_start=True)
-        statusLog.save_document(document_path=path)
 
     except Exception as ex:
         log.exception("Exception in /logstatus")
@@ -572,7 +480,6 @@ async def get_info_data():
             - "AZURE_SEARCH_SERVICE": The Azure search service information.
             - "AZURE_SEARCH_INDEX": The Azure search index information.
             - "TARGET_LANGUAGE": The target language for query terms.
-            - "USE_AZURE_OPENAI_EMBEDDINGS": Flag indicating whether to use Azure OpenAI embeddings.
             - "EMBEDDINGS_DEPLOYMENT": The deployment information for embeddings.
             - "EMBEDDINGS_MODEL_NAME": The name of the embeddings model.
             - "EMBEDDINGS_MODEL_VERSION": The version of the embeddings model.
@@ -585,7 +492,6 @@ async def get_info_data():
         "AZURE_SEARCH_SERVICE": ENV["AZURE_SEARCH_SERVICE"],
         "AZURE_SEARCH_INDEX": ENV["AZURE_SEARCH_INDEX"],
         "TARGET_LANGUAGE": ENV["QUERY_TERM_LANGUAGE"],
-        "USE_AZURE_OPENAI_EMBEDDINGS": ENV["USE_AZURE_OPENAI_EMBEDDINGS"],
         "EMBEDDINGS_DEPLOYMENT": ENV["EMBEDDING_DEPLOYMENT_NAME"],
         "EMBEDDINGS_MODEL_NAME": f"{EMBEDDING_MODEL_NAME}",
         "EMBEDDINGS_MODEL_VERSION": f"{EMBEDDING_MODEL_VERSION}",
@@ -598,14 +504,6 @@ async def get_warning_banner():
     """Get the warning banner text"""
     response ={
             "WARNING_BANNER_TEXT": ENV["CHAT_WARNING_BANNER_TEXT"]
-        }
-    return response
-
-@app.get("/getMaxCSVFileSize")
-async def get_max_csv_file_size():
-    """Get the max csv size"""
-    response ={
-            "MAX_CSV_FILE_SIZE": ENV["MAX_CSV_FILE_SIZE"]
         }
     return response
 
@@ -659,174 +557,6 @@ async def get_all_tags():
         raise HTTPException(status_code=500, detail=str(ex)) from ex
     return results
 
-@app.get("/getTempImages")
-async def get_temp_images():
-    """Get the images in the temp directory
-
-    Returns:
-        list: A list of image data in the temp directory.
-    """
-    images = get_images_in_temp()
-    return {"images": images}
-
-@app.get("/getHint")
-async def getHint(question: Optional[str] = None):
-    """
-    Get the hint for a question
-
-    Returns:
-        str: A string containing the hint
-    """
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-
-    try:
-        results = generate_response(question).split("Clues")[1][2:]
-    except Exception as ex:
-        log.exception("Exception in /getHint")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return results
-
-@app.post("/posttd")
-async def posttd(csv: UploadFile = File(...)):
-    try:
-        global DF_FINAL
-            # Read the file into a pandas DataFrame
-        content = await csv.read()
-        df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
-
-        DF_FINAL = df
-        # Process the DataFrame...
-        save_df(df)
-    except Exception as ex:
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    
-    
-    #return {"filename": csv.filename}
-@app.get("/process_td_agent_response")
-async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
-    save_df(DF_FINAL)
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-    for i in range(retries):
-        try:
-            results = td_agent_response(question,DF_FINAL)
-            return results
-        except AttributeError as ex:
-            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                if str(ex) == "'NoneType' object has no attribute 'stream'":
-                    return ["error: Csv has not been loaded"]
-                else:
-                    raise HTTPException(status_code=500, detail=str(ex)) from ex
-        except Exception as ex:
-            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-@app.get("/getTdAnalysis")
-async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
-    global DF_FINAL
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-        
-    for i in range(retries):
-        try:
-            save_df(DF_FINAL)
-            results = td_agent_scratch_pad(question, DF_FINAL)
-            return results
-        except AttributeError as ex:
-            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                if str(ex) == "'NoneType' object has no attribute 'stream'":
-                    return ["error: Csv has not been loaded"]
-                else:
-                    raise HTTPException(status_code=500, detail=str(ex)) from ex
-        except Exception as ex:
-            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-@app.post("/refresh")
-async def refresh():
-    """
-    Refresh the agent's state.
-
-    This endpoint calls the `refresh` function to reset the agent's state.
-
-    Raises:
-        HTTPException: If an error occurs while refreshing the agent's state.
-
-    Returns:
-        dict: A dictionary containing the status of the agent's state.
-    """
-    try:
-        refreshagent()
-    except Exception as ex:
-        log.exception("Exception in /refresh")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return {"status": "success"}
-
-
-@app.get("/stream")
-async def stream_response(question: str):
-    try:
-        stream = stream_agent_responses(question)
-        return StreamingResponse(stream, media_type="text/event-stream")
-    except Exception as ex:
-        log.exception("Exception in /stream")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-@app.get("/tdstream")
-async def td_stream_response(question: str):
-    save_df(DF_FINAL)
-    
-
-    try:
-        stream = td_agent_scratch_pad(question, DF_FINAL)
-        return StreamingResponse(stream, media_type="text/event-stream")
-    except Exception as ex:
-        log.exception("Exception in /stream")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-
-
-
-@app.get("/process_agent_response")
-async def stream_agent_response(question: str):
-    """
-    Stream the response of the agent for a given question.
-
-    This endpoint uses Server-Sent Events (SSE) to stream the response of the agent. 
-    It calls the `process_agent_response` function which yields chunks of data as they become available.
-
-    Args:
-        question (str): The question to be processed by the agent.
-
-    Yields:
-        dict: A dictionary containing a chunk of the agent's response.
-
-    Raises:
-        HTTPException: If an error occurs while processing the question.
-    """
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-
-    try:
-        results = process_agent_response(question)
-    except Exception as e:
-        print(f"Error processing agent response: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
-    return results
-
 
 @app.get("/getFeatureFlags")
 async def get_feature_flags():
@@ -835,16 +565,12 @@ async def get_feature_flags():
 
     Returns:
         dict: A dictionary containing various feature flags for the app.
-            - "ENABLE_WEB_CHAT": Flag indicating whether web chat is enabled.
-            - "ENABLE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
-            - "ENABLE_MATH_ASSISTANT": Flag indicating whether the math assistant is enabled.
-            - "ENABLE_TABULAR_DATA_ASSISTANT": Flag indicating whether the tabular data assistant is enabled.
-    """
+            - "USE_WEB_CHAT": Flag indicating whether web chat is enabled.
+            - "USE_UNGROUNDED_CHAT": Flag indicating whether ungrounded chat is enabled.
+            """
     response = {
-        "ENABLE_WEB_CHAT": str_to_bool.get(ENV["ENABLE_WEB_CHAT"]),
-        "ENABLE_UNGROUNDED_CHAT": str_to_bool.get(ENV["ENABLE_UNGROUNDED_CHAT"]),
-        "ENABLE_MATH_ASSISTANT": str_to_bool.get(ENV["ENABLE_MATH_ASSISTANT"]),
-        "ENABLE_TABULAR_DATA_ASSISTANT": str_to_bool.get(ENV["ENABLE_TABULAR_DATA_ASSISTANT"]),
+        "USE_WEB_CHAT": str_to_bool.get(ENV["USE_WEB_CHAT"]),
+        "USE_UNGROUNDED_CHAT": str_to_bool.get(ENV["USE_UNGROUNDED_CHAT"]),
     }
     return response
 

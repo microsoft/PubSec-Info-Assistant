@@ -1,23 +1,23 @@
-output "cognitiveServicerAccountName" {
+output "cognitiveServicesAccountName" {
   value = azurerm_cognitive_account.cognitiveService.name
 }
 
-output "cognitiveServiceID" {
+output "cognitiveServicesID" {
   value = azurerm_cognitive_account.cognitiveService.id
 }
 
-output "cognitiveServiceEndpoint" {
+output "cognitiveServicesEndpoint" {
   value = azurerm_cognitive_account.cognitiveService.endpoint
 }
 
 output "privateEndpointName" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.accountPrivateEndpoint[0].name : null
+  value = azurerm_private_endpoint.accountPrivateEndpoint.name
 }
 
 output "privateEndpointId" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.accountPrivateEndpoint[0].id : null
+  value = azurerm_private_endpoint.accountPrivateEndpoint.id
 }
 
 output "privateEndpointIp" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.accountPrivateEndpoint[0].private_service_connection[0].private_ip_address : null
+  value = azurerm_private_endpoint.accountPrivateEndpoint.private_service_connection[0].private_ip_address
 }

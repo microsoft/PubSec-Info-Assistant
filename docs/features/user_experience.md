@@ -18,7 +18,7 @@ Work Only mode provides the natural language conversation with your data that yo
 
 ## Work + Web
 
-The Work + Web mode experience starts similar to Work Only mode. It provides new options in the response enabling the user to __Searh Web__ to see if there is newer information available or __Compare with Web__ to compare the response from their data with information available on the web. In this mode the user can choose to ask questions and have the grounding data be either sourced from private data they upload or web search results from the Bing Search service. The default grounding mode can be changed in the Adjust settings located on the top right just below the Assistants preview links.
+The Work + Web mode experience starts similar to Work Only mode. It provides new options in the response enabling the user to __Search Web__ to see if there is newer information available or __Compare with Web__ to compare the response from their data with information available on the web. In this mode the user can choose to ask questions and have the grounding data be either sourced from private data they upload or web search results from the Bing Search service. The default grounding mode can be changed in the Adjust settings located on the top right just below the Assistants preview links.
 
 ![Chat Link](/docs/images/work-plus-web-ui.png)
 
@@ -71,45 +71,6 @@ Generative mode enables user interaction with the LLM without grounding the resp
 
 ![Chat Link](/docs/images/generative-ungrounded-ui.png)
 
-On the top right are two new preview features called Math Assistant and Tabular Data Assistant. The Math Assistant and Tabular Data assistant are being released in preview mode as we continue to evaluate and mitigate the potential risks associated with autonomous reasoning Agents, such as misuse of external tools, lack of transparency, biased outputs, privacy concerns, and remote code execution vulnerabilities. With future release we plan work to enhance the safety and robustness of these autonomous reasoning capabilities.
-
-## Math Assistant
-
-The Math Assistant combines natural language understanding with robust mathematical reasoning, enabling users to express mathematical queries in plain language and receive step-by-step solutions and insights.
-
-![Chat Link](/docs/images/math-assistant-ui.png)
-
-Users can select an example query or enter their own math question. There are three options below the question prompt where the user can ask for clues, ask the assistant to show them how to solve the math problem, or simply provide an answer.
-
-### Give me clues
-
-Give me clues will assist the user without answering the math question or providing step by step instructions to solve the problem.
-
-![Chat Link](/docs/images/math-assistant-give-me-clues.png)
-
-### Show me how to Solve it
-
-Show me how to Solve it presents the user with ordered steps they can perform to answer the math question.
-
-![Chat Link](/docs/images/math-assistant-show-me-how-to-solve.png)
-
-### Show Me the Answer
-
-Show Me the Answer works like a calculator and simply provides the answer to the math question.
-
-![Chat Link](/docs/images/math-assistant-show-me-the-answer.png)
-
-## Tabular Data Assistant
-
-The Tabular Data Assistants allows users to ask natural language questions about tabular data in CSV files and extract insights from structured datasets with the ability to filter, aggregate, and perform computations on CSV data.
-
-First, the user must upload a CSV file. They can drag and drop the file onto the Tabular Data Assistant UI or browse their file system(s) to select files then click the Upload File button.
-
-![Chat Link](/docs/images/tab-data-assist-upload-files-ui.png)
-
-Once a file has been uploaded the user can select an example query or enter thier own question about content in the CSV file.
-
-![Chat Link](/docs/images/tab-data-assist-how-many.png)
 
 ## Manage Content
 

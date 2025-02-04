@@ -19,16 +19,3 @@ resource "azurerm_resource_group_template_deployment" "bing_search" {
   name            = "bingsearch-${filemd5(local.arm_file_path)}"
   deployment_mode = "Incremental"
 }
-
-module "bing_search_key" {
-  source                        = "../../security/keyvaultSecret"
-  resourceGroupName             = var.resourceGroupName
-  key_vault_name                = var.key_vault_name
-  secret_name                   = "BINGSEARCH-KEY"
-  secret_value                  = jsondecode(azurerm_resource_group_template_deployment.bing_search.output_content).key1.value
-  arm_template_schema_mgmt_api  = var.arm_template_schema_mgmt_api
-  alias                         = "bingkey"
-  tags                          = var.tags
-  kv_secret_expiration          = var.kv_secret_expiration
-  contentType                   = "application/vnd.bag-StrongEncPasswordString"
-}

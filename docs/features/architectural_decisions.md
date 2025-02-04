@@ -37,7 +37,7 @@ We initially conducted experiments using cosine similarity search and Azure AI S
 
 Through a process of trial and error, our custom hybrid attempts were refined, leading us to adopt Azure AI Search's Hybrid Search. This solution seamlessly integrates the strengths of both keyword and similarity searches, providing a comprehensive and flexible approach. Notably, Azure AI Search allows us to employ different search techniques, such as keyword, vector, hybrid, and hybrid with semantic reranking, all within the same index. This enhances the precision and adaptability of our search functionality.
 
-In depth explanation about our Azure AI Hybrid Search integration can be found here: https://github.com/microsoft/PubSec-Info-Assistant/blob/main/docs/features/cognitive_search.md
+Please see the in depth explanation about our [Azure AI Hybrid Search integration](/docs/features/cognitive_search.md).
 
 ## Prompt Engineering
 

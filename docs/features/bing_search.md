@@ -2,7 +2,7 @@
 
 ## Overview
 
-This provides users with more comprehensive information and the ability to compare responses from Info Assistant with external Bing search results.
+This provides users with more comprehensive information and the ability to compare responses from Information Assistant with external Bing search results.
 
 ### New UI Buttons
 

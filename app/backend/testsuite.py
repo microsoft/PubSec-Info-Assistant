@@ -238,29 +238,6 @@ def test_get_tags():
     response = client.post("/gettags")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
-    
-
-def test_get_hint():
-    
-    response = client.get("/getHint", params={"question": "What is 2+2?"})
-    assert response.status_code == 200
-    assert "add" in response.json().lower() or "addition" in response.json().lower()
-
-
-def test_post_td():
-    with open("test_data/parts_inventory.csv", "rb") as file:
-        response = client.post("/posttd", files={"csv": file})
-        assert response.status_code == 200
-
-def test_process_td_agent_response():
-    response = client.get("/process_td_agent_response", params={"question": "How many rows are there in this file?"})
-    assert response.status_code == 200
-    assert "200" in response.json()
-
-def test_process_agent_response():
-    response = client.get("/process_agent_response", params={"question": "What is 2+2?"})
-    assert response.status_code == 200
-    assert "4" in response.json()
 
 def test_get_info_data():
     response = client.get("/getInfoData")
@@ -273,7 +250,6 @@ def test_get_info_data():
         "AZURE_SEARCH_SERVICE": "search_service_value",
         "AZURE_SEARCH_INDEX": "search_index_value",
         "TARGET_LANGUAGE": "en",
-        "USE_AZURE_OPENAI_EMBEDDINGS": "true",
         "EMBEDDINGS_DEPLOYMENT": "embedding_deployment_value",
         "EMBEDDINGS_MODEL_NAME": "embedding_model_name_value",
         "EMBEDDINGS_MODEL_VERSION": "embedding_model_version_value",
@@ -285,11 +261,6 @@ def test_get_warning_banner():
     response = client.get("/getWarningBanner")
     assert response.status_code == 200
     assert response.json() == {"WARNING_BANNER_TEXT": os.getenv("CHAT_WARNING_BANNER_TEXT")}
-
-def test_get_max_csv_file_size():
-    response = client.get("/getMaxCSVFileSize")
-    assert response.status_code == 200
-    assert response.json() == {"MAX_CSV_FILE_SIZE": os.getenv("MAX_CSV_FILE_SIZE")}
 
 def test_get_application_title():
     response = client.get("/getApplicationTitle")
@@ -306,11 +277,9 @@ def test_get_feature_flags():
     assert response.status_code == 200
     
     expected_response = {
-        "ENABLE_WEB_CHAT": os.getenv("ENABLE_WEB_CHAT") == "true",
-        "ENABLE_UNGROUNDED_CHAT": os.getenv("ENABLE_UNGROUNDED_CHAT") == "true",
-        "ENABLE_MATH_ASSISTANT": os.getenv("ENABLE_MATH_ASSISTANT") == "true",
-        "ENABLE_TABULAR_DATA_ASSISTANT": os.getenv("ENABLE_TABULAR_DATA_ASSISTANT") == "true",
-    }
+        "USE_WEB_CHAT": os.getenv("USE_WEB_CHAT") == "true",
+        "USE_UNGROUNDED_CHAT": os.getenv("USE_UNGROUNDED_CHAT") == "true"
+        }
 
     assert response.json() == expected_response
 

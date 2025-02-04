@@ -39,14 +39,14 @@ def num_tokens_from_messages(message: dict[str, str], model: str) -> int:
         num_tokens_from_messages(message, model)
         output: 11
     """
-    encoding = tiktoken.encoding_for_model(get_oai_chatmodel_tiktok(model))
+    encoding = tiktoken.encoding_for_model(get_oai_chatmodel_tiktoken(model))
     num_tokens = 2  # For "role" and "content" keys
     for key, value in message.items():
         num_tokens += len(encoding.encode(value))
     return num_tokens
 
 
-def get_oai_chatmodel_tiktok(aoaimodel: str) -> str:
+def get_oai_chatmodel_tiktoken(aoaimodel: str) -> str:
     message = "Expected Azure OpenAI ChatGPT model name"
     if aoaimodel == "" or aoaimodel is None:
         raise ValueError(message)

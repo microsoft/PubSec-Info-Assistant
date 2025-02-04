@@ -36,11 +36,6 @@ variable "componentResource" {
   default     = ""
 }
 
-variable "is_secure_mode" {
-  type    = bool
-  default = false
-}
-
 variable "vnet_id" {
   type = string
 }

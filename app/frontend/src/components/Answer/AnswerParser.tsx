@@ -70,7 +70,7 @@ export function parseAnswerToHtml(answer: string, approach: Approaches, work_cit
                         let citationIndex: number;
                         let citationShortName: string
                         // splitting the full file path from citation_lookup into an array and then slicing it to get the folders, file name, and extension 
-                        // the first 4 elements of the full file path are the "https:", "", "blob storaage url", and "container name" which are not needed in the display
+                        // the first 4 elements of the full file path are the "https:", "", "blob storage url", and "container name" which are not needed in the display
                         citationShortName = (citation_lookup)[part].citation.split("/").slice(4).join("/");
         
                         // Check if the citationShortName is already in the citations array

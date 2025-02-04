@@ -1,6 +1,6 @@
-# Considerations For Adopting Into Production
+# Considerations for adopting into production
 
-This documentation highlights key considerations for transitioning from an Information Assistant (IA) agent template to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT Model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
+This documentation highlights key considerations for transitioning from an Information Assistant (IA) agent template to a production-ready deployment. Emphasizing scalability, high availability, security, and proactive management, the recommendations cover components such as App Server scaling, Load Balancing strategies, and global-scale content delivery. Additional guidance addresses GPT model throttling, security enhancements, proactive monitoring, and redundancy. It stresses the importance of safeguarding against cyber threats, seamless integration with existing ecosystems, and proactive environment management through monitoring and alerts.
 
 ## Scalability and High Availability
 
@@ -10,11 +10,11 @@ These recommendations offer options for load balancing and high availability, ca
 
 **Consideration:** As the load on the App Server increases, scaling becomes crucial to handle varying levels of traffic efficiently.
 
-**Recommendation:** Learn more about Azure Monitor based app service scaling [here](https://learn.microsoft.com/en-us/azure/app-service/manage-automatic-scaling?tabs=azure-portal). Alternatively, you can modify the existing Auto scaling rules. See this documentation on the explanation of the [existing auto scaling rules](/docs/deployment/autoscale_sku.md). Configure autoscaling rules to automatically adjust the number of instances in response to changes in load. You can also adjust the sku to scale vertically and adjust the number of workers in the app server. Alternatively, you could  consider deploying the App to a container orchestration platform like Azure Kubernetes Service (AKS) for management and scaling.
+**Recommendation:** Learn more about Azure Monitor based app service scaling [here](https://learn.microsoft.com/azure/app-service/manage-automatic-scaling?tabs=azure-portal). Alternatively, you can modify the existing Auto scaling rules. See this documentation on the explanation of the [existing auto scaling rules](/docs/deployment/autoscale_sku.md). Configure autoscaling rules to automatically adjust the number of instances in response to changes in load. You can also adjust the sku to scale vertically and adjust the number of workers in the app server. Alternatively, you could  consider deploying the App to a container orchestration platform like Azure Kubernetes Service (AKS) for management and scaling.
 
 ### App Gateway
 
-**Consideration:** Ensure App Gateway handles increased traffic and maintains high availability. Learn more about App Gateway [here](https://learn.microsoft.com/en-us/azure/application-gateway/overview).
+**Consideration:** Ensure App Gateway handles increased traffic and maintains high availability. Learn more about App Gateway [here](https://learn.microsoft.com/azure/application-gateway/overview).
 
 **Recommendation:**
     Explore horizontal scaling with multiple instances.
@@ -27,7 +27,7 @@ These recommendations offer options for load balancing and high availability, ca
 **Recommendation:**
 Utilize Azure Load Balancer for even traffic distribution.
 Adjust load balancing rules and implement health probes.
-Learn more about load balancing options in Azure [here](https://learn.microsoft.com/en-us/azure/architecture/guide/technology-choices/load-balancing-overview).
+Learn more about load balancing options in Azure [here](https://learn.microsoft.com/azure/architecture/guide/technology-choices/load-balancing-overview).
 
 ### Front Door - Global Scale and Content Delivery
 
@@ -36,7 +36,7 @@ Learn more about load balancing options in Azure [here](https://learn.microsoft.
 **Recommendation:**
 Implement Azure Front Door for global load balancing and improved content delivery.
 Configure regional routing and caching for optimized user experience.
-Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontdoor/front-door-overview).
+Learn more about Frontdoor [here](https://learn.microsoft.com/azure/frontdoor/front-door-overview).
 
 ## Security
 
@@ -44,20 +44,20 @@ Learn more about Frontdoor [here](https://learn.microsoft.com/en-us/azure/frontd
 
 **Consideration:** Enhancing the security posture of your deployment is crucial, especially when dealing with sensitive data or services.
 
-**Recommendation:** Private Endpoints are now offered as part of our secure mode. Learn more about it [here](/docs/deployment/secure_deployment.md)
+**Recommendation:** Private Endpoints are now offered as part of the agent template. Learn more about it [here](/docs/architecture.md)
 
-### Secure Mode
+### Infrastructure security
 
-**Consideration:** Safeguarding your IA application from cyber threats is crucial for protecting sensitive data and maintaining user trust.
+**Consideration:** Safeguarding your agent from cyber threats is crucial for protecting sensitive data and maintaining user trust.
 
-**Recommendation:** Many security policies have been followed in our secure mode. You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
+**Recommendation:** IA agent template has been pre-configured for scenarios where infrastructure security and privacy are essential. The template disables public network access, deploys virtual network protection and private endpoints and enforces data encryption at rest and in transit. You can read more about this and its implementation [here](/docs/architecture.md)
 
 ### Proactive Monitoring
 
 **Consideration:** Security monitoring alerts you to potential threats and helps you respond effectively to potential incidents.
 
 **Recommendation:** Consider deploying Microsoft Defender for Cloud to secure your workloads, understand your security posture and improve your overall security. Defender for Cloud combines the capabilities of a cloud security posture management (CSPM) solution and a cloud workload protection platform (CWPP). Defender for Cloud also uses role-based access control (RBAC) allowing you to assign roles to users, groups, and services so users only see information related to resources they have access to.  
-Learn more [here](https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-cloud-introduction).
+Learn more [here](https://learn.microsoft.com/azure/defender-for-cloud/defender-for-cloud-introduction).
 
 ## AOAI Instances - Redundancy and Reliability
 
@@ -69,22 +69,20 @@ Learn more [here](https://learn.microsoft.com/en-us/azure/defender-for-cloud/def
 
 **Consideration:** Throttling is essential to control the rate at which requests are sent to the GPT model, preventing overload and maintaining performance.
 
-**Recommendation**: Microsoft offers Provisioned Throughput options, allowing you to specify the maximum request rate for your GPT model. Define appropriate throughput limits based on the model's capacity and resource availability. Adjust throttling settings as needed to ensure optimal performance without risking service degradation. Learn more [here](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/provisioned-throughput).
+**Recommendation**: Microsoft offers Provisioned Throughput options, allowing you to specify the maximum request rate for your GPT model. Define appropriate throughput limits based on the model's capacity and resource availability. Adjust throttling settings as needed to ensure optimal performance without risking service degradation. Learn more [here](https://learn.microsoft.com/azure/ai-services/openai/concepts/provisioned-throughput).
 
 ## Monitoring And Alerting
 
 **Consideration:** Proactively monitoring the IA environment is crucial for identifying performance issues, bottlenecks, and potential security threats.
 
 **Recommendation:** Leverage Azure Monitor to gain insights into the performance and health of your entire IA ecosystem. Set up custom alerts based on key performance indicators and metrics. Utilize Azure Log Analytics for in-depth analysis and troubleshooting. Integrate Azure Security Center to monitor and respond to security threats in real-time.
-Learn more [here](https://azure.microsoft.com/en-us/products/monitor/?ef_id=_k_2bb24bd93ec91aeba1fe2e4c90190298_k_&OCID=AIDcmm5edswduu_SEM__k_2bb24bd93ec91aeba1fe2e4c90190298_k_&msclkid=2bb24bd93ec91aeba1fe2e4c90190298).
+Learn more [here](https://azure.microsoft.com/products/monitor/?ef_id=_k_2bb24bd93ec91aeba1fe2e4c90190298_k_&OCID=AIDcmm5edswduu_SEM__k_2bb24bd93ec91aeba1fe2e4c90190298_k_&msclkid=2bb24bd93ec91aeba1fe2e4c90190298).
 
-Diagnostic settings have been enabled in IA as part of our secure mode. You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
+Diagnostic settings have been enabled in IA as part of our template. You can read more about this mode and its implementation [here](/docs/deployment/secure_deployment.md)
 
 ## Document Ingestion Limitations
 
-**Consideration:** This agent template uses Azure Document Intelligence for PDF's and Unstructured.io for document processing. These tools have their own limitations when it comes to document sizes they can handle. The page limit and document size limits for PDFs on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/en-us/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
-
-More info on unstructured.io for other supported document types can be found [here](https://unstructured-io.github.io/unstructured/introduction.html).
+**Consideration:** This agent template uses Azure AI Document Intelligence for document processing. The page limit and document size limits on Document Intelligence can vary by subscription tier. Learn more about Document Intelligence [here](https://learn.microsoft.com/legal/cognitive-services/document-intelligence/characteristics-and-limitations).
 
 **Recommendation:** If you see issues with the chunking or processing of very large documents, we recommend splitting those into a sensible format of multiple documents for ingestion.
 

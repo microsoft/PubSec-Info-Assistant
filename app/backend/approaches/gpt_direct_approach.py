@@ -41,7 +41,7 @@ class GPTDirectApproach(Approach):
         User persona is {userPersona}. You are having a conversation with a user and you need to provide a response.    
         
         {follow_up_questions_prompt}
-        {injected_prompt}
+        
         
         """
     follow_up_questions_prompt_content = """
@@ -106,7 +106,6 @@ class GPTDirectApproach(Approach):
         )
 
         system_message = self.system_message_chat_conversation.format(
-            injected_prompt="",
             follow_up_questions_prompt=follow_up_questions_prompt,
             response_length_prompt=self.get_response_length_prompt_text(
                 response_length

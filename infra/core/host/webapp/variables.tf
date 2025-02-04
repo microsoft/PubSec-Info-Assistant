@@ -54,11 +54,8 @@ variable "applicationInsightsConnectionString" {
   default = ""
 }
 
-variable "keyVaultUri" { 
-  type = string
-}
 
-variable "keyVaultName" {
+variable "keyVaultUri" { 
   type = string
 }
 
@@ -122,11 +119,6 @@ variable "runtimeVersion" {
   default = "3.12"
 }
 
-variable "is_secure_mode" {
-  description = "Specifies whether to deploy in secure mode"
-  type        = bool
-}
-
 variable "vnet_name" {
   type = string
 }
@@ -151,26 +143,15 @@ variable "randomString" {
   type = string
 }
 
-variable "container_registry" {
-  description = "The login server of the container registry"
-  type        = string
-}
-
-variable "container_registry_admin_username" {
-  description = "The admin username of the container registry"
-  type        = string
-}
-
-variable "container_registry_id" {
-  description = "The id of the container registry"
-  type        = string
-}
-
-variable "container_registry_admin_password" {
-  description = "The admin password of the container registry"
-  type        = string
-}
-
 variable "azure_environment" {
+  type        = string
+}
+
+variable "azure_sts_issuer_domain" {
+  type        = string  
+}
+
+variable "scm_public_ip" {
+  description = "The public IP address of the current machine"
   type        = string
 }

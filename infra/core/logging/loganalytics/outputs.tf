@@ -23,13 +23,13 @@ output "applicationInsightsConnectionString" {
 }
 
 output "privateEndpointId" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.ampls[0].id : null
+  value = azurerm_private_endpoint.ampls.id
 }
 
 output "privateEndpointName" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.ampls[0].name : null
+  value = azurerm_private_endpoint.ampls.name
 }
 
 output "privateEndpointIpAddress" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.ampls[0].private_service_connection[0].private_ip_address : null
+  value = azurerm_private_endpoint.ampls.private_service_connection[0].private_ip_address
 }

@@ -36,20 +36,6 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "key_vault_name" { 
-  type = string
-}
-
-variable "useExistingAOAIService" {
-  type    = bool
-  default = false
-}
-
-variable "is_secure_mode" {
-  type = bool
-  default = false
-}
-
 variable "private_dns_zone_ids" {
   type = set(string)
 }
@@ -83,5 +69,17 @@ variable "arm_template_schema_mgmt_api" {
 }
 
 variable "logAnalyticsWorkspaceResourceId" {
+  type = string
+}
+
+variable "existingAzureOpenAIServiceName" {
+  type = string
+}
+
+variable "existingAzureOpenAIResourceGroup" {
+  type = string
+}
+
+variable "existingAzureOpenAILocation" {
   type = string
 }

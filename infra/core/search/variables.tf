@@ -12,12 +12,11 @@ variable "tags" {
 }
 
 variable "sku" {
-  type = object({
-    name = string
-  })
-  default = {
-    name = "standard"
-  }
+  type = string
+}
+
+variable "replica_count" {
+  type = number
 }
 
 variable "authOptions" {
@@ -38,15 +37,6 @@ variable "azure_search_domain" {
   type = string  
 }
 
-variable "key_vault_name" { 
-  type = string
-}
-
-variable "is_secure_mode" {
-  type = bool
-  default = false
-}
-
 variable "vnet_name" {
   type = string
 }
@@ -61,5 +51,26 @@ variable "private_dns_zone_ids" {
 }
 
 variable "arm_template_schema_mgmt_api" {
+  type = string
+}
+
+variable "storage_account_id" {
+  type = string
+}
+
+variable "storage_account_name" {
+  type = string
+}
+
+variable "deployment_public_ip" {
+  description = "The public IP address of the deployment machine"
+  type        = string
+}
+
+variable "cognitive_services_account_id" {
+  type = string
+}
+
+variable "cognitive_services_account_name" {
   type = string
 }

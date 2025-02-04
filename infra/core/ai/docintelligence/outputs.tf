@@ -11,7 +11,7 @@ output "formRecognizerAccount" {
 }
 
 output "formPrivateEndpoint" {
-  value = var.is_secure_mode ? azurerm_private_endpoint.docintPrivateEndpoint[0].id : null
+  value = azurerm_private_endpoint.docintPrivateEndpoint.id
 }
 
 output "docIntelligenceIdentity" {

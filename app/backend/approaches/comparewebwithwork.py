@@ -74,7 +74,7 @@ class CompareWebWithWork(Approach):
         self.blob_client = blob_client
         self.query_term_language = query_term_language
         self.chatgpt_token_limit = get_token_limit(model_name)
-        self.escaped_target_model = re.sub(r'[^a-zA-Z0-9_\-.]', '_', target_embedding_model)
+        self.target_model = target_embedding_model
         self.target_translation_language=target_translation_language
         self.azure_ai_endpoint=azure_ai_endpoint
         self.azure_ai_location = azure_ai_location
@@ -118,7 +118,7 @@ class CompareWebWithWork(Approach):
                                     self.query_term_language,
                                     self.model_name,
                                     self.model_version,
-                                    self.escaped_target_model,
+                                    self.target_model,
                                     self.enrichment_appservice_url,
                                     self.target_translation_language,
                                     self.azure_ai_endpoint,
@@ -143,7 +143,7 @@ class CompareWebWithWork(Approach):
         system_persona = overrides.get("system_persona", "")
         response_length = int(overrides.get("response_length") or 1024)
 
-        # Step 2: Contruct the comparative system message with passed Rag response and Bing Search Response from above approach
+        # Step 2: Construct the comparative system message with passed Rag response and Bing Search Response from above approach
         bing_compare_query = user_query + " Web search results:\n" + web_answer + "\n\n" + "Work internal Documents:\n" + content + "\n\n"
         thought_chain["web_to_work_comparison_query"] = bing_compare_query
         messages = self.get_messages_builder(
@@ -172,7 +172,7 @@ class CompareWebWithWork(Approach):
                 stream=True)
 
             yield json.dumps({"data_points": {},
-                            "thoughts": "Searched for:<br>A Comparitive Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
+                            "thoughts": "Searched for:<br>A Comparative Analysis<br><br>Conversations:<br>" + msg_to_display.replace('\n', '<br>'),
                             "thought_chain": thought_chain,
                             "work_citation_lookup": work_citations,
                             "web_citation_lookup": web_citation_lookup}) + "\n"

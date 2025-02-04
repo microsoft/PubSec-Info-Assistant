@@ -2,9 +2,7 @@
 
 :warning: **IMPORTANT**: Please ensure you have met the [Azure account requirements](../../README.md#azure-account-requirements) before continuing.
 
-Follow these steps to get the agent template up and running in a subscription of your choice. Note that there may be specific instructions for deploying to Azure Government or other Sovereign regions.
-
-If you prefer to have a more guided experience, you may choose to [view the click-through deployment guide](https://aka.ms/InfoAssist/deploy) for this agent template.  
+Follow these steps to get the agent template up and running in a subscription of your choice. Note that there may be specific instructions for deploying to [Azure Government or other Sovereign regions](/docs/deployment/enable_sovereign_deployment.md).
 
 ## Development Environment Configuration
 
@@ -27,68 +25,58 @@ Once you have completed setting up a GitHub Codespaces, please move on to the Si
 
 ## Sizing estimator
 
- The IA agent template needs to be sized appropriately based on your use case. Please review our [Sizing Estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
+ The IA agent template needs to be sized appropriately based on your use case. Please review our [sizing estimator](/docs/costestimator.md) to help find the configuration that fits your needs.
 
- To change the size of components deployed, make changes in the [Terraform Variables](/infra/variables.tf) file.
+ To change the size of components deployed, make changes in the azd parameters detailed below.
 
-Once you have completed the Sizing Estimator and sized your deployment appropriately, please move on to the Configuring your environment step.
+Once you have completed the sizing estimator and sized your deployment appropriately, please move on to the Configure your local environment variables step.
 
-## Upgrading or migrating from 1.0
+## Upgrading or migrating from previous versions
 
-If you have an existing 1.0 deployment and you are looking to upgrade that deployment in place, or migrate your existing processed data to a newly deployed instance, review the [upgrade & migrate documentation](/docs/deployment/move_or_migrate.md).
+Information Assistant agent template v2.0 is not able to upgrade from prior versions. A new installation is required.
 
-## Configure ENV files
+## Azure resource provider registration
 
-You now need to set up your local environment variables file in preparation for deployment.
+The following resource providers must be registered within your subscription prior to beginning the deployment to prevent deployment errors:
 
-Inside your Development environment (GitHub Codespaces or Container), do the following:
+* Microsoft.ContainerRegistry
+* Microsoft.CognitiveServices
+* Microsoft.Search
+* Microsoft.Web
+* Microsoft.Network
+* Microsoft.Storage
+* Microsoft.OperationalInsights
+* Microsoft.KeyVault
+* Microsoft.AlertsManagement
+* Microsoft.Insights
 
->1. Open `scripts/environments` and copy `local.env.example` to `local.env`.
->1. Then open `local.env` and update values as needed:
+The following command lists all the subscription's resource providers that are Registered.
 
-Variable | Required | Description
---- | --- | ---
-LOCATION | Yes | The location (West Europe is the default). The Terraform templates use this value. To get a list of all the current Azure regions you can run `az account list-locations -o table`. The value here needs to be the *Name* value and not *Display Name*.
-WORKSPACE | Yes  | The workspace name (use something simple and unique to you). This will appended to infoasst-????? as the name of the resource group created in your subscription.
-SUBSCRIPTION_ID | Yes | The GUID of the Azure Subscription you plan to deploy IA into. This is required in the latest versions of Terraform.
-AZURE_ENVIRONMENT | Yes | This will determine the Azure cloud environment the deployment will target. Information Assistant currently supports, AzureCloud and AzureUSGovernment. Info available at [Azure cloud environments](https://docs.microsoft.com/en-us/cli/azure/manage-clouds-azure-cli?toc=/cli/azure/toc.json&bc=/cli/azure/breadcrumb/toc.json). If you are targeting "AzureUSGovernment" please see our [sovereign deployment support documentation](/docs/deployment/enable_sovereign_deployment.md).
-SECURE_MODE | Yes | Defaults to `false`. This feature flag will determine if the Information Assistant deploys it's Azure Infrastructure in a secure mode or not.</br>:warning: Before enabling secure mode please read the extra instructions on [Enabling Secure Deployment](/docs/secure_deployment/secure_deployment.md)
-ENABLE_WEB_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to use Web Search results as a data source for generating answers from the LLM. This feature will also deploy a Bing v7 Search instance in Azure to retrieve web results from, however Bing v7 Search is not available in AzureUSGovernment regions, so this feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`. **Note:** If you have set SECURE_MODE to `true` you will have to set ENABLE_WEB_CHAT to `false` as this feature is not compatible with secure mode deployment. 
-ENABLE_BING_SAFE_SEARCH | No | Defaults to `true`. If you are using the `ENABLE_WEB_CHAT`feature you can set the following values to enable safe search on the Bing v7 Search APIs. Bing safe search is a Bing setting that filters out inappropriate web content.
-ENABLE_UNGROUNDED_CHAT | Yes | Defaults to `false`. This feature flag will enable the ability to interact directly with an LLM. This experience will be similar to the Azure OpenAI Playground
-ENABLE_MATH_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Math Assistant tab in the Information Assistant website. Read more information on the [Math Assistant](/docs/features/features.md)
-ENABLE_TABULAR_DATA_ASSISTANT | Yes | Defaults to `true`. This feature flag will enable the Tabular Data Assistant tab in the Information Assistant website. Read more information about the [Tabular Data Assistant](/docs/features/features.md). Read the security warnings on the Tabular Data Assistant feature page when deploying this feature.
-ENABLE_SHAREPOINT_CONNECTOR | Yes | Defaults to `false`. This feature flag enabled the ability to ingest data from SharePoint document stores into the Information Assistant. When enabled, be sure to set the `SHAREPOINT_TO_SYNC` parameter for your SharePoint sites. Read more about configuring the [SharePoint Connector](/docs/features/sharepoint.md). This feature flag is **NOT** compatible with `AZURE_ENVIRONMENT=AzureUSGovernment`.
-SHAREPOINT_TO_SYNC | No | This is a JSON Array of Objects for SharePoint Sites and their entry folders. The app will crawl down from the folder specified for each site. Specifying "/Shared Documents" will crawl all the documents in your SharePoint. `[{"url": "https://SharePoint.com/", "folder": "/Shared Documents"}]` This will **overwrite** any prior changes you've made to config.json. Information on setting up SharePoint Ingestion can be found here [SharePoint Connector](/docs/features/sharepoint.md)
-REQUIRE_WEBSITE_SECURITY_MEMBERSHIP | Yes | Use this setting to determine whether a user needs to be granted explicit access to the website via an Azure AD Enterprise Application membership (true) or allow the website to be available to anyone in the Azure tenant (false). Defaults to false. If set to true, A tenant level administrator will be required to grant the implicit grant workflow for the Azure AD App Registration manually.
-SECRET_EXPIRATION_DAYS | Yes | Defaults to `730`. Use this setting to set the secret expiration to the current day plus the number of days specified. Key Vault secrets require an expiration date to be compatible with Microsoft's recommended guardrails for Azure Key Vault policy. We have NOT included automatic secret rotation in this deployment. Go [here](https://learn.microsoft.com/en-us/azure/key-vault/keys/how-to-configure-key-rotation) for more information on enabling cryptographic key auto-rotation.
-SKIP_PLAN_CHECK | No | If this value is set to 1, then the Terraform deployment will not stop to allow you to review the planned changes. The default value is 0 in the scripts, which will allow the deployment to stop and confirm you accept the proposed changes before continuing.
-USE_EXISTING_AOAI | Yes | Defaults to false. Set this value to "true" if you want to use an existing Azure Open AI service instance in your subscription. This can be useful when there are limits to the number of AOAI instances you can have in one subscription. When the value is set to "false" and Terraform will create a new Azure Open AI service instance in your resource group. **Note:** If you have set SECURE_MODE to `true` you will have to set USE_EXISTING_AOAI to `false` as using an existing Azure OpenAI resource is not compatible with secure mode. 
-AZURE_OPENAI_RESOURCE_GROUP | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the resource group that hosts the Azure Open AI service instance in your subscription.
-AZURE_OPENAI_SERVICE_NAME | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of the Azure Open AI service instance in your subscription.
-AZURE_OPENAI_CHATGPT_DEPLOYMENT | No | If you have set **USE_EXISTING_AOAI** to "true" then use this parameter to provide the name of a deployment of the gpt model in the Azure Open AI service instance in your subscription.
-USE_AZURE_OPENAI_EMBEDDINGS | Yes | Defaults to "true". When set to "true" this value indicates to Information Assistant to use Azure OpenAI models for embedding text values. If set to "false", Information Assistant will use the open source language model that is provided in the values below.
-AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME| No | If you have set **USE_AZURE_OPENAI_EMBEDDINGS** to "true" then use this parameter to provide the name of a deployment of the "text-embedding-ada-002" model in the Azure Open AI service instance in your subscription.
-OPEN_SOURCE_EMBEDDING_MODEL | No | A valid open source language model that Information Assistant will use for text embeddings. The model needs to be downloadable and available through Sentence Transformer. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
-OPEN_SOURCE_EMBEDDING_MODEL_VECTOR_SIZE | No | When specifying an open source language model the vector size the model's embedding produces must be specified so that the Azure AI Search hybrid index's vector columns can be set to the matching size. This setting will be used when **USE_AZURE_OPENAI_EMBEDDINGS** is set to "false".
-AZURE_OPENAI_CHATGPT_MODEL_NAME | No | This can be used to select a different GPT model to be deployed to Azure OpenAI when the default (gpt-35-turbo-16k) isn't available to you.
-AZURE_OPENAI_CHATGPT_MODEL_VERSION | No | This can be used to select a specific version of the GPT model above when the default (0613) isn't available to you.
-AZURE_OPENAI_CHATGPT_SKU | No | This can be used to select a different GPT model SKU to be used on the deployment to Azure OpenAI when the default (Standard) isn't available. Acceptable values are one of the following: "Standard", "ProvisionedManged", "GlobalStandard", "GlobalProvisionedManaged", "GlobalBatch"
-AZURE_OPENAI_EMBEDDINGS_MODEL_NAME | No | This can be used to select a different embeddings model to be deployed to Azure OpenAI when the default (text-embedding-ada-002) isn't available to you.
-AZURE_OPENAI_EMBEDDINGS_MODEL_VERSION | No | This can be used to select a specific version of the embeddings model above when the default (2) isn't available to you.
-AZURE_OPENAI_EMBEDDINGS_SKU | No | This can be used to select a different embeddings model SKU to be used on the deployment to Azure OpenAI when the default (Standard) isn't available.
-AZURE_OPENAI_CHATGPT_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the GPT model deployed to Azure OpenAI when you have reduced capacity.
-AZURE_OPENAI_EMBEDDINGS_MODEL_CAPACITY | Yes | This value can be used to provide the provisioned capacity of the embeddings model deployed to Azure OpenAI.
-CHAT_WARNING_BANNER_TEXT | No | Defaults to "". Provide a value in this parameter to display a header and footer to the UX of Information Assistant with the included warning banner text.
-DEFAULT_LANGUAGE | Yes | Use the parameter to specify the matching ENV file located in the `scripts/environments/languages` folder. You can then use this file to customize the language settings of the search index, search skillsets, and Azure OpenAI prompts. See [Configuring your own language ENV file](/docs/features/configuring_language_env_files.md) more information.
-ENABLE_CUSTOMER_USAGE_ATTRIBUTION <br>CUSTOMER_USAGE_ATTRIBUTION_ID | No | By default, **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** is set to `true`. The CUA GUID which is pre-configured will tell Microsoft about the usage of this software. Please see [Data Collection Notice](/README.md#data-collection-notice) for more information. <br/><br/>You may provide your own CUA GUID by changing the value in **CUSTOMER_USAGE_ATTRIBUTION_ID**. Ensure you understand how to properly notify your customers by reading <https://learn.microsoft.com/en-us/partner-center/marketplace/azure-partner-customer-usage-attribution#notify-your-customers>.<br/><br/>To disable data collection, set **ENABLE_CUSTOMER_USAGE_ATTRIBUTION** to `false`.
-ENABLE_DEV_CODE | No | Defaults to `false`. It is not recommended to enable this flag, it is for development testing scenarios only.
-APPLICATION_TITLE | No | Defaults to "". Providing a value for this parameter will replace the Information Assistant's title in the black banner at the top of the UX.
-ENTRA_OWNERS | No | Defaults to "". Additional user id's you wish to assign as owners of created Azure Entra objects by way of assign to a security group.
-SERVICE_MANAGEMENT_REFERENCE | No | Defaults to "". Sets the service management reference value on Azure Entra objects created by Information Assistant if required by your organization.
-MAX_CSV_FILE_SIZE | Yes | Defaults to 20. This value limits the size of CSV files in MBs that will be supported for upload in the Tabular Data Assistant UX feature.
-PASSWORD_LIFETIME | No | Defaults to 365. The number of days that passwords associated with created identities are set to expire after creation. Change this setting if needed to conform to you policy requirements
-ENABLE_DDOS_PROTECTION_PLAN | Yes | Defaults to false. This setting is only used in "secure-mode" and will determine if the private vnet that is deployed is associated to a DDoS protection plan or not. When true, this setting can be used in conjunction with `DDOS_PLAN_ID` to specify a specific DDOS protection plan ID or if omitted the scripts will prompt during deployment to select an available DDOS protection plan.
+``` bash
+az provider list --query "[?registrationState=='Registered']" --output table
+```
+
+Register the resource providers required with the az provider register command.
+
+``` bash
+az provider register --namespace Microsoft.ContainerRegistry
+az provider register --namespace Microsoft.Search
+az provider register --namespace Microsoft.Web
+az provider register --namespace Microsoft.Network
+az provider register --namespace Microsoft.Storage
+az provider register --namespace Microsoft.OperationalInsights
+az provider register --namespace Microsoft.KeyVault
+az provider register --namespace Microsoft.AlertsManagement
+az provider register --namespace Microsoft.Insights
+```
+
+Confirm all the resource providers have been registered before proceeding with the deployment.
+
+Get the registration status for a specific resource provider:
+
+``` bash
+az provider list --query "[?namespace=='Microsoft.Web']" --output table
+```
 
 ## Log into Azure using the Azure CLI
 
@@ -126,90 +114,55 @@ From this output, grab the Subscription ID of the subscription you intend to dep
     az account set --subscription mysubscriptionID
 ```
 
-## Azure resource provider registration
+## Configure your local environment for deployment
 
-The following resource providers must be registered within your subscription prior to beginning the deployment to prevent deployment errors:
+You now need to set up your local environment in preparation for deployment. IA agent template uses [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/overview) (azd) to provision Azure resources and deploy the application code.
 
-* Microsoft.ContainerRegistry
-* Microsoft.DocumentDB
-* Microsoft.Search
-* Microsoft.Web
-* Microsoft.Network
-* Microsoft.Storage
-* Microsoft.OperationalInsights
-* Microsoft.KeyVault
-* Microsoft.AlertsManagement
-* Microsoft.Insights
+Inside your development environment (GitHub Codespaces or Container), do the following:
 
-The following command lists all the subscription's resource providers that are Registered.
+1. Configure azd to use the Azure CLI login you performed above:
 
-``` bash
-az provider list --query "[?registrationState=='Registered']" --output table
+    ``` bash
+    azd config set auth.useAzCliAuth "true"
+    ```
+
+1. Create a new azd environment:
+
+   ``` bash
+   azd env new
+   ```
+
+   Enter a name that will be used for the resource group name (i.e. infoasst-*environment name*). This will create a new folder in the .azure folder, and set it as the active environment for any calls to azd going forward.
+
+1. (Optional) This is the point where you can customize the deployment by setting environment variables, in order to [use existing Azure Open AI resources](./deployment_features.md#azure-open-ai-resources), [enable feature flags](./deployment_features.md#feature-flags), [customize network settings](./deployment_features.md#custom-network-settings), and several other [optional settings](./deployment_features.md).
+
+1. Run `azd up` - This will provision Azure resources and deploy this sample to those resources, including building the search index based on the files found in the `./data` folder.
+
+    * **Important**: Beware that the resources created by this command will incur immediate costs, primarily from the AI Search resource. These resources may accrue costs even if you interrupt the command before it is fully executed. You can run `azd down` or delete the resources manually to avoid unnecessary spending.
+    * You will be prompted to select two locations, one for the majority of resources and one for the OpenAI resource, which is currently a short list. That location list is based on the [OpenAI model availability table](https://learn.microsoft.com/azure/cognitive-services/openai/concepts/models#model-summary-table-and-region-availability) and may become outdated as availability changes.
+
+1. After the application has been successfully deployed you will see a URL printed to the console.  Click that URL to interact with the application in your browser.
+It will look like the following:
+
+!['Output from running azd up'](../images/endpoint.png)
+
+> NOTE: It may take 5-10 minutes after you see 'SUCCESS' for the application to be fully deployed. If you see a "Python Developer" welcome screen or an error page, then wait a bit and refresh the page.
+
+### Deploying again
+
+If you've only changed the backend/frontend code in the `app` folder, then you don't need to re-provision the Azure resources. You can just run:
+
+```shell
+azd deploy
 ```
 
-Register the resource providers required with the az provider register command.
+If you've changed the infrastructure files (`infra` folder or `azure.yaml`), then you'll need to re-provision the Azure resources. You can do that by running:
 
-``` bash
-az provider register --namespace Microsoft.ContainerRegistry
-az provider register --namespace Microsoft.DocumentDB
-az provider register --namespace Microsoft.Search
-az provider register --namespace Microsoft.Web
-az provider register --namespace Microsoft.Network
-az provider register --namespace Microsoft.Storage
-az provider register --namespace Microsoft.OperationalInsights
-az provider register --namespace Microsoft.KeyVault
-az provider register --namespace Microsoft.AlertsManagement
-az provider register --namespace Microsoft.Insights
+```shell
+azd up
 ```
 
-Confirm all the resource providers have been registered before proceeding with the deployment.
-
-Get the registration status for a specific resource provider:
-
-``` bash
-az provider list --query "[?namespace=='Microsoft.Web']" --output table
-```
-
-## Deploy and Configure Azure resources
-
-Now that your GitHub Codespaces/Container and ENV files are configured, it is time to deploy the Azure resources. This is done using a `Makefile`.
-
-To deploy everything run the following command from the GitHub Codespaces/Dev Container prompt:
-
-```bash
-    make deploy
-```
-
-This will deploy the infrastructure and the application code.
-
-*This command can be run as many times as needed in the event you encounter any errors. A set of known issues and their workarounds that we have found can be found in [Known Issues](/docs/knownissues.md).*
-
-### Additional Information
-
-For a full set of Makefile rules, run `make help`.
-
-``` bash
-vscode ➜ /workspaces/<accelerator> (main ✗) $ make help
-help                         Show this help
-deploy                       Deploy infrastructure and application code
-build                        Build application code
-infrastructure               Deploy infrastructure
-extract-env                  Extract infrastructure.env file from Terraform output
-deploy-webapp                Deploys the web app code to Azure App Service
-deploy-functions             Deploys the function code to Azure Function Host
-deploy-enrichments           Deploys the web app code to Azure App Service
-deploy-search-indexes        Deploy search indexes
-extract-env-debug-webapp     Extract infrastructure.debug.env file from Terraform output
-extract-env-debug-functions  Extract local.settings.json to debug functions from Terraform output
-functional-tests             Run functional tests to check the processing pipeline is working
-merge-databases              Upgrade from bicep to terraform
-import-state                 import state of current services to TF state
-prep-upgrade                 Command to merge databases and import TF state in prep for an upgrade from 1.0 to 1.n
-prep-env                     Apply role assignments as needed to upgrade
-prep-migration-env           Prepare the environment for migration by assigning required roles
-run-data-migration           Run the data migration moving data from one resource group to another
-manual-inf-destroy           A command triggered by a user to destroy a resource group, associated resources, and related Entra items
-```
+*A set of known issues and their workarounds that we have found can be found in [Known Issues](/docs/knownissues.md).*
 
 ## Configure AD app registration ( manual steps )
 
@@ -220,30 +173,6 @@ If you have insufficient permissions at the tenant level (Application Administra
 If you have chosen to enable authentication and authorization for your deployment by setting the environment variable `REQUIRE_WEBSITE_SECURITY_MEMBERSHIP` to `true`, you will need to configure it at this point. Please see [Known Issues](/docs/knownissues.md#error-your-adminstrator-has-configured-the-application-infoasst_web_access_xxxxx-to-block-users) section for guidance on how to configure.
 
 **NOTICE:** If you haven't enabled this, but your Tenant requires this, you may still need to configure as noted above.
-
-## Authorizing SharePoint
-
-*If you do not see these connections, ensure you have the **ENABLE_SHAREPOINT_CONNECTOR** flag set to **true** during your deployment*
-
-1. Go to your resource group in the [Azure Portal](https://portal.azure.com/), select the "sharepointonline" API Connection resource.
-2. Click "Edit API Connection" in the menu on the left side of your screen.
-3. Click "Authorize" and login with the user that has access to the SharePoint sites you put in your environment file. It is **strongly** recommended that you have created a new user for this purpose.
-4. After you've done that **click Save**, if you do not click save, you will **NOT** be authorized.
-5. Once you're authorized, you may manually run the logic app (see below) or wait 24 hours for it to automatically run.
-
-More information about SharePoint can be found here [SharePoint Feature](/docs/features/sharepoint.md)
-
-**NOTICE:** You do not need to do this step if you are not using the SharePoint for Information Assistant
-
-## Find your deployment URL
-
-Once deployed, you can find the URL of your installation by:
-
-1) Browse to your new Resource Group at https://portal.azure.com and locate the "App Service" with the name that starts with "infoasst-web"
-![Location of App Service in Portal](/docs/images/deployment_app_service_location.jpg)
-
-2) After clicking on the App Service, you will see the "Default domain" listed. This is the link to your installation.
-![Default Domain of App Service in Portal](/docs/images/deployment_default_domain.jpg)
 
 ## Next steps
 

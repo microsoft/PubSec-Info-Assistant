@@ -30,15 +30,6 @@ variable "resourceGroupName" {
   default = ""
 }
 
-variable "key_vault_name" { 
-  type = string
-}
-
-variable "is_secure_mode" {
-  type = bool
-  default = false
-}
-
 variable "subnet_id" {
   type = string
   default = ""

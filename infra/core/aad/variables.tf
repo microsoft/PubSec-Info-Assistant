@@ -28,11 +28,6 @@ variable "aadMgmtServicePrincipalId" {
   type = string
 }
 
-variable "aadMgmtClientSecret" {
-  type      = string
-  sensitive = true
-}
-
 variable "entraOwners" {
   type    = string
   default = ""

@@ -54,28 +54,23 @@ The second AD App Registration will be used to query the Azure management plane 
 You will need to obtain the following information from your tenant Administrator to continue:
 
 - Web Access App Registration Client ID (guid)
-- Web Access Service Principal ID (guid)
 - Management Access App Registration Client ID (guid)
 - Management Access Service Principal ID (guid)
-- Management Access App Registration Client Secret (string)
 
 These values will be used to update the code in the infrastructure deployment section.
 
-### 4.  Adjust code in infrastructure deployment
+### 4.  Adjust variables before deployment
 
-In the file `scripts/inf-create.sh`, between lines 63 - 69, you would need to uncomment the code  and update parameters with values provided by your tenant Administrator.
-
+Run the following commands in your VSCode terminal to update the Azure Developer CLI (azd) variables.
+```bash
+  azd env set USE_CUSTOM_ENTRA_OBJECTS true
+  azd env set AAD_WEB_CLIENT_ID "{web client id}"
+  azd env set AAD_MGMT_CLIENT_ID "{mgmt client id}"
+  azd env set AAD_MGMT_SP_ID "{mgmt service principal id}"
 ```
-export TF_VAR_isInAutomation=true
-export TF_VAR_aadWebClientId=""
-export TF_VAR_aadMgmtClientId=""
-export TF_VAR_aadMgmtServicePrincipalId=""
-export TF_VAR_aadMgmtClientSecret=""
-```
-
 ### 5. Resume the deployment as per the deployment procedure
 
-After completing the step4, you can resume back the deployment steps mentioned the documentation
+After completing the step 4, you can resume back the deployment steps mentioned the documentation
 
 ### 6: Update the AD App Registration
 

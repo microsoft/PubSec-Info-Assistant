@@ -22,10 +22,6 @@ output "snetStorage_name" {
   value = data.azurerm_subnet.storageAccount.name
 }
 
-output "snetCosmosDb_name" {
-  value = data.azurerm_subnet.cosmosDb.name
-}
-
 output "snetAzureAi_id" {
   value = data.azurerm_subnet.azureAi.id
 }
@@ -43,28 +39,12 @@ output "snetKeyVault_name" {
   value = data.azurerm_subnet.keyVault.name
 }
 
-output "snetACR_name" {
-  value = data.azurerm_subnet.acr.name
-}
-
 output "snetApp_id" {
   value = data.azurerm_subnet.app.id
 }
 
 output "snetApp_name" {
   value = data.azurerm_subnet.app.name
-}
-
-output "snetFunction_id" {
-  value = data.azurerm_subnet.function.id
-}
-
-output "snetFunction_name" {
-  value = data.azurerm_subnet.function.name
-}
-
-output "snetEnrichment_name" {
-  value = data.azurerm_subnet.enrichment.name
 }
 
 output "snetIntegration_id" {
@@ -88,7 +68,7 @@ output "snetAzureOpenAI_name" {
 }
 
 output "ddos_plan_id" {
-  value = var.enabledDDOSProtectionPlan ? var.ddos_plan_id == "" ? azurerm_network_ddos_protection_plan.ddos[0].id : var.ddos_plan_id : ""
+  value = var.useDDOSProtectionPlan ? var.ddos_plan_id == "" ? azurerm_network_ddos_protection_plan.ddos[0].id : var.ddos_plan_id : ""
 }
 
 output "dns_private_resolver_ip" {

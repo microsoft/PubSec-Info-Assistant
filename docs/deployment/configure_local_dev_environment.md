@@ -4,7 +4,7 @@
 * [Install the Prerequisite Software](#Install-the-prerequisite-software)
 * [Setting up Docker Desktop for Windows with WSL 2](#setting-up-docker-desktop-for-Windows-with-WSL-2)
   * [Configure WSL2 Backend for Docker Containers](#configure-wsl2-backend-for-docker-containers)
-  * [Connect to Ubuntu WSL with VSCode](#Connect-to-ubuntu-wsl-with-vscode)
+  * [Connect to Ubuntu WSL with VS Code](#Connect-to-ubuntu-wsl-with-vscode)
   * [Configure Git in Ubuntu WSL environment](#configure-Git-in-Ubuntu-WSL-environment)
 * [Install Azure CLI on WSL](#install-azure-cli-on-wsl)
 * [Configure Local Development Environment](configure-local-development-environment)
@@ -44,12 +44,12 @@ To enable **Developing inside a Container** you must configure the integration b
 >4. Select **Apply & Restart**
 
 
-### Connect to Ubuntu WSL with VSCode
+### Connect to Ubuntu WSL with VS Code
 
-Now that Docker Desktop and Ubuntu are integrated, we want to Access the Ubuntu bash prompt from inside VSCode.
+Now that Docker Desktop and Ubuntu are integrated, we want to Access the Ubuntu bash prompt from inside VS Code.
 
->1. Launch VSCode.
->2. Select **View > Terminal**. A new window should open along the bottom of the VSCode window.
+>1. Launch VS Code.
+>2. Select **View > Terminal**. A new window should open along the bottom of the VS Code window.
 >3. From this windows use the **Launch Profile** dropdown to open the **Ubuntu 22.04 (WSL)** terminal. ![image](images/vscode_terminal_windows.png)
 >4. A bash prompt should open in the format `{username}@{machine_name}:/mnt/c/Users/{username}$`
 
@@ -82,7 +82,7 @@ git config --global credential.helper "/mnt/c/Program\ Files/Git/mingw64/bin/git
 ---
 ## Install Azure CLI On WSL
 
-In your Ubuntu 22.04(WSL) terminal from the previous step, follow the directions [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux) to install Azure CLI.
+In your Ubuntu 22.04(WSL) terminal from the previous step, follow the directions [here](https://docs.microsoft.com/cli/azure/install-azure-cli-linux) to install Azure CLI.
 
 ---
 
@@ -95,7 +95,7 @@ Follow these steps to get the agent template up and running in a subscription of
 The first step will be to clone the Git repo into your Ubuntu 18.04 WSL environment and, for production deployments, checkout the version that you would like to deploy. For development, stay on main and checkout an appropriate branch. To do this:
 
 >1. In GitHub, on the Source Tab select **<> Code** and get the HTTPS Clone path.
->2. Launch VSCode. Open the Ubuntu 22.04(WSL) Terminal.
+>2. Launch VS Code. Open the Ubuntu 22.04(WSL) Terminal.
 >3. Run the following command from the bash command prompt
 >
 >   ``` bash
@@ -115,14 +115,14 @@ This will now have created the **info-assist** folder on your Ubuntu 22.04 WSL e
 The next step is to open the source code and build the dev container. To do this you will:
 
 1. Log into Azure using the Azure CLI
-2. Open the cloned source code into VSCode
-3. Launch and connect to the development container from VSCode
+2. Open the cloned source code into VS Code
+3. Launch and connect to the development container from VS Code
 
 ---
 ### Important: Rebuild Development container
 
 
- When using any new version of Info Assistant code base from the repo, be sure to rebuild your development container.
+ When using any new version of Information Assistant code base from the repo, be sure to rebuild your development container.
 
  A new popup should appear in VS Code to rebuild the container. If the popup does not appear you can also do the following:
 
@@ -130,5 +130,5 @@ The next step is to open the source code and build the dev container. To do this
 - Type Rebuild and select "Dev Containers: Rebuild Container"
 
 ---
-This step is complete, please continue on to the next step [Configuring your Development Environment for PS Info Assistant](./deployment.md) section and complete the next step.
+This step is complete, please continue on to the next step [Configuring your Development Environment for Information Assistant](./deployment.md) section and complete the next step.
 

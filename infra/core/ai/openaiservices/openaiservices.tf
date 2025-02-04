@@ -1,12 +1,11 @@
 resource "azurerm_cognitive_account" "openaiAccount" {
-  count                               = var.useExistingAOAIService ? 0 : 1
-  name                                = var.name
-  location                            = var.location
-  resource_group_name                 = var.resourceGroupName
+  name                                = var.existingAzureOpenAIServiceName != "" ? var.existingAzureOpenAIServiceName : var.name
+  location                            = var.existingAzureOpenAILocation != "" ? var.existingAzureOpenAILocation : var.location
+  resource_group_name                 = var.existingAzureOpenAIResourceGroup != "" ? var.existingAzureOpenAIResourceGroup : var.resourceGroupName
   kind                                = var.kind
   sku_name                            = var.sku["name"]
-  public_network_access_enabled       = var.is_secure_mode ? false : true
-  local_auth_enabled                  = var.is_secure_mode ? false : true
+  public_network_access_enabled       = false
+  local_auth_enabled                  = false
   outbound_network_access_restricted  = var.outbound_network_access_restricted
   custom_subdomain_name               = var.name
   tags = var.tags
@@ -16,7 +15,7 @@ resource "azurerm_cognitive_account" "openaiAccount" {
     ip_rules       = var.network_acls_ip_rules
 
     dynamic "virtual_network_rules" {
-      for_each = var.is_secure_mode ? [1] : []
+      for_each = [1]
       content {
         subnet_id = var.subnet_id
       }
@@ -25,9 +24,9 @@ resource "azurerm_cognitive_account" "openaiAccount" {
 }
 
 resource "azurerm_cognitive_deployment" "deployment" {
-  count                 = var.useExistingAOAIService ? 0 : length(var.deployments)
+  count                 = length(var.deployments)
   name                  = var.deployments[count.index].name
-  cognitive_account_id  = azurerm_cognitive_account.openaiAccount[0].id
+  cognitive_account_id  = azurerm_cognitive_account.openaiAccount.id
   rai_policy_name       = var.deployments[count.index].rai_policy_name
   model {
     format              = "OpenAI"
@@ -41,9 +40,8 @@ resource "azurerm_cognitive_deployment" "deployment" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
-  count                      = var.useExistingAOAIService ? 0 : 1
-  name                       = azurerm_cognitive_account.openaiAccount[0].name
-  target_resource_id         = azurerm_cognitive_account.openaiAccount[0].id
+  name                       = azurerm_cognitive_account.openaiAccount.name
+  target_resource_id         = azurerm_cognitive_account.openaiAccount.id
   log_analytics_workspace_id = var.logAnalyticsWorkspaceResourceId
   enabled_log  {
     category = "Audit"
@@ -61,24 +59,22 @@ resource "azurerm_monitor_diagnostic_setting" "diagnostic_logs" {
 }
 
 data "azurerm_subnet" "subnet" {
-  count                = var.is_secure_mode ? 1 : 0
   name                 = var.subnet_name
   virtual_network_name = var.vnet_name
   resource_group_name  = var.resourceGroupName
 }
 
 resource "azurerm_private_endpoint" "openaiPrivateEndpoint" {
-  count                         = var.useExistingAOAIService ? 0 : var.is_secure_mode ? 1 : 0
   name                          = "${var.name}-private-endpoint"
   location                      = var.location
   resource_group_name           = var.resourceGroupName
-  subnet_id                     = data.azurerm_subnet.subnet[0].id
+  subnet_id                     = data.azurerm_subnet.subnet.id
   custom_network_interface_name = "infoasstaoainic"
 
   private_service_connection {
     name                            = "cognitiveAccount"
     is_manual_connection            = false
-    private_connection_resource_id  = azurerm_cognitive_account.openaiAccount[count.index].id
+    private_connection_resource_id  = azurerm_cognitive_account.openaiAccount.id
     subresource_names               = ["account"]
   }
 

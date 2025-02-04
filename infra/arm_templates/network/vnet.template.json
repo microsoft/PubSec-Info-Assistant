@@ -26,9 +26,6 @@
         "subnet_AzureStorage_CIDR": {
             "type": "string"
         },
-        "subnet_AzureCosmosDB_CIDR": {
-            "type": "string"
-        },
         "subnet_AzureAi_CIDR": {
             "type": "string"
         },
@@ -36,12 +33,6 @@
             "type": "string"
         },
         "subnet_App_CIDR": {
-            "type": "string"
-        },
-        "subnet_Function_CIDR": {
-            "type": "string"
-        },
-        "subnet_Enrichment_CIDR": {
             "type": "string"
         },
         "subnet_Integration_CIDR": {
@@ -53,10 +44,10 @@
         "subnet_AzureOpenAI_CIDR": {
             "type": "string"
         },
-        "subnet_Acr_CIDR": {
+        "subnet_Dns_CIDR": {
             "type": "string"
         },
-        "subnet_Dns_CIDR": {
+        "subnet_Bing_CIDR": {
             "type": "string"
         },
         "privateEndpointNetworkPoliciesStatus": {
@@ -106,19 +97,6 @@
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
                     {
-                        "name": "cosmosDb",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_AzureCosmosDB_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
                         "name": "azureAi",
                         "properties": {
                             "addressPrefix": "[parameters('subnet_AzureAi_CIDR')]",
@@ -150,34 +128,6 @@
                         "name": "app",
                         "properties": {
                             "addressPrefix": "[parameters('subnet_App_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.Storage" } ]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "function",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Function_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]",
-                            "serviceEndpoints": [ { "service": "Microsoft.Storage" }, { "service": "Microsoft.KeyVault" }]
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "name": "enrichment",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Enrichment_CIDR')]",
                             "networkSecurityGroup": {
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
                             },
@@ -238,19 +188,6 @@
                         "type": "Microsoft.Network/virtualNetworks/subnets"
                     },
                     {
-                        "name": "acr",
-                        "properties": {
-                            "addressPrefix": "[parameters('subnet_Acr_CIDR')]",
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
-                            },
-                            "delegations": [],
-                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
-                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
-                        },
-                        "type": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
                         "name": "dns",
                         "properties": {
                             "addressPrefix": "[parameters('subnet_Dns_CIDR')]",
@@ -266,6 +203,19 @@
                                     "type": "Microsoft.Network/virtualNetworks/subnets/delegations"
                                 }
                             ],
+                            "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
+                            "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
+                        },
+                        "type": "Microsoft.Network/virtualNetworks/subnets"
+                    },
+                    {
+                        "name": "bing",
+                        "properties": {
+                            "addressPrefix": "[parameters('subnet_Bing_CIDR')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsg_name'))]"
+                            },
+                            "delegations": [],
                             "privateEndpointNetworkPolicies": "[parameters('privateEndpointNetworkPoliciesStatus')]",
                             "privateLinkServiceNetworkPolicies": "[parameters('privateLinkServiceNetworkPoliciesStatus')]"
                         },

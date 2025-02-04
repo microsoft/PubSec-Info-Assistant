@@ -52,7 +52,7 @@ const Chat = () => {
 
     const lastQuestionRef = useRef<string>("");
     const lastQuestionWorkCitationRef = useRef<{ [key: string]: { citation: string; source_path: string; page_number: string } }>({});
-    const lastQuestionWebCitiationRef = useRef<{ [key: string]: { citation: string; source_path: string; page_number: string } }>({});
+    const lastQuestionWebCitationRef = useRef<{ [key: string]: { citation: string; source_path: string; page_number: string } }>({});
     const lastQuestionThoughtChainRef = useRef<{ [key: string]: string }>({});
     const chatMessageStreamEnd = useRef<HTMLDivElement | null>(null);
 
@@ -87,7 +87,7 @@ const Chat = () => {
                                 thought_chain: { [key: string]: string}) => {
         lastQuestionRef.current = question;
         lastQuestionWorkCitationRef.current = work_citation_lookup;
-        lastQuestionWebCitiationRef.current = web_citation_lookup;
+        lastQuestionWebCitationRef.current = web_citation_lookup;
         lastQuestionThoughtChainRef.current = thought_chain;
         setActiveApproach(approach);
 
@@ -153,7 +153,7 @@ const Chat = () => {
     const clearChat = () => {
         lastQuestionRef.current = "";
         lastQuestionWorkCitationRef.current = {};
-        lastQuestionWebCitiationRef.current = {};
+        lastQuestionWebCitationRef.current = {};
         lastQuestionThoughtChainRef.current = {};
         error && setError(undefined);
         setActiveCitation(undefined);
@@ -418,7 +418,7 @@ const Chat = () => {
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} approach={activeApproach}/>
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach, lastQuestionWorkCitationRef.current, lastQuestionWebCitiationRef.current, lastQuestionThoughtChainRef.current)} />
+                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current, activeApproach, lastQuestionWorkCitationRef.current, lastQuestionWebCitationRef.current, lastQuestionThoughtChainRef.current)} />
                                     </div>
                                 </>
                             ) : null}

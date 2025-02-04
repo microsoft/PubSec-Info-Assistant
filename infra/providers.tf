@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.3.0"
+      version = "~> 4.11.0"
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "2.47.0"
+      version = "3.0.2"
     }
     random = {
       source  = "hashicorp/random"
@@ -26,7 +26,12 @@ provider "azurerm" {
       purge_soft_delete_on_destroy    = true
       recover_soft_deleted_key_vaults = true
     }
+
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
   }
+
   resource_provider_registrations = "none"
   storage_use_azuread = true
   environment = var.azure_environment == "AzureUSGovernment" ? "usgovernment" : "public"

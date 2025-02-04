@@ -13,6 +13,8 @@ import styles from "./AnalysisPanel.module.css";
 import { SupportingContent } from "../SupportingContent";
 import { ChatResponse, ActiveCitation, getCitationObj, fetchCitationFile, FetchCitationFileResponse } from "../../api";
 import { AnalysisPanelTabs } from "./AnalysisPanelTabs";
+import { ArrowDownload16Filled } from '@fluentui/react-icons';
+import { Button} from "react-bootstrap";
 import React from "react";
 
 interface Props {
@@ -29,6 +31,19 @@ interface Props {
 const pivotItemDisabledStyle: React.CSSProperties = {
     color: 'grey'
     
+};
+
+
+
+const downloadFile = (sourceFileUrl: string | undefined, sourceFile: string | undefined) => {
+    if (sourceFileUrl) {
+        const link = document.createElement('a');
+        link.href = sourceFileUrl;
+        link.download = sourceFile?.split('/').pop() || 'download';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 };
 
 export const AnalysisPanel = ({ answer, activeTab, activeCitation, sourceFile, pageNumber, citationHeight, className, onActiveTabChanged }: Props) => {
@@ -113,6 +128,70 @@ async function fetchActiveCitationObj() {
         console.log(error);
     }
 }
+const renderContent = () => {
+    switch (activeTab) {
+        case AnalysisPanelTabs.ThoughtProcessTab:
+            return (
+                <div className={styles.thoughtProcess} dangerouslySetInnerHTML={{ __html: sanitizedThoughts }}></div>
+            );
+        case AnalysisPanelTabs.SupportingContentTab:
+            return <SupportingContent supportingContent={answer.data_points} />;
+        case AnalysisPanelTabs.CitationTab:
+            return (
+                <div>
+                    <button
+                    className={`${styles.tabButton} ${innerPivotTab === 'indexedFile' ? styles.activeTab : ''}`} onClick={() => setInnerPivotTab('indexedFile')}>Document Section</button>
+                    <button 
+                    className={`${styles.tabButton} ${innerPivotTab === 'rawFile' ? styles.activeTab : ''}`}
+                    onClick={() => setInnerPivotTab('rawFile')}>Document</button>
+                    {innerPivotTab === 'indexedFile' && (
+                        <div>
+                            {activeCitationObj === undefined ? (
+                                <Text>Loading...</Text>
+                            ) : (
+                                <div>
+                                    <Separator>Metadata</Separator>
+                                    <Label>File Name</Label><Text>{activeCitationObj.file_name}</Text>
+                                    <Label>File URI</Label><Text>{activeCitationObj.file_uri}</Text>
+                                    <Label>Title</Label><Text>{activeCitationObj.title}</Text>
+                                    <Label>Section</Label><Text>{activeCitationObj.section}</Text>
+                                    <Label>Page Number(s)</Label><Text>{activeCitationObj.pages?.join(",")}</Text>
+                                    <Label>Token Count</Label><Text>{activeCitationObj.token_count}</Text>
+                                    <Separator>Content</Separator>
+                                    <Label>Content</Label><Text>{activeCitationObj.content}</Text>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    {innerPivotTab === 'rawFile' && (
+                        <div>
+                            {getCitationURL() === '' ? (
+                                <Text>Loading...</Text>
+                            ) : ["docx", "xlsx", "pptx"].includes(sourceFileExt) ? (
+                                <iframe title="Source File" src={'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(getCitationURL()) + "&action=embedview&wdStartOn=" + (pageNumber ?? '')} width="100%" height={citationHeight} />
+                            ) : sourceFileExt === "pdf" ? (
+                                <object data={getCitationURL() + "#page=" + pageNumber} type="application/pdf" width="100%" height={citationHeight} />
+                            ) : sourceFileExt === "md" ? (
+                                <ReactMarkdown>{markdownContent}</ReactMarkdown>
+                            ) : ["json", "txt", "xml"].includes(sourceFileExt) ? (
+                                <pre>{plainTextContent}</pre>
+                            ) : (
+                                <iframe title="Source File" src={getCitationURL()} width="100%" height={citationHeight} />
+                            )}
+                            <Button 
+                                onClick={() => downloadFile(sourceFileUrl, sourceFile)} 
+                                style={{ border: '2px solid black', marginBottom: '10px' }}
+                            >
+                                <ArrowDownload16Filled />Download
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            );
+        default:
+            return null;
+    }
+};
 
 useEffect(() => {
     const fetchMarkdownContent = async () => {

@@ -1,5 +1,7 @@
 # Using IA agent template for the first time
 
+It is recommended that you run functional tests that validate the document pre-processing pipelines from ingestion to Azure AI Search indexing and the Information Assistant Embeddings REST API endpoints by running the provided [functional tests](/tests/README.md).
+
 Once you have successfully deployed the IA agent template, you are ready to use the agent template to process some data.
 
 To use the IA agent template, you need to follow these steps:

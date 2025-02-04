@@ -42,10 +42,6 @@ variable "snetStorageAccountCIDR" {
   type    = string
 }
 
-variable "snetCosmosDbCIDR" {
-  type    = string
-}
-
 variable "snetAzureAiCIDR" {
   type    = string
 }
@@ -55,10 +51,6 @@ variable "snetKeyVaultCIDR" {
 }
 
 variable "snetAppCIDR" {
-  type    = string
-}
-
-variable "snetEnrichmentCIDR" {
   type    = string
 }
 
@@ -78,14 +70,6 @@ variable "snetAzureOpenAICIDR" {
   type    = string
 }
 
-variable "snetFunctionCIDR" {
-  type    = string
-}
-
-variable "snetACRCIDR" {
-  type    = string
-}
-
 variable "snetDnsCIDR" {
   type    = string
 }
@@ -98,6 +82,6 @@ variable "azure_environment" {
   type        = string
 }
 
-variable "enabledDDOSProtectionPlan" {
+variable "useDDOSProtectionPlan" {
   type = bool
 }

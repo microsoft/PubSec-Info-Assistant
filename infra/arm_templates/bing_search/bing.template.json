@@ -1,0 +1,45 @@
+{
+    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2020-06-10",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Bing/accounts",
+            "kind": "Bing.Search.v7",
+            "tags": "[parameters('tags')]",
+            "sku": {
+                "name": "[parameters('sku')]"
+            }
+        }
+    ],
+    "outputs": {
+        "id": {
+            "value": "[resourceId('Microsoft.Bing/accounts',parameters('name'))]",
+            "type": "string"
+        },
+        "endpoint": {
+            "value": "[reference(resourceId('Microsoft.Bing/accounts',parameters('name'))).endpoint]",
+            "type": "string"
+        },
+        "key1": {
+            "value": "[listKeys(resourceId('Microsoft.Bing/accounts',parameters('name')),'2020-06-10').key1]",
+            "type": "string"
+        }
+    }
+}

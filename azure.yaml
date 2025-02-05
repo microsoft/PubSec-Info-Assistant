@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: info-assistant-agent-template
+metadata:
+    template: info-assistant-agent-template@0.0.1-beta
+infra:
+  provider: terraform
+hooks:
+  postprovision:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: ./scripts/deploy-search-indexes.sh
+  preprovision:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: true
+      run: ./scripts/prepare-tf-variables.sh
+  postup:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: false
+      run: azd env get-values > ./app/backend/.env
+services:
+    webapp:
+        project: ./app/backend
+        host: appservice
+        resourceName: ${BACKEND_NAME}
+        language: py
+        module: webapp
+        hooks:
+            prepackage:
+                posix:
+                  shell: sh
+                  run: cd ../frontend;npm install;npm run build
+                  continueOnError: false
+                  interactive: false

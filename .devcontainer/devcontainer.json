@@ -1,0 +1,79 @@
+{
+	"name": "info-asst",
+	"build": { 
+		"dockerfile": "Dockerfile",
+		"args": {
+			// To ensure that the group ID for the docker group in the container
+			// matches the group ID on the host, add this to your .bash_profile on the host
+			// 		export DOCKER_GROUP_ID=$(getent group docker | awk -F ":" '{ print $3 }')
+			"DOCKER_GROUP_ID": "${localEnv:DOCKER_GROUP_ID}"
+		}
+	},
+	"forwardPorts": [ 7071 ],
+	"runArgs": [
+		"--network", "host", "--cap-add", "NET_ADMIN" // use host networking so that the dev container can access the API when running the container locally
+	],
+
+	"mounts": [
+		// Keep command history 
+		"type=volume,source=info-asst-bashhistory,target=/home/vscode/commandhistory",
+		// Mounts the login details from the host machine to azcli works in the container
+		"type=bind,source=${env:HOME}${env:USERPROFILE}/.azure,target=/home/vscode/.azure",
+		// Mount docker socket for docker builds
+		"type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock"
+	],
+
+	// Set *default* container specific settings values on container create.
+	"customizations": {
+		"vscode": {
+			"settings": { 
+				"python.pythonPath": "/opt/conda/envs/development/bin/python",
+				"python.languageServer": "Pylance",
+				"python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+				"python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+				"python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+				"files.watcherExclude": {
+          			"**/.git/objects/**": true,
+         			"**/.git/subtree-cache/**": true,
+					"**/node_modules/*/**": true,
+           			"**/.python_packages/*/**": true
+				},
+				"files.associations": {
+					"*.workbook": "[jsonc]"
+				}
+			},
+			// Add extensions you want installed when the container is created into this array
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"IronGeek.vscode-env",
+				"ms-azuretools.vscode-docker",
+				"ms-toolsai.jupyter",
+				"humao.rest-client",
+				"ms-dotnettools.csharp",
+				"ms-vsliveshare.vsliveshare-pack",
+				"ms-vscode.powershell",
+				"DavidAnson.vscode-markdownlint",
+				"redhat.vscode-yaml",
+				"ms-azure-devops.azure-pipelines",
+				"k--kato.docomment",
+				"hediet.vscode-drawio",
+				"msazurermtools.azurerm-vscode-tools",
+				"ms-azuretools.vscode-azurestorage",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"BelkacemBerras.spellcheck",
+				"ms-azuretools.vscode-azureresourcegroups",
+				"ms-azuretools.vscode-azurefunctions",
+				"ms-python.pylint",
+				"ms-python.mypy",
+				"HashiCorp.terraform",
+				"mhutchie.git-graph",
+				"esbenp.prettier-vscode",
+				"mutantdino.resourcemonitor"
+			]
+		}
+	},
+
+	"remoteUser": "vscode"
+}

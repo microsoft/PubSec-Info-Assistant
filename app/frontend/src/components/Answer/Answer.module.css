@@ -1,0 +1,267 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.answerContainer {
+    padding: 20px;
+    background: rgb(249, 249, 249);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: transparent solid 1px;
+}
+
+.answerContainerWork {
+    padding: 20px;
+    background: rgb(249, 249, 249);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: #1B4AEF solid 1px;
+}
+
+.answerContainerWeb {
+    padding: 20px;
+    background: rgb(249, 249, 249);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: #188d45 solid 1px;
+}
+
+.answerContainerCompare {
+    padding: 20px;
+    background: rgb(249, 249, 249);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: #ce7b2e solid 1px;
+}
+
+.answerContainerUngrounded {
+    padding: 20px;
+    background: transparent;
+    outline: transparent;
+}
+
+.warningText {
+    color: rgb(182, 91, 114);
+    font-weight: bold;
+    text-decoration: underline;
+    text-align: center;
+}
+
+.answerLogoWeb {
+    font-size: 22px;
+    color: #188d45;
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoWork {
+    font-size: 22px;
+    color: #1B4AEF;
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoCompare {
+    font-size: 22px;
+    color: #ce7b2e;
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoUngrounded {
+    font-size: 22px;
+    color: rgba(0, 0, 0, 1);
+    white-space: break-spaces;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+.answerLogoUngroundedText {
+    padding-left: 10px;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 700;
+    font-variation-settings: unset;
+}
+
+.answerText {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+.answerTextUngrounded {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 36px;
+}
+
+.selected {
+    outline: 2px solid rgba(115, 118, 225, 1);
+}
+
+.citationLearnMore {
+    margin-right: 5px;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.citationWork {
+    font-weight: 500;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    padding: 0px 8px;
+    background: #d1dbfa;
+    color: #123bb6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.citationWork:hover {
+    text-decoration: underline;
+}
+
+.citationWeb {
+    font-weight: 500;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    padding: 0px 8px;
+    background: #d1fad8;
+    color: #123bb6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.citationWeb:hover {
+    text-decoration: underline;
+}
+
+.citationCompare {
+    font-weight: 500;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    padding: 0px 8px;
+    background: #fae3d1;
+    color: #123bb6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.citationCompare:hover {
+    text-decoration: underline;
+}
+
+.followupQuestionsList {
+    margin-top: 10px;
+}
+
+.followupQuestionLearnMore {
+    margin-right: 5px;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.followupQuestion {
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    padding: 0px 8px;
+    background: #e8ebfa;
+    color: black;
+    font-style: italic;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.supContainerWeb {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.supContainerWeb:hover {
+    text-decoration: underline;
+}
+
+.supContainerWork {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.supContainerWork:hover {
+    text-decoration: underline;
+}
+
+sup {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    vertical-align: top;
+    top: -1;
+    margin: 0px 2px;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: #d1dbfa;
+    color: #123bb6;
+    text-decoration-color: transparent;
+    outline: transparent solid 1px;
+    cursor: pointer;
+}
+
+.retryButton {
+    width: fit-content;
+}
+
+@keyframes loading {
+    0% {
+        content: "";
+    }
+    25% {
+        content: ".";
+    }
+    50% {
+        content: "..";
+    }
+    75% {
+        content: "...";
+    }
+    100% {
+        content: "";
+    }
+}
+
+.loadingdots::after {
+    content: "";
+    animation: loading 1s infinite;
+}
+
+.raiwarning {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(133, 133, 133);
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}

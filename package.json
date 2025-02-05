@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@fluentui/react-northstar": "^0.66.5",
+    "dataframe-js": "^1.4.4",
+    "dotenv": "^16.4.5",
+    "papaparse": "^5.4.1",
+    "react-markdown": "^6.0.3",
+    "react-sticky": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/dataframe-js": "^1.4.3",
+    "@types/papaparse": "^5.3.14",
+    "@types/react-sticky": "^6.0.6"
+  }
+}

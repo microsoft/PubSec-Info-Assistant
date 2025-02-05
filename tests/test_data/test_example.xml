@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RandomData>
+  <Item>
+    <Name>John Doe</Name>
+    <Contact>
+      <Email>john.doe@example.com</Email>
+      <Phone>123-456-7890</Phone>
+    </Contact>
+    <Age>42</Age>
+  </Item>
+  <Item>
+    <Name>Alice Smith</Name>
+    <Contact>
+      <Email>alice.smith@example.com</Email>
+      <Phone>987-654-3210</Phone>
+    </Contact>
+    <Age>30</Age>
+  </Item>
+  <Item>
+    <Name>Robert Johnson</Name>
+    <Contact>
+      <Email>robert.johnson@example.com</Email>
+      <Phone>555-123-4567</Phone>
+    </Contact>
+    <Age>25</Age>
+  </Item>
+  <Item>
+    <Name>Susan Davis</Name>
+    <Contact>
+      <Email>susan.davis@example.com</Email>
+      <Phone>444-789-1234</Phone>
+    </Contact>
+    <Age>35</Age>
+  </Item>
+</RandomData>

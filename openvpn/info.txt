@@ -1,1 +1,0 @@
-This folder can be used to host certificates and VPN config files. It is excluded by .gitignore from being added to source control. 

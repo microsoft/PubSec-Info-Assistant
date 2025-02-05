@@ -1,0 +1,31 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+# Pipeline for build validation in PRs
+trigger: none
+
+pr:
+  autoCancel: true
+  branches:
+    exclude: [ master ]
+  paths:
+    exclude: 
+      - docs/*
+      - "*.md"
+  drafts: false
+
+stages:
+- stage: Deploy
+  jobs:
+
+  - deployment: Tmp
+    environment: $(environment)
+    timeoutInMinutes: 120
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+        runOnce:    #rolling, canary are the other strategies that are supported
+          deploy:
+            steps:
+            - template: templates/deploy-template.yml
+            - template: templates/destroy-template.yml

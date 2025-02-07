@@ -1,0 +1,43 @@
+{
+    "$schema": "${arm_template_schema_mgmt_api}/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "nsp_name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object"
+        },
+        "profileId": {
+            "type": "string"
+        },
+        "privateLinkResourceId": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityPerimeters/resourceAssociations",
+            "apiVersion": "2023-08-01-preview",
+            "name": "[format('{0}/{1}', parameters('nsp_name'), parameters('name'))]",
+            "location": "[parameters('location')]",
+            "properties": {
+              "accessMode": "Learning",
+              "privateLinkResource": {
+                "id": "[parameters('privateLinkResourceId')]"
+              },
+              "profile": {
+                "id": "[parameters('profileId')]"
+              }
+            },
+            "tags": "[parameters('tags')]"
+          }
+    ],
+    "outputs": {}
+}

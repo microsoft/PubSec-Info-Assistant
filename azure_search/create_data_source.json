@@ -1,0 +1,19 @@
+{
+    "name": "infoasst-azureblob-datasource",
+    "description": null,
+    "type": "azureblob",
+    "subtype": null,
+    "credentials": {
+      "connectionString": "ResourceId=/subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP_NAME/providers/Microsoft.Storage/storageAccounts/$AZURE_STORAGE_ACCOUNT;"
+    },
+    "container": {
+      "name": "upload",
+      "query": null
+    },
+    "dataChangeDetectionPolicy": null,
+    "dataDeletionDetectionPolicy": {
+      "@odata.type": "#Microsoft.Azure.Search.NativeBlobSoftDeleteDeletionDetectionPolicy"
+    },
+    "encryptionKey": null,
+    "identity": null
+  }

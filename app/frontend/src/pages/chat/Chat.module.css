@@ -1,0 +1,214 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.subHeader {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.chatRoot {
+    flex: 1;
+    display: flex;
+}
+
+.chatContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+
+}
+
+.chat-overflow-hidden-body {
+    overflow: hidden;
+}
+
+.chatEmptyState {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-height: 1024px;
+    padding-top: 10px;
+}
+
+.chatEmptyStateHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.chatEmptyStateTitle {
+    display: contents;
+    font-size: 3rem;
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.chatEmptyObjectives {
+    padding-left: 160px;
+    padding-right: 160px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.chatEmptyObjectivesList {
+    text-align: center;
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+    padding-bottom: 40px;
+    padding-top: 24px;
+}
+
+.chatEmptyObjectivesListItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+}
+
+.chatEmptyObjectivesListItemText {
+    padding-right: 6px;
+    padding-left: 6px;
+}
+
+.chatEmptyStateSubtitle {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+@media only screen and (max-height: 780px) {
+    .chatEmptyState {
+        padding-top: 0;
+    }
+
+    .chatEmptyStateTitle {
+        font-size: 3rem;
+        margin-bottom: 0px;
+    }
+}
+
+.chatMessageStream {
+    flex-grow: 1;
+    max-width: 1028px;
+    width: 100%;
+    overflow-y: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* or 'scroll' if you always want the scrollbar to be visible */
+    max-height: calc(100vh - 313px); /* optional, adjust according to your layout */
+}
+
+.chatMessageGpt {
+    margin-bottom: 20px;
+    max-width: 80%;
+    display: flex;
+    min-width: 500px;
+}
+
+.chatMessageGptMinWidth {
+    max-width: 500px;
+    margin-bottom: 20px;
+}
+
+.chatInput {
+    position: sticky;
+    bottom: 0;
+    flex: 0 0 100px;
+    padding-top: 12px;
+    padding-bottom: 24px;
+    padding-left: 24px;
+    padding-right: 24px;
+    width: 100%;
+    max-width: 1028px;
+    background: #f2f2f2;
+}
+
+.chatAnalysisPanel {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 89vh;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.chatSettingsSeparator {
+    margin-top: 15px;
+}
+
+.loadingLogo {
+    font-size: 28px;
+}
+
+.commandsContainer {
+    display: flex;
+    align-self: flex-end;
+}
+
+.commandButton {
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+
+.hide {
+    display: none;
+}
+
+.defaultApproachWebOption {
+    font-size: 18px;
+    font-weight: 600;
+    color: #188d45;
+    padding-right: 10px;
+}
+
+.defaultApproachWorkOption {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1B4AEF;
+    padding-left: 10px;
+}
+
+.defaultApproachSwitch {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.chatInputWarningMessage{
+    font-size: 12px;
+    font-weight: 400;
+    color: #858585;
+    line-height: 22px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: absolute;
+    bottom: 23px;
+    right: 40px;
+}
+
+@media (max-width: 800px) {
+    .chatInputWarningMessage {
+        bottom: 8px;
+    }
+}

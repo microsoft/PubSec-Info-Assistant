@@ -1,0 +1,181 @@
+{
+  "name": "infoasst-skillset",
+  "description": "Document processing pipeline for Information Assistant Copilot Template", 
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Util.DocumentExtractionSkill",
+      "name": "extraction",
+      "description": "",
+      "context": "/document",
+      "inputs": [
+        {
+          "name": "file_data",
+          "source": "/document/file_data",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "content",
+          "targetName": "text"
+        },
+        {
+          "name": "normalized_images",
+          "targetName": "normalized_images"
+        }
+      ],
+      "parsingMode": "default",
+      "dataToExtract": "contentAndMetadata",
+      "configuration": {
+        "imageAction": "generateNormalizedImages",
+        "normalizedImageMaxWidth": 2000,
+        "normalizedImageMaxHeight": 2000
+      }
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
+      "name": "Split",
+      "description": "Split skill to chunk documents",
+      "context": "/document",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/text",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "textItems",
+          "targetName": "pages"
+        }
+      ],
+      "defaultLanguageCode": "en",
+      "textSplitMode": "pages",
+      "maximumPageLength": 2000,
+      "pageOverlapLength": 500
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
+      "name": "KeyPhraseExtraction",
+      "description": "Extract key phrases",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "keyPhrases",
+          "targetName": "keyPhrases"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.V3.EntityRecognitionSkill",
+      "name": "EntityRecognition",
+      "description": "Recognize entities",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "namedEntities",
+          "targetName": "entities"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
+      "name": "language detection",
+      "description": "detection of language of text",
+      "context": "/document/pages/*",
+      "defaultCountryHint": "US",
+      "modelVersion": "",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "languageCode",
+          "targetName": "language"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "language check",
+      "description": "determine if translation is needed",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*/language) != '$TRANSLATE_TO_LANGUAGE'",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= $(/document/pages/*)",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= null",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "contentToTranslate"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
+      "name": "translation",
+      "context": "/document/pages/*",
+      "defaultToLanguageCode": "$TRANSLATE_TO_LANGUAGE",
+      "suggestedFrom": "en",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*/contentToTranslate",
+          "inputs": []
+        },
+        {
+          "name": "fromLanguageCode",
+          "source": "/document/pages/*/language",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "translatedText",
+          "targetName": "translatedText"
+        },
+        {
+          "name": "translatedFromLanguageCode",
+          "targetName": "translatedFromLanguageCode"
+        },
+        {
+          "name": "translatedToLanguageCode",
+          "targetName": "translatedToLanguageCode"
+        }
+      ]
+    }
+  ],
+  "@odata.etag": "\"0x8DD2F8D60263F8A\""
+}

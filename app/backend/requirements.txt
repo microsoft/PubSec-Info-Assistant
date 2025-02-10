@@ -1,0 +1,14 @@
+azure-identity==1.18.0
+Flask==3.0.3
+azure-mgmt-cognitiveservices==13.5.0
+openai==1.55.3
+azure-search-documents==11.5.1
+azure-storage-blob==12.23.0
+tiktoken==0.7.0
+fastapi==0.115.0
+fastapi-utils==0.7.0
+uvicorn==0.30.6
+microsoft-bing-websearch==1.0.0
+pytest==8.3.3
+python-multipart==0.0.18
+cryptography==43.0.3

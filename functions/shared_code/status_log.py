@@ -108,8 +108,10 @@ class StatusLog:
             enable_cross_partition_query=True
         ))
 
-        return State(items[0]['state'])
-
+        if (items and isinstance(items, list) and len(items) > 0):
+            return State(items[0]['state'])
+        else:
+            return State("Deleted")
 
     def read_files_status_by_timeframe(self, 
                        within_n_hours: int,

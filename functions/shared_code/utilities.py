@@ -172,63 +172,66 @@ class Utilities:
         document_map['content_type'].extend([ContentType.NOT_PROCESSED] * len(result['content']))
         document_map['table_index'].extend([-1] * len(result["content"]))
 
-        # update content_type array where spans are tables
-        for index, table in enumerate(result["tables"]):
-            # initialize start_char and end_char based on the first span
-            start_char = table["spans"][0]["offset"]
-            end_char = start_char + table["spans"][0]["length"] - 1
-            
-            # iterate over the remaining spans
-            for span in table["spans"][1:]:
-                span_start = span["offset"]
-                # update start_char to the minimum offset
-                start_char = min(start_char, span_start)
-                # update total_length by adding the length of the current span
-                end_char += span["length"] -1
-            
-            # update the content_type array
-            document_map['content_type'][start_char] = ContentType.TABLE_START
-            for i in range(start_char + 1, end_char):
-                document_map['content_type'][i] = ContentType.TABLE_CHAR
-            document_map['content_type'][end_char] = ContentType.TABLE_END
-            # tag the end point in content of a table with the index of which table this is
-            document_map['table_index'][end_char] = index
+        if "tables" in result and result["tables"] is not None:
 
+            # update content_type array where spans are tables
+            for index, table in enumerate(result["tables"]):
+                # initialize start_char and end_char based on the first span
+                start_char = table["spans"][0]["offset"]
+                end_char = start_char + table["spans"][0]["length"] - 1
+                
+                # iterate over the remaining spans
+                for span in table["spans"][1:]:
+                    span_start = span["offset"]
+                    # update start_char to the minimum offset
+                    start_char = min(start_char, span_start)
+                    # update total_length by adding the length of the current span
+                    end_char += span["length"] -1
+                
+                # update the content_type array
+                document_map['content_type'][start_char] = ContentType.TABLE_START
+                for i in range(start_char + 1, end_char):
+                    document_map['content_type'][i] = ContentType.TABLE_CHAR
+                document_map['content_type'][end_char] = ContentType.TABLE_END
+                # tag the end point in content of a table with the index of which table this is
+                document_map['table_index'][end_char] = index
 
-        # update content_type array where spans are titles, section headings or regular content,
-        # BUT skip over the table paragraphs
-        for paragraph in result["paragraphs"]:
-            start_char = paragraph["spans"][0]["offset"]
-            end_char = start_char + paragraph["spans"][0]["length"] - 1
+        if "paragraphs" in result and result["paragraphs"] is not None:
 
-            # if this span has already been identified as a non textual paragraph
-            # such as a table, then skip over it
-            if document_map['content_type'][start_char] == ContentType.NOT_PROCESSED:
-                #if not hasattr(paragraph, 'role'):
-                if 'role' not in paragraph:
-                    # no assigned role
-                    document_map['content_type'][start_char] = ContentType.TEXT_START
-                    for i in range(start_char+1, end_char):
-                        document_map['content_type'][i] = ContentType.TEXT_CHAR
-                    document_map['content_type'][end_char] = ContentType.TEXT_END
+            # update content_type array where spans are titles, section headings or regular content,
+            # BUT skip over the table paragraphs
+            for paragraph in result["paragraphs"]:
+                start_char = paragraph["spans"][0]["offset"]
+                end_char = start_char + paragraph["spans"][0]["length"] - 1
 
-                elif paragraph['role'] == 'title':
-                    document_map['content_type'][start_char] = ContentType.TITLE_START
-                    for i in range(start_char+1, end_char):
-                        document_map['content_type'][i] = ContentType.TITLE_CHAR
-                    document_map['content_type'][end_char] = ContentType.TITLE_END
+                # if this span has already been identified as a non textual paragraph
+                # such as a table, then skip over it
+                if document_map['content_type'][start_char] == ContentType.NOT_PROCESSED:
+                    #if not hasattr(paragraph, 'role'):
+                    if 'role' not in paragraph:
+                        # no assigned role
+                        document_map['content_type'][start_char] = ContentType.TEXT_START
+                        for i in range(start_char+1, end_char):
+                            document_map['content_type'][i] = ContentType.TEXT_CHAR
+                        document_map['content_type'][end_char] = ContentType.TEXT_END
 
-                elif paragraph['role'] == 'sectionHeading':
-                    document_map['content_type'][start_char] = ContentType.SECTIONHEADING_START
-                    for i in range(start_char+1, end_char):
-                        document_map['content_type'][i] = ContentType.SECTIONHEADING_CHAR
-                    document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
+                    elif paragraph['role'] == 'title':
+                        document_map['content_type'][start_char] = ContentType.TITLE_START
+                        for i in range(start_char+1, end_char):
+                            document_map['content_type'][i] = ContentType.TITLE_CHAR
+                        document_map['content_type'][end_char] = ContentType.TITLE_END
 
-        # store page number metadata by paragraph object
-        page_number_by_paragraph = {}
-        for _, paragraph in enumerate(result["paragraphs"]):
-            start_char = paragraph["spans"][0]["offset"]
-            page_number_by_paragraph[start_char] = paragraph["boundingRegions"][0]["pageNumber"]
+                    elif paragraph['role'] == 'sectionHeading':
+                        document_map['content_type'][start_char] = ContentType.SECTIONHEADING_START
+                        for i in range(start_char+1, end_char):
+                            document_map['content_type'][i] = ContentType.SECTIONHEADING_CHAR
+                        document_map['content_type'][end_char] = ContentType.SECTIONHEADING_END
+
+            # store page number metadata by paragraph object
+            page_number_by_paragraph = {}
+            for _, paragraph in enumerate(result["paragraphs"]):
+                start_char = paragraph["spans"][0]["offset"]
+                page_number_by_paragraph[start_char] = paragraph["boundingRegions"][0]["pageNumber"]
 
         # iterate through the content_type and build the document paragraph catalog of content
         # tagging paragraphs with title and section
@@ -393,158 +396,161 @@ class Utilities:
     
     def build_chunks(self, document_map, myblob_name, myblob_uri, chunk_target_size):
         """ Function to build chunk outputs based on the document map """
-
-        chunk_text = ''
-        chunk_size = 0
-        file_number = 0
-        page_number = 0
-        previous_section_name = document_map['structure'][0]['section']
-        previous_title_name = document_map['structure'][0]["title"]
-        previous_subtitle_name = document_map['structure'][0]["subtitle"]
-        page_list = []
+        
         chunk_count = 0
-        previous_paragraph_element_is_a_table = False
 
-        # iterate over the paragraphs and build a chuck based on a section
-        # and/or title of the document
-        for index, paragraph_element in enumerate(document_map['structure']):
-            paragraph_size = self.token_count(paragraph_element["text"])
-            paragraph_text = paragraph_element["text"]
-            section_name = paragraph_element["section"]
-            title_name = paragraph_element["title"]
-            subtitle_name = paragraph_element["subtitle"]
+        if "structure" in document_map and document_map["structure"] is not None and len(document_map["structure"]) > 0:
 
-            #if the collected tokens in the current in-memory chunk + the next paragraph
-            # will be larger than the allowed chunk size prepare to write out the total chunk
-            if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name or subtitle_name != previous_subtitle_name:
-                
-                # If the current paragraph just by itself is larger than CHUNK_TARGET_SIZE,
-                # then we need to split this up and treat each slice as a new in-memory chunk
-                if paragraph_size >= chunk_target_size:
+            chunk_text = ''
+            chunk_size = 0
+            file_number = 0
+            page_number = 0
+            previous_section_name = document_map['structure'][0]['section']
+            previous_title_name = document_map['structure'][0]["title"]
+            previous_subtitle_name = document_map['structure'][0]["subtitle"]
+            page_list = []
+            previous_paragraph_element_is_a_table = False
+
+            # iterate over the paragraphs and build a chuck based on a section
+            # and/or title of the document
+            for index, paragraph_element in enumerate(document_map['structure']):
+                paragraph_size = self.token_count(paragraph_element["text"])
+                paragraph_text = paragraph_element["text"]
+                section_name = paragraph_element["section"]
+                title_name = paragraph_element["title"]
+                subtitle_name = paragraph_element["subtitle"]
+
+                #if the collected tokens in the current in-memory chunk + the next paragraph
+                # will be larger than the allowed chunk size prepare to write out the total chunk
+                if (chunk_size + paragraph_size >= chunk_target_size) or section_name != previous_section_name or title_name != previous_title_name or subtitle_name != previous_subtitle_name:
                     
-                    # We will process tables and regular text differently as text can be split by sentence boundaries, 
-                    # but tables fail as the code sees a table as a single sentence.
-                    # We need a speciality way of splitting a table that is greater than
-                    # our target chunk size                    
-                    if paragraph_element["type"] == "table":
-                        # table processing & splitting
-                        table_chunks = self.chunk_table_with_headers(chunk_text, 
-                                                                     paragraph_text, 
-                                                                     chunk_target_size,
-                                                                     previous_paragraph_element_is_a_table)
+                    # If the current paragraph just by itself is larger than CHUNK_TARGET_SIZE,
+                    # then we need to split this up and treat each slice as a new in-memory chunk
+                    if paragraph_size >= chunk_target_size:
                         
-                        for i, table_chunk in enumerate(table_chunks):
-                                                   
-                            # write out each table chunk, apart from the last, as this will be less than or
+                        # We will process tables and regular text differently as text can be split by sentence boundaries, 
+                        # but tables fail as the code sees a table as a single sentence.
+                        # We need a speciality way of splitting a table that is greater than
+                        # our target chunk size                    
+                        if paragraph_element["type"] == "table":
+                            # table processing & splitting
+                            table_chunks = self.chunk_table_with_headers(chunk_text, 
+                                                                        paragraph_text, 
+                                                                        chunk_target_size,
+                                                                        previous_paragraph_element_is_a_table)
+                            
+                            for i, table_chunk in enumerate(table_chunks):
+                                                    
+                                # write out each table chunk, apart from the last, as this will be less than or
+                                # equal to CHUNK_TARGET_SIZE the last chunk will be processed like
+                                # a regular paragraph
+                                if i < len(table_chunks) - 1:
+                                    self.write_chunk(myblob_name, myblob_uri,
+                                                    f"{file_number}.{i}",
+                                                    self.token_count(table_chunk),
+                                                    table_chunk, page_list,
+                                                    previous_section_name, previous_title_name, previous_subtitle_name, 
+                                                    MediaType.TEXT)
+                                    chunk_count += 1      
+                                else:
+                                    # Reset the paragraph token count to just the tokens left in the last
+                                    # chunk and leave the remaining text from the large paragraph to be
+                                    # combined with the next in the outer loop
+                                    paragraph_size = self.token_count(table_chunk)
+                                    paragraph_text = table_chunk
+                                    chunk_text = ''
+                                    file_number += 1                                
+                                            
+                        else:
+                            # text processing & splitting
+                            # start by keeping the existing in-memory chunk in front of the large paragraph
+                            # and begin to process it on sentence boundaries to break it down into
+                            # sub-chunks that are below the CHUNK_TARGET_SIZE
+                            sentences = sent_tokenize(chunk_text + paragraph_text)
+                            chunks = []
+                            chunk = ""
+                            for sentence in sentences:
+                                temp_chunk = chunk + " " + sentence if chunk else sentence
+                                if self.token_count(temp_chunk) <= chunk_target_size:
+                                    chunk = temp_chunk
+                                else:
+                                    chunks.append(chunk)
+                                    chunk = sentence
+                            if chunk:
+                                chunks.append(chunk)
+
+                            # Now write out each chunk, apart from the last, as this will be less than or
                             # equal to CHUNK_TARGET_SIZE the last chunk will be processed like
                             # a regular paragraph
-                            if i < len(table_chunks) - 1:
-                                self.write_chunk(myblob_name, myblob_uri,
-                                                f"{file_number}.{i}",
-                                                self.token_count(table_chunk),
-                                                table_chunk, page_list,
-                                                previous_section_name, previous_title_name, previous_subtitle_name, 
-                                                MediaType.TEXT)
-                                chunk_count += 1      
-                            else:
-                                # Reset the paragraph token count to just the tokens left in the last
-                                # chunk and leave the remaining text from the large paragraph to be
-                                # combined with the next in the outer loop
-                                paragraph_size = self.token_count(table_chunk)
-                                paragraph_text = table_chunk
-                                chunk_text = ''
-                                file_number += 1                                
-                                        
+                            for i, chunk_text_p in enumerate(chunks):
+                                if i < len(chunks) - 1:
+                                    # Process all but the last chunk in this large para
+                                    self.write_chunk(myblob_name, myblob_uri,
+                                                    f"{file_number}.{i}",
+                                                    self.token_count(chunk_text_p),
+                                                    chunk_text_p, page_list,
+                                                    previous_section_name, previous_title_name, previous_subtitle_name, 
+                                                    MediaType.TEXT)
+                                    chunk_count += 1
+                                else:
+                                    # Reset the paragraph token count to just the tokens left in the last
+                                    # chunk and leave the remaining text from the large paragraph to be
+                                    # combined with the next in the outer loop
+                                    paragraph_size = self.token_count(chunk_text_p)
+                                    paragraph_text = chunk_text_p
+                                    chunk_text = ''
+                                    file_number += 1
                     else:
-                        # text processing & splitting
-                        # start by keeping the existing in-memory chunk in front of the large paragraph
-                        # and begin to process it on sentence boundaries to break it down into
-                        # sub-chunks that are below the CHUNK_TARGET_SIZE
-                        sentences = sent_tokenize(chunk_text + paragraph_text)
-                        chunks = []
-                        chunk = ""
-                        for sentence in sentences:
-                            temp_chunk = chunk + " " + sentence if chunk else sentence
-                            if self.token_count(temp_chunk) <= chunk_target_size:
-                                chunk = temp_chunk
-                            else:
-                                chunks.append(chunk)
-                                chunk = sentence
-                        if chunk:
-                            chunks.append(chunk)
+                        # if this para is not large by itself but will put us over the max token count
+                        # or it is a new section, then write out the chunk text we have to this point
+                        self.write_chunk(myblob_name, myblob_uri, file_number,
+                                        chunk_size, chunk_text, page_list,
+                                        previous_section_name, previous_title_name, previous_subtitle_name,
+                                        MediaType.TEXT)
+                        chunk_count += 1
 
-                        # Now write out each chunk, apart from the last, as this will be less than or
-                        # equal to CHUNK_TARGET_SIZE the last chunk will be processed like
-                        # a regular paragraph
-                        for i, chunk_text_p in enumerate(chunks):
-                            if i < len(chunks) - 1:
-                                # Process all but the last chunk in this large para
-                                self.write_chunk(myblob_name, myblob_uri,
-                                                f"{file_number}.{i}",
-                                                self.token_count(chunk_text_p),
-                                                chunk_text_p, page_list,
-                                                previous_section_name, previous_title_name, previous_subtitle_name, 
-                                                MediaType.TEXT)
-                                chunk_count += 1
-                            else:
-                                # Reset the paragraph token count to just the tokens left in the last
-                                # chunk and leave the remaining text from the large paragraph to be
-                                # combined with the next in the outer loop
-                                paragraph_size = self.token_count(chunk_text_p)
-                                paragraph_text = chunk_text_p
-                                chunk_text = ''
-                                file_number += 1
+                        # reset chunk specific variables
+                        file_number += 1
+                        page_list = []
+                        chunk_text = ''
+                        chunk_size = 0
+                        page_number = 0
+
+                if page_number != paragraph_element["page_number"]:
+                    # increment page number if necessary
+                    page_list.append(paragraph_element["page_number"])
+                    page_number = paragraph_element["page_number"]
+
+                # add paragraph to the chunk
+                chunk_size = chunk_size + paragraph_size
+                chunk_text = chunk_text + "\n" + paragraph_text
+                
+                # store the type of paragraph and content, to be used if a table crosses page boundaries and
+                # we need to apply the column headings to subsequent pages
+
+                if paragraph_element["type"] == "table":
+                    previous_paragraph_element_is_a_table = True
+                    if self.previous_table_header == "":
+                        # Stash the current tables heading to apply to subsequent page tables if they are missing column headings,
+                        # but only for the first page of the multi-page table
+                        soup = BeautifulSoup(paragraph_text, 'html.parser')
+                        # Extract the thead and strip the thead wrapper to just leave the header cells
+                        self.previous_table_header = str(soup.find('thead'))
+                        self.previous_table_header = self.previous_table_header.replace("<thead>", "").replace("</thead>", "")
                 else:
-                    # if this para is not large by itself but will put us over the max token count
-                    # or it is a new section, then write out the chunk text we have to this point
-                    self.write_chunk(myblob_name, myblob_uri, file_number,
-                                     chunk_size, chunk_text, page_list,
-                                     previous_section_name, previous_title_name, previous_subtitle_name,
-                                     MediaType.TEXT)
+                    previous_paragraph_element_is_a_table = False
+                    self.previous_table_header = ""
+                
+                # If this is the last paragraph then write the chunk
+                if index == len(document_map['structure'])-1:
+                    self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
+                                    chunk_text, page_list, section_name, title_name, previous_subtitle_name,
+                                    MediaType.TEXT)
                     chunk_count += 1
 
-                    # reset chunk specific variables
-                    file_number += 1
-                    page_list = []
-                    chunk_text = ''
-                    chunk_size = 0
-                    page_number = 0
-
-            if page_number != paragraph_element["page_number"]:
-                # increment page number if necessary
-                page_list.append(paragraph_element["page_number"])
-                page_number = paragraph_element["page_number"]
-
-            # add paragraph to the chunk
-            chunk_size = chunk_size + paragraph_size
-            chunk_text = chunk_text + "\n" + paragraph_text
-            
-            # store the type of paragraph and content, to be used if a table crosses page boundaries and
-            # we need to apply the column headings to subsequent pages
-
-            if paragraph_element["type"] == "table":
-                previous_paragraph_element_is_a_table = True
-                if self.previous_table_header == "":
-                    # Stash the current tables heading to apply to subsequent page tables if they are missing column headings,
-                    # but only for the first page of the multi-page table
-                    soup = BeautifulSoup(paragraph_text, 'html.parser')
-                    # Extract the thead and strip the thead wrapper to just leave the header cells
-                    self.previous_table_header = str(soup.find('thead'))
-                    self.previous_table_header = self.previous_table_header.replace("<thead>", "").replace("</thead>", "")
-            else:
-                previous_paragraph_element_is_a_table = False
-                self.previous_table_header = ""
-            
-            # If this is the last paragraph then write the chunk
-            if index == len(document_map['structure'])-1:
-                self.write_chunk(myblob_name, myblob_uri, file_number, chunk_size,
-                                 chunk_text, page_list, section_name, title_name, previous_subtitle_name,
-                                 MediaType.TEXT)
-                chunk_count += 1
-
-            previous_section_name = section_name
-            previous_title_name = title_name
-            previous_subtitle_name = subtitle_name
+                previous_section_name = section_name
+                previous_title_name = title_name
+                previous_subtitle_name = subtitle_name
 
         logging.info("Chunking is complete \n")
         return chunk_count

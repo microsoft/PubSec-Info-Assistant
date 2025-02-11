@@ -4,7 +4,7 @@ azure-identity==1.18.0
 azure-mgmt-cognitiveservices==13.5.0
 azure-search-documents==11.5.1
 azure-storage-blob==12.23.0
-cryptography==43.0.3
+cryptography==44.0.1
 fastapi==0.115.0
 fastapi-utils==0.7.0
 Flask==3.0.3

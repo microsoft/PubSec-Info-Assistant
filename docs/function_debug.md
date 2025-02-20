@@ -26,7 +26,7 @@ Next you will need to create local configuration values that are used by the fun
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": "content",
     "CHUNK_TARGET_SIZE": "750",
     "CHUNK_TARGET_SIZE": "750",
-    "DOCUMENT_INTELLIGENCE_API_VERSION": "2024-11-30",
+    "AZURE_DOCUMENT_INTELLIGENCE_API_VERSION": "2024-11-30",
     "MAX_POLLING_REQUEUE_COUNT": "10",
     "MAX_READ_ATTEMPTS": "5",
     "MAX_SECONDS_HIDE_ON_UPLOAD": "300",

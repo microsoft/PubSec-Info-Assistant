@@ -155,7 +155,7 @@ resource "azurerm_linux_function_app" "function_app" {
     AZURE_QUEUE_STORAGE_ENDPOINT                = var.queueStorageAccountEndpoint
     CHUNK_TARGET_SIZE                           = var.chunkTargetSize
     TARGET_PAGES                                = var.targetPages
-    DOCUMENT_INTELLIGENCE_API_VERSION                              = var.documentIntelligenceApiVersion
+    AZURE_DOCUMENT_INTELLIGENCE_API_VERSION                              = var.documentIntelligenceApiVersion
     AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT        = var.documentIntelligenceEndpoint
     COSMOSDB_URL                                = var.CosmosDBEndpointURL
     COSMOSDB_LOG_DATABASE_NAME                  = var.CosmosDBLogDatabaseName

@@ -62,8 +62,8 @@ jq -r --arg secrets "$secrets" '
             "env_var": "CHUNK_TARGET_SIZE"
         },
         {
-            "path": "DOCUMENT_INTELLIGENCE_API_VERSION",
-            "env_var": "DOCUMENT_INTELLIGENCE_API_VERSION"
+            "path": "AZURE_DOCUMENT_INTELLIGENCE_API_VERSION",
+            "env_var": "AZURE_DOCUMENT_INTELLIGENCE_API_VERSION"
         },
         {
             "path": "TARGET_PAGES",

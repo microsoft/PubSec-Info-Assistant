@@ -83,7 +83,7 @@ output "CHUNK_TARGET_SIZE" {
   value = var.chunkTargetSize
 }
 
-output "DOCUMENT_INTELLIGENCE_API_VERSION" {
+output "AZURE_DOCUMENT_INTELLIGENCE_API_VERSION" {
   value = var.documentIntelligenceApiVersion
 }
 

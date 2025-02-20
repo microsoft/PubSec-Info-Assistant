@@ -26,7 +26,7 @@ azure_blob_drop_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_UPLOAD_CONT
 azure_blob_content_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME"]
 azure_blob_log_storage_container = os.environ["BLOB_STORAGE_ACCOUNT_LOG_CONTAINER_NAME"]
 CHUNK_TARGET_SIZE = int(os.environ["CHUNK_TARGET_SIZE"])
-DOCUMENT_INTELLIGENCE_API_VERSION = os.environ["DOCUMENT_INTELLIGENCE_API_VERSION"]
+AZURE_DOCUMENT_INTELLIGENCE_API_VERSION = os.environ["AZURE_DOCUMENT_INTELLIGENCE_API_VERSION"]
 # ALL or Custom page numbers for multi-page documents(PDF/TIFF). Input the page numbers and/or
 # ranges of pages you want to get in the result. For a range of pages, use a hyphen, like pages="1-3, 5-6".
 # Separate each page number or range with a comma.
@@ -38,7 +38,7 @@ pdf_polling_queue = os.environ["PDF_POLLING_QUEUE"]
 pdf_submit_queue = os.environ["PDF_SUBMIT_QUEUE"]
 text_enrichment_queue = os.environ["TEXT_ENRICHMENT_QUEUE"]
 endpoint = os.environ["AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"]
-api_version = os.environ["DOCUMENT_INTELLIGENCE_API_VERSION"]
+api_version = os.environ["AZURE_DOCUMENT_INTELLIGENCE_API_VERSION"]
 max_submit_requeue_count = int(os.environ["MAX_SUBMIT_REQUEUE_COUNT"])
 max_polling_requeue_count = int(os.environ["MAX_POLLING_REQUEUE_COUNT"])
 submit_requeue_hide_seconds = int(os.environ["SUBMIT_REQUEUE_HIDE_SECONDS"])

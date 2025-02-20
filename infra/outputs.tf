@@ -67,8 +67,8 @@ output "AZURE_COSMOSDB_LOG_CONTAINER_NAME" {
   value = module.cosmosdb.CosmosDBLogContainerName
 }
 
-output "AZURE_FORM_RECOGNIZER_ENDPOINT" {
-  value = module.aiDocIntelligence.formRecognizerAccountEndpoint
+output "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT" {
+  value = module.aiDocIntelligence.docIntelligenceAccountEndpoint
 }
 
 output "AZURE_BLOB_DROP_STORAGE_CONTAINER" {
@@ -83,8 +83,8 @@ output "CHUNK_TARGET_SIZE" {
   value = var.chunkTargetSize
 }
 
-output "FR_API_VERSION" {
-  value = var.formRecognizerApiVersion
+output "DOCUMENT_INTELLIGENCE_API_VERSION" {
+  value = var.documentIntelligenceApiVersion
 }
 
 output "TARGET_PAGES" {

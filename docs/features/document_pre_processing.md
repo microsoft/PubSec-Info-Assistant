@@ -56,10 +56,10 @@ subgraph "Chunking (Functions & App Services)"
   I-->|queue|M
   M-->Y(ImageEnrichment)
   J-->|queue|N
-  K-->O(FileFormRecSubmissionPDF)
+  K-->O(FileDocIntelSubmissionPDF)
   O-->|queue|P
   O-.->|submit|AA
-  P-->Q(FileFormRecPollingPDF)
+  P-->Q(FileDocIntelPollingPDF)
   Q<-.->|poll|AA
   Q & T-->|write chunks|S1
   L-->T(FileLayoutParsingOther)
@@ -81,11 +81,11 @@ We have 2 paths for text based files because we extract the content and build a 
 
 With other text based file types, we use a library called [Unstructured.io](https://unstructured.io/) to extract text content from various file types and chunk the files. [Unstructured.io](https://unstructured.io/) releases updates to this library so feel free to test newer versions if you require enhanced functionality.
 
-Listening to the **pdf-submit-queue** is a function called **FileFormRecSubmissionPDF**. This will pick up the PDF file and try to submit it to Azure Form Recognizer for processing. If this is successful it will receive an ID from Azure Form Recognizer which can be used to poll Azure Form Recognizer to receive the processed results once processing is completed. At the point it will submit a message indicating this information to the **pdf-polling-queue**. If it is not successful, a message is sent back to the **pdf-submit-queue**. However, this message is configured to not be visible to the function to pick up again for delay period specified in the function, which increases exponentially up to a maximum delay and maximum number of retries.
+Listening to the **pdf-submit-queue** is a function called **FileDocIntelSubmissionPDF**. This will pick up the PDF file and try to submit it to Azure Document Intelligence for processing. If this is successful it will receive an ID from Azure Document Intelligence which can be used to poll Azure Document Intelligence to receive the processed results once processing is completed. At the point it will submit a message indicating this information to the **pdf-polling-queue**. If it is not successful, a message is sent back to the **pdf-submit-queue**. However, this message is configured to not be visible to the function to pick up again for delay period specified in the function, which increases exponentially up to a maximum delay and maximum number of retries.
 
-This pattern of trying to submit a PDF to the Azure Form Recognizer service, and then passing back to the queue if there is a failure is a necessity to compensate for the throttling limitations inherent with Azure Form Recognizer. By default the maximum throughput possible is [15 transactions per second](https://learn.microsoft.com/en-us/azure/applied-ai-services/form-recognizer/service-limits?view=form-recog-3.0.0). If you submit 100 documents at the same time there would be failures without this approach.
+This pattern of trying to submit a PDF to the Azure Document Intelligence service, and then passing back to the queue if there is a failure is a necessity to compensate for the throttling limitations inherent with Azure Document Intelligence. By default the maximum throughput possible is [15 transactions per second](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/service-limits?view=doc-intel-4.0.0), which can be [increased by opening an Azure Support Ticket](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/service-limits?view=doc-intel-4.0.0#create-and-submit-support-request-for-tps-increase). If you submit 100 documents at the same time there would be failures without this approach.
 
-Now that the message is in the **pdf-polling-queue**, the next function picks this message up and attempts to process it. The **FileFormRecPollingPDF** reaches out to [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) with the id of the process and attempts to retrieve the results. if the service is still processing, which can take minutes for large files, the function closes down and the message returns to the queue with a delay before the function picks up the message and retries. Again, after a maximum number of retries, the document will be logged with a status or error. If the results are received, then the function will create the document map, a standard representation of the document, and this is then passed to the shared code functions to generate chunks.
+Now that the message is in the **pdf-polling-queue**, the next function picks this message up and attempts to process it. The **FileDocIntelPollingPDF** reaches out to [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) with the id of the process and attempts to retrieve the results. if the service is still processing, which can take minutes for large files, the function closes down and the message returns to the queue with a delay before the function picks up the message and retries. Again, after a maximum number of retries, the document will be logged with a status or error. If the results are received, then the function will create the document map, a standard representation of the document, and this is then passed to the shared code functions to generate chunks.
 
 We use this 2 function polling and queue pattern, rather than the SDK which uses polling also, because the processing of the PDF file can take multiple minutes. This prevents us than having an Azure Function running and just waiting, or failing if the time is too much.
 
@@ -101,17 +101,17 @@ Setting | Description
 --- | ---
 CHUNK_TARGET_SIZE | The number of tokens the function targets as the maximum per chunk text content to be generated. Additional metadata are added to the chunk JSON files as they are created that add roughly 180-200 tokens to the overall size of the chunk JSON file that gets indexed by Azure AI Search. So we recommend setting the **CHUNK_TARGET_SIZE** to your overall size target minus 200 tokens.
 MAX_SECONDS_HIDE_ON_UPLOAD | The maximum number of seconds a message will be hidden when initially submitting to the process. The actual time a message is invisible is a random value from 0 to this cap. This spreads out initial processing so as not to hit a throttling event unnecessarily
-MAX_SUBMIT_REQUEUE_COUNT | The maximum number of times the process will try to process a PDF through Form Recognizer
-PDF_SUBMIT_QUEUE_BACKOFF | The number of seconds a message will remain invisible after resubmitting to the queue due to throttling during submitting to Form Recognizer
-POLL_QUEUE_SUBMIT_BACKOFF | How many seconds we will initially wait before trying to retrieve processed results form Form Recognizer
-POLLING_BACKOFF | If, on polling the Form Recognizer service, we learn the request is still being processed, the flow will pass a new message back to the polling queue which will become visible after this number of seconds. The delay in visibility will increase from this initial value exponentially
-MAX_READ_ATTEMPTS | The maximum number of times we will try to retrieve processed results from Azure Form Recognizer
+MAX_SUBMIT_REQUEUE_COUNT | The maximum number of times the process will try to process a PDF through Document Intelligence
+PDF_SUBMIT_QUEUE_BACKOFF | The number of seconds a message will remain invisible after resubmitting to the queue due to throttling during submitting to Document Intelligence
+POLL_QUEUE_SUBMIT_BACKOFF | How many seconds we will initially wait before trying to retrieve processed results from Document Intelligence
+POLLING_BACKOFF | If, on polling the Document Intelligence service, we learn the request is still being processed, the flow will pass a new message back to the polling queue which will become visible after this number of seconds. The delay in visibility will increase from this initial value exponentially
+MAX_READ_ATTEMPTS | The maximum number of times we will try to retrieve processed results from Azure Document Intelligence
 MAX_POLLING_REQUEUE_COUNT | The maximum number of times the process will submit a message to the polling queue
 SUBMIT_REQUEUE_HIDE_SECONDS | If a throttling event occurs on upload, the message will be resubmitted to the queue up to a maximum amount of times specified in this setting
 TARGET_TRANSLATION_LANGUAGE | The target language that the process will translate chunks into
 ENRICHMENT_BACKOFF | The number of seconds a message will be invisible when resubmitted to the enrichment queue after a failure due to throttling. This will increase exponentially for every subsequent time a failure occurs
 MAX_ENRICHMENT_REQUEUE_COUNT | The maximum number of times a message will be pushed to the enrichment queue after a failure in the enrichment function
-FR_API_VERSION | The API version of [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-3.1.0) which you wish to use
+DOCUMENT_INTELLIGENCE_API_VERSION | The API version of [Azure AI Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/overview?view=doc-intel-4.0.0) which you wish to use
 
 Likewise, below are some configuration values of the App Service that you may wish to adapt to your scenario
 
@@ -124,7 +124,7 @@ EMBEDDING_REQUEUE_BACKOFF | The number of seconds a message will be invisible wh
 
 ## References
 
-- [Form Recognizer service quotas and limits](https://learn.microsoft.com/en-us/azure/applied-ai-services/form-recognizer/service-limits?view=form-recog-3.0.0)
+- [Document Intelligence service quotas and limits](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/service-limits?view=doc-intel-4.0.0)
 - [Cognitive Services autoscale feature](https://learn.microsoft.com/en-us/azure/cognitive-services/autoscale?tabs=portal)
-- [Form Recognizer 2023-02-28-preview API Reference](https://westus.dev.cognitive.microsoft.com/docs/services/form-recognizer-api-2023-02-28-preview/operations/AnalyzeDocument)
+- [Document Intelligence v4.0 REST API](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/how-to-guides/use-sdk-rest-api?view=doc-intel-4.0.0&tabs=windows&pivots=programming-language-rest-api)
 - [QueuesOptions.VisibilityTimeout Property](https://learn.microsoft.com/en-us/dotnet/api/microsoft.azure.webjobs.host.queuesoptions.visibilitytimeout?view=azure-dotnet)

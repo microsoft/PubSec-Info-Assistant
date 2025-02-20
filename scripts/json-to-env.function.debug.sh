@@ -62,16 +62,16 @@ jq -r --arg secrets "$secrets" '
             "env_var": "CHUNK_TARGET_SIZE"
         },
         {
-            "path": "FR_API_VERSION",
-            "env_var": "FR_API_VERSION"
+            "path": "DOCUMENT_INTELLIGENCE_API_VERSION",
+            "env_var": "DOCUMENT_INTELLIGENCE_API_VERSION"
         },
         {
             "path": "TARGET_PAGES",
             "env_var": "TARGET_PAGES"
         },
         {
-            "path": "AZURE_FORM_RECOGNIZER_ENDPOINT",
-            "env_var": "AZURE_FORM_RECOGNIZER_ENDPOINT"
+            "path": "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT",
+            "env_var": "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT"
         },
         {
             "path": "AZURE_COSMOSDB_URL",

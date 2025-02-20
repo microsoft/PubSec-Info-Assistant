@@ -444,13 +444,13 @@ module "functions" {
   blobStorageAccountUploadContainerName = var.uploadContainerName 
   blobStorageAccountLogContainerName    = var.functionLogsContainerName
   queueStorageAccountEndpoint           = module.storage.primary_queue_endpoint
-  formRecognizerEndpoint                = module.aiDocIntelligence.formRecognizerAccountEndpoint
+  documentIntelligenceEndpoint          = module.aiDocIntelligence.docIntelligenceAccountEndpoint
   CosmosDBEndpointURL                   = module.cosmosdb.CosmosDBEndpointURL
   CosmosDBLogDatabaseName               = module.cosmosdb.CosmosDBLogDatabaseName
   CosmosDBLogContainerName              = module.cosmosdb.CosmosDBLogContainerName
   chunkTargetSize                       = var.chunkTargetSize
   targetPages                           = var.targetPages
-  formRecognizerApiVersion              = var.formRecognizerApiVersion
+  documentIntelligenceApiVersion        = var.documentIntelligenceApiVersion
   pdfSubmitQueue                        = var.pdfSubmitQueue
   pdfPollingQueue                       = var.pdfPollingQueue
   nonPdfSubmitQueue                     = var.nonPdfSubmitQueue

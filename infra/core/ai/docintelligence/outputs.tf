@@ -1,16 +1,16 @@
-output "formRecognizerAccountName" {
+output "docIntelligenceAccountName" {
   value = azurerm_cognitive_account.docIntelligenceAccount.name
 }
 
-output "formRecognizerAccountEndpoint" {
+output "docIntelligenceAccountEndpoint" {
   value = azurerm_cognitive_account.docIntelligenceAccount.endpoint
 }
 
-output "formRecognizerAccount" {
+output "docIntelligenceAccountId" {
   value = azurerm_cognitive_account.docIntelligenceAccount.id
 }
 
-output "formPrivateEndpoint" {
+output "docIntelligencePrivateEndpointId" {
   value = var.is_secure_mode ? azurerm_private_endpoint.docintPrivateEndpoint[0].id : null
 }
 

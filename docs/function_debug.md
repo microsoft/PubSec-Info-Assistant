@@ -10,7 +10,7 @@ You will then be prompted to select a python interpreter. Select the latest vers
 This will create a folder under the Functions folder called .venv, which is git ignored.
 
 ## Setting local configurations
-Next you will need to create local configuration values that are used by the function, which include items such as the details on the storage containers used and the instance of Form Recognizer. You can create this manually, but we have provided a utility to generate this file for you, If you run a command 'make extract-env-debug-functions' this will generate a json file that includes these values called local.settings.json in the Functions folder. An example is shown below…
+Next you will need to create local configuration values that are used by the function, which include items such as the details on the storage containers used and the instance of Document Intelligence. You can create this manually, but we have provided a utility to generate this file for you, If you run a command 'make extract-env-debug-functions' this will generate a json file that includes these values called local.settings.json in the Functions folder. An example is shown below…
 
 ```json
 {
@@ -21,13 +21,12 @@ Next you will need to create local configuration values that are used by the fun
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_URL": "<YOUR AZURE VALUE>",
-    "AZURE_FORM_RECOGNIZER_ENDPOINT": "<YOUR AZURE VALUE>",
+    "AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT": "<YOUR AZURE VALUE>",
     "BLOB_STORAGE_ACCOUNT_OUTPUT_CONTAINER_NAME": "content",
     "CHUNK_TARGET_SIZE": "750",
-    "FR_API_VERSION": "2023-02-28-preview",
     "CHUNK_TARGET_SIZE": "750",
-    "FR_API_VERSION": "2022-08-31",
+    "DOCUMENT_INTELLIGENCE_API_VERSION": "2024-11-30",
     "MAX_POLLING_REQUEUE_COUNT": "10",
     "MAX_READ_ATTEMPTS": "5",
     "MAX_SECONDS_HIDE_ON_UPLOAD": "300",

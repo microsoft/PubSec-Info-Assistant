@@ -45,7 +45,7 @@ From the following locations:
 
 <https://github.com/openai/tiktoken>
 
-### azure.ai.formrecognizer
+### Azure SDK for Python
 
 <https://github.com/Azure/azure-sdk-for-python>
 

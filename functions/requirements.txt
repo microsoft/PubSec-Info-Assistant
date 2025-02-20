@@ -4,7 +4,7 @@
 
 #### Any version change made here should also be made and tested for the web apps in /app/backend and /app/enrichment
 
-azure-ai-formrecognizer==3.3.3
+azure-ai-documentintelligence==1.0.0
 azure-ai-vision-imageanalysis==1.0.0b3
 azure-core==1.31.0
 azure-cosmos==4.7.0

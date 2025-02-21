@@ -103,13 +103,13 @@ variable "targetPages" {
   type        = string
 }
 
-variable "formRecognizerApiVersion" {
-  description = "Form Recognizer API Version"
+variable "documentIntelligenceApiVersion" {
+  description = "Document Intelligence API Version"
   type        = string
 }
 
-variable "formRecognizerEndpoint" {
-  description = "Form Recognizer Endpoint"
+variable "documentIntelligenceEndpoint" {
+  description = "Document Intelligence Endpoint"
   type        = string
 }
 
@@ -134,7 +134,7 @@ variable "pdfSubmitQueue" {
 }
 
 variable "pdfPollingQueue" {
-  description = "Name of the queue used to poll for completed FR processing"
+  description = "Name of the queue used to poll for completed Document Intelligence processing"
   type        = string
 }
 
@@ -159,42 +159,42 @@ variable "imageEnrichmentQueue" {
 }
 
 variable "maxSecondsHideOnUpload" {
-  description = "The maximum number of seconds  between uploading a file and submitting it to FR"
+  description = "The maximum number of seconds  between uploading a file and submitting it to Document Intelligence"
   type        = string
 }
 
 variable "maxSubmitRequeueCount" {
-  description = "The maximum number of times a file can be resubmitted to FR due to throttling or internal FR capacity limitations"
+  description = "The maximum number of times a file can be resubmitted to Document Intelligence due to throttling or internal Document Intelligence capacity limitations"
   type        = string
 }
 
 variable "pollQueueSubmitBackoff" {
-  description = "the number of seconds that a message sleeps before we try to poll for FR completion"
+  description = "the number of seconds that a message sleeps before we try to poll for Document Intelligence completion"
   type        = string
 }
 
 variable "pdfSubmitQueueBackoff" {
-  description = "The number of seconds a message sleeps before trying to resubmit due to throttling request from FR"
+  description = "The number of seconds a message sleeps before trying to resubmit due to throttling request from Document Intelligence"
   type        = string
 }
 
 variable "maxPollingRequeueCount" {
-  description = "Max times we will retry the submission due to throttling or internal errors in FR"
+  description = "Max times we will retry the submission due to throttling or internal errors in Document Intelligence"
   type        = string
 }
 
 variable "submitRequeueHideSeconds" {
-  description = "Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error"
+  description = "Number of seconds to delay before trying to resubmit a doc to Document Intelligence when it reported an internal error"
   type        = string
 }
 
 variable "pollingBackoff" {
-  description = "The number of seconds we will hide a message before trying to repoll due to FR still processing a file. This is the default value that escalates exponentially"
+  description = "The number of seconds we will hide a message before trying to repoll due to Document Intelligence still processing a file. This is the default value that escalates exponentially"
   type        = string
 }
 
 variable "maxReadAttempts" {
-  description = "The maximum number of times we will retry to read a full processed document from FR. Failures in read may be due to network issues downloading the large response"
+  description = "The maximum number of times we will retry to read a full processed document from Document Intelligence. Failures in read may be due to network issues downloading the large response"
   type        = string
 }
 

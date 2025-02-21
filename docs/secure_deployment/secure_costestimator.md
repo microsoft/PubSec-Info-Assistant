@@ -16,7 +16,7 @@ The following list of Azure Services will be deployed for IA agent template secu
 - Application Insights [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)
 - Azure AI Services [:link:](https://azure.microsoft.com/en-ca/pricing/details/cognitive-services/)
 - Azure Cosmos DB [:link:](https://azure.microsoft.com/en-ca/pricing/details/cosmos-db/autoscale-provisioned/)
-- Azure AI Document Intelligence [:link:](https://azure.microsoft.com/en-ca/pricing/details/form-recognizer/#pricing)
+- Azure AI Document Intelligence [:link:](https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/#pricing)
 - Azure Function (App Service Plan) [:link:](https://azure.microsoft.com/en-ca/pricing/details/functions/#pricing)
 - Azure Key Vault [:link:](https://azure.microsoft.com/en-us/pricing/details/key-vault/)
 - Log Analytics workspace [:link:](https://azure.microsoft.com/en-ca/pricing/details/monitor/)

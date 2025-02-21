@@ -43,92 +43,92 @@ Finally you will need to supply 4 properties to the class before you can call th
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - Received message from pdf-submit-queue ",
+            "status": "FileDocIntelSubmissionPDF - Received message from pdf-submit-queue",
             "status_timestamp": "2024-03-12 22:37:15",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - Submitting to Form Recognizer",
+            "status": "FileDocIntelSubmissionPDF - Submitting to Document Intelligence",
             "status_timestamp": "2024-03-12 22:37:15",
             "status_classification": "Info"
         },
         {
-            "status": "FileFormRecSubmissionPDF - SAS token generated",
+            "status": "FileDocIntelSubmissionPDF - SAS token generated",
             "status_timestamp": "2024-03-12 22:37:15",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - PDF submitted to FR successfully",
+            "status": "FileDocIntelSubmissionPDF - PDF submitted to Document Intelligence successfully",
             "status_timestamp": "2024-03-12 22:37:16",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - message sent to pdf-polling-queue. Visible in 60 seconds. FR Result ID is a02f9696-813a-4bda-88cb-c7fa05ad2323",
+            "status": "FileDocIntelSubmissionPDF - message sent to pdf-polling-queue. Visible in 60 seconds. Document Intelligence Result ID is a02f9696-813a-4bda-88cb-c7fa05ad2323",
             "status_timestamp": "2024-03-12 22:37:17",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - Received message from pdf-submit-queue ",
+            "status": "FileDocIntelSubmissionPDF - Received message from pdf-submit-queue ",
             "status_timestamp": "2024-03-12 22:37:20",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - Submitting to Form Recognizer",
+            "status": "FileDocIntelSubmissionPDF - Submitting to Document Intelligence",
             "status_timestamp": "2024-03-12 22:37:20",
             "status_classification": "Info"
         },
         {
-            "status": "FileFormRecSubmissionPDF - SAS token generated",
+            "status": "FileDocIntelSubmissionPDF - SAS token generated",
             "status_timestamp": "2024-03-12 22:37:20",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - PDF submitted to FR successfully",
+            "status": "FileDocIntelSubmissionPDF - PDF submitted to Document Intelligence successfully",
             "status_timestamp": "2024-03-12 22:37:21",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecSubmissionPDF - message sent to pdf-polling-queue. Visible in 60 seconds. FR Result ID is 6b26d8b3-f6d1-495d-85cd-23fde40091a9",
+            "status": "FileDocIntelSubmissionPDF - message sent to pdf-polling-queue. Visible in 60 seconds. Document Intelligence Result ID is 6b26d8b3-f6d1-495d-85cd-23fde40091a9",
             "status_timestamp": "2024-03-12 22:37:22",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - Message received from pdf polling queue attempt 1",
+            "status": "FileDocIntelPollingPDF - Message received from pdf polling queue attempt 1",
             "status_timestamp": "2024-03-12 22:39:21",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - Polling Form Recognizer function started",
+            "status": "FileDocIntelPollingPDF - Polling Document Intelligence function started",
             "status_timestamp": "2024-03-12 22:39:21",
             "status_classification": "Info"
         },
         {
-            "status": "FileFormRecPollingPDF - Form Recognizer has completed processing and the analyze results have been received",
+            "status": "FileDocIntelPollingPDF - Document Intelligence has completed processing and the analyze results have been received",
             "status_timestamp": "2024-03-12 22:39:21",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - Starting document map build",
+            "status": "FileDocIntelPollingPDF - Starting document map build",
             "status_timestamp": "2024-03-12 22:39:21",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - Document map build complete",
+            "status": "FileDocIntelPollingPDF - Document map build complete",
             "status_timestamp": "2024-03-12 22:39:21",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - Starting chunking",
+            "status": "FileDocIntelPollingPDF - Starting chunking",
             "status_timestamp": "2024-03-12 22:39:21",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - Chunking complete, 6 chunks created.",
+            "status": "FileDocIntelPollingPDF - Chunking complete, 6 chunks created.",
             "status_timestamp": "2024-03-12 22:39:24",
             "status_classification": "Debug"
         },
         {
-            "status": "FileFormRecPollingPDF - message sent to enrichment queue",
+            "status": "FileDocIntelPollingPDF - message sent to enrichment queue",
             "status_timestamp": "2024-03-12 22:39:24",
             "status_classification": "Debug"
         },

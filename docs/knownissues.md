@@ -55,9 +55,9 @@ Turn off the option to require membership for the Azure Active Directory Enterpr
 
 ---
 
-## Errors due to throttling or overloading Form Recognizer
+## Errors due to throttling or overloading Azure AI Document Intelligence
 
-Occasionally you will see a 429 return code in the FileFormRecSubmissionPDF which indicates that you need to retry your submission later or an internal error was returned by AI Document Intelligence in the FileFormRecPollingPDF function. This indicates the service has encountered internal capacity issues. Both of these situations will occur under heavy load, but the agent template is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
+Occasionally you will see a 429 return code in the FileDocIntelSubmissionPDF which indicates that you need to retry your submission later or an internal error was returned by AI Document Intelligence in the FileDocIntelPollingPDF function. This indicates the [service transactions per second/minute](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/service-limits?view=doc-intel-4.0.0#model-usage) have been reached. An Azure Support ticket can be created to [request a transaction per second increase](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/service-limits?view=doc-intel-4.0.0#increasing-transactions-per-second-request-limit). Both of these situations will occur under heavy load, but the agent template is designed to back off and retry at a later time, up to a maximum set of retries, which is configurable.
 
 ### Solution
 
@@ -66,14 +66,14 @@ The back off and retry parameter values are surfaced as configuration settings i
 ```text
 | Name                        | Value | Description                                                                                                               |
 |-----------------------------|-------|---------------------------------------------------------------------------------------------------------------------------|
-| MAX_POLLING_REQUEUE_COUNT   | 10    | Max times to retry submission due to throttling or internal errors in FR                                                  |
-| MAX_READ_ATTEMPTS           | 5     | Number of times to retry reading a processed document from FR                                                             |
-| MAX_SECONDS_HIDE_ON_UPLOAD  | 30    | Max number of seconds between uploading a file and submitting it to FR                                                    |
-| MAX_SUBMIT_REQUEUE_COUNT    | 10    | Max number of times a file can be resubmitted to FR for throttling or capacity limitations                                |
-| PDF_SUBMIT_QUEUE_BACKOFF    | 60    | Number of seconds a message sleeps before resubmitting due to throttling request from FR                                   |
-| POLL_QUEUE_SUBMIT_BACKOFF   | 60    | Number of seconds a message sleeps before we poll for FR completion                                                       |
-| POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to FR still processing a file. This value escalates exponentially |
-| SUBMIT_REQUEUE_HIDE_SECONDS | 1200  | Number of seconds to delay before trying to resubmit a doc to FR when it reported an internal error                       |
+| MAX_POLLING_REQUEUE_COUNT   | 10    | Max times to retry submission due to throttling or internal errors in Document Intelligence                                                  |
+| MAX_READ_ATTEMPTS           | 5     | Number of times to retry reading a processed document from Document Intelligence                                                             |
+| MAX_SECONDS_HIDE_ON_UPLOAD  | 30    | Max number of seconds between uploading a file and submitting it to Document Intelligence                                                    |
+| MAX_SUBMIT_REQUEUE_COUNT    | 10    | Max number of times a file can be resubmitted to Document Intelligence for throttling or capacity limitations                                |
+| PDF_SUBMIT_QUEUE_BACKOFF    | 60    | Number of seconds a message sleeps before resubmitting due to throttling request from Document Intelligence                                   |
+| POLL_QUEUE_SUBMIT_BACKOFF   | 60    | Number of seconds a message sleeps before we poll for Document Intelligence completion                                                       |
+| POLLING_BACKOFF             | 30    | Number of seconds we hide a message before repolling due to Document Intelligence still processing a file. This value escalates exponentially |
+| SUBMIT_REQUEUE_HIDE_SECONDS | 1200  | Number of seconds to delay before trying to resubmit a doc to Document Intelligence when it reported an internal error                       |
 
 ```
 

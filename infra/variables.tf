@@ -382,11 +382,6 @@ variable "enabledDDOSProtectionPlan" {
 }
 ////
 
-variable "formRecognizerSkuName" {
-  type    = string
-  default = "S0"
-}
-
 variable "appServicePlanName" {
   type    = string
   default = ""
@@ -509,9 +504,9 @@ variable "targetPages" {
   default = "ALL"
 }
 
-variable "formRecognizerApiVersion" {
+variable "documentIntelligenceApiVersion" {
   type    = string
-  default = "2023-07-31"
+  default = "2024-11-30"
 }
 
 variable "queryTermLanguage" {

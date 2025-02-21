@@ -335,12 +335,12 @@ module_path="module.entraObjects.azuread_service_principal.aad_mgmt_sp[0]"
 import_resource_if_needed $module_path "$sp_id"
 
 
-# Form Recognizer
+# Document Intelligence
 echo
-figlet "Form Recognizer"
-name="infoasst-fr-$random_text"
+figlet "Document Intelligence"
+name="infoasst-di-$random_text"
 providers="/providers/Microsoft.CognitiveServices/accounts/$name"
-module_path="module.formrecognizer.azurerm_cognitive_account.formRecognizerAccount" 
+module_path="module.aiDocIntelligence.azurerm_cognitive_account.docIntelligenceAccountId" 
 import_resource_if_needed "$module_path" "$resourceId$providers"
 
 # Cognitive Services 

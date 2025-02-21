@@ -41,7 +41,7 @@ class ParagraphRoles(Enum):
     PAGE_NUMBER      = 7
 
 class ContentType(Enum):
-    """ Enum to define the types for various content chars returned from FR """
+    """ Enum to define the types for various content chars returned from Document Intelligence """
     NOT_PROCESSED           = 0
     TITLE_START             = 1
     TITLE_CHAR              = 2
@@ -109,7 +109,7 @@ class Utilities:
         return self.utilities_helper.get_blob_and_sas(blob_path)
 
     def table_to_html(self, table):
-        """ Function to take an output FR table json structure and convert to HTML """
+        """ Function to take an output Document Intelligence table json structure and convert to HTML """
         table_html = "<table>"
         rows = [sorted([cell for cell in table["cells"] if cell["rowIndex"] == i],
                        key=lambda cell: cell["columnIndex"]) for i in range(table["rowCount"])]
@@ -158,7 +158,7 @@ class Utilities:
     def build_document_map_pdf(self, myblob_name, myblob_uri, result, azure_blob_log_storage_container, enable_dev_code):
         """ Function to build a json structure representing the paragraphs in a document, 
         including metadata such as section heading, title, page number, etc.
-        We construct this map from the Content key/value output of FR, because the paragraphs 
+        We construct this map from the Content key/value output of Document Intelligence, because the paragraphs 
         value does not distinguish between a table and a text paragraph"""
 
         document_map = {
@@ -284,12 +284,12 @@ class Utilities:
             # Output document map to log container
             json_str = json.dumps(document_map, indent=2)
             file_name, file_extension, file_directory  = self.get_filename_and_extension(myblob_name)
-            output_filename =  file_name + "_Document_Map" + file_extension + ".json"
+            output_filename = file_name + "_Document_Map" + file_extension + ".json"
             self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
 
-            # Output FR result to log container
+            # Output Document Intelligence result to log container
             json_str = json.dumps(result, indent=2)
-            output_filename =  file_name + '_FR_Result' + file_extension + ".json"
+            output_filename = file_name + '_DocIntelligence_Result' + file_extension + ".json"
             self.write_blob(azure_blob_log_storage_container, json_str, output_filename, file_directory)
 
         return document_map

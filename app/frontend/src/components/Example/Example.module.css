@@ -1,0 +1,79 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.examplesNavList {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem; /* 10px */
+    flex: 1;
+    justify-content: center;
+}
+
+.example {
+    word-break: break-word;
+    background: #dbdbdb;
+    border-radius: 0.5rem; /* 8px */
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem; /* 20px */
+    margin-bottom: 0.3125rem; /* 5px */
+    cursor: pointer;
+}
+
+.example:hover {
+    box-shadow: 0rem 0.5rem 1rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.125rem rgba(0, 0, 0, 0.12); /* 0px 8px 16px and 0px 0px 2px */
+    outline: 0.125rem solid rgba(115, 118, 225, 1); /* 2px */
+}
+
+.exampleText {
+    margin: 0;
+    font-size: 1.3125rem; /* 21px */
+    width: 17.5rem; /* 280px */
+    height: 5.625rem; /* 90px */
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 48rem) { /* 768px */
+    .examplesNavList {
+        gap: 0.5rem; /* 8px */
+    }
+
+    .example {
+        padding: 1rem; /* 16px */
+        margin-bottom: 0.25rem; /* 4px */
+    }
+
+    .example:hover {
+        box-shadow: 0rem 0.375rem 0.75rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.12); /* 0px 6px 12px and 0px 0px 1px */
+        outline: 0.125rem solid rgba(115, 118, 225, 1); /* 2px */
+    }
+
+    .exampleText {
+        font-size: .7rem; /* 20px */
+        height: 2.5rem; /* 80px */
+        width: 7.5rem;
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .examplesNavList {
+        gap: 0.375rem; /* 6px */
+    }
+
+    .example {
+        padding: 0.75rem; /* 12px */
+        margin-bottom: 0.1875rem; /* 3px */
+    }
+
+    .example:hover {
+        box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.12); /* 0px 4px 8px and 0px 0px 1px */
+        outline: 0.125rem solid rgba(115, 118, 225, 1); /* 2px */
+    }
+
+    .exampleText {
+        font-size: .7rem; /* 18px */
+        height: 2.5rem; /* 72px */
+    }
+}

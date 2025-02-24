@@ -1,0 +1,150 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.App {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 600px;
+  }
+  
+  .App-logo {
+    height: 40vmin;
+    pointer-events: none;
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    .App-logo {
+      animation: App-logo-spin infinite 20s linear;
+    }
+  }
+  
+  .App-header {
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+  }
+  
+  .App-link {
+    color: #61dafb;
+  }
+  
+  @keyframes App-logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  button {
+    font-size: calc(10px + 2vmin);
+  }
+
+  .contentArea {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    align-content: center;
+  }
+
+  .topPivot {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+  }
+  
+.fileIconImg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Add this to your Content.module.css */
+
+.EmptyObjectives {
+  padding-left: 1rem; /* Adjusted for better responsiveness */
+  padding-right: 1rem; /* Adjusted for better responsiveness */
+  text-align: center;
+  font-size: 1rem; /* Adjusted for better readability */
+}
+
+.EmptyObjectivesList {
+  text-align: center;
+  font-size: 1rem; /* Adjusted for better readability */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap; /* Allow items to wrap to the next line */
+  justify-content: center; /* Center items horizontally */
+  padding-bottom: 3.125rem; /* 50px */
+  padding-top: 1.875rem; /* 30px */
+}
+
+.EmptyObjectivesListItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12.5rem; /* 200px */
+  margin: 0.625rem; /* 10px for spacing between items */
+}
+
+.EmptyObjectivesListItemText {
+  padding-right: 0.625rem; /* 10px */
+  padding-left: 0.625rem; /* 10px */
+}
+
+.EmptyStateTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.625rem; /* 10px */
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 768px) {
+  .EmptyObjectives {
+    padding-left: 0.5rem; /* Adjusted for smaller screens */
+    padding-right: 0.5rem; /* Adjusted for smaller screens */
+    font-size: 0.875rem; /* Adjusted for better readability */
+  }
+
+  .EmptyObjectivesList {
+    font-size: 0.875rem; /* Adjusted for better readability */
+  }
+
+  .EmptyObjectivesListItem {
+    width: 10rem; /* Adjusted for smaller screens */
+  }
+
+  .EmptyStateTitle {
+    font-size: 1.5rem; /* Adjusted for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .EmptyObjectives {
+    padding-left: 0.25rem; /* Adjusted for smaller screens */
+    padding-right: 0.25rem; /* Adjusted for smaller screens */
+    font-size: 0.75rem; /* Adjusted for better readability */
+  }
+
+  .EmptyObjectivesList {
+    font-size: 0.75rem; /* Adjusted for better readability */
+  }
+
+  .EmptyObjectivesListItem {
+    width: 8rem; /* Adjusted for smaller screens */
+  }
+
+  .EmptyStateTitle {
+    font-size: 1.25rem; /* Adjusted for smaller screens */
+  }
+}

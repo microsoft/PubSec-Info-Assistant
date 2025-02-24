@@ -1,0 +1,103 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.questionInputContainer {
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: 0rem 0.5rem 1rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.125rem rgba(0, 0, 0, 0.12); /* 0px 8px 16px and 0px 0px 2px */
+    height: 5.625rem; /* 90px */
+    width: 100%;
+    padding-top: 0.9375rem; /* 15px */
+    padding-bottom: 0.9375rem; /* 15px */
+    padding-right: 0.9375rem; /* 15px */
+    padding-left: 0.1875rem; /* 3px */
+    background: white;
+}
+
+.questionInputTextArea {
+    width: 100%;
+    line-height: 2.5rem;
+    min-height: fit-content; /* 40px */
+}
+
+.questionInputButtonsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.questionInputSendButton {
+    cursor: pointer;
+}
+
+.questionInputSendButtonDisabled {
+    opacity: 0.4;
+}
+
+.questionClearButtonsContainer {
+    height: 100%;
+    vertical-align: middle;
+    padding-top: 0.3125rem; /* 5px */
+}
+
+.questionClearChatButton {
+    display: flex;
+    width: 3.125rem; /* 50px */
+    height: 3.125rem; /* 50px */
+    cursor: pointer;
+    border: 0.125rem solid rgba(140,140,140,1); /* 2px */
+    border-radius: 3.125rem; /* 50px */
+    text-overflow: ellipsis;
+    background: rgb(125,125,125);
+    justify-content: center;
+    align-items: center;
+    transition: width 0.3s ease; 
+    font-size: .5rem;/* Smooth transition for width change */
+}
+
+.questionClearChatButton:hover {
+    width: 7.5rem; /* 120px */
+    color: lightgrey;
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 48rem) { /* 768px */
+    .questionInputContainer {
+        height: 3.5rem; /* Adjust height for smaller screens */
+        padding-top: 0.5rem; /* Adjust padding for smaller screens */
+        padding-bottom: 0.5rem; /* Adjust padding for smaller screens */
+    }
+
+    .questionInputTextArea {
+        line-height: 2rem; /* Adjust line height for smaller screens */
+    }
+
+    .questionClearChatButton {
+        width: 2rem; /* Adjust width for smaller screens */
+        height: 2rem; /* Adjust height for smaller screens */
+    }
+
+    .questionClearChatButton:hover {
+        width: 6rem; /* Adjust hover width for smaller screens */
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .questionInputContainer {
+        height: 3.5rem; /* Adjust height for smaller screens */
+        padding-top: 0.25rem; /* Adjust padding for smaller screens */
+        padding-bottom: 0.25rem; /* Adjust padding for smaller screens */
+    }
+
+    .questionInputTextArea {
+        line-height: 1.5rem; /* Adjust line height for smaller screens */
+    }
+
+    .questionClearChatButton {
+        width: 2rem; /* Adjust width for smaller screens */
+        height: 2rem; /* Adjust height for smaller screens */
+    }
+
+    .questionClearChatButton:hover {
+        width: 5rem; /* Adjust hover width for smaller screens */
+    }
+}

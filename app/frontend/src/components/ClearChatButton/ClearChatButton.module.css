@@ -1,0 +1,53 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.disabled {
+    color: #696968; /* Updated color to meet contrast ratio */
+    background-color: #f2f2f2;
+    cursor: not-allowed;
+
+}
+.clearChatText {
+    color: #6b6b6a !important;
+}
+
+.icon {
+    font-size: 1.5rem; /* 24px */
+}
+
+.text {
+    font-size: 1rem; /* 16px */
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 48rem) { /* 768px */
+    .icon {
+        width: 1rem;
+        height: 1rem;/* 20px */
+    }
+
+    .text {
+        font-size: 0.5rem; /* 14px */
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .icon {
+        width: 1rem;
+        font-size: 1rem; /* 16px */
+    }
+
+    .text {
+        font-size: 0.5rem; /* 12px */
+    }
+    .container {
+        gap: 0.1rem;
+    }
+}

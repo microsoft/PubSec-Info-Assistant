@@ -1,0 +1,148 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.container {
+    cursor: pointer;
+}
+
+.disabled {
+    opacity: 0.4;
+}
+
+.buttonGroup {
+    display: inline-flex;
+    opacity: 1;
+    transition-property: opacity, inset-inline-start;
+    transition-timing-function: linear;
+    flex-direction: row;
+    width: fit-content;
+    border-radius: 2.5rem; /* 40px */
+    border: 0.0625rem solid rgba(0, 0, 0, .04); /* 1px */
+    background: #ddd;
+    justify-content: space-between;
+    vertical-align: middle;
+    padding: 0.125rem; /* 2px */
+    gap: 0.125rem; /* 2px */
+    cursor: pointer;
+    margin: 0.125rem 0.375rem 0.125rem 0.125rem; /* 2px 6px 2px 2px */
+    position: relative;
+    align-items: center;
+}
+
+.buttonleft,
+.buttonright,
+.buttonmiddle {
+    padding-inline-end: 0.625rem; /* 10px */
+    display: flex;
+    padding: 0.375rem 0; /* 6px 0 */
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem; /* 4px */
+    color: #444;
+    font-size: 0.6875rem; /* 11px */
+    font-style: normal;
+    font-weight: 400;
+    font-family: inherit;
+    line-height: 1.5rem; /* 24px */
+    width: fit-content;
+    height: 1.5rem; /* 24px */
+    padding-inline: 0.75rem; /* 12px */
+    pointer-events: auto;
+    text-decoration: none;
+    min-width: 2.875rem; /* 46px */
+    border: transparent;
+    background: transparent;
+}
+
+.buttonleftactive,
+.buttonrightactive,
+.buttonmiddleactive {
+    padding-inline: 0.75rem !important; /* 12px */
+    display: flex;
+    padding: 0.375rem; /* 6px */
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem; /* 4px */
+    color: #111;
+    font-size: 0.6875rem; /* 11px */
+    font-style: normal;
+    font-weight: 600;
+    font-family: inherit;
+    line-height: 1.5rem; /* 24px */
+    width: fit-content;
+    height: 1.5rem; /* 24px */
+    pointer-events: none;
+    text-decoration: none;
+    min-width: 2.875rem; /* 46px */
+    background: #fff;
+    box-shadow: 0 0.1rem 0.225rem 0 rgba(0,0,0,.13), 0 0.01875rem 0.05625rem 0 rgba(0,0,0,.1); /* 0 1.6px 3.6px 0 and 0 0.3px 0.9px 0 */
+    border-radius: 2.5rem; /* 40px */
+    border: transparent;
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 48rem) { /* 768px */
+    .buttonGroup {
+        padding: 0.0625rem; /* 1px */
+        margin: 0.0625rem 0.1875rem 0.0625rem 0.0625rem; /* 1px 3px 1px 1px */
+    }
+
+    .buttonleft,
+    .buttonright,
+    .buttonmiddle {
+        font-size: 0.4rem;
+        padding-inline-end: 0.5rem; /* 8px */
+        padding: 0.25rem 0; /* 4px 0 */
+        gap: 0.1875rem; /* 3px */
+         /* 10px */
+        line-height: 1.25rem; /* 20px */
+        height: 1.25rem; /* 20px */
+        padding-inline: 0.625rem; /* 10px */
+        min-width: 2.5rem; /* 40px */
+    }
+
+    .buttonleftactive,
+    .buttonrightactive,
+    .buttonmiddleactive {
+        padding-inline: 0.625rem !important; /* 10px */
+        font-size: 0.4rem;
+        padding: 0.25rem; /* 4px */
+        gap: 0.1875rem; /* 3px */
+         /* 10px */
+        line-height: 1.25rem; /* 20px */
+        height: 1.25rem; /* 20px */
+        min-width: 2.5rem; /* 40px */
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .buttonGroup {
+        padding: 0.03125rem; /* 0.5px */
+        margin: 0.03125rem 0.09375rem 0.03125rem 0.03125rem; /* 0.5px 1.5px 0.5px 0.5px */
+    }
+
+    .buttonleft,
+    .buttonright,
+    .buttonmiddle {
+        padding-inline-end: 0.375rem; /* 6px */
+        padding: 0.1875rem 0; /* 3px 0 */
+        gap: 0.125rem; /* 2px */
+        font-size: 0.3825rem; /* 9px */
+        line-height: 1rem; /* 16px */
+        height: 1rem; /* 16px */
+        padding-inline: 0.5rem; /* 8px */
+        min-width: 2.25rem; /* 36px */
+    }
+
+    .buttonleftactive,
+    .buttonrightactive,
+    .buttonmiddleactive {
+        padding-inline: 0.5rem !important; /* 8px */
+        padding: 0.1875rem; /* 3px */
+        gap: 0.125rem; /* 2px */
+        font-size: 0.3825rem; /* 9px */
+        line-height: 1rem; /* 16px */
+        height: 1rem; /* 16px */
+        min-width: 2.25rem; /* 36px */
+    }
+}

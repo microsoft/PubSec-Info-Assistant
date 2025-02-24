@@ -1,0 +1,121 @@
+{
+    "name": "indexer",
+    "dataSourceName": "infoasst-azureblob-datasource",
+    "targetIndexName": "vector-index",
+    "skillsetName": "infoasst-skillset",
+    "schedule": {
+        "interval": "PT30M",
+        "startTime": "2025-01-13T18:19:26.259Z"
+    },
+    "parameters": {
+        "configuration": {
+            "executionEnvironment": "private",
+            "allowSkillsetToReadFileData": true
+        }
+    },
+    "fieldMappings": [
+      {
+        "sourceFieldName": "metadata_storage_path",
+        "targetFieldName": "filepath",
+        "mappingFunction": {
+          "name": "extractTokenAtPosition",
+          "parameters": {
+            "delimiter": ".net/",
+            "position@odata.type": "#Int64",
+            "position": 1
+          }
+        }
+      },
+      {
+        "sourceFieldName": "metadata_storage_name",
+        "targetFieldName": "imagetitle",
+        "mappingFunction": {
+          "name": "extractTokenAtPosition",
+          "parameters": {
+            "delimiter": ".",
+            "position@odata.type": "#Int64",
+            "position": 0
+          }
+        }
+      }
+    ],
+    "outputFieldMappings": [
+      {
+        "sourceFieldName": "/document/filepath",
+        "targetFieldName": "file_name",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/metadata_storage_path",
+        "targetFieldName": "file_uri",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/title",
+        "targetFieldName": "title",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/tags",
+        "targetFieldName": "tags",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/normalized_images/*/merged_text5",
+        "targetFieldName": "content",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/translatedTitle",
+        "targetFieldName": "translated_title",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/pages/*/embedding",
+        "targetFieldName": "contentVector",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/pages/*/entities/*/text",
+        "targetFieldName": "entities",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/pages/*/keyPhrases",
+        "targetFieldName": "key_phrases",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/ex_status",
+        "targetFieldName": "ex_status",
+        "mappingFunction": null
+      }
+      ,
+      {
+        "sourceFieldName": "/document/split_status",
+        "targetFieldName": "split_status",
+        "mappingFunction": null
+      }
+      ,
+      {
+        "sourceFieldName": "/document/pages/*/translation_status",
+        "targetFieldName": "translation_status",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/pages/*/text_enrichment_status",
+        "targetFieldName": "text_enrichment_status",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/normalized_images/*/image_enr_status",
+        "targetFieldName": "image_enr_status",
+        "mappingFunction": null
+      },
+      {
+        "sourceFieldName": "/document/pages/*/embedding_status",
+        "targetFieldName": "embedding_status",
+        "mappingFunction": null
+      }
+    ]
+}

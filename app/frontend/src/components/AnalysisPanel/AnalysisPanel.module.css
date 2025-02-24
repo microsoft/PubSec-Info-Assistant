@@ -1,0 +1,55 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+
+   .thoughtProcess {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    word-wrap: break-word;
+    padding-top: 0.75rem; /* 12px */
+    padding-bottom: 0.75rem; /* 12px */
+}
+
+.tabContainer {
+    display: flex;
+    border-bottom: 0.0625rem solid #e1e1e1; /* 1px */
+    margin-bottom: 1rem;
+}
+
+.tabButton {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 0.125rem solid transparent; /* 2px */
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: black;
+    transition: border-bottom 0.2s;
+}
+
+.tabButton:hover {
+    border-bottom: 0.125rem solid #0078d4; /* 2px */
+}
+
+.activeTab {
+    border-bottom: 0.125rem solid #0078d4; /* 2px */
+    font-weight: bold;
+}
+
+/* Smaller screen sizes */
+@media (max-width: 600px) {
+
+    .thoughtProcess {
+        padding-top: 0.5rem; /* 8px */
+        padding-bottom: 0.5rem; /* 8px */
+    }
+
+    .tabContainer {
+        margin-bottom: 0.5rem; /* 8px */
+    }
+
+    .tabButton {
+        padding: 0.25rem 0.5rem; /* 4px 8px */
+        font-size: 0.75rem; /* 12px */
+    }
+}

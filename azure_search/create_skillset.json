@@ -1,0 +1,909 @@
+{
+  "@odata.etag": "\"0x8DD367C991A0856\"",
+  "name": "infoasst-skillset",
+  "description": "Document processing pipeline for Information Assistant Copilot Template",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Util.DocumentExtractionSkill",
+      "name": "extraction",
+      "description": "",
+      "context": "/document",
+      "parsingMode": "default",
+      "dataToExtract": "contentAndMetadata",
+      "inputs": [
+        {
+          "name": "file_data",
+          "source": "/document/file_data",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "content",
+          "targetName": "text"
+        },
+        {
+          "name": "normalized_images",
+          "targetName": "normalized_images"
+        }
+      ],
+      "configuration": {
+        "imageAction": "generateNormalizedImages",
+        "normalizedImageMaxWidth@odata.type": "#Int64",
+        "normalizedImageMaxWidth": 2000,
+        "normalizedImageMaxHeight@odata.type": "#Int64",
+        "normalizedImageMaxHeight": 2000
+      }
+    },
+    {  
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "set_status",
+      "description": "Set the status of the document based on extraction",
+      "context": "/document",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/text) != null && $(/document/normalized_images) != null ",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= 'Extraction successful'",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= 'Extraction failed'",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "ex_status"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
+      "name": "Split",
+      "description": "Split skill to chunk documents",
+      "context": "/document",
+      "defaultLanguageCode": "$TARGET_TRANSLATION_LANGUAGE",
+      "textSplitMode": "pages",
+      "maximumPageLength": 700,
+      "pageOverlapLength": 0,
+      "maximumPagesToTake": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/text",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "textItems",
+          "targetName": "pages"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "set_split_status",
+      "description": "Set the status of the document based on split",
+      "context": "/document",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*) != null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= 'Split successfull'",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= 'Split either failed or did not run'",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "split_status"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
+      "name": "language detection",
+      "description": "detection of language of text",
+      "context": "/document/pages/*",
+      "defaultCountryHint": "US",
+      "modelVersion": "",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "languageCode",
+          "targetName": "language"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "check_translation",
+      "description": "Set content to translate",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*/language) == 'af' || $(/document/pages/*/language) == 'ar' || $(/document/pages/*/language) == 'bn' || $(/document/pages/*/language) == 'bg' || $(/document/pages/*/language) == 'ca' || $(/document/pages/*/language) == 'zh-Hans' || $(/document/pages/*/language) == 'zh-Hant' || $(/document/pages/*/language) == 'hr' || $(/document/pages/*/language) == 'cs' || $(/document/pages/*/language) == 'da' || $(/document/pages/*/language) == 'nl' || $(/document/pages/*/language) == 'en' || $(/document/pages/*/language) == 'et' || $(/document/pages/*/language) == 'fi' || $(/document/pages/*/language) == 'fr' || $(/document/pages/*/language) == 'de' || $(/document/pages/*/language) == 'el' || $(/document/pages/*/language) == 'gu' || $(/document/pages/*/language) == 'he' || $(/document/pages/*/language) == 'hi' || $(/document/pages/*/language) == 'hu' || $(/document/pages/*/language) == 'is' || $(/document/pages/*/language) == 'id' || $(/document/pages/*/language) == 'it' || $(/document/pages/*/language) == 'ja' || $(/document/pages/*/language) == 'kn' || $(/document/pages/*/language) == 'kk' || $(/document/pages/*/language) == 'ko' || $(/document/pages/*/language) == 'lv' || $(/document/pages/*/language) == 'lt' || $(/document/pages/*/language) == 'ms' || $(/document/pages/*/language) == 'ml' || $(/document/pages/*/language) == 'mt' || $(/document/pages/*/language) == 'mr' || $(/document/pages/*/language) == 'nb' || $(/document/pages/*/language) == 'fa' || $(/document/pages/*/language) == 'pl' || $(/document/pages/*/language) == 'pt' || $(/document/pages/*/language) == 'pa' || $(/document/pages/*/language) == 'ro' || $(/document/pages/*/language) == 'ru' || $(/document/pages/*/language) == 'sr-Cyrl' || $(/document/pages/*/language) == 'sr-Latn' || $(/document/pages/*/language) == 'sk' || $(/document/pages/*/language) == 'sl' || $(/document/pages/*/language) == 'es' || $(/document/pages/*/language) == 'sw' || $(/document/pages/*/language) == 'sv' || $(/document/pages/*/language) == 'ta' || $(/document/pages/*/language) == 'te' || $(/document/pages/*/language) == 'th' || $(/document/pages/*/language) == 'tr' || $(/document/pages/*/language) == 'uk' || $(/document/pages/*/language) == 'ur' || $(/document/pages/*/language) == 'vi' || $(/document/pages/*/language) == 'cy'",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "/document/pages/*",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= null",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "translate_content"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
+      "name": "translation",
+      "context": "/document/pages/*",
+      "defaultToLanguageCode": "$TARGET_TRANSLATION_LANGUAGE",
+      "suggestedFrom": "en",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*/translate_content",
+          "inputs": []
+        },
+        {
+          "name": "fromLanguageCode",
+          "source": "/document/pages/*/language",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "translatedText",
+          "targetName": "translatedText"
+        },
+        {
+          "name": "translatedFromLanguageCode",
+          "targetName": "translatedFromLanguageCode"
+        },
+        {
+          "name": "translatedToLanguageCode",
+          "targetName": "translatedToLanguageCode"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "set_translation_status",
+      "description": "Set the status of the document based on embeddings",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*/translatedText) == null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= 'Translation failed or did not run.'",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= 'Translation completed'",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "translation_status"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "get final text",
+      "description": "Set content to translate",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*/translate_content) != null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "/document/pages/*/translate_content",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "/document/pages/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "finaltext"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "title check",
+      "description": "determine if translation is needed",
+      "context": "/document",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/normalized_images) != null && $(/document/metadata_title) == null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= $(/document/imagetitle)",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= $(/document/metadata_title)",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "title"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
+      "name": "title language detection",
+      "description": "detection of language of text",
+      "context": "/document",
+      "defaultCountryHint": "US",
+      "modelVersion": "",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/title",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "languageCode",
+          "targetName": "titlelanguage"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
+      "name": "title translation",
+      "context": "/document",
+      "defaultToLanguageCode": "$TARGET_TRANSLATION_LANGUAGE",
+      "suggestedFrom": "$TARGET_TRANSLATION_LANGUAGE",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/title",
+          "inputs": []
+        },
+        {
+          "name": "fromLanguageCode",
+          "source": "/document/titlelanguage",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "translatedText",
+          "targetName": "translatedTitle"
+        },
+        {
+          "name": "translatedFromLanguageCode",
+          "targetName": "translatedFromLanguageCode"
+        },
+        {
+          "name": "translatedToLanguageCode",
+          "targetName": "translatedToLanguageCode"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.KeyPhraseExtractionSkill",
+      "name": "KeyPhraseExtraction",
+      "description": "Extract key phrases",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*/finaltext",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "keyPhrases",
+          "targetName": "keyPhrases"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.V3.EntityRecognitionSkill",
+      "name": "EntityRecognition",
+      "description": "Recognize entities",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*/finaltext",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "namedEntities",
+          "targetName": "entities"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "set_text_enrichment_status",
+      "description": "Set the status of the document based on text enrichment",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*/entities) != null && $(/document/pages/*/keyPhrases) != null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= 'Text enrichment successful'",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= 'Text enrichment failed or did not run.'",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "text_enrichment_status"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Vision.ImageAnalysisSkill",
+      "name": "ImageAnalysis",
+      "description": "Analyze images to extract information",
+      "context": "/document/normalized_images/*",
+      "defaultLanguageCode": "$TARGET_TRANSLATION_LANGUAGE",
+      "visualFeatures": [
+        "Tags",
+        "Description",
+        "Faces",
+        "Objects"
+
+      ],
+      "details": [],
+      "inputs": [
+        {
+          "name": "image",
+          "source": "/document/normalized_images/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "tags",
+          "targetName": "imageTags"
+        },
+        {
+          "name": "description",
+          "targetName": "imageDescription"
+        },
+        {
+          "name": "faces",
+          "targetName": "imageFaces"
+        },
+        {
+          "name": "objects",
+          "targetName": "imageObjects"
+        },
+        {
+          "name": "brands",
+          "targetName": "imageBrands"
+        },
+        {
+          "name": "adult",
+          "targetName": "imageAdult"
+        },
+        {
+          "name": "categories",
+          "targetName": "imageCategories"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Vision.OcrSkill",
+      "name": "OCR",
+      "description": "Extract text from images",
+      "context": "/document/normalized_images/*",
+      "lineEnding": "Space",
+      "defaultLanguageCode": "$TARGET_TRANSLATION_LANGUAGE",
+      "detectOrientation": true,
+      "inputs": [
+        {
+          "name": "image",
+          "source": "/document/normalized_images/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "text",
+          "targetName": "ocrText"
+        },
+        {
+          "name": "layoutText",
+          "targetName": "ocrLayoutText"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.LanguageDetectionSkill",
+      "name": "ocr language detection",
+      "description": "detection of language of text",
+      "context": "/document/normalized_images/*",
+      "defaultCountryHint": "US",
+      "modelVersion": "",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/normalized_images/*/ocrText",
+          "sourceContext": null,
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "languageCode",
+          "targetName": "ocrlanguage"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "ocr language check",
+      "description": "determine if translation is needed",
+      "context": "/document/normalized_images/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/normalized_images/*/ocrlanguage) != '$TARGET_TRANSLATION_LANGUAGE'",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= $(/document/normalized_images/*/ocrText)",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= null",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "ocrcontentToTranslate"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.TranslationSkill",
+      "name": "ocr translation",
+      "context": "/document/normalized_images/*",
+      "defaultToLanguageCode": "$TARGET_TRANSLATION_LANGUAGE",
+      "suggestedFrom": "en",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/normalized_images/*/ocrcontentToTranslate",
+          "inputs": []
+        },
+        {
+          "name": "fromLanguageCode",
+          "source": "/document/normalized_images/*/ocrlanguage",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "translatedText",
+          "targetName": "OCRtranslatedText"
+        },
+        {
+          "name": "translatedFromLanguageCode",
+          "targetName": "translatedFromLanguageCode"
+        },
+        {
+          "name": "translatedToLanguageCode",
+          "targetName": "translatedToLanguageCode"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
+      "name": "Imagecaptions",
+      "description": "Create merged_text, which includes all the textual representation of each image inserted at the right location in the content field.",
+      "context": "/document/normalized_images/*",
+      "insertPreTag": " ",
+      "insertPostTag": " ",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/normalized_images/*/ocrText",
+          "inputs": []
+        },
+        {
+          "name": "itemsToInsert",
+          "source": "/document/normalized_images/*/imageDescription/captions/*/text",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mergedText",
+          "targetName": "merged_text2"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
+      "name": "Imagetags",
+      "description": "Create merged_text, which includes all the textual representation of each image inserted at the right location in the content field.",
+      "context": "/document/normalized_images/*",
+      "insertPreTag": " ",
+      "insertPostTag": " ",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/normalized_images/*/merged_text2",
+          "inputs": []
+        },
+        {
+          "name": "itemsToInsert",
+          "source": "/document/normalized_images/*/imageDescription/tags/*",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mergedText",
+          "targetName": "merged_text3"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
+      "name": "Imageobjects",
+      "description": "Create merged_text, which includes all the textual representation of each image inserted at the right location in the content field.",
+      "context": "/document/normalized_images/*",
+      "insertPreTag": " ",
+      "insertPostTag": " ",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/normalized_images/*/merged_text3",
+          "inputs": []
+        },
+        {
+          "name": "itemsToInsert",
+          "source": "/document/normalized_images/*/imageObjects/*/object",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mergedText",
+          "targetName": "merged_text4"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.MergeSkill",
+      "name": "ImageCategories",
+      "description": "Create merged_text, which includes all the textual representation of each image inserted at the right location in the content field.",
+      "context": "/document/normalized_images/*",
+      "insertPreTag": " ",
+      "insertPostTag": " ",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/normalized_images/*/merged_text4",
+          "inputs": []
+        },
+        {
+          "name": "itemsToInsert",
+          "source": "/document/normalized_images/*/imageCategories/*/name",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "mergedText",
+          "targetName": "merged_text5"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "set_ImageEnrichment_status",
+      "description": "Set the status of the document based on image enrichment",
+      "context": "/document/normalized_images/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/normalized_images/*/merged_text5) != null && $(/document/normalized_images) != null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= 'Image enrichment complete.'",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= 'Image enrichment failed'",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "image_enr_status"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill",
+      "name": "Embedding process",
+      "description": "Connects a deployed embedding model for text embedding.",
+      "context": "/document/pages/*",
+      "resourceUri": "$AZURE_OPENAI_ENDPOINT",
+      "deploymentId": "text-embedding-ada-002",
+      "dimensions": $EMBEDDING_VECTOR_SIZE,
+      "modelName": "$AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME",
+      "inputs": [
+        {
+          "name": "text",
+          "source": "/document/pages/*/finaltext",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "embedding",
+          "targetName": "embedding"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Util.ConditionalSkill",
+      "name": "set_embedding_status",
+      "description": "Set the status of the document based on embeddings",
+      "context": "/document/pages/*",
+      "inputs": [
+        {
+          "name": "condition",
+          "source": "= $(/document/pages/*/embedding) != null",
+          "inputs": []
+        },
+        {
+          "name": "whenTrue",
+          "source": "= 'Embedding successful'",
+          "inputs": []
+        },
+        {
+          "name": "whenFalse",
+          "source": "= 'Embedding either failed or did not run'",
+          "inputs": []
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "targetName": "embedding_status"
+        }
+      ]
+    }
+  ],
+  "cognitiveServices": {
+    "@odata.type": "#Microsoft.Azure.Search.AIServicesByIdentity",
+    "subdomainUrl": "$AZURE_AI_ENDPOINT"
+  },
+  "knowledgeStore": {
+    "storageConnectionString": "$KNOWLEDGE_STORE_CONNECTION_STRING",
+    "projections": [
+      {
+        "tables": [
+          {
+            "tableName": "enrichmentstatus",
+            "referenceKeyName": "DocumentId",
+            "generatedKeyName": "DocumentId",
+            "sourceContext": "/document",
+            "inputs": [
+              {
+                "name": "filepath",
+                "source": "/document/metadata_storage_path",
+                "inputs": []
+              },
+              {
+                "name": "ex_status",
+                "source": "/document/ex_status",
+                "inputs": []
+              },
+              {
+                "name": "translation_status",
+                "source": "/document/pages/*/translation_status",
+                "inputs": []
+              },
+              {
+                "name": "split_status",
+                "source": "/document/split_status",
+                "inputs": []
+              },
+              {
+                "name": "text_enrichment_status",
+                "source": "/document/pages/*/text_enrichment_status",
+                "inputs": []
+              },
+              {
+                "name": "image_enr_status",
+                "source": "/document/normalized_images/*/image_enr_status",
+                "inputs": []
+              },
+              {
+                "name": "embedding_status",
+                "source": "/document/pages/*/embedding_status",
+                "inputs": []
+              }
+            ]
+          }
+        ],
+        "objects": [],
+        "files": []
+      }
+    ],
+    "parameters": {
+      "synthesizeGeneratedKeyName": true
+    }
+  },
+  "indexProjections": {
+    "selectors": [
+      {
+        "targetIndexName": "vector-index",
+        "parentKeyFieldName": "file_id",
+        "sourceContext": "/document/pages/*",
+        "mappings": [
+          {
+            "name": "content",
+            "source": "/document/pages/*/finaltext",
+            "inputs": []
+          },
+          {
+            "name": "contentVector",
+            "source": "/document/pages/*/embedding",
+            "inputs": []
+          },
+          {
+            "name": "entities",
+            "source": "/document/pages/*/entities/*/text",
+            "inputs": []
+          },
+          {
+            "name": "key_phrases",
+            "source": "/document/pages/*/keyPhrases",
+            "inputs": []
+          },
+          {
+            "name": "file_name",
+            "source": "/document/filepath",
+            "inputs": []
+          },
+          {
+            "name": "file_uri",
+            "source": "/document/metadata_storage_path",
+            "inputs": []
+          },
+          {
+            "name": "tags",
+            "source": "/document/tags",
+            "inputs": []
+          },
+          {
+            "name": "title",
+            "source": "/document/title",
+            "inputs": []
+          },
+          {
+            "name": "translated_title",
+            "source": "/document/translatedTitle",
+            "inputs": []
+          },
+          {
+            "name": "ex_status",
+            "source": "/document/ex_status",
+            "inputs": []
+          },
+          {
+            "name": "translation_status",
+            "source": "/document/pages/*/translation_status",
+            "inputs": []
+          },
+          {
+            "name": "split_status",
+            "source": "/document/split_status",
+            "inputs": []
+          },
+          {
+            "name": "text_enrichment_status",
+            "source": "/document/pages/*/text_enrichment_status",
+            "inputs": []
+          },
+          {
+            "name": "image_enr_status",
+            "source": "/document/normalized_images/*/image_enr_status",
+            "inputs": []
+          },
+          {
+            "name": "embedding_status",
+            "source": "/document/pages/*/embedding_status",
+            "inputs": []
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "projectionMode": "skipIndexingParentDocuments"
+    }
+  }
+}

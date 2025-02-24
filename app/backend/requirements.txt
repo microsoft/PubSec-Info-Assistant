@@ -1,0 +1,13 @@
+azure-data-tables==12.6.0
+azure-identity==1.18.0
+azure-mgmt-cognitiveservices==13.5.0
+azure-monitor-opentelemetry==1.6.4
+azure-search-documents==11.5.1
+azure-storage-blob==12.23.0
+fastapi-utils==0.7.0
+microsoft-bing-websearch==1.0.0
+openai==1.55.3
+opentelemetry-exporter-otlp==1.30.0
+python-multipart==0.0.18
+tiktoken==0.7.0
+uvicorn==0.34.0

@@ -1,0 +1,137 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+.container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.25rem; /* 20px */
+    max-width: 80%;
+    margin-left: auto;
+}
+
+.containerUngrounded {
+    display: flex;
+    margin-bottom: 1.25rem; /* 20px */
+    max-width: 100%;
+    flex-direction: row;
+}
+
+.messagework {
+    padding: 1.25rem; /* 20px */
+    background: linear-gradient(130deg, #2870EA 20%, #1B4AEF 77.5%);
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.125rem rgba(0, 0, 0, 0.12); /* 0px 2px 4px and 0px 0px 2px */
+    outline: transparent solid 0.0625rem; /* 1px */
+}
+
+.messageweb {
+    padding: 1.25rem; /* 20px */
+    background: linear-gradient(130deg, #39b468 20%, #188d45 77.5%);
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: 0rem 0.125rem 0.25rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.125rem rgba(0, 0, 0, 0.12); /* 0px 2px 4px and 0px 0px 2px */
+    outline: transparent solid 0.0625rem; /* 1px */
+}
+
+.messagecompare {
+    padding: 20px;
+    background: linear-gradient(130deg, #d68436 20%, #ce7b2e 77.5%);
+    border-radius: 8px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12);
+    outline: transparent solid 1px;
+}
+
+.messageungrounded {
+    padding: 20px;
+    background: transparent;
+    outline: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.messageungroundedheader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px
+}
+
+.messageungroundedicon {
+    margin-right: '10px';
+    background-color: #d1dbfa;
+    color: #123bb6;
+    fill: #123bb6;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    font-size: 10px;
+    line-height: 14px;
+    font-weight: 600;
+    font-variation-settings: unset;
+}
+
+.messageungroundedtext {
+    padding-left: 10px;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 700;
+    font-variation-settings: unset;
+}
+
+.userMessage {
+    color: white;
+}
+
+.userMessageUngrounded {
+    color: rgba(0, 0, 0, 1);
+    padding-left: 36px;
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 48rem) { /* 768px */
+    .container {
+        margin-bottom: 1rem; /* 16px */
+    }
+
+    .containerUngrounded {
+        margin-bottom: 1rem; /* 16px */
+    }
+
+    .messagework {
+        font-size: .5rem;
+        padding: .5rem; /* 16px */
+        border-radius: 0.375rem; /* 6px */
+        box-shadow: 0rem 0.09375rem 0.1875rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.12); /* 0px 1.5px 3px and 0px 0px 1px */
+    }
+
+    .messageweb {
+        padding: 1rem; /* 16px */
+        border-radius: 0.375rem; /* 6px */
+        box-shadow: 0rem 0.09375rem 0.1875rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.12); /* 0px 1.5px 3px and 0px 0px 1px */
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .container {
+        margin-bottom: 0.75rem; /* 12px */
+    }
+
+    .containerUngrounded {
+        margin-bottom: 0.75rem; /* 12px */
+    }
+
+    .messagework {
+        padding: 0.75rem; /* 12px */
+        border-radius: 0.25rem; /* 4px */
+        box-shadow: 0rem 0.0625rem 0.125rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.12); /* 0px 1px 2px and 0px 0px 1px */
+    }
+
+    .messageweb {
+        padding: 0.75rem; /* 12px */
+        border-radius: 0.25rem; /* 4px */
+        box-shadow: 0rem 0.0625rem 0.125rem rgba(0, 0, 0, 0.14), 0rem 0rem 0.0625rem rgba(0, 0, 0, 0.12); /* 0px 1px 2px and 0px 0px 1px */
+    }
+}

@@ -1,0 +1,162 @@
+/* Copyright (c) Microsoft Corporation.
+   Licensed under the MIT license. */
+
+   .centeredContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+    border: 1px solid lightgrey;
+    border-radius: 10px;
+    padding: 20px;
+    margin: auto;
+    width: 50%; /* Adjust as needed */
+    
+}
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #f2f2f2;
+}
+
+.header {
+    background-color: #222222;
+    color: #f2f2f2;
+}
+
+.headerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-right: 12px;
+    margin-left: 12px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.headerTitleContainer {
+    display: flex;
+    align-items: center;
+    margin-right: 40px;
+    color: #f2f2f2;
+    text-decoration: none;
+}
+
+.headerLogo {
+    height: 40px;
+}
+
+.headerTitle {
+    margin-left: 12px;
+    font-weight: 600;
+}
+
+.headerNavList {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+}
+
+.headerNavPageLink {
+    color: #f2f2f2;
+    text-decoration: none;
+    opacity: 0.75;
+
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 500ms;
+    transition-property: opacity;
+}
+
+.headerNavPageLink:hover {
+    opacity: 1;
+}
+
+.headerNavPageLinkActive {
+    color: #f2f2f2;
+    text-decoration: none;
+}
+
+.headerNavLeftMargin {
+    margin-left: 20px;
+}
+
+.headerRightText {
+    font-weight: normal;
+    margin-left: 40px;
+}
+
+.microsoftLogo {
+    height: 23px;
+    font-weight: 600;
+}
+
+.githubLogo {
+    height: 20px;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+}
+
+.right {
+    display: flex;
+    justify-content: center;
+}
+
+/* Media queries for smaller screens */
+@media (max-width: 768px) { 
+    .headerLogo {
+        height: 1rem;
+    }/* 768px */
+    .headerContainer {
+        
+        align-items: flex-start;
+    }
+
+    .headerTitle {
+        font-size: .75rem; /* 20px */
+    }
+
+    .headerNavList {
+        
+        align-items: flex-start;
+        margin-bottom: 0;
+        font-size: .2rem;
+    }
+
+    .headerNavPageLink {
+        padding: 0.3rem 0; /* 8px 0 */
+        font-size: 0.38rem; /* 14px */
+    }
+
+    .headerNavLeftMargin {
+        margin-left: 10px;
+  /* 10px */
+    }
+    .headerNavPageLinkActive {
+        color: #f2f2f2;
+        text-decoration: none;
+        font-size: 0.38rem;
+    }
+    p {
+        margin-bottom: 0.3rem;
+    }
+}
+
+@media (max-width: 30rem) { /* 480px */
+    .headerTitle {
+        font-size: .6rem; /* 16px */
+    }
+
+    .headerNavPageLink {
+        font-size: 0.5rem; /* 12px */
+        padding: 0.375rem 0; /* 6px 0 */
+    }
+    .headerNavPageLinkActive {
+        color: #f2f2f2;
+        text-decoration: none;
+        font-size: 0.5rem;
+    }
+}
+

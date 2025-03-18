@@ -6,7 +6,11 @@ from typing import Optional
 from datetime import datetime
 import asyncio
 import logging
+from fastapi.middleware.cors import CORSMiddleware
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'functions')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'shared_code')))
 import json
 import urllib.parse
 import pandas as pd
@@ -45,14 +49,15 @@ from azure.cosmos import CosmosClient
 
 ENV = {
     "AZURE_BLOB_STORAGE_ACCOUNT": "infoasststorejxrgv",
+    "USE_AZURE_OPENAI_EMBEDDINGS": False,
     "AZURE_BLOB_STORAGE_ENDPOINT": "https://infoasststorejxrgv.blob.core.windows.net/",
     "AZURE_BLOB_STORAGE_CONTAINER": "content",
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
     "AZURE_SEARCH_SERVICE": "infoasst-search-jxrgv",
     "AZURE_SEARCH_SERVICE_ENDPOINT": "https://infoasst-search-jxrgv.search.windows.net",
-    #"AZURE_SEARCH_INDEX": "gptkbindex",
-    #"AZURE_SEARCH_AUDIENCE": None,
-    #"USE_SEMANTIC_RERANKER": "true",
+    "AZURE_SEARCH_INDEX": "gptkbindex",
+    "AZURE_SEARCH_AUDIENCE": "",
+    "USE_SEMANTIC_RERANKER": "true",
     "AZURE_OPENAI_SERVICE": "infoasst-aoai-uftbv-eu",
     "AZURE_OPENAI_RESOURCE_GROUP": "infoasst-myworkspace-ircc2",
     "AZURE_OPENAI_ENDPOINT": "https://infoasst-aoai-uftbv-eu.openai.azure.com/",
@@ -64,31 +69,31 @@ ENV = {
     "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "text-embedding-ada-002",
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "2",
     "AZURE_SUBSCRIPTION_ID": "d7a55bca-4abb-4720-9ffe-133a4755d5b7",
-    #"AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
-    #"CHAT_WARNING_BANNER_TEXT": "",
-    #"APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
-    #"KB_FIELDS_CONTENT": "content",
-    #"KB_FIELDS_PAGENUMBER": "pages",
-    #"KB_FIELDS_SOURCEFILE": "file_name",
-    #"KB_FIELDS_CHUNKFILE": "chunk_file",
+    "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
+    "CHAT_WARNING_BANNER_TEXT": "",
+    "APPLICATION_TITLE": "",
+    "KB_FIELDS_CONTENT": "content",
+    "KB_FIELDS_PAGENUMBER": "pages",
+    "KB_FIELDS_SOURCEFILE": "file_name",
+    "KB_FIELDS_CHUNKFILE": "chunk_file",
     "COSMOSDB_URL": "https://infoasst-cosmos-jxrgv.documents.azure.com:443/",
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
-   # "QUERY_TERM_LANGUAGE": "English",
-   # "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
-   # "ENRICHMENT_APPSERVICE_URL": "enrichment",
-   # "TARGET_TRANSLATION_LANGUAGE": "en",
-   # "AZURE_AI_ENDPOINT": None,
-   # "AZURE_AI_LOCATION": "",
-   # "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
-   # "BING_SEARCH_KEY": "",
-   # "ENABLE_BING_SAFE_SEARCH": "true",
-   # "ENABLE_WEB_CHAT": "false",
-   # "ENABLE_UNGROUNDED_CHAT": "false",
-   # "ENABLE_MATH_ASSISTANT": "false",
-   # "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-   # "MAX_CSV_FILE_SIZE": "7",
-   "LOCAL_DEBUG": "false",
+    "QUERY_TERM_LANGUAGE": "English",
+    "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
+    "ENRICHMENT_APPSERVICE_URL": "enrichment",
+    "TARGET_TRANSLATION_LANGUAGE": "en",
+    "AZURE_AI_ENDPOINT": "",
+    "AZURE_AI_LOCATION": "",
+    "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
+    "BING_SEARCH_KEY": "",
+    "ENABLE_BING_SAFE_SEARCH": "true",
+    "ENABLE_WEB_CHAT": "false",
+    "ENABLE_UNGROUNDED_CHAT": "false",
+    "ENABLE_MATH_ASSISTANT": "false",
+    "ENABLE_TABULAR_DATA_ASSISTANT": "false",
+    "MAX_CSV_FILE_SIZE": "7",
+   "LOCAL_DEBUG": "true",
    "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
 
@@ -204,6 +209,14 @@ app = FastAPI(
     description="A Python API to serve as Backend For the Information Assistant Web App",
     version="0.1.0",
     docs_url="/docs",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or set your frontend's URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/", include_in_schema=False, response_class=RedirectResponse)
@@ -623,7 +636,7 @@ async def get_file(request: Request):
                              media_type=blob_properties.content_settings.content_type, 
                              headers={"Content-Disposition": f"inline; filename={blob_name}"})
 
-app.mount("/", StaticFiles(directory="static"), name="static")
+#app.mount("/", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     log.info("IA WebApp Starting Up...")

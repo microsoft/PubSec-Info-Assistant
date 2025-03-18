@@ -401,7 +401,7 @@ module "webapp" {
     ENRICHMENT_APPSERVICE_URL               = module.enrichmentApp.uri
     AZURE_AI_ENDPOINT                       = module.cognitiveServices.cognitiveServiceEndpoint
     AZURE_AI_LOCATION                       = var.location
-    APPLICATION_TITLE                       = var.applicationtitle == "" ? "Information Assistant, built with Azure OpenAI" : var.applicationtitle
+    APPLICATION_TITLE                       = var.applicationtitle == "" ? "" : var.applicationtitle
     USE_SEMANTIC_RERANKER                   = var.use_semantic_reranker
     BING_SEARCH_ENDPOINT                    = var.enableWebChat ? module.bingSearch[0].endpoint : ""
     ENABLE_WEB_CHAT                         = var.enableWebChat

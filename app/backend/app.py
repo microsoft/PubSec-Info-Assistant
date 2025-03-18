@@ -15,28 +15,28 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile, Form
 from fastapi.responses import RedirectResponse, StreamingResponse
 import openai
-from approaches.comparewebwithwork import CompareWebWithWork
-from approaches.compareworkwithweb import CompareWorkWithWeb
-from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
-from approaches.chatwebretrieveread import ChatWebRetrieveRead
-from approaches.gpt_direct_approach import GPTDirectApproach
-from approaches.approach import Approaches
+#from approaches.comparewebwithwork import CompareWebWithWork
+#from approaches.compareworkwithweb import CompareWorkWithWeb
+#from approaches.chatreadretrieveread import ChatReadRetrieveReadApproach
+#from approaches.chatwebretrieveread import ChatWebRetrieveRead
+#from approaches.gpt_direct_approach import GPTDirectApproach
+#from approaches.approach import Approaches
 from azure.identity import ManagedIdentityCredential, AzureAuthorityHosts, DefaultAzureCredential, get_bearer_token_provider
 from azure.mgmt.cognitiveservices import CognitiveServicesManagementClient
 from azure.search.documents import SearchClient
 from azure.storage.blob import BlobServiceClient, ContentSettings
-from approaches.mathassistant import(
-    generate_response,
-    process_agent_response,
-    stream_agent_responses
-)
-from approaches.tabulardataassistant import (
-    refreshagent,
-    save_df,
-    process_agent_response as td_agent_response,
-    process_agent_scratch_pad as td_agent_scratch_pad,
-    get_images_in_temp
-)
+#from approaches.mathassistant import(
+ #   generate_response,
+  #  process_agent_response,
+   # stream_agent_responses
+#)
+#from approaches.tabulardataassistant import (
+ #   refreshagent,
+  #  save_df,
+   # process_agent_response as td_agent_response,
+   # process_agent_scratch_pad as td_agent_scratch_pad,
+    #get_images_in_temp
+#)
 from shared_code.status_log import State, StatusClassification, StatusLog
 from azure.cosmos import CosmosClient
 
@@ -44,53 +44,52 @@ from azure.cosmos import CosmosClient
 # === ENV Setup ===
 
 ENV = {
-    "AZURE_BLOB_STORAGE_ACCOUNT": None,
-    "AZURE_BLOB_STORAGE_ENDPOINT": None,
+    "AZURE_BLOB_STORAGE_ACCOUNT": "infoasststorejxrgv",
+    "AZURE_BLOB_STORAGE_ENDPOINT": "https://infoasststorejxrgv.blob.core.windows.net/",
     "AZURE_BLOB_STORAGE_CONTAINER": "content",
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
-    "AZURE_SEARCH_SERVICE": "gptkb",
-    "AZURE_SEARCH_SERVICE_ENDPOINT": None,
-    "AZURE_SEARCH_INDEX": "gptkbindex",
-    "AZURE_SEARCH_AUDIENCE": None,
-    "USE_SEMANTIC_RERANKER": "true",
-    "AZURE_OPENAI_SERVICE": "myopenai",
-    "AZURE_OPENAI_RESOURCE_GROUP": "",
-    "AZURE_OPENAI_ENDPOINT": "",
+    "AZURE_SEARCH_SERVICE": "infoasst-search-jxrgv",
+    "AZURE_SEARCH_SERVICE_ENDPOINT": "https://infoasst-search-jxrgv.search.windows.net",
+    #"AZURE_SEARCH_INDEX": "gptkbindex",
+    #"AZURE_SEARCH_AUDIENCE": None,
+    #"USE_SEMANTIC_RERANKER": "true",
+    "AZURE_OPENAI_SERVICE": "infoasst-aoai-uftbv-eu",
+    "AZURE_OPENAI_RESOURCE_GROUP": "infoasst-myworkspace-ircc2",
+    "AZURE_OPENAI_ENDPOINT": "https://infoasst-aoai-uftbv-eu.openai.azure.com/",
     "AZURE_OPENAI_AUTHORITY_HOST": "AzureCloud",
     "AZURE_OPENAI_CHATGPT_DEPLOYMENT": "gpt-35-turbo-16k",
-    "AZURE_OPENAI_CHATGPT_MODEL_NAME": "",
-    "AZURE_OPENAI_CHATGPT_MODEL_VERSION": "",
-    "USE_AZURE_OPENAI_EMBEDDINGS": "false",
-    "EMBEDDING_DEPLOYMENT_NAME": "",
-    "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "",
-    "AZURE_OPENAI_EMBEDDINGS_VERSION": "",
-    "AZURE_SUBSCRIPTION_ID": None,
-    "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
-    "CHAT_WARNING_BANNER_TEXT": "",
-    "APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
-    "KB_FIELDS_CONTENT": "content",
-    "KB_FIELDS_PAGENUMBER": "pages",
-    "KB_FIELDS_SOURCEFILE": "file_name",
-    "KB_FIELDS_CHUNKFILE": "chunk_file",
-    "COSMOSDB_URL": None,
+    "AZURE_OPENAI_CHATGPT_MODEL_NAME": "gpt-35-turbo-16k",
+    "AZURE_OPENAI_CHATGPT_MODEL_VERSION": "0613",
+    "EMBEDDING_DEPLOYMENT_NAME": "text-embedding-ada-002",
+    "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "text-embedding-ada-002",
+    "AZURE_OPENAI_EMBEDDINGS_VERSION": "2",
+    "AZURE_SUBSCRIPTION_ID": "d7a55bca-4abb-4720-9ffe-133a4755d5b7",
+    #"AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
+    #"CHAT_WARNING_BANNER_TEXT": "",
+    #"APPLICATION_TITLE": "Information Assistant, built with Azure OpenAI",
+    #"KB_FIELDS_CONTENT": "content",
+    #"KB_FIELDS_PAGENUMBER": "pages",
+    #"KB_FIELDS_SOURCEFILE": "file_name",
+    #"KB_FIELDS_CHUNKFILE": "chunk_file",
+    "COSMOSDB_URL": "https://infoasst-cosmos-jxrgv.documents.azure.com:443/",
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
-    "QUERY_TERM_LANGUAGE": "English",
-    "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
-    "ENRICHMENT_APPSERVICE_URL": "enrichment",
-    "TARGET_TRANSLATION_LANGUAGE": "en",
-    "AZURE_AI_ENDPOINT": None,
-    "AZURE_AI_LOCATION": "",
-    "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
-    "BING_SEARCH_KEY": "",
-    "ENABLE_BING_SAFE_SEARCH": "true",
-    "ENABLE_WEB_CHAT": "false",
-    "ENABLE_UNGROUNDED_CHAT": "false",
-    "ENABLE_MATH_ASSISTANT": "false",
-    "ENABLE_TABULAR_DATA_ASSISTANT": "false",
-    "MAX_CSV_FILE_SIZE": "7",
-    "LOCAL_DEBUG": "false",
-    "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
+   # "QUERY_TERM_LANGUAGE": "English",
+   # "TARGET_EMBEDDINGS_MODEL": "BAAI/bge-small-en-v1.5",
+   # "ENRICHMENT_APPSERVICE_URL": "enrichment",
+   # "TARGET_TRANSLATION_LANGUAGE": "en",
+   # "AZURE_AI_ENDPOINT": None,
+   # "AZURE_AI_LOCATION": "",
+   # "BING_SEARCH_ENDPOINT": "https://api.bing.microsoft.com/",
+   # "BING_SEARCH_KEY": "",
+   # "ENABLE_BING_SAFE_SEARCH": "true",
+   # "ENABLE_WEB_CHAT": "false",
+   # "ENABLE_UNGROUNDED_CHAT": "false",
+   # "ENABLE_MATH_ASSISTANT": "false",
+   # "ENABLE_TABULAR_DATA_ASSISTANT": "false",
+   # "MAX_CSV_FILE_SIZE": "7",
+   "LOCAL_DEBUG": "false",
+   "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
 
 for key, value in ENV.items():
@@ -196,78 +195,6 @@ else:
     EMBEDDING_MODEL_NAME = ""
     EMBEDDING_MODEL_VERSION = ""
 
-chat_approaches = {
-    Approaches.ReadRetrieveRead: ChatReadRetrieveReadApproach(
-                                    search_client,
-                                    ENV["AZURE_OPENAI_ENDPOINT"],
-                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                    ENV["KB_FIELDS_SOURCEFILE"],
-                                    ENV["KB_FIELDS_CONTENT"],
-                                    ENV["KB_FIELDS_PAGENUMBER"],
-                                    ENV["KB_FIELDS_CHUNKFILE"],
-                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
-                                    blob_client,
-                                    ENV["QUERY_TERM_LANGUAGE"],
-                                    MODEL_NAME,
-                                    MODEL_VERSION,
-                                    ENV["TARGET_EMBEDDINGS_MODEL"],
-                                    ENV["ENRICHMENT_APPSERVICE_URL"],
-                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
-                                    ENV["AZURE_AI_ENDPOINT"],
-                                    ENV["AZURE_AI_LOCATION"],
-                                    token_provider,
-                                    str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
-                                ),
-    Approaches.ChatWebRetrieveRead: ChatWebRetrieveRead(
-                                    MODEL_NAME,
-                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
-                                    ENV["BING_SEARCH_ENDPOINT"],
-                                    ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
-                                    ENV["AZURE_OPENAI_ENDPOINT"],
-                                    token_provider
-                                ),
-    Approaches.CompareWorkWithWeb: CompareWorkWithWeb(
-                                    MODEL_NAME,
-                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
-                                    ENV["BING_SEARCH_ENDPOINT"],
-                                    ENV["BING_SEARCH_KEY"],
-                                    str_to_bool.get(ENV["ENABLE_BING_SAFE_SEARCH"]),
-                                    ENV["AZURE_OPENAI_ENDPOINT"],
-                                    token_provider
-                                ),
-    Approaches.CompareWebWithWork: CompareWebWithWork(
-                                    search_client,
-                                    ENV["AZURE_OPENAI_ENDPOINT"],
-                                    ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                    ENV["KB_FIELDS_SOURCEFILE"],
-                                    ENV["KB_FIELDS_CONTENT"],
-                                    ENV["KB_FIELDS_PAGENUMBER"],
-                                    ENV["KB_FIELDS_CHUNKFILE"],
-                                    ENV["AZURE_BLOB_STORAGE_CONTAINER"],
-                                    blob_client,
-                                    ENV["QUERY_TERM_LANGUAGE"],
-                                    MODEL_NAME,
-                                    MODEL_VERSION,
-                                    ENV["TARGET_EMBEDDINGS_MODEL"],
-                                    ENV["ENRICHMENT_APPSERVICE_URL"],
-                                    ENV["TARGET_TRANSLATION_LANGUAGE"],
-                                    ENV["AZURE_AI_ENDPOINT"],
-                                    ENV["AZURE_AI_LOCATION"],
-                                    token_provider,
-                                    str_to_bool.get(ENV["USE_SEMANTIC_RERANKER"])
-                                ),
-    Approaches.GPTDirect: GPTDirectApproach(
-                                token_provider,
-                                ENV["AZURE_OPENAI_CHATGPT_DEPLOYMENT"],
-                                ENV["QUERY_TERM_LANGUAGE"],
-                                MODEL_NAME,
-                                MODEL_VERSION,
-                                ENV["AZURE_OPENAI_ENDPOINT"]
-    )
-}
 
 IS_READY = True
 
@@ -304,43 +231,10 @@ def health():
 
     return output
 
-@app.post("/chat")
-async def chat(request: Request):
-    """Chat with the bot using a given approach
-
-    Args:
-        request (Request): The incoming request object
-
-    Returns:
-        dict: The response containing the chat results
-
-    Raises:
-        dict: The error response if an exception occurs during the chat
-    """
-    json_body = await request.json()
-    approach = json_body.get("approach")
-    try:
-        impl = chat_approaches.get(Approaches(int(approach)))
-        if not impl:
-            return {"error": "unknown approach"}, 400
-
-        if (Approaches(int(approach)) == Approaches.CompareWorkWithWeb or
-            Approaches(int(approach)) == Approaches.CompareWebWithWork):
-            r = impl.run(json_body.get("history", []),
-                         json_body.get("overrides", {}),
-                         json_body.get("citation_lookup", {}),
-                         json_body.get("thought_chain", {}))
-        else:
-            r = impl.run(json_body.get("history", []),
-                         json_body.get("overrides", {}),
-                         {},
-                         json_body.get("thought_chain", {}))
-
-        return StreamingResponse(r, media_type="application/x-ndjson")
-
-    except Exception as ex:
-        log.error("Error in chat:: %s", ex)
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
+# ---------------------------
+# REMOVED /chat ENDPOINT HERE
+# REMOVED chat_approaches logic
+# ---------------------------
 
 @app.post("/getalluploadstatus")
 async def get_all_upload_status(request: Request):
@@ -657,174 +551,6 @@ async def get_all_tags():
     except Exception as ex:
         log.exception("Exception in /getalltags")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return results
-
-@app.get("/getTempImages")
-async def get_temp_images():
-    """Get the images in the temp directory
-
-    Returns:
-        list: A list of image data in the temp directory.
-    """
-    images = get_images_in_temp()
-    return {"images": images}
-
-@app.get("/getHint")
-async def getHint(question: Optional[str] = None):
-    """
-    Get the hint for a question
-
-    Returns:
-        str: A string containing the hint
-    """
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-
-    try:
-        results = generate_response(question).split("Clues")[1][2:]
-    except Exception as ex:
-        log.exception("Exception in /getHint")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return results
-
-@app.post("/posttd")
-async def posttd(csv: UploadFile = File(...)):
-    try:
-        global DF_FINAL
-            # Read the file into a pandas DataFrame
-        content = await csv.read()
-        df = pd.read_csv(StringIO(content.decode('utf-8-sig')))
-
-        DF_FINAL = df
-        # Process the DataFrame...
-        save_df(df)
-    except Exception as ex:
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    
-    
-    #return {"filename": csv.filename}
-@app.get("/process_td_agent_response")
-async def process_td_agent_response(retries=3, delay=1000, question: Optional[str] = None):
-    save_df(DF_FINAL)
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-    for i in range(retries):
-        try:
-            results = td_agent_response(question,DF_FINAL)
-            return results
-        except AttributeError as ex:
-            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                if str(ex) == "'NoneType' object has no attribute 'stream'":
-                    return ["error: Csv has not been loaded"]
-                else:
-                    raise HTTPException(status_code=500, detail=str(ex)) from ex
-        except Exception as ex:
-            log.exception(f"Exception in /process_tabular_data_agent_response:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-@app.get("/getTdAnalysis")
-async def getTdAnalysis(retries=3, delay=1, question: Optional[str] = None):
-    global DF_FINAL
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-        
-    for i in range(retries):
-        try:
-            save_df(DF_FINAL)
-            results = td_agent_scratch_pad(question, DF_FINAL)
-            return results
-        except AttributeError as ex:
-            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                if str(ex) == "'NoneType' object has no attribute 'stream'":
-                    return ["error: Csv has not been loaded"]
-                else:
-                    raise HTTPException(status_code=500, detail=str(ex)) from ex
-        except Exception as ex:
-            log.exception(f"Exception in /getTdAnalysis:{str(ex)}")
-            if i < retries - 1:  # i is zero indexed
-                await asyncio.sleep(delay)  # wait a bit before trying again
-            else:
-                raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-@app.post("/refresh")
-async def refresh():
-    """
-    Refresh the agent's state.
-
-    This endpoint calls the `refresh` function to reset the agent's state.
-
-    Raises:
-        HTTPException: If an error occurs while refreshing the agent's state.
-
-    Returns:
-        dict: A dictionary containing the status of the agent's state.
-    """
-    try:
-        refreshagent()
-    except Exception as ex:
-        log.exception("Exception in /refresh")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return {"status": "success"}
-
-
-@app.get("/stream")
-async def stream_response(question: str):
-    try:
-        stream = stream_agent_responses(question)
-        return StreamingResponse(stream, media_type="text/event-stream")
-    except Exception as ex:
-        log.exception("Exception in /stream")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-@app.get("/tdstream")
-async def td_stream_response(question: str):
-    save_df(DF_FINAL)
-    
-
-    try:
-        stream = td_agent_scratch_pad(question, DF_FINAL)
-        return StreamingResponse(stream, media_type="text/event-stream")
-    except Exception as ex:
-        log.exception("Exception in /stream")
-        raise HTTPException(status_code=500, detail=str(ex)) from ex
-
-
-
-
-@app.get("/process_agent_response")
-async def stream_agent_response(question: str):
-    """
-    Stream the response of the agent for a given question.
-
-    This endpoint uses Server-Sent Events (SSE) to stream the response of the agent. 
-    It calls the `process_agent_response` function which yields chunks of data as they become available.
-
-    Args:
-        question (str): The question to be processed by the agent.
-
-    Yields:
-        dict: A dictionary containing a chunk of the agent's response.
-
-    Raises:
-        HTTPException: If an error occurs while processing the question.
-    """
-    if question is None:
-        raise HTTPException(status_code=400, detail="Question is required")
-
-    try:
-        results = process_agent_response(question)
-    except Exception as e:
-        print(f"Error processing agent response: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
     return results
 
 

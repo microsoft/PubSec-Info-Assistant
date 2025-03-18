@@ -17,5 +17,8 @@
     "cSpell.words": [
         "Codespaces",
         "referenceable"
+    ],
+    "python.analysis.extraPaths": [
+        "./functions"
     ]
 }

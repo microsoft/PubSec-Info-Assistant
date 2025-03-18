@@ -1,19 +1,21 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import postcssNesting from 'postcss-nesting';
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills'
+//import { nodePolyfills } from 'vite-plugin-node-polyfills'
+//import rollupNodePolyFill from 'rollup-plugin-node-polyfills' --deprecated??
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react(), nodePolyfills()],
+    plugins: [react()],
     build: {
         outDir: "../backend/static",
         emptyOutDir: true,
         sourcemap: true,
         rollupOptions: {
             plugins: [
-                rollupNodePolyFill()
+                //rollupNodePolyFill(), 
+                //nodePolyfills()
             ]
         }
     },

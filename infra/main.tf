@@ -1,5 +1,17 @@
 locals {
-  tags            = { ProjectName = "Information Assistant", BuildNumber = var.buildNumber }
+  tags            = {
+    ProjectName = "ptu-test",
+    BuildNumber = var.buildNumber ,
+    Project     = "ptu-test"
+    Owner       = "wmy",
+    Created = "20250326",
+    Environment = "Testing",
+    Entity = "DTID",
+    "Application or Project-Name" = "ptu-test",
+    Tier = "AppTier",
+    Zone = "IntranetZone"
+  }
+
   azure_roles     = jsondecode(file("${path.module}/azure_roles.json"))
   selected_roles  = ["CognitiveServicesOpenAIUser", 
                       "CognitiveServicesUser", 
@@ -314,8 +326,10 @@ module "enrichmentApp" {
     COSMOSDB_LOG_CONTAINER_NAME             = module.cosmosdb.CosmosDBLogContainerName
     MAX_EMBEDDING_REQUEUE_COUNT             = 5
     EMBEDDING_REQUEUE_BACKOFF               = 60
-    AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
-    AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    # AZURE_OPENAI_SERVICE                    = var.useExistingAOAIService ? var.azureOpenAIServiceName : module.openaiServices.name
+    # AZURE_OPENAI_ENDPOINT                   = var.useExistingAOAIService ? "https://${var.azureOpenAIServiceName}.${var.azure_openai_domain}/" : module.openaiServices.endpoint
+    AZURE_OPENAI_SERVICE                    = "azure-aoai-ia-1"
+    AZURE_OPENAI_ENDPOINT                   = "https://azure-aoai-ia-1.openai.azure.com/"
     AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME  = var.azureOpenAIEmbeddingDeploymentName
     AZURE_SEARCH_INDEX                      = var.searchIndexName
     AZURE_SEARCH_SERVICE_ENDPOINT           = module.searchServices.endpoint

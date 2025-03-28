@@ -46,7 +46,7 @@ ENV = {
     "MAX_EMBEDDING_REQUEUE_COUNT": 5,
     "EMBEDDING_REQUEUE_BACKOFF": 60,
     "AZURE_OPENAI_SERVICE": None,
-    "AZURE_OPENAI_ENDPOINT": None,
+    "AZURE_OPENAI_ENDPOINT": "https://azure-aoai-ia-1.openai.azure.com/",  # Custom endpoint to use ada embedding model
     "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": None,
     "AZURE_SEARCH_INDEX": None,
     "TARGET_EMBEDDINGS_MODEL": None,

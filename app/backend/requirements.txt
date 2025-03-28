@@ -16,7 +16,7 @@ langchain-openai==0.2.1
 matplotlib==3.9.2
 microsoft-bing-websearch==1.0.0
 numexpr==2.10.1
-openai==1.55.3
+openai==1.56.0
 pandas==2.2.3
 Pillow==10.4.0
 PyJWT==2.10.1
@@ -28,3 +28,4 @@ tiktoken==0.7.0
 uvicorn==0.30.6
 wikipedia==1.4.0
 pydantic==2.10.1
+httpx==0.27.2

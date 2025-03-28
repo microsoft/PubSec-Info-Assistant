@@ -8,10 +8,11 @@ azure-search-documents==11.5.1
 azure-identity==1.18.0
 fastapi==0.115.0
 fastapi-utils==0.7.0
-openai==1.55.3
+openai==1.56.0
 sentence-transformers==3.1.1
 tenacity==9.0.0
 torch
 torchvision
 torchaudio
 uvicorn==0.30.6
+httpx==0.27.2

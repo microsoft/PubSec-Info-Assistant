@@ -33,8 +33,6 @@ fi
 # 3. Check Python environment
 ###########################################
 echo "----- Checking Python environment -----"
-which python || true
-python --version || true
 which python3 || true
 python3 --version || true
 
@@ -42,9 +40,9 @@ python3 --version || true
 # 4. Install Python dependencies
 ###########################################
 echo "----- Installing Python dependencies -----"
-# Use 'python -m pip' to avoid relying on a 'pip' binary in PATH
-python -m pip install --upgrade pip
-python -m pip install -r /home/site/wwwroot/app/backend/requirements.txt
+# Use 'python3 -m pip' to avoid relying on a 'pip' symlink
+python3 -m pip install --upgrade pip
+python3 -m pip install -r /home/site/wwwroot/app/backend/requirements.txt
 
 ###########################################
 # 5. Build the frontend

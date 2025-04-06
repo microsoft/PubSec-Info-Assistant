@@ -1,40 +1,58 @@
 #!/bin/bash
 
-set -e  # Exit on error
+# Exit immediately if any command fails
+set -e  
 
-# Extract output.tar.gz to /home/site/wwwroot
-echo "Extracting output.tar.gz..."
-tar -xzf /home/site/wwwroot/output.tar.gz -C /home/site/wwwroot
+###########################################
+# 1. Show that we are running the script
+###########################################
+echo "===== Running deploy.sh ====="
+echo "Current working directory: $(pwd)"
+echo "Contents of /home/site/wwwroot before build:"
+ls -la /home/site/wwwroot
 
-# List contents of frontend directory for debugging
-echo "Contents of /home/site/wwwroot/app/frontend/:"
-ls -la /home/site/wwwroot/app/frontend/
-
-# Verify Node.js is available
+###########################################
+# 2. Check Node version (optional but helpful)
+###########################################
 echo "Checking Node.js version..."
 if ! command -v node >/dev/null 2>&1; then
-    echo "Node.js not found. Please ensure Node.js is pre-installed in the runtime stack."
+    echo "Node.js not found. Please ensure your Azure App Service has Node installed (e.g. Node 18+)."
     exit 1
 else
     node --version
     npm --version
 fi
 
-# Check Node.js version compatibility (Vite requires Node.js 18+)
+# If you specifically need Node 18 or higher:
 NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 18 ]; then
-    echo "Error: Node.js version $NODE_VERSION is too old. Vite requires Node.js 18 or higher."
+    echo "Error: Node.js version $NODE_VERSION is too old. Vite typically requires Node.js 18 or higher."
     exit 1
 fi
 
-# Install Python dependencies
+###########################################
+# 3. Install Python dependencies
+###########################################
 echo "Installing Python dependencies..."
+# Adjust the path if your requirements.txt is located elsewhere
 pip install -r /home/site/wwwroot/app/backend/requirements.txt
 
-# Build the frontend
+###########################################
+# 4. Build the frontend
+###########################################
 echo "Building frontend..."
 cd /home/site/wwwroot/app/frontend
-npm install || { echo "npm install failed"; exit 1; }
-npm run build || { echo "npm run build failed"; exit 1; }
 
-echo "Frontend build completed successfully."
+npm install
+npm run build
+
+# If your 'dist/' folder is created here, you might want to see what's in it:
+echo "Contents of dist after build:"
+ls -la dist
+
+###########################################
+# 5. Return to the original folder (optional)
+###########################################
+cd /home/site/wwwroot
+
+echo "===== Deployment script completed successfully ====="

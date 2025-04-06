@@ -48,13 +48,13 @@ from azure.cosmos import CosmosClient
 # === ENV Setup ===
 
 ENV = {
-    "AZURE_BLOB_STORAGE_ACCOUNT": "infoasststorejxrgv",
+    "AZURE_BLOB_STORAGE_ACCOUNT": "infoasststoreuftbv",
     "USE_AZURE_OPENAI_EMBEDDINGS": False,
-    "AZURE_BLOB_STORAGE_ENDPOINT": "https://infoasststorejxrgv.blob.core.windows.net/",
+    "AZURE_BLOB_STORAGE_ENDPOINT": "https://infoasststoreuftbv.blob.core.windows.net/",
     "AZURE_BLOB_STORAGE_CONTAINER": "content",
     "AZURE_BLOB_STORAGE_UPLOAD_CONTAINER": "upload",
-    "AZURE_SEARCH_SERVICE": "infoasst-search-jxrgv",
-    "AZURE_SEARCH_SERVICE_ENDPOINT": "https://infoasst-search-jxrgv.search.windows.net",
+    "AZURE_SEARCH_SERVICE": "infoasst-search-uftbv",
+    "AZURE_SEARCH_SERVICE_ENDPOINT": "https://infoasst-search-uftbv.search.windows.net",
     "AZURE_SEARCH_INDEX": "gptkbindex",
     "AZURE_SEARCH_AUDIENCE": "",
     "USE_SEMANTIC_RERANKER": "true",
@@ -76,7 +76,7 @@ ENV = {
     "KB_FIELDS_PAGENUMBER": "pages",
     "KB_FIELDS_SOURCEFILE": "file_name",
     "KB_FIELDS_CHUNKFILE": "chunk_file",
-    "COSMOSDB_URL": "https://infoasst-cosmos-jxrgv.documents.azure.com:443/",
+    "COSMOSDB_URL": "https://infoasst-cosmos-uftbv.documents.azure.com:443/",
     "COSMOSDB_LOG_DATABASE_NAME": "statusdb",
     "COSMOSDB_LOG_CONTAINER_NAME": "statuscontainer",
     "QUERY_TERM_LANGUAGE": "English",

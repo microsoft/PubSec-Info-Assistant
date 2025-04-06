@@ -20,6 +20,17 @@ else
     npm --version
 fi
 
+# Check Node.js version compatibility (Vite requires Node.js 18+)
+NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+if [ "$NODE_VERSION" -lt 18 ]; then
+    echo "Error: Node.js version $NODE_VERSION is too old. Vite requires Node.js 18 or higher."
+    exit 1
+fi
+
+# Install Python dependencies
+echo "Installing Python dependencies..."
+pip install -r /home/site/wwwroot/app/backend/requirements.txt
+
 # Build the frontend
 echo "Building frontend..."
 cd /home/site/wwwroot/app/frontend

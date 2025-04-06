@@ -41,7 +41,7 @@ fastapi==0.115.0
 fastapi-utils==0.7.0
 openai==1.55.3
 sentence-transformers==3.1.1
-tenacity==9.0.0
+#tenacity==9.0.0
 torch
 torchvision
 torchaudio

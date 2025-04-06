@@ -12,7 +12,7 @@ echo "Contents of /home/site/wwwroot before build:"
 ls -la /home/site/wwwroot
 
 ###########################################
-# 2. Check Node version (optional but helpful)
+# 2. Check Node version
 ###########################################
 echo "Checking Node.js version..."
 if ! command -v node >/dev/null 2>&1; then
@@ -23,7 +23,6 @@ else
     npm --version
 fi
 
-# If you specifically need Node 18 or higher:
 NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
 if [ "$NODE_VERSION" -lt 18 ]; then
     echo "Error: Node.js version $NODE_VERSION is too old. Vite typically requires Node.js 18 or higher."
@@ -31,27 +30,36 @@ if [ "$NODE_VERSION" -lt 18 ]; then
 fi
 
 ###########################################
-# 3. Install Python dependencies
+# 3. Check Python environment
 ###########################################
-echo "Installing Python dependencies..."
-# Adjust the path if your requirements.txt is located elsewhere
-pip install -r /home/site/wwwroot/app/backend/requirements.txt
+echo "----- Checking Python environment -----"
+which python || true
+python --version || true
+which python3 || true
+python3 --version || true
 
 ###########################################
-# 4. Build the frontend
+# 4. Install Python dependencies
 ###########################################
-echo "Building frontend..."
+echo "----- Installing Python dependencies -----"
+# Use 'python -m pip' to avoid relying on a 'pip' binary in PATH
+python -m pip install --upgrade pip
+python -m pip install -r /home/site/wwwroot/app/backend/requirements.txt
+
+###########################################
+# 5. Build the frontend
+###########################################
+echo "----- Building frontend -----"
 cd /home/site/wwwroot/app/frontend
 
 npm install
 npm run build
 
-# If your 'dist/' folder is created here, you might want to see what's in it:
 echo "Contents of dist after build:"
 ls -la dist
 
 ###########################################
-# 5. Return to the original folder (optional)
+# 6. Return to the original folder
 ###########################################
 cd /home/site/wwwroot
 

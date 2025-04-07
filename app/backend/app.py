@@ -93,7 +93,7 @@ ENV = {
     "ENABLE_MATH_ASSISTANT": "false",
     "ENABLE_TABULAR_DATA_ASSISTANT": "false",
     "MAX_CSV_FILE_SIZE": "7",
-   "LOCAL_DEBUG": "true",
+   "LOCAL_DEBUG": "false",
    "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
 

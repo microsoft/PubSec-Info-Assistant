@@ -360,7 +360,6 @@ MigrationBackup/
 # NPM
 npm-debug.log*
 node_modules
-static
 package-lock.json
 
 #devcontainer tools

@@ -17,5 +17,41 @@
     "cSpell.words": [
         "Codespaces",
         "referenceable"
+    ],
+    "python.analysis.extraPaths": [
+        "./functions"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/d7a55bca-4abb-4720-9ffe-133a4755d5b7/resourceGroups/infoasst-myworkspace-ircc2/providers/Microsoft.Web/sites/infoasst-web-uftbv",
+    "appService.deploySubpath": ".",
+    "appService.zipIgnorePattern": [
+        "__pycache__{,/**}",
+        "*.py[cod]",
+        "*$py.class",
+        ".Python{,/**}",
+        "build{,/**}",
+        "develop-eggs{,/**}",
+        "dist{,/**}",
+        "downloads{,/**}",
+        "eggs{,/**}",
+        ".eggs{,/**}",
+        "lib{,/**}",
+        "lib64{,/**}",
+        "parts{,/**}",
+        "sdist{,/**}",
+        "var{,/**}",
+        "wheels{,/**}",
+        "share/python-wheels{,/**}",
+        "*.egg-info{,/**}",
+        ".installed.cfg",
+        "*.egg",
+        "MANIFEST",
+        ".env{,/**}",
+        ".venv{,/**}",
+        "env{,/**}",
+        "venv{,/**}",
+        "ENV{,/**}",
+        "env.bak{,/**}",
+        "venv.bak{,/**}",
+        ".vscode{,/**}"
     ]
 }

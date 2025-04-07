@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HashRouter, Routes, Route } from "react-router-dom";
@@ -10,27 +7,25 @@ import "./index.css";
 
 import { Layout } from "./pages/layout/Layout";
 import NoPage from "./pages/NoPage";
-import Chat from "./pages/chat/Chat";
 import Content from "./pages/content/Content";
-import Tutor from "./pages/tutor/Tutor";
-import { Tda } from "./pages/tda/Tda";
 
 initializeIcons();
 
 export default function App() {
-    const [toggle, setToggle] = React.useState('Work');
     return (
         <HashRouter>
             <Routes>
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Chat />} />
+                    {/* NEW: Make the root path ("/") go to <Content /> by using an index route */}
+                    <Route index element={<Content />} />
+
+                    {/* Keep or remove this, depending on whether you want /content as well */}
                     <Route path="content" element={<Content />} />
+
                     <Route path="*" element={<NoPage />} />
-                    <Route path="tutor" element={<Tutor />} />
-                    <Route path="tda" element={<Tda folderPath={""} tags={[]} />} />
-            </Route>
+                </Route>
             </Routes>
-        </HashRouter>    
+        </HashRouter>
     );
 }
 

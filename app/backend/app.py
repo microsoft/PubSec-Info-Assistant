@@ -636,7 +636,11 @@ async def get_file(request: Request):
                              media_type=blob_properties.content_settings.content_type, 
                              headers={"Content-Disposition": f"inline; filename={blob_name}"})
 
-#app.mount("/", StaticFiles(directory="static"), name="static")
+app.mount(
+    "/",
+    StaticFiles(directory="/home/site/wwwroot/app/backend/static", html=True),
+    name="static"
+)
 
 if __name__ == "__main__":
     log.info("IA WebApp Starting Up...")

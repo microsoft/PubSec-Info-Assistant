@@ -2,25 +2,24 @@
 // Licensed under the MIT license.
 
 import React, { useEffect, useState } from  "react";
-import { ApplicationTitle, getApplicationTitle } from "../../api";
+import type { ApplicationTitle } from "../../api"; 
+import { getApplicationTitle } from "../../api";
 
 export const Title = () => {
-    const [Title, setTitle] = useState<ApplicationTitle | null>(null);
+    const [title, setTitle] = useState<ApplicationTitle | null>(null);
 
-    async function fetchApplicationTitle() {
-        console.log("fetch Application Title");
+    const fetchApplicationTitle = async () =>{
+        
+        if (process.env.NODE_ENV === 'development') {
+            console.log("Fetching Application Title...");
+        }
+
         try {
+            const { APPLICATION_TITLE } = await getApplicationTitle();
+            if(APPLICATION_TITLE) setTitle({ APPLICATION_TITLE });
 
-
-            const v = await getApplicationTitle();
-            if (!v.APPLICATION_TITLE) {
-                return null;
-            }
-
-            setTitle(v);
         } catch (error) {
-            // Handle the error here
-            console.log(error);
+            console.error("Error fetching title:", error);
         }
     }
 
@@ -28,5 +27,5 @@ export const Title = () => {
         fetchApplicationTitle();
     }, []);
 
-    return (<>{Title?.APPLICATION_TITLE}</>);
+    return (<>{title?.APPLICATION_TITLE}</>);
 };

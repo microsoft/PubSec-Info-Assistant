@@ -227,6 +227,10 @@ app = FastAPI(
     docs_url="/docs",
 )
 
+# Confirm FastAPI app object creation
+with open("/home/site/wwwroot/after_fastapi.txt", "w") as f:
+    f.write("FastAPI app object created successfully\n")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Or set your frontend's URL

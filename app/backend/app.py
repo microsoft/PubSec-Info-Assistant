@@ -97,6 +97,22 @@ ENV = {
    "AZURE_AI_CREDENTIAL_DOMAIN": "cognitiveservices.azure.com"
     }
 
+# Log and validate ENV variables
+missing = [k for k, v in ENV.items() if not os.getenv(k) and v is None]
+print("Missing ENV vars:", missing)
+
+# Optional file log for debugging in Azure Kudu
+try:
+    with open("/home/site/logs/env_check.txt", "w") as f:
+        f.write("=== Dump of os.environ ===\n")
+        for k, v in os.environ.items():
+            f.write(f"{k} = {v}\n")
+        f.write("\n=== Missing ENV vars ===\n")
+        f.write(", ".join(missing) + "\n")
+except Exception as e:
+    print(f"Failed to write env_check.txt: {e}")
+
+# Populate ENV from system environment
 for key, value in ENV.items():
     new_value = os.getenv(key)
     if new_value is not None:
@@ -644,3 +660,6 @@ app.mount(
 
 if __name__ == "__main__":
     log.info("IA WebApp Starting Up...")
+    port = int(os.getenv("PORT", 8000))  # default to port 8000
+    log.info(f"Starting Uvicorn on port {port}")
+    uvicorn.run("app:app", host="0.0.0.0", port=port)

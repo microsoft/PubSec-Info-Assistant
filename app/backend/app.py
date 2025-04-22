@@ -103,7 +103,7 @@ print("Missing ENV vars:", missing)
 
 # Optional file log for debugging in Azure Kudu
 try:
-    with open("/home/site/logs/env_check.txt", "w") as f:
+    with open("/home/site/wwwroot/env_check.txt", "w") as f:
         f.write("=== Dump of os.environ ===\n")
         for k, v in os.environ.items():
             f.write(f"{k} = {v}\n")

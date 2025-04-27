@@ -13,7 +13,7 @@
     "@fluentui/react-icons": "2.0.266",  
     "@react-spring/web": "9.7.5",  
     "classnames": "2.5.1",  
-    "dompurify": "3.2.2",  
+    "dompurify": "3.2.4",  
     "nanoid": "3.3.8",  
     "ndjson-readablestream": "1.2.0",  
     "papaparse": "5.4.1",  

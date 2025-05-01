@@ -9,6 +9,7 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import sys
+import uvicorn
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'functions')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'shared_code')))
 import json

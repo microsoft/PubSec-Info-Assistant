@@ -69,7 +69,8 @@ ENV = {
     "EMBEDDING_DEPLOYMENT_NAME": "text-embedding-ada-002",
     "AZURE_OPENAI_EMBEDDINGS_MODEL_NAME": "text-embedding-ada-002",
     "AZURE_OPENAI_EMBEDDINGS_VERSION": "2",
-    "AZURE_SUBSCRIPTION_ID": "d7a55bca-4abb-4720-9ffe-133a4755d5b7",
+    "AZURE_APP_SERVICE_SUBSCRIPTION_ID": "d7a55bca-4abb-4720-9ffe-133a4755d5b7",
+    "AZURE_AI_SERVICE_SUBSCRIPTION_ID": "d7a55bca-4abb-4720-9ffe-133a4755d5b7",
     "AZURE_ARM_MANAGEMENT_API": "https://management.azure.com",
     "CHAT_WARNING_BANNER_TEXT": "",
     "APPLICATION_TITLE": "",
@@ -126,6 +127,9 @@ str_to_bool = {'true': True, 'false': False}
 log = logging.getLogger("uvicorn")
 log.setLevel('DEBUG')
 log.propagate = True
+
+log.info(f"App Service Subscription ID: {ENV['AZURE_APP_SERVICE_SUBSCRIPTION_ID']}")
+log.info(f"AI Service Subscription ID: {ENV['AZURE_AI_SERVICE_SUBSCRIPTION_ID']}")
 
 class StatusResponse(pydantic.BaseModel):
     """The response model for the health check endpoint"""
@@ -193,7 +197,7 @@ MODEL_VERSION = ''
 # Set up OpenAI management client
 openai_mgmt_client = CognitiveServicesManagementClient(
     credential=azure_credential,
-    subscription_id=ENV["AZURE_SUBSCRIPTION_ID"],
+    subscription_id=ENV["AZURE_AI_SERVICE_SUBSCRIPTION_ID"],  # Use AI Service subscription ID
     base_url=ENV["AZURE_ARM_MANAGEMENT_API"],
     credential_scopes=[ENV["AZURE_ARM_MANAGEMENT_API"] + "/.default"])
 

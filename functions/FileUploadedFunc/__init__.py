@@ -83,8 +83,11 @@ def main(myblob: func.InputStream):
     """ Function to read supported file types and pass to the correct queue for processing"""
 
     try:
+        log = logging.getLogger(function_name)
+        log.info(f"Processing blob: {myblob.name}")
+        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)
+
         time.sleep(random.randint(1, 2))  # add a random delay
-        statusLog.upsert_document(myblob.name, 'Pipeline triggered by Blob Upload', StatusClassification.INFO, State.PROCESSING, False)            
         statusLog.upsert_document(myblob.name, f'{function_name} - FileUploadedFunc function started', StatusClassification.DEBUG)    
         
         # Create message structure to send to queue
@@ -131,13 +134,19 @@ def main(myblob: func.InputStream):
         # as part of a miration. In this case the blob has already been enriched and indexed
         # and so no further processing is required on import
         upload_blob_client = blob_client.get_blob_client(container=azure_blob_upload_container, blob=myblob_filename)
-        properties = upload_blob_client.get_blob_properties()
-        metadata = properties.metadata
-        do_not_process = metadata.get('do_not_process')   
-        if 'do_not_process' in metadata:
-            if do_not_process == 'true':   
-                statusLog.upsert_document(myblob.name,'Further procesiang cancelled due to do-not-process metadata = true', StatusClassification.DEBUG, State.COMPLETE)   
-                return                   
+        try:
+            properties = upload_blob_client.get_blob_properties()
+            metadata = properties.metadata
+            log.info(f"Blob metadata: {metadata}")
+
+            if 'do_not_process' in metadata and metadata['do_not_process'] == 'true':
+                log.info(f"Skipping blob '{myblob.name}' due to 'do_not_process' metadata.")
+                statusLog.upsert_document(myblob.name, 'Processing skipped due to metadata', StatusClassification.DEBUG, State.COMPLETE)
+                return
+        except Exception as ex:
+            log.error(f"Error processing blob '{myblob.name}': {ex}")
+            statusLog.upsert_document(myblob.name, f"Error: {str(ex)}", StatusClassification.ERROR, State.ERROR)
+            raise
         
         # If this is an update to the blob, then we need to delete any residual chunks
         # as processing will overlay chunks, but if the new file version is smaller

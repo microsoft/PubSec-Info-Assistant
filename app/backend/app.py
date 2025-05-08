@@ -31,6 +31,8 @@ env_file_path = os.path.join(os.path.dirname(__file__), "backend.env")
 load_dotenv(env_file_path)
 
 # === ENV Setup ===
+start_time = datetime.now()
+
 ENV = {
     "AZURE_BLOB_STORAGE_ACCOUNT": os.getenv("AZURE_BLOB_STORAGE_ACCOUNT"),
     "AZURE_BLOB_STORAGE_ENDPOINT": os.getenv("AZURE_BLOB_STORAGE_ENDPOINT"),
@@ -208,8 +210,21 @@ async def resubmit_items(request: Request):
 @app.post("/logstatus")
 async def logstatus(request: Request):
     try:
-        json_body = await request.json()
-        document_path = json_body.get("document_path")  # Match the frontend's key
+        # Log the raw request headers
+        log.info(f"/logstatus request headers: {dict(request.headers)}")
+        
+        # Attempt to read the raw body
+        body = await request.body()
+        log.info(f"/logstatus raw body: {body.decode('utf-8', errors='ignore')}")
+        
+        # Attempt to parse the JSON body
+        try:
+            json_body = await request.json()
+            log.info(f"/logstatus parsed JSON body: {json_body}")
+        except Exception as parse_error:
+            log.error(f"/logstatus failed to parse JSON: {parse_error}")
+
+        document_path = json_body.get("document_path")
         status = json_body.get("status")
         status_classification = StatusClassification[json_body.get("status_classification").upper()]
         state = State[json_body.get("state").upper()]
@@ -221,10 +236,10 @@ async def logstatus(request: Request):
             raise HTTPException(status_code=400, detail="status is required and cannot be null.")
 
         statusLog.upsert_document(document_path=document_path,
-                                  status=status,
-                                  status_classification=status_classification,
-                                  state=state,
-                                  fresh_start=True)
+                                 status=status,
+                                 status_classification=status_classification,
+                                 state=state,
+                                 fresh_start=True)
         statusLog.save_document(document_path=document_path)
 
         return {"message": "Status logged successfully."}

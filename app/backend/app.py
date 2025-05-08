@@ -209,38 +209,36 @@ async def resubmit_items(request: Request):
 
 @app.post("/logstatus")
 async def logstatus(request: Request):
-    try:
-        # Log the raw request headers
-        log.info(f"/logstatus request headers: {dict(request.headers)}")
-        
-        # Attempt to read the raw body
-        body = await request.body()
-        log.info(f"/logstatus raw body: {body.decode('utf-8', errors='ignore')}")
-        
-        # Attempt to parse the JSON body
-        try:
-            json_body = await request.json()
-            log.info(f"/logstatus parsed JSON body: {json_body}")
-        except Exception as parse_error:
-            log.error(f"/logstatus failed to parse JSON: {parse_error}")
+    """
+    Log the status of a file upload to CosmosDB.
 
-        document_path = json_body.get("document_path")
+    Parameters:
+    - request: Request object containing the HTTP request fields:
+                path, status, status_classification, state.
+
+    Returns:
+    - A dictionary with the status code 200 if successful, or an error
+        message with status code 500 if an exception occurs.
+    """
+    try:
+        json_body = await request.json()
+        path = json_body.get("path")
         status = json_body.get("status")
         status_classification = StatusClassification[json_body.get("status_classification").upper()]
         state = State[json_body.get("state").upper()]
 
         # Add validation to ensure required fields are present
-        if not document_path:
-            raise HTTPException(status_code=400, detail="document_path is required and cannot be null.")
+        if not path:
+            raise HTTPException(status_code=400, detail="path is required and cannot be null.")
         if not status:
             raise HTTPException(status_code=400, detail="status is required and cannot be null.")
 
-        statusLog.upsert_document(document_path=document_path,
+        statusLog.upsert_document(document_path=path,
                                  status=status,
                                  status_classification=status_classification,
                                  state=state,
                                  fresh_start=True)
-        statusLog.save_document(document_path=document_path)
+        statusLog.save_document(document_path=path)
 
         return {"message": "Status logged successfully."}
     except Exception as ex:

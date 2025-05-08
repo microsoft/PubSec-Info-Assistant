@@ -24,6 +24,7 @@ from azure.identity import ManagedIdentityCredential, DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, ContentSettings
 from azure.cosmos import CosmosClient
 from shared_code.status_log import State, StatusClassification, StatusLog
+import uuid
 
 # Load environment variables from backend.env
 env_file_path = os.path.join(os.path.dirname(__file__), "backend.env")
@@ -56,6 +57,7 @@ else:
     azure_credential = ManagedIdentityCredential()
 
 # Setup StatusLog to allow access to CosmosDB for logging
+log.info(f"StatusLog module path: {StatusLog.__module__}")
 statusLog = StatusLog(
     ENV["COSMOSDB_URL"],
     azure_credential,
@@ -123,19 +125,23 @@ async def get_all_upload_status(request: Request):
 
 @app.post("/getfolders")
 async def get_folders():
-    """Get all folders."""
+    """
+    Get all folders.
+    """
     try:
         blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
         folders = []
         blob_list = blob_container.list_blobs()
+
         for blob in blob_list:
             folder_path = os.path.dirname(blob.name)
             if folder_path and folder_path not in folders:
                 folders.append(folder_path)
+
+        return {"folders": folders}
     except Exception as ex:
         log.exception("Exception in /getfolders")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return folders
 
 @app.post("/deleteItems")
 async def delete_items(request: Request):
@@ -161,16 +167,29 @@ async def delete_items(request: Request):
 
 @app.post("/resubmitItems")
 async def resubmit_items(request: Request):
-    """Resubmit a blob."""
-    json_body = await request.json()
-    path = json_body.get("path").split("/", 1)[1]
+    """
+    Resubmit a blob.
+    """
     try:
+        json_body = await request.json()
+        path = json_body.get("path")
+        if not path:
+            raise HTTPException(status_code=400, detail="path is required.")
+
+        # Remove the container prefix
+        path = path.split("/", 1)[1]
+
         blob_container = blob_client.get_container_client(ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"])
         blob_data = blob_container.download_blob(path).readall()
+
         submitted_blob_client = blob_container.get_blob_client(blob=path)
         blob_properties = submitted_blob_client.get_blob_properties()
         metadata = blob_properties.metadata
+
+        # Re-upload the blob with metadata
         blob_container.upload_blob(name=path, data=blob_data, overwrite=True, metadata=metadata)
+
+        # Add the container to the path to avoid adding another document in the status DB
         full_path = ENV["AZURE_BLOB_STORAGE_UPLOAD_CONTAINER"] + '/' + path
         statusLog.upsert_document(
             document_path=full_path,
@@ -180,10 +199,38 @@ async def resubmit_items(request: Request):
             fresh_start=False
         )
         statusLog.save_document(document_path=full_path)
+
+        return {"message": "Blob resubmitted successfully."}
     except Exception as ex:
         log.exception("Exception in /resubmitItems")
         raise HTTPException(status_code=500, detail=str(ex)) from ex
-    return True
+
+@app.post("/logstatus")
+async def logstatus(request: Request):
+    try:
+        json_body = await request.json()
+        document_path = json_body.get("document_path")  # Match the frontend's key
+        status = json_body.get("status")
+        status_classification = StatusClassification[json_body.get("status_classification").upper()]
+        state = State[json_body.get("state").upper()]
+
+        # Add validation to ensure required fields are present
+        if not document_path:
+            raise HTTPException(status_code=400, detail="document_path is required and cannot be null.")
+        if not status:
+            raise HTTPException(status_code=400, detail="status is required and cannot be null.")
+
+        statusLog.upsert_document(document_path=document_path,
+                                  status=status,
+                                  status_classification=status_classification,
+                                  state=state,
+                                  fresh_start=True)
+        statusLog.save_document(document_path=document_path)
+
+        return {"message": "Status logged successfully."}
+    except Exception as ex:
+        log.exception("Exception in /logstatus")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
 
 @app.get("/getApplicationTitle")
 async def get_application_title():
@@ -199,6 +246,52 @@ async def get_warning_banner():
 async def get_max_csv_file_size():
     """Get the max CSV file size."""
     return {"MAX_CSV_FILE_SIZE": ENV["MAX_CSV_FILE_SIZE"]}
+
+@app.get("/getalltags")
+async def get_all_tags():
+    """Get all tags."""
+    log.info("GET /getalltags endpoint was called.")
+    return {"tags": ["tag1", "tag2", "tag3"]}
+
+@app.get("/getFeatureFlags")
+async def get_feature_flags():
+    """Get feature flags."""
+    return {"feature_flags": {"feature1": True, "feature2": False}}
+
+@app.post("/file")
+async def upload_file(
+    file: UploadFile = File(...),
+    file_path: str = Form(...),
+    tags: str = Form(None)
+):
+    """
+    Upload a file to Azure Blob Storage.
+    """
+    try:
+        if not file_path:
+            raise HTTPException(status_code=400, detail="file_path is required.")
+
+        blob_upload_client = blob_upload_container_client.get_blob_client(file_path)
+
+        # Upload the file to Blob Storage
+        blob_upload_client.upload_blob(
+            file.file,
+            overwrite=True,
+            content_settings=ContentSettings(content_type=file.content_type),
+            metadata={"tags": tags} if tags else None
+        )
+
+        return {"message": f"File '{file.filename}' uploaded successfully"}
+
+    except Exception as ex:
+        log.exception("Exception in /file")
+        raise HTTPException(status_code=500, detail=str(ex)) from ex
+
+@app.post("/gettags")
+async def get_tags(request: Request):
+    """Get tags."""
+    json_body = await request.json()
+    return {"tags": ["tag1", "tag2", "tag3"]}
 
 # Dynamically resolve the path to the static directory
 static_dir = os.path.join(os.path.dirname(__file__), "static")

@@ -292,26 +292,31 @@ export async function processAgentResponse(question: string): Promise<String> {
 }
 
 export async function logStatus(status_log_entry: StatusLogEntry): Promise<StatusLogResponse> {
-    var response = await fetch("/logstatus", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            "path": status_log_entry.path,
-            "status": status_log_entry.status,
-            "status_classification": status_log_entry.status_classification,
-            "state": status_log_entry.state
+    try {
+        const response = await fetch("/logstatus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "document_path": status_log_entry.path, // Explicitly map to document_path
+                "status": status_log_entry.status,
+                "status_classification": status_log_entry.status_classification.toUpperCase(), // Ensure uppercase
+                "state": status_log_entry.state.toUpperCase() // Ensure uppercase
             })
-    });
+        });
 
-    var parsedResponse: StatusLogResponse = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error(parsedResponse.error || "Unknown error");
+        if (!response.ok) {
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.error || "Unknown error");
+        }
+
+        const parsedResponse: StatusLogResponse = await response.json();
+        return { status: parsedResponse.status };
+    } catch (error) {
+        console.error("Error in logStatus:", error);
+        throw error;
     }
-
-    var results: StatusLogResponse = {status: parsedResponse.status};
-    return results;
 }
 
 export async function getInfoData(): Promise<GetInfoResponse> {

@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { Outlet, NavLink, Link } from "react-router-dom";
-import openai from "../../assets/openai.svg";
+import openai from "../../assets/ircclogo.jpg";
 import { WarningBanner } from "../../components/WarningBanner/WarningBanner";
 import styles from "./Layout.module.css";
 import { Title } from "../../components/Title/Title";
@@ -37,37 +37,18 @@ export const Layout = () => {
                     </div>
                     <nav>
                         <ul className={styles.headerNavList}>
+                            {/* 
+                            // -- Remove or comment out the Chat nav link --
                             <li>
                                 <NavLink to="/" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
                                     Chat
                                 </NavLink>
                             </li>
+                            */}
                             <li className={styles.headerNavLeftMargin}>
-                                <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Manage Content
-                                </NavLink>
                             </li>
-                            {featureFlags?.ENABLE_MATH_ASSISTANT &&
-                                <li className={styles.headerNavLeftMargin}>
-                                    <NavLink to="/tutor" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Math Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
-                                    </NavLink>
-                                </li>
-                            }
-                            {featureFlags?.ENABLE_TABULAR_DATA_ASSISTANT &&
-                                <li className={styles.headerNavLeftMargin}>
-                                    <NavLink to="/tda" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Tabular Data Assistant
-                                    <br />  
-                                    <p className={styles.centered}>(preview)</p>
-                                    </NavLink>
-                                    
-                                      
-                                </li>
-                            }
-                    </ul>
+ 
+                        </ul>
                     </nav>
                 </div>
             </header>

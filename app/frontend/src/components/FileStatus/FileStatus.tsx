@@ -120,7 +120,7 @@ export const FileStatus = ({ className }: Props) => {
     const fetchFolders = async () => {
         try {
             const folders = await getFolders(); // Await the promise
-            const rootOption = { key: 'Root', text: 'Root' }; // Create the "Root" option            
+            const rootOption = { key: 'Root', text: 'upload' }; // Create the "upload" option            
             const folderDropdownOptions = [rootOption, ...folders.map((folder: string) => ({ key: folder, text: folder }))];
             setFolderOptions(folderDropdownOptions);
         }
@@ -220,7 +220,7 @@ export const FileStatus = ({ className }: Props) => {
                     />
                 <Dropdown
                     label="Folder:"
-                    defaultSelectedKey={'Root'}
+                    defaultSelectedKey={'upload'}
                     onChange={onFolderChange}
                     placeholder="Select folder"
                     options={folderOptions}

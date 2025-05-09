@@ -3,7 +3,7 @@
 
 """ Library of code for status logs reused across various calling features """
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import base64
 from enum import Enum
 import logging
@@ -169,7 +169,7 @@ class StatusLog:
         base_name = os.path.basename(document_path)
         document_id = self.encode_document_id(document_path)
 
-        # add status to standard logger
+        # Add status to standard logger
         logging.info("%s DocumentID - %s", status, document_id)
 
         # If this event is the start of an upload, remove any existing status files for this path
@@ -181,8 +181,7 @@ class StatusLog:
 
         json_document = ""
         try:
-            # if the document exists and if this is the first call to the function from the parent,
-            # then retrieve the stored document from cosmos, otherwise, use the log stored in self
+            # If the document exists, retrieve it; otherwise, create a new one
             if self._log_document.get(document_id, "") == "":
                 json_document = self.container.read_item(item=document_id, partition_key=base_name)
             else:
@@ -190,17 +189,16 @@ class StatusLog:
 
             if json_document['state'] != state.value:
                 json_document['state'] = state.value
-                json_document['state_timestamp'] = str(datetime
-                                                        .now()
-                                                        .strftime('%Y-%m-%d %H:%M:%S'))
+                json_document['state_timestamp'] = datetime.now(timezone.utc).isoformat()  # Use UTC
 
-            # Update state description with latest status
+            # Update state description with the latest status
             json_document['state_description'] = status
-            # Append a new item to the array
+
+            # Append a new item to the status updates array
             status_updates = json_document["status_updates"]
             new_item = {
                 "status": status,
-                "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "status_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                 "status_classification": str(status_classification.value)
             }
 
@@ -210,49 +208,48 @@ class StatusLog:
 
         except exceptions.CosmosResourceNotFoundError:
             if state != State.DELETED:
-                # this is a valid new document
+                # Create a new document if it doesn't exist
                 json_document = {
                     "id": document_id,
                     "file_path": document_path,
                     "file_name": base_name,
                     "state": str(state.value),
-                    "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    "start_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                     "state_description": status,
-                    "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                    "state_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                     "status_updates": [
                         {
                             "status": status,
-                            "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                            "status_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                             "status_classification": str(status_classification.value)
                         }
                     ]
                 }
             elif state == State.DELETED:
-                # the status file was previously deleted. Do nothing.
-                logging.debug("No record found for deleted document %s. Nothing to do.",
-                              document_path)
+                # If the document was previously deleted, do nothing
+                logging.debug("No record found for deleted document %s. Nothing to do.", document_path)
         except Exception as err:
-            # log the exception with stack trace to the status log
+            # Log the exception with a stack trace
             logging.error("Unexpected exception upserting document %s", str(err))
             json_document = {
                 "id": document_id,
                 "file_path": document_path,
                 "file_name": base_name,
                 "state": str(state.value),
-                "start_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "start_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                 "state_description": status,
-                "state_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                "state_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                 "status_updates": [
                     {
                         "status": status,
-                        "status_timestamp": str(datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
+                        "status_timestamp": datetime.now(timezone.utc).isoformat(),  # Use UTC
                         "status_classification": str(status_classification.value),
                         "stack_trace": self.get_stack_trace() if not fresh_start else None
                     }
                 ]
             }
 
-        #self.container.upsert_item(body=json_document)
+        # Save the document to the in-memory log and CosmosDB
         self._log_document[document_id] = json_document
 
     def update_document_state(self, document_path, status, state=State.PROCESSING):

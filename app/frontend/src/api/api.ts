@@ -299,7 +299,7 @@ export async function logStatus(status_log_entry: StatusLogEntry): Promise<Statu
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "document_path": status_log_entry.path, // Explicitly map to document_path
+                "path": status_log_entry.path, // Explicitly map to document_path
                 "status": status_log_entry.status,
                 "status_classification": status_log_entry.status_classification.toUpperCase(), // Ensure uppercase
                 "state": status_log_entry.state.toUpperCase() // Ensure uppercase

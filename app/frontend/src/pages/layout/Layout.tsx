@@ -46,9 +46,6 @@ export const Layout = () => {
                             </li>
                             */}
                             <li className={styles.headerNavLeftMargin}>
-                                <NavLink to="/content" className={({ isActive }) => (isActive ? styles.headerNavPageLinkActive : styles.headerNavPageLink)}>
-                                    Manage Content
-                                </NavLink>
                             </li>
  
                         </ul>

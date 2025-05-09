@@ -96,49 +96,61 @@ export async function resubmitItem(options: ResubmitItemRequest): Promise<boolea
 
 
 export async function getFolders(): Promise<string[]> {
-    const response = await fetch("/getfolders", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            })
+    try {
+        const response = await fetch("/getfolders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({})
         });
-    
-    const parsedResponse: any = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error(parsedResponse.error || "Unknown error");
-    }
-    // Assuming parsedResponse is the array of strings (folder names) we want
-    // Check if it's actually an array and contains strings
-    if (Array.isArray(parsedResponse) && parsedResponse.every(item => typeof item === 'string')) {
-        return parsedResponse;
-    } else {
-        throw new Error("Invalid response format");
+
+        if (!response.ok) {
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.detail || "Failed to fetch folders");
+        }
+
+        const parsedResponse: { folders: string[] } = await response.json();
+
+        // Ensure the response contains a valid folders array
+        if (Array.isArray(parsedResponse.folders) && parsedResponse.folders.every(item => typeof item === 'string')) {
+            return parsedResponse.folders;
+        } else {
+            throw new Error("Invalid response format from /getfolders");
+        }
+    } catch (error) {
+        console.error("Error in getFolders:", error);
+        throw error;
     }
 }
 
 
 export async function getTags(): Promise<string[]> {
-    const response = await fetch("/gettags", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            })
+    try {
+        const response = await fetch("/gettags", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({})
         });
-    
-    const parsedResponse: any = await response.json();
-    if (response.status > 299 || !response.ok) {
-        throw Error(parsedResponse.error || "Unknown error");
-    }
-    // Assuming parsedResponse is the array of strings (folder names) we want
-    // Check if it's actually an array and contains strings
-    if (Array.isArray(parsedResponse) && parsedResponse.every(item => typeof item === 'string')) {
-        return parsedResponse;
-    } else {
-        throw new Error("Invalid response format");
+
+        if (!response.ok) {
+            const errorResponse = await response.json();
+            throw new Error(errorResponse.detail || "Failed to fetch tags");
+        }
+
+        const parsedResponse: { tags: string[] } = await response.json();
+
+        // Ensure the response contains a valid tags array
+        if (Array.isArray(parsedResponse.tags) && parsedResponse.tags.every(item => typeof item === 'string')) {
+            return parsedResponse.tags;
+        } else {
+            throw new Error("Invalid response format from /gettags");
+        }
+    } catch (error) {
+        console.error("Error in getTags:", error);
+        throw error;
     }
 }
 
@@ -414,7 +426,7 @@ export async function getAllTags(): Promise<GetTagsResponse> {
     const parsedResponse: any = await response.json();
     if (response.status > 299 || !response.ok) {
         console.log(response);
-        throw Error(parsedResponse.error || "Unknown error");
+        throw Error("Unknown error");
     }
     var results: GetTagsResponse = {tags: parsedResponse};
     return results;
@@ -430,7 +442,7 @@ export async function getFeatureFlags(): Promise<GetFeatureFlagsResponse> {
     const parsedResponse: GetFeatureFlagsResponse = await response.json();
     if (response.status > 299 || !response.ok) {
         console.log(response);
-        throw Error(parsedResponse.error || "Unknown error");
+        throw Error("Unknown error");
     }
     console.log(parsedResponse);
     return parsedResponse;

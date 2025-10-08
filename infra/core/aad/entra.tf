@@ -9,7 +9,7 @@ locals {
 resource "azuread_application" "aad_web_app" {
   count                         = var.isInAutomation ? 0 : 1
   display_name                  = "infoasst_web_access_${var.randomString}"
-  identifier_uris               = ["api://infoasst-${var.randomString}"]
+  identifier_uris               = ["api://infoasst-${var.randomString}.daymarklab.onmicrosoft.us"]
   owners                        = local.owner_ids
   sign_in_audience              = "AzureADMyOrg"
   oauth2_post_response_required = true

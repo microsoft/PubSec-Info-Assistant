@@ -2,9 +2,21 @@
 
 ## How to file issues and get help  
 
+hi
+
+hi
+
 This project uses [GitHub Issues](https://github.com/microsoft/PubSec-Info-Assistant/issues) to track bugs and feature requests. Please search the existing
 issues before filing new issues to avoid duplicates.  For new issues, file your bug or
 feature request as a new Issue. 
+
+hi
+
+hi
+
+hi
+
+hi
 
 Please provide as much information as possible when filing an issue (please redact any sensitive information). 
 

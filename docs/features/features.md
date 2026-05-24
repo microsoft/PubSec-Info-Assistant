@@ -133,7 +133,7 @@ There are multiple options to for deleting documents in the IA agent template. M
 
 ### File Deletion in the UI
 
-Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. They can use filters to locate documents, view detailed status and history of the document, then optionally delete the document. Additional information on document management, including how to upload, search, filter content and delete documents is availabe on the [User Experience](/docs/features/user_experience.md) page.
+Users can delete documents through the same Manage Content UI they use to review the status of files they have uploaded. They can use filters to locate documents, view detailed status and history of the document, then optionally delete the document. Additional information on document management, including how to upload, search, filter content and delete documents is available on the [User Experience](/docs/features/user_experience.md) page.
 
 ### Technical File Deletion from the upload container
 
